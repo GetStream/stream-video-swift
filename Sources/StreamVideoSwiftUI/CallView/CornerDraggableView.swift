@@ -5,9 +5,9 @@
 import StreamVideo
 import SwiftUI
 
+/// A view that allows dragging a content view to specific corners based on user gestures.
 public struct CornerDraggableView<Content: View>: View {
     @State var callViewPlacement = CallViewPlacement.topTrailing
-
     @State private var dragAmount = CGSize.zero
 
     private var scaleFactorX: CGFloat
@@ -19,6 +19,13 @@ public struct CornerDraggableView<Content: View>: View {
     var proxy: GeometryProxy
     var onTap: () -> Void
 
+    /// Initializes a corner draggable view with the specified parameters.
+    /// - Parameters:
+    ///   - scaleFactorX: The scale factor for the width of the draggable area.
+    ///   - scaleFactorY: The scale factor for the height of the draggable area.
+    ///   - content: A closure that provides the content view with a given frame.
+    ///   - proxy: The geometry proxy representing the enclosing view's geometry.
+    ///   - onTap: A closure that is invoked when the view is tapped.
     public init(
         scaleFactorX: CGFloat = 0.33,
         scaleFactorY: CGFloat = 0.33,
@@ -45,14 +52,7 @@ public struct CornerDraggableView<Content: View>: View {
     public var body: some View {
         content(availableFrame)
             .overlay(
-                // SwiftUI seems to remove any interaction of views that not
-                // getting rendered (e.g. an empty GeometryReader, a VStack
-                // with a Spacer, an EmptyView, a Color.clear or a Shape
-                // with clear fill). If we use a simple button here then the
-                // interaction happening is slower because than what we have now.
                 Color.black.opacity(0.01)
-                    // This is to avoid conflicts with buttons on the top and bottom
-                    // part of the participant view.
                     .padding(.vertical, 30)
                     .onTapGesture { onTap() }
             )
@@ -106,15 +106,12 @@ public struct CornerDraggableView<Content: View>: View {
                 return placement
             }
 
-            // Calculate the center of the frame
             let centerX = frame.origin.x + frame.size.width / 2
             let centerY = frame.origin.y + frame.size.height / 2
             let centerPoint = CGPoint(x: centerX, y: centerY)
 
-            // Calculate the Euclidean distance to the location
             let distance = sqrt(pow(centerPoint.x - location.x, 2) + pow(centerPoint.y - location.y, 2))
 
-            // Check if this is the closest placement so far
             if minDistance == nil {
                 minDistance = distance
                 closestPlacement = placement
@@ -124,10 +121,11 @@ public struct CornerDraggableView<Content: View>: View {
             }
         }
 
-        return closestPlacement ?? .topTrailing // default to .topTrailing if for some reason no placement was closer
+        return closestPlacement ?? .topTrailing
     }
 }
 
+/// An enum representing the placement of a call view in different corners of a container.
 public enum CallViewPlacement {
     case topLeading
     case topTrailing

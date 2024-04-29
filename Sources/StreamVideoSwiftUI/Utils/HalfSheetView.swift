@@ -82,9 +82,8 @@ struct DraggableSheetView<Content: View>: View {
 }
 
 public struct DragHandleView: View {
-
     public init() {}
-
+    
     public var body: some View {
         VStack(alignment: .center) {
             Color.white.opacity(0.3)

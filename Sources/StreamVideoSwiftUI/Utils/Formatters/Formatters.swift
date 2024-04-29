@@ -12,8 +12,8 @@ public class Formatters {
 // MARK: - Formatters + Injection
 
 /// Provides the default value of the `Formatters` class.
-public struct FormattersKey: InjectionKey {
-    public static var currentValue: Formatters = .init()
+enum FormattersKey: InjectionKey {
+    static var currentValue: Formatters = .init()
 }
 
 extension InjectedValues {

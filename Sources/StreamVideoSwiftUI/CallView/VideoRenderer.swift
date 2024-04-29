@@ -100,18 +100,23 @@ public struct VideoRendererView: UIViewRepresentable {
     }
 }
 
+/// A custom video renderer based on RTCMTLVideoView for rendering RTCVideoTrack objects.
 public class VideoRenderer: RTCMTLVideoView {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
     @Injected(\.videoRendererPool) private var videoRendererPool
 
+    /// DispatchQueue for synchronizing access to the video track.
     let queue = DispatchQueue(label: "video-track")
-    
+
+    /// The associated RTCVideoTrack being rendered.
     weak var track: RTCVideoTrack?
-    
+
+    /// Unique identifier for the video renderer instance.
     private let identifier = UUID()
     private var cancellable: AnyCancellable?
 
+    /// Preferred frames per second for rendering.
     private(set) var preferredFramesPerSecond: Int = UIScreen.main.maximumFramesPerSecond {
         didSet {
             metalView?.preferredFramesPerSecond = preferredFramesPerSecond
@@ -119,39 +124,54 @@ public class VideoRenderer: RTCMTLVideoView {
         }
     }
 
+    /// Lazily-initialized Metal view used for rendering.
     private lazy var metalView: MTKView? = { subviews.compactMap { $0 as? MTKView }.first }()
+
+    /// The ID of the associated RTCVideoTrack.
     var trackId: String? { track?.trackId }
+
+    /// The size of the renderer's view.
     private var viewSize: CGSize?
 
+    /// Required initializer (unavailable for use with Interface Builder).
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
+    /// Initializes a new VideoRenderer instance with the specified frame.
+    /// - Parameter frame: The frame rectangle for the video renderer's view.
     override public init(frame: CGRect) {
         super.init(frame: frame)
+
+        // Subscribe to thermal state changes to adjust rendering performance.
         cancellable = thermalStateObserver
             .statePublisher
-            .sink { [weak self] in
-                switch $0 {
+            .sink { [weak self] state in
+                guard let self = self else { return }
+                switch state {
                 case .nominal, .fair:
-                    self?.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+                    self.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
                 case .serious:
-                    self?.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.5)
+                    self.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.5)
                 case .critical:
-                    self?.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.4)
+                    self.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.4)
                 @unknown default:
-                    self?.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+                    self.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
                 }
             }
     }
 
+    /// Cleans up resources when the VideoRenderer instance is deallocated.
     deinit {
         cancellable?.cancel()
         log.debug("\(type(of: self)):\(identifier) deallocating", subsystems: .webRTC)
         track?.remove(self)
     }
 
+    /// Overrides the hash value to return the identifier's hash value.
     override public var hash: Int { identifier.hashValue }
 
+    /// Adds the specified RTCVideoTrack to the renderer.
+    /// - Parameter track: The RTCVideoTrack to render.
     public func add(track: RTCVideoTrack) {
         queue.sync {
             self.track?.remove(self)
@@ -161,12 +181,14 @@ public class VideoRenderer: RTCMTLVideoView {
             log.info("\(type(of: self)):\(identifier) was added on track:\(track.trackId)", subsystems: .webRTC)
         }
     }
-    
+
+    /// Overrides the layoutSubviews method to update the viewSize property.
     override public func layoutSubviews() {
         super.layoutSubviews()
         viewSize = bounds.size
     }
 
+    /// Overrides the willMove(toSuperview:) method to release the renderer when removed from its superview.
     override public func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
         if newSuperview == nil {
@@ -176,7 +198,11 @@ public class VideoRenderer: RTCMTLVideoView {
 }
 
 extension VideoRenderer {
-    
+
+    /// Handles rendering view updates for a specified participant's video track.
+    /// - Parameters:
+    ///   - participant: The participant whose video track is being handled.
+    ///   - onTrackSizeUpdate: A closure to be called when the track size is updated.
     public func handleViewRendering(
         for participant: CallParticipant,
         onTrackSizeUpdate: @escaping (CGSize, CallParticipant) -> Void
@@ -188,11 +214,11 @@ extension VideoRenderer {
             )
             add(track: track)
             DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
-                guard let self else { return }
+                guard let self = self else { return }
                 let prev = participant.trackSize
-                if let viewSize, prev != viewSize {
+                if let viewSize = self.viewSize, prev != viewSize {
                     log.debug(
-                        "Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(identifier)), \(prev) → \(viewSize)",
+                        "Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(self.identifier)), \(prev) → \(viewSize)",
                         subsystems: .webRTC
                     )
                     onTrackSizeUpdate(viewSize, participant)

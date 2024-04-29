@@ -13,6 +13,8 @@ open class CallSoundsPlayer {
     
     private var audioPlayer: AVAudioPlayer?
     
+    public init() {}
+
     /// Plays the sound for an incoming call.
     open func playIncomingCallSound() {
         playSound(sounds.incomingCallSound)

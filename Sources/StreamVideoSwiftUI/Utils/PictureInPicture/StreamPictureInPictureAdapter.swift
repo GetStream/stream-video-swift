@@ -91,7 +91,7 @@ final class StreamPictureInPictureAdapter {
 }
 
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
-struct StreamPictureInPictureAdapterKey: InjectionKey {
+enum StreamPictureInPictureAdapterKey: InjectionKey {
     static var currentValue: StreamPictureInPictureAdapter = .init()
 }
 
