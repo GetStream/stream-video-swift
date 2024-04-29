@@ -144,6 +144,18 @@ private_lane :upload_beta do |options|
   configuration = options[:configuration].to_s.empty? ? 'Release' : options[:configuration]
 
   match_me
+
+  if is_ci && configuration != 'Release'
+    ['VideoDemoApp', 'DemoAppUIKit', 'VideoDemoApp.CallIntent', 'VideoDemoApp.ScreenSharing'].each do |name|
+      target = name == 'VideoDemoApp' ? 'DemoApp' : name.split('.').last
+      update_code_signing_settings(
+        code_sign_identity: "iPhone Distribution",
+        targets: target,
+        profile_name: "match AppStore io.getstream.iOS.#{name}"
+      )
+    end
+  end
+
   testflight_build(
     api_key: appstore_api_key,
     xcode_project: xcode_project,
