@@ -457,7 +457,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
 
-        let controller = callViewModel.call!.callController as! CallController_Mock
+        let controller = try XCTUnwrap(callViewModel.call?.callController as? CallController_Mock)
         controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
 
         let callParticipant = participant.toCallParticipant(showTrack: false)

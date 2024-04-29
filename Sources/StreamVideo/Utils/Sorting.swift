@@ -181,7 +181,7 @@ public var dominantSpeaker: StreamSortComparator<CallParticipant> = { comparison
 public var isSpeaking: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.isSpeaking) }
 
 /// Comparator which prioritizes participants who are pinned.
-/// - Note: Remote pins has higher priority than local.
+/// - Note: Remote pins have higher priority than local.
 public var pinned: StreamSortComparator<CallParticipant> = { a, b in
     switch (a.pin, b.pin) {
     case (nil, _?): return .orderedDescending

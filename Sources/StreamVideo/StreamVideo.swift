@@ -661,6 +661,6 @@ extension StreamVideo: WSEventsSubscriber {
 }
 
 /// Returns the current value for the `StreamVideo` instance.
-internal struct StreamVideoProviderKey: InjectionKey {
+struct StreamVideoProviderKey: InjectionKey {
     static var currentValue: StreamVideo?
 }

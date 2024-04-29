@@ -84,8 +84,8 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
 }
 
 /// Provides the default value of the `SimulatorStreamFile` class.
-public struct SimulatorStreamFileKey: InjectionKey {
-    public static var currentValue: URL? = nil
+enum SimulatorStreamFileKey: InjectionKey {
+    static var currentValue: URL?
 }
 
 extension InjectedValues {

@@ -23,8 +23,8 @@ import Foundation
 /// itself from multiple threads can cause a crash.
 
 @propertyWrapper
-public class Atomic<T> {
-    public var wrappedValue: T {
+final class Atomic<T> {
+    var wrappedValue: T {
         get {
             var currentValue: T!
             mutate { currentValue = $0 }
@@ -41,7 +41,7 @@ public class Atomic<T> {
     
     /// Update the value safely.
     /// - Parameter changes: a block with changes. It should return a new value.
-    public func mutate(_ changes: (_ value: inout T) -> Void) {
+    func mutate(_ changes: (_ value: inout T) -> Void) {
         lock.lock()
         changes(&_wrappedValue)
         lock.unlock()
@@ -49,11 +49,11 @@ public class Atomic<T> {
     
     /// Update the value safely.
     /// - Parameter changes: a block with changes. It should return a new value.
-    public func callAsFunction(_ changes: (_ value: inout T) -> Void) {
+    func callAsFunction(_ changes: (_ value: inout T) -> Void) {
         mutate(changes)
     }
     
-    public init(wrappedValue: T) {
+    init(wrappedValue: T) {
         _wrappedValue = wrappedValue
     }
 }

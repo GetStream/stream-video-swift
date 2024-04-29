@@ -109,8 +109,8 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
 }
 
 /// Provides the default value of the `Appearance` class.
-public struct ThermalStateObserverKey: InjectionKey {
-    public static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared
+enum ThermalStateObserverKey: InjectionKey {
+    static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared
 }
 
 extension InjectedValues {
