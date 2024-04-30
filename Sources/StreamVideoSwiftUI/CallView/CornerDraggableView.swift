@@ -52,7 +52,14 @@ public struct CornerDraggableView<Content: View>: View {
     public var body: some View {
         content(availableFrame)
             .overlay(
+                // SwiftUI seems to remove any interaction of views that not
+                // getting rendered (e.g. an empty GeometryReader, a VStack
+                // with a Spacer, an EmptyView, a Color.clear or a Shape
+                // with clear fill). If we use a simple button here then the
+                // interaction happening is slower because than what we have now.
                 Color.black.opacity(0.01)
+                    // This is to avoid conflicts with buttons on the top and bottom
+                    // part of the participant view.
                     .padding(.vertical, 30)
                     .onTapGesture { onTap() }
             )
@@ -106,12 +113,15 @@ public struct CornerDraggableView<Content: View>: View {
                 return placement
             }
 
+            // Calculate the center of the frame
             let centerX = frame.origin.x + frame.size.width / 2
             let centerY = frame.origin.y + frame.size.height / 2
             let centerPoint = CGPoint(x: centerX, y: centerY)
 
+            // Calculate the Euclidean distance to the location
             let distance = sqrt(pow(centerPoint.x - location.x, 2) + pow(centerPoint.y - location.y, 2))
 
+            // Check if this is the closest placement so far
             if minDistance == nil {
                 minDistance = distance
                 closestPlacement = placement
@@ -121,7 +131,7 @@ public struct CornerDraggableView<Content: View>: View {
             }
         }
 
-        return closestPlacement ?? .topTrailing
+        return closestPlacement ?? .topTrailing // default to .topTrailing if for some reason no placement was closer
     }
 }
 

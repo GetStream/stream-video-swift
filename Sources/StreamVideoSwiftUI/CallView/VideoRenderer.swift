@@ -214,11 +214,11 @@ extension VideoRenderer {
             )
             add(track: track)
             DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 let prev = participant.trackSize
-                if let viewSize = self.viewSize, prev != viewSize {
+                if let viewSize, prev != viewSize {
                     log.debug(
-                        "Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(self.identifier)), \(prev) → \(viewSize)",
+                        "Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(identifier)), \(prev) → \(viewSize)",
                         subsystems: .webRTC
                     )
                     onTrackSizeUpdate(viewSize, participant)
