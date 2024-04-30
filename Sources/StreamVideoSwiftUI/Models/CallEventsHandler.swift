@@ -45,11 +45,16 @@ public class CallEventsHandler {
             let id = cId.components(separatedBy: ":").last ?? cId
             let caller = ringEvent.call.createdBy.toUser
             let type = ringEvent.call.type
+            var members = ringEvent.members.map(\.member)
+            let callerMember = Member(user: caller)
+            if !members.contains(callerMember) {
+                members.append(callerMember)
+            }
             let incomingCall = IncomingCall(
                 id: id,
                 caller: caller,
                 type: type,
-                members: ringEvent.members.map(\.member),
+                members: members,
                 timeout: TimeInterval(ringEvent.call.settings.ring.autoCancelTimeoutMs / 1000)
             )
             return .incoming(incomingCall)
