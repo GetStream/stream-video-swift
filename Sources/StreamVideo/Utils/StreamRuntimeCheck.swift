@@ -5,13 +5,8 @@
 import Foundation
 
 public enum StreamRuntimeCheck {
-    /// Enables assertions thrown by the Stream SDK.
+    /// Enables assertions thrown by the StreamVideo SDK.
     ///
     /// When set to false, a message will be logged on console, but the assertion will not be thrown.
-    public static var assertionsEnabled = false
-
-    /// For *internal use* only
-    ///
-    ///  Enables lazy mapping of DB models
-    public static var _isLazyMappingEnabled = true
+    static var assertionsEnabled = false
 }

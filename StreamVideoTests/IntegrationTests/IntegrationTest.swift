@@ -50,6 +50,7 @@ class IntegrationTest: XCTestCase {
             apiKey: tokenResponse.apiKey,
             user: User(id: userId),
             token: .init(rawValue: tokenResponse.token),
+            videoConfig: .dummy(),
             pushNotificationsConfig: .init(
                 pushProviderInfo: .init(name: "ios-apn", pushProvider: .apn),
                 voipPushProviderInfo: .init(name: "ios-voip", pushProvider: .apn)
