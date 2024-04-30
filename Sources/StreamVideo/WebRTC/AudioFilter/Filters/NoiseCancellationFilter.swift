@@ -50,12 +50,14 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     ///   - sampleRate: The sample rate in Hz.
     ///   - channels: The number of audio channels.
     public func initialize(sampleRate: Int, channels: Int) {
-        guard activationTask == nil else { return }
+        guard activationTask == nil, !isActive else { return }
 
+        let id = self.id
         // Asynchronously activate noise cancellation for the active call.
         activationTask = Task { @MainActor [weak self] in
             guard let activeCall = self?.streamVideo.state.activeCall else {
                 self?.activationTask = nil
+                log.warning("AudioFilter:\(id) cannot be activated. No activeCall found.")
                 return
             }
 
@@ -63,9 +65,11 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
                 try await activeCall.startNoiseCancellation()
                 self?.initializeClosure(sampleRate, channels)
                 self?.isActive = true
-            } catch {
-                log.error(error)
                 self?.activationTask = nil
+                log.debug("AudioFilter:\(id) is now active 🟢.")
+            } catch {
+                self?.activationTask = nil
+                log.debug("AudioFilter:\(id) failed to activate with error:\(error)")
             }
         }
 
@@ -75,7 +79,10 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     /// Applies noise cancellation processing to the audio buffer.
     /// - Parameter buffer: The audio buffer to which the effect is applied.
     public func applyEffect(to buffer: inout RTCAudioBuffer) {
-        guard isActive else { return }
+        guard isActive else {
+            log.debug("AudioFilter:\(id) received an audioBuffer to process, while it's not active.")
+            return
+        }
         log.debug("AudioFilter:\(id) processing channels:\(buffer.channels) frames:\(buffer.frames).")
         processClosure(
             buffer.channels,
@@ -97,6 +104,8 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
                 log.error(error)
             }
         }
+        activationTask = nil
+        isActive = false
         releaseClosure() // Invoke the release closure.
         log.debug("AudioFilter:\(id) release.")
     }

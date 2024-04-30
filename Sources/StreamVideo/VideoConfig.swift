@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-public struct VideoConfig: Sendable {
+public final class VideoConfig: Sendable {
     /// An array of `VideoFilter` objects representing the filters to apply to the video.
     public let videoFilters: [VideoFilter]
 

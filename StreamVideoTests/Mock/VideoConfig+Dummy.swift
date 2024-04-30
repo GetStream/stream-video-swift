@@ -15,7 +15,7 @@ extension VideoConfig {
 }
 
 final class MockAudioProcessingModule: NSObject, AudioProcessingModule {
-    var activeAudioFilterId: String? { nil }
+    var activeAudioFilter: AudioFilter? { nil }
     func setAudioFilter(_ filter: AudioFilter?) {}
     func apply(_ config: RTCAudioProcessingConfig) {}
 }
