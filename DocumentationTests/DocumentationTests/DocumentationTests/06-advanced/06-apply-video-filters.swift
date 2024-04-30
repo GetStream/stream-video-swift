@@ -202,12 +202,6 @@ fileprivate func content() {
     }
 
     container {
-        let audioProcessingModule = StreamAudioFilterProcessingModule()
-        let filter = RobotVoiceFilter(pitchShift: 0.8)
-        audioProcessingModule.setAudioFilter(filter)
-    }
-
-    container {
         final class RobotVoiceFilter: AudioFilter {
 
             let pitchShift: Float
@@ -255,6 +249,17 @@ fileprivate func content() {
                     }
                 }
             }
+        }
+        
+        container {
+            // Get a call object
+            let call = streamVideo.call(callType: "default", callId: UUID().uuidString)
+
+            // Create our audio filter
+            let filter = RobotVoiceFilter(pitchShift: 0.8)
+
+            // Apply the audio filter on the call. To deactivate the filter we can simply pass `nil`.
+            call.setAudioFilter(filter)
         }
     }
 }

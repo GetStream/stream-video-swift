@@ -1,0 +1,83 @@
+---
+title: Noise Cancellation
+description: Documentation on integrating noise cancellation.
+---
+
+Noise Cancellation capabilities of our [iOS Video SDK](https://getstream.io/video/sdk/ios) can be enabled by installing our NoiseCancellation package. Under the hood, this package uses the technology developed by [krisp.ai](https://krisp.ai).
+
+## Installation
+
+### Add the SDK to your project
+
+To add StreamVideo SDK, open Xcode and follow these steps:
+
+- In Xcode, go to File -> "Add Packages..."
+- Paste the URL https://github.com/GetStream/stream-video-noise-cancellation-swift
+- In the option "Dependency Rule" choose "Up to the Next Major Version," in the single text input next to it. The field will be populated automatically with the latest version.
+
+- Choose "Add Package" and wait for the dialog to complete.
+- Select `StreamVideoNoiseCancellation` and add it in your project.
+
+### Integration
+
+Our iOS SDK provides a utility component that makes the integration smoother.
+
+- `NoiseCancellationProcessor`: the object that comes from the `StreamVideoNoiseCancellation` and performs the noise cancellation operation.
+- `NoiseCancellationFilter`: an object that conforms to `StreamVideo.AudioFilter` and performs all tasks required for the noise cancellation session (e.g request start/stop).
+
+
+```swift
+// Firstly you initalize the processor.
+let processor = NoiseCancellationProcessor()
+
+// Secondly you instantiate the NoiseCancellationFilter. You can use any name, but it needs to be unique compared to other AudioFilters you may be using.
+let noiseCancellationFilter = NoiseCancellationFilter(
+    name: "noise-cancellation",
+    initialize: processor.initialize,
+    process: processor.process,
+    release: processor.release
+)
+```
+
+Once you are able to create a `NoiseCancellationFilter` you can rely on `Call`'s API and state to toggle the filter status and also observe the features availability.
+
+#### Feature availability
+
+`Call.state.settings` contains the `noiseCancellation` configuration. The configuration contains a mode property that you look into, to determine the feature's availability:
+
+- `.available`
+The featue has been enabled on the dashboard and it's available for the call. In this case, you are free to present any noise cancellation toggle UI in your application.
+
+- `.disabled`
+The feature hasn't been enabled on the dashboard or the feature isn't available for the call. In this case, you should hide any noise cancellation toggle UI in your application.
+
+- `.autoOn`
+Similar to `.available` with the difference that if possible, the StreamVideo SDK will enable the filter automatically, when the user join the call.
+
+:::note
+You will need to ensure that you have provided a `VideoConfig.noiseCancellationFilter` value when you initialise StreamVideo, in order for the `.autoOn` mode to work properly.
+:::
+
+#### Activate/Deactivate the filter
+
+The `NoiseCancellationFilter` is an object conforming to the `AudioFilter` protocol. That means, you can manage it in the same manner as any other audioFilter, as described [here](../../advanced/apply-video-filters).)
+
+In order to support `.autoOn` though, the StreamVideo SDK requires us to provide it with a `NoiseCancellationFilter` instance. The instance you provide, will be used whenever the noise cancellation mode is `.autoOn`.
+
+You can easily provide the `NoiseCancellationFilter` instance every time you initialize `StreamVideo`, like below:
+
+```swift
+// Create the NoiseCancellationFilter like the example above.
+
+// Then you create VideoConfig instance that includes our NoiseCancellationFilter.
+let videoConfig = VideoConfig(noiseCancellationFilter: noiseCancellationFilter)
+
+// Finally, you create the StreamVideo instance by passing in our videoConfig.
+let streamVideo = StreamVideo(
+    apiKey: apiKey,
+    user: user,
+    token: token,
+    videoConfig: videoConfig,
+    tokenProvider: { _ in }
+)
+```
