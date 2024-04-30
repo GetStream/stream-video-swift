@@ -187,12 +187,7 @@ final class AppState: ObservableObject {
     }
 
     private func didUpdate(audioFilter: AudioFilter?) {
-        guard
-            let audioFilterProcessingModule = streamVideo?.videoConfig.audioProcessingModule as? StreamAudioFilterProcessingModule
-        else {
-            return
-        }
-        audioFilterProcessingModule.setAudioFilter(audioFilter)
+        activeCall?.setAudioFilter(audioFilter)
     }
 
     private func didUpdate(videoFilter: VideoFilter?) {
