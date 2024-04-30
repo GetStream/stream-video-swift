@@ -20,17 +20,17 @@ To add StreamVideo SDK, open Xcode and follow these steps:
 
 ### Integration
 
-Our iOS SDK provides a utility component that make the integration smoother.
+Our iOS SDK provides a utility component that makes the integration smoother.
 
 - `NoiseCancellationProcessor`: the object that comes from the `StreamVideoNoiseCancellation` and performs the noise cancellation operation.
-- `NoiseCancellationFilter`: an object that conforms to `StreamVideo.AudioFilter` and perform all tasks requires for the noise cancellation session (e.g request start/stop).
+- `NoiseCancellationFilter`: an object that conforms to `StreamVideo.AudioFilter` and performs all tasks required for the noise cancellation session (e.g request start/stop).
 
 
 ```swift
 // Firstly you initalize the processor.
 let processor = NoiseCancellationProcessor()
 
-// Secondly you instantiate the NoiseCancellationFilter. You can use any name, but it needs to be uniqueq compared to other AudioFilters you may be using.
+// Secondly you instantiate the NoiseCancellationFilter. You can use any name, but it needs to be unique compared to other AudioFilters you may be using.
 let noiseCancellationFilter = NoiseCancellationFilter(
     name: "noise-cancellation",
     initialize: processor.initialize,
@@ -52,12 +52,15 @@ The featue has been enabled on the dashboard and it's available for the call. In
 The feature hasn't been enabled on the dashboard or the feature isn't available for the call. In this case, you should hide any noise cancellation toggle UI in your application.
 
 - `.autoOn`
-Similar to `.available` with the difference that if possible, the StreamVideo SDK will enabled the filter automatically, when the user join the useCallback.
+Similar to `.available` with the difference that if possible, the StreamVideo SDK will enable the filter automatically, when the user join the call.
 
+:::note
+You will need to ensure that you have provided a `VideoConfig.noiseCancellationFilter` value when you initialise StreamVideo, in order for the `.autoOn` mode to work properly.
+:::
 
 #### Activate/Deactivate the filter
 
-The `NoiseCancellationFilter` is an object conforming the `AudioFilter` protocol. That means, you can manage it in the same manner as any other audioFilter, as described [here](../../advanced/apply-video-filters).)
+The `NoiseCancellationFilter` is an object conforming to the `AudioFilter` protocol. That means, you can manage it in the same manner as any other audioFilter, as described [here](../../advanced/apply-video-filters).)
 
 In order to support `.autoOn` though, the StreamVideo SDK requires us to provide it with a `NoiseCancellationFilter` instance. The instance you provide, will be used whenever the noise cancellation mode is `.autoOn`.
 

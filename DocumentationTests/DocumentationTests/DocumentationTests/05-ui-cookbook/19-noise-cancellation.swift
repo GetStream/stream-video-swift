@@ -21,7 +21,7 @@ fileprivate func content() {
                 } else {
                     self.isNoiseCancellationAvailable = false
                 }
-                self.isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule.activeAudioFilterId
+                self.isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule.activeAudioFilter?.id
             }
 
             var body: some View {

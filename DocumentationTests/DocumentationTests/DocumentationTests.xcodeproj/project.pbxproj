@@ -23,6 +23,7 @@
 		409C396B2B67CD0B0090044C /* 05-picture-in-picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */; };
 		409C396D2B67CD780090044C /* 08-recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396C2B67CD780090044C /* 08-recording.swift */; };
 		409C396F2B67CDF30090044C /* 09-broadcasting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396E2B67CDF30090044C /* 09-broadcasting.swift */; };
+		409F10EA2BE11698000A984B /* StreamVideoNoiseCancellation in Frameworks */ = {isa = PBXBuildFile; productRef = 409F10E92BE11698000A984B /* StreamVideoNoiseCancellation */; };
 		40AB356B2B73965D00E465CC /* 16-snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356A2B73965D00E465CC /* 16-snapshot.swift */; };
 		40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */; };
 		40CB9FA92B7FC7DB006BED93 /* 17-camera-zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA82B7FC7DB006BED93 /* 17-camera-zoom.swift */; };
@@ -157,6 +158,7 @@
 				40FFDC852B63FD92004DA7A2 /* StreamVideoUIKit in Frameworks */,
 				40FFDC812B63FD92004DA7A2 /* StreamVideo in Frameworks */,
 				40FFDC742B63F767004DA7A2 /* StreamChatSwiftUI in Frameworks */,
+				409F10EA2BE11698000A984B /* StreamVideoNoiseCancellation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,6 +359,7 @@
 				40FFDC802B63FD92004DA7A2 /* StreamVideo */,
 				40FFDC822B63FD92004DA7A2 /* StreamVideoSwiftUI */,
 				40FFDC842B63FD92004DA7A2 /* StreamVideoUIKit */,
+				409F10E92BE11698000A984B /* StreamVideoNoiseCancellation */,
 			);
 			productName = DocumentationTests;
 			productReference = 400D91B22B63D88100EBA47D /* DocumentationTests.framework */;
@@ -388,6 +391,7 @@
 			mainGroup = 400D91A82B63D88100EBA47D;
 			packageReferences = (
 				40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */,
+				409F10E82BE11698000A984B /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */,
 			);
 			productRefGroup = 400D91B32B63D88100EBA47D /* Products */;
 			projectDirPath = "";
@@ -713,6 +717,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		409F10E82BE11698000A984B /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GetStream/stream-video-noise-cancellation-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.1;
+			};
+		};
 		40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-chat-swiftui";
@@ -724,6 +736,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		409F10E92BE11698000A984B /* StreamVideoNoiseCancellation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 409F10E82BE11698000A984B /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */;
+			productName = StreamVideoNoiseCancellation;
+		};
 		40FFDC732B63F767004DA7A2 /* StreamChatSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;

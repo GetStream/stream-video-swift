@@ -9,7 +9,7 @@ fileprivate func content() {
     container {
         let processor = NoiseCancellationProcessor()
 
-        // Secondly you instantiate the NoiseCancellationFilter. You can use any name, but it needs to be uniqueq compared to other AudioFilters you may be using.
+        // Secondly you instantiate the NoiseCancellationFilter. You can use any name, but it needs to be unique compared to other AudioFilters you may be using.
         let noiseCancellationFilter = NoiseCancellationFilter(
             name: "noise-cancellation",
             initialize: processor.initialize,

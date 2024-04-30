@@ -353,3 +353,10 @@ final class RobotVoiceFilter: AudioFilter {
 }
 
 let uiImage = UIImage()
+
+let noiseCancellationFilter = NoiseCancellationFilter(
+    name: "noise-cancellation",
+    initialize: { _, _ in},
+    process: { _, _ , _, _ in },
+    release: {}
+)
