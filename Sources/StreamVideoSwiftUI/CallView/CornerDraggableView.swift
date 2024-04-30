@@ -5,9 +5,9 @@
 import StreamVideo
 import SwiftUI
 
+/// A view that allows dragging a content view to specific corners based on user gestures.
 public struct CornerDraggableView<Content: View>: View {
     @State var callViewPlacement = CallViewPlacement.topTrailing
-
     @State private var dragAmount = CGSize.zero
 
     private var scaleFactorX: CGFloat
@@ -19,6 +19,13 @@ public struct CornerDraggableView<Content: View>: View {
     var proxy: GeometryProxy
     var onTap: () -> Void
 
+    /// Initializes a corner draggable view with the specified parameters.
+    /// - Parameters:
+    ///   - scaleFactorX: The scale factor for the width of the draggable area.
+    ///   - scaleFactorY: The scale factor for the height of the draggable area.
+    ///   - content: A closure that provides the content view with a given frame.
+    ///   - proxy: The geometry proxy representing the enclosing view's geometry.
+    ///   - onTap: A closure that is invoked when the view is tapped.
     public init(
         scaleFactorX: CGFloat = 0.33,
         scaleFactorY: CGFloat = 0.33,
@@ -128,6 +135,7 @@ public struct CornerDraggableView<Content: View>: View {
     }
 }
 
+/// An enum representing the placement of a call view in different corners of a container.
 public enum CallViewPlacement {
     case topLeading
     case topTrailing

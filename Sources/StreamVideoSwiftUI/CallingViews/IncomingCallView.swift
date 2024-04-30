@@ -5,20 +5,25 @@
 import StreamVideo
 import SwiftUI
 
+/// A SwiftUI view for displaying an incoming call screen.
 @available(iOS 14.0, *)
 public struct IncomingCallView: View {
-    
-    @Injected(\.streamVideo) var streamVideo
+
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.utils) var utils
-    
+
     @StateObject var viewModel: IncomingViewModel
-            
+
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void
-    
+
+    /// Initializes the incoming call view with call information and callbacks for call acceptance and rejection.
+    /// - Parameters:
+    ///   - callInfo: Information about the incoming call.
+    ///   - onCallAccepted: Callback when the incoming call is accepted.
+    ///   - onCallRejected: Callback when the incoming call is rejected.
     public init(
         callInfo: IncomingCall,
         onCallAccepted: @escaping (String) -> Void,
@@ -30,7 +35,7 @@ public struct IncomingCallView: View {
         self.onCallAccepted = onCallAccepted
         self.onCallRejected = onCallRejected
     }
-    
+
     public var body: some View {
         IncomingCallViewContent(
             callParticipants: viewModel.callParticipants,
@@ -49,23 +54,23 @@ public struct IncomingCallView: View {
     }
 }
 
+/// The content view of the incoming call screen.
 struct IncomingCallViewContent: View {
-    
-    @Injected(\.streamVideo) var streamVideo
+
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.utils) var utils
-    
+
     var callParticipants: [Member]
     var callInfo: IncomingCall
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void
-    
+
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
-            
+
             if callParticipants.count > 1 {
                 CallingGroupView(
                     participants: callParticipants
@@ -76,24 +81,24 @@ struct IncomingCallViewContent: View {
                     caller: callInfo.caller.id
                 )
             }
-            
+
             CallingParticipantsView(
                 participants: callParticipants,
                 caller: callInfo.caller.id
             )
             .padding()
-            
+
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(L10n.Call.Incoming.title)
                     .applyCallingStyle()
                 CallingIndicator()
             }
-            
+
             Spacer()
-            
+
             HStack {
                 Spacing()
-                
+
                 Button {
                     onCallRejected(callInfo.id)
                 } label: {
@@ -105,9 +110,9 @@ struct IncomingCallViewContent: View {
                         )
                 }
                 .padding(.all, 8)
-                
+
                 Spacing(size: 3)
-                
+
                 Button {
                     onCallAccepted(callInfo.id)
                 } label: {
@@ -119,7 +124,7 @@ struct IncomingCallViewContent: View {
                         )
                 }
                 .padding(.all, 8)
-                
+
                 Spacing()
             }
             .padding()

@@ -37,8 +37,8 @@ public extension Appearance {
 }
 
 /// Provides the default value of the `Appearance` class.
-public struct AppearanceKey: InjectionKey {
-    public static var currentValue: Appearance = Appearance()
+enum AppearanceKey: InjectionKey {
+    static var currentValue: Appearance = Appearance()
 }
 
 extension InjectedValues {
@@ -49,6 +49,46 @@ extension InjectedValues {
         }
         set {
             Self[AppearanceKey.self] = newValue
+        }
+    }
+
+    /// Provides access to the `Colors` instance.
+    public var colors: Colors {
+        get {
+            appearance.colors
+        }
+        set {
+            appearance.colors = newValue
+        }
+    }
+
+    /// Provides access to the `Images` instance.
+    public var images: Images {
+        get {
+            appearance.images
+        }
+        set {
+            appearance.images = newValue
+        }
+    }
+
+    /// Provides access to the `Fonts` instance.
+    public var fonts: Fonts {
+        get {
+            appearance.fonts
+        }
+        set {
+            appearance.fonts = newValue
+        }
+    }
+
+    /// Provides access to the `Sounds` instance.
+    public var sounds: Sounds {
+        get {
+            appearance.sounds
+        }
+        set {
+            appearance.sounds = newValue
         }
     }
 }

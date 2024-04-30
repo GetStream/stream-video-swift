@@ -6,18 +6,22 @@ import Foundation
 import StreamVideo
 
 public class Utils {
-    public var userListProvider: UserListProvider
-    public var callSoundsPlayer = CallSoundsPlayer()
+    public var userListProvider: UserListProvider?
+    public var callSoundsPlayer: CallSoundsPlayer
 
-    public init(userListProvider: UserListProvider = StreamUserListProvider()) {
+    public init(
+        userListProvider: UserListProvider? = nil,
+        callSoundsPlayer: CallSoundsPlayer = .init()
+    ) {
         self.userListProvider = userListProvider
+        self.callSoundsPlayer = callSoundsPlayer
     }
 }
 
 // MARK: - Utils + Default
 
 /// Provides the default value of the `Utils` class.
-public struct UtilsKey: InjectionKey {
+public enum UtilsKey: InjectionKey {
     public static var currentValue: Utils = .init()
 }
 

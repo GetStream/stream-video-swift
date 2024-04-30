@@ -86,10 +86,14 @@ class InviteParticipantsViewModel: ObservableObject {
         if loading {
             return
         }
-        
+
+        guard let userListProvider = utils.userListProvider else {
+            return
+        }
+
         loading = true
         Task {
-            let newUsers = try await utils.userListProvider.loadNextUsers(
+            let newUsers = try await userListProvider.loadNextUsers(
                 pagination: Pagination(pageSize: limit, offset: offset)
             )
             var temp = [User]()

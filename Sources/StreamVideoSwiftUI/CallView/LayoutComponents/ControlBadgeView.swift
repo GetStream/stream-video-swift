@@ -6,11 +6,15 @@ import Foundation
 import StreamVideo
 import SwiftUI
 
+/// A view representing a control badge displaying a value.
 public struct ControlBadgeView: View {
     @Injected(\.colors) private var colors
 
+    /// The value to be displayed within the badge.
     var value: String
 
+    /// Initializes a control badge view with the specified value.
+    /// - Parameter value: The value to display within the badge.
     public init(_ value: String) {
         self.value = value
     }
