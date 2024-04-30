@@ -11,7 +11,7 @@ import XCTest
 @MainActor
 final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase {
 
-    private var factory: PeerConnectionFactory! = .init(audioProcessingModule: StreamAudioFilterProcessingModule())
+    private var factory: PeerConnectionFactory! = .init(audioProcessingModule: MockAudioProcessingModule())
     private var adapter: StreamPictureInPictureTrackStateAdapter! = .init()
 
     // MARK: - Lifecycle
