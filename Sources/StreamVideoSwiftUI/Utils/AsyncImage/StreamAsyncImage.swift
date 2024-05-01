@@ -29,7 +29,7 @@ struct StreamAsyncImage<Content: View>: View {
     }
 
     var body: some View {
-        if #available(iOS 15.0, *) {
+        if #available(iOS 16.0, *) {
             AsyncImage(
                 url: url,
                 scale: scale,
