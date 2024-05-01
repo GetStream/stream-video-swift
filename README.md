@@ -59,6 +59,7 @@ Here are some of the features we support:
 - Push notification providers support
 - Call recording
 - Broadcasting to HLS
+- Noise cancellation
 
 Check our [docs](https://getstream.io/video/docs/ios/) to get more details about the supported features and integration guides.
 
@@ -212,7 +213,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 1.1.0 milestone - June
 
 - [ ] Closed Captions and multi language support for transcriptions
-- [ ] Improve noise reduction/cancelation
+- [x] Improve noise reduction/cancelation
 - [ ] Improved support for teams & multi-tenant
 - [ ] Waiting rooms
 - [ ] Session timers
