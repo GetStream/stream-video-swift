@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+
+# [1.0.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.0)
+_May 01, 2024_
+
+### 🔄 Changed
 - The return type of `call.get()` is now the API type `GetCallResponse` which encapsulates the previous `CallResponse` under the `call` property. [#335](https://github.com/GetStream/stream-video-swift/pull/335)
 - Remove Nuke dependency from the SwiftUI SDK. [#340](https://github.com/GetStream/stream-video-swift/pull/340)
 - `members` type changed from `MemberRequest` to `Member` in `startCall` and `enterLobby` in `CallViewModel`. [#368](https://github.com/GetStream/stream-video-swift/pull/368)
