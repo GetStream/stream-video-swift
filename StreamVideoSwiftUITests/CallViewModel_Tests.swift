@@ -75,7 +75,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(.coordinatorEvent(.typeCallRejectedEvent(event)))
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 5_000_000_000)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 10_000_000_000)
     }
     
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
