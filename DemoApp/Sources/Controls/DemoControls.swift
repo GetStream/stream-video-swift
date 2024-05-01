@@ -20,7 +20,6 @@ struct AppControlsWithChat: View {
     private let size: CGFloat = 50
     private let cornerRadius: CGFloat = 24
 
-    @ObservedObject var reactionsHelper = AppState.shared.reactionsHelper
     @ObservedObject var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, canOpenChat: Bool = true) {
@@ -55,7 +54,6 @@ struct AppControlsWithChat: View {
         }
         .padding(.horizontal, 16)
         .padding(.bottom)
-        .onReceive(viewModel.$call) { reactionsHelper.call = $0 }
     }
 }
 

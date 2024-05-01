@@ -94,7 +94,8 @@ final class DemoAppViewFactory: ViewFactory {
         availableFrame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
-        DefaultViewFactory.shared.makeVideoParticipantsView(
+        VideoParticipantsView(
+            viewFactory: self,
             viewModel: viewModel,
             availableFrame: availableFrame,
             onChangeTrackVisibility: onChangeTrackVisibility

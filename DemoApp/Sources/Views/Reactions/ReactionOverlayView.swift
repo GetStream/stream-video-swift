@@ -8,12 +8,12 @@ import SwiftUI
 
 struct ReactionOverlayView: View {
 
-    @ObservedObject var reactionsHelper = AppState.shared.reactionsHelper
+    @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
 
     var participant: CallParticipant
 
     var body: some View {
-        if let firstReaction = reactionsHelper
+        if let firstReaction = reactionsAdapter
             .activeReactions[participant.userId]?
             .last {
             reactionView(for: firstReaction)
@@ -35,9 +35,9 @@ struct ReactionOverlayView: View {
 
 struct ReactionOverlayView_Previews: PreviewProvider {
     static var previews: some View {
-        AppState.shared
-            .reactionsHelper
-            .activeReactions["preview-participant"] = [.raiseHand]
+        InjectedValues[\.reactionsAdapter].activeReactions["preview-participant"] = [
+            .raiseHand
+        ]
 
         return ReactionOverlayView(
             participant: .init(
