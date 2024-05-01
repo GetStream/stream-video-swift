@@ -31,7 +31,11 @@ struct NoiseCancellationButtonView: View {
     }
 
     var body: some View {
-        if let call = viewModel.call, let noiseCancellationAudioFilter = streamVideo.videoConfig.noiseCancellationFilter {
+        if 
+            let call = viewModel.call, // Ensure we have an active call.
+            let noiseCancellationAudioFilter = streamVideo.videoConfig.noiseCancellationFilter, // Ensure that we have noiseCancellation audioFilter to activate.
+            streamVideo.isHardwareAccelerationAvailable // Ensure that the device supports Apple's neuralEngine.
+        {
             Group {
                 if isNoiseCancellationAvailable {
                     Button {

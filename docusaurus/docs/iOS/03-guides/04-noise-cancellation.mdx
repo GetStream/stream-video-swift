@@ -52,16 +52,8 @@ The featue has been enabled on the dashboard and it's available for the call. In
 Even though the feature may be enabled for your call, you should note that NoiseCancellation is a very performance-heavy process. For that reason, it's recommended to only allow the feature on devices that support Apple's neuralEngine. 
 
 You can easily check if the current device has neuralEngine support by using `StreamVideo.isHardwareAccelerationAvailable` on your streamVideo initialized instance.
-```swift
-let streamVideo = StreamVideo(
-    apiKey: apiKey,
-    user: user,
-    token: token,
-    tokenProvider: { _ in }
-)
 
-let isHardwareAccelerationAvailable = streamVideo.isHardwareAccelerationAvailable
-```
+For more info you can refer to our [UI docs](../../ui-cookbook/noise-cancellation). about Noise Cancellation.
 :::
 
 - `.disabled`
