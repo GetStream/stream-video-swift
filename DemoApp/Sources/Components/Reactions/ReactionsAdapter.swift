@@ -3,12 +3,13 @@
 //
 
 import AVFoundation
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
 
 @MainActor
-final class ReactionsHelper: ObservableObject {
+final class ReactionsAdapter: ObservableObject {
 
     @Injected(\.streamVideo) var streamVideo
 
@@ -16,29 +17,34 @@ final class ReactionsHelper: ObservableObject {
 
     private var reactionsTask: Task<Void, Error>?
     private var callEndedNotificationObserver: Any?
+    private var activeCallUpdated: AnyCancellable?
+    private var call: Call? { didSet { subscribeToReactionEvents() } }
 
     @Published var showFireworks = false
     @Published var availableReactions: [Reaction] = [
-        .fireworks,
-        .raiseHand,
-        .lowerHand,
         .like,
+        .fireworks,
         .dislike,
         .heart,
-        .smile
+        .smile,
+        .raiseHand,
+        .lowerHand
     ]
 
     @Published var activeReactions: [String: [Reaction]] = [:]
 
-    var call: Call? {
-        didSet {
-            subscribeToReactionEvents()
-        }
-    }
+    // MARK: - Lifecycle
 
     init() {
         subscribeToCallStatusUpdates()
+
+        activeCallUpdated = streamVideo
+            .state
+            .$activeCall
+            .sink { [weak self] in self?.call = $0 }
     }
+
+    // MARK: - Actions
 
     func send(reaction: Reaction) {
         Task {
@@ -62,6 +68,8 @@ final class ReactionsHelper: ObservableObject {
     func removeRaisedHand(from userId: String) {
         unregister(reaction: .raiseHand, for: userId)
     }
+
+    // MARK: - Private API
 
     private func subscribeToCallStatusUpdates() {
         callEndedNotificationObserver = NotificationCenter.default.addObserver(
@@ -87,6 +95,7 @@ final class ReactionsHelper: ObservableObject {
                     continue
                 }
                 self?.handleReaction(reaction, from: event.reaction.user.toUser)
+                log.debug("\(event.reaction.user.name ?? event.reaction.user.id) reacted with reaction:\(reaction.id)")
             }
             return
         }
@@ -94,12 +103,20 @@ final class ReactionsHelper: ObservableObject {
 
     private func reaction(for event: CallReactionEvent) -> Reaction? {
         guard let emojiCode = event.reaction.emojiCode else {
+            log
+                .warning(
+                    "\(event.reaction.user.name ?? event.reaction.user.id) reacted with unsupported emojiCode:\(event.reaction.emojiCode ?? "n/a")"
+                )
             return nil
         }
 
         if let availableReaction = availableReactions.first(where: { $0.id.rawValue == emojiCode }) {
             return availableReaction
         } else {
+            log
+                .warning(
+                    "\(event.reaction.user.name ?? event.reaction.user.id) reacted with unsupported emojiCode:\(event.reaction.emojiCode ?? "n/a")"
+                )
             return nil
         }
     }
@@ -182,5 +199,16 @@ final class ReactionsHelper: ObservableObject {
                 self?.reactionsTask = nil
             }
         }
+    }
+}
+
+extension ReactionsAdapter: InjectionKey {
+    static var currentValue: ReactionsAdapter = .init()
+}
+
+extension InjectedValues {
+    var reactionsAdapter: ReactionsAdapter {
+        get { Self[ReactionsAdapter.self] }
+        set { Self[ReactionsAdapter.self] = newValue }
     }
 }

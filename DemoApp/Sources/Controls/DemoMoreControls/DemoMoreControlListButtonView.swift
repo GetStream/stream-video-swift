@@ -45,7 +45,7 @@ struct DemoMoreControlListButtonView: View {
 @MainActor
 struct DemoRaiseHandToggleButtonView: View {
 
-    @ObservedObject var reactionsHelper = AppState.shared.reactionsHelper
+    @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
     @ObservedObject var viewModel: CallViewModel
 
     init(viewModel: CallViewModel) {
@@ -55,7 +55,7 @@ struct DemoRaiseHandToggleButtonView: View {
     var body: some View {
         DemoMoreControlListButtonView(
             centered: true,
-            action: { reactionsHelper.send(reaction: .raiseHand) },
+            action: { reactionsAdapter.send(reaction: .raiseHand) },
             label: currentUserHasRaisedHand ? "Lower Hand" : "Raise Hand"
         ) {
             Image(
@@ -71,7 +71,7 @@ struct DemoRaiseHandToggleButtonView: View {
             return false
         }
 
-        return reactionsHelper
+        return reactionsAdapter
             .activeReactions[userId]?
             .first(where: { $0.id == .raiseHand }) != nil
     }

@@ -9,13 +9,7 @@ import SwiftUI
 
 struct DemoReactionSelectorView: View {
 
-    var reactions: [Reaction] = [
-        .like,
-        .fireworks,
-        .dislike,
-        .heart,
-        .hello
-    ]
+    @Injected(\.reactionsAdapter) var reactionsAdapter
 
     @Injected(\.images) private var images
 
@@ -45,7 +39,7 @@ struct DemoReactionSelectorView: View {
     @ViewBuilder
     private var contentView: some View {
         HStack(alignment: .center) {
-            ForEach(reactions) { reaction in
+            ForEach(reactionsAdapter.availableReactions.filter { $0 != .raiseHand && $0 != .lowerHand }) { reaction in
                 DemoReactionButton(reaction: reaction)
             }
         }
@@ -56,13 +50,13 @@ struct DemoReactionSelectorView: View {
 struct DemoReactionButton: View {
 
     @Injected(\.colors) var colors
+    @Injected(\.reactionsAdapter) var reactionsAdapter
 
     var reaction: Reaction
-    var reactionsHelper = AppState.shared.reactionsHelper
 
     var body: some View {
         Button {
-            reactionsHelper.send(reaction: reaction)
+            reactionsAdapter.send(reaction: reaction)
         } label: {
             Circle()
                 .fill(Color(colors.participantBackground))

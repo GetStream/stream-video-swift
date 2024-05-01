@@ -12,7 +12,7 @@ struct DemoCallTopView: View {
     @Injected(\.colors) var colors
     @Injected(\.images) var images
 
-    @ObservedObject private var reactionsHelper = AppState.shared.reactionsHelper
+    @ObservedObject private var reactionsAdapter = InjectedValues[\.reactionsAdapter]
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var appState = AppState.shared
@@ -71,7 +71,7 @@ struct DemoCallTopView: View {
     private func reactionsList() -> some View {
         ForEach(availableReactions) { reaction in
             Button {
-                reactionsHelper.send(reaction: reaction.id == .lowerHand ? .raiseHand : reaction)
+                reactionsAdapter.send(reaction: reaction.id == .lowerHand ? .raiseHand : reaction)
             } label: {
                 Label(
                     title: {
@@ -88,12 +88,12 @@ struct DemoCallTopView: View {
             return []
         }
 
-        let hasRaisedHand = reactionsHelper.activeReactions[userId]?.first(where: { $0.id == .raiseHand }) != nil
+        let hasRaisedHand = reactionsAdapter.activeReactions[userId]?.first(where: { $0.id == .raiseHand }) != nil
 
         if hasRaisedHand {
-            return reactionsHelper.availableReactions.filter { $0.id != .raiseHand }
+            return reactionsAdapter.availableReactions.filter { $0.id != .raiseHand }
         } else {
-            return reactionsHelper.availableReactions.filter { $0.id != .lowerHand }
+            return reactionsAdapter.availableReactions.filter { $0.id != .lowerHand }
         }
     }
 }

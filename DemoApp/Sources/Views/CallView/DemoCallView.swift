@@ -16,7 +16,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
-    @ObservedObject var reactionsHelper: ReactionsHelper = AppState.shared.reactionsHelper
+    @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
 
     @State var mutedIndicatorShown = false
     @StateObject var snapshotViewModel: DemoSnapshotViewModel
@@ -67,7 +67,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             )
             .overlay(
                 ZStack {
-                    reactionsHelper.showFireworks
+                    reactionsAdapter.showFireworks
                         ? FireworksView(config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast))
                         : nil
                 }

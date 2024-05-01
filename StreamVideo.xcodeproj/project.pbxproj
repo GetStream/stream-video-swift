@@ -98,7 +98,7 @@
 		406A8EA02AA1D7E9001F598A /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D32A9E2051004BE3DA /* Reaction.swift */; };
 		406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
-		406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */; };
+		406A8EA92AA1D80C001F598A /* ReactionsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsAdapter.swift */; };
 		406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */; };
 		406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -270,7 +270,7 @@
 		40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */; };
 		40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */; };
-		40F445D22A9E2033004BE3DA /* ReactionsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */; };
+		40F445D22A9E2033004BE3DA /* ReactionsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsAdapter.swift */; };
 		40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D32A9E2051004BE3DA /* Reaction.swift */; };
 		40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */; };
 		40F445E02A9E22EA004BE3DA /* SimpleCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */; };
@@ -1243,7 +1243,7 @@
 		40F445C12A9E1449004BE3DA /* JoinCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinCallView.swift; sourceTree = "<group>"; };
 		40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatViewFactory.swift; sourceTree = "<group>"; };
 		40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoReactionsOverlayView.swift; sourceTree = "<group>"; };
-		40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsHelper.swift; sourceTree = "<group>"; };
+		40F445D12A9E2033004BE3DA /* ReactionsAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsAdapter.swift; sourceTree = "<group>"; };
 		40F445D32A9E2051004BE3DA /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
 		40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallContentView.swift; sourceTree = "<group>"; };
 		40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCallingView.swift; sourceTree = "<group>"; };
@@ -2694,7 +2694,7 @@
 		40F445D02A9E2028004BE3DA /* Reactions */ = {
 			isa = PBXGroup;
 			children = (
-				40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */,
+				40F445D12A9E2033004BE3DA /* ReactionsAdapter.swift */,
 			);
 			path = Reactions;
 			sourceTree = "<group>";
@@ -4611,7 +4611,7 @@
 				40CB9FA72B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
 				40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */,
-				40F445D22A9E2033004BE3DA /* ReactionsHelper.swift in Sources */,
+				40F445D22A9E2033004BE3DA /* ReactionsAdapter.swift in Sources */,
 				84FFB06A2A8D1380005BA275 /* DemoCallTopView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4653,7 +4653,7 @@
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
 				40AB354D2B738C5A00E465CC /* DemoVideoCallParticipantModifier.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
-				406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */,
+				406A8EA92AA1D80C001F598A /* ReactionsAdapter.swift in Sources */,
 				4029A6262AB0692C0065DAFB /* DemoChatViewModel+Injection.swift in Sources */,
 				406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */,
 				406303472AD943B60091AE77 /* GoogleHelper.swift in Sources */,
