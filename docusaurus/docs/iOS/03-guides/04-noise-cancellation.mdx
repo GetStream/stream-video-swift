@@ -49,9 +49,19 @@ Once you are able to create a `NoiseCancellationFilter` you can rely on `Call`'s
 The featue has been enabled on the dashboard and it's available for the call. In this case, you are free to present any noise cancellation toggle UI in your application.
 
 :::important
-Even though the feature may be enabled for your call, you should not that NoiseCancellation is a very performance-heavy process. For that reason, it's recommended to only allow the feature on devices that support Apple's neuralEngine. 
+Even though the feature may be enabled for your call, you should note that NoiseCancellation is a very performance-heavy process. For that reason, it's recommended to only allow the feature on devices that support Apple's neuralEngine. 
 
-You can easily check if the current device has neuralEngine support by using `StreamVideo.isHardwareAccelerationAvailable` on your streamVideo initialized instanceof.
+You can easily check if the current device has neuralEngine support by using `StreamVideo.isHardwareAccelerationAvailable` on your streamVideo initialized instance.
+```swift
+let streamVideo = StreamVideo(
+    apiKey: apiKey,
+    user: user,
+    token: token,
+    tokenProvider: { _ in }
+)
+
+let isHardwareAccelerationAvailable = streamVideo.isHardwareAccelerationAvailable
+```
 :::
 
 - `.disabled`
@@ -63,7 +73,7 @@ Similar to `.available` with the difference that if possible, the StreamVideo SD
 :::note
 The requirements for `.autoOn` to work properly are:
 - A `VideoConfig.noiseCancellationFilter` value when you initialise StreamVideo
-- Device to have support for Apple's neuralEngine
+- Device has support for Apple's neuralEngine
 :::
 
 #### Activate/Deactivate the filter
