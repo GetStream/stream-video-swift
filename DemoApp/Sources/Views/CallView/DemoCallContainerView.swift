@@ -33,9 +33,9 @@ internal struct DemoCallContainerView: View {
                     chatViewModel: chatViewModel
                 )
             )
-            .onCallEnded { call in
-                if #available(iOS 15.0, *), let call {
-                    DemoFeedbackView(call)
+            .onCallEnded { call, dismiss in
+                if let call {
+                    DemoFeedbackView(call, dismiss: dismiss)
                 }
             }
             .onContinueUserActivity(

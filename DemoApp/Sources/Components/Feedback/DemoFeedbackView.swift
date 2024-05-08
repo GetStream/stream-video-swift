@@ -7,10 +7,8 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct DemoFeedbackView: View {
 
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Injected(\.appearance) private var appearance
 
@@ -20,10 +18,12 @@ struct DemoFeedbackView: View {
     @State private var isSubmitting = false
 
     private var call: Call
+    private var dismiss: () -> Void
     private var isSubmitEnabled: Bool { !email.isEmpty && !isSubmitting }
 
-    init(_ call: Call) {
+    init(_ call: Call, dismiss: @escaping () -> Void) {
         self.call = call
+        self.dismiss = dismiss
     }
 
     var body: some View {
@@ -48,9 +48,8 @@ struct DemoFeedbackView: View {
                 VStack(spacing: 27) {
                     VStack(spacing: 16) {
                         TextField(
-                            "Email Address",
-                            text: $email,
-                            prompt: Text("Email Address *")
+                            "Email Address *",
+                            text: $email
                         )
                         .textFieldStyle(DemoTextfieldStyle())
 

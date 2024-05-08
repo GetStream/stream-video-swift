@@ -573,17 +573,17 @@ open class CallViewModel: ObservableObject {
                             // Accepted on another device.
                             callingState = .idle
                         }
-                    case let .rejected(callEventInfo):
+                    case .rejected:
                         handleRejectedEvent(callEvent)
-                    case let .ended(callEventInfo):
+                    case .ended:
                         leaveCall()
                     case let .userBlocked(callEventInfo):
                         if callEventInfo.user?.id == streamVideo.user.id {
                             leaveCall()
                         }
-                    case let .userUnblocked(callEventInfo):
+                    case .userUnblocked:
                         break
-                    case let .sessionStarted(callSessionResponse):
+                    case .sessionStarted:
                         break
                     }
                 } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {

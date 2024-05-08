@@ -10,59 +10,94 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
 
     private final class CallEndedViewModifierState: ObservableObject {
         @Published var call: Call?
-        @Published var isPresentingSubview: Bool = false
+        @Published var isPresentingSubview: Bool
+        @Published var maxParticipantsCount: Int
 
-        init() {}
+        init(
+            call: Call? = nil,
+            isPresentingSubview: Bool = false,
+            maxParticipantsCount: Int = 0
+        ) {
+            self.call = call
+            self.isPresentingSubview = isPresentingSubview
+            self.maxParticipantsCount = maxParticipantsCount
+        }
     }
 
-    private var notificationCenter: NotificationCenter
-    private var subviewProvider: (Call?) -> Subview
+    @Injected(\.streamVideo) private var streamVideo
+
+    private var subviewProvider: (Call?, @escaping () -> Void) -> Subview
 
     @StateObject private var state: CallEndedViewModifierState = .init()
 
     init(
-        notificationCenter: NotificationCenter,
-        @ViewBuilder subviewProvider: @escaping (Call?) -> Subview
+        @ViewBuilder subviewProvider: @escaping (Call?, @escaping () -> Void) -> Subview
     ) {
-        self.notificationCenter = notificationCenter
         self.subviewProvider = subviewProvider
     }
 
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $state.isPresentingSubview) {
-                subviewProvider(state.call)
-            }
-            .onReceive(
-                notificationCenter.publisher(for: .init(CallNotification.callEnded))
-            ) { notification in
-                guard let call = notification.object as? Call else {
-                    log.warning("Received CallNotification.callEnded but the object isn't a call.")
+                subviewProvider(state.call) {
+                    state.call = nil
                     state.isPresentingSubview = false
-                    return
                 }
+            }
+            .onReceive(streamVideo.state.$activeCall.removeDuplicates { $0?.cId != $1?.cId }) { call in
+                switch (call, state.call, state.isPresentingSubview) {
+                case (nil, let activeCall, false) where activeCall != nil && state.maxParticipantsCount > 1:
+                    /// The following presentation criteria are required:
+                    /// - The activeCall was ended.
+                    /// - Participants, during call's duration, grew to more than one.
+                    state.isPresentingSubview = true
 
-                guard state.call?.cId != call.cId else {
-                    return
+                case let (newActiveCall, activeCall, _) where newActiveCall != nil && activeCall != nil:
+                    /// The activeCall was replaced with another call. We should not present the
+                    /// subview. We will also hide any modals if any is visible.
+                    state.call = newActiveCall
+                    state.isPresentingSubview = false
+                    state.maxParticipantsCount = 0
+
+                case (let newActiveCall, nil, _) where newActiveCall != nil:
+                    /// The activeCall was replaced with another call. We should not present the
+                    /// subview. We will also hide any modals if any is visible.
+                    state.call = newActiveCall
+                    state.isPresentingSubview = false
+                    state.maxParticipantsCount = 0
+
+                default:
+                    /// For every other case we won't perform any action.
+                    log
+                        .debug(
+                            "CallEnded view modifier received newValue:\(call?.cId ?? "nil") oldValue:\(state.call?.cId ?? "nil") isPresentingSubview:\(state.isPresentingSubview) maxParticipantsCount:\(state.maxParticipantsCount). No action is required."
+                        )
                 }
-
-                log.debug("Received CallNotification.callEnded for call:\(call.cId)")
-                state.call = call
-                state.isPresentingSubview = true
+            }
+            .onReceive(streamVideo.state.activeCall?.state.$participants.map(\.count)) {
+                /// Every time participants update, we store the maximum number of participants in
+                /// the call (during call's duration).
+                state.maxParticipantsCount = max(state.maxParticipantsCount, $0)
             }
     }
 }
 
 extension View {
 
+    /// A viewModifier that observes callState from StreamVideo. Once the following criteria are being
+    /// fulfilled, presents a modal with the provided content.
+    /// Activation criteria:
+    /// - Active call was ended.
+    /// - Participants, during call's duration, grew to more than one.
+    ///
+    /// - Parameter content: A viewBuilder that returns the modal's content. The viewModifier
+    /// will provide a dismiss closure that can be called from the content to close the modal.
     @ViewBuilder
     public func onCallEnded(
-        notificationCenter: NotificationCenter = .default,
-        @ViewBuilder _ content: @escaping (Call?) -> some View
+        @ViewBuilder _ content: @escaping (Call?, @escaping () -> Void) -> some View
     ) -> some View {
         modifier(
             CallEndedViewModifier(
-                notificationCenter: notificationCenter,
                 subviewProvider: content
             )
         )

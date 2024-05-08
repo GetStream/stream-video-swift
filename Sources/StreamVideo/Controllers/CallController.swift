@@ -375,8 +375,8 @@ class CallController: @unchecked Sendable {
                 custom: custom,
                 rating: rating,
                 reason: reason,
-                sdk: "iOS", // Not sure how to fill this one
-                sdkVersion: "1.0.0", // Not sure how to fill this one
+                sdk: SystemEnvironment.sdkName,
+                sdkVersion: SystemEnvironment.version,
                 userSessionId: sessionID
             )
         )
