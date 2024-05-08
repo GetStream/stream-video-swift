@@ -933,9 +933,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     @MainActor
     public func collectUserFeedback(
-        custom: [String: RawJSON]? = nil,
         rating: Int? = nil,
-        reason: String? = nil
+        reason: String? = nil,
+        custom: [String: RawJSON]? = nil
     ) async throws -> CollectUserFeedbackResponse {
         try await callController.collectUserFeedback(
             sessionID: state.sessionId,

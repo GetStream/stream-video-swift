@@ -9,7 +9,7 @@ import SwiftUI
 extension View {
 
     @ViewBuilder
-    func onReceive<P>(
+    public func onReceive<P>(
         _ publisher: P?,
         perform action: @escaping (P.Output) -> Void
     ) -> some View where P: Publisher, P.Failure == Never {
