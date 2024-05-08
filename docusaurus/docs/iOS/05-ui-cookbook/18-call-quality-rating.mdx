@@ -3,14 +3,16 @@ title: Call Quality Rating
 description: Documentation on implementing feedback collection when a call ends.
 ---
 
-# Introduction
+# Call Quality Rating
+
+## Introduction
 ​
 In this guide, we are going to show how one can build a call quality rating form on top of our Swift Video SDK. It is a good practice to ask your end users about their overall experience after the end of the call or, while being in a call.
 
 Here is a preview of the component we are going to build:
 ![alt text](../assets/call-quality-rating.png)
 
-# Submit Feedback API
+## Submit Feedback API
 ​
 Our Swift Video SDK provides an API for collecting this feedback which later can be seen in the call stats section of our dashboard.
 
@@ -20,11 +22,12 @@ try await call.collectUserFeedback(
     reason: "it worked great!", // the main feedback
     custom: [
          // ... any extra properties that you wish to collect
+         "callWasAwesome": .bool(true)
     ]
 )
 ```
 
-# Implementation
+## Implementation
 
 We are going to present a simple view that will be presented as a modal to the user and ask for feedback. 
 
@@ -148,7 +151,7 @@ struct DemoFeedbackView: View {
 }
 ```
 
-The View uses a simple view for the start rating:
+The View uses a simple star rating View implementation:
 
 ```swift
 struct DemoStarRatingView: View {
@@ -184,18 +187,20 @@ struct DemoStarRatingView: View {
 With the FeedbackView declared, the next step is to find a way to inject the View in the call's lifecycle in order to be presented to the user at the right time. To simplify this step, the Swift Video SDK provides the `onCallEnded` ViewModifier . The modifier accepts a closure with inputs an optional `Call` object and a dismiss closure. 
 
 ```swift
-var body: some View {
-    YourRootView()
-        .modifier(CallModifier(viewModel: viewModel))
-        .onCallEnded { call, dismiss in
-            if let call {
-                DemoFeedbackView(call, dismiss: dismiss)
+struct CallContainer: View {      
+    var body: some View {
+        YourRootView()
+            .modifier(CallModifier(viewModel: viewModel))
+            .onCallEnded { call, dismiss in
+                if let call {
+                    DemoFeedbackView(call, dismiss: dismiss)
+                }
             }
-        }
+    }
 }
 ```
 
-The ViewModifier observes the Call's lifecycle andy by using following triggering criteria:
+The ViewModifier observes the Call's lifecycle and looks for the following triggering criteria:
 - Once the active call has ended
 - If the max number of joined participants, during call's duration, grew to more than one
 
