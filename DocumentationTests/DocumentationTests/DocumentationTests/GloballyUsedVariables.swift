@@ -19,6 +19,7 @@ var utils = Utils()
 var availableFrame = CGRect.zero
 var availableSize = CGSize.zero
 var videoSize = CGSize.zero
+var rating: Int = 0
 var participant = CallParticipant(
     id: "",
     userId: "",
@@ -360,3 +361,44 @@ let noiseCancellationFilter = NoiseCancellationFilter(
     process: { _, _ , _, _ in },
     release: {}
 )
+
+struct DemoFeedbackView: View {
+    var call: Call?
+    var dismiss: () -> Void
+
+    init(_ call: Call? = nil, dismiss: @escaping () -> Void) {
+        self.call = call
+        self.dismiss = dismiss
+    }
+
+    var body: some View { EmptyView() }
+}
+
+struct DemoTextfieldStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        EmptyView()
+    }
+}
+
+struct DemoStarRatingView: View {
+    var rating: Binding<Int>
+
+    var body: some View { EmptyView() }
+}
+
+struct DemoTextEditor: View {
+    var text: Binding<String>
+    var placeholder: String
+
+    var body: some View { EmptyView() }
+}
+
+enum ImageFile {
+    case feedbackLogo
+}
+
+extension Image {
+    init(_ value: ImageFile) {
+        self = .init(systemName: "star")
+    }
+}

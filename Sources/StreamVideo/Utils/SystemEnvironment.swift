@@ -5,6 +5,8 @@
 import Foundation
 
 enum SystemEnvironment {
+    static var sdkName: String { "stream-ios" }
+
     static var deviceModelName: String {
         var systemInfo = utsname()
         uname(&systemInfo)

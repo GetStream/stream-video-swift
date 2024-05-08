@@ -353,6 +353,35 @@ class CallController: @unchecked Sendable {
         }
     }
     
+    /// Collects user feedback asynchronously.
+    ///
+    /// - Parameters:
+    ///   - custom: Optional custom data in the form of a dictionary of String keys and RawJSON values.
+    ///   - rating: Optional rating provided by the user.
+    ///   - reason: Optional reason for the user's feedback.
+    /// - Returns: An instance of `CollectUserFeedbackResponse` representing the result of collecting feedback.
+    /// - Throws: An error if the feedback collection process encounters an issue.
+    func collectUserFeedback(
+        sessionID: String,
+        custom: [String: RawJSON]? = nil,
+        rating: Int? = nil,
+        reason: String? = nil
+    ) async throws -> CollectUserFeedbackResponse {
+        try await defaultAPI.collectUserFeedback(
+            type: callType,
+            id: callId,
+            session: sessionID,
+            collectUserFeedbackRequest: .init(
+                custom: custom,
+                rating: rating,
+                reason: reason,
+                sdk: SystemEnvironment.sdkName,
+                sdkVersion: SystemEnvironment.version,
+                userSessionId: sessionID
+            )
+        )
+    }
+
     // MARK: - private
     
     private func connectToEdge(

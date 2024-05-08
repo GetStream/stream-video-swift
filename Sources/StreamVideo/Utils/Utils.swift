@@ -9,8 +9,16 @@ internal extension DispatchQueue {
     static let sdk = DispatchQueue(label: "StreamVideoSDK", qos: .userInitiated)
 }
 
-func postNotification(with name: String, userInfo: [AnyHashable: Any] = [:]) {
-    NotificationCenter.default.post(name: NSNotification.Name(name), object: nil, userInfo: userInfo)
+func postNotification(
+    with name: String,
+    object: Any? = nil,
+    userInfo: [AnyHashable: Any] = [:]
+) {
+    NotificationCenter.default.post(
+        name: NSNotification.Name(name),
+        object: object,
+        userInfo: userInfo
+    )
 }
 
 func callCid(from callId: String, callType: String) -> String {
