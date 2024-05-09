@@ -79,12 +79,9 @@ The following fields are available on the participant:
 
 | Attribute | Description|
 | --------- | ---------- |
+| `user` | The `User` object for the participant. |
 | `id` | The unique call id of the participant. |
-| `userId` | The user's id. This is not necessarily unique, since a user can join from multiple devices. |
 | `roles` | The user's roles in the call. |
-| `name` | The user's name. |
-| `profileImageURL`| The user's profile image url. |
-| `trackLookupPrefix` | The id of the track that's connected to the participant. |
 | `hasVideo` | Returns whether the participant has video. |
 | `hasAudio` | Returns whether the participant has audio. |
 | `isScreensharing` | Returns whether the participant is screenSharing. |
@@ -97,8 +94,10 @@ The following fields are available on the participant:
 | `sessionId` | Returns whether the participant is speaking. |
 | `connectionQuality` | The participant's connection quality. |
 | `joinedAt` | Returns the date when the user joined the call. |
+| `pin` | Holds pinning information. |
 | `isPinned` | Returns whether the user is pinned. |
 | `audioLevel` | The audio level for the user. |
+| `audioLevels` | A list of the last 10 audio levels. Convenient for audio visualizations. |
 
 ### Client State
 

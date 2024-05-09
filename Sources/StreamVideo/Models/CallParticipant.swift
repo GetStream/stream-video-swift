@@ -7,16 +7,12 @@ import Foundation
 
 /// Represents a participant in the call.
 public struct CallParticipant: Identifiable, Sendable, Equatable {
+    /// The `User` object for the participant.
+    public var user: User
     /// The unique call id of the participant.
     public var id: String
-    /// The user's id. This is not necessarily unique, since a user can join from multiple devices.
-    public let userId: String
     /// The user's roles in the call.
     public let roles: [String]
-    /// The user's name.
-    public let name: String
-    /// The user's profile image url.
-    public let profileImageURL: URL?
     /// The id of the track that's connected to the participant.
     public var trackLookupPrefix: String?
     /// Returns whether the participant has video.
@@ -49,6 +45,19 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var audioLevels: [Float]
     public var pin: PinInfo?
     
+    /// The user's id. This is not necessarily unique, since a user can join from multiple devices.
+    public var userId: String {
+        user.id
+    }
+    /// The user's name.
+    public var name: String {
+        user.name
+    }
+    /// The user's profile image url.
+    public var profileImageURL: URL? {
+        user.imageURL
+    }
+    
     public init(
         id: String,
         userId: String,
@@ -72,11 +81,13 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         audioLevels: [Float],
         pin: PinInfo?
     ) {
+        self.user = User(
+            id: userId,
+            name: name,
+            imageURL: profileImageURL
+        )
         self.id = id
-        self.userId = userId
         self.roles = roles
-        self.name = name
-        self.profileImageURL = profileImageURL
         self.trackLookupPrefix = trackLookupPrefix
         self.hasVideo = hasVideo
         self.hasAudio = hasAudio
