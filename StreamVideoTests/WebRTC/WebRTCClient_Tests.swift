@@ -37,6 +37,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = userId
         participant.sessionID = sessionId
+        participant.name = "Test"
         return participant
     }()
     
@@ -248,6 +249,36 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         try await waitForCallEvent()
         let left = await webRTCClient.state.callParticipants[sessionId]
         XCTAssertNil(left)
+    }
+    
+    func test_webRTCClient_participantJoinedAndUpdated() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        
+        // When
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
+        
+        // Then
+        try await waitForCallEvent()
+        let newParticipant = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssertNotNil(newParticipant)
+        XCTAssertEqual(newParticipant?.userId, userId)
+        XCTAssertEqual(newParticipant?.name, "Test")
+        
+        // When
+        var participantUpdated = Stream_Video_Sfu_Event_ParticipantUpdated()
+        participantUpdated.callCid = callCid
+        var updatedParticipant = participant
+        updatedParticipant.name = "Test 1"
+        participantUpdated.participant = updatedParticipant
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantUpdated(participantUpdated)))
+        
+        // Then
+        try await waitForCallEvent()
+        let updated = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssertNotNil(updated)
+        XCTAssertEqual(updated?.userId, userId)
+        XCTAssertEqual(updated?.name, "Test 1")
     }
     
     func test_webRTCClient_dominantSpeakerChanged() async throws {

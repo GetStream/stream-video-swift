@@ -93,6 +93,8 @@ class SfuMiddleware: EventMiddleware {
                 onPinsChanged?(event.pins)
             case let .callEnded(event):
                 log.debug("Received call ended event with reason \(event.reason)")
+            case let .participantUpdated(event):
+                await handleParticipantUpdated(event)
             }
         }
         return event
@@ -136,6 +138,17 @@ class SfuMiddleware: EventMiddleware {
         let participant = event.participant.toCallParticipant(showTrack: showTrack)
         await state.update(callParticipant: participant)
         log.debug("Participant \(participant.name) joined the call")
+    }
+    
+    private func handleParticipantUpdated(_ event: Stream_Video_Sfu_Event_ParticipantUpdated) async {
+        let callParticipants = await state.callParticipants
+        let existing = callParticipants[event.participant.sessionID]
+        let participant = event.participant.toCallParticipant(
+            showTrack: existing?.showTrack ?? true,
+            pin: existing?.pin
+        )
+        await state.update(callParticipant: participant)
+        log.debug("Participant \(participant.name) was updated")
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
