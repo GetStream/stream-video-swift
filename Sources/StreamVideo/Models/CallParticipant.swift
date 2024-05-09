@@ -49,10 +49,12 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var userId: String {
         user.id
     }
+    
     /// The user's name.
     public var name: String {
         user.name
     }
+    
     /// The user's profile image url.
     public var profileImageURL: URL? {
         user.imageURL
@@ -81,7 +83,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         audioLevels: [Float],
         pin: PinInfo?
     ) {
-        self.user = User(
+        user = User(
             id: userId,
             name: name,
             imageURL: profileImageURL
