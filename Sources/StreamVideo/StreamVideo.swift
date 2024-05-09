@@ -23,7 +23,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     oldValue?.leave()
                 }
                 if ringingCall != nil {
-                    ringingCall = nil
+                    Task { @MainActor in
+                        ringingCall = nil
+                    }
                 }
             }
         }
@@ -654,8 +656,8 @@ extension StreamVideo: WSEventsSubscriber {
             )
             executeOnMain {
                 call.state.update(from: ringEvent)
+                self.state.ringingCall = call
             }
-            self.state.ringingCall = call
         }
     }
 }
