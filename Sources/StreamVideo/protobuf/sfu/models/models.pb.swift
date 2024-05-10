@@ -543,6 +543,76 @@ extension Stream_Video_Sfu_Models_CallEndedReason: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+/// WebsocketReconnectStrategy defines the ws strategies available for handling reconnections.
+enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+
+  /// Sent after reaching the maximum reconnection attempts, leading to permanent disconnect.
+  case disconnect // = 1
+
+  /// SDK should maintaining existing publisher/subscriber pc instances
+  /// and establish a new WebSocket connection.
+  case fast // = 2
+
+  /// SDK should drop existing pc instances and creates a fresh WebSocket connection,
+  /// ensuring a clean state for the reconnection.
+  case clean // = 3
+
+  /// SDK should obtain new credentials from the coordinator, drops existing pc instances, and initializes
+  /// a completely new WebSocket connection, ensuring a comprehensive reset.
+  case full // = 4
+
+  /// SDK should migrate to a new SFU instance
+  case migrate // = 5
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .disconnect
+    case 2: self = .fast
+    case 3: self = .clean
+    case 4: self = .full
+    case 5: self = .migrate
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .disconnect: return 1
+    case .fast: return 2
+    case .clean: return 3
+    case .full: return 4
+    case .migrate: return 5
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Stream_Video_Sfu_Models_WebsocketReconnectStrategy] = [
+    .unspecified,
+    .disconnect,
+    .fast,
+    .clean,
+    .full,
+    .migrate,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// CallState is the current state of the call
 /// as seen by an SFU.
 struct Stream_Video_Sfu_Models_CallState {
@@ -1010,6 +1080,7 @@ extension Stream_Video_Sfu_Models_SdkType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_GoAwayReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallEndedReason: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantCount: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Pin: @unchecked Sendable {}
@@ -1130,6 +1201,17 @@ extension Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf._ProtoNameProvi
     1: .same(proto: "CALL_ENDED_REASON_ENDED"),
     2: .same(proto: "CALL_ENDED_REASON_LIVE_ENDED"),
     3: .same(proto: "CALL_ENDED_REASON_KICKED"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED"),
+    1: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT"),
+    2: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_FAST"),
+    3: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_CLEAN"),
+    4: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_FULL"),
+    5: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_MIGRATE"),
   ]
 }
 
