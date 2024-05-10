@@ -110,6 +110,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 let call = streamVideo.call(callType: callType, callId: callId)
                 let callState = try await call.get()
 
+                if streamVideo.state.ringingCall?.cId != call.cId {
+                    Task { @MainActor in
+                        streamVideo.state.ringingCall = call
+                    }
+                }
+
                 if !checkIfCallWasHandled(callState: callState), state == .idle {
                     setUpRingingTimer(for: callState)
                     state = .joining
@@ -233,8 +239,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             do {
                 log.debug("Answering VoIP incoming call with callId:\(callId) callType:\(callType).")
                 call = streamVideo.call(callType: callType, callId: callId)
-                try await call?.accept()
                 try await call?.join()
+                try await call?.accept()
                 state = .inCall
                 action.fulfill()
             } catch {
@@ -272,7 +278,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ///
     /// - Parameter transaction: The transaction to be requested.
     /// - Throws: An error if the request fails.
-    public func requestTransaction(
+    open func requestTransaction(
         _ action: CXAction
     ) async throws {
         try await callController.requestTransaction(with: action)
@@ -282,7 +288,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ///
     /// - Parameter callState: The state of the call.
     /// - Returns: A boolean value indicating whether the call was handled.
-    public func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
+    open func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
         guard let streamVideo else {
             log.warning("CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.")
             return false
@@ -300,7 +306,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Sets up a ringing timer for the call.
     ///
     /// - Parameter callState: The state of the call.
-    public func setUpRingingTimer(for callState: GetCallResponse) {
+    open func setUpRingingTimer(for callState: GetCallResponse) {
         createdBy = callState.call.createdBy.toUser
         let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
         ringingTimerCancellable = Foundation.Timer.publish(
@@ -313,6 +319,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             log.debug("Detected ringing timeout, hanging up...")
             self?.callEnded()
         }
+    }
+
+    /// A method that's being called every time the StreamVideo instance is getting updated.
+    /// - Parameter streamVideo: The new StreamVideo instance (nil if none)
+    open func didUpdate(_ streamVideo: StreamVideo?) {
+        subscribeToCallEvents()
     }
 
     // MARK: - Private helpers
@@ -381,10 +393,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         update.hasVideo = true
 
         return update
-    }
-
-    private func didUpdate(_ streamVideo: StreamVideo?) {
-        subscribeToCallEvents()
     }
 }
 

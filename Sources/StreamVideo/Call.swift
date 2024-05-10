@@ -114,7 +114,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             await state.update(from: response)
             let updated = await state.callSettings
             updateCallSettingsManagers(with: updated)
-            streamVideo.state.activeCall = self
+            Task { @MainActor in
+                streamVideo.state.activeCall = self
+            }
             return response
         })
     }
@@ -141,7 +143,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            streamVideo.state.ringingCall = self
+            Task { @MainActor in
+                streamVideo.state.ringingCall = self
+            }
         }
         return response
     }
@@ -199,7 +203,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            streamVideo.state.ringingCall = self
+            Task { @MainActor in
+                streamVideo.state.ringingCall = self
+            }
         }
         return response.call
     }
@@ -226,7 +232,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func reject() async throws -> RejectCallResponse {
         let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
         if streamVideo.state.ringingCall?.cId == cId {
-            streamVideo.state.ringingCall = nil
+            Task { @MainActor in
+                streamVideo.state.ringingCall = nil
+            }
         }
         return response
     }
@@ -361,8 +369,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         cancellables.removeAll()
         eventHandlers.removeAll()
         callController.cleanUp()
-        streamVideo.state.ringingCall = nil
-        streamVideo.state.activeCall = nil
+        Task { @MainActor in
+            if streamVideo.state.ringingCall?.cId == cId {
+                streamVideo.state.ringingCall = nil
+            }
+            if streamVideo.state.activeCall?.cId == cId {
+                streamVideo.state.activeCall = nil
+            }
+        }
     }
 
     /// Starts noise cancellation asynchronously.

@@ -168,11 +168,12 @@ fileprivate func content() {
 
         container {
             struct CallContainer: View {
+                @Injected(\.streamVideo) var streamVideo
 
                 var body: some View {
                     YourRootView()
                         .modifier(CallModifier(viewModel: viewModel))
-                        .onCallEnded { call, dismiss in
+                        .onCallEnded(presentationValidator: { $0?.state.createdBy?.id == streamVideo.user.id }) { call, dismiss in
                             if let call {
                                 DemoFeedbackView(call, dismiss: dismiss)
                             }

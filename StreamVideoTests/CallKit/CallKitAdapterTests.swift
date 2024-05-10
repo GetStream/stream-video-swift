@@ -46,7 +46,7 @@ final class CallKitAdapterTests: XCTestCase {
 
     // MARK: - streamVideo updated
 
-    func testDidUpdate_streamVideoIsNotNilAndNotConnected_callKitServiceWasUpdatedAndRegisterWasNotCalled() async throws {
+    func testDidUpdate_streamVideoIsNotNilAndNotConnected_callKitServiceWasUpdatedAndRegisterWasCalled() async throws {
         // Given
         let streamVideo = try await makeStreamVideo()
 
@@ -82,7 +82,8 @@ final class CallKitAdapterTests: XCTestCase {
         let client = StreamVideo(
             apiKey: tokenResponse.apiKey,
             user: User(id: userId),
-            token: .init(rawValue: tokenResponse.token)
+            token: .init(rawValue: tokenResponse.token),
+            videoConfig: .dummy()
         )
 
         return client

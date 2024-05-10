@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-struct CallConnectingView<CallControls: View, CallTopView: View>: View {
+public struct CallConnectingView<CallControls: View, CallTopView: View>: View {
     @Injected(\.streamVideo) var streamVideo
     
     @Injected(\.colors) var colors
@@ -13,12 +13,24 @@ struct CallConnectingView<CallControls: View, CallTopView: View>: View {
     @Injected(\.images) var images
     @Injected(\.utils) var utils
     
-    var outgoingCallMembers: [Member]
-    var title: String
-    var callControls: CallControls
-    var callTopView: CallTopView
+    public var outgoingCallMembers: [Member]
+    public var title: String
+    public var callControls: CallControls
+    public var callTopView: CallTopView
 
-    var body: some View {
+    public init(
+        outgoingCallMembers: [Member],
+        title: String,
+        callControls: CallControls,
+        callTopView: CallTopView
+    ) {
+        self.outgoingCallMembers = outgoingCallMembers
+        self.title = title
+        self.callControls = callControls
+        self.callTopView = callTopView
+    }
+
+    public var body: some View {
         ZStack {
             VStack(spacing: 16) {
                 callTopView
