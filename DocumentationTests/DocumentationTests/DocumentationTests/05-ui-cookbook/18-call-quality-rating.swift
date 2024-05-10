@@ -173,7 +173,7 @@ fileprivate func content() {
                 var body: some View {
                     YourRootView()
                         .modifier(CallModifier(viewModel: viewModel))
-                        .onCallEnded(additionalPresentationValidator: { $0?.state.createdBy?.id == streamVideo.user.id }) { call, dismiss in
+                        .onCallEnded(presentationValidator: { $0?.state.createdBy?.id == streamVideo.user.id }) { call, dismiss in
                             if let call {
                                 DemoFeedbackView(call, dismiss: dismiss)
                             }

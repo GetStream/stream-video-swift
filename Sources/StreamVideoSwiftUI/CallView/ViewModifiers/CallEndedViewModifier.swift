@@ -30,16 +30,16 @@ private final class CallEndedViewModifierViewModel: ObservableObject {
 @available(iOS 14.0, *)
 private struct CallEndedViewModifier<Subview: View>: ViewModifier {
 
-    private var additionalPresentationValidator: (Call?) -> Bool
+    private var presentationValidator: (Call?) -> Bool
     private var subviewProvider: (Call?, @escaping () -> Void) -> Subview
 
     @StateObject private var viewModel: CallEndedViewModifierViewModel
 
     init(
-        additionalPresentationValidator: @escaping (Call?) -> Bool,
+        presentationValidator: @escaping (Call?) -> Bool,
         @ViewBuilder subviewProvider: @escaping (Call?, @escaping () -> Void) -> Subview
     ) {
-        self.additionalPresentationValidator = additionalPresentationValidator
+        self.presentationValidator = presentationValidator
         self.subviewProvider = subviewProvider
         _viewModel = .init(wrappedValue: .init())
     }
@@ -62,7 +62,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
                 switch (call, viewModel.lastCall, viewModel.isPresentingSubview) {
                 case (nil, let activeCall, false)
                     where activeCall != nil && viewModel
-                    .maxParticipantsCount > 1 && additionalPresentationValidator(viewModel.lastCall):
+                    .maxParticipantsCount > 1 && presentationValidator(viewModel.lastCall):
                     /// The following presentation criteria are required:
                     /// - The activeCall was ended.
                     /// - Participants, during call's duration, grew to more than one.
@@ -105,16 +105,16 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
 @available(iOS, introduced: 13, obsoleted: 14)
 private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
 
-    private var additionalPresentationValidator: (Call?) -> Bool
+    private var presentationValidator: (Call?) -> Bool
     private var subviewProvider: (Call?, @escaping () -> Void) -> Subview
 
     @BackportStateObject private var viewModel: CallEndedViewModifierViewModel
 
     init(
-        additionalPresentationValidator: @escaping (Call?) -> Bool,
+        presentationValidator: @escaping (Call?) -> Bool,
         @ViewBuilder subviewProvider: @escaping (Call?, @escaping () -> Void) -> Subview
     ) {
-        self.additionalPresentationValidator = additionalPresentationValidator
+        self.presentationValidator = presentationValidator
         self.subviewProvider = subviewProvider
         _viewModel = .init(wrappedValue: .init())
     }
@@ -136,7 +136,7 @@ private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
                 switch (call, viewModel.lastCall, viewModel.isPresentingSubview) {
                 case (nil, let activeCall, false)
                     where activeCall != nil && viewModel
-                    .maxParticipantsCount > 1 && additionalPresentationValidator(viewModel.lastCall):
+                    .maxParticipantsCount > 1 && presentationValidator(viewModel.lastCall):
                     /// The following presentation criteria are required:
                     /// - The activeCall was ended.
                     /// - Participants, during call's duration, grew to more than one.
@@ -185,26 +185,26 @@ extension View {
     /// - Participants, during call's duration, grew to more than one.
     ///
     /// - Parameters:
-    ///  - additionalPresentationValidator: A closure that can be used to provide additional
+    ///  - presentationValidator: A closure that can be used to provide additional
     ///  validation rules for presentation. The modifier will inject the last available call when calling.
     ///  - content: A viewBuilder that returns the modal's content. The viewModifier
     /// will provide a dismiss closure that can be called from the content to close the modal.
     @ViewBuilder
     public func onCallEnded(
-        additionalPresentationValidator: @escaping (Call?) -> Bool = { _ in true },
+        presentationValidator: @escaping (Call?) -> Bool = { _ in true },
         @ViewBuilder _ content: @escaping (Call?, @escaping () -> Void) -> some View
     ) -> some View {
         if #available(iOS 14.0, *) {
             modifier(
                 CallEndedViewModifier(
-                    additionalPresentationValidator: additionalPresentationValidator,
+                    presentationValidator: presentationValidator,
                     subviewProvider: content
                 )
             )
         } else {
             modifier(
                 CallEndedViewModifier_iOS13(
-                    additionalPresentationValidator: additionalPresentationValidator,
+                    presentationValidator: presentationValidator,
                     subviewProvider: content
                 )
             )
