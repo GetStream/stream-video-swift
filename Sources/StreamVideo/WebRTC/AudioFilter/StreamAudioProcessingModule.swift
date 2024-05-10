@@ -30,7 +30,7 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
         capturePostProcessingDelegate: AudioFilterCapturePostProcessingModule = StreamAudioFilterCapturePostProcessingModule(),
         renderPreProcessingDelegate: RTCAudioCustomProcessingDelegate? = nil
     ) {
-        #if canImport(XCTest)
+        #if STREAM_TESTS
         assert(
             false,
             "\(type(of: self)) should not be used in Tests as it relies on the WebRTC stack being fully setup. Consider using `VideoConfig.dummy()` when initializing StreamVideo in tests or `MockAudioProcessingModule` if you need to use an instance directly."
