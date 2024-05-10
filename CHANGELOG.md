@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [1.0.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.1)
+_May 10, 2024_
+
+### 🔄 Changed
+
 ### ✅ Added
 - A viewModifier that allows you to present a view whenever a call ends. [#382](https://github.com/GetStream/stream-video-swift/pull/382)
 
