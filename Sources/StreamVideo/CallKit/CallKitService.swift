@@ -116,14 +116,23 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     }
                 }
 
-                if !checkIfCallWasHandled(callState: callState), state == .idle {
-                    setUpRingingTimer(for: callState)
-                    state = .joining
-                } else {
-                    log.debug(
-                        "Rejecting VoIP incoming call with callKitId:\(callUUID) cid:\(cid) callerId:\(callerId) callerName:\(localizedCallerName) as it has been handled. CallKit state is \(state)"
-                    )
-                    callEnded()
+                switch state {
+                case .idle:
+                    if !checkIfCallWasHandled(callState: callState) {
+                        setUpRingingTimer(for: callState)
+                        state = .joining
+                    } else {
+                        log.debug(
+                            """
+                            Rejecting VoIP incoming call with callKitId:\(callUUID)
+                            cid:\(cid) callerId:\(callerId) callerName:\(localizedCallerName)
+                            as it has been handled. CallKit state is \(state).
+                            """
+                        )
+                        callEnded()
+                    }
+                default:
+                    log.debug("No action after reporting incoming VoIP call as current CallKit state is \(state).")
                 }
             } catch {
                 callEnded()
