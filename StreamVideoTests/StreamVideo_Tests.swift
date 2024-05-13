@@ -13,6 +13,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             apiKey: "key1",
             user: .anonymous,
             token: StreamVideo.mockToken,
+            videoConfig: .dummy(),
             tokenProvider: { _ in }
         )
         
@@ -31,6 +32,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             apiKey: "key1",
             user: StreamVideo.mockUser,
             token: StreamVideo.mockToken,
+            videoConfig: .dummy(),
             tokenProvider: { _ in }
         )
         
@@ -42,7 +44,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         XCTAssert(call.callType == .default)
         XCTAssert(call.callId == "123")
     }
-    
+
     func test_streamVideo_activeCallAndLeave() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
@@ -51,12 +53,16 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         // When
         try await call.join()
 
+        await fulfillment { streamVideo.state.activeCall != nil }
+
         // Then
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
         
         // When
         call.leave()
-        
+
+        await fulfillment { streamVideo.state.activeCall == nil }
+
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
     }
@@ -68,7 +74,11 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         
         // When
         try await call.ring()
-        
+        await fulfillment {
+            streamVideo.state.activeCall == nil
+                && streamVideo.state.ringingCall != nil
+        }
+
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
         XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
@@ -83,7 +93,11 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         let event = WrappedEvent.coordinatorEvent(.typeCallAcceptedEvent(callAcceptedEvent))
         streamVideo.eventNotificationCenter.process(event)
         try await call.join()
-        
+        await fulfillment {
+            streamVideo.state.activeCall != nil
+                && streamVideo.state.ringingCall == nil
+        }
+
         // Then
         XCTAssert(streamVideo.state.ringingCall == nil)
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
@@ -99,14 +113,22 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         
         // When
         try await call.ring()
-        
+        await fulfillment {
+            streamVideo.state.activeCall == nil
+                && streamVideo.state.ringingCall != nil
+        }
+
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
         XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
         
         // When
         try await call.reject()
-        
+        await fulfillment {
+            streamVideo.state.activeCall == nil
+                && streamVideo.state.ringingCall == nil
+        }
+
         // Then
         XCTAssert(streamVideo.state.ringingCall == nil)
         XCTAssert(streamVideo.state.activeCall == nil)
@@ -136,7 +158,11 @@ final class StreamVideo_Tests: StreamVideoTestCase {
 
         // When
         try await call.join()
-        
+        await fulfillment {
+            streamVideo.state.activeCall != nil
+                && streamVideo.state.ringingCall == nil
+        }
+
         // Then
         XCTAssert(streamVideo.state.ringingCall == nil)
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
@@ -162,14 +188,22 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         let incomingCall = WrappedEvent.coordinatorEvent(.typeCallRingEvent(ringEvent))
         streamVideo.eventNotificationCenter.process(incomingCall)
         try await waitForCallEvent()
-        
+        await fulfillment {
+            streamVideo.state.activeCall == nil
+                && streamVideo.state.ringingCall != nil
+        }
+
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
         XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
 
         // When
         try await call.reject()
-        
+        await fulfillment {
+            streamVideo.state.activeCall == nil
+                && streamVideo.state.ringingCall == nil
+        }
+
         // Then
         XCTAssert(streamVideo.state.ringingCall == nil)
         XCTAssert(streamVideo.state.activeCall == nil)
@@ -181,6 +215,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             apiKey: "key1",
             user: StreamVideo.mockUser,
             token: StreamVideo.mockToken,
+            videoConfig: .dummy(),
             tokenProvider: { _ in }
         )
         

@@ -184,14 +184,20 @@ struct DemoStarRatingView: View {
 }
 ```
 
-With the FeedbackView declared, the next step is to find a way to inject the View in the call's lifecycle in order to be presented to the user at the right time. To simplify this step, the Swift Video SDK provides the `onCallEnded` ViewModifier . The modifier accepts a closure with inputs an optional `Call` object and a dismiss closure. 
+With the FeedbackView declared, the next step is to find a way to inject the View in the call's lifecycle in order to be presented to the user at the right time. To simplify this step, the Swift Video SDK provides the `onCallEnded` ViewModifier . The modifier accepts two closures with inputs an optional `Call` object while only the second one also receives a dismiss closure. 
+
+The first closure can be used to provide additional logic when calculating the decision to present or not the modal. The second closure is a `ViewBuilder` that will be called to provide the modal's content.
+
+The example below, presents the feedback modal **only** to the call's creator.
 
 ```swift
-struct CallContainer: View {      
+struct CallContainer: View {
+    @Injected(\.streamVideo) var streamVideo
+
     var body: some View {
         YourRootView()
             .modifier(CallModifier(viewModel: viewModel))
-            .onCallEnded { call, dismiss in
+            .onCallEnded(presentationValidator: { call in call?.state.createdBy?.id == streamVideo.user.id }) { call, dismiss in
                 if let call {
                     DemoFeedbackView(call, dismiss: dismiss)
                 }
@@ -203,6 +209,7 @@ struct CallContainer: View {
 The ViewModifier observes the Call's lifecycle and looks for the following triggering criteria:
 - Once the active call has ended
 - If the max number of joined participants, during call's duration, grew to more than one
+- It will evaluate the `presentationValidator`
 
 Then the modifier will trigger the provided closure and will expect a view that will presented inside the modal.
 
