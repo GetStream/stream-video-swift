@@ -28,7 +28,7 @@ public final class CallSettings: ObservableObject, Sendable, Equatable {
         self.speakerOn = speakerOn
         self.audioOutputOn = audioOutputOn
         self.cameraPosition = cameraPosition
-        #if targetEnvironment(simulator) && !STREAM_TESTS
+        #if targetEnvironment(simulator)
         self.videoOn = InjectedValues[\.simulatorStreamFile] != nil ? videoOn : false
         #else
         self.videoOn = videoOn

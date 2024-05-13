@@ -47,7 +47,7 @@ public struct StatelessParticipantsListButton: View {
         self.call = call
         self.size = size
         self.isActive = isActive
-        count = call?.state.participants.endIndex ?? 0
+        _count = .init(initialValue: call?.state.participants.endIndex ?? 0)
         self.actionHandler = actionHandler
     }
 
