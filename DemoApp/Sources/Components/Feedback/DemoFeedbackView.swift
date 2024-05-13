@@ -29,7 +29,7 @@ struct DemoFeedbackView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
-                Image(.feedbackLogo)
+                Image("feedbackLogo")
 
                 VStack(spacing: 8) {
                     Text("How is your call going?")
