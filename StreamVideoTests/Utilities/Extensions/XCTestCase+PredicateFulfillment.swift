@@ -20,10 +20,26 @@ extension XCTestCase {
             object: nil
         )
 
-        await fulfillment(
+        await safeFulfillment(
             of: [waitExpectation],
             timeout: timeout,
-            enforceOrder: enforceOrder
+            enforceOrder: enforceOrder,
+            file: file,
+            line: line
         )
+    }
+
+    func safeFulfillment(
+        of expectations: [XCTestExpectation],
+        timeout seconds: TimeInterval = .infinity,
+        enforceOrder: Bool = false,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        #if compiler(>=5.8)
+        await fulfillment(of: expectations, timeout: seconds, enforceOrder: enforceOrder)
+        #else
+        await waitForExpectations(timeout: timeout)
+        #endif
     }
 }

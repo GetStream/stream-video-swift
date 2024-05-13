@@ -67,6 +67,8 @@
 		4049CE822BBBF74C003D07D2 /* LegacyAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CE812BBBF74C003D07D2 /* LegacyAsyncImage.swift */; };
 		4049CE842BBBF8EF003D07D2 /* StreamAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */; };
 		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
+		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
+		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		4063033F2AD847EC0091AE77 /* CallState_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4063033E2AD847EC0091AE77 /* CallState_Tests.swift */; };
@@ -336,9 +338,6 @@
 		82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0F729E80933001F816C /* LobbyTests.swift */; };
 		82B8C0FA29E80997001F816C /* RingProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0F929E80997001F816C /* RingProcessTests.swift */; };
 		82B8C0FC29E80A2A001F816C /* CallLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0FB29E80A2A001F816C /* CallLifecycleTests.swift */; };
-		82C65EED2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C65EEC2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift */; };
-		82C65EF02B8DFF1D00A78DD6 /* XCTestCase+SafeFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C65EEC2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift */; };
-		82C65EF12B8DFF1F00A78DD6 /* XCTestCase+SafeFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C65EEC2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift */; };
 		82C837E029A531ED00CB6B0E /* CallPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837DF29A531ED00CB6B0E /* CallPage.swift */; };
 		82C837E229A532C000CB6B0E /* LoginPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837E129A532C000CB6B0E /* LoginPage.swift */; };
 		82C837E429A5333700CB6B0E /* CallDetailsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837E329A5333700CB6B0E /* CallDetailsPage.swift */; };
@@ -1305,7 +1304,6 @@
 		82B8C0F729E80933001F816C /* LobbyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyTests.swift; sourceTree = "<group>"; };
 		82B8C0F929E80997001F816C /* RingProcessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingProcessTests.swift; sourceTree = "<group>"; };
 		82B8C0FB29E80A2A001F816C /* CallLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallLifecycleTests.swift; sourceTree = "<group>"; };
-		82C65EEC2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+SafeFulfillment.swift"; sourceTree = "<group>"; };
 		82C837DF29A531ED00CB6B0E /* CallPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallPage.swift; sourceTree = "<group>"; };
 		82C837E129A532C000CB6B0E /* LoginPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPage.swift; sourceTree = "<group>"; };
 		82C837E329A5333700CB6B0E /* CallDetailsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDetailsPage.swift; sourceTree = "<group>"; };
@@ -2899,7 +2897,6 @@
 				829F7BF929FABC0E003EBACE /* ViewFactory.swift */,
 				8251E62E2A17BEEF00E7257A /* ImageFactory.swift */,
 				8202215E2A24BB7100F7BAED /* LaunchArgument.swift */,
-				82C65EEC2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift */,
 			);
 			path = TestData;
 			sourceTree = "<group>";
@@ -5074,7 +5071,6 @@
 				846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */,
 				84F58B8929EEAC4400010C4C /* MockFunc.swift in Sources */,
 				40F0174B2BBEEFB200E89FD1 /* VideoSettings+Dummy.swift in Sources */,
-				82C65EED2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift in Sources */,
 				8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */,
 				40F0174D2BBEEFD500E89FD1 /* TranscriptionSettings+Dummy.swift in Sources */,
 				84F58B7629EE92BF00010C4C /* UniqueValues.swift in Sources */,
@@ -5316,7 +5312,6 @@
 				829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */,
 				82E3BA4A2A0BAE33001AB93E /* UniqueValues.swift in Sources */,
 				84DCA20B2A382FE0000C3411 /* CallViewModel_Tests.swift in Sources */,
-				82C65EF02B8DFF1D00A78DD6 /* XCTestCase+SafeFulfillment.swift in Sources */,
 				4067A5D82AE1249400CFDEB1 /* CornerClipper_Tests.swift in Sources */,
 				82E3BA542A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
 				82E3BA372A0BAD59001AB93E /* StreamVideo_Mock.swift in Sources */,
@@ -5358,6 +5353,7 @@
 				82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */,
 				40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */,
 				82FF40C42A17C74D00B4D95E /* IncomingCallView_Tests.swift in Sources */,
+				404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */,
 				408CE0F82BD95F170052EC3A /* VideoConfig+Dummy.swift in Sources */,
 				829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */,
 				8457BF802A5C18A7000AE567 /* ToastView_Tests.swift in Sources */,
@@ -5395,9 +5391,9 @@
 				8251E6312A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				82E3BA412A0BADFA001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */,
+				404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */,
 				82E3BA572A0BAF65001AB93E /* WebSocketEngine_Mock.swift in Sources */,
 				8251E62D2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
-				82C65EF12B8DFF1F00A78DD6 /* XCTestCase+SafeFulfillment.swift in Sources */,
 				82E3BA492A0BAE2B001AB93E /* AssertAsync.swift in Sources */,
 				4069A0052AD985D3009A3A06 /* CallParticipant_Mock.swift in Sources */,
 				829F7BFB29FABC0E003EBACE /* ViewFactory.swift in Sources */,
