@@ -39,7 +39,7 @@ extension XCTestCase {
         #if compiler(>=5.8)
         await fulfillment(of: expectations, timeout: seconds, enforceOrder: enforceOrder)
         #else
-        await waitForExpectations(timeout: timeout)
+        await waitForExpectations(timeout: seconds)
         #endif
     }
 }
