@@ -54,20 +54,9 @@ public struct VideoIconView: View {
     }
 
     public var body: some View {
-        Button(
-            action: {
-                viewModel.toggleCameraEnabled()
-            },
-            label: {
-                CallIconView(
-                    icon: (viewModel.callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
-                    size: size,
-                    iconStyle: (viewModel.callSettings.videoOn ? .transparent : .disabled)
-                )
-            }
-        )
-        .accessibility(identifier: "cameraToggle")
-        .streamAccessibility(value: viewModel.callSettings.videoOn ? "1" : "0")
+        StatelessVideoIconView(call: viewModel.call) { [weak viewModel] in
+            viewModel?.toggleCameraEnabled()
+        }
     }
 }
 
@@ -89,20 +78,9 @@ public struct MicrophoneIconView: View {
     }
 
     public var body: some View {
-        Button(
-            action: {
-                viewModel.toggleMicrophoneEnabled()
-            },
-            label: {
-                CallIconView(
-                    icon: (viewModel.callSettings.audioOn ? images.micTurnOn : images.micTurnOff),
-                    size: size,
-                    iconStyle: (viewModel.callSettings.audioOn ? .transparent : .disabled)
-                )
-            }
-        )
-        .accessibility(identifier: "microphoneToggle")
-        .streamAccessibility(value: viewModel.callSettings.audioOn ? "1" : "0")
+        StatelessMicrophoneIconView(call: viewModel.call) { [weak viewModel] in
+            viewModel?.toggleMicrophoneEnabled()
+        }
     }
 }
 
@@ -124,20 +102,9 @@ public struct ToggleCameraIconView: View {
     }
 
     public var body: some View {
-        Button(
-            action: {
-                viewModel.toggleCameraPosition()
-            },
-            label: {
-                CallIconView(
-                    icon: images.toggleCamera,
-                    size: size,
-                    iconStyle: .secondary
-                )
-            }
-        )
-        .accessibility(identifier: "cameraPositionToggle")
-        .streamAccessibility(value: viewModel.callSettings.cameraPosition == .front ? "1" : "0")
+        StatelessToggleCameraIconView(call: viewModel.call) { [weak viewModel] in
+            viewModel?.toggleCameraPosition()
+        }
     }
 }
 
@@ -160,16 +127,9 @@ public struct HangUpIconView: View {
     }
 
     public var body: some View {
-        Button {
-            viewModel.hangUp()
-        } label: {
-            CallIconView(
-                icon: images.hangup,
-                size: size,
-                iconStyle: .destructive
-            )
+        StatelessHangUpIconView(call: viewModel.call) { [weak viewModel] in
+            viewModel?.hangUp()
         }
-        .accessibility(identifier: "hangUp")
     }
 }
 
@@ -191,18 +151,9 @@ public struct AudioOutputIconView: View {
     }
 
     public var body: some View {
-        Button(
-            action: {
-                viewModel.toggleAudioOutput()
-            },
-            label: {
-                CallIconView(
-                    icon: (viewModel.callSettings.audioOutputOn ? images.speakerOn : images.speakerOff),
-                    size: size,
-                    iconStyle: (viewModel.callSettings.audioOutputOn ? .primary : .transparent)
-                )
-            }
-        )
+        StatelessAudioOutputIconView(call: viewModel.call) { [weak viewModel] in
+            viewModel?.toggleAudioOutput()
+        }
     }
 }
 
@@ -224,17 +175,8 @@ public struct SpeakerIconView: View {
     }
 
     public var body: some View {
-        Button(
-            action: {
-                viewModel.toggleSpeaker()
-            },
-            label: {
-                CallIconView(
-                    icon: (viewModel.callSettings.speakerOn ? images.speakerOn : images.speakerOff),
-                    size: size,
-                    iconStyle: (viewModel.callSettings.speakerOn ? .primary : .transparent)
-                )
-            }
-        )
+        StatelessSpeakerIconView(call: viewModel.call) { [weak viewModel] in
+            viewModel?.toggleSpeaker()
+        }
     }
 }

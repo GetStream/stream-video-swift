@@ -28,6 +28,46 @@
 		401BEC4F2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401BEC4E2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift */; };
 		401BEC512AE17F2900EEEAC5 /* SpotlightSpeakerView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401BEC502AE17F2900EEEAC5 /* SpotlightSpeakerView_Tests.swift */; };
 		401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */; };
+		40245F322BE269E300FCF075 /* StatelessVideoIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */; };
+		40245F342BE26BC900FCF075 /* StatelessMicrophoneIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */; };
+		40245F362BE26D6700FCF075 /* StatelessToggleCameraIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F352BE26D6700FCF075 /* StatelessToggleCameraIconView.swift */; };
+		40245F382BE26F2200FCF075 /* StatelessHangUpIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F372BE26F2200FCF075 /* StatelessHangUpIconView.swift */; };
+		40245F3A2BE26F7200FCF075 /* StatelessAudioOutputIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F392BE26F7200FCF075 /* StatelessAudioOutputIconView.swift */; };
+		40245F3C2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F3B2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift */; };
+		40245F3E2BE2709800FCF075 /* StatelessParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F3D2BE2709800FCF075 /* StatelessParticipantsListButton.swift */; };
+		40245F432BE2730700FCF075 /* StatelessVideoIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F422BE2730700FCF075 /* StatelessVideoIconView_Tests.swift */; };
+		40245F442BE2745600FCF075 /* CallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0176E2BBEF22D00E89FD1 /* CallResponse+Dummy.swift */; };
+		40245F452BE2746300FCF075 /* CallIngressResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017662BBEF1B700E89FD1 /* CallIngressResponse+Dummy.swift */; };
+		40245F462BE2746300FCF075 /* GeofenceSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017562BBEF07B00E89FD1 /* GeofenceSettings+Dummy.swift */; };
+		40245F472BE2746300FCF075 /* CallRejectedEvent+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017742BBEF3E700E89FD1 /* CallRejectedEvent+Dummy.swift */; };
+		40245F482BE2746300FCF075 /* CallParticipantResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017602BBEF15E00E89FD1 /* CallParticipantResponse+Dummy.swift */; };
+		40245F492BE2746300FCF075 /* EgressHLSResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017682BBEF1DA00E89FD1 /* EgressHLSResponse+Dummy.swift */; };
+		40245F4A2BE2746300FCF075 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017762BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift */; };
+		40245F4B2BE2746300FCF075 /* RecordSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017542BBEF03E00E89FD1 /* RecordSettingsResponse+Dummy.swift */; };
+		40245F4C2BE2746300FCF075 /* AudioSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0175E2BBEF11600E89FD1 /* AudioSettings+Dummy.swift */; };
+		40245F4D2BE2746300FCF075 /* CallSessionResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017622BBEF17600E89FD1 /* CallSessionResponse+Dummy.swift */; };
+		40245F4E2BE2746300FCF075 /* CallSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017702BBEF24E00E89FD1 /* CallSettingsResponse+Dummy.swift */; };
+		40245F4F2BE2746300FCF075 /* RTMPIngress+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017642BBEF1A200E89FD1 /* RTMPIngress+Dummy.swift */; };
+		40245F502BE2746300FCF075 /* VideoSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0174A2BBEEFB200E89FD1 /* VideoSettings+Dummy.swift */; };
+		40245F512BE2746300FCF075 /* HLSSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017582BBEF0A800E89FD1 /* HLSSettingsResponse+Dummy.swift */; };
+		40245F522BE2746300FCF075 /* TargetResolution+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017482BBEEF8100E89FD1 /* TargetResolution+Dummy.swift */; };
+		40245F532BE2746300FCF075 /* TranscriptionSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0174C2BBEEFD500E89FD1 /* TranscriptionSettings+Dummy.swift */; };
+		40245F542BE2746300FCF075 /* BroadcastSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0175A2BBEF0C100E89FD1 /* BroadcastSettingsResponse+Dummy.swift */; };
+		40245F552BE2746300FCF075 /* UserResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017442BBEEE6D00E89FD1 /* UserResponse+Dummy.swift */; };
+		40245F562BE2746300FCF075 /* ScreensharingSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017502BBEF00500E89FD1 /* ScreensharingSettings+Dummy.swift */; };
+		40245F572BE2746300FCF075 /* EgressRTMPResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0176A2BBEF1F400E89FD1 /* EgressRTMPResponse+Dummy.swift */; };
+		40245F582BE2746300FCF075 /* EgressResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0176C2BBEF20D00E89FD1 /* EgressResponse+Dummy.swift */; };
+		40245F592BE2746300FCF075 /* BackstageSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0175C2BBEF0E200E89FD1 /* BackstageSettings+Dummy.swift */; };
+		40245F5A2BE2746300FCF075 /* CallAcceptedEvent+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017722BBEF28600E89FD1 /* CallAcceptedEvent+Dummy.swift */; };
+		40245F5B2BE2746300FCF075 /* RingSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017522BBEF01F00E89FD1 /* RingSettings+Dummy.swift */; };
+		40245F5C2BE2746300FCF075 /* ThumbnailResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017462BBEEF5100E89FD1 /* ThumbnailResponse+Dummy.swift */; };
+		40245F5D2BE2746300FCF075 /* ThumbnailsSettings+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0174E2BBEEFED00E89FD1 /* ThumbnailsSettings+Dummy.swift */; };
+		40245F5F2BE279D300FCF075 /* StatelessToggleCameraIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F5E2BE279D300FCF075 /* StatelessToggleCameraIconView_Tests.swift */; };
+		40245F612BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F602BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift */; };
+		40245F632BE27AE900FCF075 /* StatelessHangUpIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F622BE27AE900FCF075 /* StatelessHangUpIconView_Tests.swift */; };
+		40245F652BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F642BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift */; };
+		40245F672BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F662BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift */; };
+		40245F692BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */; };
 		402778832BD13C62002F4399 /* NoiseCancellationFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */; };
 		4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
 		4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */; };
@@ -1089,6 +1129,20 @@
 		401BEC4E2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalParticipantsListView_Tests.swift; sourceTree = "<group>"; };
 		401BEC502AE17F2900EEEAC5 /* SpotlightSpeakerView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightSpeakerView_Tests.swift; sourceTree = "<group>"; };
 		401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier.swift; sourceTree = "<group>"; };
+		40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessVideoIconView.swift; sourceTree = "<group>"; };
+		40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessMicrophoneIconView.swift; sourceTree = "<group>"; };
+		40245F352BE26D6700FCF075 /* StatelessToggleCameraIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessToggleCameraIconView.swift; sourceTree = "<group>"; };
+		40245F372BE26F2200FCF075 /* StatelessHangUpIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessHangUpIconView.swift; sourceTree = "<group>"; };
+		40245F392BE26F7200FCF075 /* StatelessAudioOutputIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessAudioOutputIconView.swift; sourceTree = "<group>"; };
+		40245F3B2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessSpeakerIconView.swift; sourceTree = "<group>"; };
+		40245F3D2BE2709800FCF075 /* StatelessParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessParticipantsListButton.swift; sourceTree = "<group>"; };
+		40245F422BE2730700FCF075 /* StatelessVideoIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessVideoIconView_Tests.swift; sourceTree = "<group>"; };
+		40245F5E2BE279D300FCF075 /* StatelessToggleCameraIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessToggleCameraIconView_Tests.swift; sourceTree = "<group>"; };
+		40245F602BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessMicrophoneIconView_Tests.swift; sourceTree = "<group>"; };
+		40245F622BE27AE900FCF075 /* StatelessHangUpIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessHangUpIconView_Tests.swift; sourceTree = "<group>"; };
+		40245F642BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessAudioOutputIconView_Tests.swift; sourceTree = "<group>"; };
+		40245F662BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessSpeakerIconView_Tests.swift; sourceTree = "<group>"; };
+		40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessParticipantsListButton_Tests.swift; sourceTree = "<group>"; };
 		402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseCancellationFilter.swift; sourceTree = "<group>"; };
 		402C545A2B6BE50500672BFB /* MockStreamStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamStatistics.swift; sourceTree = "<group>"; };
 		402C545C2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsFormatter_Tests.swift; sourceTree = "<group>"; };
@@ -2013,6 +2067,68 @@
 			path = LayoutComponents;
 			sourceTree = "<group>";
 		};
+		40245F2E2BE269B400FCF075 /* CallControls */ = {
+			isa = PBXGroup;
+			children = (
+				40245F302BE269C300FCF075 /* Stateful */,
+				40245F2F2BE269BE00FCF075 /* Stateless */,
+			);
+			path = CallControls;
+			sourceTree = "<group>";
+		};
+		40245F2F2BE269BE00FCF075 /* Stateless */ = {
+			isa = PBXGroup;
+			children = (
+				40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */,
+				40245F352BE26D6700FCF075 /* StatelessToggleCameraIconView.swift */,
+				40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */,
+				40245F372BE26F2200FCF075 /* StatelessHangUpIconView.swift */,
+				40245F392BE26F7200FCF075 /* StatelessAudioOutputIconView.swift */,
+				40245F3B2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift */,
+				40245F3D2BE2709800FCF075 /* StatelessParticipantsListButton.swift */,
+			);
+			path = Stateless;
+			sourceTree = "<group>";
+		};
+		40245F302BE269C300FCF075 /* Stateful */ = {
+			isa = PBXGroup;
+			children = (
+				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
+			);
+			path = Stateful;
+			sourceTree = "<group>";
+		};
+		40245F3F2BE272E400FCF075 /* CallControls */ = {
+			isa = PBXGroup;
+			children = (
+				40245F412BE272EF00FCF075 /* Stateless */,
+				40245F402BE272E900FCF075 /* Stateful */,
+			);
+			path = CallControls;
+			sourceTree = "<group>";
+		};
+		40245F402BE272E900FCF075 /* Stateful */ = {
+			isa = PBXGroup;
+			children = (
+				82FF40B42A17C6C200B4D95E /* CallControlsView_Tests.swift */,
+			);
+			path = Stateful;
+			sourceTree = "<group>";
+		};
+		40245F412BE272EF00FCF075 /* Stateless */ = {
+			isa = PBXGroup;
+			children = (
+				40245F422BE2730700FCF075 /* StatelessVideoIconView_Tests.swift */,
+				40245F5E2BE279D300FCF075 /* StatelessToggleCameraIconView_Tests.swift */,
+				40245F602BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift */,
+				40245F622BE27AE900FCF075 /* StatelessHangUpIconView_Tests.swift */,
+				40245F642BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift */,
+				40245F662BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift */,
+				40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */,
+			);
+			path = Stateless;
+			sourceTree = "<group>";
+		};
 		402778812BD13C54002F4399 /* Filters */ = {
 			isa = PBXGroup;
 			children = (
@@ -2904,11 +3020,11 @@
 		829F7BFF29FAC5B1003EBACE /* CallView */ = {
 			isa = PBXGroup;
 			children = (
+				40245F3F2BE272E400FCF075 /* CallControls */,
 				401BEC4D2AE1737C00EEEAC5 /* LayoutComponents */,
 				829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */,
 				829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */,
 				829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */,
-				82FF40B42A17C6C200B4D95E /* CallControlsView_Tests.swift */,
 				82FF40B62A17C6CD00B4D95E /* ReconnectionView_Tests.swift */,
 				82FF40B82A17C6D600B4D95E /* RecordingView_Tests.swift */,
 				82FF40BA2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift */,
@@ -3110,11 +3226,11 @@
 		8434C523289AA2B60001490A /* CallView */ = {
 			isa = PBXGroup;
 			children = (
+				40245F2E2BE269B400FCF075 /* CallControls */,
 				40C7B82A2B612D5100FB9DB2 /* ViewModifiers */,
 				40AA2EDF2ADFF61B000DCA5C /* LayoutComponents */,
 				84429930293FA4680037232A /* ScreenSharing */,
 				846FBE8728AAD81E00147F6E /* Participants */,
-				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
 				84231E4628B2506B007985EF /* VideoRenderer.swift */,
 				401480352A5447C50029166A /* LocalParticipantViewModifier.swift */,
 				8457CF9028BB835F00E8CF50 /* CallView.swift */,
@@ -5208,6 +5324,7 @@
 				84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */,
 				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
+				40245F3C2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift in Sources */,
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
 				840042CF2A70212D00917B30 /* ScreensharingControls.swift in Sources */,
 				40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */,
@@ -5229,8 +5346,10 @@
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
+				40245F3A2BE26F7200FCF075 /* StatelessAudioOutputIconView.swift in Sources */,
 				8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */,
 				846E4AFD29D1DDE8003733AB /* LayoutMenuView.swift in Sources */,
+				40245F382BE26F2200FCF075 /* StatelessHangUpIconView.swift in Sources */,
 				846E4AFB29CDF87C003733AB /* ParticipantsSpotlightLayout.swift in Sources */,
 				40E1104C2B5A9F6D007DF492 /* MediaDurationFormatter.swift in Sources */,
 				84F3B0E228916FF20088751D /* CallParticipantsInfoView.swift in Sources */,
@@ -5244,11 +5363,13 @@
 				846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */,
 				40D1657F2B5FE8AB00C6D951 /* (null) in Sources */,
 				848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */,
+				40245F342BE26BC900FCF075 /* StatelessMicrophoneIconView.swift in Sources */,
 				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
 				40D1657E2B5FE82200C6D951 /* HalfSheetView.swift in Sources */,
 				8479F83429C09EF1009ECE37 /* UserAvatar.swift in Sources */,
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
 				846FBE8D28AAEBBC00147F6E /* SearchBar.swift in Sources */,
+				40245F3E2BE2709800FCF075 /* StatelessParticipantsListButton.swift in Sources */,
 				846E4B0529D2D3D3003733AB /* ModifiedContent.swift in Sources */,
 				849EDA8D297AFD840072A12D /* Camera.swift in Sources */,
 				844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */,
@@ -5266,6 +5387,7 @@
 				840626722A37A431004B8748 /* IncomingCall.swift in Sources */,
 				40AA2EDC2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift in Sources */,
 				846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */,
+				40245F362BE26D6700FCF075 /* StatelessToggleCameraIconView.swift in Sources */,
 				8490032D29D4774500AD9BB4 /* JoiningCallView.swift in Sources */,
 				403FF3F42BA1DC690092CE8A /* StreamYUVToARGBConversion.swift in Sources */,
 				409145EB2B68FDD2007F3C17 /* ReadableContentGuide.swift in Sources */,
@@ -5280,6 +5402,7 @@
 				402F04AE2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift in Sources */,
 				4049CE842BBBF8EF003D07D2 /* StreamAsyncImage.swift in Sources */,
 				40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */,
+				40245F322BE269E300FCF075 /* StatelessVideoIconView.swift in Sources */,
 				84429933293FA48B0037232A /* ScreenSharingView.swift in Sources */,
 				84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */,
 				40E110472B5A9DF4007DF492 /* CallDurationView.swift in Sources */,
@@ -5312,6 +5435,7 @@
 				829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */,
 				82E3BA4A2A0BAE33001AB93E /* UniqueValues.swift in Sources */,
 				84DCA20B2A382FE0000C3411 /* CallViewModel_Tests.swift in Sources */,
+				40245F5F2BE279D300FCF075 /* StatelessToggleCameraIconView_Tests.swift in Sources */,
 				4067A5D82AE1249400CFDEB1 /* CornerClipper_Tests.swift in Sources */,
 				82E3BA542A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
 				82E3BA372A0BAD59001AB93E /* StreamVideo_Mock.swift in Sources */,
@@ -5322,21 +5446,51 @@
 				82E3BA402A0BADF9001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
 				403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */,
+				40245F452BE2746300FCF075 /* CallIngressResponse+Dummy.swift in Sources */,
+				40245F462BE2746300FCF075 /* GeofenceSettings+Dummy.swift in Sources */,
+				40245F472BE2746300FCF075 /* CallRejectedEvent+Dummy.swift in Sources */,
+				40245F482BE2746300FCF075 /* CallParticipantResponse+Dummy.swift in Sources */,
+				40245F492BE2746300FCF075 /* EgressHLSResponse+Dummy.swift in Sources */,
+				40245F4A2BE2746300FCF075 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */,
+				40245F4B2BE2746300FCF075 /* RecordSettingsResponse+Dummy.swift in Sources */,
+				40245F4C2BE2746300FCF075 /* AudioSettings+Dummy.swift in Sources */,
+				40245F4D2BE2746300FCF075 /* CallSessionResponse+Dummy.swift in Sources */,
+				40245F4E2BE2746300FCF075 /* CallSettingsResponse+Dummy.swift in Sources */,
+				40245F4F2BE2746300FCF075 /* RTMPIngress+Dummy.swift in Sources */,
+				40245F502BE2746300FCF075 /* VideoSettings+Dummy.swift in Sources */,
+				40245F512BE2746300FCF075 /* HLSSettingsResponse+Dummy.swift in Sources */,
+				40245F522BE2746300FCF075 /* TargetResolution+Dummy.swift in Sources */,
+				40245F672BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift in Sources */,
+				40245F692BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift in Sources */,
+				40245F532BE2746300FCF075 /* TranscriptionSettings+Dummy.swift in Sources */,
+				40245F542BE2746300FCF075 /* BroadcastSettingsResponse+Dummy.swift in Sources */,
+				40245F552BE2746300FCF075 /* UserResponse+Dummy.swift in Sources */,
+				40245F562BE2746300FCF075 /* ScreensharingSettings+Dummy.swift in Sources */,
+				40245F572BE2746300FCF075 /* EgressRTMPResponse+Dummy.swift in Sources */,
+				40245F582BE2746300FCF075 /* EgressResponse+Dummy.swift in Sources */,
+				40245F592BE2746300FCF075 /* BackstageSettings+Dummy.swift in Sources */,
+				40245F5A2BE2746300FCF075 /* CallAcceptedEvent+Dummy.swift in Sources */,
+				40245F5B2BE2746300FCF075 /* RingSettings+Dummy.swift in Sources */,
+				40245F5C2BE2746300FCF075 /* ThumbnailResponse+Dummy.swift in Sources */,
+				40245F5D2BE2746300FCF075 /* ThumbnailsSettings+Dummy.swift in Sources */,
 				82E3BA422A0BAE09001AB93E /* EventBatcher_Mock.swift in Sources */,
 				84DCA2122A389167000C3411 /* AssertDelay.swift in Sources */,
 				82FF40C22A17C74600B4D95E /* CallingParticipantView_Tests.swift in Sources */,
 				82E3BA482A0BAE2A001AB93E /* AssertAsync.swift in Sources */,
 				4069A0042AD985D2009A3A06 /* CallParticipant_Mock.swift in Sources */,
+				40245F432BE2730700FCF075 /* StatelessVideoIconView_Tests.swift in Sources */,
 				82FF40BB2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift in Sources */,
 				401BEC512AE17F2900EEEAC5 /* SpotlightSpeakerView_Tests.swift in Sources */,
 				84D425102AA72F3500473150 /* LivestreamPlayer_Tests.swift in Sources */,
 				82FF40C02A17C73C00B4D95E /* CallingGroupView_Tests.swift in Sources */,
+				40245F612BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift in Sources */,
 				407AF71A2B6163DD00E9E3E7 /* StreamMediaDurationFormatter_Tests.swift in Sources */,
 				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
 				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
 				82FF40CA2A17C76400B4D95E /* MicrophoneCheckView_Tests.swift in Sources */,
 				8251E6302A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				8251E62C2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
+				40245F442BE2745600FCF075 /* CallResponse+Dummy.swift in Sources */,
 				401BEC4F2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift in Sources */,
 				401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
@@ -5344,6 +5498,7 @@
 				82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */,
 				82E3BA382A0BADB8001AB93E /* CallController_Mock.swift in Sources */,
 				40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */,
+				40245F652BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift in Sources */,
 				407AF7142B615D3300E9E3E7 /* CallDurationView_Tests.swift in Sources */,
 				82FF40B92A17C6D600B4D95E /* RecordingView_Tests.swift in Sources */,
 				82E3BA562A0BAF64001AB93E /* WebSocketEngine_Mock.swift in Sources */,
@@ -5351,6 +5506,7 @@
 				82FF40C62A17C75400B4D95E /* JoiningCallView_Tests.swift in Sources */,
 				407D5D3D2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift in Sources */,
 				82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */,
+				40245F632BE27AE900FCF075 /* StatelessHangUpIconView_Tests.swift in Sources */,
 				40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */,
 				82FF40C42A17C74D00B4D95E /* IncomingCallView_Tests.swift in Sources */,
 				404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */,

@@ -27,27 +27,9 @@ public struct ParticipantsListButton: View {
     }
 
     public var body: some View {
-        Button(
-            action: {
-                viewModel.participantsShown = true
-            },
-            label: {
-                CallIconView(
-                    icon: images.participantsIcon,
-                    size: size,
-                    iconStyle: viewModel.participantsShown ? .secondaryActive : .secondary
-                )
-            }
-        )
-        .overlay(
-            ControlBadgeView("\(count)")
-                .opacity(count > 1 ? 1 : 0)
-        )
-        .accessibility(identifier: "participantMenu")
-        .onReceive(viewModel.call?.state.$participants) {
-            // We use the participants array in order to access the count of
-            // Participants in an O(1) operation.
-            count = $0.endIndex
-        }
+        StatelessParticipantsListButton(
+            call: viewModel.call,
+            isActive: $viewModel.participantsShown
+        ) { [weak viewModel] in viewModel?.participantsShown = true }
     }
 }
