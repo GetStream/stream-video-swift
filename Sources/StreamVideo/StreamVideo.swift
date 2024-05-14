@@ -427,7 +427,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 custom: self.user.customData,
                 id: self.user.id,
                 image: self.user.imageURL?.absoluteString,
-                name: self.user.name
+                name: self.user.originalName
             )
             
             let authRequest = WSAuthMessageRequest(

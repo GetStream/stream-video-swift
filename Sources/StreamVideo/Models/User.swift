@@ -7,12 +7,20 @@ import Foundation
 /// Model for the user's info.
 public struct User: Identifiable, Equatable, Sendable, Codable {
     public let id: String
-    public let name: String
     public let imageURL: URL?
     public let role: String
     public let type: UserAuthType
     public let customData: [String: RawJSON]
-    
+
+    /// User's name that was provided when the object was created. It will be used when communicating
+    /// with the API and in cases where it doesn't make sense to override `nil` values with the
+    /// `non-nil` id.
+    public let originalName: String?
+
+    /// A computed property that can be used for UI elements where you need to display user's identifier.
+    /// If a `name` value was provided on initialisation it will return it. Otherwise returns the `id`.
+    public var name: String { originalName ?? id }
+
     public init(
         id: String,
         name: String? = nil,
@@ -39,7 +47,7 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
         customData: [String: RawJSON] = [:]
     ) {
         self.id = id
-        self.name = name ?? id
+        originalName = name
         self.imageURL = imageURL
         self.role = role
         self.type = type
