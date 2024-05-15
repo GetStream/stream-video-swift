@@ -12,6 +12,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Represents the state of a call.
     public enum State { case idle, joining, inCall }
 
+    /// Represents a call that is being managed by the service.
+    struct CallEntry {
+        var call: Call
+        var callKitId: UUID = .init()
+    }
+
     /// The currently active StreamVideo client.
     /// - Important: We need to update it whenever a user logins.
     public var streamVideo: StreamVideo? {
@@ -19,9 +25,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     }
 
     /// The unique identifier for the call.
-    open var callId: String = ""
+    open var callId: String { stack.peek()?.call.callId ?? "" }
     /// The type of call.
-    open var callType: String = ""
+    open var callType: String { stack.peek()?.call.callType ?? "" }
     /// The icon data for the call template.
     open var iconTemplateImageData: Data?
 
@@ -30,13 +36,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// The call provider responsible for handling call-related actions.
     open internal(set) lazy var callProvider = buildProvider()
 
+    internal private(set) var stack: Stack<CallEntry> = .init()
+
     private var call: Call?
     private var state: State = .idle
-    private var callKitId: UUID?
+    private var callKitId: UUID? { stack.peek()?.callKitId }
     private var createdBy: User?
     private var ringingTimer: Foundation.Timer?
     private var callEventsSubscription: Task<Void, Never>?
-
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
@@ -48,10 +55,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callEndedNotificationCancellable = NotificationCenter
             .default
             .publisher(for: Notification.Name(CallNotification.callEnded))
-            .sink { [weak self] _ in self?.callEnded() }
-
-        // Subscribe to call events.
-        subscribeToCallEvents()
+            .compactMap { $0.object as? Call }
+            .sink { [weak self] call in
+                guard
+                    call.callId == self?.callId,
+                    call.callType == self?.callType
+                else {
+                    return
+                }
+                self?.callEnded()
+            }
     }
 
     /// Reports an incoming call to the CallKit framework.
@@ -73,8 +86,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             callerId: callerId
         )
 
-        let callUUID = UUID()
-        callKitId = callUUID
+        let callUUID = {
+            if let prepared = stack.peek()?.callKitId {
+                return prepared
+            } else {
+                log.warning("Call information haven't been prepared correctly.")
+                return UUID()
+            }
+        }()
 
         callProvider.reportNewIncomingCall(
             with: callUUID,
@@ -120,7 +139,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 case .idle:
                     if !checkIfCallWasHandled(callState: callState) {
                         setUpRingingTimer(for: callState)
-                        state = .joining
                     } else {
                         log.debug(
                             """
@@ -135,6 +153,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     log.debug("No action after reporting incoming VoIP call as current CallKit state is \(state).")
                 }
             } catch {
+                log.error("Failed to report incoming call with callId:\(callId) callType:\(callType)")
                 callEnded()
             }
         }
@@ -231,7 +250,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
 
-        guard state != .inCall else {
+        guard state == .idle else {
             action.fulfill()
             return
         }
@@ -265,18 +284,27 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         _ provider: CXProvider,
         perform action: CXEndCallAction
     ) {
-        callKitId = nil
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
+
+        defer { state = stack.isEmpty() ? .idle : .inCall }
+
+        guard let endedCall = stack.pop()?.call else {
+            return
+        }
+
         Task {
-            if call == nil, !callId.isEmpty {
-                call = streamVideo?.call(callType: callType, callId: callId)
-                log.debug("Rejecting VoIP incoming call with callId:\(callId) callType:\(callType).")
+            log
+                .debug(
+                    "\(streamVideo?.state.activeCall?.cId == endedCall.cId ? "Ending" : "Rejecting incoming") VoIP call with callId:\(endedCall.callId) callType:\(endedCall.callType)."
+                )
+            do {
+                try await endedCall.reject()
+            } catch {
+                log.error(error)
             }
-            try await call?.reject()
-            call = nil
+            endedCall.leave()
             createdBy = nil
-            state = .idle
             action.fulfill()
         }
     }
@@ -350,7 +378,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callEventsSubscription = Task {
             for await event in streamVideo.subscribe() {
                 switch event {
-                case .typeCallEndedEvent:
+                case let .typeCallEndedEvent(response) where response.call.id == callId && response.call.type == callType:
                     callEnded()
                 case let .typeCallAcceptedEvent(response):
                     callAccepted(response)
@@ -363,6 +391,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 }
             }
         }
+
+        log.debug("\(type(of: self)) is now subscribed to CallEvent updates.")
     }
 
     private func buildProvider(
@@ -392,9 +422,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ) -> CXCallUpdate {
         let update = CXCallUpdate()
         let idComponents = cid.components(separatedBy: ":")
-        if idComponents.count >= 2 {
-            callId = idComponents[1]
-            callType = idComponents[0]
+        if idComponents.count >= 2, let call = streamVideo?.call(callType: idComponents[0], callId: idComponents[1]) {
+            stack.push(.init(call: call))
         }
 
         update.localizedCallerName = localizedCallerName
