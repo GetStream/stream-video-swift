@@ -150,7 +150,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         Task {
             do {
                 // Update call state to inCall and send the answer call action.
-                state = .inCall
                 try await requestTransaction(CXAnswerCallAction(call: callKitId))
             } catch {
                 log.error(error)
@@ -250,6 +249,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 call = streamVideo.call(callType: callType, callId: callId)
                 try await call?.join()
                 try await call?.accept()
+                self.call = call
                 state = .inCall
                 action.fulfill()
             } catch {
