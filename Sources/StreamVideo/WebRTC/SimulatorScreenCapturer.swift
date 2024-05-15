@@ -19,25 +19,36 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
         startCapturing()
     }
 
+    deinit {
+        log.debug("\(type(of: self)) deallocated.")
+    }
+
     func startCapturing() {
-        queue.async {
+        queue.async { [weak self] in
+            guard let self else { return }
             self.setupAssetReader()
             self.displayLink = CADisplayLink(
                 target: self,
                 selector: #selector(self.readFrame)
             )
             self.displayLink?.preferredFramesPerSecond = 30 // Assuming 30 fps video
-            self.displayLink?.add(to: .current, forMode: .common)
-            RunLoop.current.run()
+            self.displayLink?.add(to: .main, forMode: .common)
         }
     }
 
     func stopCapturing() {
+        videoTrackOutput = nil
         displayLink?.invalidate()
+        displayLink = nil
         assetReader?.cancelReading()
+        assetReader = nil
     }
 
     private func setupAssetReader() {
+        assetReader?.cancelReading()
+        assetReader = nil
+        videoTrackOutput = nil
+
         let asset = AVAsset(url: videoURL)
         guard let track = asset.tracks(withMediaType: .video).first else { return }
 
@@ -58,7 +69,7 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
     }
 
     @objc private func readFrame() {
-        guard let trackOutput = videoTrackOutput else {
+        guard displayLink != nil, let trackOutput = videoTrackOutput else {
             return
         }
 
@@ -72,12 +83,12 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
                 timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9)
             )
 
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
                 self.delegate?.capturer(self, didCapture: rtcVideoFrame)
             }
         } else {
             // Reached the end of the video file, restart from the beginning
-            assetReader?.cancelReading()
             setupAssetReader()
         }
     }

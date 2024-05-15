@@ -323,6 +323,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         log.debug("Cleaning up WebRTCClient", subsystems: .webRTC)
         try? await videoCapturer?.stopCapture()
         try? await screenshareCapturer?.stopCapture()
+        videoCapturer = nil
         publisher?.close()
         subscriber?.close()
         publisher = nil

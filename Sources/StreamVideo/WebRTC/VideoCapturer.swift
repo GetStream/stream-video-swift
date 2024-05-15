@@ -7,7 +7,7 @@ import StreamWebRTC
 
 class VideoCapturer: CameraVideoCapturing {
     
-    private var videoCapturer: RTCVideoCapturer
+    private var videoCapturer: RTCVideoCapturer?
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
     private var videoCaptureHandler: StreamVideoCaptureHandler?
@@ -36,7 +36,7 @@ class VideoCapturer: CameraVideoCapturing {
         checkForBackgroundCameraAccess()
         #endif
     }
-    
+
     func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice? {
         VideoCapturingUtils.capturingDevice(for: cameraPosition)
     }
@@ -99,6 +99,9 @@ class VideoCapturer: CameraVideoCapturing {
                 capturer.stopCapture {
                     continuation.resume(returning: ())
                 }
+            } else if let capturer = videoCapturer as? SimulatorScreenCapturer {
+                capturer.stopCapturing()
+                continuation.resume(returning: ())
             } else {
                 continuation.resume(returning: ())
             }
