@@ -193,6 +193,7 @@
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
+		4097B3832BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097B3822BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift */; };
 		409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */; };
@@ -1233,6 +1234,7 @@
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
+		4097B3822BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnChangeViewModifier_iOS13.swift; sourceTree = "<group>"; };
 		409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+PredicateFulfillment.swift"; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
 		40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIInterfaceOrientation+CGOrientation.swift"; sourceTree = "<group>"; };
@@ -2576,6 +2578,14 @@
 			path = MemoryLogDestination;
 			sourceTree = "<group>";
 		};
+		4097B3812BF4E36C0057992D /* Backports */ = {
+			isa = PBXGroup;
+			children = (
+				4097B3822BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift */,
+			);
+			path = Backports;
+			sourceTree = "<group>";
+		};
 		409BFA442A9F7E92003341EF /* CallingView */ = {
 			isa = PBXGroup;
 			children = (
@@ -3915,6 +3925,7 @@
 		84EBAA91288C135700BE3176 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				4097B3812BF4E36C0057992D /* Backports */,
 				40F0C3A42BC7F8CB00AB75AD /* VideoRendererPool */,
 				4049CE802BBBF73A003D07D2 /* AsyncImage */,
 				403FF3E22BA1D2270092CE8A /* StreamPixelBufferRepository */,
@@ -5041,6 +5052,7 @@
 				8487D8B02A697E9A00536ED4 /* VideoCapturing.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,
 				848CCCE62AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift in Sources */,
+				4097B3832BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
 				841BAA472BD15CDE000C73E4 /* CallTranscriptionReadyEvent.swift in Sources */,
 				841BAA352BD15CDE000C73E4 /* CallTranscriptionStartedEvent.swift in Sources */,
