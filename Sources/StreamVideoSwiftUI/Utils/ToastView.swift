@@ -56,7 +56,6 @@ public struct ToastView: View {
     }
 }
 
-@available(iOS 14.0, *)
 public struct ToastModifier: ViewModifier {
     
     @Binding var toast: Toast?
@@ -128,7 +127,6 @@ public struct ToastModifier: ViewModifier {
     }
 }
 
-@available(iOS 14.0, *)
 extension View {
     public func toastView(toast: Binding<Toast?>) -> some View {
         modifier(ToastModifier(toast: toast))

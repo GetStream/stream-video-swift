@@ -19,9 +19,9 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
         self.viewFactory = viewFactory
         _viewModel = BackportStateObject(wrappedValue: viewModel)
     }
-    
+
     public var body: some View {
-        ZStack {
+        Group {
             if shouldShowCallView {
                 if viewModel.callParticipants.count > 1 {
                     if viewModel.isMinimized {
@@ -32,19 +32,12 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
                 } else {
                     viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
                 }
-            } else if case let .lobby(lobbyInfo) = viewModel.callingState {
-                viewFactory.makeLobbyView(
-                    viewModel: viewModel,
-                    lobbyInfo: lobbyInfo,
-                    callSettings: $viewModel.callSettings
-                )
             } else if viewModel.callingState == .reconnecting {
                 viewFactory.makeReconnectionView(viewModel: viewModel)
             }
         }
-        .alert(isPresented: $viewModel.errorAlertShown, content: {
-            Alert.defaultErrorAlert
-        })
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .toastView(toast: $viewModel.toast)
         .overlay(overlayView)
         .onReceive(viewModel.$callingState) { _ in
             if viewModel.callingState == .idle || viewModel.callingState == .inCall {
@@ -52,7 +45,7 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var overlayView: some View {
         if case let .incoming(callInfo) = viewModel.callingState {
@@ -61,14 +54,20 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
             viewFactory.makeOutgoingCallView(viewModel: viewModel)
         } else if viewModel.callingState == .joining {
             viewFactory.makeJoiningCallView(viewModel: viewModel)
+        } else if case let .lobby(lobbyInfo) = viewModel.callingState {
+            viewFactory.makeLobbyView(
+                viewModel: viewModel,
+                lobbyInfo: lobbyInfo,
+                callSettings: $viewModel.callSettings
+            )
         } else {
             EmptyView()
         }
     }
-    
+
     private var shouldShowCallView: Bool {
         switch viewModel.callingState {
-        case .outgoing, .incoming(_), .inCall, .joining:
+        case .outgoing, .incoming(_), .inCall, .joining, .lobby:
             return true
         default:
             return false
