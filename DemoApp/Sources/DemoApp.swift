@@ -10,57 +10,32 @@ import SwiftUI
 
 @main
 struct DemoApp: App {
-
-    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
-
-    // MARK: - State properties
-
-    @State private var userState: UserState = .notLoggedIn
-    private let router: Router
-
-    // MARK: - Lifecycle
-
+    @State var streamVideo: StreamVideo?
+    
     init() {
-        let router = Router.shared
-        self.router = router
-
-        LogConfig.level = .debug
-        configureSentry()
+        // mmhfdzb5evj2
+        streamVideo = StreamVideo(apiKey: "par8f5s3gn2j", user: .anonymous, token: UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiIWFub24iLCJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyLyFhbm9uIiwiaWF0IjoxNzE1ODY4OTIwLCJjYWxsX2NpZHMiOlsibGl2ZXN0cmVhbTpsaXZlc3RyZWFtX2MzYWYxMDhiLTkyNDgtNDc3OC05OTdkLWI3OTkzMDM4Mjg4MSJdLCJleHAiOjE3MTY0NzM3MjV9.dkck9Vcs2go3fN2n4qklNDEwbqFgHa4BtzqYtDSVRq4"))
     }
-
+    
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                if userState == .loggedIn {
-                    NavigationView {
-                        DemoCallContainerView(callId: router.appState.deeplinkInfo.callId)
-                            .navigationBarHidden(true)
-                    }
-                    .navigationViewStyle(.stack)
-                } else {
-                    if AppEnvironment.configuration.isRelease {
-                        LoadingView()
-                    } else {
-                        NavigationView {
-                            LoginView() { credentials in
-                                Task {
-                                    try await router.handleLoggedInUserCredentials(
-                                        credentials,
-                                        deeplinkInfo: router.appState.deeplinkInfo
-                                    )
-                                }
-                            }
-                        }
-                        .navigationViewStyle(.stack)
-                    }
+            LivestreamView()
+        }
+    }
+}
+
+struct LivestreamView: View {
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                NavigationLink {
+                  LivestreamPlayer(type: "livestream", id: "livestream_c3af108b-9248-4778-997d-b79930382881")
+//                    LivestreamPlayer(type: "livestream", id: "marceloooo")
+                } label: {
+                  Text("Join stream")
                 }
             }
-            .onReceive(router.appState.$userState) { self.userState = $0 }
-            .preferredColorScheme(.dark)
-            .onOpenURL { router.handle(url: $0) }
-            .onContinueUserActivity(
-                NSUserActivityTypeBrowsingWeb
-            ) { $0.webpageURL.map { url in router.handle(url: url) } }
         }
     }
 }

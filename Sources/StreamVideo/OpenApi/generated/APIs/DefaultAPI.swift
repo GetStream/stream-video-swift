@@ -602,6 +602,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
         let queryParams = APIHelper.mapValuesToQueryItems([
             "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: true),
+            "sfu_id": (wrappedValue: "sfu-fe72837.dpk-mil1.stream-io-video.com".encodeToJSON(), isExplode: true),
+            "cascading": (wrappedValue: true.encodeToJSON(), isExplode: true)
         ])
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
