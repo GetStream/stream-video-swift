@@ -14,6 +14,8 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo: ObservableObject, @unchecked Sendable {
     
+    @Injected(\.callCache) private var callCache
+
     public class State: ObservableObject {
         @Published public internal(set) var connection: ConnectionStatus = .initialized
         @Published public internal(set) var user: User
@@ -190,15 +192,17 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         callType: String,
         callId: String
     ) -> Call {
-        let callController = makeCallController(callType: callType, callId: callId)
-        let call = Call(
-            callType: callType,
-            callId: callId,
-            coordinatorClient: coordinatorClient,
-            callController: callController
-        )
-        eventsMiddleware.add(subscriber: call)
-        return call
+        callCache.getCall(callType: callType, callId: callId) {
+            let callController = makeCallController(callType: callType, callId: callId)
+            let call = Call(
+                callType: callType,
+                callId: callId,
+                coordinatorClient: coordinatorClient,
+                callController: callController
+            )
+            eventsMiddleware.add(subscriber: call)
+            return call
+        }
     }
 
     /// Creates a controller used for querying and watching calls.
