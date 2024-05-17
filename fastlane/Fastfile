@@ -626,20 +626,6 @@ lane :run_swift_format do |options|
   end
 end
 
-lane :install_sim do |options|
-  xcode_install_cache_dir = File.expand_path('~/Library/Caches/XcodeInstall')
-  sim_dmg_path = Dir["#{xcode_install_cache_dir}/*.dmg"].first
-  sim_pkg_path = Dir["#{xcode_install_cache_dir}/*.pkg"].first
-  if is_localhost || sim_dmg_path.nil? || sim_pkg_path.nil?
-    sh("bundle exec xcversion simulators --install='iOS #{options[:ios]}'")
-  else
-    sh("hdiutil attach '#{sim_dmg_path}'")
-    sh("sudo installer -pkg '#{sim_pkg_path}' -target /")
-    mount_point = sh("hdiutil attach '#{sim_dmg_path}' | grep Volumes | cut -f 3").strip
-    sh("hdiutil detach '#{mount_point}'")
-  end
-end
-
 desc 'Remove UI Snapshots'
 lane :remove_snapshots do |options|
   snapshots_path = "../#{options[:scheme]}Tests/**/__Snapshots__/**/*.png"
