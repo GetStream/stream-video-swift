@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [1.0.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.2)
+_May 17, 2024_
+
+### 🔄 Changed
+
 ### ✅ Added
 - An `originalName` property on the `User` that will hold the name provided when initialized. [#391](https://github.com/GetStream/stream-video-swift/pull/391
 
