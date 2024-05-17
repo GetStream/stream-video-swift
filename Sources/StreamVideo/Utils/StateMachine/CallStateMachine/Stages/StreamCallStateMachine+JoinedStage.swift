@@ -7,7 +7,7 @@ import Foundation
 extension StreamCallStateMachine.Stage {
 
     static func joined(
-        _ call: Call,
+        _ call: Call?,
         response: JoinCallResponse
     ) -> StreamCallStateMachine.Stage {
         JoinedStage(
@@ -23,7 +23,7 @@ extension StreamCallStateMachine.Stage {
         let response: JoinCallResponse
 
         init(
-            _ call: Call,
+            _ call: Call?,
             response: JoinCallResponse
         ) {
             self.response = response

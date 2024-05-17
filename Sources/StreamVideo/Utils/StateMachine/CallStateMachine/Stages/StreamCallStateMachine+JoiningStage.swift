@@ -7,7 +7,7 @@ import Foundation
 extension StreamCallStateMachine.Stage {
 
     static func joining(
-        _ call: Call,
+        _ call: Call?,
         create: Bool,
         options: CreateCallOptions?,
         ring: Bool,
@@ -35,7 +35,7 @@ extension StreamCallStateMachine.Stage {
         let callSettings: CallSettings?
 
         init(
-            _ call: Call,
+            _ call: Call?,
             create: Bool,
             options: CreateCallOptions?,
             ring: Bool,
@@ -57,17 +57,20 @@ extension StreamCallStateMachine.Stage {
             case .idle:
                 Task {
                     do {
-                        let response = try await call.executeJoin(
-                            create: create,
-                            options: options,
-                            ring: ring,
-                            notify: notify,
-                            callSettings: callSettings
-                        )
-                        transition?(.joined(call, response: response))
+                        if let call {
+                            let response = try await call.executeJoin(
+                                create: create,
+                                options: options,
+                                ring: ring,
+                                notify: notify,
+                                callSettings: callSettings
+                            )
+                            transition?(.joined(call, response: response))
+                        } else {
+                            transition?(.error(call, error: ClientError("Unknown error in \(type(of: self)) Call stage.")))
+                        }
                     } catch {
-                        log.error(error)
-                        transition?(.idle(call))
+                        transition?(.error(call, error: error))
                     }
                 }
                 return self

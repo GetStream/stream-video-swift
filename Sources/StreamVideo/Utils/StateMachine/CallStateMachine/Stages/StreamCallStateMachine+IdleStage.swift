@@ -6,7 +6,7 @@ import Foundation
 
 extension StreamCallStateMachine.Stage {
 
-    static func idle(_ call: Call) -> StreamCallStateMachine.Stage {
+    static func idle(_ call: Call?) -> StreamCallStateMachine.Stage {
         IdleStage(call)
     }
 }
@@ -14,7 +14,7 @@ extension StreamCallStateMachine.Stage {
 extension StreamCallStateMachine.Stage {
 
     final class IdleStage: StreamCallStateMachine.Stage {
-        convenience init(_ call: Call) {
+        convenience init(_ call: Call?) {
             self.init(id: .idle, call: call)
         }
 

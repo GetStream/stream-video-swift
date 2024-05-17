@@ -13,7 +13,19 @@ private final class CallEndedViewModifierViewModel: ObservableObject {
 
     @Published var activeCall: Call?
     @Published var lastCall: Call?
-    @Published var isPresentingSubview: Bool = false
+    @Published var isPresentingSubview: Bool = false {
+        didSet {
+            switch (isPresentingSubview, oldValue) {
+            case (false, true):
+                // The order matters here as it triggers the publisher on the View
+                lastCall = nil
+                activeCall = nil
+            default:
+                break
+            }
+        }
+    }
+
     @Published var maxParticipantsCount: Int = 0
 
     private var observationCancellable: AnyCancellable?

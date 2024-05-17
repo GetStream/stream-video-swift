@@ -276,7 +276,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             await setupUserMedia(callSettings: callSettings)
             log.debug("Connecting WS channel", subsystems: .webRTC)
             signalChannel?.connect()
-            sfuMiddleware.onSocketConnected = handleOnSocketConnected
+            sfuMiddleware.onSocketConnected = { [weak self] in self?.handleOnSocketConnected(reconnected: $0) }
         } else if migrating {
             log.debug("Performing session migration", subsystems: .webRTC)
             migratingWSClient?.connect()
@@ -1403,14 +1403,16 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private func subscribeToInternetConnectionUpdates() {
         NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleConnectionStateChange),
-            name: .internetConnectionStatusDidChange,
-            object: nil
+            forName: .internetConnectionStatusDidChange,
+            object: nil,
+            queue: nil,
+            using: { [weak self] in
+                self?.handleConnectionStateChange($0)
+            }
         )
     }
     
-    @objc private func handleConnectionStateChange(_ notification: NSNotification) {
+    @objc private func handleConnectionStateChange(_ notification: Notification) {
         guard let status = notification.userInfo?[Notification.internetConnectionStatusUserInfoKey] as? InternetConnection.Status
         else {
             return

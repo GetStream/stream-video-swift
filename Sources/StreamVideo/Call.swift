@@ -85,6 +85,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
+    deinit {
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+    }
+
     /// Joins the current call.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.

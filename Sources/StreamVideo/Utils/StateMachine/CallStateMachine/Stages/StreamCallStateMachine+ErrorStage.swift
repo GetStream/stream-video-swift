@@ -7,7 +7,7 @@ import Foundation
 extension StreamCallStateMachine.Stage {
 
     static func error(
-        _ call: Call,
+        _ call: Call?,
         error: Error
     ) -> StreamCallStateMachine.Stage {
         ErrorStage(
@@ -23,7 +23,7 @@ extension StreamCallStateMachine.Stage {
         let error: Error
 
         init(
-            _ call: Call,
+            _ call: Call?,
             error: Error
         ) {
             self.error = error

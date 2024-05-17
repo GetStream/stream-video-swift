@@ -25,6 +25,9 @@ struct DemoApp: App {
         self.router = router
 
         LogConfig.level = .debug
+        LogConfig.showDate = false
+        LogConfig.showThreadName = false
+        LogConfig.showIdentifier = false
         configureSentry()
     }
 

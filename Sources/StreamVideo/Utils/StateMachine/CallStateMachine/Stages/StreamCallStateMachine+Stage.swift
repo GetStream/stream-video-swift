@@ -15,11 +15,11 @@ extension StreamCallStateMachine {
         }
 
         let id: ID
-        let call: Call
+        weak var call: Call?
 
         var transition: Transition?
 
-        init(id: ID, call: Call) {
+        init(id: ID, call: Call?) {
             self.id = id
             self.call = call
         }
