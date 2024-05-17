@@ -169,7 +169,7 @@ jobs:
       uses: actions/cache@v3
       id: runtime-cache
       with:
-        path: /Library/Developer/CoreSimulator/Profiles/Runtimes/
+        path: ~/Downloads/*.dmg
         key: xcodes-runtime-ios-${{ matrix.ios }}
         restore-keys: xcodes-runtime-ios-${{ matrix.ios }}
     - name: Setup iOS ${{ matrix.ios }} Runtime
