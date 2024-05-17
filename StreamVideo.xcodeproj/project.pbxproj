@@ -344,6 +344,7 @@
 		40FB02012BAC8A4A00A1C206 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB02002BAC8A4A00A1C206 /* CallKitService.swift */; };
 		40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB02022BAC93A800A1C206 /* CallKitAdapter.swift */; };
 		40FB02052BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB02042BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift */; };
+		40FB150A2BF74C1300D5E580 /* CallCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB15092BF74C1300D5E580 /* CallCache.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
 		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
@@ -1340,6 +1341,7 @@
 		40FB02002BAC8A4A00A1C206 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
 		40FB02022BAC93A800A1C206 /* CallKitAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAdapter.swift; sourceTree = "<group>"; };
 		40FB02042BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitPushNotificationAdapter.swift; sourceTree = "<group>"; };
+		40FB15092BF74C1300D5E580 /* CallCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCache.swift; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
 		40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+KeyboardIntroduction.swift"; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
@@ -2941,6 +2943,14 @@
 			path = CallKit;
 			sourceTree = "<group>";
 		};
+		40FB15082BF74C0A00D5E580 /* CallCache */ = {
+			isa = PBXGroup;
+			children = (
+				40FB15092BF74C1300D5E580 /* CallCache.swift */,
+			);
+			path = CallCache;
+			sourceTree = "<group>";
+		};
 		40FBEF472AC3030C007CFF17 /* UITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -3613,6 +3623,7 @@
 			isa = PBXGroup;
 			children = (
 				403FF3DF2BA1D20E0092CE8A /* UnfairQueue */,
+				40FB15082BF74C0A00D5E580 /* CallCache */,
 				40149DCA2B7E813500473176 /* AudioRecorder */,
 				8456E6C7287EC343004E180E /* Logger */,
 				84C2997C28784BB30034B735 /* Utils.swift */,
@@ -5019,6 +5030,7 @@
 				84DC389329ADFCFD00946713 /* ScreensharingSettingsRequest.swift in Sources */,
 				40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */,
 				84EBA4A22A72B81100577297 /* BroadcastBufferConnection.swift in Sources */,
+				40FB150A2BF74C1300D5E580 /* CallCache.swift in Sources */,
 				40FB02012BAC8A4A00A1C206 /* CallKitService.swift in Sources */,
 				840F598F2A77FDCB00EF3EB2 /* PinRequest.swift in Sources */,
 				84DC389F29ADFCFD00946713 /* JoinCallResponse.swift in Sources */,

@@ -11,6 +11,7 @@ import StreamWebRTC
 public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.callCache) var callCache
 
     @MainActor public internal(set) var state = CallState()
 
@@ -374,6 +375,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         cancellables.removeAll()
         eventHandlers.removeAll()
         callController.cleanUp()
+        callCache.removeCall(callType: callType, callId: callId)
         Task { @MainActor in
             if streamVideo.state.ringingCall?.cId == cId {
                 streamVideo.state.ringingCall = nil
