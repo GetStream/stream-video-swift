@@ -139,7 +139,7 @@ jobs:
             os: macos-14
             device: "iPhone 15 Pro"
             setup_runtime: false
-          - ios: 16.2
+          - ios: 16.4
             xcode: 15.3
             os: macos-14
             device: "iPhone 13 Pro Max"
