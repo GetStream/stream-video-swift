@@ -266,6 +266,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         perform action: CXEndCallAction
     ) {
         callKitId = nil
+        createdBy = nil
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
         Task {
@@ -275,7 +276,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
             try await call?.reject()
             call = nil
-            createdBy = nil
             state = .idle
             action.fulfill()
         }

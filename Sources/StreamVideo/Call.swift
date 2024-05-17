@@ -11,6 +11,9 @@ import StreamWebRTC
 public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.callCache) var callCache
+
+    private lazy var stateMachine: StreamCallStateMachine = .init(self)
 
     @MainActor public internal(set) var state = CallState()
 
@@ -92,6 +95,45 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the call could not be joined.
     @discardableResult
     public func join(
+        create: Bool = false,
+        options: CreateCallOptions? = nil,
+        ring: Bool = false,
+        notify: Bool = false,
+        callSettings: CallSettings? = nil
+    ) async throws -> JoinCallResponse {
+        let currentStage = stateMachine.currentStage
+        switch currentStage.id {
+        case .joining:
+            break
+        case .joined where currentStage is StreamCallStateMachine.Stage.JoinedStage:
+            let stage = currentStage as! StreamCallStateMachine.Stage.JoinedStage
+            return stage.response
+        default:
+            stateMachine.transition(
+                .joining(
+                    self,
+                    create: create,
+                    options: options,
+                    ring: ring,
+                    notify: notify,
+                    callSettings: callSettings
+                )
+            )
+        }
+
+        let stage = try await stateMachine.publisher.nextValue(dropFirst: 1)
+        if let joined = stage as? StreamCallStateMachine.Stage.JoinedStage {
+            return joined.response
+        } else if let errorStage = stage as? StreamCallStateMachine.Stage.ErrorStage {
+            throw errorStage.error
+        } else {
+            throw ClientError(
+                "Unknown error occurred while joining callId:\(callId) callType:\(callType) stage:\(stage.description)."
+            )
+        }
+    }
+
+    internal func executeJoin(
         create: Bool = false,
         options: CreateCallOptions? = nil,
         ring: Bool = false,
@@ -369,6 +411,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         cancellables.removeAll()
         eventHandlers.removeAll()
         callController.cleanUp()
+        stateMachine.transition(.idle(self))
+        callCache.removeCall(callType: callType, callId: callId)
         Task { @MainActor in
             if streamVideo.state.ringingCall?.cId == cId {
                 streamVideo.state.ringingCall = nil
