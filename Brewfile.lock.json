@@ -68,31 +68,18 @@
             }
           }
         }
-      },
-      "chargepoint/xcparse/xcparse": {
-        "version": "2.3.1",
-        "bottle": false
-      },
-      "xcparse": {
-        "version": "2.3.1",
-        "bottle": false
-      }
-    },
-    "tap": {
-      "chargepoint/xcparse": {
-        "revision": "ebde7613d1b59ea40cc39cf0bf3110f6db5e18b4"
       }
     }
   },
   "system": {
     "macos": {
-      "ventura": {
-        "HOMEBREW_VERSION": "4.1.14",
-        "HOMEBREW_PREFIX": "/usr/local",
+      "sonoma": {
+        "HOMEBREW_VERSION": "4.3.0-20-g1f603d3",
+        "HOMEBREW_PREFIX": "/opt/homebrew",
         "Homebrew/homebrew-core": "api",
-        "CLT": "15.0.0.0.1.1694021235",
-        "Xcode": "14.3.1",
-        "macOS": "13.6"
+        "CLT": "15.3.0.0.1.1708646388",
+        "Xcode": "15.3",
+        "macOS": "14.0"
       }
     }
   }

@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '15.2'
+xcode_version = ENV['XCODE_VERSION'] || '15.3'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 podspec_names = ['StreamVideo', 'StreamVideo-XCFramework', 'StreamVideoSwiftUI', 'StreamVideoSwiftUI-XCFramework', 'StreamVideoUIKit', 'StreamVideoUIKit-XCFramework']
@@ -623,20 +623,6 @@ lane :run_swift_format do |options|
     swiftformat_source_paths.each do |path|
       sh("mint run swiftformat #{action} --config .swiftformat --exclude #{swiftformat_excluded_paths.join(',')} #{path}")
     end
-  end
-end
-
-lane :install_sim do |options|
-  xcode_install_cache_dir = File.expand_path('~/Library/Caches/XcodeInstall')
-  sim_dmg_path = Dir["#{xcode_install_cache_dir}/*.dmg"].first
-  sim_pkg_path = Dir["#{xcode_install_cache_dir}/*.pkg"].first
-  if is_localhost || sim_dmg_path.nil? || sim_pkg_path.nil?
-    sh("bundle exec xcversion simulators --install='iOS #{options[:ios]}'")
-  else
-    sh("hdiutil attach '#{sim_dmg_path}'")
-    sh("sudo installer -pkg '#{sim_pkg_path}' -target /")
-    mount_point = sh("hdiutil attach '#{sim_dmg_path}' | grep Volumes | cut -f 3").strip
-    sh("hdiutil detach '#{mount_point}'")
   end
 end
 
