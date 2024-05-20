@@ -158,21 +158,21 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             coordinatorClient.middlewares.append(anonymousAuth)
         }
         prefetchLocation()
-        connectTask = Task {
-            if user.type == .guest {
-                do {
-                    let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
-                    self.state.user = guestInfo.user
-                    self.token = guestInfo.token
-                    self.tokenProvider = guestInfo.tokenProvider
-                    try await self.connectUser(isInitial: true)
-                } catch {
-                    log.error("Error connecting as guest", error: error)
-                }
-            } else {
-                try await self.connectUser(isInitial: true)
-            }
-        }
+//        connectTask = Task {
+//            if user.type == .guest {
+//                do {
+//                    let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
+//                    self.state.user = guestInfo.user
+//                    self.token = guestInfo.token
+//                    self.tokenProvider = guestInfo.tokenProvider
+//                    try await self.connectUser(isInitial: true)
+//                } catch {
+//                    log.error("Error connecting as guest", error: error)
+//                }
+//            } else {
+//                try await self.connectUser(isInitial: true)
+//            }
+//        }
     }
     
     /// Connects the current user.
@@ -315,6 +315,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             next: nil,
             watch: watch
         )
+    }
+    
+    public func update(token: UserToken) {
+        self.token = token
     }
 
     internal func queryCalls(

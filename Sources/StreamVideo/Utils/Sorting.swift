@@ -35,7 +35,7 @@ public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
     ifInvisible(isSpeaking),
     ifInvisible(publishingVideo),
     ifInvisible(publishingAudio),
-    roles(),
+    roles(["host"]),
     joinedAt,
     userId
 ]

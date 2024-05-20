@@ -38,7 +38,7 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
         )
     }
 
-    init(
+    public init(
         id: String,
         name: String? = nil,
         imageURL: URL? = nil,

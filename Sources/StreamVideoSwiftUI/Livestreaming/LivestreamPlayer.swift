@@ -8,32 +8,66 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct LivestreamPlayer: View {
     
+    @State var viewModel: LivestreamPlayerViewModel?
+    
+    @MainActor public init(
+        token: String,
+        muted: Bool = false,
+        showParticipantCount: Bool = true,
+        onFullScreenStateChange: ((Bool) -> Void)? = nil
+    ) {
+        if let viewModel = try? LivestreamPlayerViewModel(
+            token: token,
+            muted: muted,
+            showParticipantCount: showParticipantCount
+        ) {
+            _viewModel = State(wrappedValue: viewModel)
+        }
+    }
+    
+    @MainActor public init(
+        streamVideo: StreamVideo,
+        call: Call,
+        token: String,
+        muted: Bool = false,
+        showParticipantCount: Bool = true,
+        onFullScreenStateChange: ((Bool) -> Void)? = nil
+    ) {
+        let viewModel = LivestreamPlayerViewModel(
+            streamVideo: streamVideo,
+            call: call,
+            token: token,
+            muted: muted,
+            showParticipantCount: showParticipantCount
+        )
+        _viewModel = State(wrappedValue: viewModel)
+    }
+    
+    public var body: some View {
+        ZStack {
+            if let viewModel {
+                LivestreamPlayerView(
+                    state: viewModel.call.state,
+                    viewModel: viewModel
+                )
+            } else {
+                Text("Incorrect livestream data provided")
+            }
+        }
+    }
+}
+
+@available(iOS 14.0, *)
+struct LivestreamPlayerView: View {
+    
     @Injected(\.colors) var colors
     
     var onFullScreenStateChange: ((Bool) -> Void)?
     
     @StateObject var state: CallState
     @StateObject var viewModel: LivestreamPlayerViewModel
-    
-    public init(
-        type: String,
-        id: String,
-        muted: Bool = false,
-        showParticipantCount: Bool = true,
-        onFullScreenStateChange: ((Bool) -> Void)? = nil
-    ) {
-        let viewModel = LivestreamPlayerViewModel(
-            type: type,
-            id: id,
-            muted: muted,
-            showParticipantCount: showParticipantCount
-        )
-        _viewModel = StateObject(wrappedValue: viewModel)
-        _state = StateObject(wrappedValue: viewModel.call.state)
-        self.onFullScreenStateChange = onFullScreenStateChange
-    }
-    
-    public var body: some View {
+
+    var body: some View {
         ZStack {
             if viewModel.errorShown {
                 Text(L10n.Call.Livestream.error)
