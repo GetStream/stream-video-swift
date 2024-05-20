@@ -144,7 +144,7 @@ extension AppEnvironment {
             return .detailed
         case .debug:
             #if targetEnvironment(simulator)
-            return .simple
+            return .detailed
             #else
             return .simple
             #endif

@@ -45,6 +45,13 @@ struct Stack<Element>: Sequence {
         elements.count
     }
 
+    mutating func remove(_ element: Element) where Element: Equatable {
+        guard let indexOf = elements.firstIndex(where: { $0 == element }) else {
+            return
+        }
+        elements.remove(at: indexOf)
+    }
+
     /// An iterator for the stack.
     struct Iterator: IteratorProtocol {
         /// The elements to iterate over.
