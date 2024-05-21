@@ -30,7 +30,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// The call provider responsible for handling call-related actions.
     open internal(set) lazy var callProvider = buildProvider()
 
-    private var call: Call?
+    private weak var call: Call?
     private var state: State = .idle
     private var callKitId: UUID?
     private var createdBy: User?

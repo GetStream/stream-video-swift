@@ -163,7 +163,7 @@ open class CallViewModel: ObservableObject {
     private var screenSharingUpdates: AnyCancellable?
     private var callSettingsUpdates: AnyCancellable?
         
-    private var ringingTimer: Foundation.Timer?
+    private var ringingTimerCancellable: AnyCancellable?
     private var lastScreenSharingParticipant: CallParticipant?
     
     private var lastLayoutChange = Date()
@@ -485,6 +485,7 @@ open class CallViewModel: ObservableObject {
         callingState = .idle
         isMinimized = false
         localVideoPrimary = false
+        Task { await audioRecorder.stopRecording() }
     }
     
     private func enterCall(
@@ -534,22 +535,20 @@ open class CallViewModel: ObservableObject {
     
     private func handleRingingEvents() {
         if callingState != .outgoing {
-            ringingTimer?.invalidate()
+            ringingTimerCancellable?.cancel()
         }
     }
     
     private func startTimer(timeout: TimeInterval) {
-        ringingTimer = Foundation.Timer.scheduledTimer(
-            withTimeInterval: timeout,
-            repeats: false,
-            block: { [weak self] _ in
-                guard let self = self else { return }
+        ringingTimerCancellable?.cancel()
+        ringingTimerCancellable = Foundation.Timer
+            .publish(every: timeout, on: .main, in: .default)
+            .autoconnect()
+            .sink { [weak self] _ in
                 log.debug("Detected ringing timeout, hanging up...")
-                Task {
-                    await self.hangUp()
-                }
+                self?.ringingTimerCancellable?.cancel()
+                self?.hangUp()
             }
-        )
     }
     
     private func subscribeToCallEvents() {

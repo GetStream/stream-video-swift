@@ -55,6 +55,8 @@ final class StreamPictureInPictureAdapter {
     @MainActor
     private func didUpdate(_ call: Call?) {
         participantUpdatesCancellable?.cancel()
+        activeParticipant = nil
+        pictureInPictureController?.track = nil
 
         guard let call = call else { return }
 

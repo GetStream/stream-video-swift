@@ -34,15 +34,25 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// A public publisher that exposes the average power of the audio signal.
     open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
 
-    /// Indicates whether an active call is present, influencing recording behavior.
+    private let queue = UnfairQueue()
+    private var _isRecording: Bool = false
+    private var isRecording: Bool {
+        get { queue.sync { _isRecording } }
+        set { queue.sync { _isRecording = newValue } }
+    }
+
+    /// Indicates whether an active call is present, influencing recording behaviour.
     private var hasActiveCall: Bool = false {
         didSet {
+            guard hasActiveCall != oldValue else { return }
+            log.debug("🎙️updated with hasActiveCall:\(hasActiveCall).")
             if !hasActiveCall {
                 Task {
                     await stopRecording()
                     do {
                         /// It's safe to deactivate the session as a call isn't in progress.
                         try audioSession.setActive(false, options: [])
+                        log.debug("🎙️AudioSession deactivated.")
                     } catch {
                         log.error("🎙️Failed to deactivate AudioSession.", error: error)
                     }
@@ -92,14 +102,15 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     open func startRecording(ignoreActiveCall: Bool = false) async {
         do {
             let audioRecorder = try await setUpAudioCaptureIfRequired()
-            guard hasActiveCall || ignoreActiveCall, !audioRecorder.isRecording else {
+            guard hasActiveCall || ignoreActiveCall, !isRecording else {
                 log
                     .info(
-                        "🎙️Attempted to start recording but failed. hasActiveCall:\(hasActiveCall) isRecording:\(audioRecorder.isRecording)"
+                        "🎙️Attempted to start recording but failed. hasActiveCall:\(hasActiveCall) isRecording:\(isRecording)"
                     )
                 return
             }
             audioRecorder.record()
+            isRecording = true
             audioRecorder.isMeteringEnabled = true
 
             log.debug("️🎙️Recording started.")
@@ -115,22 +126,26 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
                     }
                 }
         } catch {
+            isRecording = false
             log.error("🎙️Failed to set up recording session", error: error)
         }
     }
 
     /// Stops recording audio asynchronously.
     open func stopRecording() async {
+        updateMetersTimerCancellable?.cancel()
+        updateMetersTimerCancellable = nil
+        log.debug("🎙️Meters cancellable nullified.")
+
         guard
-            let audioRecorder = await audioRecorderBuilder.result,
-            audioRecorder.isRecording
+            isRecording,
+            let audioRecorder = await audioRecorderBuilder.result
         else {
             return
         }
 
-        updateMetersTimerCancellable?.cancel()
-        updateMetersTimerCancellable = nil
         audioRecorder.stop()
+        isRecording = false
         removeRecodingFile()
         log.debug("️🎙️Recording stopped.")
     }
@@ -138,6 +153,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     // MARK: - Private helpers
 
     private func setUp() {
+        setUpTask?.cancel()
         setUpTask = Task {
             do {
                 try await audioRecorderBuilder.build()

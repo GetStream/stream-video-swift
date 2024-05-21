@@ -194,6 +194,7 @@ public class VideoRenderer: RTCMTLVideoView {
         if newSuperview == nil {
             videoRendererPool.releaseRenderer(self)
         }
+        renderFrame(nil)
     }
 }
 

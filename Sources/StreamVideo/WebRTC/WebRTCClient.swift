@@ -177,7 +177,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var isFastReconnecting = false
     private var disconnectTime: Date?
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
-    
+
     @Injected(\.thermalStateObserver) private var thermalStateObserver
     
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
@@ -276,7 +276,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             await setupUserMedia(callSettings: callSettings)
             log.debug("Connecting WS channel", subsystems: .webRTC)
             signalChannel?.connect()
-            sfuMiddleware.onSocketConnected = handleOnSocketConnected
+            sfuMiddleware.onSocketConnected = { [weak self] in self?.handleOnSocketConnected(reconnected: $0) }
         } else if migrating {
             log.debug("Performing session migration", subsystems: .webRTC)
             migratingWSClient?.connect()
@@ -835,8 +835,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             videoOptions: videoOptions
         )
         
-        subscriber?.onStreamAdded = handleStreamAdded
-        subscriber?.onStreamRemoved = handleStreamRemoved
+        subscriber?.onStreamAdded = { [weak self] in self?.handleStreamAdded($0) }
+        subscriber?.onStreamRemoved = { [weak self] in self?.handleStreamRemoved($0) }
         subscriber?.onDisconnect = { [weak self] _ in
             log.debug("subscriber disconnected")
             if self?.isFastReconnecting == false {
@@ -1304,10 +1304,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     private func addOnParticipantsChangeHandler() {
-        Task {
+        Task { [weak self] in
             for await _ in await state.callParticipantsUpdates() {
                 log.debug("received participant event", subsystems: .webRTC)
-                await self.handleParticipantsUpdated()
+                await self?.handleParticipantsUpdated()
             }
         }
     }
@@ -1403,14 +1403,16 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private func subscribeToInternetConnectionUpdates() {
         NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleConnectionStateChange),
-            name: .internetConnectionStatusDidChange,
-            object: nil
+            forName: .internetConnectionStatusDidChange,
+            object: nil,
+            queue: nil,
+            using: { [weak self] in
+                self?.handleConnectionStateChange($0)
+            }
         )
     }
     
-    @objc private func handleConnectionStateChange(_ notification: NSNotification) {
+    @objc private func handleConnectionStateChange(_ notification: Notification) {
         guard let status = notification.userInfo?[Notification.internetConnectionStatusUserInfoKey] as? InternetConnection.Status
         else {
             return
