@@ -92,6 +92,12 @@ public protocol ViewFactory: AnyObject {
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
+    
+    associatedtype MinimizedCallViewType: View = MinimizedCallView
+    /// Creates the minimized call view.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in the minimized call view slot.
+    func makeMinimizedCallView(viewModel: CallViewModel) -> MinimizedCallViewType
 
     associatedtype CallTopViewType: View = CallTopView
     /// Creates a view displayed at the top of the call view.
@@ -239,6 +245,10 @@ extension ViewFactory {
 
     public func makeCallView(viewModel: CallViewModel) -> some View {
         CallView(viewFactory: self, viewModel: viewModel)
+    }
+    
+    public func makeMinimizedCallView(viewModel: CallViewModel) -> some View {
+        MinimizedCallView(viewModel: viewModel)
     }
 
     public func makeCallTopView(viewModel: CallViewModel) -> some View {

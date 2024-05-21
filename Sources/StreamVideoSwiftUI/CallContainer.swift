@@ -46,7 +46,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
             if shouldShowCallView {
                 if viewModel.callParticipants.count > 1 {
                     if viewModel.isMinimized {
-                        MinimizedCallView(viewModel: viewModel)
+                        viewFactory.makeMinimizedCallView(viewModel: viewModel)
                     } else {
                         viewFactory.makeCallView(viewModel: viewModel)
                     }
