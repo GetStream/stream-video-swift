@@ -485,6 +485,7 @@ open class CallViewModel: ObservableObject {
         callingState = .idle
         isMinimized = false
         localVideoPrimary = false
+        Task { await audioRecorder.stopRecording() }
     }
     
     private func enterCall(

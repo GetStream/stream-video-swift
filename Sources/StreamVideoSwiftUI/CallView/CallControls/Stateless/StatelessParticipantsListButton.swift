@@ -17,7 +17,7 @@ public struct StatelessParticipantsListButton: View {
     @Injected(\.colors) var colors
 
     /// The associated call for the participants list button.
-    public var call: Call?
+    public weak var call: Call?
 
     /// The size of the participants list button.
     public var size: CGFloat
