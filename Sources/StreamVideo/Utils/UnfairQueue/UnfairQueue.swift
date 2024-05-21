@@ -23,7 +23,7 @@ import Foundation
 /// additional overhead of dispatching tasks and managing thread execution in a DispatchQueue could result
 /// in unnecessary latency, making `os_unfair_lock` the superior choice for scenarios where rapid, lightweight
 /// synchronization is paramount.
-final class UnfairQueue {
+public final class UnfairQueue {
 
     /// The unfair lock variable, managed as an unsafe mutable pointer to `os_unfair_lock`.
     private let lock: os_unfair_lock_t
@@ -31,7 +31,7 @@ final class UnfairQueue {
     /// Initializes a new instance of `UnfairQueue`.
     ///
     /// It allocates memory for an `os_unfair_lock` and initializes it.
-    init() {
+    public init() {
         lock = UnsafeMutablePointer<os_unfair_lock>.allocate(capacity: 1)
         lock.initialize(to: os_unfair_lock())
     }
@@ -49,7 +49,7 @@ final class UnfairQueue {
     /// - Parameter block: The block of code to execute safely under the lock.
     /// - Returns: The value returned by the block, if any.
     /// - Throws: Rethrows any errors that are thrown by the block.
-    func sync<T>(_ block: () throws -> T) rethrows -> T {
+    public func sync<T>(_ block: () throws -> T) rethrows -> T {
         os_unfair_lock_lock(lock)
         defer { os_unfair_lock_unlock(lock) }
         return try block()
