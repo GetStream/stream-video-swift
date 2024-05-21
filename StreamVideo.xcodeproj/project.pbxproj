@@ -345,6 +345,9 @@
 		40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB02022BAC93A800A1C206 /* CallKitAdapter.swift */; };
 		40FB02052BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB02042BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift */; };
 		40FB150A2BF74C1300D5E580 /* CallCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB15092BF74C1300D5E580 /* CallCache.swift */; };
+		40FB150F2BF77CEC00D5E580 /* StreamStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB150E2BF77CEC00D5E580 /* StreamStateMachine.swift */; };
+		40FB15112BF77D5800D5E580 /* Stage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB15102BF77D5800D5E580 /* Stage.swift */; };
+		40FB15212BF78FA100D5E580 /* Publisher+NextValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
 		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
@@ -1342,6 +1345,9 @@
 		40FB02022BAC93A800A1C206 /* CallKitAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAdapter.swift; sourceTree = "<group>"; };
 		40FB02042BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitPushNotificationAdapter.swift; sourceTree = "<group>"; };
 		40FB15092BF74C1300D5E580 /* CallCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCache.swift; sourceTree = "<group>"; };
+		40FB150E2BF77CEC00D5E580 /* StreamStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamStateMachine.swift; sourceTree = "<group>"; };
+		40FB15102BF77D5800D5E580 /* Stage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stage.swift; sourceTree = "<group>"; };
+		40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+NextValue.swift"; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
 		40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+KeyboardIntroduction.swift"; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
@@ -2951,6 +2957,16 @@
 			path = CallCache;
 			sourceTree = "<group>";
 		};
+		40FB150D2BF77CA200D5E580 /* StateMachine */ = {
+			isa = PBXGroup;
+			children = (
+				40FB150E2BF77CEC00D5E580 /* StreamStateMachine.swift */,
+				40FB15102BF77D5800D5E580 /* Stage.swift */,
+				40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */,
+			);
+			path = StateMachine;
+			sourceTree = "<group>";
+		};
 		40FBEF472AC3030C007CFF17 /* UITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -3623,6 +3639,7 @@
 			isa = PBXGroup;
 			children = (
 				403FF3DF2BA1D20E0092CE8A /* UnfairQueue */,
+				40FB150D2BF77CA200D5E580 /* StateMachine */,
 				40FB15082BF74C0A00D5E580 /* CallCache */,
 				40149DCA2B7E813500473176 /* AudioRecorder */,
 				8456E6C7287EC343004E180E /* Logger */,
@@ -4978,8 +4995,10 @@
 				841BAA332BD15CDE000C73E4 /* SFULocationResponse.swift in Sources */,
 				84DC38D129ADFCFD00946713 /* Credentials.swift in Sources */,
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
+				40FB15212BF78FA100D5E580 /* Publisher+NextValue.swift in Sources */,
 				84BAD77C2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift in Sources */,
 				84DC38DB29ADFCFD00946713 /* JSONDataEncoding.swift in Sources */,
+				40FB15112BF77D5800D5E580 /* Stage.swift in Sources */,
 				8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */,
 				8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */,
 				8409465929AF4EEC007AF5BF /* SendReactionResponse.swift in Sources */,
@@ -5186,6 +5205,7 @@
 				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
 				848CCCEE2AB8ED8F002E83A2 /* CallUserMuted.swift in Sources */,
 				435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */,
+				40FB150F2BF77CEC00D5E580 /* StreamStateMachine.swift in Sources */,
 				40CB9FA42B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
 				848CCCE72AB8ED8F002E83A2 /* ThumbnailsSettingsRequest.swift in Sources */,
