@@ -55,6 +55,15 @@ final class AppState: ObservableObject {
 
     var streamVideo: StreamVideo? {
         didSet {
+            if let streamVideo {
+                streamVideoUI = StreamVideoUI(
+                    streamVideo: streamVideo,
+                    utils: UtilsKey.currentValue
+                )
+            } else {
+                streamVideoUI = nil
+            }
+
             didUpdate(pushToken: pushToken)
             didUpdate(voIPPushToken: voIPPushToken, oldValue: nil)
             deferSetDevice = false
@@ -75,6 +84,8 @@ final class AppState: ObservableObject {
             }
         }
     }
+    var streamVideoUI: StreamVideoUI?
+    var streamChatWrapper: DemoChatAdapter?
 
     private var deferSetDevice = false
     private var deferSetVoipDevice = false
@@ -134,8 +145,12 @@ final class AppState: ObservableObject {
         }
         await streamVideo?.disconnect()
         unsecureRepository.removeCurrentUser()
-        streamVideo = nil
+        streamChatWrapper = nil
         userState = .notLoggedIn
+        Task { @MainActor in
+            streamVideo?.release()
+            streamVideo = nil
+        }
     }
 
     func dispatchLogout() {

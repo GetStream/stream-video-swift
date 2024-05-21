@@ -84,12 +84,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             self?.state.update(from: response)
         }
     }
-
-    deinit {
-        cancellables.forEach { $0.cancel() }
-        cancellables.removeAll()
-    }
-
+    
     /// Joins the current call.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.
@@ -381,7 +376,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Sets an`audioFilter` for the current call.
     /// - Parameter audioFilter: An `AudioFilter` instance representing the audio filter to set.
     public func setAudioFilter(_ audioFilter: AudioFilter?) {
-        streamVideo.videoConfig.audioProcessingModule.setAudioFilter(audioFilter)
+        streamVideo.videoConfig.audioProcessingModule?.setAudioFilter(audioFilter)
     }
 
     /// Starts screensharing from the device.
@@ -1204,7 +1199,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             switch value.mode {
             case .available:
                 log.debug("NoiseCancellationSettings updated with mode:\(value.mode).")
-            case .disabled where audioProcessingModule.activeAudioFilter?.id == noiseCancellationFilter.id:
+            case .disabled where audioProcessingModule?.activeAudioFilter?.id == noiseCancellationFilter.id:
                 /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
                 /// audioFilter is currently active.
                 log
@@ -1213,7 +1208,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     )
                 setAudioFilter(nil)
             case .autoOn
-                where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id && streamVideo
+                where audioProcessingModule?.activeAudioFilter?.id != noiseCancellationFilter.id && streamVideo
                     .isHardwareAccelerationAvailable:
                 /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
                 /// available and the noiseCancellation audioFilter isn't already enabled.

@@ -17,15 +17,11 @@ final class Router: ObservableObject {
 
     // MARK: - Properties
 
+    private lazy var deeplinkAdapter = DeeplinkAdapter()
+
     // MARK: Singleton
 
     static let shared = Router(.shared)
-
-    // MARK: Instance
-
-    var streamVideoUI: StreamVideoUI?
-    var streamChatWrapper: DemoChatAdapter?
-    private lazy var deeplinkAdapter = DeeplinkAdapter()
 
     // MARK: Published
 
@@ -77,7 +73,7 @@ final class Router: ObservableObject {
             }
         } else {
             log.debug("Request to handle deeplink \(url) accepted ✅")
-            if streamVideoUI != nil {
+            if appState.streamVideoUI != nil {
                 appState.deeplinkInfo = deeplinkInfo
             } else {
                 Task {
@@ -183,7 +179,7 @@ final class Router: ObservableObject {
         )
 
         if !AppEnvironment.configuration.isTest {
-            streamChatWrapper = .init(user, token: token)
+            appState.streamChatWrapper = .init(user, token: token)
         }
         setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: user)
 
@@ -205,12 +201,10 @@ final class Router: ObservableObject {
         appState.deeplinkInfo = deeplinkInfo
         appState.currentUser = user
         appState.userState = .loggedIn
-        appState.streamVideo = streamVideo
-
         let utils = UtilsKey.currentValue
         utils.userListProvider = appState
-        streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
 
+        appState.streamVideo = streamVideo
         appState.connectUser()
     }
 

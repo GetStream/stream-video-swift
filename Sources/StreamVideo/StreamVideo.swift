@@ -362,6 +362,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         try await coordinatorClient.queryCalls(queryCallsRequest: request)
     }
 
+    public func release() {
+        StreamVideoProviderKey.currentValue = nil
+        StreamActiveCallProviderKey.currentValue = nil
+    }
+
     // MARK: - private
     
     /// Creates a call controller, used for establishing and managing a call.

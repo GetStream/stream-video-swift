@@ -176,7 +176,7 @@ struct DemoNoiseCancellationButtonView: View {
         } else {
             isNoiseCancellationAvailable = false
         }
-        isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule
+        isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule?
             .activeAudioFilter?.id
     }
 
