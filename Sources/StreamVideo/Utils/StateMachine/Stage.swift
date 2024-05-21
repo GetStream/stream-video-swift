@@ -6,7 +6,7 @@ import Foundation
 
 public protocol StateMachineStage: CustomStringConvertible {
     associatedtype ID: Hashable
-    typealias Transition = (Self) -> Void
+    typealias Transition = (Self) throws -> Void
     var id: ID { get }
 
     var transition: Transition? { get set }

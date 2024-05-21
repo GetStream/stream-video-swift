@@ -15,16 +15,15 @@ public final class StreamStateMachine<StageType: StateMachineStage> {
         publisher = .init(initialStage)
     }
 
-    public func transition(to nextStage: StageType) {
-        queue.sync {
+    public func transition(to nextStage: StageType) throws {
+        try queue.sync {
             var nextStage = nextStage
-            nextStage.transition = { [weak self] in self?.transition(to: $0) }
+            nextStage.transition = { [weak self] in try self?.transition(to: $0) }
             guard
                 let newStage = nextStage.transition(from: currentStage),
                 newStage.id.hashValue != currentStage.id.hashValue
             else {
-                log.debug("Cannot transition from \(String(describing: currentStage.description)) → \(nextStage.description)")
-                return
+                throw ClientError.Unexpected("Cannot transition from \(String(describing: currentStage.description)) → \(nextStage.description)")
             }
 
             log.debug("Transition \(String(describing: currentStage.description)) → \(newStage.description)")

@@ -13,6 +13,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.callCache) var callCache
 
+    private lazy var stateMachine: StreamCallStateMachine = .init(self)
+
     @MainActor public internal(set) var state = CallState()
 
     /// The call id.
@@ -104,27 +106,52 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
-        try await executeTask(retryPolicy: .fastAndSimple, task: {
-            let response = try await callController.joinCall(
-                create: create,
-                callType: callType,
-                callId: callId,
-                callSettings: callSettings,
-                options: options,
-                ring: ring,
-                notify: notify
+        let currentStage = stateMachine.currentStage
+        switch currentStage.id {
+        case .joining:
+            break
+        case .joined where currentStage is StreamCallStateMachine.Stage.JoinedStage:
+            let stage = currentStage as! StreamCallStateMachine.Stage.JoinedStage
+            return stage.response
+        default:
+            try stateMachine.transition(
+                .joining(
+                    self,
+                    actionBlock: { [weak self] in
+                        guard let self else { throw ClientError.Unexpected() }
+                        return try await executeTask(retryPolicy: .fastAndSimple, task: { [weak self] in
+                            guard let self else { throw ClientError.Unexpected() }
+                            let response = try await callController.joinCall(
+                                create: create,
+                                callType: callType,
+                                callId: callId,
+                                callSettings: callSettings,
+                                options: options,
+                                ring: ring,
+                                notify: notify
+                            )
+                            if let callSettings {
+                                await state.update(callSettings: callSettings)
+                            }
+                            await state.update(from: response)
+                            let updated = await state.callSettings
+                            updateCallSettingsManagers(with: updated)
+                            Task { @MainActor [weak self] in
+                                self?.streamVideo.state.activeCall = self
+                            }
+                            return response
+                        })
+                    }
+                )
             )
-            if let callSettings {
-                await state.update(callSettings: callSettings)
-            }
-            await state.update(from: response)
-            let updated = await state.callSettings
-            updateCallSettingsManagers(with: updated)
-            Task { @MainActor in
-                streamVideo.state.activeCall = self
-            }
-            return response
-        })
+        }
+
+        return try await stateMachine
+            .nextStageShouldBe(
+                StreamCallStateMachine.Stage.JoinedStage.self,
+                dropFirst: 1
+            )
+            .response
     }
 
     /// Gets the call on the backend with the given parameters.
@@ -230,19 +257,55 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Accepts an incoming call.
     @discardableResult
     public func accept() async throws -> AcceptCallResponse {
-        try await coordinatorClient.acceptCall(type: callType, id: callId)
+        let currentStage = stateMachine.currentStage
+        switch currentStage.id {
+        case .accepting:
+            break
+        case .accepted where currentStage is StreamCallStateMachine.Stage.AcceptedStage:
+            let stage = currentStage as! StreamCallStateMachine.Stage.AcceptedStage
+            return stage.response
+        default:
+            try stateMachine.transition(.accepting(self, actionBlock: { [coordinatorClient, callType, callId] in
+                try await coordinatorClient.acceptCall(type: callType, id: callId)
+            }))
+        }
+
+        return try await stateMachine
+            .nextStageShouldBe(
+                StreamCallStateMachine.Stage.AcceptedStage.self,
+                dropFirst: 1
+            )
+            .response
     }
 
     /// Rejects a call.
     @discardableResult
     public func reject() async throws -> RejectCallResponse {
-        let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
-        if streamVideo.state.ringingCall?.cId == cId {
-            Task { @MainActor in
-                streamVideo.state.ringingCall = nil
-            }
+        let currentStage = stateMachine.currentStage
+        switch currentStage.id {
+        case .rejecting:
+            break
+        case .rejected where currentStage is StreamCallStateMachine.Stage.RejectedStage:
+            let stage = currentStage as! StreamCallStateMachine.Stage.RejectedStage
+            return stage.response
+        default:
+            try stateMachine.transition(.rejecting(self, actionBlock: { [coordinatorClient, callType, callId, streamVideo, cId] in
+                let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
+                if streamVideo.state.ringingCall?.cId == cId {
+                    Task { @MainActor in
+                        streamVideo.state.ringingCall = nil
+                    }
+                }
+                return response
+            }))
         }
-        return response
+
+        return try await stateMachine
+            .nextStageShouldBe(
+                StreamCallStateMachine.Stage.RejectedStage.self,
+                dropFirst: 1
+            )
+            .response
     }
 
     /// Adds the given user to the list of blocked users for the call.
@@ -375,6 +438,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         cancellables.removeAll()
         eventHandlers.removeAll()
         callController.cleanUp()
+        try? stateMachine.transition(.idle(self))
         callCache.removeCall(callType: callType, callId: callId)
         Task { @MainActor in
             if streamVideo.state.ringingCall?.cId == cId {
@@ -417,10 +481,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 && callSettings.audio.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.sendVideo.rawValue
-                && callSettings.video.accessRequestEnabled == false {
+                        && callSettings.video.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.screenshare.rawValue
-                && callSettings.screensharing.accessRequestEnabled == false {
+                        && callSettings.screensharing.accessRequestEnabled == false {
                 return false
             }
         }
@@ -1150,7 +1214,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 setAudioFilter(nil)
             case .autoOn
                 where audioProcessingModule.activeAudioFilter?.id != noiseCancellationFilter.id && streamVideo
-                .isHardwareAccelerationAvailable:
+                    .isHardwareAccelerationAvailable:
                 /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
                 /// available and the noiseCancellation audioFilter isn't already enabled.
                 log
