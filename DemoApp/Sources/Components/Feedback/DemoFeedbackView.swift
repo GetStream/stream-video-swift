@@ -17,7 +17,7 @@ struct DemoFeedbackView: View {
     @State private var rating: Int = 1
     @State private var isSubmitting = false
 
-    private var call: Call
+    private weak var call: Call?
     private var dismiss: () -> Void
     private var isSubmitEnabled: Bool { !email.isEmpty && !isSubmitting }
 
@@ -84,7 +84,7 @@ struct DemoFeedbackView: View {
                         isSubmitting = true
                         Task {
                             do {
-                                try await call.collectUserFeedback(
+                                try await call?.collectUserFeedback(
                                     rating: rating,
                                     reason: """
                                     \(email)
