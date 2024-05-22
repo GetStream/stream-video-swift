@@ -10,14 +10,6 @@ import Foundation
 /// facilitating VoIP calls in an application.
 open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
-    /// Represents the state of a call.
-    @available(
-        *,
-        deprecated,
-        message: "State has been deprecated as CallKitService doesn't provide information regarding the call state."
-    )
-    public enum State { case idle, joining, inCall }
-
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
         var call: Call
