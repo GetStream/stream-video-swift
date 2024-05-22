@@ -23,8 +23,10 @@ final class CallCache {
     ) -> Call {
         queue.sync {
             if let cached = storage[cId] {
+                log.debug("Will reuse call:\(cId).")
                 return cached
             } else {
+                log.debug("Will create and cache call:\(cId)")
                 let call = factory()
                 storage[cId] = call
                 return call
@@ -37,6 +39,7 @@ final class CallCache {
     /// - Parameters:
     ///   - cId: The ``cID`` of the call.
     func remove(for cId: String) {
+        log.debug("Will remove call:\(cId)")
         queue.sync {
             storage[cId] = nil
         }
@@ -44,6 +47,7 @@ final class CallCache {
 
     func removeAll() {
         queue.sync {
+            log.debug("Will remove \(storage.count) calls.")
             storage.removeAll()
         }
     }

@@ -15,7 +15,7 @@ public struct StatelessHangUpIconView: View {
     @Injected(\.images) private var images
 
     /// The associated call for the hang-up icon.
-    public var call: Call?
+    public weak var call: Call?
 
     /// The size of the hang-up icon.
     public var size: CGFloat

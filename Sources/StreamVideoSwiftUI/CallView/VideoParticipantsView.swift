@@ -338,8 +338,8 @@ public struct VideoCallParticipantView: View {
                 showVideo: showVideo && isVisible,
                 handleRendering: { [weak call] view in
                     guard call != nil else { return }
-                    view.handleViewRendering(for: participant) { size, participant in
-                        Task {
+                    view.handleViewRendering(for: participant) { [weak call] size, participant in
+                        Task { [weak call] in
                             await call?.updateTrackSize(size, for: participant)
                         }
                     }
