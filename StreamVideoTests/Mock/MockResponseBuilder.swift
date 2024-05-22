@@ -52,19 +52,19 @@ class MockResponseBuilder {
             cid: cid,
             createdAt: Date(),
             createdBy: userResponse,
-            currentSessionId: "123",
+            currentSessionId: String(cid.split(separator: ":")[1]),
             custom: [:],
             egress: EgressResponse(
                 broadcasting: false,
                 rtmps: []
             ),
-            id: "123",
+            id: String(cid.split(separator: ":")[1]),
             ingress: callIngressResponse,
             recording: recording,
             session: session,
             settings: makeCallSettingsResponse(),
             transcribing: false,
-            type: "default",
+            type: String(cid.split(separator: ":")[0]),
             updatedAt: Date()
         )
         return callResponse
