@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+
+# [1.0.3](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.3)
+_May 22, 2024_
+
+### 🔄 Changed
 - `Call` objects for the same `cId` will reference the same memory instance. [#404](https://github.com/GetStream/stream-video-swift/pull/404)
 - `CallKitService.callEnded` now accepts the cId of the call to end. [#406](https://github.com/GetStream/stream-video-swift/pull/406)
 - `CallKitService.State` has been deprecated. [#406](https://github.com/GetStream/stream-video-swift/pull/406)
