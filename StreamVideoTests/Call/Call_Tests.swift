@@ -303,6 +303,34 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertTrue(Int(duration) >= 1)
     }
 
+    // MARK: - join
+
+    func test_join_callControllerWasCalledOnlyOnce() async throws {
+        LogConfig.level = .debug
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init())
+        mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+
+        let executionExpectation = expectation(description: "Iteration expectation")
+        executionExpectation.expectedFulfillmentCount = 10
+
+        for _ in (0..<10) {
+            Task {
+                do {
+                    _ = try await call.join()
+                } catch {
+                    log.error(error)
+                }
+                executionExpectation.fulfill()
+            }
+        }
+
+        await safeFulfillment(of: [executionExpectation], timeout: defaultTimeout)
+
+        XCTAssertEqual(mockCallController.timesJoinWasCalled, 1)
+    }
+
     // MARK: - Private helpers
 
     private func assertUpdateState(
@@ -334,5 +362,69 @@ private struct UpdateStateStep {
     ) {
         self.event = event
         validation = { $0[keyPath: keyPath] == expected }
+    }
+}
+
+private final class MockCallController: CallController, Mockable {
+    typealias FunctionKey = MockFunctionKey
+
+    enum MockFunctionKey: Hashable {
+        case join
+    }
+
+    var joinError: Error?
+    var timesJoinWasCalled: Int = 0
+    var stubbedProperty: [String: Any] = [:]
+    var stubbedFunction: [FunctionKey: Any] = [:]
+
+    convenience init() {
+        self.init(
+            defaultAPI: .dummy(),
+            user: .dummy(),
+            callId: .unique,
+            callType: .unique,
+            apiKey: .unique,
+            videoConfig: .dummy(),
+            cachedLocation: nil
+        )
+    }
+
+    func stub<T>(for keyPath: KeyPath<MockCallController, T>, with value: T) {
+        stubbedProperty[propertyKey(for: keyPath)] = value
+    }
+
+    func stub<T>(for function: FunctionKey, with value: T) {
+        stubbedFunction[function] = value
+    }
+
+    override func joinCall(
+        create: Bool = true,
+        callType: String,
+        callId: String,
+        callSettings: CallSettings?,
+        options: CreateCallOptions? = nil,
+        migratingFrom: String? = nil,
+        sessionID: String? = nil,
+        ring: Bool = false,
+        notify: Bool = false
+    ) async throws -> JoinCallResponse {
+        timesJoinWasCalled += 1
+        if let stub = stubbedFunction[.join] as? JoinCallResponse {
+            return stub
+        } else if let joinError {
+            throw joinError
+        } else {
+            return try await super.joinCall(
+                create: create,
+                callType: callType,
+                callId: callId,
+                callSettings: callSettings,
+                options: options,
+                migratingFrom: migratingFrom,
+                sessionID: sessionID,
+                ring: ring,
+                notify: notify
+            )
+        }
     }
 }

@@ -64,6 +64,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             initialAudioOutputStatus: .enabled
         )
         self.callController.call = self
+        // It's important to instantiate the stateMachine as soon as possible
+        // to ensure it's uniqueness.
+        _ = stateMachine
         subscribeToLocalCallSettingsChanges()
         subscribeToNoiseCancellationSettingsChanges()
         subscribeToTranscriptionSettingsChanges()
