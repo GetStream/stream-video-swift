@@ -4,17 +4,24 @@
 
 import Foundation
 
+/// A cache for managing `Call` instances, ensuring thread-safe operations.
 final class CallCache {
+    /// A queue for synchronizing access to the cache.
     private let queue = UnfairQueue()
+    /// The underlying storage for cached calls.
     private var storage: [String: Call] = [:]
 
-    func getCall(
-        callType: String,
-        callId: String,
+    /// Dequeues a `Call` from the cache or creates a new one using the provided factory.
+    ///
+    /// - Parameters:
+    ///   - cId: The ``cId`` of the call.
+    ///   - factory: A closure that creates a new `Call` instance if none exists in the cache.
+    /// - Returns: A `Call` instance, either from the cache or newly created.
+    func call(
+        for cId: String,
         factory: () -> Call
     ) -> Call {
-        let cId = callCid(from: callType, callType: callId)
-        return queue.sync {
+        queue.sync {
             if let cached = storage[cId] {
                 return cached
             } else {
@@ -25,8 +32,11 @@ final class CallCache {
         }
     }
 
-    func removeCall(callType: String, callId: String) {
-        let cId = callCid(from: callType, callType: callId)
+    /// Remove a `Call` from the cache.
+    ///
+    /// - Parameters:
+    ///   - cId: The ``cID`` of the call.
+    func remove(for cId: String) {
         queue.sync {
             storage[cId] = nil
         }

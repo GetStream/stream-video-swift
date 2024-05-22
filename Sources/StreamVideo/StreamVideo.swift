@@ -192,7 +192,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         callType: String,
         callId: String
     ) -> Call {
-        callCache.getCall(callType: callType, callId: callId) {
+        callCache.call(for: callCid(from: callType, callType: callId)) {
             let callController = makeCallController(callType: callType, callId: callId)
             let call = Call(
                 callType: callType,

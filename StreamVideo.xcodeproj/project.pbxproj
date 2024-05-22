@@ -100,6 +100,7 @@
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
 		403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403EFCA02BDC003A0057C248 /* DemoFeedbackView.swift */; };
+		403FB1492BFDF3950047A696 /* CallCache_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FB1482BFDF3950047A696 /* CallCache_Tests.swift */; };
 		403FF3E72BA1D2D40092CE8A /* StreamPixelBufferRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E32BA1D2460092CE8A /* StreamPixelBufferRepository.swift */; };
 		403FF3E82BA1D2D70092CE8A /* StreamPixelBufferPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E52BA1D2610092CE8A /* StreamPixelBufferPool.swift */; };
 		403FF3F32BA1DC650092CE8A /* StreamRTCYUVBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3EA2BA1D2F90092CE8A /* StreamRTCYUVBuffer.swift */; };
@@ -1176,6 +1177,7 @@
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
 		403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEndedViewModifier.swift; sourceTree = "<group>"; };
 		403EFCA02BDC003A0057C248 /* DemoFeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoFeedbackView.swift; sourceTree = "<group>"; };
+		403FB1482BFDF3950047A696 /* CallCache_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCache_Tests.swift; sourceTree = "<group>"; };
 		403FF3E02BA1D21E0092CE8A /* UnfairQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfairQueue.swift; sourceTree = "<group>"; };
 		403FF3E32BA1D2460092CE8A /* StreamPixelBufferRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPixelBufferRepository.swift; sourceTree = "<group>"; };
 		403FF3E52BA1D2610092CE8A /* StreamPixelBufferPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPixelBufferPool.swift; sourceTree = "<group>"; };
@@ -3194,6 +3196,7 @@
 				84D6E5392B3AD10000D0056C /* RepeatingTimer_Tests.swift */,
 				4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */,
 				40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */,
+				403FB1482BFDF3950047A696 /* CallCache_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -5295,6 +5298,7 @@
 				40F017652BBEF1A200E89FD1 /* RTMPIngress+Dummy.swift in Sources */,
 				84DCA2112A389160000C3411 /* AssertDelay.swift in Sources */,
 				40F0173B2BBEB1A900E89FD1 /* CallKitAdapterTests.swift in Sources */,
+				403FB1492BFDF3950047A696 /* CallCache_Tests.swift in Sources */,
 				40A0E9642B88DE830089E8D3 /* SerialActor_Tests.swift in Sources */,
 				40F017692BBEF1DA00E89FD1 /* EgressHLSResponse+Dummy.swift in Sources */,
 				84F58B8B29EEACAD00010C4C /* WebSocketEngine_Mock.swift in Sources */,
