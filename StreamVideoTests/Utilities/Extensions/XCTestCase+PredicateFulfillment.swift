@@ -8,7 +8,7 @@ import XCTest
 extension XCTestCase {
 
     func fulfillment(
-        timeout: TimeInterval = .infinity,
+        timeout: TimeInterval = defaultTimeout,
         enforceOrder: Bool = false,
         block: @escaping () -> Bool,
         file: StaticString = #file,

@@ -7,6 +7,16 @@ import XCTest
 
 final class StreamVideo_Tests: StreamVideoTestCase {
 
+    private lazy var callId: String! = String(String.unique.prefix(10))
+    private lazy var callType: String! = .default
+    private var cId: String { callCid(from: callId, callType: callType) }
+
+    override func tearDown() {
+        callId = nil
+        callType = nil
+        super.tearDown()
+    }
+
     func test_streamVideo_anonymousConnectError() async throws {
         // Given
         let streamVideo = StreamVideo(
@@ -16,7 +26,8 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             videoConfig: .dummy(),
             tokenProvider: { _ in }
         )
-        
+        self.streamVideo = streamVideo
+
         // Then
         do {
             try await streamVideo.connect()
@@ -35,21 +46,23 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             videoConfig: .dummy(),
             tokenProvider: { _ in }
         )
-        
+        self.streamVideo = streamVideo
+
         // When
-        let call = streamVideo.call(callType: .default, callId: "123")
-        
+        let call = streamVideo.call(callType: callType, callId: callId)
+
         // Then
-        XCTAssert(call.cId == "default:123")
-        XCTAssert(call.callType == .default)
-        XCTAssert(call.callId == "123")
+        XCTAssert(call.cId == cId)
+        XCTAssert(call.callType == callType)
+        XCTAssert(call.callId == callId)
     }
 
     func test_streamVideo_activeCallAndLeave() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        let call = streamVideo.call(callType: .default, callId: "123")
-        
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
+
         // When
         try await call.join()
 
@@ -70,8 +83,9 @@ final class StreamVideo_Tests: StreamVideoTestCase {
     func test_streamVideo_ringCallAccept() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
-        let call = streamVideo.call(callType: .default, callId: "123")
-        
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
+
         // When
         try await call.ring()
         await fulfillment {
@@ -86,7 +100,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         // When
         let callAcceptedEvent = CallAcceptedEvent(
             call: makeCallResponse(),
-            callCid: "123",
+            callCid: cId,
             createdAt: Date(),
             user: makeUserResponse()
         )
@@ -109,8 +123,9 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         let data = try! JSONEncoder.default.encode(rejectCallResponse)
         httpClient.dataResponses.append(data)
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
-        let call = streamVideo.call(callType: .default, callId: "123")
-        
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
+
         // When
         try await call.ring()
         await fulfillment {
@@ -137,15 +152,16 @@ final class StreamVideo_Tests: StreamVideoTestCase {
     func test_streamVideo_incomingCallAccept() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
-        let call = streamVideo.call(callType: .default, callId: "123")
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
 
         // When
         let ringEvent = CallRingEvent(
             call: makeCallResponse(),
-            callCid: "default:123",
+            callCid: cId,
             createdAt: Date(),
             members: [],
-            sessionId: "123",
+            sessionId: callId,
             user: makeUserResponse()
         )
         let incomingCall = WrappedEvent.coordinatorEvent(.typeCallRingEvent(ringEvent))
@@ -174,15 +190,16 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         let data = try! JSONEncoder().encode(RejectCallResponse(duration: "1"))
         httpClient.dataResponses = [data]
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
-        let call = streamVideo.call(callType: .default, callId: "123")
+        self.streamVideo = streamVideo
+        let call = streamVideo.call(callType: callType, callId: callId)
 
         // When
         let ringEvent = CallRingEvent(
             call: makeCallResponse(),
-            callCid: "default:123",
+            callCid: cId,
             createdAt: Date(),
             members: [],
-            sessionId: "123",
+            sessionId: callId,
             user: makeUserResponse()
         )
         let incomingCall = WrappedEvent.coordinatorEvent(.typeCallRingEvent(ringEvent))
@@ -194,8 +211,8 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         }
 
         // Then
-        XCTAssert(streamVideo.state.activeCall == nil)
-        XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
+        XCTAssertNil(streamVideo.state.activeCall)
+        XCTAssertEqual(streamVideo.state.ringingCall?.cId, call.cId)
 
         // When
         try await call.reject()
@@ -205,8 +222,8 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         }
 
         // Then
-        XCTAssert(streamVideo.state.ringingCall == nil)
-        XCTAssert(streamVideo.state.activeCall == nil)
+        XCTAssertNil(streamVideo.state.ringingCall)
+        XCTAssertNil(streamVideo.state.activeCall)
     }
     
     func test_streamVideo_initialState() {
@@ -227,7 +244,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
     // MARK: - private
     
     private func makeCallResponse() -> CallResponse {
-        let callResponse = MockResponseBuilder().makeCallResponse(cid: "default:123")
+        let callResponse = MockResponseBuilder().makeCallResponse(cid: cId)
         return callResponse
     }
     

@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+- `Call` objects for the same `cId` will reference the same memory instance. [#404](https://github.com/GetStream/stream-video-swift/pull/404)
+
 ### 🐞 Fixed
 - Video tracks for anonymous users not displaying
 

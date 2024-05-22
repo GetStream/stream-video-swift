@@ -11,6 +11,7 @@ import StreamWebRTC
 public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.callCache) var callCache
 
     @MainActor public internal(set) var state = CallState()
 
@@ -374,6 +375,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         cancellables.removeAll()
         eventHandlers.removeAll()
         callController.cleanUp()
+        /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
+        /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
+        /// client.
+        callCache.remove(for: cId)
         Task { @MainActor in
             if streamVideo.state.ringingCall?.cId == cId {
                 streamVideo.state.ringingCall = nil
