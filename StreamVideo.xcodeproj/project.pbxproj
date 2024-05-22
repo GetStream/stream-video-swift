@@ -209,6 +209,8 @@
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
+		4097B37E2BF4B06A0057992D /* GetCallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097B37D2BF4B06A0057992D /* GetCallResponse+Dummy.swift */; };
+		4097B3802BF4B0850057992D /* MockCXProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097B37F2BF4B0850057992D /* MockCXProvider.swift */; };
 		4097B3832BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097B3822BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift */; };
 		409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
@@ -1276,6 +1278,8 @@
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
+		4097B37D2BF4B06A0057992D /* GetCallResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GetCallResponse+Dummy.swift"; sourceTree = "<group>"; };
+		4097B37F2BF4B0850057992D /* MockCXProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCXProvider.swift; sourceTree = "<group>"; };
 		4097B3822BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnChangeViewModifier_iOS13.swift; sourceTree = "<group>"; };
 		409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+PredicateFulfillment.swift"; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
@@ -2803,6 +2807,7 @@
 			children = (
 				40F017382BBEAF6400E89FD1 /* MockCallKitService.swift */,
 				40F0173F2BBEBC6500E89FD1 /* MockCallKitPushNotificationAdapter.swift */,
+				4097B37F2BF4B0850057992D /* MockCXProvider.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -2860,6 +2865,7 @@
 				40F0174A2BBEEFB200E89FD1 /* VideoSettings+Dummy.swift */,
 				40F017742BBEF3E700E89FD1 /* CallRejectedEvent+Dummy.swift */,
 				40F017762BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift */,
+				4097B37D2BF4B06A0057992D /* GetCallResponse+Dummy.swift */,
 			);
 			path = Dummy;
 			sourceTree = "<group>";
@@ -5414,6 +5420,7 @@
 				841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */,
 				40F017452BBEEE6D00E89FD1 /* UserResponse+Dummy.swift in Sources */,
 				40F017422BBEC81C00E89FD1 /* CallKitServiceTests.swift in Sources */,
+				4097B3802BF4B0850057992D /* MockCXProvider.swift in Sources */,
 				40F0175D2BBEF0E200E89FD1 /* BackstageSettings+Dummy.swift in Sources */,
 				8490032F29D6D00C00AD9BB4 /* CallController_Mock.swift in Sources */,
 				842747F829EEEB8200E063AD /* EventNotificationCenter_Tests.swift in Sources */,
@@ -5448,6 +5455,7 @@
 				4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */,
 				84F58B8529EEABC100010C4C /* EventDecoder_Mock.swift in Sources */,
 				8414081129F284A800FF2D7C /* AssertJSONEqual.swift in Sources */,
+				4097B37E2BF4B06A0057992D /* GetCallResponse+Dummy.swift in Sources */,
 				846D16292A52F3A10036CE4C /* MicrophoneManager_Tests.swift in Sources */,
 				40F017492BBEEF8100E89FD1 /* TargetResolution+Dummy.swift in Sources */,
 				8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */,

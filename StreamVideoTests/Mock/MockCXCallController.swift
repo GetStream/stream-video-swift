@@ -8,6 +8,8 @@ import Foundation
 final class MockCXCallController: CXCallController {
     private(set) var requestWasCalledWith: (CXTransaction, (Error?) -> Void)?
 
+    func reset() { requestWasCalledWith = nil }
+
     override func request(
         _ transaction: CXTransaction,
         completion: @escaping ((any Error)?) -> Void

@@ -24,7 +24,6 @@
       "identifier" : "84F737F3287C13AD00A363F4",
       "name" : "StreamVideoTests"
     },
-    "testRepetitionMode" : "retryOnFailure",
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
