@@ -27,10 +27,10 @@ public final class VideoConfig: Sendable {
     public init(
         videoFilters: [VideoFilter] = [],
         noiseCancellationFilter: NoiseCancellationFilter? = nil,
-        audioProcessingModule: AudioProcessingModule = StreamAudioFilterProcessingModule()
+        audioProcessingModule: AudioProcessingModule? = nil
     ) {
         self.videoFilters = videoFilters
         self.noiseCancellationFilter = noiseCancellationFilter
-        self.audioProcessingModule = audioProcessingModule
+        self.audioProcessingModule = audioProcessingModule ?? InjectedValues[\.audioFilterProcessingModule]
     }
 }
