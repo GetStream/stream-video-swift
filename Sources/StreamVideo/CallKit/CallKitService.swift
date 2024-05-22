@@ -232,7 +232,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimerCancellable = nil
 
         guard state != .inCall else {
-            action.fulfill()
+            action.fail()
             return
         }
 
@@ -244,19 +244,27 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         Task { @MainActor in
             state = .joining
+            log.debug("Answering VoIP incoming call with callId:\(callId) callType:\(callType).")
+            let call = streamVideo.call(callType: callType, callId: callId)
+
             do {
-                log.debug("Answering VoIP incoming call with callId:\(callId) callType:\(callType).")
-                call = streamVideo.call(callType: callType, callId: callId)
-                try await call?.join()
-                try await call?.accept()
+                try await call.accept()
+            } catch {
+                log.error(error)
+            }
+
+            do {
+                try await call.join()
                 self.call = call
                 state = .inCall
                 action.fulfill()
             } catch {
-                call?.leave()
-                call = nil
+                log.error(error)
+                self.call?.leave()
+                self.call = nil
                 state = .idle
                 log.error(error)
+                action.fail()
             }
         }
     }

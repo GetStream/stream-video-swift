@@ -61,6 +61,16 @@ final class MockCall: Call, Mockable {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
-        stubbedFunction[.join] as! JoinCallResponse
+        if let stub = stubbedFunction[.join] as? JoinCallResponse {
+            return stub
+        } else {
+            return try await super.join(
+                create: create,
+                options: options,
+                ring: ring,
+                notify: notify,
+                callSettings: callSettings
+            )
+        }
     }
 }
