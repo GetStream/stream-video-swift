@@ -420,9 +420,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         let webSocketClient = environment.webSocketClientBuilder(eventNotificationCenter, url)
         
         webSocketClient.connectionStateDelegate = self
-        webSocketClient.onWSConnectionEstablished = { [weak self] in
-            guard let self = self else { return }
-            
+        webSocketClient.onWSConnectionEstablished = { [weak self, weak webSocketClient] in
+            guard let self = self, let webSocketClient else { return }
+
             let connectUserRequest = ConnectUserDetailsRequest(
                 custom: self.user.customData,
                 id: self.user.id,
@@ -654,7 +654,8 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            executeOnMain {
+            executeOnMain { [weak self, call] in
+                guard let self else { return }
                 call.state.update(from: ringEvent)
                 self.state.ringingCall = call
             }

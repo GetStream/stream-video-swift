@@ -347,9 +347,10 @@ class CallController: @unchecked Sendable {
         call = nil
         statsCancellable?.cancel()
         statsCancellable = nil
-        Task {
-            await webRTCClient?.cleanUp()
-            webRTCClient = nil
+        let _webRTCClient = webRTCClient
+        webRTCClient = nil
+        Task { [weak _webRTCClient] in
+            await _webRTCClient?.cleanUp()
         }
     }
     

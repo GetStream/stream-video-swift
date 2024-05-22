@@ -28,7 +28,7 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
     private lazy var videoOutput: AVCaptureVideoDataOutput = .init()
     private var state = State()
 
-    var call: Call? {
+    weak var call: Call? {
         didSet {
             guard call?.cId != oldValue?.cId else { return }
             do {

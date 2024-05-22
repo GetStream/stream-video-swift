@@ -13,7 +13,19 @@ private final class CallEndedViewModifierViewModel: ObservableObject {
 
     @Published var activeCall: Call?
     @Published var lastCall: Call?
-    @Published var isPresentingSubview: Bool = false
+    @Published var isPresentingSubview: Bool = false {
+        didSet {
+            switch (isPresentingSubview, oldValue) {
+            case (false, true):
+                // The order matters here as it triggers the publisher on the View
+                lastCall = nil
+                activeCall = nil
+            default:
+                break
+            }
+        }
+    }
+
     @Published var maxParticipantsCount: Int = 0
 
     private var observationCancellable: AnyCancellable?
@@ -53,7 +65,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
                     viewModel.isPresentingSubview = false
                 }
             }
-            .onReceive(viewModel.$activeCall) { call in
+            .onReceive(viewModel.$activeCall.removeDuplicates { $0?.cId == $1?.cId }) { call in
                 log
                     .debug(
                         "CallEnded view modifier received newValue:\(call?.cId ?? "nil") oldValue:\(viewModel.lastCall?.cId ?? "nil") isPresentingSubview:\(viewModel.isPresentingSubview) maxParticipantsCount:\(viewModel.maxParticipantsCount)."
