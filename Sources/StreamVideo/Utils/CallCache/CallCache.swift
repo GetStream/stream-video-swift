@@ -41,6 +41,12 @@ final class CallCache {
             storage[cId] = nil
         }
     }
+
+    func removeAll() {
+        queue.sync {
+            storage.removeAll()
+        }
+    }
 }
 
 extension CallCache: InjectionKey {

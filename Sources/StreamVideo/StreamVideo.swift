@@ -145,14 +145,21 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         // This is used from the `StreamCallAudioRecorder` to observe active
         // calls and activate/deactivate the AudioSession.
         StreamActiveCallProviderKey.currentValue = self
+
+        // Clear up the call cache to avoid stale call objects.
+        callCache.removeAll()
+
         (apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
             self?.token = userToken
         }
         if user.type != .anonymous {
-            let userAuth = UserAuth { [unowned self] in
-                self.token.rawValue
-            } connectionId: { [unowned self] in
-                await self.loadConnectionId()
+            let userAuth = UserAuth { [weak self] in
+                self?.token.rawValue ?? ""
+            } connectionId: { [weak self] in
+                guard let self else {
+                    throw ClientError.Unexpected()
+                }
+                return await self.loadConnectionId()
             }
             coordinatorClient.middlewares.append(userAuth)
         } else {
