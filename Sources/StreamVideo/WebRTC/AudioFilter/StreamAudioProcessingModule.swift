@@ -17,6 +17,10 @@ public protocol AudioProcessingModule: RTCAudioProcessingModule, Sendable {
 }
 
 /// A custom audio processing module that integrates with an audio filter for stream processing.
+///
+/// - Important: It seems that ``RTCDefaultAudioProcessingModule`` has a bug on release
+/// which causes a crash. As a workaround for now we create and instance of
+/// ``StreamAudioFilterProcessingModule`` and cache it in the `InjectedValues` for reuse.
 open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, AudioProcessingModule, @unchecked Sendable {
 
     private let _capturePostProcessingDelegate: AudioFilterCapturePostProcessingModule
@@ -43,11 +47,7 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
             renderPreProcessingDelegate: renderPreProcessingDelegate
         )
     }
-
-    deinit {
-        _capturePostProcessingDelegate.audioProcessingRelease()
-    }
-
+    
     override public func apply(_ config: RTCAudioProcessingConfig) {
         super.apply(config)
     }
@@ -61,5 +61,16 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
     /// - Parameter filter: The audio filter to set.
     public func setAudioFilter(_ filter: AudioFilter?) {
         _capturePostProcessingDelegate.setAudioFilter(filter)
+    }
+}
+
+enum AudioProcessingModuleKey: InjectionKey {
+    public static var currentValue: AudioProcessingModule = StreamAudioFilterProcessingModule()
+}
+
+extension InjectedValues {
+    var audioFilterProcessingModule: AudioProcessingModule {
+        get { Self[AudioProcessingModuleKey.self] }
+        set { Self[AudioProcessingModuleKey.self] = newValue }
     }
 }
