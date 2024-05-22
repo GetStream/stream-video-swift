@@ -26,7 +26,13 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         private var scheduledUpdate = false
         private var cancellables = Set<AnyCancellable>()
         private(set) var lastUpdate: TimeInterval = Date().timeIntervalSince1970
-        var connectionState = ConnectionState.disconnected(reason: nil)
+        var connectionState = ConnectionState.disconnected(reason: nil) {
+            didSet {
+                if connectionState == .connected {
+                    continuation?.yield([true])
+                }
+            }
+        }
         @Published var callParticipants = [String: CallParticipant]() {
             didSet {
                 if !scheduledUpdate {
