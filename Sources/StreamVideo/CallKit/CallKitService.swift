@@ -10,6 +10,14 @@ import Foundation
 /// facilitating VoIP calls in an application.
 open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
+    /// Represents the state of a call.
+    @available(
+        *,
+        deprecated,
+        message: "State has been deprecated as CallKitService doesn't provide information regarding the call state."
+    )
+    public enum State { case idle, joining, inCall }
+
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
         var call: Call
@@ -55,7 +63,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// The call provider responsible for handling call-related actions.
     open internal(set) lazy var callProvider = buildProvider()
 
-    private var storage: [UUID: CallEntry] = [:]
+    private(set) var storage: [UUID: CallEntry] = [:]
     private var active: UUID?
 
     private var ringingTimer: Foundation.Timer?
@@ -229,7 +237,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         /// We listen for the event so in the case we are the only ones remaining
         /// in the call, we leave.
         Task { @MainActor in
-            if let call = storage.first(where: { $0.value.call.cId == response.callCid })?.value.call, call.state.participants.count == 1 {
+            if let call = storage.first(where: { $0.value.call.cId == response.callCid })?.value.call,
+               call.state.participants.count == 1 {
                 callEnded(response.callCid)
             }
         }
