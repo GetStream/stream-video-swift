@@ -14,7 +14,7 @@ struct DemoFeedbackView: View {
 
     @State private var email: String = ""
     @State private var comment: String = ""
-    @State private var rating: Int = 1
+    @State private var rating: Int = 5
     @State private var isSubmitting = false
 
     private weak var call: Call?
