@@ -15,8 +15,8 @@ final class VideoRendererPool {
 
     /// Initializes the `VideoRendererPool` with a specified initial capacity.
     ///
-    /// - Parameter initialCapacity: The initial capacity of the pool (default is 10).
-    init(initialCapacity: Int = 10) {
+    /// - Parameter initialCapacity: The initial capacity of the pool (default is 2).
+    init(initialCapacity: Int = 2) {
         // Initialize the pool with a capacity and a factory closure to create `VideoRenderer` instances
         pool = ReusePool(initialCapacity: initialCapacity) {
             VideoRenderer(frame: CGRect(origin: .zero, size: .zero))
@@ -43,7 +43,7 @@ final class VideoRendererPool {
     ///
     /// - Parameter renderer: The `VideoRenderer` instance to release.
     func releaseRenderer(_ renderer: VideoRenderer) {
-        pool.release(renderer)
+        pool.release(renderer, replaceAvailableElementWithNew: true)
     }
 }
 

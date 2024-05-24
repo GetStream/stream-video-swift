@@ -345,6 +345,7 @@ public struct VideoCallParticipantView: View {
                     }
                 }
             )
+            .id(participant.id)
         }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
