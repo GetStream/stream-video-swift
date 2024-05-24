@@ -65,6 +65,43 @@ final class ReusePoolTests: XCTestCase {
         XCTAssertNotNil(object7)
     }
 
+    func test_acquireAndReleaseWithReplace() {
+        // Acquire objects from the pool and then release them
+        let object1 = subject.acquire()
+        let object2 = subject.acquire()
+
+        XCTAssertNotNil(object1)
+        XCTAssertNotNil(object2)
+        XCTAssertNotEqual(object1, object2)
+
+        subject.release(object2, replaceAvailableElementWithNew: true)
+        subject.release(object1, replaceAvailableElementWithNew: true)
+
+        // After releasing, these objects should be available for reuse
+        let object3 = subject.acquire()
+        let object4 = subject.acquire()
+
+        XCTAssertNotNil(object3)
+        XCTAssertNotNil(object4)
+        XCTAssertFalse(object1 === object3) // Reused object
+        XCTAssertFalse(object2 === object4) // Reused object
+
+        // Now, the pool should be at initial capacity
+        let object5 = subject.acquire()
+        XCTAssertNotNil(object5)
+
+        // Try to acquire more than the initial capacity
+        let object6 = subject.acquire()
+        XCTAssertNotNil(object6)
+
+        // Release all objects
+        subject.releaseAll()
+
+        // After releasing all, all objects should be back in the pool
+        let object7 = subject.acquire()
+        XCTAssertNotNil(object7)
+    }
+
     func test_exceedCapacity() {
         // Acquire objects up to the initial capacity
         let objects = (0..<3).map { _ in subject.acquire() }

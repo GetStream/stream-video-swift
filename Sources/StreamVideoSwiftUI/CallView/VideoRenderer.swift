@@ -194,7 +194,7 @@ public class VideoRenderer: RTCMTLVideoView {
         if newSuperview == nil {
             videoRendererPool.releaseRenderer(self)
             // Clean up any rendered frames.
-            renderFrame(nil)
+            setSize(.zero)
         }
     }
 }

@@ -60,12 +60,16 @@ final class ReusePool<Element: AnyObject & Hashable> {
 
     /// Releases an element back to the pool for reuse.
     ///
-    /// - Parameter element: The element to release.
-    func release(_ element: Element) {
+    /// - Parameters:
+    ///   - element: The element to release.
+    ///   - replaceAvailableElementWithNew: If set to `true` rather than moving the item to
+    ///   available, it will throw it away and instead place a newly created element in `available` storage.
+    ///   Defaults to `false`.
+    func release(_ element: Element, replaceAvailableElementWithNew: Bool = false) {
         queue.sync {
             if inUse.contains(element), available.endIndex < initialCapacity {
                 inUse.remove(element)
-                available.append(element)
+                available.append(replaceAvailableElementWithNew ? factory() : element)
                 log.debug("Will make available \(type(of: element)):\(String(describing: element)).")
             } else {
                 inUse.remove(element)
