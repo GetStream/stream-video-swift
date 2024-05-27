@@ -67,6 +67,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
 
     // MARK: - pushRegistry(_:didReceiveIncomingPushWith:for:completion:)
 
+    @MainActor
     func test_pushRegistryDidReceiveIncomingPush_typeIsVoIP_reportIncomingCallWasCalledAsExpected() {
         assertDidReceivePushNotification(
             .init(
@@ -77,6 +78,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_pushRegistryDidReceiveIncomingPush_typeIsVoIPWithDisplayNameAndCallerName_reportIncomingCallWasCalledAsExpected() {
         assertDidReceivePushNotification(
             .init(
@@ -88,6 +90,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_pushRegistryDidReceiveIncomingPush_typeIsNotVoIP_reportIncomingCallWasNotCalled() {
         assertDidReceivePushNotification(contentType: .fileProvider)
     }
@@ -108,6 +111,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
         )
     }
 
+    @MainActor
     private func assertDidReceivePushNotification(
         _ content: CallKitPushNotificationAdapter.Content? = nil,
         contentType: PKPushType = .voIP,
