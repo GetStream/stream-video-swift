@@ -86,6 +86,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     }
 
     /// Delegate method called when the device receives a VoIP push notification.
+    @MainActor
     open func pushRegistry(
         _ registry: PKPushRegistry,
         didReceiveIncomingPushWith payload: PKPushPayload,
