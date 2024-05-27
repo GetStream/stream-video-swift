@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- `CallKitAdapter` will dispatch voIP notification reporting to the MainActor. [#41](https://github.com/GetStream/stream-video-swift/pull/41)
 
 # [1.0.3](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.3)
 _May 22, 2024_

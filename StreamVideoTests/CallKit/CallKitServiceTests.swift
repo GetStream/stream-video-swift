@@ -53,6 +53,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - reportIncomingCall
 
+    @MainActor
     func test_reportIncomingCall_callProviderWasCalledWithExpectedValues() {
         // Given
         let expectation = self.expectation(description: "Report Incoming Call")
@@ -429,9 +430,10 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Private Helpers
 
+    @MainActor
     private func assertRequestTransaction<T>(
         _ expected: T.Type,
-        actionBlock: @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable() -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -477,8 +479,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    @MainActor
     private func assertWithoutRequestTransaction(
-        actionBlock: @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable() -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
