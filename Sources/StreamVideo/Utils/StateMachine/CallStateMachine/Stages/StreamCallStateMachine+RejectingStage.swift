@@ -57,6 +57,9 @@ extension StreamCallStateMachine.Stage {
                 Task {
                     do {
                         let response = try await actionBlock()
+                        if let cId = call?.cId {
+                            callCache.remove(for: cId)
+                        }
                         try transition?(.rejected(call, response: response))
                     } catch {
                         do {
