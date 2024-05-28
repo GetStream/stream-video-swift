@@ -10,6 +10,7 @@ import XCTest
 final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     private lazy var subject: CallKitService! = .init()
+    private lazy var uuidFactory: MockUUIDFactory! = .init()
     private lazy var callController: MockCXCallController! = .init()
     private lazy var callProvider: MockCXProvider! = .init()
     private lazy var user: User! = .init(id: "test")
@@ -34,6 +35,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     override func setUp() {
         super.setUp()
+        InjectedValues[\.uuidFactory] = uuidFactory
         subject.callController = callController
         subject.callProvider = callProvider
         callProvider.setDelegate(subject, queue: nil)
@@ -41,6 +43,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() {
         subject = nil
+        uuidFactory = nil
         callController = nil
         callProvider = nil
         user = nil
@@ -72,9 +75,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         // Then
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertNil(completionError)
-        XCTAssertTrue(callProvider.reportNewIncomingCallCalled)
-        XCTAssertEqual(callProvider.reportNewIncomingCallUpdate?.localizedCallerName, localizedCallerName)
-        XCTAssertEqual(callProvider.reportNewIncomingCallUpdate?.remoteHandle?.value, callerId)
+
+        guard case let .reportNewIncomingCall(_, update, _) = callProvider.invocations.last else {
+            return XCTFail()
+        }
+
+        XCTAssertEqual(update.localizedCallerName, localizedCallerName)
+        XCTAssertEqual(update.remoteHandle?.value, callerId)
     }
 
     func test_reportIncomingCall_streamVideoIsNil_noCallWasCreatedAndNoActionIsBeingPerformed() async throws {
@@ -242,7 +249,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             callerId: callerId
         ) { _ in }
 
-        try await assertRequestTransaction(CXAnswerCallAction.self) {
+        await assertReportCallEnded(.answeredElsewhere) {
             subject.callAccepted(
                 .dummy(
                     call: .dummy(
@@ -269,7 +276,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             callerId: callerId
         ) { _ in }
 
-        try await assertRequestTransaction(CXEndCallAction.self) {
+        await assertReportCallEnded(.declinedElsewhere) {
             subject.callRejected(
                 .dummy(
                     call: .dummy(id: callId),
@@ -282,6 +289,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     func test_callRejected_whileInCall_expectedTransactionWasRequestedAndRemainsInCall() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
         stubCall(response: defaultGetCallResponse)
         subject.streamVideo = mockedStreamVideo
 
@@ -291,18 +300,20 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             callerId: callerId
         ) { _ in }
 
-        try await assertRequestTransaction(CXAnswerCallAction.self) {
-            subject.callAccepted(
-                .dummy(
-                    call: .dummy(id: callId),
-                    callCid: cid
-                )
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
             )
-        }
+        )
+
+        await waitExpectation()
 
         XCTAssertEqual(subject.storage.count, 1)
 
         // Stub with the new call
+        let secondCallUUID = UUID()
+        uuidFactory.getResult = secondCallUUID
         let secondCallId = "default:test-call-2"
         stubCall(overrideCallId: secondCallId, response: .dummy(
             call: .dummy(
@@ -321,15 +332,12 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(subject.storage.count, 2)
 
-        try await assertRequestTransaction(CXEndCallAction.self) {
-            subject.callRejected(
-                .dummy(
-                    call: .dummy(id: secondCallId),
-                    callCid: callCid(from: secondCallId, callType: .default),
-                    user: .dummy(id: user.id)
-                )
+        subject.provider(
+            callProvider,
+            perform: CXEndCallAction(
+                call: secondCallUUID
             )
-        }
+        )
 
         await fulfillment { [weak subject] in subject?.storage.count == 1 }
 
@@ -358,38 +366,39 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     func test_callParticipantLeft_participantsLeftMoreThanOne_callWasNotEnded() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
         subject.streamVideo = mockedStreamVideo
 
-        try await assertRequestTransaction(CXAnswerCallAction.self) {
-            subject.reportIncomingCall(
-                cid,
-                localizedCallerName: localizedCallerName,
-                callerId: callerId
-            ) { _ in }
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
 
-            let waitExpectation = expectation(description: "Wait expectation.")
-            waitExpectation.isInverted = true
-            wait(for: [waitExpectation], timeout: 2)
+        await waitExpectation(timeout: 2)
 
-            subject.callAccepted(
-                .dummy(
-                    call: .dummy(id: callId),
-                    callCid: cid
-                )
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
             )
-        }
+        )
 
         let callState = CallState()
         callState.participants = [.dummy(), .dummy()]
         call.stub(for: \.state, with: callState)
         try await assertNotRequestTransaction(CXEndCallAction.self) {
-            subject.callParticipantLeft(.dummy())
+            subject.callParticipantLeft(.dummy(callCid: call.cId))
         }
     }
 
     @MainActor
     func test_callParticipantLeft_participantsLeftOnlyOne_callNotEnded() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
         let call = stubCall(
             response: .dummy(
                 call: defaultGetCallResponse.call,
@@ -400,24 +409,21 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         )
         subject.streamVideo = mockedStreamVideo
 
-        try await assertRequestTransaction(CXAnswerCallAction.self) {
-            subject.reportIncomingCall(
-                cid,
-                localizedCallerName: localizedCallerName,
-                callerId: callerId
-            ) { _ in }
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
 
-            let waitExpectation = expectation(description: "Wait expectation.")
-            waitExpectation.isInverted = true
-            wait(for: [waitExpectation], timeout: 2)
+        await waitExpectation(timeout: 2)
 
-            subject.callAccepted(.dummy(call: .dummy(id: callId), callCid: cid))
-            subject.provider(callProvider, perform: CXAnswerCallAction(call: UUID()))
-
-            let waitExpectation2 = expectation(description: "Wait expectation.")
-            waitExpectation2.isInverted = true
-            wait(for: [waitExpectation2], timeout: 2)
-        }
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
+            )
+        )
 
         let callState = CallState()
         callState.participants = [.dummy()]
@@ -431,6 +437,33 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - Private Helpers
 
     @MainActor
+    private func assertReportCallEnded(
+        _ expectedReason: CXCallEndedReason,
+        actionBlock: @MainActor @Sendable() -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        callProvider.reset()
+
+        actionBlock()
+
+        await fulfillment(timeout: defaultTimeout, file: file, line: line) {
+            if case .reportCall = self.callProvider.invocations.last {
+                return true
+            } else {
+                return false
+            }
+        }
+
+        guard case let .reportCall(uuid, dateEnded, reason) = callProvider.invocations.last else {
+            XCTFail(file: file, line: line)
+            return
+        }
+
+        XCTAssertEqual(expectedReason, reason, file: file, line: line)
+    }
+
+    @MainActor
     private func assertRequestTransaction<T>(
         _ expected: T.Type,
         actionBlock: @MainActor @Sendable() -> Void,
@@ -441,7 +474,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         actionBlock()
 
-        await fulfillment(timeout: defaultTimeout) { self.callController.requestWasCalledWith?.0.actions.first != nil }
+        await fulfillment(timeout: defaultTimeout, file: file, line: line) {
+            self.callController.requestWasCalledWith?.0.actions.first != nil
+        }
 
         let action = try XCTUnwrap(
             callController.requestWasCalledWith?.0.actions.first,
@@ -468,15 +503,19 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
+        callProvider.reset()
+
         actionBlock()
 
         await waitExpectation(timeout: 1, description: "Wait for internal async tasks to complete.")
 
-        let action = try XCTUnwrap(callController.requestWasCalledWith?.0.actions.first)
-        XCTAssertFalse(
-            action is T,
-            "Action type is \(String(describing: type(of: action))) instead of \(String(describing: T.self))"
-        )
+        if let record = callController.requestWasCalledWith {
+            let action = try XCTUnwrap(record.0.actions.first)
+            XCTAssertFalse(
+                action is T,
+                "Action type is \(String(describing: type(of: action))) instead of \(String(describing: T.self))"
+            )
+        }
     }
 
     @MainActor
@@ -588,5 +627,13 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         call.stub(for: \.state, with: .init())
         mockedStreamVideo.stub(for: .call, with: call)
         return call
+    }
+}
+
+private class MockUUIDFactory: UUIDProviding {
+    var getResult: UUID?
+
+    func get() -> UUID {
+        getResult ?? .init()
     }
 }

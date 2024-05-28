@@ -178,6 +178,7 @@
 		407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408679F62BD12F1000D027E0 /* AudioFilter.swift */; };
+		4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */; };
 		408CE0F32BD905920052EC3A /* Models+Sendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F22BD905920052EC3A /* Models+Sendable.swift */; };
 		408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
 		408CE0F82BD95F170052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
@@ -1250,6 +1251,7 @@
 		407AF7192B6163DD00E9E3E7 /* StreamMediaDurationFormatter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamMediaDurationFormatter_Tests.swift; sourceTree = "<group>"; };
 		407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier_Tests.swift; sourceTree = "<group>"; };
 		408679F62BD12F1000D027E0 /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
+		4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamUUIDFactory.swift; sourceTree = "<group>"; };
 		408CE0F22BD905920052EC3A /* Models+Sendable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models+Sendable.swift"; sourceTree = "<group>"; };
 		408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoConfig+Dummy.swift"; sourceTree = "<group>"; };
 		408D29A12B6D209700885473 /* SnapshotViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotViewModifier.swift; sourceTree = "<group>"; };
@@ -2520,6 +2522,14 @@
 			path = AudioFilter;
 			sourceTree = "<group>";
 		};
+		408937892C062B0B000EEB69 /* UUIDProviding */ = {
+			isa = PBXGroup;
+			children = (
+				4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */,
+			);
+			path = UUIDProviding;
+			sourceTree = "<group>";
+		};
 		408D29A02B6D208700885473 /* Snapshot */ = {
 			isa = PBXGroup;
 			children = (
@@ -3750,6 +3760,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				408937892C062B0B000EEB69 /* UUIDProviding */,
 				403FF3DF2BA1D20E0092CE8A /* UnfairQueue */,
 				40FB150D2BF77CA200D5E580 /* StateMachine */,
 				40FB15082BF74C0A00D5E580 /* CallCache */,
@@ -5146,6 +5157,7 @@
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,
 				84A737D128F4716E001A6769 /* events.pb.swift in Sources */,
 				84DC38C129ADFCFD00946713 /* CallRequest.swift in Sources */,
+				4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */,
 				84DC38A829ADFCFD00946713 /* QueryCallsResponse.swift in Sources */,
 				840F59912A77FDCB00EF3EB2 /* HLSSettingsRequest.swift in Sources */,
 				842B8E1B2A2DFED900863A87 /* CallSessionStartedEvent.swift in Sources */,

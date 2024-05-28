@@ -10,9 +10,9 @@ extension XCTestCase {
     func fulfillment(
         timeout: TimeInterval = defaultTimeout,
         enforceOrder: Bool = false,
-        block: @escaping () -> Bool,
         file: StaticString = #file,
-        line: UInt = #line
+        line: UInt = #line,
+        block: @escaping () -> Bool
     ) async {
         let predicate = NSPredicate { _, _ in block() }
         let waitExpectation = XCTNSPredicateExpectation(

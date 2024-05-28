@@ -6,8 +6,12 @@ import CallKit
 import Foundation
 
 final class MockCXProvider: CXProvider {
-    var reportNewIncomingCallCalled = false
-    var reportNewIncomingCallUpdate: CXCallUpdate?
+    enum Invocation {
+        case reportNewIncomingCall(uuid: UUID, update: CXCallUpdate, completion: (Error?) -> Void)
+        case reportCall(uuid: UUID, endedAt: Date?, reason: CXCallEndedReason)
+    }
+
+    private(set) var invocations: [Invocation] = []
 
     convenience init() {
         self.init(configuration: .init(localizedName: "test"))
@@ -18,8 +22,31 @@ final class MockCXProvider: CXProvider {
         update: CXCallUpdate,
         completion: @escaping (Error?) -> Void
     ) {
-        reportNewIncomingCallCalled = true
-        reportNewIncomingCallUpdate = update
+        invocations.append(
+            .reportNewIncomingCall(
+                uuid: UUID,
+                update: update,
+                completion: completion
+            )
+        )
         completion(nil)
+    }
+
+    override func reportCall(
+        with UUID: UUID,
+        endedAt dateEnded: Date?,
+        reason endedReason: CXCallEndedReason
+    ) {
+        invocations.append(
+            .reportCall(
+                uuid: UUID,
+                endedAt: dateEnded,
+                reason: endedReason
+            )
+        )
+    }
+
+    func reset() {
+        invocations = []
     }
 }

@@ -10,6 +10,9 @@ import Foundation
 /// facilitating VoIP calls in an application.
 open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
+    @Injected(\.callCache) private var callCache
+    @Injected(\.uuidFactory) private var uuidFactory
+
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
         var call: Call
@@ -157,20 +160,21 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ///
     /// - Parameter response: The call accepted event.
     open func callAccepted(_ response: CallAcceptedEvent) {
+        /// The call was accepted somewhere else (e.g the incoming call on the same device or another
+        /// device). No action is required.
         guard
             let newCallEntry = storage.first(where: { $0.value.call.cId == response.callCid })?.value,
             newCallEntry.callUUID != active // Ensure that the new call isn't the currently active one.
         else {
             return
         }
-        Task {
-            do {
-                // Update call state to inCall and send the answer call action.
-                try await requestTransaction(CXAnswerCallAction(call: newCallEntry.callUUID))
-            } catch {
-                log.error(error)
-            }
-        }
+        callProvider.reportCall(
+            with: newCallEntry.callUUID,
+            endedAt: nil,
+            reason: .answeredElsewhere
+        )
+        storage[newCallEntry.callUUID] = nil
+        callCache.remove(for: newCallEntry.call.cId)
     }
 
     /// Handles the event when a call is rejected.
@@ -192,14 +196,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         else {
             return
         }
-        Task {
-            do {
-                // End the call if rejected.
-                try await requestTransaction(CXEndCallAction(call: newCallEntry.callUUID))
-            } catch {
-                log.error(error)
-            }
-        }
+        callProvider.reportCall(
+            with: newCallEntry.callUUID,
+            endedAt: nil,
+            reason: .declinedElsewhere
+        )
+        storage[newCallEntry.callUUID] = nil
+        callCache.remove(for: newCallEntry.call.cId)
     }
 
     /// Handles the event when a call ends.
@@ -294,6 +297,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ) {
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
+        let currentCallWasEnded = action.callUUID == active
 
         guard let stackEntry = storage[action.callUUID] else {
             action.fail()
@@ -310,7 +314,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             } catch {
                 log.error(error)
             }
-            stackEntry.call.leave()
+            if currentCallWasEnded {
+                stackEntry.call.leave()
+            }
             storage[action.callUUID] = nil
             action.fulfill()
         }
@@ -372,6 +378,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     // MARK: - Private helpers
 
+    /// Subscription to event should **never** perform an accept or joining a call action. Those actions
+    /// are only being performed explicitly from the component that receives the user action.
+    /// Subscribing to events is being used to reject/stop calls that have been accepted/rejected
+    /// on other devices or components (e.g. incoming callScreen, CallKitService)
     private func subscribeToCallEvents() {
         callEventsSubscription?.cancel()
         callEventsSubscription = nil
@@ -435,7 +445,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ) -> (UUID, CXCallUpdate) {
         let update = CXCallUpdate()
         let idComponents = cid.components(separatedBy: ":")
-        let uuid = UUID()
+        let uuid = uuidFactory.get()
         if idComponents.count >= 2, let call = streamVideo?.call(callType: idComponents[0], callId: idComponents[1]) {
             storage[uuid] = .init(call: call, callUUID: uuid)
         }
