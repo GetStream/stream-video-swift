@@ -4,34 +4,34 @@
 
 import Foundation
 
-struct EndpointConfig {
-    let hostname: String
-    let wsEndpoint: String
-    var baseVideoURL: String {
-        "\(hostname)"
+public struct EndpointConfig {
+    public let hostname: String
+    public let wsEndpoint: String
+    public var baseVideoURL: String { hostname }
+
+    public init(hostname: String, wsEndpoint: String) {
+        self.hostname = hostname
+        self.wsEndpoint = wsEndpoint
+    }
+
+    public static let production = EndpointConfig(
+        hostname: "https://video.stream-io-api.com",
+        wsEndpoint: "wss://video.stream-io-api.com/video/connect"
+    )
+}
+
+enum EndpointConfigProviderKey: InjectionKey {
+    static var currentValue: EndpointConfig = .production
+}
+
+extension InjectedValues {
+    public var endpointConfig: EndpointConfig {
+        get { Self[EndpointConfigProviderKey.self] }
+        set { Self[EndpointConfigProviderKey.self] = newValue }
     }
 }
 
 extension EndpointConfig {
-    static let production = EndpointConfig(
-        hostname: "https://video.stream-io-api.com",
-        wsEndpoint: "wss://video.stream-io-api.com/video/connect"
-    )
-    
-    static let localhostConfig = EndpointConfig(
-        hostname: "http://localhost:3030/",
-        wsEndpoint: "ws://localhost:8800/video/connect"
-    )
-    
-    static let oregonStagingConfig = EndpointConfig(
-        hostname: "https://video-edge-oregon-ce3.stream-io-api.com/",
-        wsEndpoint: "wss://video-edge-oregon-ce3.stream-io-api.com/video/connect"
-    )
-    
-    static let frankfurtStagingConfig = EndpointConfig(
-        hostname: "https://video-edge-frankfurt-ce1.stream-io-api.com/",
-        wsEndpoint: "wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect"
-    )
     
     func connectQueryParams(apiKey: String) -> [String: String] {
         [

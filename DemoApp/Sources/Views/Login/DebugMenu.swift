@@ -32,6 +32,13 @@ struct DebugMenu: View {
         }
     }
 
+    @State private var endpointConfiguration: AppEnvironment.EndpointConfiguration = AppEnvironment.endpoingConfiguration {
+        didSet {
+            AppEnvironment.endpoingConfiguration = endpointConfiguration
+            InjectedValues[\.endpointConfig] = endpointConfiguration.configuration
+        }
+    }
+
     @State private var supportedDeeplinks: [AppEnvironment.SupportedDeeplink] = AppEnvironment.supportedDeeplinks {
         didSet { AppEnvironment.supportedDeeplinks = supportedDeeplinks }
     }
@@ -73,6 +80,12 @@ struct DebugMenu: View {
                 currentValue: baseURL,
                 label: "Environment"
             ) { self.baseURL = $0 }
+
+            makeMenu(
+                for: [.production, .frankfurt],
+                currentValue: endpointConfiguration,
+                label: "Endpoint Configuration"
+            ) { self.endpointConfiguration = $0 }
 
             makeMultipleSelectMenu(
                 for: AppEnvironment.SupportedDeeplink.allCases,

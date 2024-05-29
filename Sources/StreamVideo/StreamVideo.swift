@@ -15,6 +15,7 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
+    @Injected(\.endpointConfig) private var endpointConfig
 
     public class State: ObservableObject {
         @Published public internal(set) var connection: ConnectionStatus = .initialized
@@ -51,7 +52,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     var token: UserToken
 
     private var tokenProvider: UserTokenProvider
-    private static let endpointConfig: EndpointConfig = .production
     private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
     
@@ -137,7 +137,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
         coordinatorClient = DefaultAPI(
-            basePath: Self.endpointConfig.baseVideoURL,
+            basePath: InjectedValues[\.endpointConfig].baseVideoURL,
             transport: apiTransport,
             middlewares: [defaultParams]
         )
@@ -393,10 +393,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     }
     
     private func connectWebSocketClient() async throws {
-        let queryParams = Self.endpointConfig.connectQueryParams(
+        let queryParams = endpointConfig.connectQueryParams(
             apiKey: apiKey.apiKeyString
         )
-        if let connectURL = try? URL(string: Self.endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
+        if let connectURL = try? URL(string: endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
         } else {
@@ -578,7 +578,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     ) async throws -> CreateGuestResponse {
         let transport = environment.apiTransportBuilder { _ in }
         let defaultAPI = DefaultAPI(
-            basePath: Self.endpointConfig.baseVideoURL,
+            basePath: InjectedValues[\.endpointConfig].baseVideoURL,
             transport: transport,
             middlewares: [DefaultParams(apiKey: apiKey), AnonymousAuth(token: "")]
         )

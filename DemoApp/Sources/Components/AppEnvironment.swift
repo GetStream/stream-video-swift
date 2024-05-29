@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 
 protocol Debuggable: Hashable {
     var title: String { get }
@@ -315,5 +316,35 @@ extension AppEnvironment {
         case .release:
             return .thirtyMinutes
         }
+    }()
+}
+
+extension AppEnvironment {
+
+    enum EndpointConfiguration: Hashable, Debuggable {
+        case production
+        case frankfurt
+
+        var title: String {
+            switch self {
+            case .production:
+                return "Production"
+            case .frankfurt:
+                return "Frankfurt"
+            }
+        }
+
+        var configuration: EndpointConfig {
+            switch self {
+            case .production:
+                return .production
+            case .frankfurt:
+                return .frankfurtStagingConfig
+            }
+        }
+    }
+
+    static var endpoingConfiguration: EndpointConfiguration = {
+        .production
     }()
 }

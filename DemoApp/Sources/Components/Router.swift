@@ -177,7 +177,8 @@ final class Router: ObservableObject {
         let streamVideo = StreamVideo(
             apiKey: AppState.shared.apiKey,
             user: user,
-            token: .init(stringLiteral: token),
+            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiaWxpYXMiLCJleHAiOjB9.CmdIo_hYXqLwDGhLTUWdO3fZo3hBlY16YKfQub1CINU",
+            // .init(stringLiteral: token),
             videoConfig: videoConfig,
             tokenProvider: tokenProvider
         )
@@ -218,6 +219,7 @@ final class Router: ObservableObject {
         for userId: String,
         _ completionHandler: @escaping (Result<UserToken, Error>) -> Void
     ) {
+        print("Refreshing token ....")
         Task {
             do {
                 let token = try await AuthenticationProvider.fetchToken(for: userId)
