@@ -45,14 +45,21 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallTranscriptionStartedEvent(CallTranscriptionStartedEvent)
     case typeCallTranscriptionStoppedEvent(CallTranscriptionStoppedEvent)
     case typeCallUpdatedEvent(CallUpdatedEvent)
-    case typeCallUserMuted(CallUserMuted)
+    case typeCallUserMutedEvent(CallUserMutedEvent)
     case typeClosedCaptionEvent(ClosedCaptionEvent)
     case typeConnectedEvent(ConnectedEvent)
     case typeConnectionErrorEvent(ConnectionErrorEvent)
     case typePermissionRequestEvent(PermissionRequestEvent)
     case typeUnblockedUserEvent(UnblockedUserEvent)
     case typeUpdatedCallPermissionsEvent(UpdatedCallPermissionsEvent)
-    
+    case typeUserBannedEvent(UserBannedEvent)
+    case typeUserDeactivatedEvent(UserDeactivatedEvent)
+    case typeUserDeletedEvent(UserDeletedEvent)
+    case typeUserMutedEvent(UserMutedEvent)
+    case typeUserPresenceChangedEvent(UserPresenceChangedEvent)
+    case typeUserReactivatedEvent(UserReactivatedEvent)
+    case typeUserUnbannedEvent(UserUnbannedEvent)
+    case typeUserUpdatedEvent(UserUpdatedEvent)
     public var type: String {
         switch self {
         case .typeBlockedUserEvent(let value):
@@ -115,7 +122,7 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value.type
         case .typeCallUpdatedEvent(let value):
             return value.type
-        case .typeCallUserMuted(let value):
+        case .typeCallUserMutedEvent(let value):
             return value.type
         case .typeClosedCaptionEvent(let value):
             return value.type
@@ -123,15 +130,31 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value.type
         case .typeConnectionErrorEvent(let value):
             return value.type
+        case .typeCustomVideoEvent(let value):
+            return value.type
+        case .typeHealthCheckEvent(let value):
+            return value.type
         case .typePermissionRequestEvent(let value):
             return value.type
         case .typeUnblockedUserEvent(let value):
             return value.type
         case .typeUpdatedCallPermissionsEvent(let value):
             return value.type
-        case .typeHealthCheckEvent(let value):
+        case .typeUserBannedEvent(let value):
             return value.type
-        case .typeCustomVideoEvent(let value):
+        case .typeUserDeactivatedEvent(let value):
+            return value.type
+        case .typeUserDeletedEvent(let value):
+            return value.type
+        case .typeUserMutedEvent(let value):
+            return value.type
+        case .typeUserPresenceChangedEvent(let value):
+            return value.type
+        case .typeUserReactivatedEvent(let value):
+            return value.type
+        case .typeUserUnbannedEvent(let value):
+            return value.type
+        case .typeUserUpdatedEvent(let value):
             return value.type
         }
     }
@@ -197,7 +220,7 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value
         case .typeCallUpdatedEvent(let value):
             return value
-        case .typeCallUserMuted(let value):
+        case .typeCallUserMutedEvent(let value):
             return value
         case .typeClosedCaptionEvent(let value):
             return value
@@ -205,15 +228,31 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value
         case .typeConnectionErrorEvent(let value):
             return value
+        case .typeCustomVideoEvent(let value):
+            return value
+        case .typeHealthCheckEvent(let value):
+            return value
         case .typePermissionRequestEvent(let value):
             return value
         case .typeUnblockedUserEvent(let value):
             return value
         case .typeUpdatedCallPermissionsEvent(let value):
             return value
-        case .typeHealthCheckEvent(let value):
+        case .typeUserBannedEvent(let value):
             return value
-        case .typeCustomVideoEvent(let value):
+        case .typeUserDeactivatedEvent(let value):
+            return value
+        case .typeUserDeletedEvent(let value):
+            return value
+        case .typeUserMutedEvent(let value):
+            return value
+        case .typeUserPresenceChangedEvent(let value):
+            return value
+        case .typeUserReactivatedEvent(let value):
+            return value
+        case .typeUserUnbannedEvent(let value):
+            return value
+        case .typeUserUpdatedEvent(let value):
             return value
         }
     }
@@ -280,7 +319,7 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             try container.encode(value)
         case .typeCallUpdatedEvent(let value):
             try container.encode(value)
-        case .typeCallUserMuted(let value):
+        case .typeCallUserMutedEvent(let value):
             try container.encode(value)
         case .typeClosedCaptionEvent(let value):
             try container.encode(value)
@@ -288,15 +327,31 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             try container.encode(value)
         case .typeConnectionErrorEvent(let value):
             try container.encode(value)
+        case .typeCustomVideoEvent(let value):
+            try container.encode(value)
+        case .typeHealthCheckEvent(let value):
+            try container.encode(value)
         case .typePermissionRequestEvent(let value):
             try container.encode(value)
         case .typeUnblockedUserEvent(let value):
             try container.encode(value)
         case .typeUpdatedCallPermissionsEvent(let value):
             try container.encode(value)
-        case .typeHealthCheckEvent(let value):
+        case .typeUserBannedEvent(let value):
             try container.encode(value)
-        case .typeCustomVideoEvent(let value):
+        case .typeUserDeactivatedEvent(let value):
+            try container.encode(value)
+        case .typeUserDeletedEvent(let value):
+            try container.encode(value)
+        case .typeUserMutedEvent(let value):
+            try container.encode(value)
+        case .typeUserPresenceChangedEvent(let value):
+            try container.encode(value)
+        case .typeUserReactivatedEvent(let value):
+            try container.encode(value)
+        case .typeUserUnbannedEvent(let value):
+            try container.encode(value)
+        case .typeUserUpdatedEvent(let value):
             try container.encode(value)
         }
     }
@@ -407,8 +462,8 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             let value = try container.decode(CallUpdatedEvent.self)
             self = .typeCallUpdatedEvent(value)
         } else if dto.type == "call.user_muted" {
-            let value = try container.decode(CallUserMuted.self)
-            self = .typeCallUserMuted(value)
+            let value = try container.decode(CallUserMutedEvent.self)
+            self = .typeCallUserMutedEvent(value)
         } else if dto.type == "connection.error" {
             let value = try container.decode(ConnectionErrorEvent.self)
             self = .typeConnectionErrorEvent(value)
@@ -421,8 +476,31 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "health.check" {
             let value = try container.decode(HealthCheckEvent.self)
             self = .typeHealthCheckEvent(value)
-        }
-        else {
+        } else if dto.type == "user.banned" {
+            let value = try container.decode(UserBannedEvent.self)
+            self = .typeUserBannedEvent(value)
+        } else if dto.type == "user.deactivated" {
+            let value = try container.decode(UserDeactivatedEvent.self)
+            self = .typeUserDeactivatedEvent(value)
+        } else if dto.type == "user.deleted" {
+            let value = try container.decode(UserDeletedEvent.self)
+            self = .typeUserDeletedEvent(value)
+        } else if dto.type == "user.muted" {
+            let value = try container.decode(UserMutedEvent.self)
+            self = .typeUserMutedEvent(value)
+        } else if dto.type == "user.presence.changed" {
+            let value = try container.decode(UserPresenceChangedEvent.self)
+            self = .typeUserPresenceChangedEvent(value)
+        } else if dto.type == "user.reactivated" {
+            let value = try container.decode(UserReactivatedEvent.self)
+            self = .typeUserReactivatedEvent(value)
+        } else if dto.type == "user.unbanned" {
+            let value = try container.decode(UserUnbannedEvent.self)
+            self = .typeUserUnbannedEvent(value)
+        } else if dto.type == "user.updated" {
+            let value = try container.decode(UserUpdatedEvent.self)
+            self = .typeUserUpdatedEvent(value)
+        } else {
             throw DecodingError.typeMismatch(Self.Type.self, .init(codingPath: decoder.codingPath, debugDescription: "Unable to decode instance of WSEvent"))
         }
     }

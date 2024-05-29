@@ -161,8 +161,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Accept Call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: AcceptCallResponse
      */
 
@@ -186,19 +186,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Accept Call
      - POST /video/call/{type}/{id}/accept
-     -   Sends events: - call.accepted  Required permissions: - JoinCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<AcceptCallResponse> 
+     -   Sends events: - call.accepted  Required permissions: - JoinCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<AcceptCallResponse>
      */
 
 
     /**
      Block user on a call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter blockUserRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter blockUserRequest: (body)
      - returns: BlockUserResponse
      */
 
@@ -223,21 +223,21 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Block user on a call
      - POST /video/call/{type}/{id}/block
-     - Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter blockUserRequest: (body)  
-     - returns: RequestBuilder<BlockUserResponse> 
+     - Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter blockUserRequest: (body)
+     - returns: RequestBuilder<BlockUserResponse>
      */
 
 
     /**
      Collect user feedback
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter session: (path)  
-     - parameter collectUserFeedbackRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
+     - parameter collectUserFeedbackRequest: (body)
      - returns: CollectUserFeedbackResponse
      */
 
@@ -262,11 +262,22 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(CollectUserFeedbackResponse.self, from: $0)
         }
     }
-    
+    /**
+     Collect user feedback
+     - POST /video/call/{type}/{id}/feedback/{session}
+     -   Required permissions: - JoinCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
+     - parameter collectUserFeedbackRequest: (body)
+     - returns: RequestBuilder<CollectUserFeedbackResponse>
+     */
+
+
     /**
      Create device
      
-     - parameter createDeviceRequest: (body)  
+     - parameter createDeviceRequest: (body)
      - returns: ModelResponse
      */
 
@@ -285,16 +296,16 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Create device
      - POST /video/devices
-     - Adds a new device to a user, if the same device already exists the call will have no effect 
-     - parameter createDeviceRequest: (body)  
-     - returns: RequestBuilder<ModelResponse> 
+     - Adds a new device to a user, if the same device already exists the call will have no effect
+     - parameter createDeviceRequest: (body)
+     - returns: RequestBuilder<ModelResponse>
      */
 
 
     /**
      Create Guest
      
-     - parameter createGuestRequest: (body)  
+     - parameter createGuestRequest: (body)
      - returns: CreateGuestResponse
      */
 
@@ -313,24 +324,24 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Create Guest
      - POST /video/guest
-     -  
-     - parameter createGuestRequest: (body)  
-     - returns: RequestBuilder<CreateGuestResponse> 
+     -
+     - parameter createGuestRequest: (body)
+     - returns: RequestBuilder<CreateGuestResponse>
      */
 
 
     /**
      Delete device
      
-     - parameter id: (query)  (optional)
+     - parameter id: (query)
      - parameter userId: (query)  (optional)
      - returns: ModelResponse
      */
 
-    open func deleteDevice(id: String? = nil, userId: String? = nil) async throws -> ModelResponse {
+    open func deleteDevice(id: String, userId: String? = nil) async throws -> ModelResponse {
         let localVariablePath = "/video/devices"
         let queryParams = APIHelper.mapValuesToQueryItems([
-            "id": (wrappedValue: id?.encodeToJSON(), isExplode: true),
+            "id": (wrappedValue: id.encodeToJSON(), isExplode: true),
             "user_id": (wrappedValue: userId?.encodeToJSON(), isExplode: true),
         ])
         let urlRequest = try makeRequest(
@@ -345,18 +356,108 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Delete device
      - DELETE /video/devices
-     - Deletes one device 
-     - parameter id: (query)  (optional)
+     - Deletes one device
+     - parameter id: (query)
      - parameter userId: (query)  (optional)
-     - returns: RequestBuilder<ModelResponse> 
+     - returns: RequestBuilder<ModelResponse>
+     */
+
+
+    /**
+     Delete recording
+     
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
+     - parameter filename: (path)
+     - returns: DeleteRecordingResponse
+     */
+
+    open func deleteRecording(type: String, id: String, session: String, filename: String) async throws -> DeleteRecordingResponse {
+        var localVariablePath = "/video/call/{type}/{id}/{session}/recordings/{filename}"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
+        let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{session}", with: sessionPostEscape, options: .literal, range: nil)
+        let filenamePreEscape = "\(APIHelper.mapValueToPathItem(filename))"
+        let filenamePostEscape = filenamePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{filename}", with: filenamePostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "DELETE"
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(DeleteRecordingResponse.self, from: $0)
+        }
+    }
+    /**
+     Delete recording
+     - DELETE /video/call/{type}/{id}/{session}/recordings/{filename}
+     - Deletes recording  Required permissions: - DeleteRecording
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
+     - parameter filename: (path)
+     - returns: RequestBuilder<DeleteRecordingResponse>
+     */
+
+
+    /**
+     Delete transcription
+     
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
+     - parameter filename: (path)
+     - returns: DeleteTranscriptionResponse
+     */
+
+    open func deleteTranscription(type: String, id: String, session: String, filename: String) async throws -> DeleteTranscriptionResponse {
+        var localVariablePath = "/video/call/{type}/{id}/{session}/transcriptions/{filename}"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
+        let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{session}", with: sessionPostEscape, options: .literal, range: nil)
+        let filenamePreEscape = "\(APIHelper.mapValueToPathItem(filename))"
+        let filenamePostEscape = filenamePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{filename}", with: filenamePostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "DELETE"
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(DeleteTranscriptionResponse.self, from: $0)
+        }
+    }
+    /**
+     Delete transcription
+     - DELETE /video/call/{type}/{id}/{session}/transcriptions/{filename}
+     - Deletes transcription  Required permissions: - DeleteTranscription
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
+     - parameter filename: (path)
+     - returns: RequestBuilder<DeleteTranscriptionResponse>
      */
 
 
     /**
      End call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: EndCallResponse
      */
 
@@ -380,18 +481,18 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      End call
      - POST /video/call/{type}/{id}/mark_ended
-     -   Sends events: - call.ended  Required permissions: - EndCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<EndCallResponse> 
+     -   Sends events: - call.ended  Required permissions: - EndCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<EndCallResponse>
      */
 
 
     /**
      Get Call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - parameter connectionId: (query)  (optional)
      - parameter membersLimit: (query)  (optional)
      - parameter ring: (query)  (optional)
@@ -425,23 +526,23 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Get Call
      - GET /video/call/{type}/{id}
-     -   Required permissions: - ReadCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
+     -   Required permissions: - ReadCall
+     - parameter type: (path)
+     - parameter id: (path)
      - parameter connectionId: (query)  (optional)
      - parameter membersLimit: (query)  (optional)
      - parameter ring: (query)  (optional)
      - parameter notify: (query)  (optional)
-     - returns: RequestBuilder<GetCallResponse> 
+     - returns: RequestBuilder<GetCallResponse>
      */
 
 
     /**
      Get Call Stats
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter session: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
      - returns: GetCallStatsResponse
      */
 
@@ -468,11 +569,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Get Call Stats
      - GET /video/call/{type}/{id}/stats/{session}
-     -   Required permissions: - ReadCallStats 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter session: (path)  
-     - returns: RequestBuilder<GetCallStatsResponse> 
+     -   Required permissions: - ReadCallStats
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter session: (path)
+     - returns: RequestBuilder<GetCallStatsResponse>
      */
 
 
@@ -496,17 +597,17 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Get Edges
      - GET /video/edges
-     - Returns the list of all edges available for video calls. 
-     - returns: RequestBuilder<GetEdgesResponse> 
+     - Returns the list of all edges available for video calls.
+     - returns: RequestBuilder<GetEdgesResponse>
      */
 
 
     /**
      Get or create a call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter getOrCreateCallRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter getOrCreateCallRequest: (body)
      - parameter connectionId: (query)  (optional)
      - returns: GetOrCreateCallResponse
      */
@@ -535,21 +636,21 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Get or create a call
      - POST /video/call/{type}/{id}
-     - Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter getOrCreateCallRequest: (body)  
+     - Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter getOrCreateCallRequest: (body)
      - parameter connectionId: (query)  (optional)
-     - returns: RequestBuilder<GetOrCreateCallResponse> 
+     - returns: RequestBuilder<GetOrCreateCallResponse>
      */
 
 
     /**
      Set call as live
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter goLiveRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter goLiveRequest: (body)
      - returns: GoLiveResponse
      */
 
@@ -574,20 +675,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Set call as live
      - POST /video/call/{type}/{id}/go_live
-     -   Sends events: - call.live_started  Required permissions: - UpdateCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter goLiveRequest: (body)  
-     - returns: RequestBuilder<GoLiveResponse> 
+     -   Sends events: - call.live_started  Required permissions: - UpdateCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter goLiveRequest: (body)
+     - returns: RequestBuilder<GoLiveResponse>
      */
 
 
     /**
      Join call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter joinCallRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter joinCallRequest: (body)
      - parameter connectionId: (query)  (optional)
      - returns: JoinCallResponse
      */
@@ -616,12 +717,12 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Join call
      - POST /video/call/{type}/{id}/join
-     - Request to join a call  Required permissions: - CreateCall - JoinCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter joinCallRequest: (body)  
+     - Request to join a call  Required permissions: - CreateCall - JoinCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter joinCallRequest: (body)
      - parameter connectionId: (query)  (optional)
-     - returns: RequestBuilder<JoinCallResponse> 
+     - returns: RequestBuilder<JoinCallResponse>
      */
 
 
@@ -649,17 +750,17 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      List devices
      - GET /video/devices
-     - Returns all available devices 
+     - Returns all available devices
      - parameter userId: (query)  (optional)
-     - returns: RequestBuilder<ListDevicesResponse> 
+     - returns: RequestBuilder<ListDevicesResponse>
      */
 
 
     /**
      List recordings
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: ListRecordingsResponse
      */
 
@@ -683,18 +784,18 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      List recordings
      - GET /video/call/{type}/{id}/recordings
-     - Lists recordings  Required permissions: - ListRecordings 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<ListRecordingsResponse> 
+     - Lists recordings  Required permissions: - ListRecordings
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<ListRecordingsResponse>
      */
 
 
     /**
      List transcriptions
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: ListTranscriptionsResponse
      */
 
@@ -718,19 +819,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      List transcriptions
      - GET /video/call/{type}/{id}/transcriptions
-     - Lists transcriptions  Required permissions: - ListTranscriptions 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<ListTranscriptionsResponse> 
+     - Lists transcriptions  Required permissions: - ListTranscriptions
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<ListTranscriptionsResponse>
      */
 
 
     /**
      Mute users
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter muteUsersRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter muteUsersRequest: (body)
      - returns: MuteUsersResponse
      */
 
@@ -755,18 +856,46 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Mute users
      - POST /video/call/{type}/{id}/mute_users
-     - Mutes users in a call  Required permissions: - MuteUsers 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter muteUsersRequest: (body)  
-     - returns: RequestBuilder<MuteUsersResponse> 
+     - Mutes users in a call  Required permissions: - MuteUsers
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter muteUsersRequest: (body)
+     - returns: RequestBuilder<MuteUsersResponse>
+     */
+
+
+    /**
+     Query call members
+     
+     - parameter queryCallMembersRequest: (body)
+     - returns: QueryCallMembersResponse
+     */
+
+    open func queryMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse {
+        let localVariablePath = "/video/call/members"
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "POST",
+            request: queryMembersRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(QueryMembersResponse.self, from: $0)
+        }
+    }
+    /**
+     Query call members
+     - POST /video/call/members
+     - Query call members with filter query  Required permissions: - ReadCall
+     - parameter queryCallMembersRequest: (body)
+     - returns: RequestBuilder<QueryCallMembersResponse>
      */
 
 
     /**
      Query Call Stats
      
-     - parameter queryCallStatsRequest: (body)  
+     - parameter queryCallStatsRequest: (body)
      - returns: QueryCallStatsResponse
      */
 
@@ -785,16 +914,16 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Query Call Stats
      - POST /video/call/stats
-     -   Required permissions: - ReadCallStats 
-     - parameter queryCallStatsRequest: (body)  
-     - returns: RequestBuilder<QueryCallStatsResponse> 
+     -   Required permissions: - ReadCallStats
+     - parameter queryCallStatsRequest: (body)
+     - returns: RequestBuilder<QueryCallStatsResponse>
      */
 
 
     /**
      Query call
      
-     - parameter queryCallsRequest: (body)  
+     - parameter queryCallsRequest: (body)
      - parameter connectionId: (query)  (optional)
      - returns: QueryCallsResponse
      */
@@ -817,46 +946,18 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Query call
      - POST /video/calls
-     - Query calls with filter query  Required permissions: - ReadCall 
-     - parameter queryCallsRequest: (body)  
+     - Query calls with filter query  Required permissions: - ReadCall
+     - parameter queryCallsRequest: (body)
      - parameter connectionId: (query)  (optional)
-     - returns: RequestBuilder<QueryCallsResponse> 
-     */
-
-
-    /**
-     Query call members
-     
-     - parameter queryMembersRequest: (body)  
-     - returns: QueryMembersResponse
-     */
-
-    open func queryMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse {
-        let localVariablePath = "/video/call/members"
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "POST",
-            request: queryMembersRequest
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(QueryMembersResponse.self, from: $0)
-        }
-    }
-    /**
-     Query call members
-     - POST /video/call/members
-     - Query call members with filter query  Required permissions: - ReadCall 
-     - parameter queryMembersRequest: (body)  
-     - returns: RequestBuilder<QueryMembersResponse> 
+     - returns: RequestBuilder<QueryCallsResponse>
      */
 
 
     /**
      Reject Call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: RejectCallResponse
      */
 
@@ -880,19 +981,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Reject Call
      - POST /video/call/{type}/{id}/reject
-     -   Sends events: - call.rejected  Required permissions: - JoinCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<RejectCallResponse> 
+     -   Sends events: - call.rejected  Required permissions: - JoinCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<RejectCallResponse>
      */
 
 
     /**
      Request permission
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter requestPermissionRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter requestPermissionRequest: (body)
      - returns: RequestPermissionResponse
      */
 
@@ -917,21 +1018,21 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Request permission
      - POST /video/call/{type}/{id}/request_permission
-     - Request permission to perform an action  Sends events: - call.permission_request 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter requestPermissionRequest: (body)  
-     - returns: RequestBuilder<RequestPermissionResponse> 
+     - Request permission to perform an action  Sends events: - call.permission_request
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter requestPermissionRequest: (body)
+     - returns: RequestBuilder<RequestPermissionResponse>
      */
 
 
     /**
      Send custom event
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter sendEventRequest: (body)  
-     - returns: SendEventResponse
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter sendCallEventRequest: (body)
+     - returns: SendCallEventResponse
      */
 
     open func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse {
@@ -955,20 +1056,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Send custom event
      - POST /video/call/{type}/{id}/event
-     - Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter sendEventRequest: (body)  
-     - returns: RequestBuilder<SendEventResponse> 
+     - Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter sendCallEventRequest: (body)
+     - returns: RequestBuilder<SendCallEventResponse>
      */
 
 
     /**
      Send reaction to the call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter sendReactionRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter sendReactionRequest: (body)
      - returns: SendReactionResponse
      */
 
@@ -993,19 +1094,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Send reaction to the call
      - POST /video/call/{type}/{id}/reaction
-     - Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter sendReactionRequest: (body)  
-     - returns: RequestBuilder<SendReactionResponse> 
+     - Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter sendReactionRequest: (body)
+     - returns: RequestBuilder<SendReactionResponse>
      */
 
 
     /**
      Start HLS broadcasting
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: StartHLSBroadcastingResponse
      */
 
@@ -1029,19 +1130,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Start HLS broadcasting
      - POST /video/call/{type}/{id}/start_broadcasting
-     - Starts HLS broadcasting  Required permissions: - StartBroadcasting 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<StartHLSBroadcastingResponse> 
+     - Starts HLS broadcasting  Required permissions: - StartBroadcasting
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<StartHLSBroadcastingResponse>
      */
 
 
     /**
      Start recording
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter startRecordingRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter startRecordingRequest: (body)
      - returns: StartRecordingResponse
      */
 
@@ -1066,20 +1167,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Start recording
      - POST /video/call/{type}/{id}/start_recording
-     - Starts recording  Sends events: - call.recording_started  Required permissions: - StartRecording 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter startRecordingRequest: (body)  
-     - returns: RequestBuilder<StartRecordingResponse> 
+     - Starts recording  Sends events: - call.recording_started  Required permissions: - StartRecording
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter startRecordingRequest: (body)
+     - returns: RequestBuilder<StartRecordingResponse>
      */
 
 
     /**
      Start transcription
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter startTranscriptionRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter startTranscriptionRequest: (body)
      - returns: StartTranscriptionResponse
      */
 
@@ -1104,19 +1205,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Start transcription
      - POST /video/call/{type}/{id}/start_transcription
-     - Starts transcription  Required permissions: - StartTranscription 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter startTranscriptionRequest: (body)  
-     - returns: RequestBuilder<StartTranscriptionResponse> 
+     - Starts transcription  Required permissions: - StartTranscription
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter startTranscriptionRequest: (body)
+     - returns: RequestBuilder<StartTranscriptionResponse>
      */
 
 
     /**
      Stop HLS broadcasting
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: StopHLSBroadcastingResponse
      */
 
@@ -1140,18 +1241,18 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Stop HLS broadcasting
      - POST /video/call/{type}/{id}/stop_broadcasting
-     - Stops HLS broadcasting  Required permissions: - StopBroadcasting 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<StopHLSBroadcastingResponse> 
+     - Stops HLS broadcasting  Required permissions: - StopBroadcasting
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<StopHLSBroadcastingResponse>
      */
 
 
     /**
      Set call as not live
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: StopLiveResponse
      */
 
@@ -1175,18 +1276,18 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Set call as not live
      - POST /video/call/{type}/{id}/stop_live
-     -   Sends events: - call.updated  Required permissions: - UpdateCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<StopLiveResponse> 
+     -   Sends events: - call.updated  Required permissions: - UpdateCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<StopLiveResponse>
      */
 
 
     /**
      Stop recording
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: StopRecordingResponse
      */
 
@@ -1210,18 +1311,18 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Stop recording
      - POST /video/call/{type}/{id}/stop_recording
-     - Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<StopRecordingResponse> 
+     - Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<StopRecordingResponse>
      */
 
 
     /**
      Stop transcription
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
      - returns: StopTranscriptionResponse
      */
 
@@ -1245,19 +1346,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Stop transcription
      - POST /video/call/{type}/{id}/stop_transcription
-     - Stops transcription  Sends events: - call.transcription_stopped  Required permissions: - StopTranscription 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<StopTranscriptionResponse> 
+     - Stops transcription  Sends events: - call.transcription_stopped  Required permissions: - StopTranscription
+     - parameter type: (path)
+     - parameter id: (path)
+     - returns: RequestBuilder<StopTranscriptionResponse>
      */
 
 
     /**
      Unblocks user on a call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter unblockUserRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter unblockUserRequest: (body)
      - returns: UnblockUserResponse
      */
 
@@ -1282,20 +1383,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Unblocks user on a call
      - POST /video/call/{type}/{id}/unblock
-     - Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter unblockUserRequest: (body)  
-     - returns: RequestBuilder<UnblockUserResponse> 
+     - Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter unblockUserRequest: (body)
+     - returns: RequestBuilder<UnblockUserResponse>
      */
 
 
     /**
      Update Call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter updateCallRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateCallRequest: (body)
      - returns: UpdateCallResponse
      */
 
@@ -1320,20 +1421,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Update Call
      - PATCH /video/call/{type}/{id}
-     -   Sends events: - call.updated  Required permissions: - UpdateCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter updateCallRequest: (body)  
-     - returns: RequestBuilder<UpdateCallResponse> 
+     -   Sends events: - call.updated  Required permissions: - UpdateCall
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateCallRequest: (body)
+     - returns: RequestBuilder<UpdateCallResponse>
      */
 
 
     /**
      Update Call Member
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter updateCallMembersRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateCallMembersRequest: (body)
      - returns: UpdateCallMembersResponse
      */
 
@@ -1358,20 +1459,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Update Call Member
      - POST /video/call/{type}/{id}/members
-     -   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter updateCallMembersRequest: (body)  
-     - returns: RequestBuilder<UpdateCallMembersResponse> 
+     -   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateCallMembersRequest: (body)
+     - returns: RequestBuilder<UpdateCallMembersResponse>
      */
 
 
     /**
      Update user permissions
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter updateUserPermissionsRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateUserPermissionsRequest: (body)
      - returns: UpdateUserPermissionsResponse
      */
 
@@ -1396,20 +1497,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Update user permissions
      - POST /video/call/{type}/{id}/user_permissions
-     - Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter updateUserPermissionsRequest: (body)  
-     - returns: RequestBuilder<UpdateUserPermissionsResponse> 
+     - Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateUserPermissionsRequest: (body)
+     - returns: RequestBuilder<UpdateUserPermissionsResponse>
      */
 
 
     /**
      Pin
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter pinRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter pinRequest: (body)
      - returns: PinResponse
      */
 
@@ -1434,20 +1535,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Pin
      - POST /video/call/{type}/{id}/pin
-     - Pins a track for all users in the call.  Required permissions: - PinCallTrack 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter pinRequest: (body)  
-     - returns: RequestBuilder<PinResponse> 
+     - Pins a track for all users in the call.  Required permissions: - PinCallTrack
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter pinRequest: (body)
+     - returns: RequestBuilder<PinResponse>
      */
 
 
     /**
      Unpin
      
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter unpinRequest: (body)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter unpinRequest: (body)
      - returns: UnpinResponse
      */
 
@@ -1469,131 +1570,125 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(UnpinResponse.self, from: $0)
         }
     }
-    /**
-     Unpin
-     - POST /video/call/{type}/{id}/unpin
-     - Unpins a track for all users in the call.  Required permissions: - PinCallTrack 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - parameter unpinRequest: (body)  
-     - returns: RequestBuilder<UnpinResponse> 
-     */
 
 }
 
 protocol DefaultAPIEndpoints {
 
+    func acceptCall(type: String, id: String) async throws -> AcceptCallResponse
 
-        func acceptCall(type: String, id: String) async throws -> AcceptCallResponse
 
+    func blockUser(type: String, id: String, blockUserRequest: BlockUserRequest) async throws -> BlockUserResponse
 
-        func blockUser(type: String, id: String, blockUserRequest: BlockUserRequest) async throws -> BlockUserResponse
 
+    func collectUserFeedback(type: String, id: String, session: String, collectUserFeedbackRequest: CollectUserFeedbackRequest) async throws -> CollectUserFeedbackResponse
 
-        func collectUserFeedback(type: String, id: String, session: String, collectUserFeedbackRequest: CollectUserFeedbackRequest) async throws -> CollectUserFeedbackResponse
 
+    func createDevice(createDeviceRequest: CreateDeviceRequest) async throws -> ModelResponse
 
-        func createDevice(createDeviceRequest: CreateDeviceRequest) async throws -> ModelResponse
 
+    func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
 
-        func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
 
+    func deleteDevice(id: String, userId: String?) async throws -> ModelResponse
 
-        func deleteDevice(id: String?, userId: String?) async throws -> ModelResponse
 
+    func deleteRecording(type: String, id: String, session: String, filename: String) async throws -> DeleteRecordingResponse
 
-        func endCall(type: String, id: String) async throws -> EndCallResponse
 
+    func deleteTranscription(type: String, id: String, session: String, filename: String) async throws -> DeleteTranscriptionResponse
 
-        func getCall(type: String, id: String, connectionId: String?, membersLimit: Int?, ring: Bool?, notify: Bool?) async throws -> GetCallResponse
 
+    func endCall(type: String, id: String) async throws -> EndCallResponse
 
-        func getCallStats(type: String, id: String, session: String) async throws -> GetCallStatsResponse
 
+    func getCall(type: String, id: String, connectionId: String?, membersLimit: Int?, ring: Bool?, notify: Bool?) async throws -> GetCallResponse
 
-        func getEdges() async throws -> GetEdgesResponse
 
+    func getCallStats(type: String, id: String, session: String) async throws -> GetCallStatsResponse
 
-        func getOrCreateCall(type: String, id: String, getOrCreateCallRequest: GetOrCreateCallRequest, connectionId: String?) async throws -> GetOrCreateCallResponse
 
+    func getEdges() async throws -> GetEdgesResponse
 
-        func goLive(type: String, id: String, goLiveRequest: GoLiveRequest) async throws -> GoLiveResponse
 
+    func getOrCreateCall(type: String, id: String, getOrCreateCallRequest: GetOrCreateCallRequest, connectionId: String?) async throws -> GetOrCreateCallResponse
 
-        func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest, connectionId: String?) async throws -> JoinCallResponse
 
+    func goLive(type: String, id: String, goLiveRequest: GoLiveRequest) async throws -> GoLiveResponse
 
-        func listDevices(userId: String?) async throws -> ListDevicesResponse
 
+    func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest, connectionId: String?) async throws -> JoinCallResponse
 
-        func listRecordings(type: String, id: String) async throws -> ListRecordingsResponse
 
+    func listDevices(userId: String?) async throws -> ListDevicesResponse
 
-        func listTranscriptions(type: String, id: String) async throws -> ListTranscriptionsResponse
 
+    func listRecordings(type: String, id: String) async throws -> ListRecordingsResponse
 
-        func muteUsers(type: String, id: String, muteUsersRequest: MuteUsersRequest) async throws -> MuteUsersResponse
 
+    func listTranscriptions(type: String, id: String) async throws -> ListTranscriptionsResponse
 
-        func queryCallStats(queryCallStatsRequest: QueryCallStatsRequest) async throws -> QueryCallStatsResponse
 
+    func muteUsers(type: String, id: String, muteUsersRequest: MuteUsersRequest) async throws -> MuteUsersResponse
 
-        func queryCalls(queryCallsRequest: QueryCallsRequest, connectionId: String?) async throws -> QueryCallsResponse
 
+    func queryMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse
 
-        func queryMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse
 
+    func queryCallStats(queryCallStatsRequest: QueryCallStatsRequest) async throws -> QueryCallStatsResponse
 
-        func rejectCall(type: String, id: String) async throws -> RejectCallResponse
 
+    func queryCalls(queryCallsRequest: QueryCallsRequest, connectionId: String?) async throws -> QueryCallsResponse
 
-        func requestPermission(type: String, id: String, requestPermissionRequest: RequestPermissionRequest) async throws -> RequestPermissionResponse
 
+    func rejectCall(type: String, id: String) async throws -> RejectCallResponse
 
-        func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse
 
+    func requestPermission(type: String, id: String, requestPermissionRequest: RequestPermissionRequest) async throws -> RequestPermissionResponse
 
-        func sendVideoReaction(type: String, id: String, sendReactionRequest: SendReactionRequest) async throws -> SendReactionResponse
 
+    func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse
 
-        func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
 
+    func sendVideoReaction(type: String, id: String, sendReactionRequest: SendReactionRequest) async throws -> SendReactionResponse
 
-        func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws -> StartRecordingResponse
 
+    func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
 
-        func startTranscription(type: String, id: String, startTranscriptionRequest: StartTranscriptionRequest) async throws -> StartTranscriptionResponse
 
+    func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws -> StartRecordingResponse
 
-        func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
 
+    func startTranscription(type: String, id: String, startTranscriptionRequest: StartTranscriptionRequest) async throws -> StartTranscriptionResponse
 
-        func stopLive(type: String, id: String) async throws -> StopLiveResponse
 
+    func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
 
-        func stopRecording(type: String, id: String) async throws -> StopRecordingResponse
 
+    func stopLive(type: String, id: String) async throws -> StopLiveResponse
 
-        func stopTranscription(type: String, id: String) async throws -> StopTranscriptionResponse
 
+    func stopRecording(type: String, id: String) async throws -> StopRecordingResponse
 
-        func unblockUser(type: String, id: String, unblockUserRequest: UnblockUserRequest) async throws -> UnblockUserResponse
 
+    func stopTranscription(type: String, id: String) async throws -> StopTranscriptionResponse
 
-        func updateCall(type: String, id: String, updateCallRequest: UpdateCallRequest) async throws -> UpdateCallResponse
 
+    func unblockUser(type: String, id: String, unblockUserRequest: UnblockUserRequest) async throws -> UnblockUserResponse
 
-        func updateCallMembers(type: String, id: String, updateCallMembersRequest: UpdateCallMembersRequest) async throws -> UpdateCallMembersResponse
 
+    func updateCall(type: String, id: String, updateCallRequest: UpdateCallRequest) async throws -> UpdateCallResponse
 
-        func updateUserPermissions(type: String, id: String, updateUserPermissionsRequest: UpdateUserPermissionsRequest) async throws -> UpdateUserPermissionsResponse
 
+    func updateCallMembers(type: String, id: String, updateCallMembersRequest: UpdateCallMembersRequest) async throws -> UpdateCallMembersResponse
 
-        func videoPin(type: String, id: String, pinRequest: PinRequest) async throws -> PinResponse
 
+    func updateUserPermissions(type: String, id: String, updateUserPermissionsRequest: UpdateUserPermissionsRequest) async throws -> UpdateUserPermissionsResponse
 
-        func videoUnpin(type: String, id: String, unpinRequest: UnpinRequest) async throws -> UnpinResponse
 
+    func videoPin(type: String, id: String, pinRequest: PinRequest) async throws -> PinResponse
 
+
+    func videoUnpin(type: String, id: String, unpinRequest: UnpinRequest) async throws -> UnpinResponse
 }
 

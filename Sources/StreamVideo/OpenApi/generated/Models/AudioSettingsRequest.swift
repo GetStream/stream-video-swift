@@ -27,12 +27,12 @@ public struct AudioSettingsRequest: Codable, JSONEncodable, Hashable {
     public var accessRequestEnabled: Bool?
     public var defaultDevice: DefaultDevice
     public var micDefaultOn: Bool?
-    public var noiseCancellation: NoiseCancellationSettingsRequest?
+    public var noiseCancellation: NoiseCancellationSettings?
     public var opusDtxEnabled: Bool?
     public var redundantCodingEnabled: Bool?
     public var speakerDefaultOn: Bool?
 
-    public init(accessRequestEnabled: Bool? = nil, defaultDevice: DefaultDevice, micDefaultOn: Bool? = nil, noiseCancellation: NoiseCancellationSettingsRequest? = nil, opusDtxEnabled: Bool? = nil, redundantCodingEnabled: Bool? = nil, speakerDefaultOn: Bool? = nil) {
+    public init(accessRequestEnabled: Bool? = nil, defaultDevice: DefaultDevice, micDefaultOn: Bool? = nil, noiseCancellation: NoiseCancellationSettings? = nil, opusDtxEnabled: Bool? = nil, redundantCodingEnabled: Bool? = nil, speakerDefaultOn: Bool? = nil) {
         self.accessRequestEnabled = accessRequestEnabled
         self.defaultDevice = defaultDevice
         self.micDefaultOn = micDefaultOn

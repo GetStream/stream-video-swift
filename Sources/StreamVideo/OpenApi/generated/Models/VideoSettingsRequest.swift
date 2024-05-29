@@ -29,9 +29,9 @@ public struct VideoSettingsRequest: Codable, JSONEncodable, Hashable {
     public var cameraDefaultOn: Bool?
     public var cameraFacing: CameraFacing?
     public var enabled: Bool?
-    public var targetResolution: TargetResolutionRequest?
+    public var targetResolution: TargetResolution?
 
-    public init(accessRequestEnabled: Bool? = nil, cameraDefaultOn: Bool? = nil, cameraFacing: CameraFacing? = nil, enabled: Bool? = nil, targetResolution: TargetResolutionRequest? = nil) {
+    public init(accessRequestEnabled: Bool? = nil, cameraDefaultOn: Bool? = nil, cameraFacing: CameraFacing? = nil, enabled: Bool? = nil, targetResolution: TargetResolution? = nil) {
         self.accessRequestEnabled = accessRequestEnabled
         self.cameraDefaultOn = cameraDefaultOn
         self.cameraFacing = cameraFacing

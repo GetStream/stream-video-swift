@@ -179,7 +179,7 @@ public class CallState: ObservableObject {
         case .typeHealthCheckEvent:
             // note: health checks are not relevant for call state sync'ing
             break
-        case .typeCallUserMuted:
+        case .typeCallUserMutedEvent:
             break
         case .typeCallDeletedEvent:
             break
@@ -199,6 +199,15 @@ public class CallState: ObservableObject {
             transcribing = true
         case .typeCallTranscriptionStoppedEvent:
             transcribing = false
+        case .typeUserBannedEvent,
+             .typeUserDeactivatedEvent,
+             .typeUserDeletedEvent,
+             .typeUserMutedEvent,
+             .typeUserPresenceChangedEvent,
+             .typeUserReactivatedEvent,
+             .typeUserUnbannedEvent,
+             .typeUserUpdatedEvent:
+            break
         }
     }
 

@@ -26,15 +26,18 @@ public struct TranscriptionSettingsRequest: Codable, JSONEncodable, Hashable {
         }
     }
     public var closedCaptionMode: String?
-    public var mode: Mode?
+    public var languages: [String]?
+    public var mode: Mode
 
-    public init(closedCaptionMode: String? = nil, mode: Mode? = nil) {
+    public init(closedCaptionMode: String? = nil, languages: [String]? = nil, mode: Mode) {
         self.closedCaptionMode = closedCaptionMode
+        self.languages = languages
         self.mode = mode
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case closedCaptionMode = "closed_caption_mode"
+        case languages
         case mode
     }
 
@@ -43,7 +46,8 @@ public struct TranscriptionSettingsRequest: Codable, JSONEncodable, Hashable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(closedCaptionMode, forKey: .closedCaptionMode)
-        try container.encodeIfPresent(mode, forKey: .mode)
+        try container.encodeIfPresent(languages, forKey: .languages)
+        try container.encode(mode, forKey: .mode)
     }
 }
 
