@@ -56,7 +56,8 @@ extension StreamVideo {
         
         var connectionRecoveryHandlerBuilder: (
             _ webSocketClient: WebSocketClient,
-            _ eventNotificationCenter: EventNotificationCenter
+            _ eventNotificationCenter: EventNotificationCenter,
+            _ refreshTokenHandler: @escaping () async throws -> Void
         ) -> ConnectionRecoveryHandler = {
             DefaultConnectionRecoveryHandler(
                 webSocketClient: $0,
@@ -65,7 +66,8 @@ extension StreamVideo {
                 internetConnection: InternetConnection(monitor: InternetConnection.Monitor()),
                 reconnectionStrategy: DefaultRetryStrategy(),
                 reconnectionTimerType: DefaultTimer.self,
-                keepConnectionAliveInBackground: true
+                keepConnectionAliveInBackground: true,
+                refreshTokenHandler: $2
             )
         }
         

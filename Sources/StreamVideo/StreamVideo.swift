@@ -552,7 +552,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         connectionRecoveryHandler = nil
         connectionRecoveryHandler = environment.connectionRecoveryHandlerBuilder(
             webSocketClient,
-            eventNotificationCenter
+            eventNotificationCenter,
+            { [weak self] in
+                guard let apiTransport = self?.apiTransport as? URLSessionTransport else {
+                    throw ClientError("Unable to refresh authentication token.")
+                }
+                self?.token = try await apiTransport.refreshToken()
+            }
         )
     }
     

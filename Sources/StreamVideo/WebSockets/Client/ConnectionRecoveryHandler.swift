@@ -28,7 +28,8 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
     private var reconnectionStrategy: RetryStrategy
     private var reconnectionTimer: TimerControl?
     private let keepConnectionAliveInBackground: Bool
-    
+    private let refreshTokenHandler: () async throws -> Void
+
     // MARK: - Init
     
     init(
@@ -38,7 +39,8 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
         internetConnection: InternetConnection,
         reconnectionStrategy: RetryStrategy,
         reconnectionTimerType: Timer.Type,
-        keepConnectionAliveInBackground: Bool
+        keepConnectionAliveInBackground: Bool,
+        refreshTokenHandler: @escaping () async throws -> Void
     ) {
         self.webSocketClient = webSocketClient
         self.eventNotificationCenter = eventNotificationCenter
@@ -47,6 +49,7 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
         self.reconnectionStrategy = reconnectionStrategy
         self.reconnectionTimerType = reconnectionTimerType
         self.keepConnectionAliveInBackground = keepConnectionAliveInBackground
+        self.refreshTokenHandler = refreshTokenHandler
 
         subscribeOnNotifications()
     }
@@ -187,8 +190,15 @@ private extension DefaultConnectionRecoveryHandler {
 private extension DefaultConnectionRecoveryHandler {
     func reconnectIfNeeded() {
         guard canReconnectAutomatically else { return }
-                
-        webSocketClient.connect()
+
+        Task {
+            do {
+                try await refreshTokenHandler()
+                webSocketClient.connect()
+            } catch {
+                log.error(error)
+            }
+        }
     }
     
     var canReconnectAutomatically: Bool {
