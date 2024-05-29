@@ -58,7 +58,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
                         onTokenUpdate(token)
                     }
                     let updated = update(request: request, with: token.rawValue)
-                    log.debug("Retrying failed request with new token", subsystems: .httpRequests)
+                    log.debug("Retrying failed request \(updated) with new token", subsystems: .httpRequests)
                     return try await execute(request: updated, isRetry: true)
                 } else {
                     throw error
