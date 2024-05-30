@@ -13,7 +13,7 @@ struct LoginView: View {
     @Injected(\.appearance) var appearance
 
     @State var addUserShown = false
-    @State private var appState: AppState = .shared
+    @ObservedObject private var appState: AppState = .shared
     @State private var showJoinCallPopup = false
     @State private var error: Error?
 
@@ -21,7 +21,13 @@ struct LoginView: View {
         _viewModel = StateObject(wrappedValue: LoginViewModel())
         self.completion = completion
     }
-    
+
+    func delete(at offsets: IndexSet) {
+        var users = AppState.shared.users
+        users.remove(atOffsets: offsets)
+        AppState.shared.users = users
+    }
+
     var body: some View {
         VStack {
             List {
@@ -33,7 +39,9 @@ struct LoginView: View {
                             completion: completion
                         )
                         .listRowBackground(Color.clear)
+                        .deleteDisabled(User.builtIn.first { $0.id == user.id } != nil)
                     }
+                    .onDelete(perform: delete)
 
                     LoginItemView {
                         addUserShown = true
@@ -99,7 +107,7 @@ struct LoginView: View {
             appState.loading ? ProgressView() : nil
         )
         .sheet(isPresented: $addUserShown, onDismiss: {}) {
-            AddUserView()
+            DemoAddUserView()
         }
         .halfSheet(isPresented: $showJoinCallPopup) {
             JoinCallView(viewModel: viewModel, completion: completion)

@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-struct AddUserView: View {
+struct DemoAddUserView: View {
 
     @Injected(\.appearance) var appearance
     @Environment(\.presentationMode) var presentationMode
