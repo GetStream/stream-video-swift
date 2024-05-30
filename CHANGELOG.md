@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- In `CallKitService` you can now configure if calls support Video. Depending on the value `CallKit` will suffix either the word `Audio` (when false) or `Video` when true, next to the application's name. [#420](https://github.com/GetStream/stream-video-swift/pull/420)
 
 # [1.0.5](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.5)
 _May 28, 2024_
@@ -15,7 +16,7 @@ _May 28, 2024_
 _May 27, 2024_
 
 ### 🔄 Changed
-- `CallKitAdapter` will dispatch voIP notification reporting to the MainActor. [#41](https://github.com/GetStream/stream-video-swift/pull/41)
+- `CallKitAdapter` will dispatch voIP notification reporting to the MainActor. [#411](https://github.com/GetStream/stream-video-swift/pull/411)
 
 # [1.0.3](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.3)
 _May 22, 2024_
