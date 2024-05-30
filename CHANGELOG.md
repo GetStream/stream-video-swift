@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.0.6](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.6)
+_May 30, 2024_
+
 ### ✅ Added
 - In `CallKitService` you can now configure if calls support Video. Depending on the value `CallKit` will suffix either the word `Audio` (when false) or `Video` when true, next to the application's name. [#420](https://github.com/GetStream/stream-video-swift/pull/420)
 
