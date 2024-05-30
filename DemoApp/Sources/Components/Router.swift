@@ -124,7 +124,9 @@ final class Router: ObservableObject {
             user: updatedCredentials.userInfo,
             token: updatedCredentials.token.rawValue,
             deeplinkInfo: deeplinkInfo,
-            tokenProvider: { [weak self] in self?.refreshToken(for: updatedCredentials.id, $0) }
+            tokenProvider: { [weak self] in
+                self?.refreshToken(for: updatedCredentials.id, $0)
+            }
         )
     }
 

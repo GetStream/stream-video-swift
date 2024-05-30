@@ -52,6 +52,51 @@ struct DemoAddUserView: View {
     }
 }
 
+struct DemoCustomEnvironmentView: View {
+
+    @Injected(\.appearance) var appearance
+    @Environment(\.presentationMode) var presentationMode
+
+    @State var baseURL: AppEnvironment.BaseURL
+    @State var apiKey: String
+    @State var token: String
+    var completionHandler: (AppEnvironment.BaseURL, String, String) -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack {
+                Picker("Base on which environment?", selection: $baseURL) {
+                    Text(AppEnvironment.BaseURL.demo.title).tag(AppEnvironment.BaseURL.demo)
+                    Text(AppEnvironment.BaseURL.pronto.title).tag(AppEnvironment.BaseURL.pronto)
+                }
+                .pickerStyle(.segmented)
+
+                TextField("API Key", text: $apiKey)
+                    .textFieldStyle(DemoTextfieldStyle())
+
+                DemoTextEditor(text: $token, placeholder: "Token")
+
+                Button {
+                    completionHandler(baseURL, apiKey, token)
+                } label: {
+                    CallButtonView(
+                        title: "Complete Setup",
+                        isDisabled: buttonDisabled
+                    )
+                    .disabled(buttonDisabled)
+                }
+                Spacer()
+            }
+        }
+        .padding()
+        .navigationTitle("Custom Environment")
+    }
+
+    private var buttonDisabled: Bool {
+        apiKey.isEmpty || token.isEmpty
+    }
+}
+
 struct DemoTextfieldStyle: TextFieldStyle {
 
     @Injected(\.appearance) var appearance

@@ -53,8 +53,17 @@ extension AppEnvironment {
                 return "Legacy"
             case .demo:
                 return "Demo"
+            case let .custom(_, apiKey, _):
+                return apiKey.isEmpty ? "Custom" : "Custom(\(apiKey)"
             }
         }
+
+        static var allCases: [BaseURL] = [
+            .pronto,
+            .staging,
+            .demo,
+            .legacy
+        ]
     }
 
     static var baseURL: BaseURL = {

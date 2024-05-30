@@ -27,6 +27,10 @@ enum AuthenticationProvider {
         for userId: String,
         callIds: [String] = []
     ) async throws -> UserToken {
+        if case let .custom(_, apiKey, token) = AppEnvironment.baseURL {
+            return .init(stringLiteral: token)
+        }
+
         let environment = {
             switch AppEnvironment.baseURL {
             case .staging:
@@ -39,6 +43,8 @@ enum AuthenticationProvider {
                 return "pronto"
             case .demo:
                 return "demo"
+            case .custom:
+                return ""
             }
         }()
 

@@ -72,11 +72,14 @@ struct DebugMenu: View {
 
     @State private var isLogsViewerVisible: Bool = false
 
+    @State private var presentsCustomEnvironmentSetup: Bool = false
+
     var body: some View {
         Menu {
             makeMenu(
                 for: [.demo, .pronto, .pronto_staging],
                 currentValue: baseURL,
+                additionalItems: { customEnvironmentView },
                 label: "Environment"
             ) { self.baseURL = $0 }
 
@@ -146,12 +149,61 @@ struct DebugMenu: View {
                 MemoryLogViewer()
             }
         }
+        .sheet(isPresented: $presentsCustomEnvironmentSetup) {
+            NavigationView {
+                if case let .custom(baseURL, apiKey, token) = AppEnvironment.baseURL {
+                    DemoCustomEnvironmentView(
+                        baseURL: baseURL,
+                        apiKey: apiKey,
+                        token: token
+                    ) {
+                        self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
+                        presentsCustomEnvironmentSetup = false
+                    }
+                } else {
+                    DemoCustomEnvironmentView(
+                        baseURL: .demo,
+                        apiKey: "",
+                        token: ""
+                    ) {
+                        self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
+                        presentsCustomEnvironmentSetup = false
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customEnvironmentView: some View {
+        if case let .custom(_, apiKey, _) = AppEnvironment.baseURL {
+            Button {
+                presentsCustomEnvironmentSetup = true
+            } label: {
+                Label {
+                    Text("Custom (\(apiKey))")
+                } icon: {
+                    Image(systemName: "checkmark")
+                }
+            }
+        } else {
+            Button {
+                presentsCustomEnvironmentSetup = true
+            } label: {
+                Label {
+                    Text("Custom")
+                } icon: {
+                    EmptyView()
+                }
+            }
+        }
     }
 
     @ViewBuilder
     private func makeMenu<Item: Debuggable>(
         for items: [Item],
         currentValue: Item,
+        @ViewBuilder additionalItems: () -> some View = { EmptyView() },
         label: String,
         updater: @escaping (Item) -> Void
     ) -> some View {
@@ -169,6 +221,8 @@ struct DebugMenu: View {
                     }
                 }
             }
+
+            additionalItems()
         } label: {
             Text(label)
         }
