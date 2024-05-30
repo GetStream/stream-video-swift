@@ -57,6 +57,46 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - reportIncomingCall
 
     @MainActor
+    func test_reportIncomingCall_supportsVideo_callUpdateWasConfiguredCorrectly() throws {
+        subject.supportsVideo = true
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        let invocation = try XCTUnwrap(callProvider.invocations.first)
+
+        switch invocation {
+        case let .reportNewIncomingCall(_, update, _):
+            XCTAssertTrue(update.hasVideo)
+        default:
+            XCTFail()
+        }
+    }
+
+    @MainActor
+    func test_reportIncomingCall_doesNotSupportVideo_callUpdateWasConfiguredCorrectly() throws {
+        subject.supportsVideo = false
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        let invocation = try XCTUnwrap(callProvider.invocations.first)
+
+        switch invocation {
+        case let .reportNewIncomingCall(_, update, _):
+            XCTAssertFalse(update.hasVideo)
+        default:
+            XCTFail()
+        }
+    }
+
+    @MainActor
     func test_reportIncomingCall_callProviderWasCalledWithExpectedValues() {
         // Given
         let expectation = self.expectation(description: "Report Incoming Call")

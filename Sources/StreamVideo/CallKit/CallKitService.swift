@@ -52,6 +52,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Whether the call can be held on its own or swapped with another call.
     /// - Important: Holding a call isn't supported yet!
     open var supportsHolding: Bool = false
+    /// Whether the service supports Video in addition to Audio calls. If set to true, CallKit push notification
+    /// title, will be suffixed with the word `Video` next to the application's name. Otherwise, it will be
+    /// suffixed with the word `Audio`.
+    /// - Note: defaults to `false`.
+    open var supportsVideo: Bool = false
 
     /// The call controller used for managing calls.
     open internal(set) lazy var callController = CXCallController()
@@ -412,7 +417,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     }
 
     private func buildProvider(
-        supportsVideo: Bool = true,
         supportedHandleTypes: Set<CXHandle.HandleType> = [.generic]
     ) -> CXProvider {
         let configuration = {
@@ -452,7 +456,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         update.localizedCallerName = localizedCallerName
         update.remoteHandle = CXHandle(type: .generic, value: callerId)
-        update.hasVideo = true
+        update.hasVideo = supportsVideo
         update.supportsDTMF = false
 
         if supportsHolding {

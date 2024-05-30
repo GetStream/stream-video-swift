@@ -138,4 +138,16 @@ fileprivate func content() {
             }
         }
     }
+
+    container {
+        @Injected(\.callKitService) var callKitService
+
+        // Setting the `supportsVideo` property to `true` will
+        // make the subtitle's format be: `<Application's name> Video`
+        callKitService.supportsVideo = true
+
+        // Setting the `supportsVideo` property to `false` will
+        // make the subtitle's format be: `<Application's name> Audio`
+        callKitService.supportsVideo = false
+    }
 }
