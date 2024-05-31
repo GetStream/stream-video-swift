@@ -25,6 +25,8 @@ struct DebugMenu: View {
                 AppEnvironment.baseURL = .pronto
             case .demo:
                 AppEnvironment.baseURL = .demo
+            case .pronto_staging:
+                AppEnvironment.baseURL = .pronto_staging
             default:
                 break
             }
@@ -69,7 +71,7 @@ struct DebugMenu: View {
     var body: some View {
         Menu {
             makeMenu(
-                for: [.demo, .pronto],
+                for: [.demo, .pronto, .pronto_staging],
                 currentValue: baseURL,
                 label: "Environment"
             ) { self.baseURL = $0 }

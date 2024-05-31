@@ -35,6 +35,7 @@ extension AppEnvironment {
 
     enum BaseURL: String, Debuggable, CaseIterable {
         case pronto = "https://pronto.getstream.io"
+        case pronto_staging = "https://pronto.getstream.io/ "
         case staging = "https://staging.getstream.io"
         case demo = "https://getstream.io"
         case legacy = "https://stream-calls-dogfood.vercel.app"
@@ -44,6 +45,8 @@ extension AppEnvironment {
             switch self {
             case .pronto:
                 return "Pronto"
+            case .pronto_staging:
+                return "ProntoStaging"
             case .staging:
                 return "Staging"
             case .legacy:
