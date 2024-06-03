@@ -156,6 +156,7 @@ class MockResponseBuilder {
             backstage: backstageSettings,
             broadcasting: broadcastSettings,
             geofencing: geofenceSettings,
+            limits: .dummy(),
             recording: recordSettings,
             ring: ringSettings,
             screensharing: screensharingSettings,

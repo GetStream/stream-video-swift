@@ -13,6 +13,7 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
     public var backstage: BackstageSettingsRequest?
     public var broadcasting: BroadcastSettingsRequest?
     public var geofencing: GeofenceSettingsRequest?
+    public var limits: LimitsSettingsRequest?
     public var recording: RecordSettingsRequest?
     public var ring: RingSettingsRequest?
     public var screensharing: ScreensharingSettingsRequest?
@@ -20,11 +21,12 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
     public var transcription: TranscriptionSettingsRequest?
     public var video: VideoSettingsRequest?
 
-    public init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, broadcasting: BroadcastSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, thumbnails: ThumbnailsSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
+    public init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, broadcasting: BroadcastSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, limits: LimitsSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, thumbnails: ThumbnailsSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
         self.geofencing = geofencing
+        self.limits = limits
         self.recording = recording
         self.ring = ring
         self.screensharing = screensharing
@@ -38,6 +40,7 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
         case backstage
         case broadcasting
         case geofencing
+        case limits
         case recording
         case ring
         case screensharing
@@ -54,6 +57,7 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(backstage, forKey: .backstage)
         try container.encodeIfPresent(broadcasting, forKey: .broadcasting)
         try container.encodeIfPresent(geofencing, forKey: .geofencing)
+        try container.encodeIfPresent(limits, forKey: .limits)
         try container.encodeIfPresent(recording, forKey: .recording)
         try container.encodeIfPresent(ring, forKey: .ring)
         try container.encodeIfPresent(screensharing, forKey: .screensharing)

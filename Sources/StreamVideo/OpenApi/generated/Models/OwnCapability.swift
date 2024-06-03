@@ -10,6 +10,7 @@ import Foundation
 
 public enum OwnCapability: String, Codable, CaseIterable {
     case blockUsers = "block-users"
+    case changeMaxDuration = "change-max-duration"
     case createCall = "create-call"
     case createReaction = "create-reaction"
     case enableNoiseCancellation = "enable-noise-cancellation"

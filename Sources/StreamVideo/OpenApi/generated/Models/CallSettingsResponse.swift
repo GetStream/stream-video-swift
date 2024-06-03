@@ -13,6 +13,7 @@ public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
     public var backstage: BackstageSettings
     public var broadcasting: BroadcastSettingsResponse
     public var geofencing: GeofenceSettings
+    public var limits: LimitsSettingsResponse
     public var recording: RecordSettingsResponse
     public var ring: RingSettings
     public var screensharing: ScreensharingSettings
@@ -20,11 +21,12 @@ public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
     public var transcription: TranscriptionSettings
     public var video: VideoSettings
 
-    public init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettingsResponse, geofencing: GeofenceSettings, recording: RecordSettingsResponse, ring: RingSettings, screensharing: ScreensharingSettings, thumbnails: ThumbnailsSettings, transcription: TranscriptionSettings, video: VideoSettings) {
+    public init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettingsResponse, geofencing: GeofenceSettings, limits: LimitsSettingsResponse, recording: RecordSettingsResponse, ring: RingSettings, screensharing: ScreensharingSettings, thumbnails: ThumbnailsSettings, transcription: TranscriptionSettings, video: VideoSettings) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
         self.geofencing = geofencing
+        self.limits = limits
         self.recording = recording
         self.ring = ring
         self.screensharing = screensharing
@@ -38,6 +40,7 @@ public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         case backstage
         case broadcasting
         case geofencing
+        case limits
         case recording
         case ring
         case screensharing
@@ -54,6 +57,7 @@ public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         try container.encode(backstage, forKey: .backstage)
         try container.encode(broadcasting, forKey: .broadcasting)
         try container.encode(geofencing, forKey: .geofencing)
+        try container.encode(limits, forKey: .limits)
         try container.encode(recording, forKey: .recording)
         try container.encode(ring, forKey: .ring)
         try container.encode(screensharing, forKey: .screensharing)
