@@ -684,6 +684,7 @@
 		845C09842C0DEB5C00F725B3 /* LimitsSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */; };
 		845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */; };
 		845C09872C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
+		845C09892C0DFA5E00F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
 		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -5727,6 +5728,7 @@
 				8251E6302A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				8251E62C2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				40245F442BE2745600FCF075 /* CallResponse+Dummy.swift in Sources */,
+				845C09892C0DFA5E00F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */,
 				401BEC4F2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift in Sources */,
 				401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
