@@ -28,15 +28,15 @@ class SessionTimer: ObservableObject {
                 timer = Timer.scheduledTimer(
                     withTimeInterval: timerInterval,
                     repeats: false,
-                    block: { [weak self] timer in
+                    block: { [weak self] _ in
                         log.debug("Showing timer alert")
                         self?.showTimerAlert = true
                     }
                 )
             }
-            
         }
     }
+    
     private var timer: Timer?
     private let alertInterval: TimeInterval
     
@@ -46,7 +46,7 @@ class SessionTimer: ObservableObject {
     ) {
         self.call = call
         self.alertInterval = alertInterval
-        self.timerEndsAt = call?.state.session?.timerEndsAt
+        timerEndsAt = call?.state.session?.timerEndsAt
         self.call?.state.$session.sink { [weak self] response in
             guard let self else { return }
             if response?.timerEndsAt != self.timerEndsAt {
