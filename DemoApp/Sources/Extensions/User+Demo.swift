@@ -53,7 +53,7 @@ extension User {
                 "vasil",
                 "Willard Hesser",
                 "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg"
-            ),
+            )
         ].map {
             User(id: $0.0, name: $0.1, imageURL: URL(string: $0.2))
         }
