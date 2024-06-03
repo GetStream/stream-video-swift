@@ -685,6 +685,7 @@
 		845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */; };
 		845C09872C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845C09892C0DFA5E00F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
+		845C098A2C0DFE7200F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
 		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -5795,6 +5796,7 @@
 				82E3BA4D2A0BAE41001AB93E /* EquatableEvent.swift in Sources */,
 				820221612A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
 				8493227D29093A1A0013C029 /* HTTPClient_Mock.swift in Sources */,
+				845C098A2C0DFE7200F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */,
 				82E3BA452A0BAE10001AB93E /* EventDecoder_Mock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
