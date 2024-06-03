@@ -681,6 +681,9 @@
 		8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872D28A4EC1F002A81BF /* CallSettings.swift */; };
 		8458B704290ACF2A00F8E487 /* CallSoundsPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458B703290ACF2A00F8E487 /* CallSoundsPlayer.swift */; };
 		8458B706290ACFE400F8E487 /* incoming.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8458B705290ACFE400F8E487 /* incoming.wav */; };
+		845C09842C0DEB5C00F725B3 /* LimitsSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */; };
+		845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */; };
+		845C09872C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
 		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -1654,6 +1657,9 @@
 		8458872D28A4EC1F002A81BF /* CallSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettings.swift; sourceTree = "<group>"; };
 		8458B703290ACF2A00F8E487 /* CallSoundsPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSoundsPlayer.swift; sourceTree = "<group>"; };
 		8458B705290ACFE400F8E487 /* incoming.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = incoming.wav; sourceTree = "<group>"; };
+		845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LimitsSettingsRequest.swift; sourceTree = "<group>"; };
+		845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LimitsSettingsResponse.swift; sourceTree = "<group>"; };
+		845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LimitsSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
 		845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver_Tests.swift; sourceTree = "<group>"; };
 		845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastUtils_Tests.swift; sourceTree = "<group>"; };
 		8468821228DFA448003BA9EE /* UnsecureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsecureRepository.swift; sourceTree = "<group>"; };
@@ -2876,6 +2882,7 @@
 				40F017742BBEF3E700E89FD1 /* CallRejectedEvent+Dummy.swift */,
 				40F017762BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift */,
 				4097B37D2BF4B06A0057992D /* GetCallResponse+Dummy.swift */,
+				845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */,
 			);
 			path = Dummy;
 			sourceTree = "<group>";
@@ -3872,6 +3879,8 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */,
+				845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */,
 				841BAA1D2BD15CDC000C73E4 /* CallEvent.swift */,
 				841BAA2D2BD15CDE000C73E4 /* CallStatsReportSummaryResponse.swift */,
 				841BAA1F2BD15CDC000C73E4 /* CallTimeline.swift */,
@@ -5295,6 +5304,7 @@
 				84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */,
 				40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */,
 				842B8E222A2DFED900863A87 /* CallNotificationEvent.swift in Sources */,
+				845C09842C0DEB5C00F725B3 /* LimitsSettingsRequest.swift in Sources */,
 				84DC38DA29ADFCFD00946713 /* Extensions.swift in Sources */,
 				8490032229D308A000AD9BB4 /* AudioSettingsRequest.swift in Sources */,
 				84DC38B629ADFCFD00946713 /* QueryMembersResponse.swift in Sources */,
@@ -5303,6 +5313,7 @@
 				84DC38D429ADFCFD00946713 /* CallSettingsResponse.swift in Sources */,
 				84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */,
 				842B8E2E2A2DFED900863A87 /* RejectCallResponse.swift in Sources */,
+				845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
 				8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */,
 				84DC38D929ADFCFD00946713 /* OpenISO8601DateFormatter.swift in Sources */,
@@ -5405,6 +5416,7 @@
 				40E9B3B72BCD941600ACF18F /* SFUResponse+Dummy.swift in Sources */,
 				40F017672BBEF1B700E89FD1 /* CallIngressResponse+Dummy.swift in Sources */,
 				406303422AD848000091AE77 /* CallParticipant_Mock.swift in Sources */,
+				845C09872C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */,
 				841FF5032A5D6FEC00809BBB /* CallsController_Tests.swift in Sources */,
 				40F017592BBEF0A800E89FD1 /* HLSSettingsResponse+Dummy.swift in Sources */,
 				4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */,

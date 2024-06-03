@@ -1311,9 +1311,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private func addOnParticipantsChangeHandler() {
         Task { [weak self] in
-            for await _ in await state.callParticipantsUpdates() {
+            guard let self else { return }
+            for await _ in await self.state.callParticipantsUpdates() {
                 log.debug("received participant event", subsystems: .webRTC)
-                await self?.handleParticipantsUpdated()
+                await self.handleParticipantsUpdated()
             }
         }
     }

@@ -18,8 +18,9 @@ public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
     public var participantsCountByRole: [String: Int]
     public var rejectedBy: [String: Date]
     public var startedAt: Date?
+    public var timerEndsAt: Date?
 
-    public init(acceptedBy: [String: Date], endedAt: Date? = nil, id: String, liveEndedAt: Date? = nil, liveStartedAt: Date? = nil, participants: [CallParticipantResponse], participantsCountByRole: [String: Int], rejectedBy: [String: Date], startedAt: Date? = nil) {
+    public init(acceptedBy: [String: Date], endedAt: Date? = nil, id: String, liveEndedAt: Date? = nil, liveStartedAt: Date? = nil, participants: [CallParticipantResponse], participantsCountByRole: [String: Int], rejectedBy: [String: Date], startedAt: Date? = nil, timerEndsAt: Date? = nil) {
         self.acceptedBy = acceptedBy
         self.endedAt = endedAt
         self.id = id
@@ -29,6 +30,7 @@ public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
         self.participantsCountByRole = participantsCountByRole
         self.rejectedBy = rejectedBy
         self.startedAt = startedAt
+        self.timerEndsAt = timerEndsAt
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -41,6 +43,7 @@ public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
         case participantsCountByRole = "participants_count_by_role"
         case rejectedBy = "rejected_by"
         case startedAt = "started_at"
+        case timerEndsAt = "timer_ends_at"
     }
 
     // Encodable protocol methods
@@ -56,6 +59,6 @@ public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
         try container.encode(participantsCountByRole, forKey: .participantsCountByRole)
         try container.encode(rejectedBy, forKey: .rejectedBy)
         try container.encodeIfPresent(startedAt, forKey: .startedAt)
+        try container.encodeIfPresent(timerEndsAt, forKey: .timerEndsAt)
     }
 }
-
