@@ -297,11 +297,15 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - members: list of members that are part of the call.
     ///  - ring: whether the call should ring.
+    ///  - maxDuration: An optional integer representing the maximum duration of the call in seconds.
+    ///  - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
     public func startCall(
         callType: String,
         callId: String,
         members: [Member],
-        ring: Bool = false
+        ring: Bool = false,
+        maxDuration: Int? = nil,
+        maxParticipants: Int? = nil
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
@@ -313,7 +317,12 @@ open class CallViewModel: ObservableObject {
             self.call = call
             Task {
                 do {
-                    let callData = try await call.create(members: membersRequest, ring: ring)
+                    let callData = try await call.create(
+                        members: membersRequest,
+                        ring: ring,
+                        maxDuration: maxDuration,
+                        maxParticipants: maxParticipants
+                    )
                     let timeoutSeconds = TimeInterval(
                         callData.settings.ring.autoCancelTimeoutMs / 1000
                     )

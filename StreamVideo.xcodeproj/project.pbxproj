@@ -686,6 +686,8 @@
 		845C09872C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845C09892C0DFA5E00F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845C098A2C0DFE7200F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
+		845C098D2C0DFEBC00F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C098C2C0DFEBC00F725B3 /* SessionTimer.swift */; };
+		845C098E2C0E05BA00F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C098C2C0DFEBC00F725B3 /* SessionTimer.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
 		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -1662,6 +1664,7 @@
 		845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LimitsSettingsRequest.swift; sourceTree = "<group>"; };
 		845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LimitsSettingsResponse.swift; sourceTree = "<group>"; };
 		845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LimitsSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
+		845C098C2C0DFEBC00F725B3 /* SessionTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTimer.swift; sourceTree = "<group>"; };
 		845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver_Tests.swift; sourceTree = "<group>"; };
 		845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastUtils_Tests.swift; sourceTree = "<group>"; };
 		8468821228DFA448003BA9EE /* UnsecureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsecureRepository.swift; sourceTree = "<group>"; };
@@ -2325,6 +2328,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				845C098B2C0DFEAB00F725B3 /* SessionTimer */,
 				403EFC9D2BDBFDEE0057C248 /* Feedback */,
 				40CB9FA52B7FB1B2006BED93 /* Snapshot */,
 				409386182AA09E3900FF5AF4 /* MemoryLogDestination */,
@@ -3567,6 +3571,14 @@
 				8490032A29D4769700AD9BB4 /* CallConnectingView.swift */,
 			);
 			path = CallingViews;
+			sourceTree = "<group>";
+		};
+		845C098B2C0DFEAB00F725B3 /* SessionTimer */ = {
+			isa = PBXGroup;
+			children = (
+				845C098C2C0DFEBC00F725B3 /* SessionTimer.swift */,
+			);
+			path = SessionTimer;
 			sourceTree = "<group>";
 		};
 		845E31042A7121BE004DC470 /* Screensharing */ = {
@@ -4872,6 +4884,7 @@
 				40F445B42A9E01B2004BE3DA /* AuthenticationProvider.swift in Sources */,
 				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
+				845C098D2C0DFEBC00F725B3 /* SessionTimer.swift in Sources */,
 				403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
@@ -4996,6 +5009,7 @@
 				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
 				40AB354F2B738C5D00E465CC /* ChangeEnvironmentViewModifier.swift in Sources */,
 				407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */,
+				845C098E2C0E05BA00F725B3 /* SessionTimer.swift in Sources */,
 				40AB35512B738C6400E465CC /* DemoStatsView.swift in Sources */,
 				406A8EB42AA1D8F5001F598A /* LoginView.swift in Sources */,
 				40AB35502B738C6000E465CC /* LongPressToFocusViewModifier.swift in Sources */,
