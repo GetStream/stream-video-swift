@@ -65,6 +65,10 @@ struct DebugMenu: View {
     @State private var tokenExpiration: AppEnvironment.TokenExpiration = AppEnvironment.tokenExpiration {
         didSet { AppEnvironment.tokenExpiration = tokenExpiration }
     }
+    
+    @State private var callExpiration: AppEnvironment.CallExpiration = AppEnvironment.callExpiration {
+        didSet { AppEnvironment.callExpiration = callExpiration }
+    }
 
     @State private var isLogsViewerVisible: Bool = false
 
@@ -99,6 +103,12 @@ struct DebugMenu: View {
                 currentValue: tokenExpiration,
                 label: "Token Expiration"
             ) { self.tokenExpiration = $0 }
+            
+            makeMenu(
+                for: [.never, .twoMinutes, .fiveMinutes, .tenMinutes],
+                currentValue: callExpiration,
+                label: "Call Expiration"
+            ) { self.callExpiration = $0 }
 
             makeMenu(
                 for: [.enabled, .disabled],

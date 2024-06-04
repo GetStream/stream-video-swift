@@ -320,3 +320,46 @@ extension AppEnvironment {
         }
     }()
 }
+
+extension AppEnvironment {
+
+    enum CallExpiration: Hashable, Debuggable {
+        case never
+        case twoMinutes
+        case fiveMinutes
+        case tenMinutes
+        case custom(Int)
+
+        var title: String {
+            switch self {
+            case .never:
+                return "Never"
+            case .twoMinutes:
+                return "2'"
+            case .fiveMinutes:
+                return "5'"
+            case .tenMinutes:
+                return "10'"
+            case let .custom(value):
+                return "\(value)\""
+            }
+        }
+
+        var duration: Int? {
+            switch self {
+            case .never:
+                return nil
+            case .twoMinutes:
+                return 2 * 60
+            case .fiveMinutes:
+                return 5 * 60
+            case .tenMinutes:
+                return 10 * 60
+            case let .custom(value):
+                return value
+            }
+        }
+    }
+
+    static var callExpiration: CallExpiration = .never
+}

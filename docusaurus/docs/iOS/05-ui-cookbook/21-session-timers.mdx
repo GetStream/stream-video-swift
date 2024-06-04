@@ -1,0 +1,326 @@
+---
+title: Session Timers
+description: Documentation on using session timers.
+---
+
+# Session Timers
+
+In some cases, you want to be able to limit the duration of a call. StreamVideo supports this use-case by allowing you to specify the duration of a call on creation. Additionally, it provides you a way to extend the duration during the call, if needed.
+
+## Low-level client capabilities
+
+First, let's see how we can create a call that has limited duration.
+
+```swift
+let call = streamVideo.call(callType: "default", callId: "callId")
+try await call.create(members: [], maxDuration: 300)
+```
+
+This code will create a call, which will have a duration of 300 seconds (5 minutes), as soon as the session is started (a participant joined the call). 
+
+You can check the start date of a call with the following code:
+
+```swift
+let startedAt = call.state.session?.startedAt
+```
+
+When the `maxDuration` of a call is specified, the call session also provides the `timerEndsAt` value, which provides the date when the call will end. When a call is ended, all the participants are kicked out of the call.
+
+```swift
+let timerEndsAt = call.state.session?.timerEndsAt
+```
+
+## Extending the call duration
+
+You can also extend the duration of a call, both before or during the call. To do that, you should use the `call.update` method:
+
+```swift
+let newDuration = (call.state.settings?.limits.maxDurationSeconds ?? 0) + Int(extendDuration)
+try await call.update(settingsOverride: .init(limits: .init(maxDurationSeconds: newDuration)))
+```
+
+When the call duration is extended, the `timerEndsAt` will be updated to reflect that change.
+
+# Example implementation
+
+Let's see how we can put these methods together in a sample session timer implementation. 
+
+In this cookbook, we will show a popup that will notify the user that a call will end soon. It will also allow the creator of the call to extend its duration.
+
+Prerequisite for following along is a working StreamVideo integration and the ability to establish calls. To help with that, check our [tutorials](https://getstream.io/video/sdk/ios/#tutorials) and getting started [docs](https://getstream.io/video/docs/ios/basics/quickstart/).
+
+## Session Timer example
+
+Let's create a new Swift file, and call it `SessionTimer`. We will put the following contents in it:
+
+```swift
+@MainActor class SessionTimer: ObservableObject {
+    
+    @Published var showTimerAlert: Bool = false {
+        didSet {
+            if showTimerAlert, let timerEndsAt {
+                sessionEndCountdown?.invalidate()
+                secondsUntilEnd = timerEndsAt.timeIntervalSinceNow
+                sessionEndCountdown = Timer.scheduledTimer(
+                    withTimeInterval: 1.0,
+                    repeats: true,
+                    block: { [weak self] _ in
+                        guard let self else { return }
+                        log.debug("Showing timer alert")
+                        Task { @MainActor in
+                            if self.secondsUntilEnd <= 0 {
+                                self.sessionEndCountdown?.invalidate()
+                                self.sessionEndCountdown = nil
+                                self.secondsUntilEnd = 0
+                                return
+                            }
+                            self.secondsUntilEnd -= 1
+                        }
+                    }
+                )
+            }
+        }
+    }
+    @Published var secondsUntilEnd: TimeInterval = 0
+    @Published var permissionRequest: PermissionRequestEvent?
+
+    private var call: Call?
+    private var cancellables = Set<AnyCancellable>()
+    private var timerEndsAt: Date? {
+        didSet {
+            setupTimerIfNeeded()
+        }
+    }
+
+    private var timer: Timer?
+    private var sessionEndCountdown: Timer?
+    
+    private let alertInterval: TimeInterval
+    
+    private var extendDuration: TimeInterval
+    
+    private let changeMaxDurationPermission = Permission(
+        rawValue: OwnCapability.changeMaxDuration.rawValue
+    )
+    
+    let extensionTime: TimeInterval
+    
+    var showExtendCallDurationButton: Bool {
+        call?.state.ownCapabilities.contains(.changeMaxDuration) == true
+    }
+
+    @MainActor init(
+        call: Call?,
+        alertInterval: TimeInterval,
+        extendDuration: TimeInterval = 120
+    ) {
+        self.call = call
+        self.alertInterval = alertInterval
+        self.extendDuration = extendDuration
+        self.extensionTime = extendDuration
+        timerEndsAt = call?.state.session?.timerEndsAt
+        setupTimerIfNeeded()
+        subscribeForSessionUpdates()
+        subscribeForPermissionRequests()
+    }
+    
+    func extendCallDuration() {
+        guard let call else { return }
+        Task {
+            do {
+                let newDuration = (call.state.settings?.limits.maxDurationSeconds ?? 0) + Int(extendDuration)
+                extendDuration += extendDuration
+                log.debug("Extending call duration to \(newDuration) seconds")
+                try await call.update(settingsOverride: .init(limits: .init(maxDurationSeconds: newDuration)))
+                showTimerAlert = false
+            } catch {
+                log.error("Error extending call duration \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    nonisolated func requestCallExtensionCapability() {
+        Task {
+            do {
+                try await call?.request(
+                    permissions: [changeMaxDurationPermission]
+                )
+            } catch {
+                log.error("Error requesting call permission \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    nonisolated func grantPermissionRequest() {
+        Task {
+            guard let permissionRequest = await permissionRequest else { return }
+            try await call?.grant(
+                permissions: [changeMaxDurationPermission],
+                for: permissionRequest.user.id
+            )
+            await self.cleanUpPermissionRequest()
+        }
+    }
+    
+    func rejectPermissionRequest() {
+        cleanUpPermissionRequest()
+    }
+    
+    // MARK: - private
+    
+    private func cleanUpPermissionRequest() {
+        permissionRequest = nil
+    }
+    
+    private func subscribeForSessionUpdates() {
+        self.call?.state.$session.sink { [weak self] response in
+            guard let self else { return }
+            if response?.timerEndsAt != self.timerEndsAt {
+                self.timerEndsAt = response?.timerEndsAt
+            }
+        }
+        .store(in: &cancellables)
+    }
+    
+    private func subscribeForPermissionRequests() {
+        guard let call else { return }
+        Task {
+            for await event in call.subscribe(for: PermissionRequestEvent.self) {
+                if event.permissions.contains(OwnCapability.changeMaxDuration.rawValue) {
+                    self.permissionRequest = event
+                }
+            }
+        }
+    }
+    
+    private func setupTimerIfNeeded() {
+        timer?.invalidate()
+        timer = nil
+        if let timerEndsAt {
+            let alertDate = timerEndsAt.addingTimeInterval(-alertInterval)
+            let timerInterval = alertDate.timeIntervalSinceNow
+            if timerInterval <= 0 {
+                showTimerAlert = true
+                return
+            }
+            log.debug("Starting a timer in \(timerInterval) seconds")
+            timer = Timer.scheduledTimer(
+                withTimeInterval: timerInterval,
+                repeats: false,
+                block: { [weak self] _ in
+                    guard let self else { return }
+                    log.debug("Showing timer alert")
+                    Task { @MainActor in
+                        self.showTimerAlert = true
+                    }
+                }
+            )
+        }
+    }
+    
+    deinit {
+        timer?.invalidate()
+        sessionEndCountdown?.invalidate()
+        timer = nil
+        sessionEndCountdown = nil
+    }
+}
+```
+
+The session timer will be used in our SwiftUI view shown during a call. It will provide information when the session timer popup should be shown, as well as a countdown timer.
+
+The `showTimerAlert` published variable will be set to true whenever the popup should be shown. This value is set whenever the `timerEndsAt` variable is updated. We listen to this value in the `subscribeForSessionUpdates` method above.
+
+When the popup is shown, we start a timer called `sessionEndCountdown`, which will count down the seconds until the call is ended. We will use this value in the UI layer to inform the user.
+
+We also created a method called `extendCallDuration`, which will allows us the extend the duration of the call, which would be an option provided to the user.
+
+Next, let's declare this timer in our view shown during a duration of the call:
+
+```swift
+@StateObject var sessionTimer: SessionTimer
+
+init(
+    // other params ommited
+    call: Call?
+) {
+    _sessionTimer = .init(wrappedValue: .init(call: call, alertInterval: 60))
+}
+```
+
+Our `SessionTimer` is created with a `Call` object, and an `alertInterval`. The alert interval in seconds tells us when the popup for session end should appear. The 60 seconds value means that the popup will be shown a minute before the session expires. Depending on your app's use-case, you can set a bigger value.
+
+We can set the popup view as an overlay to your existing call view:
+
+```swift
+YourExistingCallView()
+    .overlay(
+        sessionTimer.showTimerAlert ? DemoSessionTimerView(sessionTimer: sessionTimer) : nil
+    )
+```
+
+## View implementation
+
+Next, let's see a sample implementation of the `DemoSessionTimerView`:
+
+```swift
+struct DemoSessionTimerView: View {
+    
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    public var formatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .positional
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.zeroFormattingBehavior = .pad
+        return formatter
+    }()
+
+    @ObservedObject var sessionTimer: SessionTimer
+    
+    var body: some View {
+        VStack {
+            HStack {
+                if let duration = formatter.string(from: sessionTimer.secondsUntilEnd) {
+                    Text("Call will end in \(duration)")
+                        .font(fonts.body.monospacedDigit())
+                        .minimumScaleFactor(0.2)
+                        .lineLimit(1)
+                } else {
+                    Text("Call will end soon")
+                }
+                Divider()
+                if sessionTimer.showExtendCallDurationButton {
+                    Button(action: {
+                        sessionTimer.extendCallDuration()
+                    }, label: {
+                        Text("Extend for \(Int(sessionTimer.extensionTime / 60)) min")
+                            .bold()
+                    })
+                }
+            }
+            .foregroundColor(Color(colors.callDurationColor))
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+            .background(Color(colors.participantBackground))
+            .clipShape(Capsule())
+            .frame(height: 60)
+            .padding(.top, 80)
+            
+            Spacer()
+        }
+    }
+}
+```
+
+In the implementation, we are formatting the `secondsUntilEnd` value from the `sessionTimer`, in order to inform the user about the session end. 
+
+Additionally, we expose a button for extending the call duration. The visibility of this button is controlled by the `showExtendCallDurationButton` from the `sessionTimer`, which checks if the user has the `changeMaxDuration` capability:
+
+```swift
+var showExtendCallDurationButton: Bool {
+    call?.state.ownCapabilities.contains(.changeMaxDuration) == true
+}
+```
+
+With that, you can have a working implementation of a session timer.
