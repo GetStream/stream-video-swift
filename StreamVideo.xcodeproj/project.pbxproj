@@ -686,6 +686,10 @@
 		845C09872C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845C09892C0DFA5E00F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
 		845C098A2C0DFE7200F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */; };
+		845C09912C0E0B7600F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09902C0E0B7600F725B3 /* SessionTimer.swift */; };
+		845C09932C0E1BF900F725B3 /* DemoSessionTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */; };
+		845C09942C0E1BFF00F725B3 /* DemoSessionTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */; };
+		845C09952C10A7D700F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09902C0E0B7600F725B3 /* SessionTimer.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
 		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -1662,6 +1666,8 @@
 		845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LimitsSettingsRequest.swift; sourceTree = "<group>"; };
 		845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LimitsSettingsResponse.swift; sourceTree = "<group>"; };
 		845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LimitsSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
+		845C09902C0E0B7600F725B3 /* SessionTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTimer.swift; sourceTree = "<group>"; };
+		845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSessionTimerView.swift; sourceTree = "<group>"; };
 		845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver_Tests.swift; sourceTree = "<group>"; };
 		845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastUtils_Tests.swift; sourceTree = "<group>"; };
 		8468821228DFA448003BA9EE /* UnsecureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsecureRepository.swift; sourceTree = "<group>"; };
@@ -2325,6 +2331,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				845C098F2C0E0B6B00F725B3 /* SessionTimer */,
 				403EFC9D2BDBFDEE0057C248 /* Feedback */,
 				40CB9FA52B7FB1B2006BED93 /* Snapshot */,
 				409386182AA09E3900FF5AF4 /* MemoryLogDestination */,
@@ -2997,6 +3004,7 @@
 				40F446012A9E2C23004BE3DA /* DemoCallView.swift */,
 				844ADA6A2AD4439D00769F6A /* DemoCallsView.swift */,
 				844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */,
+				845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */,
 			);
 			path = CallView;
 			sourceTree = "<group>";
@@ -3567,6 +3575,14 @@
 				8490032A29D4769700AD9BB4 /* CallConnectingView.swift */,
 			);
 			path = CallingViews;
+			sourceTree = "<group>";
+		};
+		845C098F2C0E0B6B00F725B3 /* SessionTimer */ = {
+			isa = PBXGroup;
+			children = (
+				845C09902C0E0B7600F725B3 /* SessionTimer.swift */,
+			);
+			path = SessionTimer;
 			sourceTree = "<group>";
 		};
 		845E31042A7121BE004DC470 /* Screensharing */ = {
@@ -4872,6 +4888,7 @@
 				40F445B42A9E01B2004BE3DA /* AuthenticationProvider.swift in Sources */,
 				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
+				845C09912C0E0B7600F725B3 /* SessionTimer.swift in Sources */,
 				403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
@@ -4922,6 +4939,7 @@
 				4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */,
 				40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */,
 				40B499CA2AC1A5E100A53B60 /* OSLogDestination.swift in Sources */,
+				845C09932C0E1BF900F725B3 /* DemoSessionTimerView.swift in Sources */,
 				409146162B6924B6007F3C17 /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */,
 				401A64AB2A9DF7EC00534ED1 /* DemoChatAdapter.swift in Sources */,
@@ -4984,6 +5002,7 @@
 				402F04AF2B7245F800CA1986 /* DemoCallView.swift in Sources */,
 				40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */,
 				4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */,
+				845C09952C10A7D700F725B3 /* SessionTimer.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
 				40AB354D2B738C5A00E465CC /* DemoVideoCallParticipantModifier.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
@@ -5020,6 +5039,7 @@
 				40F017882BC014D800E89FD1 /* DemoApp+Sentry.swift in Sources */,
 				40AB35462B738C4500E465CC /* DemoParticipantOptionsButton.swift in Sources */,
 				40AB35532B738C6A00E465CC /* LinkInfoView.swift in Sources */,
+				845C09942C0E1BFF00F725B3 /* DemoSessionTimerView.swift in Sources */,
 				40AB35612B738C7D00E465CC /* ReactionOverlayView.swift in Sources */,
 				406A8E932AA1D7BF001F598A /* LoginViewModel.swift in Sources */,
 				402C544B2B6B9FF000672BFB /* CallButtonView.swift in Sources */,

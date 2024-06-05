@@ -297,23 +297,39 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - members: list of members that are part of the call.
     ///  - ring: whether the call should ring.
+    ///  - maxDuration: An optional integer representing the maximum duration of the call in seconds.
+    ///  - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
     public func startCall(
         callType: String,
         callId: String,
         members: [Member],
-        ring: Bool = false
+        ring: Bool = false,
+        maxDuration: Int? = nil,
+        maxParticipants: Int? = nil
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
         let membersRequest = members.map(\.toMemberRequest)
         if !ring {
-            enterCall(callType: callType, callId: callId, members: membersRequest, ring: ring)
+            enterCall(
+                callType: callType,
+                callId: callId,
+                members: membersRequest,
+                ring: ring,
+                maxDuration: maxDuration,
+                maxParticipants: maxParticipants
+            )
         } else {
             let call = streamVideo.call(callType: callType, callId: callId)
             self.call = call
             Task {
                 do {
-                    let callData = try await call.create(members: membersRequest, ring: ring)
+                    let callData = try await call.create(
+                        members: membersRequest,
+                        ring: ring,
+                        maxDuration: maxDuration,
+                        maxParticipants: maxParticipants
+                    )
                     let timeoutSeconds = TimeInterval(
                         callData.settings.ring.autoCancelTimeoutMs / 1000
                     )
@@ -494,7 +510,9 @@ open class CallViewModel: ObservableObject {
         callType: String,
         callId: String,
         members: [MemberRequest],
-        ring: Bool = false
+        ring: Bool = false,
+        maxDuration: Int? = nil,
+        maxParticipants: Int? = nil
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -503,7 +521,13 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let call = call ?? streamVideo.call(callType: callType, callId: callId)
-                let options = CreateCallOptions(members: members)
+                var settingsRequest: CallSettingsRequest?
+                if maxDuration != nil || maxParticipants != nil {
+                    settingsRequest = CallSettingsRequest(
+                        limits: .init(maxDurationSeconds: maxDuration, maxParticipants: maxParticipants)
+                    )
+                }
+                let options = CreateCallOptions(members: members, settings: settingsRequest)
                 let settings = localCallSettingsChange ? callSettings : nil
                 try await call.join(
                     create: true,
