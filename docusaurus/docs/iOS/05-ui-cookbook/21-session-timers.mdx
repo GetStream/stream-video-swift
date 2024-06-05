@@ -24,7 +24,7 @@ You can check the start date of a call with the following code:
 let startedAt = call.state.session?.startedAt
 ```
 
-When the `maxDuration` of a call is specified, the call session also provides the `timerEndsAt` value, which provides the date when the call will end. When a call is ended, all the participants are kicked out of the call.
+When the `maxDuration` of a call is specified, the call session also provides the `timerEndsAt` value, which provides the date when the call will end. When a call is ended, all the participants are removed from the call.
 
 ```swift
 let timerEndsAt = call.state.session?.timerEndsAt
@@ -182,8 +182,6 @@ Let's create a new Swift file, and call it `SessionTimer`. We will put the follo
     deinit {
         timer?.invalidate()
         sessionEndCountdown?.invalidate()
-        timer = nil
-        sessionEndCountdown = nil
     }
 }
 ```

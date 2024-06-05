@@ -65,7 +65,7 @@ import SwiftUI
         call?.state.ownCapabilities.contains(.changeMaxDuration) == true
     }
 
-    @MainActor init(
+    init(
         call: Call?,
         alertInterval: TimeInterval,
         extendDuration: TimeInterval = 120
@@ -135,7 +135,5 @@ import SwiftUI
     deinit {
         timer?.invalidate()
         sessionEndCountdown?.invalidate()
-        timer = nil
-        sessionEndCountdown = nil
     }
 }

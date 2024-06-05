@@ -689,6 +689,7 @@
 		845C09912C0E0B7600F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09902C0E0B7600F725B3 /* SessionTimer.swift */; };
 		845C09932C0E1BF900F725B3 /* DemoSessionTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */; };
 		845C09942C0E1BFF00F725B3 /* DemoSessionTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */; };
+		845C09952C10A7D700F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09902C0E0B7600F725B3 /* SessionTimer.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
 		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -5001,6 +5002,7 @@
 				402F04AF2B7245F800CA1986 /* DemoCallView.swift in Sources */,
 				40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */,
 				4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */,
+				845C09952C10A7D700F725B3 /* SessionTimer.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
 				40AB354D2B738C5A00E465CC /* DemoVideoCallParticipantModifier.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
