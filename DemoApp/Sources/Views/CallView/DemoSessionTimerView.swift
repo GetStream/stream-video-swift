@@ -33,13 +33,6 @@ struct DemoSessionTimerView: View {
                         Text("Extend for \(Int(sessionTimer.extensionTime / 60)) min")
                             .bold()
                     })
-                } else {
-                    Button(action: {
-                        sessionTimer.requestCallExtensionCapability()
-                    }, label: {
-                        Text("Request call extension capability")
-                            .bold()
-                    })
                 }
             }
             .foregroundColor(Color(colors.callDurationColor))
@@ -52,51 +45,5 @@ struct DemoSessionTimerView: View {
             
             Spacer()
         }
-    }
-}
-
-struct DemoSessionTimerRequest: View {
-    
-    @Injected(\.colors) var colors
-    
-    @ObservedObject var sessionTimer: SessionTimer
-    
-    var body: some View {
-        if let permissionRequest = sessionTimer.permissionRequest {
-            BottomView {
-                VStack(spacing: 16) {
-                    Text(title(for: permissionRequest))
-                    HStack(spacing: 32) {
-                        Button(action: {
-                            sessionTimer.grantPermissionRequest()
-                        }, label: {
-                            Text("Accept")
-                                .bold()
-                        })
-                        
-                        Button(action: {
-                            sessionTimer.rejectPermissionRequest()
-                        }, label: {
-                            Text("Ignore")
-                                .bold()
-                        })
-                    }
-                }
-                .foregroundColor(Color(colors.callDurationColor))
-                .padding(.horizontal)
-                .padding(.vertical, 4)
-                .background(Color(colors.participantBackground))
-                .cornerRadius(16)
-            }
-            .padding()
-            .padding(.bottom, 60)
-        } else {
-            EmptyView()
-        }
-    }
-    
-    func title(for permissionRequest: PermissionRequestEvent) -> String {
-        let name = permissionRequest.user.name ?? permissionRequest.user.id
-        return "User \(name) wants to request call extension capability"
     }
 }

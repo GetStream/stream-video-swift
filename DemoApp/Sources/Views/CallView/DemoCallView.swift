@@ -77,9 +77,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             .overlay(
                 sessionTimer.showTimerAlert ? DemoSessionTimerView(sessionTimer: sessionTimer) : nil
             )
-            .overlay(
-                sessionTimer.permissionRequest != nil ? DemoSessionTimerRequest(sessionTimer: sessionTimer) : nil
-            )
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
             .toastView(toast: $snapshotViewModel.toast)

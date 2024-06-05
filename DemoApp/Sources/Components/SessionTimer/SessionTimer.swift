@@ -19,24 +19,26 @@ import SwiftUI
                     repeats: true,
                     block: { [weak self] _ in
                         guard let self else { return }
-                        log.debug("Showing timer alert")
                         Task { @MainActor in
                             if self.secondsUntilEnd <= 0 {
                                 self.sessionEndCountdown?.invalidate()
                                 self.sessionEndCountdown = nil
                                 self.secondsUntilEnd = 0
+                                self.showTimerAlert = false
                                 return
                             }
                             self.secondsUntilEnd -= 1
                         }
                     }
                 )
+            } else if !showTimerAlert {
+                sessionEndCountdown?.invalidate()
+                secondsUntilEnd = 0
             }
         }
     }
     
     @Published var secondsUntilEnd: TimeInterval = 0
-    @Published var permissionRequest: PermissionRequestEvent?
 
     private var call: Call?
     private var cancellables = Set<AnyCancellable>()
@@ -75,7 +77,6 @@ import SwiftUI
         timerEndsAt = call?.state.session?.timerEndsAt
         setupTimerIfNeeded()
         subscribeForSessionUpdates()
-        subscribeForPermissionRequests()
     }
     
     func extendCallDuration() {
@@ -93,38 +94,7 @@ import SwiftUI
         }
     }
     
-    nonisolated func requestCallExtensionCapability() {
-        Task {
-            do {
-                try await call?.request(
-                    permissions: [changeMaxDurationPermission]
-                )
-            } catch {
-                log.error("Error requesting call permission \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    nonisolated func grantPermissionRequest() {
-        Task {
-            guard let permissionRequest = await permissionRequest else { return }
-            try await call?.grant(
-                permissions: [changeMaxDurationPermission],
-                for: permissionRequest.user.id
-            )
-            await self.cleanUpPermissionRequest()
-        }
-    }
-    
-    func rejectPermissionRequest() {
-        cleanUpPermissionRequest()
-    }
-    
     // MARK: - private
-    
-    private func cleanUpPermissionRequest() {
-        permissionRequest = nil
-    }
     
     private func subscribeForSessionUpdates() {
         call?.state.$session.sink { [weak self] response in
@@ -136,24 +106,14 @@ import SwiftUI
         .store(in: &cancellables)
     }
     
-    private func subscribeForPermissionRequests() {
-        guard let call else { return }
-        Task {
-            for await event in call.subscribe(for: PermissionRequestEvent.self) {
-                if event.permissions.contains(OwnCapability.changeMaxDuration.rawValue) {
-                    self.permissionRequest = event
-                }
-            }
-        }
-    }
-    
     private func setupTimerIfNeeded() {
         timer?.invalidate()
         timer = nil
+        showTimerAlert = false
         if let timerEndsAt {
             let alertDate = timerEndsAt.addingTimeInterval(-alertInterval)
             let timerInterval = alertDate.timeIntervalSinceNow
-            if timerInterval <= 0 {
+            if timerInterval < 0 {
                 showTimerAlert = true
                 return
             }
