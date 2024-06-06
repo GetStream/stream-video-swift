@@ -855,12 +855,13 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Reject Call
      
-     - parameter type: (path)  
-     - parameter id: (path)  
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter rejectCallRequest: (body)
      - returns: RejectCallResponse
      */
 
-    open func rejectCall(type: String, id: String) async throws -> RejectCallResponse {
+    open func rejectCall(type: String, id: String, rejectCallRequest: RejectCallRequest) async throws -> RejectCallResponse {
         var localVariablePath = "/video/call/{type}/{id}/reject"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -871,21 +872,13 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: rejectCallRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(RejectCallResponse.self, from: $0)
         }
     }
-    /**
-     Reject Call
-     - POST /video/call/{type}/{id}/reject
-     -   Sends events: - call.rejected  Required permissions: - JoinCall 
-     - parameter type: (path)  
-     - parameter id: (path)  
-     - returns: RequestBuilder<RejectCallResponse> 
-     */
-
 
     /**
      Request permission
@@ -1544,7 +1537,7 @@ protocol DefaultAPIEndpoints {
         func queryMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse
 
 
-        func rejectCall(type: String, id: String) async throws -> RejectCallResponse
+        func rejectCall(type: String, id: String, rejectCallRequest: RejectCallRequest) async throws -> RejectCallResponse
 
 
         func requestPermission(type: String, id: String, requestPermissionRequest: RequestPermissionRequest) async throws -> RequestPermissionResponse

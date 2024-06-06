@@ -322,9 +322,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             .response
     }
 
-    /// Rejects a call.
+    /// Rejects a call with an optional reason.
+    /// - Parameters:
+    ///   - reason: An optional `String` providing the reason for the rejection. Default is `nil`.
+    /// - Returns: A `RejectCallResponse` object indicating the result of the rejection.
+    /// - Throws: An error if the rejection fails.
     @discardableResult
-    public func reject() async throws -> RejectCallResponse {
+    public func reject(reason: String? = nil) async throws -> RejectCallResponse {
         let currentStage = stateMachine.currentStage
         switch currentStage.id {
         case .rejecting:
@@ -334,7 +338,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return stage.response
         default:
             try stateMachine.transition(.rejecting(self, actionBlock: { [coordinatorClient, callType, callId, streamVideo, cId] in
-                let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
+                let response = try await coordinatorClient.rejectCall(
+                    type: callType,
+                    id: callId,
+                    rejectCallRequest: .init(reason: reason)
+                )
                 if streamVideo.state.ringingCall?.cId == cId {
                     Task { @MainActor in
                         streamVideo.state.ringingCall = nil

@@ -690,6 +690,7 @@
 		845C09932C0E1BF900F725B3 /* DemoSessionTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */; };
 		845C09942C0E1BFF00F725B3 /* DemoSessionTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */; };
 		845C09952C10A7D700F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09902C0E0B7600F725B3 /* SessionTimer.swift */; };
+		845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09962C11AAA100F725B3 /* RejectCallRequest.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
 		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -1668,6 +1669,7 @@
 		845C09862C0DF3D100F725B3 /* LimitsSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LimitsSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
 		845C09902C0E0B7600F725B3 /* SessionTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTimer.swift; sourceTree = "<group>"; };
 		845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSessionTimerView.swift; sourceTree = "<group>"; };
+		845C09962C11AAA100F725B3 /* RejectCallRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RejectCallRequest.swift; sourceTree = "<group>"; };
 		845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver_Tests.swift; sourceTree = "<group>"; };
 		845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastUtils_Tests.swift; sourceTree = "<group>"; };
 		8468821228DFA448003BA9EE /* UnsecureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsecureRepository.swift; sourceTree = "<group>"; };
@@ -3897,6 +3899,7 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				845C09962C11AAA100F725B3 /* RejectCallRequest.swift */,
 				845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */,
 				845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */,
 				841BAA1D2BD15CDC000C73E4 /* CallEvent.swift */,
@@ -5240,6 +5243,7 @@
 				84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
+				845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */,
 				40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */,
 				402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */,
 				8487D8B02A697E9A00536ED4 /* VideoCapturing.swift in Sources */,
