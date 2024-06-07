@@ -35,6 +35,7 @@ extension AppEnvironment {
 
     enum BaseURL: String, Debuggable, CaseIterable {
         case pronto = "https://pronto.getstream.io"
+        case pronto_staging = "https://pronto.getstream.io/ "
         case staging = "https://staging.getstream.io"
         case demo = "https://getstream.io"
         case legacy = "https://stream-calls-dogfood.vercel.app"
@@ -44,6 +45,8 @@ extension AppEnvironment {
             switch self {
             case .pronto:
                 return "Pronto"
+            case .pronto_staging:
+                return "ProntoStaging"
             case .staging:
                 return "Staging"
             case .legacy:
@@ -316,4 +319,47 @@ extension AppEnvironment {
             return .thirtyMinutes
         }
     }()
+}
+
+extension AppEnvironment {
+
+    enum CallExpiration: Hashable, Debuggable {
+        case never
+        case twoMinutes
+        case fiveMinutes
+        case tenMinutes
+        case custom(Int)
+
+        var title: String {
+            switch self {
+            case .never:
+                return "Never"
+            case .twoMinutes:
+                return "2'"
+            case .fiveMinutes:
+                return "5'"
+            case .tenMinutes:
+                return "10'"
+            case let .custom(value):
+                return "\(value)\""
+            }
+        }
+
+        var duration: Int? {
+            switch self {
+            case .never:
+                return nil
+            case .twoMinutes:
+                return 2 * 60
+            case .fiveMinutes:
+                return 5 * 60
+            case .tenMinutes:
+                return 10 * 60
+            case let .custom(value):
+                return value
+            }
+        }
+    }
+
+    static var callExpiration: CallExpiration = .never
 }

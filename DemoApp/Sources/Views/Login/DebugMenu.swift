@@ -25,6 +25,8 @@ struct DebugMenu: View {
                 AppEnvironment.baseURL = .pronto
             case .demo:
                 AppEnvironment.baseURL = .demo
+            case .pronto_staging:
+                AppEnvironment.baseURL = .pronto_staging
             default:
                 break
             }
@@ -63,13 +65,17 @@ struct DebugMenu: View {
     @State private var tokenExpiration: AppEnvironment.TokenExpiration = AppEnvironment.tokenExpiration {
         didSet { AppEnvironment.tokenExpiration = tokenExpiration }
     }
+    
+    @State private var callExpiration: AppEnvironment.CallExpiration = AppEnvironment.callExpiration {
+        didSet { AppEnvironment.callExpiration = callExpiration }
+    }
 
     @State private var isLogsViewerVisible: Bool = false
 
     var body: some View {
         Menu {
             makeMenu(
-                for: [.demo, .pronto],
+                for: [.demo, .pronto, .pronto_staging],
                 currentValue: baseURL,
                 label: "Environment"
             ) { self.baseURL = $0 }
@@ -97,6 +103,12 @@ struct DebugMenu: View {
                 currentValue: tokenExpiration,
                 label: "Token Expiration"
             ) { self.tokenExpiration = $0 }
+            
+            makeMenu(
+                for: [.never, .twoMinutes, .fiveMinutes, .tenMinutes],
+                currentValue: callExpiration,
+                label: "Call Expiration"
+            ) { self.callExpiration = $0 }
 
             makeMenu(
                 for: [.enabled, .disabled],

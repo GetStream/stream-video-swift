@@ -83,7 +83,6 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
             log.debug("AudioFilter:\(id) received an audioBuffer to process, while it's not active.")
             return
         }
-        log.debug("AudioFilter:\(id) processing channels:\(buffer.channels) frames:\(buffer.frames).")
         processClosure(
             buffer.channels,
             buffer.bands,

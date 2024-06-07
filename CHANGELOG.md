@@ -4,7 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- Support for session timers. [#425](https://github.com/GetStream/stream-video-swift/pull/425)
+- Rejecting call contains a reason parameter. [#428](https://github.com/GetStream/stream-video-swift/issues/428)
 
 # [1.0.6](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.6)
 _May 30, 2024_

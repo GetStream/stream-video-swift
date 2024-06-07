@@ -33,6 +33,26 @@ extension User {
                 "marcelo",
                 "Marcelo",
                 "https://getstream.io/static/aaf5fb17dcfd0a3dd885f62bd21b325a/802d2/marcelo-pires.webp"
+            ),
+            (
+                "kanat",
+                "Kanat",
+                "https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-9a37493e25e0-512"
+            ),
+            (
+                "alex",
+                "Alex",
+                "https://ca.slack-edge.com/T02RM6X6B-U05UD37MA1G-f062f8b7afc2-512"
+            ),
+            (
+                "valia",
+                "Bernard Windler",
+                "https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg"
+            ),
+            (
+                "vasil",
+                "Willard Hesser",
+                "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg"
             )
         ].map {
             User(id: $0.0, name: $0.1, imageURL: URL(string: $0.2))

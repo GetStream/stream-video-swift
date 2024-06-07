@@ -20,7 +20,8 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     @State var mutedIndicatorShown = false
     @StateObject var snapshotViewModel: DemoSnapshotViewModel
-
+    @StateObject var sessionTimer: SessionTimer
+    
     private let viewFactory: ViewFactory
 
     init(
@@ -32,6 +33,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
         self.microphoneChecker = microphoneChecker
         self.viewModel = viewModel
         _snapshotViewModel = .init(wrappedValue: .init(viewModel))
+        _sessionTimer = .init(wrappedValue: .init(call: viewModel.call, alertInterval: 60))
     }
 
     var body: some View {
@@ -71,6 +73,9 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
                         ? FireworksView(config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast))
                         : nil
                 }
+            )
+            .overlay(
+                sessionTimer.showTimerAlert ? DemoSessionTimerView(sessionTimer: sessionTimer) : nil
             )
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)

@@ -115,7 +115,8 @@ struct SimpleCallingView: View {
                         callType: .default,
                         callId: .unique,
                         members: [],
-                        ring: false
+                        ring: false,
+                        maxDuration: AppEnvironment.callExpiration.duration
                     )
                 } label: {
                     CallButtonView(
