@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.0.7](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.7)
+_June 07, 2024_
+
 ### ✅ Added
 - Support for session timers. [#425](https://github.com/GetStream/stream-video-swift/pull/425)
 - Rejecting call contains a reason parameter. [#428](https://github.com/GetStream/stream-video-swift/issues/428)
