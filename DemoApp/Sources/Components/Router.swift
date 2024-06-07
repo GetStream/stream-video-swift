@@ -181,6 +181,7 @@ final class Router: ObservableObject {
             user: user,
             token: .init(stringLiteral: token),
             videoConfig: videoConfig,
+            pushNotificationsConfig: AppState.shared.pushNotificationConfiguration,
             tokenProvider: tokenProvider
         )
 

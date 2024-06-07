@@ -22,11 +22,17 @@ struct DebugMenu: View {
         didSet {
             switch baseURL {
             case .pronto:
+                AppState.shared.pushNotificationConfiguration = .default
                 AppEnvironment.baseURL = .pronto
             case .demo:
+                AppState.shared.pushNotificationConfiguration = .default
                 AppEnvironment.baseURL = .demo
-            case .pronto_staging:
-                AppEnvironment.baseURL = .pronto_staging
+            case .prontoStaging:
+                AppState.shared.pushNotificationConfiguration = .default
+                AppEnvironment.baseURL = .prontoStaging
+            case let .custom(baseURL, apiKey, token):
+                AppState.shared.apiKey = apiKey
+                AppEnvironment.baseURL = .custom(baseURL: baseURL, apiKey: apiKey, token: token)
             default:
                 break
             }
@@ -77,7 +83,7 @@ struct DebugMenu: View {
     var body: some View {
         Menu {
             makeMenu(
-                for: [.demo, .pronto, .pronto_staging],
+                for: [.demo, .pronto, .prontoStaging],
                 currentValue: baseURL,
                 additionalItems: { customEnvironmentView },
                 label: "Environment"

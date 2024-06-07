@@ -33,19 +33,36 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
-    enum BaseURL: String, Debuggable, CaseIterable {
-        case pronto = "https://pronto.getstream.io"
-        case pronto_staging = "https://pronto.getstream.io/ "
-        case staging = "https://staging.getstream.io"
-        case demo = "https://getstream.io"
-        case legacy = "https://stream-calls-dogfood.vercel.app"
+    indirect enum BaseURL: Debuggable, CaseIterable {
+        case pronto
+        case prontoStaging
+        case staging
+        case demo
+        case legacy
+        case custom(baseURL: BaseURL, apiKey: String, token: String)
 
-        var url: URL { URL(string: rawValue)! }
+        var url: URL {
+            switch self {
+            case .pronto:
+                URL(string: "https://pronto.getstream.io")!
+            case .prontoStaging:
+                URL(string: "https://pronto.getstream.io")!
+            case .staging:
+                URL(string: "https://staging.getstream.io")!
+            case .demo:
+                URL(string: "https://getstream.io")!
+            case .legacy:
+                URL(string: "https://stream-calls-dogfood.vercel.app")!
+            case let .custom(baseURL, _, _):
+                baseURL.url
+            }
+        }
+
         var title: String {
             switch self {
             case .pronto:
                 return "Pronto"
-            case .pronto_staging:
+            case .prontoStaging:
                 return "ProntoStaging"
             case .staging:
                 return "Staging"

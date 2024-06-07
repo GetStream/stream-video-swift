@@ -7331,8 +7331,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-chat-swiftui";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.48.0;
+				kind = exactVersion;
+				version = 4.56.0;
 			};
 		};
 		401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */ = {

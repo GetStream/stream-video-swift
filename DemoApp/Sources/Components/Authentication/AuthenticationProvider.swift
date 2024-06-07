@@ -28,6 +28,7 @@ enum AuthenticationProvider {
         callIds: [String] = []
     ) async throws -> UserToken {
         if case let .custom(_, apiKey, token) = AppEnvironment.baseURL {
+            log.debug("Authentication info userId:\(userId) apiKey:\(apiKey) token:\(token)")
             return .init(stringLiteral: token)
         }
 
@@ -37,7 +38,7 @@ enum AuthenticationProvider {
                 return "pronto"
             case .pronto:
                 return "pronto"
-            case .pronto_staging:
+            case .prontoStaging:
                 return "pronto-staging"
             case .legacy:
                 return "pronto"
