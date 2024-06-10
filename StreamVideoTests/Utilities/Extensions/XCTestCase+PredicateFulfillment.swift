@@ -7,9 +7,9 @@ import XCTest
 
 extension XCTestCase {
 
+    @MainActor
     func fulfillment(
         timeout: TimeInterval = defaultTimeout,
-        enforceOrder: Bool = false,
         file: StaticString = #file,
         line: UInt = #line,
         block: @escaping () -> Bool
@@ -23,12 +23,14 @@ extension XCTestCase {
         await safeFulfillment(
             of: [waitExpectation],
             timeout: timeout,
-            enforceOrder: enforceOrder,
             file: file,
             line: line
         )
+
+        XCTAssertTrue(block(), file: file, line: line)
     }
 
+    @MainActor
     func safeFulfillment(
         of expectations: [XCTestExpectation],
         timeout seconds: TimeInterval = .infinity,
