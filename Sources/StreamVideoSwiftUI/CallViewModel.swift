@@ -169,6 +169,7 @@ open class CallViewModel: ObservableObject {
 
     private var lastLayoutChange = Date()
     private var enteringCallTask: Task<Void, Never>?
+    private var callEventsSubscriptionTask: Task<Void, Never>?
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
@@ -193,6 +194,10 @@ open class CallViewModel: ObservableObject {
 
     private var automaticLayoutHandling = true
 
+    /// A simple value, signalling that the viewModel has been subscribed to receive callEvents from
+    /// `StreamVideo`.
+    var isSubscribedToCallEvents: Bool { callEventsSubscriptionTask != nil }
+
     public init(
         participantsLayout: ParticipantsLayout = .grid,
         callSettings: CallSettings? = nil
@@ -205,6 +210,11 @@ open class CallViewModel: ObservableObject {
         pictureInPictureAdapter.onSizeUpdate = { [weak self] in
             self?.updateTrackSize($0, for: $1)
         }
+    }
+
+    deinit {
+        enteringCallTask?.cancel()
+        callEventsSubscriptionTask?.cancel()
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
@@ -579,7 +589,7 @@ open class CallViewModel: ObservableObject {
     }
 
     private func subscribeToCallEvents() {
-        Task {
+        callEventsSubscriptionTask = Task {
             for await event in streamVideo.subscribe() {
                 if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
                     switch callEvent {
