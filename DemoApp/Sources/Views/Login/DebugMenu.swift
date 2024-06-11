@@ -22,11 +22,17 @@ struct DebugMenu: View {
         didSet {
             switch baseURL {
             case .pronto:
+                AppState.shared.pushNotificationConfiguration = .default
                 AppEnvironment.baseURL = .pronto
             case .demo:
+                AppState.shared.pushNotificationConfiguration = .default
                 AppEnvironment.baseURL = .demo
-            case .pronto_staging:
-                AppEnvironment.baseURL = .pronto_staging
+            case .prontoStaging:
+                AppState.shared.pushNotificationConfiguration = .default
+                AppEnvironment.baseURL = .prontoStaging
+            case let .custom(baseURL, apiKey, token):
+                AppState.shared.apiKey = apiKey
+                AppEnvironment.baseURL = .custom(baseURL: baseURL, apiKey: apiKey, token: token)
             default:
                 break
             }
@@ -56,7 +62,7 @@ struct DebugMenu: View {
     @State private var chatIntegration: AppEnvironment.ChatIntegration = AppEnvironment.chatIntegration {
         didSet { AppEnvironment.chatIntegration = chatIntegration }
     }
-    
+
     @State private var pictureInPictureIntegration: AppEnvironment.PictureInPictureIntegration = AppEnvironment
         .pictureInPictureIntegration {
         didSet { AppEnvironment.pictureInPictureIntegration = pictureInPictureIntegration }
@@ -65,18 +71,27 @@ struct DebugMenu: View {
     @State private var tokenExpiration: AppEnvironment.TokenExpiration = AppEnvironment.tokenExpiration {
         didSet { AppEnvironment.tokenExpiration = tokenExpiration }
     }
-    
+
     @State private var callExpiration: AppEnvironment.CallExpiration = AppEnvironment.callExpiration {
         didSet { AppEnvironment.callExpiration = callExpiration }
     }
 
     @State private var isLogsViewerVisible: Bool = false
 
+    @State private var presentsCustomEnvironmentSetup: Bool = false
+
+    @State private var customCallExpirationValue: Int = 0
+    @State private var presentsCustomCallExpiration: Bool = false
+
+    @State private var customTokenExpirationValue: Int = 0
+    @State private var presentsCustomTokenExpiration: Bool = false
+
     var body: some View {
         Menu {
             makeMenu(
-                for: [.demo, .pronto, .pronto_staging],
+                for: [.demo, .pronto, .prontoStaging],
                 currentValue: baseURL,
+                additionalItems: { customEnvironmentView },
                 label: "Environment"
             ) { self.baseURL = $0 }
 
@@ -101,14 +116,16 @@ struct DebugMenu: View {
             makeMenu(
                 for: [.never, .oneMinute, .fiveMinutes, .thirtyMinutes],
                 currentValue: tokenExpiration,
+                additionalItems: { customTokenExpirationView },
                 label: "Token Expiration"
             ) { self.tokenExpiration = $0 }
-            
+
             makeMenu(
                 for: [.never, .twoMinutes, .fiveMinutes, .tenMinutes],
                 currentValue: callExpiration,
+                additionalItems: { customCallExpirationView },
                 label: "Call Expiration"
-            ) { self.callExpiration = $0 }
+            ) { _ in self.callExpiration = .custom(10) }
 
             makeMenu(
                 for: [.enabled, .disabled],
@@ -141,9 +158,124 @@ struct DebugMenu: View {
         } label: {
             Image(systemName: "gearshape.fill")
                 .foregroundColor(colors.text)
-        }.sheet(isPresented: $isLogsViewerVisible) {
+        }
+        .sheet(isPresented: $isLogsViewerVisible) {
             NavigationView {
                 MemoryLogViewer()
+            }
+        }
+        .sheet(isPresented: $presentsCustomEnvironmentSetup) {
+            NavigationView {
+                if case let .custom(baseURL, apiKey, token) = AppEnvironment.baseURL {
+                    DemoCustomEnvironmentView(
+                        baseURL: baseURL,
+                        apiKey: apiKey,
+                        token: token
+                    ) {
+                        self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
+                        presentsCustomEnvironmentSetup = false
+                    }
+                } else {
+                    DemoCustomEnvironmentView(
+                        baseURL: .demo,
+                        apiKey: "",
+                        token: ""
+                    ) {
+                        self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
+                        presentsCustomEnvironmentSetup = false
+                    }
+                }
+            }
+        }
+        .alertWithTextField(
+            title: "Enter Call expiration interval in seconds",
+            placeholder: "Interval",
+            presentationBinding: $presentsCustomCallExpiration,
+            valueBinding: $customCallExpirationValue,
+            transformer: { Int($0) ?? 0 },
+            action: { self.callExpiration = .custom(customCallExpirationValue) }
+        )
+        .alertWithTextField(
+            title: "Enter Token expiration interval in seconds",
+            placeholder: "Interval",
+            presentationBinding: $presentsCustomTokenExpiration,
+            valueBinding: $customTokenExpirationValue,
+            transformer: { Int($0) ?? 0 },
+            action: { self.tokenExpiration = .custom(customTokenExpirationValue) }
+        )
+    }
+
+    @ViewBuilder
+    private var customEnvironmentView: some View {
+        if case let .custom(_, apiKey, _) = AppEnvironment.baseURL {
+            Button {
+                presentsCustomEnvironmentSetup = true
+            } label: {
+                Label {
+                    Text("Custom (\(apiKey))")
+                } icon: {
+                    Image(systemName: "checkmark")
+                }
+            }
+        } else {
+            Button {
+                presentsCustomEnvironmentSetup = true
+            } label: {
+                Label {
+                    Text("Custom")
+                } icon: {
+                    EmptyView()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customTokenExpirationView: some View {
+        if case let .custom(value) = AppEnvironment.tokenExpiration {
+            Button {
+                presentsCustomTokenExpiration = true
+            } label: {
+                Label {
+                    Text("Custom (\(value)\")")
+                } icon: {
+                    Image(systemName: "checkmark")
+                }
+            }
+        } else {
+            Button {
+                presentsCustomTokenExpiration = true
+            } label: {
+                Label {
+                    Text("Custom")
+                } icon: {
+                    EmptyView()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customCallExpirationView: some View {
+        if case let .custom(value) = AppEnvironment.callExpiration {
+            Button {
+                presentsCustomCallExpiration = true
+            } label: {
+                Label {
+                    Text("Custom (\(value)\")")
+                } icon: {
+                    Image(systemName: "checkmark")
+                }
+            }
+        } else {
+            Button {
+                presentsCustomCallExpiration = true
+            } label: {
+                Label {
+                    Text("Custom")
+                } icon: {
+                    EmptyView()
+                }
             }
         }
     }
@@ -152,6 +284,7 @@ struct DebugMenu: View {
     private func makeMenu<Item: Debuggable>(
         for items: [Item],
         currentValue: Item,
+        @ViewBuilder additionalItems: () -> some View = { EmptyView() },
         label: String,
         updater: @escaping (Item) -> Void
     ) -> some View {
@@ -169,6 +302,8 @@ struct DebugMenu: View {
                     }
                 }
             }
+
+            additionalItems()
         } label: {
             Text(label)
         }

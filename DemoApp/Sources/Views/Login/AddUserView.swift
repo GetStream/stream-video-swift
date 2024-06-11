@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-struct AddUserView: View {
+struct DemoAddUserView: View {
 
     @Injected(\.appearance) var appearance
     @Environment(\.presentationMode) var presentationMode
@@ -49,6 +49,117 @@ struct AddUserView: View {
 
     private var buttonDisabled: Bool {
         name.isEmpty || id.isEmpty
+    }
+}
+
+@MainActor
+struct DemoCustomEnvironmentView: View {
+
+    @Injected(\.appearance) var appearance
+    @Environment(\.presentationMode) var presentationMode
+
+    @State var baseURL: AppEnvironment.BaseURL
+    @State var apiKey: String
+    @State var token: String
+    @State var usesDefaultPushNotificationConfig = false
+    @State var pushNotificationName: String = AppState.shared.pushNotificationConfiguration.pushProviderInfo.name
+    @State var voIPPushNotificationName: String = AppState.shared.pushNotificationConfiguration.voipPushProviderInfo.name
+    var completionHandler: (AppEnvironment.BaseURL, String, String) -> Void
+
+    init(
+        baseURL: AppEnvironment.BaseURL,
+        apiKey: String,
+        token: String,
+        completionHandler: @escaping (AppEnvironment.BaseURL, String, String) -> Void
+    ) {
+        self.baseURL = baseURL
+        self.apiKey = apiKey
+        self.token = token
+        usesDefaultPushNotificationConfig = AppState.shared.pushNotificationConfiguration == .default
+        self.completionHandler = completionHandler
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack {
+                Picker("Base on which environment?", selection: $baseURL) {
+                    Text(AppEnvironment.BaseURL.demo.title).tag(AppEnvironment.BaseURL.demo)
+                    Text(AppEnvironment.BaseURL.pronto.title).tag(AppEnvironment.BaseURL.pronto)
+                }
+                .pickerStyle(.segmented)
+
+                TextField("API Key", text: $apiKey)
+                    .textFieldStyle(DemoTextfieldStyle())
+
+                DemoTextEditor(text: $token, placeholder: "Token")
+
+                pushNotificationConfiguration
+
+                Button {
+                    AppState.shared.pushNotificationConfiguration = usesDefaultPushNotificationConfig
+                        ? .default
+                        : .init(
+                            pushProviderInfo: .init(name: pushNotificationName, pushProvider: .apn),
+                            voipPushProviderInfo: .init(name: voIPPushNotificationName, pushProvider: .apn)
+                        )
+                    completionHandler(baseURL, apiKey, token)
+                } label: {
+                    CallButtonView(
+                        title: "Complete Setup",
+                        isDisabled: buttonDisabled
+                    )
+                    .disabled(buttonDisabled)
+                }
+                Spacer()
+            }
+        }
+        .padding()
+        .navigationTitle("Custom Environment")
+    }
+
+    private var buttonDisabled: Bool {
+        apiKey.isEmpty || token.isEmpty
+    }
+
+    @ViewBuilder
+    private var pushNotificationConfiguration: some View {
+        VStack {
+            DemoCheckboxView(isChecked: $usesDefaultPushNotificationConfig) {
+                Text("Use `.default` push notification configuration")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
+            } icon: {
+                Image(systemName: usesDefaultPushNotificationConfig ? "checkmark.square" : "square")
+            }
+            .foregroundColor(usesDefaultPushNotificationConfig ? appearance.colors.text : .init(appearance.colors.textLowEmphasis))
+
+            if !usesDefaultPushNotificationConfig {
+                VStack {
+                    TextField("Push Notification", text: $pushNotificationName)
+                    TextField("VoIP Push Notification", text: $voIPPushNotificationName)
+                }
+                .textFieldStyle(DemoTextfieldStyle())
+            }
+        }
+        .padding(.vertical, 16)
+    }
+}
+
+struct DemoCheckboxView<Label: View, CheckIcon: View>: View {
+    @Binding var isChecked: Bool
+    var label: () -> Label
+    var icon: () -> CheckIcon
+
+    var body: some View {
+        Button {
+            isChecked.toggle()
+        } label: {
+            HStack(spacing: 8) {
+                label()
+                    .frame(maxWidth: .infinity)
+                icon()
+            }
+        }
     }
 }
 

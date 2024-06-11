@@ -10,6 +10,16 @@ extension User {
     static let builtIn: [User] = {
         [
             (
+                "valia",
+                "Bernard Windler",
+                "https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg"
+            ),
+            (
+                "vasil",
+                "Willard Hesser",
+                "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg"
+            ),
+            (
                 "thierry",
                 "Thierry",
                 "https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp"
@@ -43,16 +53,6 @@ extension User {
                 "alex",
                 "Alex",
                 "https://ca.slack-edge.com/T02RM6X6B-U05UD37MA1G-f062f8b7afc2-512"
-            ),
-            (
-                "valia",
-                "Bernard Windler",
-                "https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg"
-            ),
-            (
-                "vasil",
-                "Willard Hesser",
-                "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg"
             )
         ].map {
             User(id: $0.0, name: $0.1, imageURL: URL(string: $0.2))
