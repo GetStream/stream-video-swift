@@ -200,20 +200,13 @@ extension WebSocketClient: WebSocketEngineDelegate {
             }
             return
         }
-        
-        switch event {
-        case let .coordinatorEvent(event):
-            log.info("received WS \(event.type) event from coordinator \(connectURL)", subsystems: .webSocket)
-        case .internalEvent:
-            break
-        case .sfuEvent:
-            break
-        }
 
         if let error = event.error() {
-            log.error("received an error event", subsystems: .webSocket, error: error)
+            log.error("Received an error webSocket event.", subsystems: .webSocket, error: error)
             connectionState = .disconnecting(source: .serverInitiated(error: ClientError(with: error)))
             return
+        } else {
+            log.info("Received webSocket event \(event.name).", subsystems: .webSocket)
         }
 
         // healthcheck events are not passed to batcher

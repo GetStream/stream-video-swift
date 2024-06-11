@@ -182,6 +182,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var currentScreenhsareType: ScreensharingType?
     private var isFastReconnecting = false
     private var disconnectTime: Date?
+    private var addOnParticipantsChangeHandlerTask: Task<Void, Never>?
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
@@ -257,7 +258,11 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         subscribeToAppLifecycleChanges()
         subscribeToInternetConnectionUpdates()
     }
-    
+
+    deinit {
+        addOnParticipantsChangeHandlerTask?.cancel()
+    }
+
     func connect(
         callSettings: CallSettings,
         videoOptions: VideoOptions,
@@ -1310,7 +1315,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     private func addOnParticipantsChangeHandler() {
-        Task { [weak self] in
+        addOnParticipantsChangeHandlerTask = Task { [weak self] in
             guard let self else { return }
             for await _ in await self.state.callParticipantsUpdates() {
                 log.debug("received participant event", subsystems: .webRTC)

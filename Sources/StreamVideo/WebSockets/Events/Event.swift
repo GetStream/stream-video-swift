@@ -13,7 +13,7 @@ extension Event {
     var name: String {
         String(describing: Self.self)
     }
-
+    
     func unwrap() -> VideoEvent? {
         if let unwrapped = self as? VideoEvent {
             return unwrapped
@@ -25,7 +25,7 @@ extension Event {
         }
         return nil
     }
-
+    
     func forCall(cid: String) -> Bool {
         guard let videoEvent = unwrap() else {
             return false
@@ -42,7 +42,7 @@ internal enum WrappedEvent: Event {
     case internalEvent(Event)
     case coordinatorEvent(VideoEvent)
     case sfuEvent(Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)
-
+    
     func healthcheck() -> HealthCheckInfo? {
         switch self {
         case let .coordinatorEvent(event):
@@ -67,7 +67,7 @@ internal enum WrappedEvent: Event {
         }
         return nil
     }
-
+    
     func error() -> Error? {
         switch self {
         case let .coordinatorEvent(event):
@@ -84,15 +84,42 @@ internal enum WrappedEvent: Event {
         }
         return nil
     }
-
+    
     var name: String {
         switch self {
         case let .coordinatorEvent(event):
-            return "Coordinator:\(event.name)"
+            return "Coordinator:\(event.type)"
         case let .sfuEvent(event):
-            return "SFU:\(type(of: event))"
+            return "SFU:\(event.name)"
         case let .internalEvent(event):
             return "Internal:\(event.name)"
+        }
+    }
+}
+
+extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: Event {
+    var name: String {
+        switch self {
+        case .subscriberOffer: return "subscriberOffer"
+        case .publisherAnswer: return "publisherAnswer"
+        case .connectionQualityChanged: return "connectionQualityChanged"
+        case .audioLevelChanged: return "audioLevelChanged"
+        case .iceTrickle: return "iceTrickle"
+        case .changePublishQuality: return "changePublishQuality"
+        case .participantJoined: return "participantJoined"
+        case .participantLeft: return "participantLeft"
+        case .dominantSpeakerChanged: return "dominantSpeakerChanged"
+        case .joinResponse: return "joinResponse"
+        case .healthCheckResponse: return "healthCheckResponse"
+        case .trackPublished: return "trackPublished"
+        case .trackUnpublished: return "trackUnpublished"
+        case .error: return "error"
+        case .callGrantsUpdated: return "callGrantsUpdated"
+        case .goAway: return "goAway"
+        case .iceRestart: return "iceRestart"
+        case .pinsUpdated: return "pinsUpdated"
+        case .callEnded: return "callEnded"
+        case .participantUpdated: return "participantUpdated"
         }
     }
 }
