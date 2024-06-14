@@ -417,5 +417,5 @@ extension AppEnvironment {
         }
     }
 
-    static var autoLeavePolicy: AutoLeavePolicy = .lastParticipant
+    static var autoLeavePolicy: AutoLeavePolicy = .default
 }
