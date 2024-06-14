@@ -279,6 +279,9 @@
 		40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */; };
 		40C4DF4D2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4C2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift */; };
 		40C4DF502C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */; };
+		40C4DF522C1C60A80035DBC2 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
+		40C4DF532C1C60A80035DBC2 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */; };
 		40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8312B61325500FB9DB2 /* ModalButton.swift */; };
 		40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */; };
@@ -1011,6 +1014,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		40C4DF542C1C60A80035DBC2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F737EC287C13AC00A363F4;
+			remoteInfo = StreamVideo;
+		};
 		82392D572993C9E100941435 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
@@ -1105,6 +1115,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		40C4DF562C1C60A80035DBC2 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				40C4DF532C1C60A80035DBC2 /* StreamVideo.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		82A51F1F2AF26C1300A9CF7C /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1993,6 +2014,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40C4DF522C1C60A80035DBC2 /* StreamVideo.framework in Frameworks */,
 				822FF7212AEAD100000202A7 /* StreamSwiftTestHelpers in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4403,11 +4425,13 @@
 				82392D4D2993C9E100941435 /* Sources */,
 				82392D4E2993C9E100941435 /* Frameworks */,
 				82392D4F2993C9E100941435 /* Resources */,
+				40C4DF562C1C60A80035DBC2 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				82392D582993C9E100941435 /* PBXTargetDependency */,
+				40C4DF552C1C60A80035DBC2 /* PBXTargetDependency */,
 			);
 			name = SwiftUIDemoAppUITests;
 			packageProductDependencies = (
@@ -4892,6 +4916,7 @@
 				82D858B829EDAE0A00CF9F8B /* ParticipantActionsTests.swift in Sources */,
 				82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */,
 				82392D6F2994027C00941435 /* Sinatra.swift in Sources */,
+				40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */,
 				82392D6D2993CE7200941435 /* StreamVideoUITests.swift in Sources */,
 				82FB89372A702A9200AC16A1 /* Authentication_Tests.swift in Sources */,
 				82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */,
@@ -5870,6 +5895,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		40C4DF552C1C60A80035DBC2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
+			targetProxy = 40C4DF542C1C60A80035DBC2 /* PBXContainerItemProxy */;
+		};
 		82392D582993C9E100941435 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 842D8BC22865B31B00801910 /* DemoApp */;
