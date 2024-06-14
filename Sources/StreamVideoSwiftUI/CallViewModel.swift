@@ -194,7 +194,7 @@ open class CallViewModel: ObservableObject {
 
     private var automaticLayoutHandling = true
 
-    var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = LastParticipantAutoLeavePolicy() {
+    public var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = LastParticipantAutoLeavePolicy() {
         didSet { participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() } }
     }
 

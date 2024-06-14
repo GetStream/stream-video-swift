@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 
 protocol Debuggable: Hashable {
     var title: String { get }
@@ -389,4 +390,32 @@ extension AppEnvironment {
     }
 
     static var callExpiration: CallExpiration = .never
+}
+
+extension AppEnvironment {
+
+    enum AutoLeavePolicy: Hashable, Debuggable {
+        case `default`
+        case lastParticipant
+
+        var title: String {
+            switch self {
+            case .default:
+                return "Default"
+            case .lastParticipant:
+                return "Last Participant"
+            }
+        }
+
+        var policy: ParticipantAutoLeavePolicy {
+            switch self {
+            case .default:
+                DefaultParticipantAutoLeavePolicy()
+            case .lastParticipant:
+                LastParticipantAutoLeavePolicy()
+            }
+        }
+    }
+
+    static var autoLeavePolicy: AutoLeavePolicy = .lastParticipant
 }
