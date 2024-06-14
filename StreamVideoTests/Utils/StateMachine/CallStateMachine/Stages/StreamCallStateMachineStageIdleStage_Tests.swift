@@ -3,9 +3,9 @@
 //
 
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
-final class StreamCallStateMachineStageIdleStage_Tests: StreamVideoTestCase {
+final class StreamCallStateMachineStageIdleStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private lazy var call: Call! = .dummy()
     private lazy var allOtherStages: [StreamCallStateMachine.Stage]! = StreamCallStateMachine.Stage.ID

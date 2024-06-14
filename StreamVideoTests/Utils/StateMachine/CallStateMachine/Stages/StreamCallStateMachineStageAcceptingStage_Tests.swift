@@ -3,9 +3,9 @@
 //
 
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
-final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase {
+final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private struct TestError: Error {}
 
@@ -18,6 +18,7 @@ final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase
         .idle
     ]
     private lazy var subject: StreamCallStateMachine.Stage! = .accepting(call) { .init(duration: "123") }
+    private var transitionedToStage: StreamCallStateMachine.Stage?
 
     override func tearDown() {
         call = nil
@@ -39,10 +40,9 @@ final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase
     func testTransition() async {
         for nextStage in allOtherStages {
             if validOtherStages.contains(nextStage.id) {
-                var transitionedToStage: StreamCallStateMachine.Stage?
-                subject.transition = { transitionedToStage = $0 }
+                subject.transition = { self.transitionedToStage = $0 }
                 XCTAssertNotNil(subject.transition(from: nextStage))
-                await fulfillment(timeout: defaultTimeout) { transitionedToStage != nil }
+                await fulfillment(timeout: defaultTimeout) { self.transitionedToStage != nil }
                 XCTAssertEqual(transitionedToStage?.id, .accepted)
             } else {
                 XCTAssertNil(subject.transition(from: nextStage), "No error was thrown for \(nextStage.id)")
@@ -53,11 +53,10 @@ final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase
     func testTransitionAfterError() async {
         for nextStage in allOtherStages {
             if validOtherStages.contains(nextStage.id) {
-                var transitionedToStage: StreamCallStateMachine.Stage?
                 subject = .accepting(call) { throw TestError() }
-                subject.transition = { transitionedToStage = $0 }
+                subject.transition = { self.transitionedToStage = $0 }
                 XCTAssertNotNil(subject.transition(from: nextStage))
-                await fulfillment(timeout: defaultTimeout) { transitionedToStage != nil }
+                await fulfillment(timeout: defaultTimeout) { self.transitionedToStage != nil }
                 XCTAssertEqual(transitionedToStage?.id, .error)
             } else {
                 XCTAssertNil(subject.transition(from: nextStage), "No error was thrown for \(nextStage.id)")

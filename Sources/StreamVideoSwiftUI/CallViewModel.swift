@@ -194,8 +194,14 @@ open class CallViewModel: ObservableObject {
 
     private var automaticLayoutHandling = true
 
-    public var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = LastParticipantAutoLeavePolicy() {
-        didSet { participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() } }
+    /// The policy to whenever call events occur in order to decide if the current user should remain
+    /// in the call or not. Default value is the no operation policy `DefaultParticipantAutoLeavePolicy`,
+    public var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = DefaultParticipantAutoLeavePolicy() {
+        didSet {
+            var oldValue = oldValue
+            oldValue.onPolicyTriggered = nil
+            participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
+        }
     }
 
     /// A simple value, signalling that the viewModel has been subscribed to receive callEvents from
@@ -215,6 +221,9 @@ open class CallViewModel: ObservableObject {
             self?.updateTrackSize($0, for: $1)
         }
         
+        // As we are setting the value on init, the `didSet` won't trigger, thus
+        // we are firing it manually.
+        // For any subsequent changes, `didSet` will trigger as expected.
         participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
     }
 
