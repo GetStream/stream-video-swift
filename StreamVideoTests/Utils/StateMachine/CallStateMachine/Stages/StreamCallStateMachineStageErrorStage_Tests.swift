@@ -3,9 +3,9 @@
 //
 
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
-final class StreamCallStateMachineStageErrorStage_Tests: StreamVideoTestCase {
+final class StreamCallStateMachineStageErrorStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private struct TestError: Error {}
 
@@ -22,6 +22,7 @@ final class StreamCallStateMachineStageErrorStage_Tests: StreamVideoTestCase {
     }()
 
     private lazy var subject: StreamCallStateMachine.Stage! = .error(call, error: error)
+    private var transitionedToStage: StreamCallStateMachine.Stage?
 
     override func tearDown() {
         call = nil
@@ -45,10 +46,9 @@ final class StreamCallStateMachineStageErrorStage_Tests: StreamVideoTestCase {
     func testTransition() async {
         for nextStage in allOtherStages {
             if validOtherStages.contains(nextStage.id) {
-                var transitionedToStage: StreamCallStateMachine.Stage?
-                subject.transition = { transitionedToStage = $0 }
+                subject.transition = { self.transitionedToStage = $0 }
                 XCTAssertNotNil(subject.transition(from: nextStage))
-                await fulfillment(timeout: defaultTimeout) { transitionedToStage != nil }
+                await fulfillment(timeout: defaultTimeout) { self.transitionedToStage != nil }
                 XCTAssertEqual(transitionedToStage?.id, .idle)
             } else {
                 XCTAssertNil(subject.transition(from: nextStage), "No error was thrown for \(nextStage.id)")

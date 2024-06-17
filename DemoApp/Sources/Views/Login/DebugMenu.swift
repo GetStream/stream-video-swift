@@ -86,6 +86,10 @@ struct DebugMenu: View {
     @State private var customTokenExpirationValue: Int = 0
     @State private var presentsCustomTokenExpiration: Bool = false
 
+    @State private var autoLeavePolicy: AppEnvironment.AutoLeavePolicy = AppEnvironment.autoLeavePolicy {
+        didSet { AppEnvironment.autoLeavePolicy = autoLeavePolicy }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -138,6 +142,12 @@ struct DebugMenu: View {
                 currentValue: pictureInPictureIntegration,
                 label: "Picture in Picture Integration"
             ) { self.pictureInPictureIntegration = $0 }
+
+            makeMenu(
+                for: [.default, .lastParticipant],
+                currentValue: autoLeavePolicy,
+                label: "Auto Leave policy"
+            ) { self.autoLeavePolicy = $0 }
 
             makeMenu(
                 for: [.visible, .hidden],

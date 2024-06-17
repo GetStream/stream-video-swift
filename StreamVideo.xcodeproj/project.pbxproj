@@ -274,6 +274,11 @@
 		40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */; };
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
+		40C4DF482C1C2BFC0035DBC2 /* LastParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF412C1C215E0035DBC2 /* LastParticipantAutoLeavePolicy.swift */; };
+		40C4DF492C1C2C210035DBC2 /* Publisher+WeakAssign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */; };
+		40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */; };
+		40C4DF4D2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4C2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift */; };
+		40C4DF502C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */; };
 		40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */; };
 		40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8312B61325500FB9DB2 /* ModalButton.swift */; };
 		40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */; };
@@ -1315,6 +1320,11 @@
 		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
+		40C4DF412C1C215E0035DBC2 /* LastParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
+		40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+WeakAssign.swift"; sourceTree = "<group>"; };
+		40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
+		40C4DF4C2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
+		40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicyTests.swift; sourceTree = "<group>"; };
 		40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListViewModifier.swift; sourceTree = "<group>"; };
 		40C7B8312B61325500FB9DB2 /* ModalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalButton.swift; sourceTree = "<group>"; };
 		40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView.swift; sourceTree = "<group>"; };
@@ -2785,6 +2795,24 @@
 			path = Events;
 			sourceTree = "<group>";
 		};
+		40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */ = {
+			isa = PBXGroup;
+			children = (
+				40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */,
+				40C4DF4C2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift */,
+				40C4DF412C1C215E0035DBC2 /* LastParticipantAutoLeavePolicy.swift */,
+			);
+			path = ParticipantAutoLeavePolicy;
+			sourceTree = "<group>";
+		};
+		40C4DF4E2C1C41470035DBC2 /* ParticipantAutoLeavePolicy */ = {
+			isa = PBXGroup;
+			children = (
+				40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */,
+			);
+			path = ParticipantAutoLeavePolicy;
+			sourceTree = "<group>";
+		};
 		40C7B82A2B612D5100FB9DB2 /* ViewModifiers */ = {
 			isa = PBXGroup;
 			children = (
@@ -3342,6 +3370,7 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C4DF4E2C1C41470035DBC2 /* ParticipantAutoLeavePolicy */,
 				403FB14A2BFE14690047A696 /* StateMachine */,
 				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
 				846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */,
@@ -3791,6 +3820,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */,
 				408937892C062B0B000EEB69 /* UUIDProviding */,
 				403FF3DF2BA1D20E0092CE8A /* UnfairQueue */,
 				40FB150D2BF77CA200D5E580 /* StateMachine */,
@@ -3817,6 +3847,7 @@
 				40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */,
 				40013DDB2B87AA2300915453 /* SerialActor.swift */,
 				40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */,
+				40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */,
 				408CE0F22BD905920052EC3A /* Models+Sendable.swift */,
 			);
 			path = Utils;
@@ -5192,6 +5223,7 @@
 				84DC38B029ADFCFD00946713 /* MuteUsersRequest.swift in Sources */,
 				406AF2012AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift in Sources */,
 				84A7E18A2883638200526C98 /* URLSessionWebSocketEngine.swift in Sources */,
+				40C4DF492C1C2C210035DBC2 /* Publisher+WeakAssign.swift in Sources */,
 				408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */,
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,
@@ -5332,6 +5364,7 @@
 				40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */,
 				84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */,
 				84BAD77A2A6BFEF900733156 /* BroadcastBufferUploader.swift in Sources */,
+				40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */,
 				84DC38A429ADFCFD00946713 /* BackstageSettings.swift in Sources */,
 				84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */,
 				40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */,
@@ -5355,6 +5388,7 @@
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
 				4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */,
 				84DC38B429ADFCFD00946713 /* ICEServer.swift in Sources */,
+				40C4DF482C1C2BFC0035DBC2 /* LastParticipantAutoLeavePolicy.swift in Sources */,
 				82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */,
 				842B8E182A2DFED900863A87 /* TargetResolutionRequest.swift in Sources */,
 				406583922B877A1600B4F979 /* BackgroundImageFilterProcessor.swift in Sources */,
@@ -5364,6 +5398,7 @@
 				84DC389629ADFCFD00946713 /* EndCallResponse.swift in Sources */,
 				847BE09C29DADE0100B55D21 /* Call.swift in Sources */,
 				848CCCEF2AB8ED8F002E83A2 /* ThumbnailsSettings.swift in Sources */,
+				40C4DF4D2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift in Sources */,
 				84FC2C2228ACF2E000181490 /* PeerConnection.swift in Sources */,
 				401A0F032AB1C1B600BE2DBD /* ThermalStateObserver.swift in Sources */,
 				84D2E37929DC856D001D2118 /* CallMemberAddedEvent.swift in Sources */,
@@ -5525,6 +5560,7 @@
 				403FB1582BFE21470047A696 /* StreamCallStateMachineStageJoiningStage_Tests.swift in Sources */,
 				40F0176B2BBEF1F400E89FD1 /* EgressRTMPResponse+Dummy.swift in Sources */,
 				400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */,
+				40C4DF502C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift in Sources */,
 				4013387C2BF248E9007318BD /* Mockable.swift in Sources */,
 				402C545B2B6BE50500672BFB /* MockStreamStatistics.swift in Sources */,
 				8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */,

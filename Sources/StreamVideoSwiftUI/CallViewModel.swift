@@ -194,6 +194,16 @@ open class CallViewModel: ObservableObject {
 
     private var automaticLayoutHandling = true
 
+    /// The policy to whenever call events occur in order to decide if the current user should remain
+    /// in the call or not. Default value is the no operation policy `DefaultParticipantAutoLeavePolicy`,
+    public var participantAutoLeavePolicy: ParticipantAutoLeavePolicy = DefaultParticipantAutoLeavePolicy() {
+        didSet {
+            var oldValue = oldValue
+            oldValue.onPolicyTriggered = nil
+            participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
+        }
+    }
+
     /// A simple value, signalling that the viewModel has been subscribed to receive callEvents from
     /// `StreamVideo`.
     var isSubscribedToCallEvents: Bool { callEventsSubscriptionTask != nil }
@@ -210,6 +220,11 @@ open class CallViewModel: ObservableObject {
         pictureInPictureAdapter.onSizeUpdate = { [weak self] in
             self?.updateTrackSize($0, for: $1)
         }
+        
+        // As we are setting the value on init, the `didSet` won't trigger, thus
+        // we are firing it manually.
+        // For any subsequent changes, `didSet` will trigger as expected.
+        participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
     }
 
     deinit {
@@ -621,16 +636,9 @@ open class CallViewModel: ObservableObject {
                         log.debug("Skipping participant events for big calls")
                         return
                     }
+
                     self.participantEvent = participantEvent
-                    if participantEvent.action == .leave,
-                       callParticipants.count == 1,
-                       call?.state.session?.acceptedBy.isEmpty == false
-                    {
-                        leaveCall()
-                    } else {
-                        // The event is shown for 2 seconds.
-                        try? await Task.sleep(nanoseconds: 2_000_000_000)
-                    }
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
                     self.participantEvent = nil
                 }
             }
@@ -644,7 +652,7 @@ open class CallViewModel: ObservableObject {
 
         switch callingState {
         case .incoming where event.user?.id == streamVideo.user.id:
-            callingState = .idle
+            break
         case .outgoing where call?.cId == event.callCid:
             enterCall(
                 call: call,
@@ -726,6 +734,10 @@ open class CallViewModel: ObservableObject {
                 cameraPosition: previous.cameraPosition
             )
         }
+    }
+
+    private func participantAutoLeavePolicyTriggered() {
+        leaveCall()
     }
 }
 

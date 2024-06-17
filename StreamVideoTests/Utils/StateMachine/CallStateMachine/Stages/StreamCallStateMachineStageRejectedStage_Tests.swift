@@ -3,9 +3,9 @@
 //
 
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
-final class StreamCallStateMachineStageRejectedStage_Tests: StreamVideoTestCase {
+final class StreamCallStateMachineStageRejectedStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private struct TestError: Error {}
 

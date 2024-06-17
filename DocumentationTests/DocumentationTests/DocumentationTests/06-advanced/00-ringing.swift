@@ -34,4 +34,9 @@ fileprivate func content() {
         let call = streamVideo.call(callType: "default", callId: callId)
         let callResponse = try await call.notify()
     }
+
+    container {
+        let callViewModel = CallViewModel()
+        callViewModel.participantAutoLeavePolicy = LastParticipantAutoLeavePolicy()
+    }
 }

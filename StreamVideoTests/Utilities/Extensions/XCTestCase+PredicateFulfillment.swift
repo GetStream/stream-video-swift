@@ -12,7 +12,7 @@ extension XCTestCase {
         timeout: TimeInterval = defaultTimeout,
         file: StaticString = #file,
         line: UInt = #line,
-        block: @escaping () -> Bool
+        block: @MainActor @Sendable @escaping () -> Bool
     ) async {
         let predicate = NSPredicate { _, _ in block() }
         let waitExpectation = XCTNSPredicateExpectation(
@@ -33,7 +33,7 @@ extension XCTestCase {
     @MainActor
     func safeFulfillment(
         of expectations: [XCTestExpectation],
-        timeout seconds: TimeInterval = .infinity,
+        timeout seconds: TimeInterval = defaultTimeout,
         enforceOrder: Bool = false,
         file: StaticString = #file,
         line: UInt = #line
