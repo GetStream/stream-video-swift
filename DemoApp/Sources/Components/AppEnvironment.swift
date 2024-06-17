@@ -76,6 +76,29 @@ extension AppEnvironment {
             }
         }
 
+        func joinLink(_ callId: String, callType: String = .default) -> URL {
+            switch self {
+            case .demo:
+                return url
+                    .appendingPathComponent("video")
+                    .appendingPathComponent("demos")
+                    .appendingPathComponent("join")
+                    .appendingPathComponent(callId)
+                    .addQueryParameter("type", value: callType)
+            case let .custom(baseURL, _, _):
+                return baseURL
+                    .url
+                    .appendingPathComponent("join")
+                    .appendingPathComponent(callId)
+                    .addQueryParameter("type", value: callType)
+            default:
+                return url
+                    .appendingPathComponent("join")
+                    .appendingPathComponent(callId)
+                    .addQueryParameter("type", value: callType)
+            }
+        }
+
         static var allCases: [BaseURL] = [
             .pronto,
             .prontoStaging,
