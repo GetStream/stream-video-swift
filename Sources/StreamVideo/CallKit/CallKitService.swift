@@ -66,7 +66,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private(set) var storage: [UUID: CallEntry] = [:]
     private var active: UUID?
 
-    private var ringingTimer: Foundation.Timer?
     private var callEventsSubscription: Task<Void, Never>?
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
@@ -178,6 +177,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             endedAt: nil,
             reason: .answeredElsewhere
         )
+        ringingTimerCancellable?.cancel()
+        ringingTimerCancellable = nil
         storage[newCallEntry.callUUID] = nil
         callCache.remove(for: newCallEntry.call.cId)
     }
@@ -206,6 +207,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             endedAt: nil,
             reason: .declinedElsewhere
         )
+        ringingTimerCancellable?.cancel()
+        ringingTimerCancellable = nil
         storage[newCallEntry.callUUID] = nil
         callCache.remove(for: newCallEntry.call.cId)
     }
@@ -372,6 +375,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         .sink { [weak self] _ in
             log.debug("Detected ringing timeout, hanging up...")
             self?.callEnded(callState.call.cid)
+            self?.ringingTimerCancellable = nil
         }
     }
 
