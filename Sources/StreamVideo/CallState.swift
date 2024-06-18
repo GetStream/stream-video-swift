@@ -98,6 +98,8 @@ public class CallState: ObservableObject {
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
     
+    var sortComparators = defaultComparators
+    
     private var localCallSettingsUpdate = false
     private var durationTimer: Foundation.Timer?
         
@@ -349,7 +351,7 @@ public class CallState: ObservableObject {
             participants
                 .compactMap { participantsMap[$0.id] } + newlyAddedParticipants
         )
-        .sorted(by: defaultComparators)
+        .sorted(by: sortComparators)
 
         // Variables to hold segregated participants.
         var remoteParticipants: [CallParticipant] = []
