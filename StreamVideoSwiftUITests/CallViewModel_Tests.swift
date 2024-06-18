@@ -8,27 +8,30 @@ import XCTest
 
 final class CallViewModel_Tests: StreamVideoTestCase {
     
-    lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
-    
-    private let mockResponseBuilder = MockResponseBuilder()
-    
-    let firstUser: Member = Member(user: StreamVideo.mockUser, updatedAt: .now)
-    let secondUser: Member = Member(user: User(id: "test2"), updatedAt: .now)
-    let thirdUser: Member = Member(user: User(id: "test3"), updatedAt: .now)
-    let callType: String = .default
-    var callId: String!
-    var callCid: String!
+    private lazy var mockResponseBuilder: MockResponseBuilder! = MockResponseBuilder()
+    private lazy var firstUser: Member! = Member(user: StreamVideo.mockUser, updatedAt: .now)
+    private lazy var secondUser: Member! = Member(user: User(id: "test2"), updatedAt: .now)
+    private lazy var thirdUser: Member! = Member(user: User(id: "test3"), updatedAt: .now)
+    private lazy var callType: String! = .default
+    private lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
+    private lazy var callId: String! = UUID().uuidString
+    private lazy var participants: [Member]! = [firstUser, secondUser]
 
-    lazy var participants = [firstUser, secondUser]
-
-    override func setUp() async throws {
-        try await super.setUp()
-        LogConfig.level = .debug
-        callId = UUID().uuidString
-        callCid = "\(callType):\(callId!)"
-    }
+    private var cId: String { callCid(from: callId, callType: callType) }
 
     // MARK: - Call Events
+
+    override func tearDown() {
+        participants = nil
+        callId = nil
+        eventNotificationCenter = nil
+        callType = nil
+        thirdUser = nil
+        secondUser = nil
+        firstUser = nil
+        mockResponseBuilder = nil
+        super.tearDown()
+    }
 
     @MainActor
     func test_startCall_joiningState() {
@@ -63,16 +66,17 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         await fulfillment { callViewModel.isSubscribedToCallEvents }
 
         // When
-        eventNotificationCenter?.process(
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(
             .coordinatorEvent(
                 .typeCallRejectedEvent(.dummy(
                     call: .dummy(
-                        cid: callCid,
+                        cid: cId,
                         session: .dummy(
                             rejectedBy: [secondUser.userId: Date()]
                         )
                     ),
-                    callCid: callCid,
+                    callCid: cId,
                     createdAt: Date(),
                     user: secondUser.user.toUserResponse()
                 ))
@@ -80,49 +84,56 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         )
         
         // Then
-        await fulfillment { callViewModel.callingState == .idle }
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .idle
+        }
     }
     
     @MainActor
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
         // Given
-        let threeParticipants = participants + [thirdUser]
+        let threeParticipants: [Member] = participants + [thirdUser]
         let callViewModel = callViewModelWithRingingCall(participants: threeParticipants)
         await fulfillment { callViewModel.isSubscribedToCallEvents }
         
         // When
         let firstCallResponse = mockResponseBuilder.makeCallResponse(
-            cid: callCid,
+            cid: cId,
             rejectedBy: [secondUser.userId: Date()]
         )
         let firstReject = CallRejectedEvent(
             call: firstCallResponse,
-            callCid: callCid,
+            callCid: cId,
             createdAt: Date(),
             user: User(id: secondUser.userId).toUserResponse()
         )
         let first = WrappedEvent.coordinatorEvent(.typeCallRejectedEvent(firstReject))
-        eventNotificationCenter?.process(first)
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(first)
         
         // Then
-        await fulfillment { callViewModel.callingState == .outgoing }
+        await fulfillment("CallViewModel.callingState expected:.outgoing actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .outgoing
+        }
 
         // When
         let secondCallResponse = mockResponseBuilder.makeCallResponse(
-            cid: callCid,
+            cid: cId,
             rejectedBy: [secondUser.userId: Date(), thirdUser.userId: Date()]
         )
         let secondReject = CallRejectedEvent(
             call: secondCallResponse,
-            callCid: callCid,
+            callCid: cId,
             createdAt: Date(),
             user: User(id: thirdUser.userId).toUserResponse()
         )
         let second = WrappedEvent.coordinatorEvent(.typeCallRejectedEvent(secondReject))
-        eventNotificationCenter?.process(second)
-        
+        eventNotificationCenter.process(second)
+
         // Then
-        await fulfillment { callViewModel.callingState == .idle }
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .idle
+        }
     }
     
     @MainActor
@@ -133,14 +144,17 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // When
         let event = CallEndedEvent(
-            call: mockResponseBuilder.makeCallResponse(cid: callCid),
-            callCid: callCid,
+            call: mockResponseBuilder.makeCallResponse(cid: cId),
+            callCid: cId,
             createdAt: Date()
         )
-        eventNotificationCenter?.process(.coordinatorEvent(.typeCallEndedEvent(event)))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(.coordinatorEvent(.typeCallEndedEvent(event)))
         
         // Then
-        await fulfillment { callViewModel.callingState == .idle }
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .idle
+        }
     }
     
     @MainActor
@@ -151,14 +165,17 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // When
         let event = BlockedUserEvent(
-            callCid: callCid,
+            callCid: cId,
             createdAt: Date(),
             user: User(id: firstUser.userId).toUserResponse()
         )
-        eventNotificationCenter?.process(.coordinatorEvent(.typeBlockedUserEvent(event)))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(.coordinatorEvent(.typeBlockedUserEvent(event)))
         
         // Then
-        await fulfillment { callViewModel.callingState == .idle }
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .idle
+        }
     }
     
     @MainActor
@@ -169,19 +186,22 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(
-            cid: callCid
+            cid: cId
         )
         call?.state.update(from: callData)
         callViewModel.setActiveCall(call)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
 
         // When
         let event = BlockedUserEvent(
-            callCid: callCid,
+            callCid: cId,
             createdAt: Date(),
             user: User(id: secondUser.userId).toUserResponse()
         )
-        eventNotificationCenter?.process(.coordinatorEvent(.typeBlockedUserEvent(event)))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(.coordinatorEvent(.typeBlockedUserEvent(event)))
         
         // Then
         await fulfillment { callViewModel.call?.state.blockedUserIds.first == self.secondUser.userId }
@@ -203,7 +223,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.hangUp()
         
         // Then
-        await fulfillment { callViewModel.callingState == .idle }
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .idle
+        }
     }
     
     @MainActor
@@ -218,8 +240,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         let event = CallRingEvent(
-            call: mockResponseBuilder.makeCallResponse(cid: callCid),
-            callCid: callCid,
+            call: mockResponseBuilder.makeCallResponse(cid: cId),
+            callCid: cId,
             createdAt: Date(),
             members: [],
             sessionId: "123",
@@ -235,7 +257,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         )
 
         let wrapped = WrappedEvent.coordinatorEvent(.typeCallRingEvent(event))
-        eventNotificationCenter?.process(wrapped)
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(wrapped)
         
         await fulfillment {
             if case .incoming(_) = callViewModel.callingState {
@@ -257,7 +280,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.acceptCall(callType: callType, callId: callId)
         
         // Then
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
     }
     
     @MainActor
@@ -269,10 +294,10 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         let event = CallRingEvent(
             call: mockResponseBuilder.makeCallResponse(
-                cid: callCid,
+                cid: cId,
                 rejectedBy: [firstUser.userId: Date()]
             ),
-            callCid: callCid,
+            callCid: cId,
             createdAt: Date(),
             members: [],
             sessionId: "123",
@@ -286,7 +311,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 updatedAt: Date()
             )
         )
-        eventNotificationCenter?.process(.coordinatorEvent(.typeCallRingEvent(event)))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(.coordinatorEvent(.typeCallRingEvent(event)))
         
         await fulfillment {
             if case .incoming(_) = callViewModel.callingState {
@@ -308,7 +334,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.rejectCall(callType: callType, callId: callId)
         
         // Then
-        await fulfillment { callViewModel.callingState == .idle }
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .idle
+        }
     }
     
     @MainActor
@@ -321,7 +349,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // Then
         XCTAssert(callViewModel.callingState == .joining)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
     }
     
     @MainActor
@@ -360,7 +390,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         )
         
         // Then
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
     }
     
     @MainActor
@@ -397,7 +429,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.hangUp()
         
         // Then
-        await fulfillment { callViewModel.callingState == .idle }
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .idle
+        }
     }
     
     // MARK: - Toggle media state
@@ -410,7 +444,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
 
         callViewModel.toggleCameraEnabled()
         
@@ -426,7 +462,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
 
         callViewModel.toggleMicrophoneEnabled()
         
@@ -442,7 +480,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
 
         callViewModel.toggleCameraPosition()
         
@@ -460,10 +500,12 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
 
         let participantEvent = CallSessionParticipantJoinedEvent(
-            callCid: callCid,
+            callCid: cId,
             createdAt: Date(),
             participant: CallParticipantResponse(
                 joinedAt: Date(),
@@ -474,7 +516,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             sessionId: "123"
         )
 
-        eventNotificationCenter?.process(.coordinatorEvent(.typeCallSessionParticipantJoinedEvent(participantEvent)))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(.coordinatorEvent(.typeCallSessionParticipantJoinedEvent(participantEvent)))
 
         // Then
         await fulfillment { callViewModel.participantEvent != nil }
@@ -492,7 +535,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         await fulfillment { callViewModel.callingState == .inCall }
 
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
-        participantJoined.callCid = callCid
+        participantJoined.callCid = cId
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
@@ -511,7 +554,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         var participantLeft = Stream_Video_Sfu_Event_ParticipantLeft()
-        participantLeft.callCid = callCid
+        participantLeft.callCid = cId
         participantLeft.participant = participant
         controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantLeft(participantLeft)))
 
@@ -527,10 +570,12 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
 
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
-        participantJoined.callCid = callCid
+        participantJoined.callCid = cId
 
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = secondUser.userId
@@ -555,10 +600,12 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
 
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
-        participantJoined.callCid = callCid
+        participantJoined.callCid = cId
 
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = secondUser.userId
@@ -668,7 +715,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         await fulfillment { callViewModel.isSubscribedToCallEvents }
 
         callViewModel.startCall(callType: .default, callId: callId, members: [])
-        await fulfillment { callViewModel.callingState == .inCall }
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+            callViewModel.callingState == .inCall
+        }
         let call = try XCTUnwrap(callViewModel.call, file: file, line: line)
 
         let localParticipant = CallParticipant.dummy(
@@ -705,7 +754,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(
-            cid: callCid
+            cid: cId
         )
         call?.state.update(from: callData)
         callViewModel.setActiveCall(call)
