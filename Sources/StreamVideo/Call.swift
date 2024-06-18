@@ -1084,6 +1084,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             reason: reason
         )
     }
+    
+    // MARK: - Sorting
+    
+    /// Updates the sorting of call participants with the provided sort comparators.
+    ///
+    /// - Parameters:
+    ///   - sortComparators: An array of `StreamSortComparator` objects for `CallParticipant`.
+    @MainActor
+    public func updateParticipantsSorting(
+        with sortComparators: [StreamSortComparator<CallParticipant>]
+    ) {
+        state.sortComparators = sortComparators
+    }
 
     // MARK: - Internal
 
