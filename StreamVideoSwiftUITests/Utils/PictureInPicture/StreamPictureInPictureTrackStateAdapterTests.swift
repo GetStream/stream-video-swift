@@ -3,13 +3,12 @@
 //
 
 import Foundation
-import XCTest  
+import XCTest
 @preconcurrency import StreamWebRTC
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 
-@MainActor
-final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase {
+final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Sendable {
 
     private var factory: PeerConnectionFactory! = .init(audioProcessingModule: MockAudioProcessingModule())
     private var adapter: StreamPictureInPictureTrackStateAdapter! = .init()
@@ -24,6 +23,7 @@ final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase {
 
     // MARK: - enabled
 
+    @MainActor
     func test_enabled_enablesTheActiveTrack() async throws {
         let activeTrack = await makeVideoTrack()
         activeTrack.isEnabled = false
@@ -31,9 +31,10 @@ final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase {
 
         adapter.isEnabled = true
 
-        try await XCTAssertWithDelay(activeTrack.isEnabled)
+        await fulfillment { activeTrack.isEnabled == true }
     }
 
+    @MainActor
     func test_enabled_whenTheActiveTrackChanges_disablesTheOldTrack() async throws {
         let activeTrack = await makeVideoTrack()
         activeTrack.isEnabled = true
@@ -44,12 +45,12 @@ final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase {
 
         adapter.activeTrack = newActiveTrack
 
-        try await XCTAssertWithDelay(newActiveTrack.isEnabled)
-        XCTAssertFalse(activeTrack.isEnabled)
+        await fulfillment { activeTrack.isEnabled == false }
     }
 
     // MARK: - disabled
 
+    @MainActor
     func test_disabled_doesNotChangeTheEnableForTheActiveTrack() async throws {
         let activeTrack = await makeVideoTrack()
         activeTrack.isEnabled = false
@@ -57,9 +58,10 @@ final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase {
 
         adapter.isEnabled = false
 
-        try await XCTAssertWithDelay(!activeTrack.isEnabled)
+        await fulfillment { activeTrack.isEnabled == false }
     }
 
+    @MainActor
     func test_disabled_whenTheActiveTrackChanges_doesNotDisableTheOldTrack() async throws {
         let activeTrack = await makeVideoTrack()
         activeTrack.isEnabled = true
@@ -70,7 +72,7 @@ final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase {
 
         adapter.activeTrack = newActiveTrack
 
-        try await XCTAssertWithDelay(activeTrack.isEnabled)
+        await fulfillment { activeTrack.isEnabled == true }
     }
 
     // MARK: - Private Helpers

@@ -21,7 +21,13 @@ open class StreamVideoTestCase: XCTestCase {
         streamVideo = nil
         httpClient = nil
     }
-    
+
+    override open func tearDown() {
+        streamVideo = nil
+        httpClient = nil
+        super.tearDown()
+    }
+
     // TODO: replace this with something a bit better
     func waitForCallEvent(nanoseconds: UInt64 = 500_000_000) async throws {
         try await Task.sleep(nanoseconds: nanoseconds)
