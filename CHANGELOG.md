@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.0.8](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.8)
+_June 17, 2024_
+
 ### ✅ Added
 - A new `ParticipantAutoLeavePolicy` that allows you to set when a user should automatically leave a call. [#434](https://github.com/GetStream/stream-video-swift/pull/434)
 
