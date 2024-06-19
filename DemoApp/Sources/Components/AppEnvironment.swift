@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 
 protocol Debuggable: Hashable {
     var title: String { get }
@@ -33,25 +34,78 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
-    enum BaseURL: String, Debuggable, CaseIterable {
-        case pronto = "https://pronto.getstream.io"
-        case staging = "https://staging.getstream.io"
-        case demo = "https://getstream.io"
-        case legacy = "https://stream-calls-dogfood.vercel.app"
+    indirect enum BaseURL: Debuggable, CaseIterable {
+        case pronto
+        case prontoStaging
+        case staging
+        case demo
+        case legacy
+        case custom(baseURL: BaseURL, apiKey: String, token: String)
 
-        var url: URL { URL(string: rawValue)! }
+        var url: URL {
+            switch self {
+            case .pronto:
+                URL(string: "https://pronto.getstream.io")!
+            case .prontoStaging:
+                URL(string: "https://pronto-staging.getstream.io")!
+            case .staging:
+                URL(string: "https://staging.getstream.io")!
+            case .demo:
+                URL(string: "https://getstream.io")!
+            case .legacy:
+                URL(string: "https://stream-calls-dogfood.vercel.app")!
+            case let .custom(baseURL, _, _):
+                baseURL.url
+            }
+        }
+
         var title: String {
             switch self {
             case .pronto:
                 return "Pronto"
+            case .prontoStaging:
+                return "Pronto Staging"
             case .staging:
                 return "Staging"
             case .legacy:
                 return "Legacy"
             case .demo:
                 return "Demo"
+            case let .custom(_, apiKey, _):
+                return apiKey.isEmpty ? "Custom" : "Custom(\(apiKey)"
             }
         }
+
+        func joinLink(_ callId: String, callType: String = .default) -> URL {
+            switch self {
+            case .demo:
+                return url
+                    .appendingPathComponent("video")
+                    .appendingPathComponent("demos")
+                    .appendingPathComponent("join")
+                    .appendingPathComponent(callId)
+                    .addQueryParameter("type", value: callType)
+            case let .custom(baseURL, _, _):
+                return baseURL
+                    .url
+                    .appendingPathComponent("join")
+                    .appendingPathComponent(callId)
+                    .addQueryParameter("type", value: callType)
+            default:
+                return url
+                    .appendingPathComponent("join")
+                    .appendingPathComponent(callId)
+                    .addQueryParameter("type", value: callType)
+            }
+        }
+
+        static var allCases: [BaseURL] = [
+            .pronto,
+            .prontoStaging,
+            .staging,
+            .demo,
+            .legacy
+        ]
     }
 
     static var baseURL: BaseURL = {
@@ -316,4 +370,75 @@ extension AppEnvironment {
             return .thirtyMinutes
         }
     }()
+}
+
+extension AppEnvironment {
+
+    enum CallExpiration: Hashable, Debuggable {
+        case never
+        case twoMinutes
+        case fiveMinutes
+        case tenMinutes
+        case custom(Int)
+
+        var title: String {
+            switch self {
+            case .never:
+                return "Never"
+            case .twoMinutes:
+                return "2'"
+            case .fiveMinutes:
+                return "5'"
+            case .tenMinutes:
+                return "10'"
+            case let .custom(value):
+                return "\(value)\""
+            }
+        }
+
+        var duration: Int? {
+            switch self {
+            case .never:
+                return nil
+            case .twoMinutes:
+                return 2 * 60
+            case .fiveMinutes:
+                return 5 * 60
+            case .tenMinutes:
+                return 10 * 60
+            case let .custom(value):
+                return value
+            }
+        }
+    }
+
+    static var callExpiration: CallExpiration = .never
+}
+
+extension AppEnvironment {
+
+    enum AutoLeavePolicy: Hashable, Debuggable {
+        case `default`
+        case lastParticipant
+
+        var title: String {
+            switch self {
+            case .default:
+                return "Default"
+            case .lastParticipant:
+                return "Last Participant"
+            }
+        }
+
+        var policy: ParticipantAutoLeavePolicy {
+            switch self {
+            case .default:
+                DefaultParticipantAutoLeavePolicy()
+            case .lastParticipant:
+                LastParticipantAutoLeavePolicy()
+            }
+        }
+    }
+
+    static var autoLeavePolicy: AutoLeavePolicy = .default
 }

@@ -161,6 +161,24 @@ If none of the fields above are being set, the property will be an empty string.
 - **created_by_display_name**
 The property is always set and contains the name of the user who created the call.
 
+#### Call's type suffix
+
+Depending on the `Call` type `CallKit` adds a suffix in the push notification's subtitle (which contains the application name). That suffix can either be `Audio` or `Video`. `CallKitService` allows you to configure what the supported call types are, by setting the `CallKitService.supportsVideo` property like below:
+
+```swift
+@Injected(\.callKitService) var callKitService
+
+// Setting the `supportsVideo` property to `true` will 
+// make the subtitle's format be: `<Application's name> Video`
+callKitService.supportsVideo = true 
+
+// Setting the `supportsVideo` property to `false` will 
+// make the subtitle's format be: `<Application's name> Audio`
+callKitService.supportsVideo = false
+```
+
+`CallKitService.supportsVideo` default value is `false`.
+
 ### Registering for VoIP Push Notifications
 
 Even though using the `CallKitAdapter` abstracts most of the `CallKit` & `PushKit` complexity from you, there is still a need for you to register/unregister the deviceToken.

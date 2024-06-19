@@ -21,7 +21,7 @@ func postNotification(
     )
 }
 
-func callCid(from callId: String, callType: String) -> String {
+public func callCid(from callId: String, callType: String) -> String {
     "\(callType):\(callId)"
 }
 

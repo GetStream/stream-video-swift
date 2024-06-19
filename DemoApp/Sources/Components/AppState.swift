@@ -21,9 +21,18 @@ final class AppState: ObservableObject {
     // MARK: Published
 
     @Published var apiKey: String = ""
+
     @Published var userState: UserState = .notLoggedIn
     @Published var deeplinkInfo: DeeplinkInfo = .empty
-    @Published var currentUser: User?
+    @Published var pushNotificationConfiguration = PushNotificationsConfig.default
+    @Published var currentUser: User? {
+        didSet {
+            if let currentUser, users.first(where: { $0.id == currentUser.id }) == nil {
+                users.append(currentUser)
+            }
+        }
+    }
+
     @Published var loading = false
     @Published var activeCall: Call?
     @Published var activeAnonymousCallId: String = ""

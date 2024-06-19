@@ -4,8 +4,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- Support for custom participant sorting in the Call object. [#438](https://github.com/GetStream/stream-video-swift/pull/438)
+
+# [1.0.8](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.8)
+_June 17, 2024_
+
+### ✅ Added
+- A new `ParticipantAutoLeavePolicy` that allows you to set when a user should automatically leave a call. [#434](https://github.com/GetStream/stream-video-swift/pull/434)
+
 ### 🔄 Changed
-- `CallKitAdapter` will dispatch voIP notification reporting to the MainActor. [#41](https://github.com/GetStream/stream-video-swift/pull/41)
+
+# [1.0.7](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.7)
+_June 10, 2024_
+
+### ✅ Added
+- Support for session timers. [#425](https://github.com/GetStream/stream-video-swift/pull/425)
+- Rejecting call contains a reason parameter. [#428](https://github.com/GetStream/stream-video-swift/issues/428)
+
+# [1.0.6](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.6)
+_May 30, 2024_
+
+### ✅ Added
+- In `CallKitService` you can now configure if calls support Video. Depending on the value `CallKit` will suffix either the word `Audio` (when false) or `Video` when true, next to the application's name. [#420](https://github.com/GetStream/stream-video-swift/pull/420)
+
+# [1.0.5](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.5)
+_May 28, 2024_
+
+### 🔄 Changed
+
+# [1.0.4](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.4)
+_May 27, 2024_
+
+### 🔄 Changed
+- `CallKitAdapter` will dispatch voIP notification reporting to the MainActor. [#411](https://github.com/GetStream/stream-video-swift/pull/411)
 
 # [1.0.3](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.3)
 _May 22, 2024_

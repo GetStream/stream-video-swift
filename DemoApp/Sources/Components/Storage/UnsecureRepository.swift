@@ -122,14 +122,24 @@ final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandl
     }
 
     func save(baseURL: AppEnvironment.BaseURL) {
-        set(baseURL.rawValue, for: .lastRunBaseURL)
+        set(baseURL.url.absoluteString, for: .lastRunBaseURL)
     }
 
     func currentBaseURL() -> AppEnvironment.BaseURL? {
         guard let lastBaseURLString: String = get(for: .lastRunBaseURL) else {
             return nil
         }
-        return .init(rawValue: lastBaseURLString)
+        if lastBaseURLString == AppEnvironment.BaseURL.demo.url.absoluteString {
+            return .demo
+        } else if lastBaseURLString == AppEnvironment.BaseURL.pronto.url.absoluteString {
+            return .pronto
+        } else if lastBaseURLString == AppEnvironment.BaseURL.legacy.url.absoluteString {
+            return .legacy
+        } else if lastBaseURLString == AppEnvironment.BaseURL.staging.url.absoluteString {
+            return .staging
+        } else {
+            return .demo
+        }
     }
     
     func userFavorites() -> [String] {

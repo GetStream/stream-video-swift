@@ -122,7 +122,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
                         guard let self else { return }
                         audioRecorder.updateMeters()
                         self._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))
-                        log.debug("️🎙️Recording meters updated")
                     }
                 }
         } catch {

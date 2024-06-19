@@ -330,6 +330,27 @@ final class Call_Tests: StreamVideoTestCase {
 
         XCTAssertEqual(mockCallController.timesJoinWasCalled, 1)
     }
+    
+    func test_call_customSorting() async throws {
+        // Given
+        let nameComparator: StreamSortComparator<CallParticipant> = {
+            comparison($0, $1, keyPath: \.name)
+        }
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        call?.updateParticipantsSorting(with: [nameComparator])
+        
+        // When
+        call?.state.participantsMap = [
+            "martin": .dummy(id: "martin", name: "Martin", isSpeaking: true),
+            "ilias": .dummy(id: "ilias", name: "Ilias", pin: PinInfo(isLocal: false, pinnedAt: Date())),
+            "alexey": .dummy(id: "alexey", name: "Alexey")
+        ]
+        
+        // Then
+        let participants = call?.state.participants
+        XCTAssertEqual(participants?[0].name, "Alexey")
+        XCTAssertEqual(participants?[1].name, "Ilias")
+    }
 
     // MARK: - Private helpers
 

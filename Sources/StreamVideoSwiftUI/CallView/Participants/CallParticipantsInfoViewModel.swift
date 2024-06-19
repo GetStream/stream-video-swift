@@ -52,7 +52,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
         isDestructive: false
     )
     
-    private var call: Call?
+    private weak var call: Call?
     
     var inviteParticipantsButtonShown: Bool {
         call?.currentUserHasCapability(.updateCallMember) == true

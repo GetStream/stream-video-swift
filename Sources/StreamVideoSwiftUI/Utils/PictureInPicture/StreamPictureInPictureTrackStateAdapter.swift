@@ -35,6 +35,12 @@ final class StreamPictureInPictureTrackStateAdapter {
         }
     }
 
+    deinit {
+        observerCancellable?.cancel()
+        isEnabled = false
+        activeTrack = nil
+    }
+
     // MARK: - Private helpers
 
     /// This property holds a reference to the observer cancellable.

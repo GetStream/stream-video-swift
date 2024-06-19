@@ -56,3 +56,18 @@ You can also use a shortcut of this method, with the `notify` method:
 let call = streamVideo.call(callType: "default", callId: callId)
 let callResponse = try await call.notify()
 ```
+
+### AutoLeave Policy
+
+There may be scenarios where once a call is concluded there is no point for a user to remain in the call if the other participants have already left. In cases like that you may find youself in a position where you need to last participant to automatically leave the call. Luckily, the StreamVideoSwiftUI SDK makes that very easy by allowing you to set the `ParticipantAutoLeavePolicy`, like below:
+
+```swift
+let callViewModel = CallViewModel()
+callViewModel.participantAutoLeavePolicy = LastParticipantAutoLeavePolicy()
+```
+
+By doing that, we are instructing the `CallViewModel` to observe the participants during the ringing flow call (incoming or outgoing). Once a user remain the last one, the callViewModel will automatically trigger the flow to leave the call.
+
+:::note
+The `participantAutoLeavePolicy` is set to `DefaultParticipantAutoLeavePolicy` which is a no-operation policy, meaning that if the user remain in the call alone, no automatic action will be performed.
+:::

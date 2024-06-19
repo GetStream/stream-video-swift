@@ -170,20 +170,30 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         connectTask = Task {
             if user.type == .guest {
                 do {
+                    try Task.checkCancellation()
                     let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
+
                     self.state.user = guestInfo.user
                     self.token = guestInfo.token
                     self.tokenProvider = guestInfo.tokenProvider
+
+                    try Task.checkCancellation()
                     try await self.connectUser(isInitial: true)
                 } catch {
                     log.error("Error connecting as guest", error: error)
                 }
             } else {
+                try Task.checkCancellation()
                 try await self.connectUser(isInitial: true)
             }
         }
     }
     
+    deinit {
+        connectTask?.cancel()
+        connectTask = nil
+    }
+
     /// Connects the current user.
     public func connect() async throws {
         try await connectUser()

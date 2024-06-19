@@ -204,6 +204,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response.call
     }
 
+    /// Creates a call with the specified parameters.
+    /// - Parameters:
+    ///   - members: An optional array of `MemberRequest` objects to add to the call.
+    ///   - memberIds: An optional array of member IDs to add to the call.
+    ///   - custom: An optional dictionary of custom data to include in the call request.
+    ///   - startsAt: An optional `Date` indicating when the call should start.
+    ///   - team: An optional string representing the team for the call.
+    ///   - ring: A boolean indicating whether to ring the call. Default is `false`.
+    ///   - notify: A boolean indicating whether to send notifications. Default is `false`.
+    ///   - maxDuration: An optional integer representing the maximum duration of the call in seconds.
+    ///   - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
+    /// - Returns: A `CallResponse` object representing the created call.
+    /// - Throws: An error if the call creation fails.
     @discardableResult
     public func create(
         members: [MemberRequest]? = nil,
@@ -212,7 +225,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         startsAt: Date? = nil,
         team: String? = nil,
         ring: Bool = false,
-        notify: Bool = false
+        notify: Bool = false,
+        maxDuration: Int? = nil,
+        maxParticipants: Int? = nil
     ) async throws -> CallResponse {
         var membersRequest = [MemberRequest]()
         memberIds?.forEach {
@@ -221,11 +236,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         members?.forEach {
             membersRequest.append($0)
         }
+        
+        var settingsOverride: CallSettingsRequest?
+        if maxDuration != nil || maxParticipants != nil {
+            settingsOverride = CallSettingsRequest(
+                limits: .init(
+                    maxDurationSeconds: maxDuration,
+                    maxParticipants: maxParticipants
+                )
+            )
+        }
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,
                 members: membersRequest,
-                settingsOverride: nil,
+                settingsOverride: settingsOverride,
                 startsAt: startsAt,
                 team: team
             ),
@@ -246,13 +271,29 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response.call
     }
 
+    /// Updates an existing call with the specified parameters.
+    /// - Parameters:
+    ///   - custom: An optional dictionary of custom data to include in the update request.
+    ///   - settingsOverride: An optional `CallSettingsRequest` object to override the call settings.
+    ///   - startsAt: An optional `Date` indicating when the call should start.
+    /// - Returns: An `UpdateCallResponse` object representing the updated call.
+    /// - Throws: An error if the call update fails.
     @discardableResult
     public func update(
         custom: [String: RawJSON]? = nil,
+        settingsOverride: CallSettingsRequest? = nil,
         startsAt: Date? = nil
     ) async throws -> UpdateCallResponse {
-        let request = UpdateCallRequest(custom: custom, startsAt: startsAt)
-        let response = try await coordinatorClient.updateCall(type: callType, id: callId, updateCallRequest: request)
+        let request = UpdateCallRequest(
+            custom: custom,
+            settingsOverride: settingsOverride,
+            startsAt: startsAt
+        )
+        let response = try await coordinatorClient.updateCall(
+            type: callType,
+            id: callId,
+            updateCallRequest: request
+        )
         await state.update(from: response)
         return response
     }
@@ -281,9 +322,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             .response
     }
 
-    /// Rejects a call.
+    /// Rejects a call with an optional reason.
+    /// - Parameters:
+    ///   - reason: An optional `String` providing the reason for the rejection. Default is `nil`.
+    /// - Returns: A `RejectCallResponse` object indicating the result of the rejection.
+    /// - Throws: An error if the rejection fails.
     @discardableResult
-    public func reject() async throws -> RejectCallResponse {
+    public func reject(reason: String? = nil) async throws -> RejectCallResponse {
         let currentStage = stateMachine.currentStage
         switch currentStage.id {
         case .rejecting:
@@ -293,7 +338,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return stage.response
         default:
             try stateMachine.transition(.rejecting(self, actionBlock: { [coordinatorClient, callType, callId, streamVideo, cId] in
-                let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
+                let response = try await coordinatorClient.rejectCall(
+                    type: callType,
+                    id: callId,
+                    rejectCallRequest: .init(reason: reason)
+                )
                 if streamVideo.state.ringingCall?.cId == cId {
                     Task { @MainActor in
                         streamVideo.state.ringingCall = nil
@@ -1034,6 +1083,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             rating: rating,
             reason: reason
         )
+    }
+    
+    // MARK: - Sorting
+    
+    /// Updates the sorting of call participants with the provided sort comparators.
+    ///
+    /// - Parameters:
+    ///   - sortComparators: An array of `StreamSortComparator` objects for `CallParticipant`.
+    @MainActor
+    public func updateParticipantsSorting(
+        with sortComparators: [StreamSortComparator<CallParticipant>]
+    ) {
+        state.sortComparators = sortComparators
     }
 
     // MARK: - Internal

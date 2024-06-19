@@ -161,10 +161,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     private var callLink: String {
         AppEnvironment
             .baseURL
-            .url
-            .appendingPathComponent("join")
-            .appendingPathComponent(callId)
-            .addQueryParameter("type", value: callType)
+            .joinLink(callId, callType: callType)
             .absoluteString
     }
 

@@ -99,6 +99,20 @@ The following fields are available on the participant:
 | `audioLevel` | The audio level for the user. |
 | `audioLevels` | A list of the last 10 audio levels. Convenient for audio visualizations. |
 
+### Participants Sorting
+
+If you want to change the default sorting of the participants, you can use the `Call` object's method `updateParticipantsSorting`.
+
+Here's an example that will sort participants alphabetically, by their name:
+
+```swift
+let nameComparator: StreamSortComparator<CallParticipant> = {
+    comparison($0, $1, keyPath: \.name)
+}
+let call = streamVideo.call(callType: callType, callId: callId)
+call.updateParticipantsSorting(with: [nameComparator])
+```
+
 ### Client State
 
 ```swift

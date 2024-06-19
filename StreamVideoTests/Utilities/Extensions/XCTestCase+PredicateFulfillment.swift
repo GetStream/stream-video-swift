@@ -7,12 +7,13 @@ import XCTest
 
 extension XCTestCase {
 
+    @MainActor
     func fulfillment(
         timeout: TimeInterval = defaultTimeout,
-        enforceOrder: Bool = false,
-        block: @escaping () -> Bool,
+        _ message: @autoclosure () -> String = "",
         file: StaticString = #file,
-        line: UInt = #line
+        line: UInt = #line,
+        block: @MainActor @Sendable @escaping () -> Bool
     ) async {
         let predicate = NSPredicate { _, _ in block() }
         let waitExpectation = XCTNSPredicateExpectation(
@@ -23,15 +24,17 @@ extension XCTestCase {
         await safeFulfillment(
             of: [waitExpectation],
             timeout: timeout,
-            enforceOrder: enforceOrder,
             file: file,
             line: line
         )
+
+        XCTAssertTrue(block(), message(), file: file, line: line)
     }
 
+    @MainActor
     func safeFulfillment(
         of expectations: [XCTestExpectation],
-        timeout seconds: TimeInterval = .infinity,
+        timeout seconds: TimeInterval = defaultTimeout,
         enforceOrder: Bool = false,
         file: StaticString = #file,
         line: UInt = #line
