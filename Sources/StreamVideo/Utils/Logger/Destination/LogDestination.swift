@@ -20,6 +20,7 @@ public enum LogLevel: Int {
 /// Encapsulates the components of a log message.
 public struct LogDetails {
     public let loggerIdentifier: String
+    public let subsystem: LogSubsystem
     
     public let level: LogLevel
     public let date: Date

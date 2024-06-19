@@ -11,6 +11,7 @@ import Foundation
 /// publishing the average power of the audio signal. Additionally, it adjusts its behavior based on the
 /// presence of an active call, automatically stopping recording if needed.
 open class StreamCallAudioRecorder: @unchecked Sendable {
+    private struct StartRecordingRequest: Hashable { var hasActiveCall, ignoreActiveCall, isRecording: Bool }
 
     @Injected(\.activeCallProvider) private var activeCallProvider
 
@@ -61,6 +62,8 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         }
     }
 
+    private var lastStartRecordingRequest: StartRecordingRequest?
+
     /// Initializes the recorder with a filename.
     ///
     /// - Parameter filename: The name of the file to record to.
@@ -102,11 +105,30 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     open func startRecording(ignoreActiveCall: Bool = false) async {
         do {
             let audioRecorder = try await setUpAudioCaptureIfRequired()
-            guard hasActiveCall || ignoreActiveCall, !isRecording else {
-                log
-                    .info(
-                        "🎙️Attempted to start recording but failed. hasActiveCall:\(hasActiveCall) isRecording:\(isRecording)"
-                    )
+            let startRecordingRequest = StartRecordingRequest(
+                hasActiveCall: hasActiveCall,
+                ignoreActiveCall: ignoreActiveCall,
+                isRecording: isRecording
+            )
+
+            guard startRecordingRequest != lastStartRecordingRequest else {
+                lastStartRecordingRequest = startRecordingRequest
+                return
+            }
+
+            lastStartRecordingRequest = startRecordingRequest
+            guard
+                startRecordingRequest.hasActiveCall || startRecordingRequest.ignoreActiveCall,
+                !startRecordingRequest.isRecording
+            else {
+                log.debug(
+                    """
+                    🎙️Attempted to start recording but failed
+                    hasActiveCall: \(startRecordingRequest.hasActiveCall)
+                    ignoreActiveCall: \(startRecordingRequest.ignoreActiveCall)
+                    isRecording: \(startRecordingRequest.isRecording)
+                    """
+                )
                 return
             }
             audioRecorder.record()
@@ -134,7 +156,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     open func stopRecording() async {
         updateMetersTimerCancellable?.cancel()
         updateMetersTimerCancellable = nil
-        log.debug("🎙️Meters cancellable nullified.")
 
         guard
             isRecording,
@@ -197,7 +218,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             try FileManager.default.removeItem(at: fileURL)
             log.debug("🎙️Successfully deleted audio filename")
         } catch {
-            log.warning("🎙️Cannot delete \(fileURL).\(error)")
+            log.debug("🎙️Cannot delete \(fileURL).\(error)")
         }
     }
 }

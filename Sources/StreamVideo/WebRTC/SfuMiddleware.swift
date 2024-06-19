@@ -178,7 +178,7 @@ class SfuMiddleware: EventMiddleware {
         let params = transceiver.sender.parameters
         var updatedEncodings = [RTCRtpEncodingParameters]()
         var changed = false
-        log.debug("Current publish quality \(params)")
+        log.debug("Current publish qualities: \(params.encodings.compactMap(\.rid)).")
         for encoding in params.encodings {
             let shouldEnable = enabledRids.contains(encoding.rid ?? UUID().uuidString)
             if shouldEnable && encoding.isActive {
