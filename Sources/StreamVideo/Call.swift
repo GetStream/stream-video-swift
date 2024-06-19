@@ -67,6 +67,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // It's important to instantiate the stateMachine as soon as possible
         // to ensure it's uniqueness.
         _ = stateMachine
+        subscribeToOwnCapabilitiesChanges()
         subscribeToLocalCallSettingsChanges()
         subscribeToNoiseCancellationSettingsChanges()
         subscribeToTranscriptionSettingsChanges()
@@ -1125,7 +1126,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         executeOnMain { [weak self] in
             guard let self else { return }
             self.state.updateState(from: videoEvent)
-            self.callController.updateOwnCapabilities(ownCapabilities: self.state.ownCapabilities)
         }
 
         // Get a copy of eventHandlers to avoid crashes when `leave` call is being
@@ -1173,6 +1173,18 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.mergeMembers(response.members)
         return response
+    }
+
+    private func subscribeToOwnCapabilitiesChanges() {
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            self
+                .state
+                .$ownCapabilities
+                .removeDuplicates()
+                .sink { [weak self] in self?.callController.updateOwnCapabilities(ownCapabilities: $0) }
+                .store(in: &cancellables)
+        }
     }
 
     private func subscribeToLocalCallSettingsChanges() {
