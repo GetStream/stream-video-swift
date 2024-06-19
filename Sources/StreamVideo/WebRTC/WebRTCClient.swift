@@ -251,6 +251,18 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             audioProcessingModule: videoConfig.audioProcessingModule
         )
         super.init()
+
+        log.debug(
+            """
+            WebRTC client was created.
+            userId: \(user.id)
+            callCid: \(callCid)
+            sessionID: \(sessionID ?? "nil"),
+            ownCapabilities: \(ownCapabilities.map(\.rawValue))
+            """,
+            subsystems: .webRTC
+        )
+
         if let url = URL(string: webSocketURLString) {
             signalChannel = makeWebSocketClient(url: url, apiKey: .init(apiKey))
         }
@@ -379,18 +391,88 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     func publishUserMedia(callSettings: CallSettings) {
-        if hasCapability(.sendAudio),
-           let audioTrack = localAudioTrack, callSettings.audioOn,
-           publisher?.audioTrackPublished == false {
-            log.debug("publishing audio track", subsystems: .webRTC)
-            publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"], trackType: .audio)
+        guard let publisher else {
+            log.warning(
+                "Trying to publish userMedia but publisher is not available.",
+                subsystems: .webRTC
+            )
+            return
         }
+
+        let canSendAudio = hasCapability(.sendAudio)
+
+        if canSendAudio,
+           let audioTrack = localAudioTrack,
+           callSettings.audioOn,
+           publisher.audioTrackPublished == false {
+            let streamIds = ["\(sessionID):audio"]
+            log.debug(
+                """
+                Publishing user audio
+                StreamIds: \(streamIds)
+                hasCapability: \(canSendAudio)
+                isAudioTrackAvailable: \(localAudioTrack != nil)
+                isCallSettingsAudioOn: \(callSettings.audioOn),
+                isAudioTrackNotPublished: \(publisher.audioTrackPublished == false)
+                """,
+                subsystems: .webRTC
+            )
+
+            publisher.addTrack(
+                audioTrack,
+                streamIds: streamIds,
+                trackType: .audio
+            )
+        } else {
+            log.debug(
+                """
+                User audio wasn't published
+                hasCapability: \(canSendAudio)
+                ownCapabilities: \(ownCapabilities.map(\.rawValue))
+                isAudioTrackAvailable: \(localAudioTrack != nil)
+                isCallSettingsAudioOn: \(callSettings.audioOn),
+                isAudioTrackNotPublished: \(publisher.audioTrackPublished == false)
+                """,
+                subsystems: .webRTC
+            )
+        }
+
+        let canSendVideo = hasCapability(.sendVideo)
+
         if hasCapability(.sendVideo),
            callSettings.videoOn,
            let videoTrack = localVideoTrack,
-           publisher?.videoTrackPublished == false {
-            log.debug("publishing video track", subsystems: .webRTC)
-            publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"], trackType: .video)
+           publisher.videoTrackPublished == false {
+            let streamIds = ["\(sessionID):video"]
+            log.debug(
+                """
+                Publishing user video
+                StreamIds: \(streamIds)
+                hasCapability: \(canSendVideo)
+                isVideoTrackAvailable: \(localVideoTrack != nil)
+                isCallSettingsVideoOn: \(callSettings.videoOn),
+                isVideoTrackNotPublished: \(publisher.videoTrackPublished == false)
+                """,
+                subsystems: .webRTC
+            )
+
+            publisher.addTransceiver(
+                videoTrack,
+                streamIds: streamIds,
+                trackType: .video
+            )
+        } else {
+            log.debug(
+                """
+                User video wasn't published
+                hasCapability: \(canSendVideo)
+                ownCapabilities: \(ownCapabilities.map(\.rawValue))
+                isVideoTrackAvailable: \(localVideoTrack != nil)
+                isCallSettingsVideoOn: \(callSettings.videoOn),
+                isVideoTrackNotPublished: \(publisher.videoTrackPublished == false)
+                """,
+                subsystems: .webRTC
+            )
         }
     }
     

@@ -59,7 +59,27 @@ public class CallState: ObservableObject {
     @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var settings: CallSettingsResponse?
-    @Published public internal(set) var ownCapabilities: [OwnCapability] = []
+    @Published public internal(set) var ownCapabilities: [OwnCapability] = [] {
+        didSet {
+            let oldValue = Set(oldValue)
+            let newValue = Set(ownCapabilities)
+            guard newValue != oldValue else {
+                return
+            }
+            log.debug(
+                """
+                Updating ownCapabilities:
+                From:
+                \(oldValue.map(\.rawValue))
+
+                To:
+                \(ownCapabilities.map(\.rawValue))
+                """,
+                subsystems: .webRTC
+            )
+        }
+    }
+
     @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
