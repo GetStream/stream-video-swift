@@ -25,7 +25,7 @@ jobs:
       run: bundle exec fastlane build_test_app_and_frameworks
       timeout-minutes: 60
       env:
-        XCODE_VERSION: "15.0.1" # Should match the minimum version in dependent jobs
+        XCODE_VERSION: "15.2" # Should match the minimum version in dependent jobs
     - uses: actions/upload-artifact@v4
       if: success()
       with:
@@ -41,18 +41,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 17.0
-            xcode: 15.0.1
+          - ios: 17.2
+            xcode: 15.2
             os: macos-14
             device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
-            xcode: 15.0.1
+            xcode: 15.2
             os: macos-14
             device: "iPhone 14 Pro Max"
             setup_runtime: true
           - ios: 15.5
-            xcode: 15.0.1
+            xcode: 15.2
             os: macos-14
             device: "iPhone 13"
             setup_runtime: true
@@ -129,6 +129,7 @@ jobs:
         path: |
           fastlane/recordings
           fastlane/*.log
+          fastlane/test_output/report.junit
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
 
