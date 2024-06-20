@@ -43,7 +43,6 @@ jobs:
       run: bundle exec fastlane build_test_app_and_frameworks
       timeout-minutes: 60
       env:
-        STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
         XCODE_VERSION: "15.0.1" # Should match the minimum version in dependent jobs
     - uses: actions/upload-artifact@v4
       if: success()
