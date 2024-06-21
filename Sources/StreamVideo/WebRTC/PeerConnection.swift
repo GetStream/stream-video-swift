@@ -91,8 +91,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 
         return try await withCheckedThrowingContinuation { [type] continuation in
             pc.offer(for: constraints) {
-                sdp,
-                error in
+                sdp, error in
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else if let sdp = sdp {
@@ -424,9 +423,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         _ peerConnection: RTCPeerConnection,
         didFailToGatherIceCandidate event: RTCIceCandidateErrorEvent
     ) {
+        let message = event.errorText.isEmpty ? "<unavailable>" : event.errorText
         log.error(
             """
-            PeerConnection of type:\(type.rawValue) produced an error with code:\(event.errorCode) message:\(event.errorText.isEmpty ? "<unavailable>" : event.errorText)
+            PeerConnection of type:\(type.rawValue) produced an error with code:\(event.errorCode) message:\(message)
             URL: \(event.url)
             Address: \(event.address)
             Port: \(event.port)
@@ -442,9 +442,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         lastReceivedMs lastDataReceivedMs: Int32,
         changeReason reason: String
     ) {
+        let reason = reason.isEmpty ? "<unavailable>" : reason
         log.debug(
             """
-            PeerConnection of type:\(type.rawValue) didChangeLocalCandidate with reason:\(reason.isEmpty ? "<unavailable>" : reason):
+            PeerConnection of type:\(type.rawValue) didChangeLocalCandidate with reason:\(reason):
             local: \(local)
             remote: \(remote)
             lastDataReceivedMs: \(lastDataReceivedMs)

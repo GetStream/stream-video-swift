@@ -83,7 +83,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
                     /// - Participants, during call's duration, grew to more than one.
                     viewModel.isPresentingSubview = true
 
-                case (nil, let activeCall, false):
+                case (nil, _, false):
                     /// If we are not going to present then we clear any data.
                     viewModel.lastCall = nil
                     viewModel.isPresentingSubview = false
