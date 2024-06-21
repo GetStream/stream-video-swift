@@ -42,8 +42,6 @@ jobs:
     - name: Build
       run: bundle exec fastlane build_test_app_and_frameworks
       timeout-minutes: 60
-      env:
-        XCODE_VERSION: "15.2" # Should match the minimum version in dependent jobs
     - uses: actions/upload-artifact@v4
       if: success()
       with:
@@ -77,6 +75,9 @@ jobs:
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" skip_build:true
       timeout-minutes: 40
+      env:
+        XCODE_VERSION: "15.2" # the most stable pair of Xcode
+        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
     - name: Get branch name
       id: get_branch_name
       run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
@@ -131,6 +132,9 @@ jobs:
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
       timeout-minutes: 40
+      env:
+        XCODE_VERSION: "15.2" # the most stable pair of Xcode
+        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
     - name: Parse xcresult
       if: failure()
       run: |
@@ -160,6 +164,9 @@ jobs:
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
       timeout-minutes: 40
+      env:
+        XCODE_VERSION: "15.2" # the most stable pair of Xcode
+        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
     - name: Parse xcresult
       if: failure()
       run: |
