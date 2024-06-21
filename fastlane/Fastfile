@@ -21,7 +21,6 @@ gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
-develop_branch = 'main'
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
 swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoUIKitTests"]
 
@@ -79,6 +78,7 @@ lane :publish_release do |options|
   clean_products
 
   publish_ios_sdk(
+    skip_git_status_check: false,
     version: options[:version],
     sdk_names: sdk_names,
     podspec_names: podspec_names,
@@ -691,7 +691,7 @@ lane :copyright do
 end
 
 private_lane :create_pr do |options|
-  options[:base_branch] ||= develop_branch
+  options[:base_branch] ||= 'develop'
   sh("git checkout -b #{options[:head_branch]}")
   sh('git add -A')
   sh("git commit -m '#{options[:title]}'")
