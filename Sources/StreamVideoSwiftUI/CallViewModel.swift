@@ -330,7 +330,9 @@ open class CallViewModel: ObservableObject {
         members: [Member],
         ring: Bool = false,
         maxDuration: Int? = nil,
-        maxParticipants: Int? = nil
+        maxParticipants: Int? = nil,
+        startsAt: Date? = nil,
+        backstage: BackstageSettingsRequest? = nil
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
@@ -342,7 +344,9 @@ open class CallViewModel: ObservableObject {
                 members: membersRequest,
                 ring: ring,
                 maxDuration: maxDuration,
-                maxParticipants: maxParticipants
+                maxParticipants: maxParticipants,
+                startsAt: startsAt,
+                backstage: backstage
             )
         } else {
             let call = streamVideo.call(callType: callType, callId: callId)
@@ -537,7 +541,9 @@ open class CallViewModel: ObservableObject {
         members: [MemberRequest],
         ring: Bool = false,
         maxDuration: Int? = nil,
-        maxParticipants: Int? = nil
+        maxParticipants: Int? = nil,
+        startsAt: Date? = nil,
+        backstage: BackstageSettingsRequest? = nil
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -547,12 +553,16 @@ open class CallViewModel: ObservableObject {
                 log.debug("Starting call")
                 let call = call ?? streamVideo.call(callType: callType, callId: callId)
                 var settingsRequest: CallSettingsRequest?
+                var limits: LimitsSettingsRequest?
                 if maxDuration != nil || maxParticipants != nil {
-                    settingsRequest = CallSettingsRequest(
-                        limits: .init(maxDurationSeconds: maxDuration, maxParticipants: maxParticipants)
-                    )
+                    limits = .init(maxDurationSeconds: maxDuration, maxParticipants: maxParticipants)
                 }
-                let options = CreateCallOptions(members: members, settings: settingsRequest)
+                settingsRequest = .init(backstage: backstage, limits: limits)
+                let options = CreateCallOptions(
+                    members: members,
+                    settings: settingsRequest,
+                    startsAt: startsAt
+                )
                 let settings = localCallSettingsChange ? callSettings : nil
                 try await call.join(
                     create: true,

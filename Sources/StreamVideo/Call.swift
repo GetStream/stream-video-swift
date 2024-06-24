@@ -228,7 +228,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false,
         maxDuration: Int? = nil,
-        maxParticipants: Int? = nil
+        maxParticipants: Int? = nil,
+        backstage: BackstageSettingsRequest? = nil
     ) async throws -> CallResponse {
         var membersRequest = [MemberRequest]()
         memberIds?.forEach {
@@ -239,14 +240,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         
         var settingsOverride: CallSettingsRequest?
+        var limits: LimitsSettingsRequest?
         if maxDuration != nil || maxParticipants != nil {
-            settingsOverride = CallSettingsRequest(
-                limits: .init(
-                    maxDurationSeconds: maxDuration,
-                    maxParticipants: maxParticipants
-                )
+            limits = .init(
+                maxDurationSeconds: maxDuration,
+                maxParticipants: maxParticipants
             )
         }
+
+        settingsOverride = CallSettingsRequest(
+            backstage: backstage,
+            limits: limits
+        )
+        
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,

@@ -25,6 +25,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Call ID */
     public var id: String
     public var ingress: CallIngressResponse
+    public var joinAheadTimeSeconds: Int?
     public var recording: Bool
     public var session: CallSessionResponse?
     public var settings: CallSettingsResponse
@@ -38,7 +39,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     public var updatedAt: Date
 
-    public init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: RawJSON], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, thumbnails: ThumbnailResponse? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    public init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: RawJSON], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, joinAheadTimeSeconds: Int? = nil, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, thumbnails: ThumbnailResponse? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.cid = cid
@@ -50,6 +51,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
         self.endedAt = endedAt
         self.id = id
         self.ingress = ingress
+        self.joinAheadTimeSeconds = joinAheadTimeSeconds
         self.recording = recording
         self.session = session
         self.settings = settings
@@ -73,6 +75,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
         case endedAt = "ended_at"
         case id
         case ingress
+        case joinAheadTimeSeconds = "join_ahead_time_seconds"
         case recording
         case session
         case settings
@@ -99,6 +102,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(endedAt, forKey: .endedAt)
         try container.encode(id, forKey: .id)
         try container.encode(ingress, forKey: .ingress)
+        try container.encodeIfPresent(joinAheadTimeSeconds, forKey: .joinAheadTimeSeconds)
         try container.encode(recording, forKey: .recording)
         try container.encodeIfPresent(session, forKey: .session)
         try container.encode(settings, forKey: .settings)
