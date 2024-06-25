@@ -152,6 +152,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         (apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
             self?.token = userToken
         }
+
+        // Warm up
+        _ = eventNotificationCenter
+
         if user.type != .anonymous {
             let userAuth = UserAuth { [weak self] in
                 self?.token.rawValue ?? ""

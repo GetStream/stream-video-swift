@@ -5,24 +5,43 @@
 import Foundation
 import StreamWebRTC
 
-actor PeerConnectionFactory {
-    
-    static let supportedVideoCodecEncoding: [RTCVideoCodecInfo] = {
-        RTCDefaultVideoEncoderFactory().supportedCodecs()
-    }()
-    
-    static let supportedVideoCodecDecoding: [RTCVideoCodecInfo] = {
-        RTCDefaultVideoDecoderFactory().supportedCodecs()
-    }()
-    
-    private let factory: RTCPeerConnectionFactory
-    
-    init(audioProcessingModule: RTCAudioProcessingModule) {
-        self.factory = Self.createRTCPeerConnectionFactory(
+final class PeerConnectionFactory {
+
+    private let audioProcessingModule: RTCAudioProcessingModule
+    private lazy var factory: RTCPeerConnectionFactory = {
+        let encoderFactory = RTCVideoEncoderFactorySimulcast(
+            primary: defaultEncoder,
+            fallback: defaultEncoder
+        )
+        let decoderFactory = RTCDefaultVideoDecoderFactory()
+        return RTCPeerConnectionFactory(
+            bypassVoiceProcessing: false,
+            encoderFactory: encoderFactory,
+            decoderFactory: decoderFactory,
             audioProcessingModule: audioProcessingModule
         )
+    }()
+
+    private lazy var defaultEncoder = RTCDefaultVideoEncoderFactory()
+    private lazy var defaultDecoder = RTCDefaultVideoDecoderFactory()
+
+    var supportedVideoCodecEncoding: [RTCVideoCodecInfo] {
+        defaultEncoder.supportedCodecs()
     }
     
+    var supportedVideoCodecDecoding: [RTCVideoCodecInfo] {
+        defaultDecoder.supportedCodecs()
+    }
+    
+    init(audioProcessingModule: RTCAudioProcessingModule) {
+        self.audioProcessingModule = audioProcessingModule
+        _ = factory
+    }
+
+    deinit {
+        RTCCleanupSSL()
+    }
+
     func makePeerConnection(
         sessionId: String,
         configuration: RTCConfiguration,
@@ -76,25 +95,5 @@ actor PeerConnectionFactory {
         }
         
         return peerConnection
-    }
-    
-    private static func createRTCPeerConnectionFactory(
-        audioProcessingModule: RTCAudioProcessingModule
-    ) -> RTCPeerConnectionFactory {
-        RTCInitializeSSL()
-        let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
-        let encoderFactory = RTCVideoEncoderFactorySimulcast(
-            primary: defaultEncoderFactory,
-            fallback: defaultEncoderFactory
-        )
-        let decoderFactory = RTCDefaultVideoDecoderFactory()
-        let factory = RTCPeerConnectionFactory(
-            bypassVoiceProcessing: false,
-            encoderFactory: encoderFactory,
-            decoderFactory: decoderFactory,
-            audioProcessingModule: audioProcessingModule
-        )
-
-        return factory
     }
 }

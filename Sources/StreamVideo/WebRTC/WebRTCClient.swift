@@ -164,7 +164,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var screenshareCapturer: VideoCapturing?
     private let user: User
     private let callCid: String
-    private let audioSession = AudioSession()
+    private lazy var audioSession = AudioSession()
     private var connectOptions: ConnectOptions?
     internal var ownCapabilities: [OwnCapability]
     private let videoConfig: VideoConfig
