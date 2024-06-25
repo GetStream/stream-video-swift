@@ -324,6 +324,8 @@ open class CallViewModel: ObservableObject {
     ///  - ring: whether the call should ring.
     ///  - maxDuration: An optional integer representing the maximum duration of the call in seconds.
     ///  - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
+    ///  - startsAt: An optional date when the call starts.
+    ///  - backstage: An optional request for setting up backstage.
     public func startCall(
         callType: String,
         callId: String,

@@ -216,6 +216,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - notify: A boolean indicating whether to send notifications. Default is `false`.
     ///   - maxDuration: An optional integer representing the maximum duration of the call in seconds.
     ///   - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
+    ///   - backstage: An optional backstage request.
     /// - Returns: A `CallResponse` object representing the created call.
     /// - Throws: An error if the call creation fails.
     @discardableResult

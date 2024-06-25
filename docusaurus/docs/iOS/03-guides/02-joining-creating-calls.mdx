@@ -71,6 +71,32 @@ Members are permanently associated with a call. It allows you to:
 - Restrict the ability to join a call only to members
 - Send a push notification to members when the call starts
 
+#### Backstage setup
+
+The backstage feature makes it easy to build a use-case where you and your co-hosts can setup your camera before going live. Only after you call call.goLive() the regular users be allowed to join the livestream.
+
+However, you can also specify a `joinAheadTimeSeconds`, which allows regular users to join the livestream before it is live, in the specified join time before the stream starts.
+
+Here's an example how to do that:
+
+```swift
+let call = streamVideo.call(callType: "livestream", callId: callId)
+let backstageRequest = BackstageSettingsRequest(
+    enabled: true,
+    joinAheadTimeSeconds: 300
+)
+Task {
+	try await call.create(
+		members: [.init(userId: "test")],
+		startsAt: Date().addingTimeInterval(500),
+		backstage: backstageRequest
+	)
+    try await call.join()
+}
+```
+
+In the code snippet above, we are creating a call that starts 500 seconds from now. We are also enabling backstage mode, with a `joinAheadTimeSeconds` of 300 seconds. That means that regular users will be able to join the call 200 seconds from now.
+
 The following options are supported when creating a call:
 
 | Option | Description | Default |
@@ -82,6 +108,9 @@ The following options are supported when creating a call:
 | `team` | Restrict the access to this call to a specific team. | `nil` |
 | `ring` | If you want the call to ring for each member. | `false` |
 | `notify` | If you want the call to nofiy each member by sending push notification. | `false` |
+| `maxDuration` | If you want to specify a max duration of the call, in seconds. | `nil` |
+| `maxParticipants` | If you want to specify the max number of participants in the call. | `nil` |
+| `backstage` | If you want to specify backstage setup for the call. | `nil` |
 
 ### Querying Members
 
