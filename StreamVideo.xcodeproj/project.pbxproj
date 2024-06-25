@@ -661,6 +661,7 @@
 		8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993929422BEA0037232A /* BackportStateObject.swift */; };
 		8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993B294232360037232A /* IncomingCallView_iOS13.swift */; };
 		844299412942394C0037232A /* VideoView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299402942394C0037232A /* VideoView_iOS13.swift */; };
+		844542F02C296AAB001D5ADF /* BackstageSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844542EF2C296AAA001D5ADF /* BackstageSettingsResponse.swift */; };
 		8446AF912A4D84F4002AB07B /* Retries_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8446AF902A4D84F4002AB07B /* Retries_Tests.swift */; };
 		844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */; };
 		844ADA672AD3F21000769F6A /* GoogleSignIn.plist in Resources */ = {isa = PBXBuildFile; fileRef = 844ADA662AD3F21000769F6A /* GoogleSignIn.plist */; };
@@ -1669,6 +1670,7 @@
 		8442993929422BEA0037232A /* BackportStateObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackportStateObject.swift; sourceTree = "<group>"; };
 		8442993B294232360037232A /* IncomingCallView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView_iOS13.swift; sourceTree = "<group>"; };
 		844299402942394C0037232A /* VideoView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView_iOS13.swift; sourceTree = "<group>"; };
+		844542EF2C296AAA001D5ADF /* BackstageSettingsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackstageSettingsResponse.swift; sourceTree = "<group>"; };
 		8446AF902A4D84F4002AB07B /* Retries_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries_Tests.swift; sourceTree = "<group>"; };
 		844ADA662AD3F21000769F6A /* GoogleSignIn.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = GoogleSignIn.plist; sourceTree = "<group>"; };
 		844ADA682AD3F78F00769F6A /* GoogleHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleHelper.swift; sourceTree = "<group>"; };
@@ -3956,6 +3958,7 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				844542EF2C296AAA001D5ADF /* BackstageSettingsResponse.swift */,
 				845C09962C11AAA100F725B3 /* RejectCallRequest.swift */,
 				845C09822C0DEB5C00F725B3 /* LimitsSettingsRequest.swift */,
 				845C09832C0DEB5C00F725B3 /* LimitsSettingsResponse.swift */,
@@ -5155,6 +5158,7 @@
 				8409465B29AF4EEC007AF5BF /* ListRecordingsResponse.swift in Sources */,
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
+				844542F02C296AAB001D5ADF /* BackstageSettingsResponse.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
 				4065839B2B877ADA00B4F979 /* CIImage+Sendable.swift in Sources */,
 				84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */,

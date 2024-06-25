@@ -216,6 +216,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - notify: A boolean indicating whether to send notifications. Default is `false`.
     ///   - maxDuration: An optional integer representing the maximum duration of the call in seconds.
     ///   - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
+    ///   - backstage: An optional backstage request.
     /// - Returns: A `CallResponse` object representing the created call.
     /// - Throws: An error if the call creation fails.
     @discardableResult
@@ -228,7 +229,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false,
         maxDuration: Int? = nil,
-        maxParticipants: Int? = nil
+        maxParticipants: Int? = nil,
+        backstage: BackstageSettingsRequest? = nil
     ) async throws -> CallResponse {
         var membersRequest = [MemberRequest]()
         memberIds?.forEach {
@@ -239,14 +241,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         
         var settingsOverride: CallSettingsRequest?
+        var limits: LimitsSettingsRequest?
         if maxDuration != nil || maxParticipants != nil {
-            settingsOverride = CallSettingsRequest(
-                limits: .init(
-                    maxDurationSeconds: maxDuration,
-                    maxParticipants: maxParticipants
-                )
+            limits = .init(
+                maxDurationSeconds: maxDuration,
+                maxParticipants: maxParticipants
             )
         }
+
+        settingsOverride = CallSettingsRequest(
+            backstage: backstage,
+            limits: limits
+        )
+        
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,

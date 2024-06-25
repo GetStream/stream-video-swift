@@ -37,6 +37,20 @@ fileprivate func content() {
             notify: false
         )
     }
+    
+    asyncContainer {
+        let call = streamVideo.call(callType: "livestream", callId: callId)
+        let backstageRequest = BackstageSettingsRequest(
+            enabled: true,
+            joinAheadTimeSeconds: 300
+        )
+        try await call.create(
+            members: [.init(userId: "test")],
+            startsAt: Date().addingTimeInterval(500),
+            backstage: backstageRequest
+        )
+        try await call.join()
+    }
 
     asyncContainer {
         let filters: [String: RawJSON] = ["user_id": .string("jaewoong")]
