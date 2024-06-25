@@ -66,7 +66,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private(set) var storage: [UUID: CallEntry] = [:]
     private var active: UUID?
 
-    private var callEventsSubscription: Task<Void, Never>?
+    private var callEventsSubscription: Task<Void, Error>?
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 

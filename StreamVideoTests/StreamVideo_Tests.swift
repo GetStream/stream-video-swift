@@ -143,10 +143,6 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             streamVideo.state.activeCall == nil
                 && streamVideo.state.ringingCall == nil
         }
-
-        // Then
-        XCTAssert(streamVideo.state.ringingCall == nil)
-        XCTAssert(streamVideo.state.activeCall == nil)
     }
     
     func test_streamVideo_incomingCallAccept() async throws {

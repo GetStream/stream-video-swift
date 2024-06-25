@@ -37,7 +37,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
     private var eventHandlers = [EventHandler]()
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables = DisposableBag()
 
     internal init(
         callType: String,
@@ -90,7 +90,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     deinit {
-        cancellables.forEach { $0.cancel() }
         cancellables.removeAll()
     }
 
@@ -490,9 +489,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded, object: self)
-        for cancellable in cancellables {
-            cancellable.cancel()
-        }
         eventHandlers.forEach { $0.cancel() }
 
         cancellables.removeAll()
@@ -1190,7 +1186,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .$ownCapabilities
                 .removeDuplicates()
                 .sink { [weak self] in self?.callController.updateOwnCapabilities(ownCapabilities: $0) }
-                .store(in: &cancellables)
+                .store(in: cancellables)
         }
     }
 
@@ -1202,7 +1198,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: &cancellables)
+        .store(in: cancellables)
 
         speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
             guard let self else { return }
@@ -1211,7 +1207,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: &cancellables)
+        .store(in: cancellables)
 
         camera.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
@@ -1220,7 +1216,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: &cancellables)
+        .store(in: cancellables)
 
         camera.$direction.dropFirst().sink { [weak self] position in
             guard let self else { return }
@@ -1229,7 +1225,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: &cancellables)
+        .store(in: cancellables)
 
         microphone.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
@@ -1238,7 +1234,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: &cancellables)
+        .store(in: cancellables)
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
@@ -1250,19 +1246,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .map(\.?.audio.noiseCancellation)
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: &self.cancellables)
+                .store(in: cancellables)
         }
     }
 
     private func subscribeToTranscriptionSettingsChanges() {
-        executeOnMain {
+        executeOnMain { [weak self] in
+            guard let self else { return }
             self
                 .state
                 .$settings
                 .map(\.?.transcription)
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: &self.cancellables)
+                .store(in: cancellables)
         }
     }
 

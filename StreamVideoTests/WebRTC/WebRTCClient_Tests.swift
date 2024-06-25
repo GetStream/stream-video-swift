@@ -40,15 +40,28 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         participant.name = "Test"
         return participant
     }()
-    
+
     private lazy var participantJoined: Stream_Video_Sfu_Event_ParticipantJoined = {
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
         participantJoined.participant = participant
         return participantJoined
     }()
-    
+
+    private lazy var factory: PeerConnectionFactory! = PeerConnectionFactory(audioProcessingModule: MockAudioProcessingModule())
     private var webRTCClient: WebRTCClient!
+    private var tracks: Set<RTCVideoTrack> = []
+
+    // MARK: - Lifecycle
+
+    override func tearDown() {
+        tracks.forEach { $0.isEnabled = false }
+        factory = nil
+        webRTCClient = nil
+        super.tearDown()
+    }
+
+    // MARK: init
 
     func test_webRTCClient_init_signalChannelIsUsingTheExpectedConnectURL() {
         // Given
@@ -149,7 +162,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         try await test_webRTCClient_connectionFlow()
         var participant = participant.toCallParticipant()
         participant.trackLookupPrefix = "test-track"
-        let track = await makeVideoTrack()
+        let track = makeVideoTrack()
         
         // When
         await webRTCClient.state.update(tracks: ["test-track": track])
@@ -165,7 +178,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Given
         try await test_webRTCClient_connectionFlow()
         let participant = participant.toCallParticipant()
-        let track = await makeVideoTrack()
+        let track = makeVideoTrack()
         
         // When
         await webRTCClient.state.update(tracks: ["123": track])
@@ -181,7 +194,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Given
         try await test_webRTCClient_connectionFlow()
         let participant = participant.toCallParticipant()
-        let track = await makeVideoTrack()
+        let track = makeVideoTrack()
         
         // When
         await webRTCClient.state.update(tracks: ["test-track": track])
@@ -198,7 +211,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         try await test_webRTCClient_connectionFlow()
         var participant = participant.toCallParticipant()
         participant.trackLookupPrefix = "test-track"
-        let screensharingTrack = await makeVideoTrack()
+        let screensharingTrack = makeVideoTrack()
         
         // When
         await webRTCClient.state.update(screensharingTracks: ["test-track": screensharingTrack])
@@ -214,7 +227,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Given
         try await test_webRTCClient_connectionFlow()
         let participant = participant.toCallParticipant()
-        let screensharingTrack = await makeVideoTrack()
+        let screensharingTrack = makeVideoTrack()
         
         // When
         await webRTCClient.state.update(screensharingTracks: ["123": screensharingTrack])
@@ -333,11 +346,15 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         connectionQualityChanged.connectionQualityUpdates = [update]
         
         // When
-        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
+        webRTCClient
+            .eventNotificationCenter
+            .process(.sfuEvent(.participantJoined(participantJoined)))
+        webRTCClient
+            .eventNotificationCenter
+            .process(.sfuEvent(.connectionQualityChanged(connectionQualityChanged)))
+
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(.sfuEvent(.connectionQualityChanged(connectionQualityChanged)))
-        try await waitForCallEvent()
-        
+
         // Then
         let newParticipant = await webRTCClient.state.callParticipants[sessionId]
         XCTAssertNotNil(newParticipant)
@@ -648,14 +665,31 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         }
         
         // When
-        let videoTrack = await makeVideoTrack()
-        webRTCClient.publisher?.addTransceiver(videoTrack, streamIds: ["some-id"], trackType: .video)
-        try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(.sfuEvent(.changePublishQuality(event)))
-        try await waitForCallEvent()
+        let videoTrack = makeVideoTrack()
+        webRTCClient
+            .publisher?
+            .addTransceiver(
+                videoTrack,
+                streamIds: ["some-id"],
+                trackType: .video
+            )
 
-        // Then
-        XCTAssert(webRTCClient.publisher?.transceiver?.sender.parameters.encodings.map(\.rid) == encodingParams.map(\.rid))
+        webRTCClient
+            .eventNotificationCenter
+            .process(.sfuEvent(.changePublishQuality(event)))
+
+        let expected = encodingParams.map(\.rid)
+        await fulfillment { [weak webRTCClient] in
+            let actual = webRTCClient?
+                .publisher?
+                .transceiver?
+                .sender
+                .parameters
+                .encodings
+                .map(\.rid)
+
+            return actual == expected
+        }
     }
     
     func test_webRTCClient_screensharingBroadcast() async throws {
@@ -750,10 +784,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         ownCapabilities: [OwnCapability] = [],
         httpClient: HTTPClient? = nil
     ) -> WebRTCClient {
-        let time = VirtualTime()
-        VirtualTimeTimer.time = time
         var environment = WebSocketClient.Environment.mock
-        environment.timerType = VirtualTimeTimer.self
         environment.httpClientBuilder = {
             httpClient ?? HTTPClient_Mock()
         }
@@ -792,10 +823,10 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         return trickleEvent
     }
     
-    private func makeVideoTrack() async -> RTCVideoTrack {
-        let factory = PeerConnectionFactory(audioProcessingModule: MockAudioProcessingModule())
-        let videoSource = await factory.makeVideoSource(forScreenShare: false)
-        let track = await factory.makeVideoTrack(source: videoSource)
+    private func makeVideoTrack() -> RTCVideoTrack {
+        let videoSource = factory.makeVideoSource(forScreenShare: false)
+        let track = factory.makeVideoTrack(source: videoSource)
+        tracks.insert(track)
         return track
     }
 }

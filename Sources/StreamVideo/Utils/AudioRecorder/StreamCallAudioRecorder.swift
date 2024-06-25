@@ -21,7 +21,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     let audioSession: AudioSessionProtocol
 
     /// A private task responsible for setting up the recorder in the background.
-    private var setUpTask: Task<Void, Never>?
+    private var setUpTask: Task<Void, Error>?
 
     private var hasActiveCallCancellable: AnyCancellable?
 
