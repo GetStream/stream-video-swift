@@ -85,14 +85,12 @@ let backstageRequest = BackstageSettingsRequest(
     enabled: true,
     joinAheadTimeSeconds: 300
 )
-Task {
-	try await call.create(
-		members: [.init(userId: "test")],
-		startsAt: Date().addingTimeInterval(500),
-		backstage: backstageRequest
-	)
-    try await call.join()
-}
+try await call.create(
+    members: [.init(userId: "test")],
+    startsAt: Date().addingTimeInterval(500),
+    backstage: backstageRequest
+)
+try await call.join()
 ```
 
 In the code snippet above, we are creating a call that starts 500 seconds from now. We are also enabling backstage mode, with a `joinAheadTimeSeconds` of 300 seconds. That means that regular users will be able to join the call 200 seconds from now.
