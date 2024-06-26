@@ -11,7 +11,9 @@ import SwiftUI
 @MainActor
 final class ReactionsAdapter: ObservableObject {
 
-    @Injected(\.streamVideo) var streamVideo
+    var streamVideo: StreamVideo? {
+        didSet { didUpdate(streamVideo) }
+    }
 
     var player: AVAudioPlayer?
 
@@ -35,15 +37,6 @@ final class ReactionsAdapter: ObservableObject {
 
     // MARK: - Lifecycle
 
-    init() {
-        subscribeToCallStatusUpdates()
-
-        activeCallUpdated = streamVideo
-            .state
-            .$activeCall
-            .sink { [weak self] in self?.call = $0 }
-    }
-
     // MARK: - Actions
 
     func send(reaction: Reaction) {
@@ -62,7 +55,9 @@ final class ReactionsAdapter: ObservableObject {
     }
 
     func shouldRevert(reaction: Reaction) -> Bool {
-        reaction.id == .raiseHand && activeReactions[streamVideo.user.id]?.first { $0.id == .raiseHand } != nil
+        guard let streamVideo else { return false }
+        return reaction.id == .raiseHand
+            && activeReactions[streamVideo.user.id]?.first { $0.id == .raiseHand } != nil
     }
 
     func removeRaisedHand(from userId: String) {
@@ -71,7 +66,19 @@ final class ReactionsAdapter: ObservableObject {
 
     // MARK: - Private API
 
-    private func subscribeToCallStatusUpdates() {
+    private func didUpdate(_ streamVideo: StreamVideo?) {
+
+        activeCallUpdated?.cancel()
+        activeCallUpdated = nil
+        callEndedNotificationObserver = nil
+
+        guard let streamVideo else { return }
+
+        activeCallUpdated = streamVideo
+            .state
+            .$activeCall
+            .sink { [weak self] in self?.call = $0 }
+
         callEndedNotificationObserver = NotificationCenter.default.addObserver(
             forName: .init(CallNotification.callEnded),
             object: nil,
