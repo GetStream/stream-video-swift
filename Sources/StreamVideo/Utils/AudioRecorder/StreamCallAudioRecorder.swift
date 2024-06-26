@@ -165,6 +165,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         }
 
         audioRecorder.stop()
+        lastStartRecordingRequest = nil
         isRecording = false
         removeRecodingFile()
         log.debug("️🎙️Recording stopped.")
