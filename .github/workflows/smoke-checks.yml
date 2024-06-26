@@ -43,10 +43,6 @@ jobs:
     - uses: actions/checkout@v4.1.1
       with:
         fetch-depth: 100
-    - uses: actions/download-artifact@v4
-      with:
-        name: cache-derived-data
-        path: derived_data/Build/
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_YEETD: true
