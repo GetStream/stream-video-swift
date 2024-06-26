@@ -38,7 +38,7 @@ func configureSentry() {
         LogConfig.level = .debug
         LogConfig.destinationTypes = [
             MemoryLogDestination.self,
-            ConsoleLogDestination.self
+            OSLogDestination.self
         ]
         LogConfig.formatters = [
             DemoLogFormatter()
