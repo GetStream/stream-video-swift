@@ -7,17 +7,17 @@ import StreamWebRTC
 
 actor AudioSession {
     
+    private let rtcAudioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
+
     func configure(
         _ configuration: RTCAudioSessionConfiguration = .default,
         audioOn: Bool,
         speakerOn: Bool
     ) {
-        let audioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
-        audioSession.lockForConfiguration()
-        audioSession.useManualAudio = true
-        audioSession.isAudioEnabled = true
-
-        defer { audioSession.unlockForConfiguration() }
+        rtcAudioSession.lockForConfiguration()
+        defer { rtcAudioSession.unlockForConfiguration() }
+        rtcAudioSession.useManualAudio = true
+        rtcAudioSession.isAudioEnabled = true
 
         do {
             log.debug("Configuring audio session")
@@ -28,18 +28,22 @@ actor AudioSession {
                 configuration.categoryOptions.remove(.defaultToSpeaker)
                 configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
             }
-            try audioSession.setConfiguration(configuration, active: audioOn)
+            try rtcAudioSession.setConfiguration(configuration, active: audioOn)
         } catch {
             log.error("Error occured while configuring audio session", error: error)
         }
     }
     
     func setAudioSessionEnabled(_ enabled: Bool) {
-        let audioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
-        audioSession.lockForConfiguration()
+        rtcAudioSession.lockForConfiguration()
+        defer { rtcAudioSession.unlockForConfiguration() }
+        rtcAudioSession.isAudioEnabled = enabled
+    }
 
-        defer { audioSession.unlockForConfiguration() }
-        audioSession.isAudioEnabled = enabled
+    deinit {
+        rtcAudioSession.lockForConfiguration()
+        rtcAudioSession.isAudioEnabled = false
+        rtcAudioSession.unlockForConfiguration()
     }
 }
 

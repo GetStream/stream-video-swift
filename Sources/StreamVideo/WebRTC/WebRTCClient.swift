@@ -24,7 +24,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             static let highParticipantDelay: UInt64 = 1_000_000_000
         }
         private var scheduledUpdate = false
-        private var cancellables = Set<AnyCancellable>()
         private(set) var lastUpdate: TimeInterval = Date().timeIntervalSince1970
         var connectionState = ConnectionState.disconnected(reason: nil) {
             didSet {
@@ -134,8 +133,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
     }
     
-    let state: State
-    
+    private(set) var state: State
+
     let httpClient: HTTPClient
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     let peerConnectionFactory: PeerConnectionFactory
@@ -164,7 +163,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var screenshareCapturer: VideoCapturing?
     private let user: User
     private let callCid: String
-    private let audioSession = AudioSession()
+    private lazy var audioSession = AudioSession()
     private var connectOptions: ConnectOptions?
     internal var ownCapabilities: [OwnCapability]
     private let videoConfig: VideoConfig
@@ -182,7 +181,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var currentScreenhsareType: ScreensharingType?
     private var isFastReconnecting = false
     private var disconnectTime: Date?
-    private var addOnParticipantsChangeHandlerTask: Task<Void, Never>?
+    private var addOnParticipantsChangeHandlerTask: Task<Void, Error>?
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
@@ -273,6 +272,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
 
     deinit {
         addOnParticipantsChangeHandlerTask?.cancel()
+        state = .init()
     }
 
     func connect(

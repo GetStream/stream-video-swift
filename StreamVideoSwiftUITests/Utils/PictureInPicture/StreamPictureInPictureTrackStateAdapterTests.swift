@@ -4,7 +4,7 @@
 
 import Foundation
 import XCTest
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 
@@ -13,11 +13,16 @@ final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked
     private var factory: PeerConnectionFactory! = .init(audioProcessingModule: MockAudioProcessingModule())
     private var adapter: StreamPictureInPictureTrackStateAdapter! = .init()
 
+    private lazy var trackA: RTCVideoTrack! = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+    private lazy var trackB: RTCVideoTrack! = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+
     // MARK: - Lifecycle
 
     override func tearDown() {
-        factory = nil
+        trackA?.isEnabled = false
+        trackB?.isEnabled = false
         adapter = nil
+        factory = nil
         super.tearDown()
     }
 
@@ -25,60 +30,47 @@ final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked
 
     @MainActor
     func test_enabled_enablesTheActiveTrack() async throws {
-        let activeTrack = await makeVideoTrack()
-        activeTrack.isEnabled = false
-        adapter.activeTrack = activeTrack
+        trackA.isEnabled = false
+        adapter.activeTrack = trackA
 
         adapter.isEnabled = true
 
-        await fulfillment { activeTrack.isEnabled == true }
+        await fulfillment { self.trackA.isEnabled == true }
     }
 
     @MainActor
     func test_enabled_whenTheActiveTrackChanges_disablesTheOldTrack() async throws {
-        let activeTrack = await makeVideoTrack()
-        activeTrack.isEnabled = true
-        adapter.activeTrack = activeTrack
-        let newActiveTrack = await makeVideoTrack()
-        newActiveTrack.isEnabled = false
+        trackA.isEnabled = true
+        adapter.activeTrack = trackA
+        trackB.isEnabled = false
+
         adapter.isEnabled = true
+        adapter.activeTrack = trackB
 
-        adapter.activeTrack = newActiveTrack
-
-        await fulfillment { activeTrack.isEnabled == false }
+        await fulfillment { self.trackA.isEnabled == false }
     }
 
     // MARK: - disabled
 
     @MainActor
     func test_disabled_doesNotChangeTheEnableForTheActiveTrack() async throws {
-        let activeTrack = await makeVideoTrack()
-        activeTrack.isEnabled = false
-        adapter.activeTrack = activeTrack
+        trackA.isEnabled = false
+        adapter.activeTrack = trackA
 
         adapter.isEnabled = false
 
-        await fulfillment { activeTrack.isEnabled == false }
+        await fulfillment { self.trackA.isEnabled == false }
     }
 
     @MainActor
     func test_disabled_whenTheActiveTrackChanges_doesNotDisableTheOldTrack() async throws {
-        let activeTrack = await makeVideoTrack()
-        activeTrack.isEnabled = true
-        adapter.activeTrack = activeTrack
-        let newActiveTrack = await makeVideoTrack()
-        newActiveTrack.isEnabled = false
+        trackA.isEnabled = true
+        adapter.activeTrack = trackA
+        trackB.isEnabled = false
         adapter.isEnabled = false
 
-        adapter.activeTrack = newActiveTrack
+        adapter.activeTrack = trackB
 
-        await fulfillment { activeTrack.isEnabled == true }
-    }
-
-    // MARK: - Private Helpers
-
-    private func makeVideoTrack() async -> RTCVideoTrack {
-        let videoSource = await factory.makeVideoSource(forScreenShare: false)
-        return await factory.makeVideoTrack(source: videoSource)
+        await fulfillment { self.trackA.isEnabled == true }
     }
 }

@@ -178,25 +178,46 @@ final class CallCRUDTest: IntegrationTest {
             v.count == 1 && v[0].id == self.user1
         }
         
-        try await call.updateMembers(members: [.init(custom: [membersGroup: .number(membersCount)], userId: user1)])
-        await assertNext(call.state.$members) { v in
-            guard let member = v.first else {
+        try await call
+            .updateMembers(
+                members: [
+                    .init(
+                        custom: [
+                            membersGroup: .number(membersCount)
+                        ], userId: user1
+                    )
+                ]
+            )
+
+        await fulfillment {
+            if let member = call.state.members.first {
+                return member.id == self.user1
+                    && member.customData[membersGroup]?.numberValue == membersCount
+            } else {
                 return false
             }
-            return member.id == self.user1 && member.customData[membersGroup]?.numberValue == membersCount
         }
-        
+
         try await call.removeMembers(ids: [user1])
-        await assertNext(call.state.$members) { v in
-            v.isEmpty
-        }
         
-        try await call.addMembers(members: [.init(custom: [roleKey: .string(roleValue)], userId: user1)])
-        await assertNext(call.state.$members) { v in
-            guard let member = v.first else {
+        await fulfillment { call.state.members.isEmpty }
+        
+        try await call.addMembers(
+            members: [
+                .init(
+                    custom: [roleKey: .string(roleValue)],
+                    userId: user1
+                )
+            ]
+        )
+        
+        await fulfillment {
+            if let member = call.state.members.first {
+                return member.id == self.user1
+                    && member.customData[roleKey]?.stringValue == roleValue
+            } else {
                 return false
             }
-            return member.id == self.user1 && member.customData[roleKey]?.stringValue == roleValue
         }
     }
     
@@ -206,10 +227,9 @@ final class CallCRUDTest: IntegrationTest {
         
         let call2 = client.call(callType: call1.callType, callId: call1.callId)
         _ = try await call2.get(membersLimit: 1)
-        await assertNext(call1.state.$members) { v in
-            v.count == 1
-        }
         
+        await fulfillment { call1.state.members.count == 1 }
+
         var membersResponse = try await call2.queryMembers()
         XCTAssertEqual(1, membersResponse.members.count)
         
@@ -224,10 +244,8 @@ final class CallCRUDTest: IntegrationTest {
         
         // add to call2 so we can test that the other call object is updated via WS events
         try await call2.addMembers(ids: [user2])
-        await assertNext(call1.state.$members) { v in
-            v.count == 2
-        }
-        
+        await fulfillment { call1.state.members.count == 2 }
+
         membersResponse = try await call2.queryMembers(filters: [userIdKey: .string(user2)])
         XCTAssertEqual(1, membersResponse.members.count)
         
@@ -239,11 +257,13 @@ final class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(1, membersResponse.members.count)
         XCTAssertEqual(user1, membersResponse.members.first?.userId)
         
-        await assertNext(call2.state.$members) { v in
-            v.count == 2 && v.first?.id == self.user2
+        await fulfillment {
+            call2.state.members.count == 2
+                && call2.state.members.first?.id == self.user2
         }
     }
     
+    @MainActor
     func test_queryChannels() async throws {
         let colorKey = "color"
         let blue: RawJSON = "blue"
@@ -256,15 +276,14 @@ final class CallCRUDTest: IntegrationTest {
             watch: true
         )
         XCTAssertEqual(1, calls.count)
-        XCTAssertEqual(call.cId, calls[0].cId)
-        
+        var fetchedCall = try XCTUnwrap(calls.first)
+        XCTAssertEqual(call.cId, fetchedCall.cId)
+
         // changes to a watched call via query call should propagate as usual to the state
         let updateResponse = try await call.update(custom: [colorKey: blue])
         XCTAssertEqual(updateResponse.call.custom[colorKey], blue)
         
-        await assertNext(calls[0].state.$custom) { v in
-            v[colorKey] == blue
-        }
+        await fulfillment { fetchedCall.state.custom[colorKey] == blue }
         
         let (secondTry, _) = try await client.queryCalls(
             filters: [
@@ -273,8 +292,9 @@ final class CallCRUDTest: IntegrationTest {
             ]
         )
         XCTAssertEqual(1, secondTry.count)
-        XCTAssertEqual(call.cId, calls[0].cId)
-        
+        fetchedCall = try XCTUnwrap(secondTry.first)
+        XCTAssertEqual(call.cId, fetchedCall.cId)
+
         try await call.end()
         
         let (thirdTry, _) = try await client.queryCalls(
@@ -285,10 +305,7 @@ final class CallCRUDTest: IntegrationTest {
         )
         XCTAssertEqual(0, thirdTry.count)
         
-        // check propagation as well
-        await assertNext(calls[0].state.$endedAt) { v in
-            v != nil
-        }
+        await fulfillment { fetchedCall.state.endedAt != nil }
     }
     
     func test_sendReaction() async throws {
@@ -305,6 +322,7 @@ final class CallCRUDTest: IntegrationTest {
         let specificSub = call.subscribe(for: CallReactionEvent.self)
         
         _ = try await call.sendReaction(type: reactionType1)
+        
         await assertNext(specificSub) { ev in
             ev.reaction.type == reactionType1
         }
@@ -653,11 +671,13 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func test_joinBackstageRegularUser() async throws {
+        let startingDate = Date(timeIntervalSinceNow: 30)
+        let joiningDate = Date(timeInterval: -20, since: startingDate)
         let firstUserCall = client.call(callType: .livestream, callId: randomCallId)
         try await firstUserCall.create(
             memberIds: [user1],
-            startsAt: Date().addingTimeInterval(15),
-            backstage: .init(enabled: true, joinAheadTimeSeconds: 10)
+            startsAt: startingDate,
+            backstage: .init(enabled: true, joinAheadTimeSeconds: 20)
         )
         
         let secondUserClient = try await makeClient(for: user2)
@@ -667,15 +687,13 @@ final class CallCRUDTest: IntegrationTest {
         )
         
         try await firstUserCall.join()
-        try await customWait()
-                    
+
         let error = await XCTAssertThrowsErrorAsync {
             try await secondUserCall.join()
         }
-        
         XCTAssertEqual((error as! APIError).statusCode, 403)
         
-        try await customWait(nanoseconds: 6_000_000_000)
+        await fulfillment(timeout: 30) { Date() >= joiningDate }
         try await secondUserCall.join()
     }
 }

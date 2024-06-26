@@ -37,8 +37,6 @@ final class StreamPictureInPictureTrackStateAdapter {
 
     deinit {
         observerCancellable?.cancel()
-        isEnabled = false
-        activeTrack = nil
     }
 
     // MARK: - Private helpers
@@ -50,6 +48,8 @@ final class StreamPictureInPictureTrackStateAdapter {
     ///
     /// - Parameter isActive: A Boolean value indicating whether the observer should be active.
     private func enableObserver(_ isActive: Bool) {
+        observerCancellable?.cancel()
+        observerCancellable = nil
         if isActive {
             /// If 'isActive' is true, it sets up an observer that checks tracks state periodically.
             observerCancellable = Timer
@@ -62,17 +62,16 @@ final class StreamPictureInPictureTrackStateAdapter {
             log.debug("✅ Activated.")
         } else {
             /// If 'isActive' is false, it cancels the observer.
-            observerCancellable?.cancel()
-            observerCancellable = nil
             log.debug("❌ Disabled.")
         }
     }
 
     /// This private function checks the state of the active track and enables it if it's not already enabled.
     private func checkTracksState() {
+        let activeTrack = self.activeTrack
         if let activeTrack, !activeTrack.isEnabled {
             log.info("⚙️Active track:\(activeTrack.trackId) for picture-in-picture will be enabled now.")
-            self.activeTrack?.isEnabled = true
+            activeTrack.isEnabled = true
         }
     }
 }
