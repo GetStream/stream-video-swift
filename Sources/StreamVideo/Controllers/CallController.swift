@@ -195,9 +195,17 @@ class CallController: @unchecked Sendable {
     }
     
     func updateOwnCapabilities(ownCapabilities: [OwnCapability]) {
-        if ownCapabilities != webRTCClient?.ownCapabilities {
-            webRTCClient?.ownCapabilities = ownCapabilities
+        guard let webRTCClient else {
+            return
         }
+        let oldValue = Set(webRTCClient.ownCapabilities)
+        let newValue = Set(ownCapabilities)
+
+        guard oldValue != newValue else {
+            return
+        }
+
+        webRTCClient.ownCapabilities = ownCapabilities
     }
 
     /// Initiates a focus operation at a specific point on the camera's view.

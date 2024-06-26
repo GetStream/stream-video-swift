@@ -651,4 +651,31 @@ final class CallCRUDTest: IntegrationTest {
         pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
         XCTAssertNil(pin)
     }
+    
+    func test_joinBackstageRegularUser() async throws {
+        let firstUserCall = client.call(callType: .livestream, callId: randomCallId)
+        try await firstUserCall.create(
+            memberIds: [user1],
+            startsAt: Date().addingTimeInterval(15),
+            backstage: .init(enabled: true, joinAheadTimeSeconds: 10)
+        )
+        
+        let secondUserClient = try await makeClient(for: user2)
+        let secondUserCall = secondUserClient.call(
+            callType: .livestream,
+            callId: firstUserCall.callId
+        )
+        
+        try await firstUserCall.join()
+        try await customWait()
+                    
+        let error = await XCTAssertThrowsErrorAsync {
+            try await secondUserCall.join()
+        }
+        
+        XCTAssertEqual((error as! APIError).statusCode, 403)
+        
+        try await customWait(nanoseconds: 6_000_000_000)
+        try await secondUserCall.join()
+    }
 }

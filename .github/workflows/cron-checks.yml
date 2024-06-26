@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: bundle exec fastlane build_test_app_and_frameworks
       timeout-minutes: 60
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: success()
       with:
         name: cache-derived-data
@@ -39,18 +39,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 17.4
-            xcode: 15.3
+          - ios: 17.2
+            xcode: 15.2
             os: macos-14
             device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
-            xcode: 15.3
+            xcode: 15.2
             os: macos-14
             device: "iPhone 14 Pro Max"
             setup_runtime: true
           - ios: 15.5
-            xcode: 15.3
+            xcode: 15.2
             os: macos-14
             device: "iPhone 13"
             setup_runtime: true
@@ -64,7 +64,7 @@ jobs:
       IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})" # For the Allure report
     steps:
     - uses: actions/checkout@v4.1.1
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: cache-derived-data
         path: derived_data/Build/
@@ -73,6 +73,7 @@ jobs:
         INSTALL_ALLURE: true
         INSTALL_VIDEO_BUDDY: true
         INSTALL_YEETD: true
+        SKIP_MINT_BOOTSTRAP: true
     - name: Cache iOS Simulator Runtime
       uses: actions/cache@v4
       id: runtime-cache
@@ -119,13 +120,14 @@ jobs:
       run: |
         brew install chargepoint/xcparse/xcparse
         xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: Test Data E2E
+        name: Test Data E2E (iOS ${{ matrix.ios }})
         path: |
           fastlane/recordings
           fastlane/*.log
+          fastlane/test_output/report.junit
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
 
@@ -134,23 +136,23 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 17.4
-            xcode: 15.3
+          - ios: 17.2
+            xcode: 15.2
             os: macos-14
             device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
-            xcode: 15.3
+            xcode: 15.2
             os: macos-14
             device: "iPhone 13 Pro Max"
             setup_runtime: true
           - ios: 15.5
-            xcode: 15.3
+            xcode: 15.2
             os: macos-14
             device: "iPhone 13"
             setup_runtime: true
           - ios: 14.5
-            xcode: 15.3
+            xcode: 15.2
             os: macos-14
             device: "iPhone SE (2nd generation)"
             setup_runtime: true
@@ -197,10 +199,10 @@ jobs:
       run: |
         brew install chargepoint/xcparse/xcparse
         xcparse logs fastlane/test_output/StreamVideo.xcresult fastlane/test_output/logs/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: Test Data LLC
+        name: Test Data LLC (iOS ${{ matrix.ios }})
         path: |
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
@@ -211,7 +213,7 @@ jobs:
     needs: build-test-app-and-frameworks
     steps:
     - uses: actions/checkout@v4.1.1
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: cache-derived-data
         path: derived_data/Build/
@@ -256,7 +258,9 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-14
+    runs-on: macos-13
+    env:
+      XCODE_VERSION: "15.0.1"
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
