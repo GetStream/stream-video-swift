@@ -920,7 +920,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         log.debug("Creating subscriber peer connection", subsystems: .webRTC)
         let configuration = connectOptions.rtcConfiguration
-        subscriber = try await peerConnectionFactory.makePeerConnection(
+        subscriber = try peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
             configuration: configuration,
             type: .subscriber,
@@ -948,7 +948,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private func publishLocalTracks(configuration: RTCConfiguration) async throws {
         if publisher == nil {
-            publisher = try await peerConnectionFactory.makePeerConnection(
+            publisher = try peerConnectionFactory.makePeerConnection(
                 sessionId: sessionID,
                 configuration: configuration,
                 type: .publisher,
@@ -1112,13 +1112,13 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private func makeAudioTrack() async -> RTCAudioTrack {
         let audioConstrains = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
-        let audioSource = await peerConnectionFactory.makeAudioSource(audioConstrains)
-        let audioTrack = await peerConnectionFactory.makeAudioTrack(source: audioSource)
+        let audioSource = peerConnectionFactory.makeAudioSource(audioConstrains)
+        let audioTrack = peerConnectionFactory.makeAudioTrack(source: audioSource)
         return audioTrack
     }
     
     private func makeVideoTrack(screenshareType: ScreensharingType? = nil) async -> RTCVideoTrack {
-        let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshareType != nil)
+        let videoSource = peerConnectionFactory.makeVideoSource(forScreenShare: screenshareType != nil)
         if let screenshareType {
             if screenshareType == .inApp {
                 screenshareCapturer = ScreenshareCapturer(
@@ -1143,7 +1143,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             let device = videoCapturer?.capturingDevice(for: position)
             try? await videoCapturer?.startCapture(device: device)
         }
-        let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
+        let videoTrack = peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
     }
     
@@ -1223,7 +1223,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             throw ClientError.Unexpected()
         }
         
-        let tempPeerConnection = try await peerConnectionFactory.makePeerConnection(
+        let tempPeerConnection = try peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
