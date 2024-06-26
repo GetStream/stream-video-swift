@@ -274,6 +274,7 @@
 		40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */; };
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
+		40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */; };
 		40C4DF482C1C2BFC0035DBC2 /* LastParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF412C1C215E0035DBC2 /* LastParticipantAutoLeavePolicy.swift */; };
 		40C4DF492C1C2C210035DBC2 /* Publisher+WeakAssign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */; };
 		40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */; };
@@ -1342,6 +1343,7 @@
 		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
+		40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisposableBag.swift; sourceTree = "<group>"; };
 		40C4DF412C1C215E0035DBC2 /* LastParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
 		40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+WeakAssign.swift"; sourceTree = "<group>"; };
 		40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
@@ -2819,6 +2821,14 @@
 			path = Events;
 			sourceTree = "<group>";
 		};
+		40C2B5B42C2B604800EC2C2D /* DisposableBag */ = {
+			isa = PBXGroup;
+			children = (
+				40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */,
+			);
+			path = DisposableBag;
+			sourceTree = "<group>";
+		};
 		40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */ = {
 			isa = PBXGroup;
 			children = (
@@ -3844,6 +3854,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C2B5B42C2B604800EC2C2D /* DisposableBag */,
 				40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */,
 				408937892C062B0B000EEB69 /* UUIDProviding */,
 				403FF3DF2BA1D20E0092CE8A /* UnfairQueue */,
@@ -5142,6 +5153,7 @@
 				40FB02052BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift in Sources */,
 				84C4004129E3F446007B69C2 /* WSClientEvent.swift in Sources */,
 				84AF64D5287C79320012A503 /* RawJSON.swift in Sources */,
+				40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */,
 				84F73858287C1A3400A363F4 /* ConnectionState.swift in Sources */,
 				846E4B0129D2D372003733AB /* Sorting.swift in Sources */,
 				841BAA3F2BD15CDE000C73E4 /* QueryCallStatsRequest.swift in Sources */,

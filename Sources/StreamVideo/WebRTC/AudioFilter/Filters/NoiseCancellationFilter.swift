@@ -15,7 +15,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
     @Injected(\.streamVideo) private var streamVideo
 
     private var isActive: Bool = false
-    private var activationTask: Task<Void, Never>?
+    private var activationTask: Task<Void, Error>?
 
     private let name: String
     private let initializeClosure: (Int, Int) -> Void

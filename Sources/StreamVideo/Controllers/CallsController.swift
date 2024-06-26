@@ -34,8 +34,8 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     
     private var watchTask: Task<Void, Error>?
     private var socketDisconnected = false
-    private var cancellables = Set<AnyCancellable>()
-        
+    private var cancellables = DisposableBag()
+
     init(streamVideo: StreamVideo, callsQuery: CallsQuery) {
         self.callsQuery = callsQuery
         self.streamVideo = streamVideo
@@ -51,9 +51,6 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     public func cleanUp() {
         watchTask?.cancel()
         watchTask = nil
-        for cancellable in cancellables {
-            cancellable.cancel()
-        }
         cancellables.removeAll()
     }
     
@@ -70,7 +67,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
                 self.reWatchCalls()
             }
         }
-        .store(in: &cancellables)
+        .store(in: cancellables)
     }
     
     private func loadCalls(shouldRefresh: Bool = false) async throws {
