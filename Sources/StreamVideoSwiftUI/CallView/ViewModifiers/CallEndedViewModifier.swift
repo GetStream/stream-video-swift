@@ -18,6 +18,7 @@ private final class CallEndedViewModifierViewModel: ObservableObject {
             switch (isPresentingSubview, oldValue) {
             case (false, true):
                 // The order matters here as it triggers the publisher on the View
+                maxParticipantsCount = 0
                 lastCall = nil
                 activeCall = nil
             default:
@@ -60,16 +61,18 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
         content
             .sheet(isPresented: $viewModel.isPresentingSubview) {
                 subviewProvider(viewModel.lastCall) {
-                    viewModel.lastCall = nil
-                    viewModel.maxParticipantsCount = 0
                     viewModel.isPresentingSubview = false
                 }
             }
             .onReceive(viewModel.$activeCall.removeDuplicates { $0?.cId == $1?.cId }) { call in
-                log
-                    .debug(
-                        "CallEnded view modifier received newValue:\(call?.cId ?? "nil") oldValue:\(viewModel.lastCall?.cId ?? "nil") isPresentingSubview:\(viewModel.isPresentingSubview) maxParticipantsCount:\(viewModel.maxParticipantsCount)."
-                    )
+                log.debug(
+                    """
+                    Call id:\(call?.callId ?? "nil") has ended.
+                    LastCall id:\(viewModel.lastCall?.cId ?? "nil")
+                    isPresentingSubview: \(viewModel.isPresentingSubview)
+                    maxParticipantsCount:\(viewModel.maxParticipantsCount)
+                    """
+                )
 
                 switch (call, viewModel.lastCall, viewModel.isPresentingSubview) {
                 case (nil, let activeCall, false)
@@ -79,6 +82,12 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
                     /// - The activeCall was ended.
                     /// - Participants, during call's duration, grew to more than one.
                     viewModel.isPresentingSubview = true
+
+                case (nil, _, false):
+                    /// If we are not going to present then we clear any data.
+                    viewModel.lastCall = nil
+                    viewModel.isPresentingSubview = false
+                    viewModel.maxParticipantsCount = 0
 
                 case let (newActiveCall, activeCall, _) where newActiveCall != nil && activeCall != nil:
                     /// The activeCall was replaced with another call. We should not present the

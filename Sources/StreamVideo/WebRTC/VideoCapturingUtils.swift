@@ -113,7 +113,9 @@ enum VideoCapturingUtils {
         let devices = RTCCameraVideoCapturer.captureDevices()
         
         guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {
-            log.warning("No camera video capture devices available")
+            #if !targetEnvironment(simulator)
+            log.warning("Unable to find any VideoCapture device.", subsystems: .webRTC)
+            #endif
             return nil
         }
         

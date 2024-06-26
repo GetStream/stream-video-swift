@@ -9,15 +9,33 @@ public var log: Logger {
 }
 
 /// Entity for identifying which subsystem the log message comes from.
-public struct LogSubsystem: OptionSet {
+public struct LogSubsystem: OptionSet, CustomStringConvertible {
     public let rawValue: Int
     
     public init(rawValue: Int) {
         self.rawValue = rawValue
     }
     
+    public static let allCases: [LogSubsystem] = [
+        .database,
+        .httpRequests,
+        .webSocket,
+        .webRTC,
+        .other,
+        .offlineSupport,
+        .peerConnection
+    ]
+
     /// All subsystems within the SDK.
-    public static let all: LogSubsystem = [.database, .httpRequests, .webSocket, .webRTC, .other, .offlineSupport]
+    public static let all: LogSubsystem = [
+        .database,
+        .httpRequests,
+        .webSocket,
+        .webRTC,
+        .other,
+        .offlineSupport,
+        .peerConnection
+    ]
     
     /// The subsystem responsible for any other part of the SDK.
     /// This is the default subsystem value for logging, to be used when `subsystem` is not specified.
@@ -31,8 +49,31 @@ public struct LogSubsystem: OptionSet {
     public static let webSocket = Self(rawValue: 1 << 3)
     /// The subsystem responsible for offline support.
     public static let offlineSupport = Self(rawValue: 1 << 4)
-    // The subsustem responsible for web rtc.
+    /// The subsystem responsible for WebRTC.
     public static let webRTC = Self(rawValue: 1 << 5)
+    /// The subsystem responsible for PeerConnections.
+    public static let peerConnection = Self(rawValue: 1 << 6)
+
+    public var description: String {
+        switch rawValue {
+        case LogSubsystem.other.rawValue:
+            return "other"
+        case LogSubsystem.database.rawValue:
+            return "database"
+        case LogSubsystem.httpRequests.rawValue:
+            return "httpRequests"
+        case LogSubsystem.webSocket.rawValue:
+            return "webSocket"
+        case LogSubsystem.offlineSupport.rawValue:
+            return "offlineSupport"
+        case LogSubsystem.webRTC.rawValue:
+            return "webRTC"
+        case LogSubsystem.peerConnection.rawValue:
+            return "peerConnection"
+        default:
+            return "unknown(rawValue:\(rawValue)"
+        }
+    }
 }
 
 public enum LogConfig {
@@ -267,6 +308,7 @@ public class Logger {
         
         let logDetails = LogDetails(
             loggerIdentifier: identifier,
+            subsystem: subsystems,
             level: level,
             date: Date(),
             message: String(describing: message()),

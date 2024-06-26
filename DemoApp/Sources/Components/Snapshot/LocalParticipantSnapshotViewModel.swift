@@ -32,6 +32,7 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
         didSet {
             guard call?.cId != oldValue?.cId else { return }
             do {
+                #if !targetEnvironment(simulator)
                 if #available(iOS 16.0, *) {
                     try call?.addVideoOutput(videoOutput)
                     /// Following Apple guidelines for videoOutputs from here:
@@ -40,6 +41,7 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
                 } else {
                     try call?.addCapturePhotoOutput(photoOutput)
                 }
+                #endif
             } catch {
                 log.error("Failed to setup for localParticipant snapshot", error: error)
             }
