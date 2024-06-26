@@ -624,7 +624,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     private func prefetchLocation() {
         Task {
-            self.cachedLocation = try await LocationFetcher.getLocation()
+            do {
+                self.cachedLocation = try await LocationFetcher.getLocation()
+            } catch {
+                log.error(error)
+            }
         }
     }
 }

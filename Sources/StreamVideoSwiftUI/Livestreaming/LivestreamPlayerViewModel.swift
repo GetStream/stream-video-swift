@@ -66,19 +66,27 @@ final class LivestreamPlayerViewModel: ObservableObject {
     func muteLivestreamOnJoin() {
         guard !mutedOnJoin else { return }
         Task {
-            try await call.speaker.disableAudioOutput()
-            mutedOnJoin = true
+            do {
+                try await call.speaker.disableAudioOutput()
+                mutedOnJoin = true
+            } catch {
+                log.error(error)
+            }
         }
     }
     
     func toggleAudioOutput() {
         Task {
-            if !muted {
-                try await call.speaker.disableAudioOutput()
-            } else {
-                try await call.speaker.enableAudioOutput()
+            do {
+                if !muted {
+                    try await call.speaker.disableAudioOutput()
+                } else {
+                    try await call.speaker.enableAudioOutput()
+                }
+                muted.toggle()
+            } catch {
+                log.error(error)
             }
-            muted.toggle()
         }
     }
     

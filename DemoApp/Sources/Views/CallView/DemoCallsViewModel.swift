@@ -30,9 +30,13 @@ class DemoCallsViewModel: ObservableObject {
     
     func loadEmployees() {
         Task {
-            let allEmployees = try await GoogleHelper.loadUsers()
-            self.streamEmployees = allEmployees.filter { $0.isFavorite == false }
-            self.favorites = allEmployees.filter { $0.isFavorite }
+            do {
+                let allEmployees = try await GoogleHelper.loadUsers()
+                self.streamEmployees = allEmployees.filter { $0.isFavorite == false }
+                self.favorites = allEmployees.filter { $0.isFavorite }
+            } catch {
+                log.error(error)
+            }
         }
     }
         

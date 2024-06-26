@@ -180,8 +180,12 @@ public class CallsController: ObservableObject, @unchecked Sendable {
         prev = nil
         next = nil
         Task {
-            await state.update(loadedAllCalls: false)
-            try await loadCalls(shouldRefresh: true)
+            do {
+                await state.update(loadedAllCalls: false)
+                try await loadCalls(shouldRefresh: true)
+            } catch {
+                log.error(error)
+            }
         }
     }
     

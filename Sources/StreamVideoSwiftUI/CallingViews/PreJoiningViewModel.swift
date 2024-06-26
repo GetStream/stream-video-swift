@@ -81,9 +81,13 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     
     private func loadCurrentMembers() {
         Task {
-            let response = try await call.get()
-            withAnimation {
-                participants = response.call.session?.participants.map(\.user.toUser) ?? []
+            do {
+                let response = try await call.get()
+                withAnimation {
+                    participants = response.call.session?.participants.map(\.user.toUser) ?? []
+                }
+            } catch {
+                log.error(error)
             }
         }
     }

@@ -64,12 +64,16 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
 
     func zoom() {
         Task {
-            if await state.zoomFactor > 1 {
-                await state.setZoomFactor(1)
-                try call?.zoom(by: 1)
-            } else {
-                await state.setZoomFactor(1.5)
-                try call?.zoom(by: 1.5)
+            do {
+                if await state.zoomFactor > 1 {
+                    await state.setZoomFactor(1)
+                    try call?.zoom(by: 1)
+                } else {
+                    await state.setZoomFactor(1.5)
+                    try call?.zoom(by: 1.5)
+                }
+            } catch {
+                log.error(error)
             }
         }
     }

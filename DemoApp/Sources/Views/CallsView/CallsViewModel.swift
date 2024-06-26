@@ -42,7 +42,11 @@ final class CallsViewModel: ObservableObject {
 
     func loadCalls() {
         Task {
-            try await callsController.loadNextCalls()
+            do {
+                try await callsController.loadNextCalls()
+            } catch {
+                log.error(error)
+            }
         }
     }
 

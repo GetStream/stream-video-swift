@@ -888,18 +888,22 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         cleanupMigrationData()
         Task {
-            tempSubscriber = subscriber
-            tempSubscriber?.paused = true
-            try await setupPeerConnections()
-            if publisher?.shouldRestartIce == true {
-                try await negotiate(peerConnection: publisher, constraints: .iceRestartConstraints)
-            }
-            subscriber?.onConnected = { [weak self] _ in
-                guard let self else { return }
-                self.onSessionMigrationCompleted?()
-                self.tempSubscriber?.close()
-                self.tempSubscriber = nil
-                self.subscriber?.onConnected = nil
+            do {
+                tempSubscriber = subscriber
+                tempSubscriber?.paused = true
+                try await setupPeerConnections()
+                if publisher?.shouldRestartIce == true {
+                    try await negotiate(peerConnection: publisher, constraints: .iceRestartConstraints)
+                }
+                subscriber?.onConnected = { [weak self] _ in
+                    guard let self else { return }
+                    self.onSessionMigrationCompleted?()
+                    self.tempSubscriber?.close()
+                    self.tempSubscriber = nil
+                    self.subscriber?.onConnected = nil
+                }
+            } catch {
+                log.error(error)
             }
         }
     }
@@ -1196,10 +1200,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         webSocketClient.onWSConnectionEstablished = { [weak self] in
             guard let self = self else { return }
             Task {
-                if isMigrating {
-                    await self.sendMigrationJoinRequest()
-                } else {
-                    try await self.handleSocketConnected(fastReconnect: isFastReconnect)
+                do {
+                    if isMigrating {
+                        await self.sendMigrationJoinRequest()
+                    } else {
+                        try await self.handleSocketConnected(fastReconnect: isFastReconnect)
+                    }
+                } catch {
+                    log.error(error)
                 }
             }
         }
@@ -1540,13 +1548,17 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 isFastReconnect: true
             )
             Task {
-                try await connect(
-                    callSettings: callSettings,
-                    videoOptions: videoOptions,
-                    connectOptions: connectOptions!,
-                    fastReconnect: true
-                )
-                checkFastReconnectionStatus()
+                do {
+                    try await connect(
+                        callSettings: callSettings,
+                        videoOptions: videoOptions,
+                        connectOptions: connectOptions!,
+                        fastReconnect: true
+                    )
+                    checkFastReconnectionStatus()
+                } catch {
+                    log.error(error)
+                }
             }
         }
     }

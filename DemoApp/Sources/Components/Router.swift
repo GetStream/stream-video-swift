@@ -50,7 +50,11 @@ final class Router: ObservableObject {
         appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
 
         Task {
-            try await loadLoggedInUser()
+            do {
+                try await loadLoggedInUser()
+            } catch {
+                log.error(error)
+            }
         }
     }
 
@@ -71,9 +75,13 @@ final class Router: ObservableObject {
             deeplinkInfo.baseURL != AppEnvironment.baseURL,
             let currentUser = appState.currentUser {
             Task {
-                await appState.logout()
-                AppEnvironment.baseURL = deeplinkInfo.baseURL
-                try await handleLoggedInUserCredentials(.init(userInfo: currentUser, token: .empty), deeplinkInfo: deeplinkInfo)
+                do {
+                    await appState.logout()
+                    AppEnvironment.baseURL = deeplinkInfo.baseURL
+                    try await handleLoggedInUserCredentials(.init(userInfo: currentUser, token: .empty), deeplinkInfo: deeplinkInfo)
+                } catch {
+                    log.error(error)
+                }
             }
         } else {
             log.debug("Request to handle deeplink \(url) accepted ✅")
@@ -81,7 +89,11 @@ final class Router: ObservableObject {
                 appState.deeplinkInfo = deeplinkInfo
             } else {
                 Task {
-                    try await handleGuestUser(deeplinkInfo: deeplinkInfo)
+                    do {
+                        try await handleGuestUser(deeplinkInfo: deeplinkInfo)
+                    } catch {
+                        log.error(error)
+                    }
                 }
             }
         }
@@ -96,7 +108,11 @@ final class Router: ObservableObject {
             if userCredentials.userInfo.id.contains("@getstream") {
                 GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _, _ in
                     Task {
-                        try await self?.setupUser(with: userCredentials)
+                        do {
+                            try await self?.setupUser(with: userCredentials)
+                        } catch {
+                            log.error(error)
+                        }
                     }
                 }
             } else {

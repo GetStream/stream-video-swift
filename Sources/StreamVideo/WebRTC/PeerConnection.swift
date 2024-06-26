@@ -384,15 +384,19 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             return
         }
         Task {
-            let encoder = JSONEncoder()
-            let iceCandidate = candidate.toIceCandidate()
-            let json = try encoder.encode(iceCandidate)
-            let jsonString = String(data: json, encoding: .utf8) ?? ""
-            var iceTrickle = Stream_Video_Sfu_Models_ICETrickle()
-            iceTrickle.iceCandidate = jsonString
-            iceTrickle.sessionID = sessionId
-            iceTrickle.peerType = type == .publisher ? .publisherUnspecified : .subscriber
-            _ = try await signalService.iceTrickle(iCETrickle: iceTrickle)
+            do {
+                let encoder = JSONEncoder()
+                let iceCandidate = candidate.toIceCandidate()
+                let json = try encoder.encode(iceCandidate)
+                let jsonString = String(data: json, encoding: .utf8) ?? ""
+                var iceTrickle = Stream_Video_Sfu_Models_ICETrickle()
+                iceTrickle.iceCandidate = jsonString
+                iceTrickle.sessionID = sessionId
+                iceTrickle.peerType = type == .publisher ? .publisherUnspecified : .subscriber
+                _ = try await signalService.iceTrickle(iCETrickle: iceTrickle)
+            } catch {
+                log.error(error)
+            }
         }
     }
 

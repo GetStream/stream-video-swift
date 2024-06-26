@@ -24,10 +24,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             rootView: NavigationView {
                 LoginView { [router] credentials in
                     Task {
-                        try await router.handleLoggedInUserCredentials(
-                            credentials,
-                            deeplinkInfo: router.appState.deeplinkInfo
-                        )
+                        do {
+                            try await router.handleLoggedInUserCredentials(
+                                credentials,
+                                deeplinkInfo: router.appState.deeplinkInfo
+                            )
+                        } catch {
+                            log.error(error)
+                        }
                     }
                 }
             }

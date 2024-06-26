@@ -43,26 +43,30 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         didCapture frame: RTCVideoFrame
     ) {
         Task { [serialActor, weak self] in
-            try await serialActor.execute { [weak self] in
-                guard let self else { return }
+            do {
+                try await serialActor.execute { [weak self] in
+                    guard let self else { return }
 
-                var _buffer: RTCCVPixelBuffer?
+                    var _buffer: RTCCVPixelBuffer?
 
-                if self.selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
-                    _buffer = buffer
-                    let imageBuffer = buffer.pixelBuffer
-                    CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-                    let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: self.colorSpace])
-                    let outputImage = await self.filter(image: inputImage, pixelBuffer: imageBuffer)
-                    CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-                    self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: self.colorSpace)
+                    if self.selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
+                        _buffer = buffer
+                        let imageBuffer = buffer.pixelBuffer
+                        CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+                        let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: self.colorSpace])
+                        let outputImage = await self.filter(image: inputImage, pixelBuffer: imageBuffer)
+                        CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+                        self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: self.colorSpace)
+                    }
+
+                    let updatedFrame = self.handleRotation
+                        ? self.adjustRotation(capturer, for: _buffer, frame: frame)
+                        : frame
+
+                    self.source.capturer(capturer, didCapture: updatedFrame)
                 }
-
-                let updatedFrame = self.handleRotation
-                    ? self.adjustRotation(capturer, for: _buffer, frame: frame)
-                    : frame
-
-                self.source.capturer(capturer, didCapture: updatedFrame)
+            } catch {
+                log.error(error)
             }
         }
     }

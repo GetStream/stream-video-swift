@@ -40,17 +40,22 @@ final class ReactionsAdapter: ObservableObject {
     // MARK: - Actions
 
     func send(reaction: Reaction) {
+        guard let call else { return }
         Task {
-            try await call?.sendReaction(
-                type: reaction.id.rawValue,
-                custom: [
-                    "id": .string(reaction.id.rawValue),
-                    "duration": .number(reaction.duration ?? 0),
-                    "userSpecific": .bool(reaction.userSpecific),
-                    "isReverted": .bool(shouldRevert(reaction: reaction))
-                ],
-                emojiCode: reaction.id.rawValue
-            )
+            do {
+                try await call.sendReaction(
+                    type: reaction.id.rawValue,
+                    custom: [
+                        "id": .string(reaction.id.rawValue),
+                        "duration": .number(reaction.duration ?? 0),
+                        "userSpecific": .bool(reaction.userSpecific),
+                        "isReverted": .bool(shouldRevert(reaction: reaction))
+                    ],
+                    emojiCode: reaction.id.rawValue
+                )
+            } catch {
+                log.error(error)
+            }
         }
     }
 
@@ -83,7 +88,7 @@ final class ReactionsAdapter: ObservableObject {
             forName: .init(CallNotification.callEnded),
             object: nil,
             queue: nil
-        ) { _ in Task { await MainActor.run { [weak self] in self?.handleCallEnded() } } }
+        ) { _ in Task { @MainActor [weak self] in self?.handleCallEnded() } }
     }
 
     private func subscribeToReactionEvents() {

@@ -87,9 +87,13 @@ struct DemoCallingViewModifier: ViewModifier {
         }
 
         Task {
-            try await streamVideo.connect()
-            await MainActor.run {
-                viewModel.joinCall(callType: callType, callId: callId)
+            do {
+                try await streamVideo.connect()
+                await MainActor.run {
+                    viewModel.joinCall(callType: callType, callId: callId)
+                }
+            } catch {
+                log.error(error)
             }
         }
     }
