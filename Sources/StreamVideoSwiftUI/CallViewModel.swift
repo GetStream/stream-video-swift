@@ -14,6 +14,7 @@ open class CallViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
+    @Injected(\.rejectionReasonProvider) var rejectionReasonProvider
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -430,10 +431,15 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    public func rejectCall(callType: String, callId: String) {
+    public func rejectCall(
+        callType: String,
+        callId: String
+    ) {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
-            _ = try? await call.reject()
+            let rejectionReason = rejectionReasonProvider
+                .rejectionReason(for: call.cId)
+            _ = try? await call.reject(reason: rejectionReason)
             self.callingState = .idle
         }
     }
