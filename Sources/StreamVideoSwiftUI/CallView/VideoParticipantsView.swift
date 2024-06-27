@@ -232,35 +232,51 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
 
     private func unpin() {
         Task {
-            try await call?.unpin(
-                sessionId: participant.sessionId
-            )
+            do {
+                try await call?.unpin(
+                    sessionId: participant.sessionId
+                )
+            } catch {
+                log.error(error)
+            }
         }
     }
 
     private func pin() {
         Task {
-            try await call?.pin(
-                sessionId: participant.sessionId
-            )
+            do {
+                try await call?.pin(
+                    sessionId: participant.sessionId
+                )
+            } catch {
+                log.error(error)
+            }
         }
     }
 
     private func unpinForEveryone() {
         Task {
-            try await call?.unpinForEveryone(
-                userId: participant.userId,
-                sessionId: participant.id
-            )
+            do {
+                _ = try await call?.unpinForEveryone(
+                    userId: participant.userId,
+                    sessionId: participant.id
+                )
+            } catch {
+                log.error(error)
+            }
         }
     }
 
     private func pinForEveryone() {
         Task {
-            try await call?.pinForEveryone(
-                userId: participant.userId,
-                sessionId: participant.id
-            )
+            do {
+                _ = try await call?.pinForEveryone(
+                    userId: participant.userId,
+                    sessionId: participant.id
+                )
+            } catch {
+                log.error(error)
+            }
         }
     }
 }

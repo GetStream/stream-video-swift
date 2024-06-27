@@ -397,9 +397,13 @@ open class CallViewModel: ObservableObject {
         callingState = .lobby(lobbyInfo)
         if !localCallSettingsChange {
             Task {
-                let call = streamVideo.call(callType: callType, callId: callId)
-                let info = try await call.get()
-                self.callSettings = info.call.settings.toCallSettings
+                do {
+                    let call = streamVideo.call(callType: callType, callId: callId)
+                    let info = try await call.get()
+                    self.callSettings = info.call.settings.toCallSettings
+                } catch {
+                    log.error(error)
+                }
             }
         }
     }
@@ -457,13 +461,21 @@ open class CallViewModel: ObservableObject {
 
     public func startScreensharing(type: ScreensharingType) {
         Task {
-            try await call?.startScreensharing(type: type)
+            do {
+                try await call?.startScreensharing(type: type)
+            } catch {
+                log.error(error)
+            }
         }
     }
 
     public func stopScreensharing() {
         Task {
-            try await call?.stopScreensharing()
+            do {
+                try await call?.stopScreensharing()
+            } catch {
+                log.error(error)
+            }
         }
     }
 

@@ -33,15 +33,23 @@ public struct ParticipantPopoverView<CustomView: View>: View {
                 ) {
                     if participant.isPinned {
                         Task {
-                            try await call?.unpin(
-                                sessionId: participant.sessionId
-                            )
+                            do {
+                                try await call?.unpin(
+                                    sessionId: participant.sessionId
+                                )
+                            } catch {
+                                log.error(error)
+                            }
                         }
                     } else {
                         Task {
-                            try await call?.pin(
-                                sessionId: participant.sessionId
-                            )
+                            do {
+                                try await call?.pin(
+                                    sessionId: participant.sessionId
+                                )
+                            } catch {
+                                log.error(error)
+                            }
                         }
                     }
                 }
@@ -54,17 +62,25 @@ public struct ParticipantPopoverView<CustomView: View>: View {
                 ) {
                     if participant.isPinnedRemotely {
                         Task {
-                            try await call?.unpinForEveryone(
-                                userId: participant.userId,
-                                sessionId: participant.id
-                            )
+                            do {
+                                _ = try await call?.unpinForEveryone(
+                                    userId: participant.userId,
+                                    sessionId: participant.id
+                                )
+                            } catch {
+                                log.error(error)
+                            }
                         }
                     } else {
                         Task {
-                            try await call?.pinForEveryone(
-                                userId: participant.userId,
-                                sessionId: participant.id
-                            )
+                            do {
+                                _ = try await call?.pinForEveryone(
+                                    userId: participant.userId,
+                                    sessionId: participant.id
+                                )
+                            } catch {
+                                log.error(error)
+                            }
                         }
                     }
                 }

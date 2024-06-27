@@ -560,25 +560,29 @@ class CallController: @unchecked Sendable {
     
     private func handleSessionMigrationEvent() {
         Task {
-            let state = await call?.state.reconnectionStatus
-            if state == .migrating {
-                log.debug("Migration already in progress")
-                return
+            do {
+                let state = await call?.state.reconnectionStatus
+                if state == .migrating {
+                    log.debug("Migration already in progress")
+                    return
+                }
+                // We don't want to process any events from the old SFU but as we
+                // cannot disconnect the ws (as this will cause disconnections on
+                // WebRTC connections) we are simply pausing the processing.
+                webRTCClient?.signalChannel?.updatePaused(true)
+
+                try await joinCall(
+                    callType: callType,
+                    callId: callId,
+                    callSettings: call?.state.callSettings ?? CallSettings(),
+                    migratingFrom: currentSFU,
+                    sessionID: webRTCClient?.sessionID,
+                    ring: false,
+                    notify: false
+                )
+            } catch {
+                log.error(error)
             }
-            // We don't want to process any events from the old SFU but as we
-            // cannot disconnect the ws (as this will cause disconnections on
-            // WebRTC connections) we are simply pausing the processing.
-            webRTCClient?.signalChannel?.updatePaused(true)
-            
-            try await joinCall(
-                callType: callType,
-                callId: callId,
-                callSettings: call?.state.callSettings ?? CallSettings(),
-                migratingFrom: currentSFU,
-                sessionID: webRTCClient?.sessionID,
-                ring: false,
-                notify: false
-            )
         }
     }
     
@@ -607,7 +611,11 @@ class CallController: @unchecked Sendable {
     
     private func prefetchLocation() {
         Task {
-            self.cachedLocation = try await getLocation()
+            do {
+                self.cachedLocation = try await getLocation()
+            } catch {
+                log.error(error)
+            }
         }
     }
 
@@ -674,9 +682,13 @@ class CallController: @unchecked Sendable {
     
     private func collectAndSendStats() {
         Task {
-            let stats = try await webRTCClient?.collectStats()
-            await call?.state.update(statsReport: stats)
-            try await webRTCClient?.sendStats(report: stats)
+            do {
+                let stats = try await webRTCClient?.collectStats()
+                await call?.state.update(statsReport: stats)
+                try await webRTCClient?.sendStats(report: stats)
+            } catch {
+                log.error(error)
+            }
         }
     }
 }
