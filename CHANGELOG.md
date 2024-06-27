@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Support for custom participant sorting in the Call object. [#438](https://github.com/GetStream/stream-video-swift/pull/438)
 - Ability to join call in advance with joinAheadTimeSeconds parameter. [#446](https://github.com/GetStream/stream-video-swift/pull/446)
 - Missed calls support [#449](https://github.com/GetStream/stream-video-swift/pull/449)
+- IncomingCallViewModel has been simplified and the `hideIncomingCallScreen` property as also the `stopTimer` have been removed. [#449](https://github.com/GetStream/stream-video-swift/pull/449)
 
 # [1.0.8](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.8)
 _June 17, 2024_

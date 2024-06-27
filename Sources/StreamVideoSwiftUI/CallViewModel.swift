@@ -439,6 +439,14 @@ open class CallViewModel: ObservableObject {
             let call = streamVideo.call(callType: callType, callId: callId)
             let rejectionReason = rejectionReasonProvider
                 .rejectionReason(for: call.cId, ringTimeout: false)
+            log.debug(
+                """
+                Rejecting with reason: \(rejectionReason ?? "nil")
+                call:\(call.callId)
+                callType: \(call.callType)
+                ringTimeout: \(false)
+                """
+            )
             _ = try? await call.reject(reason: rejectionReason)
             self.callingState = .idle
         }

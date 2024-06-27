@@ -43,14 +43,6 @@ public struct IncomingCallView: View {
             onCallAccepted: onCallAccepted,
             onCallRejected: onCallRejected
         )
-        .onChange(of: viewModel.hideIncomingCallScreen) { newValue in
-            if newValue {
-                onCallRejected(viewModel.callInfo.id)
-            }
-        }
-        .onDisappear {
-            viewModel.stopTimer()
-        }
     }
 }
 
