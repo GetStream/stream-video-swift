@@ -639,6 +639,14 @@ open class CallViewModel: ObservableObject {
             do {
                 let rejectionReason = rejectionReasonProvider
                     .rejectionReason(for: call.cId, ringTimeout: ringTimeout)
+                log.debug(
+                    """
+                    Rejecting with reason: \(rejectionReason ?? "nil")
+                    call:\(call.callId)
+                    callType: \(call.callType)
+                    ringTimeout: \(ringTimeout)
+                    """
+                )
                 try await call.reject(reason: rejectionReason)
             } catch {
                 log.error(error)

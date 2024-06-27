@@ -342,13 +342,19 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 """
             )
             do {
-                try await stackEntry.call.reject(
-                    reason: rejectionReasonProvider
-                        .rejectionReason(
-                            for: stackEntry.call.cId,
-                            ringTimeout: false
-                        )
+                let rejectionReason = rejectionReasonProvider
+                    .rejectionReason(
+                        for: stackEntry.call.cId,
+                        ringTimeout: false
+                    )
+                log.debug(
+                    """
+                    Rejecting with reason: \(rejectionReason ?? "nil")
+                    call:\(stackEntry.call.callId)
+                    callType: \(stackEntry.call.callType)
+                    """
                 )
+                try await stackEntry.call.reject(reason: rejectionReason)
             } catch {
                 log.error(error)
             }
