@@ -1,0 +1,17 @@
+# Directory and file filters
+included:
+  - Sources
+  - DemoApp
+  - DemoAppUIKit
+  - StreamVideoTests
+  - StreamVideoUIKitTests
+excluded:
+  - Tests/SwiftLintFrameworkTests/Resources
+  - Sources/StreamVideo/Generated
+  - Sources/StreamVideo/OpenApi
+  - Sources/StreamVideo/protobuf
+  - Sources/StreamVideoSwiftUI/Generated
+
+# Enabled/disabled rules
+only_rules:
+  - unhandled_throwing_task

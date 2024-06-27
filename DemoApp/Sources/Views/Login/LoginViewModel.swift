@@ -16,10 +16,14 @@ final class LoginViewModel: ObservableObject {
             completion(credentials)
         } else {
             Task {
-                let token = try await AuthenticationProvider.fetchToken(for: user.id, callIds: [callId])
-                let credentials = UserCredentials(userInfo: user, token: token)
-                // Perform login
-                completion(credentials)
+                do {
+                    let token = try await AuthenticationProvider.fetchToken(for: user.id, callIds: [callId])
+                    let credentials = UserCredentials(userInfo: user, token: token)
+                    // Perform login
+                    completion(credentials)
+                } catch {
+                    log.error(error)
+                }
             }
         }
     }
@@ -39,19 +43,23 @@ final class LoginViewModel: ObservableObject {
     func joinCallAnonymously(callId: String, completion: @escaping (UserCredentials) -> Void) {
         AppState.shared.loading = true
         Task {
-            if case let .custom(_, _, token) = AppEnvironment.baseURL {
-                let credentials = UserCredentials(
-                    userInfo: .anonymous,
-                    token: .init(stringLiteral: token)
-                )
-                // Perform login
-                completion(credentials)
-            } else {
-                let token = try await AuthenticationProvider.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
-                let credentials = UserCredentials(userInfo: User.anonymous, token: token)
-                // Perform login
-                AppState.shared.activeAnonymousCallId = callId
-                completion(credentials)
+            do {
+                if case let .custom(_, _, token) = AppEnvironment.baseURL {
+                    let credentials = UserCredentials(
+                        userInfo: .anonymous,
+                        token: .init(stringLiteral: token)
+                    )
+                    // Perform login
+                    completion(credentials)
+                } else {
+                    let token = try await AuthenticationProvider.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
+                    let credentials = UserCredentials(userInfo: User.anonymous, token: token)
+                    // Perform login
+                    AppState.shared.activeAnonymousCallId = callId
+                    completion(credentials)
+                }
+            } catch {
+                log.error(error)
             }
         }
     }

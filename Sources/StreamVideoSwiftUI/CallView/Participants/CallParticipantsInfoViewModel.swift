@@ -97,21 +97,33 @@ class CallParticipantsInfoViewModel: ObservableObject {
     private func block(userId: String) {
         guard let call else { return }
         Task {
-            try await call.blockUser(with: userId)
+            do {
+                try await call.blockUser(with: userId)
+            } catch {
+                log.error(error)
+            }
         }
     }
     
     private func unblock(userId: String) {
         guard let call else { return }
         Task {
-            try await call.unblockUser(with: userId)
+            do {
+                try await call.unblockUser(with: userId)
+            } catch {
+                log.error(error)
+            }
         }
     }
     
     private func executeMute(userId: String, audio: Bool = true, video: Bool = true) {
         guard let call else { return }
         Task {
-            try await call.mute(userId: userId, audio: audio, video: video)
+            do {
+                try await call.mute(userId: userId, audio: audio, video: video)
+            } catch {
+                log.error(error)
+            }
         }
     }
 }

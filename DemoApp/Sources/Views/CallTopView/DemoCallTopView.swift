@@ -12,8 +12,6 @@ struct DemoCallTopView: View {
     @Injected(\.colors) var colors
     @Injected(\.images) var images
 
-    @ObservedObject private var reactionsAdapter = InjectedValues[\.reactionsAdapter]
-
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var appState = AppState.shared
     @State var sharingPopupDismissed = false
@@ -65,36 +63,6 @@ struct DemoCallTopView: View {
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
-    }
-
-    @ViewBuilder
-    private func reactionsList() -> some View {
-        ForEach(availableReactions) { reaction in
-            Button {
-                reactionsAdapter.send(reaction: reaction.id == .lowerHand ? .raiseHand : reaction)
-            } label: {
-                Label(
-                    title: {
-                        Text(reaction.title)
-                    },
-                    icon: { Image(systemName: reaction.iconName) }
-                )
-            }
-        }
-    }
-
-    private var availableReactions: [Reaction] {
-        guard let userId = viewModel.localParticipant?.userId else {
-            return []
-        }
-
-        let hasRaisedHand = reactionsAdapter.activeReactions[userId]?.first(where: { $0.id == .raiseHand }) != nil
-
-        if hasRaisedHand {
-            return reactionsAdapter.availableReactions.filter { $0.id != .raiseHand }
-        } else {
-            return reactionsAdapter.availableReactions.filter { $0.id != .lowerHand }
-        }
     }
 }
 

@@ -48,53 +48,57 @@ class SfuMiddleware: EventMiddleware {
     func handle(event: WrappedEvent) -> WrappedEvent? {
         log.debug("Received an event \(event)")
         Task {
-            guard case let .sfuEvent(event) = event else {
-                return
-            }
-            switch event {
-            case let .subscriberOffer(event):
-                await handleSubscriberEvent(event)
-            case .publisherAnswer:
-                log.warning("Publisher answer event shouldn't be sent")
-            case let .connectionQualityChanged(event):
-                await handleConnectionQualityChangedEvent(event)
-            case let .audioLevelChanged(event):
-                await handleAudioLevelsChanged(event)
-            case let .iceTrickle(event):
-                try await handleICETrickle(event)
-            case let .changePublishQuality(event):
-                handleChangePublishQualityEvent(event)
-            case let .participantJoined(event):
-                await handleParticipantJoined(event)
-            case let .participantLeft(event):
-                await handleParticipantLeft(event)
-            case let .dominantSpeakerChanged(event):
-                await handleDominantSpeakerChanged(event)
-            case let .joinResponse(event):
-                onSocketConnected?(event.reconnected)
-                await loadParticipants(from: event)
-            case let .healthCheckResponse(event):
-                onParticipantCountUpdated?(event.participantCount.total)
-            case let .trackPublished(event):
-                await handleTrackPublishedEvent(event)
-            case let .trackUnpublished(event):
-                await handleTrackUnpublishedEvent(event)
-            case let .error(event):
-                log.error(event.error.message, error: event.error)
-            case .callGrantsUpdated:
-                log.warning("TODO: callGrantsUpdated")
-            case let .goAway(event):
-                log.info("Received go away event with reason: \(event.reason.rawValue)")
-                onSessionMigrationEvent?()
-            case .iceRestart:
-                log.info("Received ice restart message")
-            case let .pinsUpdated(event):
-                log.debug("Pins changed \(event.pins.map(\.sessionID))")
-                onPinsChanged?(event.pins)
-            case let .callEnded(event):
-                log.debug("Received call ended event with reason \(event.reason)")
-            case let .participantUpdated(event):
-                await handleParticipantUpdated(event)
+            do {
+                guard case let .sfuEvent(event) = event else {
+                    return
+                }
+                switch event {
+                case let .subscriberOffer(event):
+                    await handleSubscriberEvent(event)
+                case .publisherAnswer:
+                    log.warning("Publisher answer event shouldn't be sent")
+                case let .connectionQualityChanged(event):
+                    await handleConnectionQualityChangedEvent(event)
+                case let .audioLevelChanged(event):
+                    await handleAudioLevelsChanged(event)
+                case let .iceTrickle(event):
+                    try await handleICETrickle(event)
+                case let .changePublishQuality(event):
+                    handleChangePublishQualityEvent(event)
+                case let .participantJoined(event):
+                    await handleParticipantJoined(event)
+                case let .participantLeft(event):
+                    await handleParticipantLeft(event)
+                case let .dominantSpeakerChanged(event):
+                    await handleDominantSpeakerChanged(event)
+                case let .joinResponse(event):
+                    onSocketConnected?(event.reconnected)
+                    await loadParticipants(from: event)
+                case let .healthCheckResponse(event):
+                    onParticipantCountUpdated?(event.participantCount.total)
+                case let .trackPublished(event):
+                    await handleTrackPublishedEvent(event)
+                case let .trackUnpublished(event):
+                    await handleTrackUnpublishedEvent(event)
+                case let .error(event):
+                    log.error(event.error.message, error: event.error)
+                case .callGrantsUpdated:
+                    log.warning("TODO: callGrantsUpdated")
+                case let .goAway(event):
+                    log.info("Received go away event with reason: \(event.reason.rawValue)")
+                    onSessionMigrationEvent?()
+                case .iceRestart:
+                    log.info("Received ice restart message")
+                case let .pinsUpdated(event):
+                    log.debug("Pins changed \(event.pins.map(\.sessionID))")
+                    onPinsChanged?(event.pins)
+                case let .callEnded(event):
+                    log.debug("Received call ended event with reason \(event.reason)")
+                case let .participantUpdated(event):
+                    await handleParticipantUpdated(event)
+                }
+            } catch {
+                log.error(error)
             }
         }
         return event

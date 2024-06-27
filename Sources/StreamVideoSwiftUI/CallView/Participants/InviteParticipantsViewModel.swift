@@ -93,17 +93,21 @@ class InviteParticipantsViewModel: ObservableObject {
 
         loading = true
         Task {
-            let newUsers = try await userListProvider.loadNextUsers(
-                pagination: Pagination(pageSize: limit, offset: offset)
-            )
-            var temp = [User]()
-            for user in allUsers {
-                temp.append(user)
+            do {
+                let newUsers = try await userListProvider.loadNextUsers(
+                    pagination: Pagination(pageSize: limit, offset: offset)
+                )
+                var temp = [User]()
+                for user in allUsers {
+                    temp.append(user)
+                }
+                temp.append(contentsOf: newUsers)
+                allUsers = temp
+                offset = allUsers.count
+                loading = false
+            } catch {
+                log.error(error)
             }
-            temp.append(contentsOf: newUsers)
-            allUsers = temp
-            offset = allUsers.count
-            loading = false
         }
     }
 }

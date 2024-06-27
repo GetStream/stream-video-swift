@@ -76,9 +76,18 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             let call = streamVideo.call(callType: callType, callId: callId)
             AppState.shared.activeCall = call
             Task {
-                try await streamVideo.connect()
-                try await call.accept()
-                try await call.join()
+                do {
+                    try Task.checkCancellation()
+                    try await streamVideo.connect()
+
+                    try Task.checkCancellation()
+                    try await call.accept()
+
+                    try Task.checkCancellation()
+                    try await call.join()
+                } catch {
+                    log.error(error)
+                }
             }
         }
     }
