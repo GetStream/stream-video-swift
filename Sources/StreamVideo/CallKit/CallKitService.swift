@@ -158,9 +158,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 } else {
                     log.debug(
                         """
-                        Rejecting VoIP incoming call with callUUID:\(callUUID)
-                        cid:\(cid) callerId:\(callerId) callerName:\(localizedCallerName)
-                        as it has been handled.
+                        Rejecting VoIP incoming call as it has been handled.
+                        callUUID:\(callUUID)
+                        cid:\(cid) 
+                        callerId:\(callerId)
+                        callerName:\(localizedCallerName)
                         """
                     )
                     callEnded(cid)
@@ -343,7 +345,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 try await stackEntry.call.reject(
                     reason: rejectionReasonProvider
                         .rejectionReason(
-                            for: stackEntry.call.cId
+                            for: stackEntry.call.cId,
+                            ringTimeout: false
                         )
                 )
             } catch {

@@ -13,10 +13,16 @@ public protocol RejectionReasonProviding {
 
     /// Determines the rejection reason for a call with the specified call ID.
     ///
-    /// - Parameter callCid: The call ID to evaluate.
+    /// - Parameters:
+    ///   - callCid: The call ID to evaluate.
+    ///   - ringTimeout: Informs the provider that the rejection is because of the ringing call timeout.
+    ///
     /// - Returns: A string representing the rejection reason, or `nil` if there is no reason to reject
     /// the call.
-    func rejectionReason(for callCid: String) -> String?
+    ///
+    /// - Note: ``ringTimeout`` being true, has an effect **only** when it's set  from the side of
+    /// the caller when the callee doesn't reply the ringing call in the amount of time set on the dashboard.
+    func rejectionReason(for callCid: String, ringTimeout: Bool) -> String?
 }
 
 /// A provider that determines the rejection reason for a call based on its state.
@@ -38,25 +44,29 @@ final class StreamRejectionReasonProvider: RejectionReasonProviding {
 
     // MARK: - RejectionReasonProviding
 
-    /// Determines the rejection reason for a call with the specified call ID.
-    ///
-    /// - Parameter callCid: The call ID to evaluate.
-    /// - Returns: A string representing the rejection reason, or `nil` if there is no reason to reject
-    /// the call.
-    func rejectionReason(for callCid: String) -> String? {
-        let activeCall = self.activeCall
-        let ringingCall = self.ringingCall
+    @MainActor
+    func rejectionReason(
+        for callCid: String,
+        ringTimeout: Bool
+    ) -> String? {
+        guard
+            ringingCall?.cId == callCid,
+            let rejectingCall = ringingCall
+        else {
+            return nil
+        }
 
-        if callCid == activeCall?.cId {
-            return nil
-        } else if callCid == ringingCall?.cId {
-            if activeCall != nil {
-                return RejectCallRequest.Reason.busy
-            } else {
-                return RejectCallRequest.Reason.decline
-            }
+        let isUserBusy = activeCall != nil
+        let isUserRejectingOutgoingCall = rejectingCall.state.createdBy?.id == streamVideo?.user.id
+
+        if isUserBusy {
+            return RejectCallRequest.Reason.busy
+        } else if isUserRejectingOutgoingCall {
+            return ringTimeout
+                ? RejectCallRequest.Reason.timeout
+                : RejectCallRequest.Reason.cancel
         } else {
-            return nil
+            return RejectCallRequest.Reason.decline
         }
     }
 

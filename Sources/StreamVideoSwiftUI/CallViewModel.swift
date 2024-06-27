@@ -438,7 +438,7 @@ open class CallViewModel: ObservableObject {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
             let rejectionReason = rejectionReasonProvider
-                .rejectionReason(for: call.cId)
+                .rejectionReason(for: call.cId, ringTimeout: false)
             _ = try? await call.reject(reason: rejectionReason)
             self.callingState = .idle
         }
@@ -487,14 +487,7 @@ open class CallViewModel: ObservableObject {
 
     /// Hangs up from the active call.
     public func hangUp() {
-        if callingState == .outgoing {
-            Task {
-                _ = try? await call?.reject()
-                leaveCall()
-            }
-        } else {
-            leaveCall()
-        }
+        handleCallHangUp(ringTimeout: false)
     }
 
     /// Sets a video filter for the current call.
@@ -624,13 +617,35 @@ open class CallViewModel: ObservableObject {
             withTimeInterval: timeout,
             repeats: false,
             block: { [weak self] _ in
-                guard let self = self else { return }
-                log.debug("Detected ringing timeout, hanging up...")
-                Task {
-                    await self.hangUp()
+                Task { @MainActor [weak self] in
+                    guard let self = self else { return }
+                    log.debug("Detected ringing timeout, hanging up...")
+                    handleCallHangUp(ringTimeout: true)
                 }
             }
         )
+    }
+
+    private func handleCallHangUp(ringTimeout: Bool = false) {
+        guard
+            let call,
+            callingState == .outgoing
+        else {
+            leaveCall()
+            return
+        }
+
+        Task {
+            do {
+                let rejectionReason = rejectionReasonProvider
+                    .rejectionReason(for: call.cId, ringTimeout: ringTimeout)
+                try await call.reject(reason: rejectionReason)
+            } catch {
+                log.error(error)
+            }
+
+            leaveCall()
+        }
     }
 
     private func subscribeToCallEvents() {

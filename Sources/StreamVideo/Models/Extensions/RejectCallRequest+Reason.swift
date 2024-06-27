@@ -18,5 +18,8 @@ extension RejectCallRequest {
 
         /// Indicates that the caller cancels the call.
         public static let cancel = "cancel"
+
+        /// Indicates that the callee didn't answer the call in a given time amount.
+        public static let timeout = "timeout"
     }
 }

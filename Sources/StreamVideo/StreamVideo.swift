@@ -187,8 +187,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     log.error("Error connecting as guest", error: error)
                 }
             } else {
-                try Task.checkCancellation()
-                try await self.connectUser(isInitial: true)
+                do {
+                    try Task.checkCancellation()
+                    try await self.connectUser(isInitial: true)
+                } catch {
+                    log.error(error)
+                }
             }
         }
     }
