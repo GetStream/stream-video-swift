@@ -7467,8 +7467,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa";
 			requirement = {
-				branch = 8.0.0;
-				kind = branch;
+				kind = exactVersion;
+				version = 8.30.0;
 			};
 		};
 		844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
