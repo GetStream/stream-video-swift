@@ -27,8 +27,6 @@ swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTe
 before_all do |lane|
   if is_ci
     setup_ci
-    ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
-    ENV['FASTLANE_XCODEBUILD_SETTINGS_RETRIES'] = '10'
     xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload, :pod_lint, :stop_e2e_helpers].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
@@ -203,7 +201,7 @@ lane :test do |options|
 
   update_testplan_on_ci(path: "StreamVideoTests/StreamVideo.xctestplan")
 
-  scan(
+  scan_options = {
     project: xcode_project,
     scheme: 'StreamVideo',
     testplan: 'StreamVideo',
@@ -211,11 +209,21 @@ lane :test do |options|
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     devices: options[:device],
-    number_of_retries: 2,
+    number_of_retries: 3,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
     xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
-  )
+  }
+
+  begin
+    scan(scan_options)
+  rescue StandardError => e
+    UI.user_error!(e) unless options[:cron]
+
+    failed_tests = retreive_failed_tests
+    UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
+    scan(scan_options.merge(only_testing: failed_tests))
+  end
 end
 
 desc 'Runs SwiftUI tests'
@@ -380,13 +388,13 @@ private_lane :parallelize_tests_on_ci do |options|
     UI.success("Tests in total: #{only_testing.flatten.size}. Running #{only_testing_batch.size} of them ⌛️")
     scan(options[:scan].merge(only_testing: only_testing_batch))
   rescue StandardError
-    failed_tests = retreive_failed_e2e_tests
+    failed_tests = retreive_failed_tests
     UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
     scan(options[:scan].merge(only_testing: failed_tests))
   end
 end
 
-private_lane :retreive_failed_e2e_tests do
+private_lane :retreive_failed_tests do
   report_path = 'test_output/report.junit'
   raise UI.user_error!('There is no junit report to parse') unless File.file?(report_path)
 
@@ -667,6 +675,24 @@ lane :run_swift_format do |options|
       sh("mint run swiftformat #{action} --config .swiftformat --exclude #{swiftformat_excluded_paths.join(',')} #{path}")
       sh("mint run swiftlint lint --config .swiftlint.yml --progress --quiet --reporter json #{path}")
     end
+  end
+end
+
+lane :install_runtime do |options|
+  runtimes = `xcrun simctl runtime list -j`
+  UI.message("👉 Runtime list:\n#{runtimes}")
+  simulators = JSON.parse(runtimes).select do |_, sim|
+    sim['platformIdentifier'].end_with?('iphonesimulator') && sim['version'] == options[:ios] && sim['state'] == 'Ready'
+  end
+
+  if simulators.empty?
+    Dir.chdir('..') do
+      sh("echo 'iOS #{options[:ios]} Simulator' | ipsw download xcode --sim") if Dir['*.dmg'].first.nil?
+      sh("./Scripts/install_ios_runtime.sh #{Dir['*.dmg'].first}")
+      UI.success("iOS #{options[:ios]} Runtime successfuly installed")
+    end
+  else
+    UI.important("iOS #{options[:ios]} Runtime already exists")
   end
 end
 
