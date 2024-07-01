@@ -139,7 +139,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         coordinatorClient = DefaultAPI(
             basePath: Self.endpointConfig.baseVideoURL,
             transport: apiTransport,
-            middlewares: [defaultParams]
+            middlewares: [defaultParams, StreamSFUOverrideInterceptor.currentValue]
         )
         StreamVideoProviderKey.currentValue = self
         // This is used from the `StreamCallAudioRecorder` to observe active
@@ -695,4 +695,33 @@ extension StreamVideo: WSEventsSubscriber {
 /// Returns the current value for the `StreamVideo` instance.
 struct StreamVideoProviderKey: InjectionKey {
     static var currentValue: StreamVideo?
+}
+
+final class StreamSFUOverrideInterceptor: DefaultAPIClientMiddleware, @unchecked Sendable {
+
+    var overrideSFUId: String?
+
+    func intercept(
+        _ request: Request,
+        next: (Request) async throws -> (Data, URLResponse)
+    ) async throws -> (Data, URLResponse) {
+        guard request.url.lastPathComponent == "join", let overrideSFUId else {
+            return try await next(request)
+        }
+
+        var request = request
+        request.queryParams.append(.init(name: "sfu_id", value: overrideSFUId))
+        return try await next(request)
+    }
+}
+
+extension StreamSFUOverrideInterceptor: InjectionKey {
+    static var currentValue: StreamSFUOverrideInterceptor = .init()
+}
+
+extension InjectedValues {
+    public var sfuOverride: String? {
+        get { Self[StreamSFUOverrideInterceptor.self].overrideSFUId }
+        set { Self[StreamSFUOverrideInterceptor.self].overrideSFUId = newValue }
+    }
 }

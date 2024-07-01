@@ -198,7 +198,7 @@ extension AppEnvironment {
             return .detailed
         case .debug:
             #if targetEnvironment(simulator)
-            return .simple
+            return .detailed
             #else
             return .simple
             #endif
@@ -441,4 +441,26 @@ extension AppEnvironment {
     }
 
     static var autoLeavePolicy: AutoLeavePolicy = .default
+}
+
+extension AppEnvironment {
+
+    enum SFUOverride: Hashable, Debuggable, CustomStringConvertible {
+
+        case none
+        case custom(String)
+
+        var description: String { title }
+
+        var title: String {
+            switch self {
+            case .none:
+                return "None"
+            case .custom:
+                return "Custom"
+            }
+        }
+    }
+
+    static var sfuOverride: SFUOverride = .none
 }

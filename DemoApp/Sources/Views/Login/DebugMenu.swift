@@ -76,6 +76,18 @@ struct DebugMenu: View {
         didSet { AppEnvironment.callExpiration = callExpiration }
     }
 
+    @State private var sfuOverride: AppEnvironment.SFUOverride = AppEnvironment.sfuOverride {
+        didSet {
+            AppEnvironment.sfuOverride = sfuOverride
+            switch sfuOverride {
+            case .none:
+                InjectedValues[\.sfuOverride] = nil
+            case .custom(let string):
+                InjectedValues[\.sfuOverride] = string
+            }
+        }
+    }
+
     @State private var isLogsViewerVisible: Bool = false
 
     @State private var presentsCustomEnvironmentSetup: Bool = false
@@ -85,6 +97,9 @@ struct DebugMenu: View {
 
     @State private var customTokenExpirationValue: Int = 0
     @State private var presentsCustomTokenExpiration: Bool = false
+
+    @State private var customSFUOverride: String = ""
+    @State private var presentsCustomSFUOverride: Bool = false
 
     @State private var autoLeavePolicy: AppEnvironment.AutoLeavePolicy = AppEnvironment.autoLeavePolicy {
         didSet { AppEnvironment.autoLeavePolicy = autoLeavePolicy }
@@ -98,6 +113,13 @@ struct DebugMenu: View {
                 additionalItems: { customEnvironmentView },
                 label: "Environment"
             ) { self.baseURL = $0 }
+
+            makeMenu(
+                for: [.none],
+                currentValue: sfuOverride,
+                additionalItems: { customSFUOverrideView },
+                label: "SFU Override"
+            ) { sfuOverride = $0 }
 
             makeMultipleSelectMenu(
                 for: AppEnvironment.SupportedDeeplink.allCases,
@@ -213,6 +235,20 @@ struct DebugMenu: View {
             transformer: { Int($0) ?? 0 },
             action: { self.tokenExpiration = .custom(customTokenExpirationValue) }
         )
+        .alertWithTextField(
+            title: "Enter SFU Override",
+            placeholder: "URL",
+            presentationBinding: $presentsCustomSFUOverride,
+            valueBinding: $customSFUOverride,
+            transformer: { $0 },
+            action: {
+                if customSFUOverride.isEmpty {
+                    self.sfuOverride = .none
+                } else {
+                    self.sfuOverride = .custom(customSFUOverride)
+                }
+            }
+        )
     }
 
     @ViewBuilder
@@ -285,6 +321,24 @@ struct DebugMenu: View {
                     Text("Custom")
                 } icon: {
                     EmptyView()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customSFUOverrideView: some View {
+        Button {
+            presentsCustomSFUOverride = true
+        } label: {
+            Label {
+                Text("Custom")
+            } icon: {
+                switch AppEnvironment.sfuOverride {
+                case .none:
+                    EmptyView()
+                case .custom:
+                    Image(systemName: "checkmark")
                 }
             }
         }
