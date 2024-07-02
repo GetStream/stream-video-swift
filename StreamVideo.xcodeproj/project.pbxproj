@@ -275,6 +275,9 @@
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */; };
+		40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */; };
+		40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */; };
+		40C2B5C62C2D7AED00EC2C2D /* RejectionReasonProvider_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5C52C2D7AED00EC2C2D /* RejectionReasonProvider_Tests.swift */; };
 		40C4DF482C1C2BFC0035DBC2 /* LastParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF412C1C215E0035DBC2 /* LastParticipantAutoLeavePolicy.swift */; };
 		40C4DF492C1C2C210035DBC2 /* Publisher+WeakAssign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */; };
 		40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */; };
@@ -1344,6 +1347,9 @@
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
 		40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisposableBag.swift; sourceTree = "<group>"; };
+		40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RejectCallRequest+Reason.swift"; sourceTree = "<group>"; };
+		40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RejectionReasonProvider.swift; sourceTree = "<group>"; };
+		40C2B5C52C2D7AED00EC2C2D /* RejectionReasonProvider_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RejectionReasonProvider_Tests.swift; sourceTree = "<group>"; };
 		40C4DF412C1C215E0035DBC2 /* LastParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
 		40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+WeakAssign.swift"; sourceTree = "<group>"; };
 		40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
@@ -2829,6 +2835,30 @@
 			path = DisposableBag;
 			sourceTree = "<group>";
 		};
+		40C2B5B92C2C41CF00EC2C2D /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		40C2B5BC2C2C447700EC2C2D /* RejectionReasonProvider */ = {
+			isa = PBXGroup;
+			children = (
+				40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */,
+			);
+			path = RejectionReasonProvider;
+			sourceTree = "<group>";
+		};
+		40C2B5C42C2D7ADE00EC2C2D /* RejectionReasonProvider */ = {
+			isa = PBXGroup;
+			children = (
+				40C2B5C52C2D7AED00EC2C2D /* RejectionReasonProvider_Tests.swift */,
+			);
+			path = RejectionReasonProvider;
+			sourceTree = "<group>";
+		};
 		40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */ = {
 			isa = PBXGroup;
 			children = (
@@ -3404,6 +3434,7 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C2B5C42C2D7ADE00EC2C2D /* RejectionReasonProvider */,
 				40C4DF4E2C1C41470035DBC2 /* ParticipantAutoLeavePolicy */,
 				403FB14A2BFE14690047A696 /* StateMachine */,
 				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
@@ -3603,6 +3634,7 @@
 		8456E6D9287EC46D004E180E /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				40C2B5B92C2C41CF00EC2C2D /* Extensions */,
 				84AF64D1287C78E70012A503 /* User.swift */,
 				84AF64D6287C79610012A503 /* Token.swift */,
 				84C2997828784B180034B735 /* CallType.swift */,
@@ -3854,6 +3886,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C2B5BC2C2C447700EC2C2D /* RejectionReasonProvider */,
 				40C2B5B42C2B604800EC2C2D /* DisposableBag */,
 				40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */,
 				408937892C062B0B000EEB69 /* UUIDProviding */,
@@ -5199,6 +5232,7 @@
 				84DCA20E2A3885FE000C3411 /* Permissions.swift in Sources */,
 				842E70D82B91BE1700D2D68B /* StatsOptions.swift in Sources */,
 				84BAD77E2A6BFFB200733156 /* BroadcastSampleHandler.swift in Sources */,
+				40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */,
 				840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				841BAA462BD15CDE000C73E4 /* CallStatsReportSummaryResponse.swift in Sources */,
@@ -5338,6 +5372,7 @@
 				842B8E162A2DFED900863A87 /* CallRingEvent.swift in Sources */,
 				842B8E2D2A2DFED900863A87 /* StopTranscriptionResponse.swift in Sources */,
 				400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */,
+				40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
 				841BAA412BD15CDE000C73E4 /* Subsession.swift in Sources */,
@@ -5548,6 +5583,7 @@
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
 				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,
 				841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */,
+				40C2B5C62C2D7AED00EC2C2D /* RejectionReasonProvider_Tests.swift in Sources */,
 				403FB15C2BFE22170047A696 /* StreamCallStateMachineStageAcceptingStage_Tests.swift in Sources */,
 				841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */,
 				40F017452BBEEE6D00E89FD1 /* UserResponse+Dummy.swift in Sources */,

@@ -33,6 +33,11 @@ final class MockStreamVideo: StreamVideo, Mockable {
         pushNotificationsConfig: PushNotificationsConfig = .default,
         environment: Environment = .init()
     ) {
+        var stubbedProperty = stubbedProperty
+        if stubbedProperty[MockStreamVideo.propertyKey(for: \.state)] == nil {
+            stubbedProperty[MockStreamVideo.propertyKey(for: \.state)] = MockStreamVideo.State(user: user)
+        }
+
         self.stubbedProperty = stubbedProperty
         self.stubbedFunction = stubbedFunction
 

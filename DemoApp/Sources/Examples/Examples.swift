@@ -256,14 +256,6 @@ struct CustomIncomingCallView: View {
             .padding()
         }
         .background(Color.white.edgesIgnoringSafeArea(.all))
-        .onChange(of: viewModel.hideIncomingCallScreen) { newValue in
-            if newValue {
-                callViewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
-            }
-        }
-        .onDisappear {
-            viewModel.stopTimer()
-        }
     }
     
     var callInfo: IncomingCall {

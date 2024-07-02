@@ -15,7 +15,7 @@ final class MockCall: Call, Mockable {
         case join
     }
 
-    var stubbedProperty: [String: Any] = [:]
+    var stubbedProperty: [String: Any]
     var stubbedFunction: [FunctionKey: Any] = [:]
 
     override var state: CallState {
@@ -23,10 +23,15 @@ final class MockCall: Call, Mockable {
         set { _ = newValue }
     }
 
-    convenience init(
+    @MainActor
+    init(
         _ source: Call = .dummy()
     ) {
-        self.init(
+        stubbedProperty = [
+            MockCall.propertyKey(for: \.state): CallState()
+        ]
+
+        super.init(
             callType: source.callType,
             callId: source.callId,
             coordinatorClient: source.coordinatorClient,

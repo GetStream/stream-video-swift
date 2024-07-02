@@ -37,13 +37,5 @@ public struct IncomingCallView_iOS13: View {
             onCallAccepted: onCallAccepted,
             onCallRejected: onCallRejected
         )
-        .onReceive(viewModel.$hideIncomingCallScreen, perform: { value in
-            if value {
-                onCallRejected(viewModel.callInfo.id)
-            }
-        })
-        .onDisappear {
-            viewModel.stopTimer()
-        }
     }
 }

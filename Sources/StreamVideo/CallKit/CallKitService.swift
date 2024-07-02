@@ -109,11 +109,22 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         )
 
         log.debug(
-            "Reporting VoIP incoming call with callUUID:\(callUUID) cid:\(cid) callerId:\(callerId) callerName:\(localizedCallerName)."
+            """
+            Reporting VoIP incoming call with
+            callUUID:\(callUUID) 
+            cid:\(cid)
+            callerId:\(callerId)
+            callerName:\(localizedCallerName)
+            """
         )
 
         guard let streamVideo, let callEntry = storage[callUUID] else {
-            log.warning("CallKit operation:reportIncomingCall cannot be fulfilled because StreamVideo is nil.")
+            log.warning(
+                """
+                CallKit operation:reportIncomingCall cannot be fulfilled because 
+                StreamVideo is nil.
+                """
+            )
             callEnded(cid)
             return
         }
@@ -146,15 +157,23 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 } else {
                     log.debug(
                         """
-                        Rejecting VoIP incoming call with callUUID:\(callUUID)
-                        cid:\(cid) callerId:\(callerId) callerName:\(localizedCallerName)
-                        as it has been handled.
+                        Rejecting VoIP incoming call as it has been handled.
+                        callUUID:\(callUUID)
+                        cid:\(cid) 
+                        callerId:\(callerId)
+                        callerName:\(localizedCallerName)
                         """
                     )
                     callEnded(cid)
                 }
             } catch {
-                log.error("Failed to report incoming call with callId:\(callId) callType:\(callType)")
+                log.error(
+                    """
+                    Failed to report incoming call with 
+                    callId:\(callId)
+                    callType:\(callType)
+                    """
+                )
                 callEnded(cid)
             }
         }
@@ -313,12 +332,29 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
 
         Task {
-            log
-                .debug(
-                    "Ending VoIP call with callId:\(stackEntry.call.callId) callType:\(stackEntry.call.callType) callerId:\(String(describing: stackEntry.createdBy?.id))."
-                )
+            log.debug(
+                """
+                Ending VoIP call with
+                callId:\(stackEntry.call.callId)
+                callType:\(stackEntry.call.callType)
+                callerId:\(String(describing: stackEntry.createdBy?.id))
+                """
+            )
             do {
-                try await stackEntry.call.reject()
+                let rejectionReason = streamVideo?
+                    .rejectionReasonProvider
+                    .reason(
+                        for: stackEntry.call.cId,
+                        ringTimeout: false
+                    )
+                log.debug(
+                    """
+                    Rejecting with reason: \(rejectionReason ?? "nil")
+                    call:\(stackEntry.call.callId)
+                    callType: \(stackEntry.call.callType)
+                    """
+                )
+                try await stackEntry.call.reject(reason: rejectionReason)
             } catch {
                 log.error(error)
             }
@@ -396,7 +432,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callEventsSubscription = nil
 
         guard let streamVideo else {
-            log.warning("CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.")
+            log.warning(
+                """
+                CallKit operation:\(#function) cannot be fulfilled because
+                StreamVideo is nil.
+                """
+            )
             return
         }
 
@@ -454,7 +495,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         let update = CXCallUpdate()
         let idComponents = cid.components(separatedBy: ":")
         let uuid = uuidFactory.get()
-        if idComponents.count >= 2, let call = streamVideo?.call(callType: idComponents[0], callId: idComponents[1]) {
+        if
+            idComponents.count >= 2,
+            let call = streamVideo?.call(
+                callType: idComponents[0],
+                callId: idComponents[1]
+            ) {
             storage[uuid] = .init(call: call, callUUID: uuid)
         }
 
