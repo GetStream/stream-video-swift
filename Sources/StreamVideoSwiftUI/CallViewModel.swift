@@ -14,7 +14,6 @@ open class CallViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
-    @Injected(\.rejectionReasonProvider) var rejectionReasonProvider
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -437,8 +436,9 @@ open class CallViewModel: ObservableObject {
     ) {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
-            let rejectionReason = rejectionReasonProvider
-                .rejectionReason(for: call.cId, ringTimeout: false)
+            let rejectionReason = streamVideo
+                .rejectionReasonProvider
+                .reason(for: call.cId, ringTimeout: false)
             log.debug(
                 """
                 Rejecting with reason: \(rejectionReason ?? "nil")
@@ -645,8 +645,9 @@ open class CallViewModel: ObservableObject {
 
         Task {
             do {
-                let rejectionReason = rejectionReasonProvider
-                    .rejectionReason(for: call.cId, ringTimeout: ringTimeout)
+                let rejectionReason = streamVideo
+                    .rejectionReasonProvider
+                    .reason(for: call.cId, ringTimeout: ringTimeout)
                 log.debug(
                     """
                     Rejecting with reason: \(rejectionReason ?? "nil")

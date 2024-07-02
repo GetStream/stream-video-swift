@@ -12,7 +12,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
-    @Injected(\.rejectionReasonProvider) private var rejectionReasonProvider
 
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
@@ -342,8 +341,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 """
             )
             do {
-                let rejectionReason = rejectionReasonProvider
-                    .rejectionReason(
+                let rejectionReason = streamVideo?
+                    .rejectionReasonProvider
+                    .reason(
                         for: stackEntry.call.cId,
                         ringTimeout: false
                     )
@@ -419,7 +419,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Parameter streamVideo: The new StreamVideo instance (nil if none)
     open func didUpdate(_ streamVideo: StreamVideo?) {
         subscribeToCallEvents()
-        rejectionReasonProvider.streamVideo = streamVideo
     }
 
     // MARK: - Private helpers

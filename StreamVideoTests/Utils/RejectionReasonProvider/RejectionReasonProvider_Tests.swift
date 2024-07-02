@@ -9,11 +9,7 @@ import XCTest
 final class StreamRejectionReasonProviderTests: XCTestCase {
 
     private lazy var mockStreamVideo: MockStreamVideo! = MockStreamVideo()
-    private lazy var subject: StreamRejectionReasonProvider! = {
-        let subject = StreamRejectionReasonProvider()
-        subject.streamVideo = mockStreamVideo
-        return subject
-    }()
+    private lazy var subject: StreamRejectionReasonProvider! = StreamRejectionReasonProvider(mockStreamVideo)
 
     override func tearDown() {
         subject = nil
@@ -27,7 +23,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
         mockStreamVideo.state.activeCall = MockCall(.dummy())
         mockStreamVideo.state.ringingCall = ringingCall
 
-        let reason = subject.rejectionReason(
+        let reason = subject.reason(
             for: ringingCall.cId,
             ringTimeout: true
         )
@@ -42,7 +38,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = mockStreamVideo.user
 
-        let reason = subject.rejectionReason(
+        let reason = subject.reason(
             for: ringingCall.cId,
             ringTimeout: true
         )
@@ -57,7 +53,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = mockStreamVideo.user
 
-        let reason = subject.rejectionReason(
+        let reason = subject.reason(
             for: ringingCall.cId,
             ringTimeout: false
         )
@@ -72,7 +68,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = .dummy()
 
-        let reason = subject.rejectionReason(
+        let reason = subject.reason(
             for: ringingCall.cId,
             ringTimeout: false
         )
@@ -86,7 +82,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = .dummy()
 
-        let reason = subject.rejectionReason(
+        let reason = subject.reason(
             for: .unique,
             ringTimeout: false
         )
@@ -96,7 +92,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
 
     @MainActor
     func test_rejectionReason_givenNoRingingCall_thenReturnsNil() {
-        let reason = subject.rejectionReason(
+        let reason = subject.reason(
             for: .unique,
             ringTimeout: false
         )

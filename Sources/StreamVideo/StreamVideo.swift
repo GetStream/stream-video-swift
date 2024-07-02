@@ -48,6 +48,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// Provides information regarding hardware-acceleration capabilities (neuralEngine) on device.
     public var isHardwareAccelerationAvailable: Bool { neuralEngineExists }
 
+    /// A protocol that provides a method to determine the rejection reason for a call.
+    public lazy var rejectionReasonProvider: RejectionReasonProviding = StreamRejectionReasonProvider(self)
+
     var token: UserToken
 
     private var tokenProvider: UserTokenProvider
