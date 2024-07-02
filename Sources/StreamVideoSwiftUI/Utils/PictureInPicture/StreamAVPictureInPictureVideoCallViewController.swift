@@ -3,6 +3,7 @@
 //
 
 import AVKit
+import Combine
 import Foundation
 import StreamVideo
 import StreamWebRTC
@@ -25,11 +26,20 @@ protocol StreamAVPictureInPictureViewControlling {
     var displayLayer: CALayer { get }
 }
 
+extension StreamAVPictureInPictureViewControlling {
+    /// The default size to use as `preferredContentSize` for the `AVPictureInPictureVideoCallViewController`
+    /// instances.
+    /// Once PiP has been activated, the VideoRenderer will publish it's preferredContentSize for the
+    /// controller to update to.
+    static var defaultPreferredContentSize: CGSize { .init(width: 640, height: 480) }
+}
+
 @available(iOS 15.0, *)
 final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController,
     StreamAVPictureInPictureViewControlling {
 
     private let contentView: StreamPictureInPictureVideoRenderer = .init()
+    private var contentViewPreferredSizeChanged: AnyCancellable?
 
     var onSizeUpdate: ((CGSize) -> Void)?
 
@@ -41,6 +51,17 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
     var displayLayer: CALayer { contentView.displayLayer }
 
     // MARK: - Lifecycle
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    /// Initializes a new instance and sets the `preferredContentSize` to `Self.defaultPreferredContentSize`
+    /// value.
+    required init() {
+        super.init(nibName: nil, bundle: nil)
+        let defaultPreferredContentSize = Self.defaultPreferredContentSize
+        preferredContentSize = defaultPreferredContentSize
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,5 +90,16 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
         ])
 
         contentView.bounds = view.bounds
+        let defaultPreferredContentSize = Self.defaultPreferredContentSize
+
+        /// The VideoRenderer view will post the `preferredContentSize` based on the frames
+        /// it receives. The ViewController is responsible on updating its `preferredContentSize`
+        /// in order to update the size of the PiP window.
+        contentViewPreferredSizeChanged = contentView
+            .preferredContentSizePublisher
+            .removeDuplicates()
+            .map { $0 == .zero ? defaultPreferredContentSize : $0 }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.preferredContentSize, onWeak: self)
     }
 }

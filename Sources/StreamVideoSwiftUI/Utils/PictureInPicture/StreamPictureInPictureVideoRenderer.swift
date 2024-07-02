@@ -28,6 +28,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// The publisher which is used to streamline the frames received from the track.
     private let bufferPublisher: PassthroughSubject<CMSampleBuffer, Never> = .init()
 
+    /// The publisher that the renderer will use to communicate changes to the size of the PiP window
+    /// in order to fit its content.
+    private(set) lazy var preferredContentSizePublisher: PassthroughSubject<CGSize, Never> = .init()
+
     /// The view that contains the rendering layer.
     private lazy var contentView: SampleBufferVideoCallView = {
         let contentView = SampleBufferVideoCallView()
@@ -148,6 +152,11 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         if
             let pixelBuffer = pixelBuffer,
             let sampleBuffer = bufferTransformer.transformAndResizeIfRequired(pixelBuffer, targetSize: contentSize) {
+            if let size = sampleBuffer.size, size != .zero {
+                preferredContentSizePublisher.send(size)
+                log.debug("↺ Preferred contentSize - to fit - updated to \(size).")
+            }
+
             log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.")
             bufferPublisher.send(sampleBuffer)
         } else {
@@ -237,7 +246,16 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             0
         skippedFrames = 0
         log.debug(
-            "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"
+            """
+            contentSize:\(contentSize)
+            trackId:\(track?.trackId ?? "n/a")
+            trackSize:\(trackSize)
+            requiresResize:\(requiresResize)
+            noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering)
+            skippedFrames:\(skippedFrames)
+            widthDiffRatio:\(widthDiffRatio)
+            heightDiffRatio:\(heightDiffRatio)
+            """
         )
     }
 
