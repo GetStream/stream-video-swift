@@ -294,6 +294,7 @@
 		40CB9FA72B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */; };
 		40D1657E2B5FE82200C6D951 /* HalfSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D1657D2B5FE82200C6D951 /* HalfSheetView.swift */; };
 		40D1657F2B5FE8AB00C6D951 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		40D3A0132C3410FD0039128D /* DefaultRetryStategy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D3A0122C3410FD0039128D /* DefaultRetryStategy_Tests.swift */; };
 		40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */; };
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
@@ -1362,6 +1363,7 @@
 		40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureSession+ActiveCaptureDevice.swift"; sourceTree = "<group>"; };
 		40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantSnapshotViewModel.swift; sourceTree = "<group>"; };
 		40D1657D2B5FE82200C6D951 /* HalfSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HalfSheetView.swift; sourceTree = "<group>"; };
+		40D3A0122C3410FD0039128D /* DefaultRetryStategy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRetryStategy_Tests.swift; sourceTree = "<group>"; };
 		40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer_Tests.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
@@ -2814,6 +2816,7 @@
 		40AB31232A49836800C270E1 /* WebSockets */ = {
 			isa = PBXGroup;
 			children = (
+				40D3A0112C3410F10039128D /* Client */,
 				40AB31242A49837400C270E1 /* Events */,
 			);
 			path = WebSockets;
@@ -2905,6 +2908,14 @@
 				40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */,
 			);
 			path = Snapshot;
+			sourceTree = "<group>";
+		};
+		40D3A0112C3410F10039128D /* Client */ = {
+			isa = PBXGroup;
+			children = (
+				40D3A0122C3410FD0039128D /* DefaultRetryStategy_Tests.swift */,
+			);
+			path = Client;
 			sourceTree = "<group>";
 		};
 		40D9463F2AA5ECDC00C8861B /* CodeScanner */ = {
@@ -5535,6 +5546,7 @@
 			files = (
 				84F58B7829EE945900010C4C /* RetryStrategy_Tests.swift in Sources */,
 				84DCA2182A398C53000C3411 /* Call_Tests.swift in Sources */,
+				40D3A0132C3410FD0039128D /* DefaultRetryStategy_Tests.swift in Sources */,
 				40F017472BBEEF5100E89FD1 /* ThumbnailResponse+Dummy.swift in Sources */,
 				408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */,
 				84F58B7029EE914400010C4C /* BackgroundTaskScheduler_Tests.swift in Sources */,
