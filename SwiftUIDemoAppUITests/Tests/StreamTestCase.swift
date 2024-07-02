@@ -12,7 +12,7 @@ class StreamTestCase: XCTestCase {
     let deviceRobot = DeviceRobot(app)
     var participantRobot = ParticipantRobot()
     var sinatra = Sinatra()
-    var recordVideo = true
+    var recordVideo = false
     var launchApp = true
     let callId = randomCallId
     let allViews: [UserRobot.View] = [.grid, .fullscreen, .spotlight]
