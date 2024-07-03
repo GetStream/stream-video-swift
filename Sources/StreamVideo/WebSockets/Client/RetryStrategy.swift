@@ -52,8 +52,14 @@ struct DefaultRetryStrategy: RetryStrategy {
     
     func nextRetryDelay() -> TimeInterval {
         var delay: TimeInterval = 0
-        
+
         _consecutiveFailuresCount.mutate {
+            /// The first time we get to retry, we do it without any delay. Any subsequent time will
+            /// be delayed by a random interval.
+            guard $0 > 0 else {
+                return
+            }
+
             let maxDelay: TimeInterval = min(0.5 + Double($0 * 2), Self.maximumReconnectionDelay)
             let minDelay: TimeInterval = min(max(0.25, (Double($0) - 1) * 2), Self.maximumReconnectionDelay)
             
