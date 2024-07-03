@@ -7,7 +7,7 @@ import Foundation
 
 actor AudioSession {
     
-    private let rtcAudioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
+    private var rtcAudioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
 
     func configure(
         _ configuration: RTCAudioSessionConfiguration = .default,
@@ -45,9 +45,9 @@ actor AudioSession {
     }
     
     nonisolated private func cleanup() {
-        rtcAudioSession.lockForConfiguration()
-        rtcAudioSession.isAudioEnabled = false
-        rtcAudioSession.unlockForConfiguration()
+        RTCAudioSession.sharedInstance().lockForConfiguration()
+        RTCAudioSession.sharedInstance().isAudioEnabled = false
+        RTCAudioSession.sharedInstance().unlockForConfiguration()
     }
 }
 

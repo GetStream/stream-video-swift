@@ -27,7 +27,7 @@ protocol StreamAVPictureInPictureViewControlling {
 
 @available(iOS 15.0, *)
 final class StreamAVPictureInPictureVideoCallViewController:
-    AVPictureInPictureVideoCallViewController, StreamAVPictureInPictureViewControlling {
+    AVPictureInPictureVideoCallViewController {
 
     private let contentView: StreamPictureInPictureVideoRenderer = .init()
 
@@ -71,3 +71,11 @@ final class StreamAVPictureInPictureVideoCallViewController:
         contentView.bounds = view.bounds
     }
 }
+
+#if swift(>=6.0)
+@available(iOS 15.0, *)
+extension StreamAVPictureInPictureVideoCallViewController: @preconcurrency StreamAVPictureInPictureViewControlling {}
+#else
+@available(iOS 15.0, *)
+extension StreamAVPictureInPictureVideoCallViewController: StreamAVPictureInPictureViewControlling {}
+#endif

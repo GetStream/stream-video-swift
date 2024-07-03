@@ -30,10 +30,17 @@ final class StreamSnapshotTrigger: SnapshotTriggering, @unchecked Sendable {
 }
 
 /// Provides the default value of the `StreamSnapshotTrigger` class.
+#if swift(>=6.0)
+struct StreamSnapshotTriggerKey: @preconcurrency InjectionKey {
+    @MainActor
+    static var currentValue: StreamSnapshotTrigger = .init()
+}
+#else
 struct StreamSnapshotTriggerKey: InjectionKey {
     @MainActor
     static var currentValue: StreamSnapshotTrigger = .init()
 }
+#endif
 
 extension InjectedValues {
     /// Provides access to the `StreamSnapshotTrigger` class to the views and view models.

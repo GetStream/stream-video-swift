@@ -94,9 +94,15 @@ final class StreamPictureInPictureAdapter {
 }
 
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
+#if swift(>=6.0)
+enum StreamPictureInPictureAdapterKey: @preconcurrency InjectionKey {
+    @MainActor static var currentValue: StreamPictureInPictureAdapter = .init()
+}
+#else
 enum StreamPictureInPictureAdapterKey: InjectionKey {
     @MainActor static var currentValue: StreamPictureInPictureAdapter = .init()
 }
+#endif
 
 extension InjectedValues {
     /// Provides access to the `StreamPictureInPictureAdapter` class to the views and view models.

@@ -8,7 +8,7 @@ import SwiftUI
 /// A property wrapper type that instantiates an observable object.
 @preconcurrency @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
 @MainActor
-public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
+public struct BackportStateObject<ObjectType: ObservableObject>
     where ObjectType: Sendable, ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
     /// Wrapper that helps with initialising without actually having an ObservableObject yet
@@ -148,3 +148,9 @@ public struct PublishedObject<Value: Sendable>: @unchecked Sendable {
         mutating get { _projectedValue.eraseToAnyPublisher() }
     }
 }
+
+#if swift(>=6.0)
+extension BackportStateObject: @preconcurrency DynamicProperty {}
+#else
+extension BackportStateObject: DynamicProperty {}
+#endif

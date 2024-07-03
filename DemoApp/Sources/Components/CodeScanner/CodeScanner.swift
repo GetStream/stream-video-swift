@@ -112,8 +112,7 @@ struct CodeScannerView_Previews: PreviewProvider {
     }
 }
 
-final class ScannerViewController: UIViewController, UINavigationControllerDelegate, AVCaptureMetadataOutputObjectsDelegate,
-    UIAdaptivePresentationControllerDelegate {
+final class ScannerViewController: UIViewController, UINavigationControllerDelegate, UIAdaptivePresentationControllerDelegate {
     private let photoOutput = AVCapturePhotoOutput()
     private var isCapturing = false
     private var handler: ((UIImage) -> Void)?
@@ -487,7 +486,14 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
     }
 }
 
-extension ScannerViewController: AVCapturePhotoCaptureDelegate {
+#if swift(>=6.0)
+extension ScannerViewController: @preconcurrency AVCapturePhotoCaptureDelegate,
+    @preconcurrency AVCaptureMetadataOutputObjectsDelegate {}
+#else
+extension ScannerViewController: AVCapturePhotoCaptureDelegate, AVCaptureMetadataOutputObjectsDelegate {}
+#endif
+
+extension ScannerViewController {
 
     func photoOutput(
         _ output: AVCapturePhotoOutput,

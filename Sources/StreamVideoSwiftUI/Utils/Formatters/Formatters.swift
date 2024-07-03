@@ -12,9 +12,15 @@ public class Formatters {
 // MARK: - Formatters + Injection
 
 /// Provides the default value of the `Formatters` class.
+#if swift(>=6.0)
+enum FormattersKey: @preconcurrency InjectionKey {
+    @MainActor static var currentValue: Formatters = .init()
+}
+#else
 enum FormattersKey: InjectionKey {
     @MainActor static var currentValue: Formatters = .init()
 }
+#endif
 
 extension InjectedValues {
     /// Provides access to the `Formatters` class to the views and view models.

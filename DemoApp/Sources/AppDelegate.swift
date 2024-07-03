@@ -7,7 +7,7 @@ import StreamVideo
 import SwiftUI
 import UIKit
 
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate {
 
     @Injected(\.streamVideo) var streamVideo
 
@@ -118,3 +118,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
 }
+
+#if swift(>=6.0)
+extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {}
+#else
+extension AppDelegate: UNUserNotificationCenterDelegate {}
+#endif

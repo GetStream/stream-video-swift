@@ -8,7 +8,7 @@ import StreamVideo
 import StreamWebRTC
 
 /// A view that can be used to render an instance of `RTCVideoTrack`
-final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
+final class StreamPictureInPictureVideoRenderer: UIView {
 
     /// The rendering track.
     var track: RTCVideoTrack? {
@@ -264,3 +264,9 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         startFrameStreaming(for: track, on: window)
     }
 }
+
+#if swift(>=6.0)
+extension StreamPictureInPictureVideoRenderer: @preconcurrency RTCVideoRenderer {}
+#else
+extension StreamPictureInPictureVideoRenderer: RTCVideoRenderer {}
+#endif

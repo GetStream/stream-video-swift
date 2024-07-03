@@ -9,7 +9,7 @@ import class StreamVideoSwiftUI.CallViewModel
 import SwiftUI
 
 @MainActor
-final class DemoChatViewFactory: ViewFactory {
+final class DemoChatViewFactory {
 
     @Injected(\.chatClient) var chatClient: ChatClient
 
@@ -34,3 +34,9 @@ final class DemoChatViewFactory: ViewFactory {
         )
     }
 }
+
+#if swift(>=6.0)
+extension DemoChatViewFactory: @preconcurrency ViewFactory {}
+#else
+extension DemoChatViewFactory: ViewFactory {}
+#endif

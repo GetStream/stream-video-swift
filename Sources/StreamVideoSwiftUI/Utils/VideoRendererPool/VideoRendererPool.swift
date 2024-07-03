@@ -47,9 +47,15 @@ final class VideoRendererPool {
     }
 }
 
+#if swift(>=6.0)
+extension VideoRendererPool: @preconcurrency InjectionKey {
+    @MainActor static var currentValue: VideoRendererPool = .init()
+}
+#else
 extension VideoRendererPool: InjectionKey {
     @MainActor static var currentValue: VideoRendererPool = .init()
 }
+#endif
 
 extension InjectedValues {
     var videoRendererPool: VideoRendererPool {

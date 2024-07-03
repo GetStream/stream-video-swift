@@ -6,7 +6,7 @@ import Foundation
 import PushKit
 
 /// Handles push notifications for CallKit integration.
-@preconcurrency open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject {
+@preconcurrency open class CallKitPushNotificationAdapter: NSObject, ObservableObject {
 
     /// Represents the keys that the Payload dictionary
     public enum PayloadKey: String {
@@ -167,3 +167,9 @@ extension InjectedValues {
         set { Self[CallKitPushNotificationAdapter.self] = newValue }
     }
 }
+
+#if swift(>=6.0)
+extension CallKitPushNotificationAdapter: @preconcurrency PKPushRegistryDelegate {}
+#else
+extension CallKitPushNotificationAdapter: PKPushRegistryDelegate {}
+#endif
