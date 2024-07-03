@@ -56,6 +56,7 @@ public struct ToastView: View {
     }
 }
 
+@MainActor
 public struct ToastModifier: ViewModifier {
     
     @Binding var toast: Toast?
@@ -128,7 +129,7 @@ public struct ToastModifier: ViewModifier {
 }
 
 extension View {
-    public func toastView(toast: Binding<Toast?>) -> some View {
+    @MainActor public func toastView(toast: Binding<Toast?>) -> some View {
         modifier(ToastModifier(toast: toast))
     }
 }

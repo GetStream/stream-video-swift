@@ -9,7 +9,7 @@ public var log: Logger {
 }
 
 /// Entity for identifying which subsystem the log message comes from.
-public struct LogSubsystem: OptionSet, CustomStringConvertible {
+public struct LogSubsystem: OptionSet, CustomStringConvertible, @unchecked Sendable {
     public let rawValue: Int
     
     public init(rawValue: Int) {
@@ -78,21 +78,21 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
 
 public enum LogConfig {
     /// Identifier for the logger. Defaults to empty.
-    public static var identifier = "" {
+    nonisolated(unsafe) public static var identifier = "" {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Output level for the logger.
-    public static var level: LogLevel = .error {
+    nonisolated(unsafe) public static var level: LogLevel = .error {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Date formatter for the logger. Defaults to ISO8601
-    public static var dateFormatter: DateFormatter = {
+    nonisolated(unsafe) public static var dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
         return df
@@ -104,63 +104,63 @@ public enum LogConfig {
     
     /// Log formatters to be applied in order before logs are outputted. Defaults to empty (no formatters).
     /// Please see `LogFormatter` for more info.
-    public static var formatters = [LogFormatter]() {
+    nonisolated(unsafe) public static var formatters = [LogFormatter]() {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Toggle for showing date in logs
-    public static var showDate = true {
+    nonisolated(unsafe) public static var showDate = true {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Toggle for showing log level in logs
-    public static var showLevel = true {
+    nonisolated(unsafe) public static var showLevel = true {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Toggle for showing identifier in logs
-    public static var showIdentifier = false {
+    nonisolated(unsafe) public static var showIdentifier = false {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Toggle for showing thread name in logs
-    public static var showThreadName = true {
+    nonisolated(unsafe) public static var showThreadName = true {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Toggle for showing file name in logs
-    public static var showFileName = true {
+    nonisolated(unsafe) public static var showFileName = true {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Toggle for showing line number in logs
-    public static var showLineNumber = true {
+    nonisolated(unsafe) public static var showLineNumber = true {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Toggle for showing function name in logs
-    public static var showFunctionName = true {
+    nonisolated(unsafe) public static var showFunctionName = true {
         didSet {
             invalidateLogger()
         }
     }
     
     /// Subsystems for the logger
-    public static var subsystems: LogSubsystem = .all {
+    nonisolated(unsafe) public static var subsystems: LogSubsystem = .all {
         didSet {
             invalidateLogger()
         }
@@ -170,13 +170,13 @@ public enum LogConfig {
     ///
     /// Logger will initialize the destinations with its own parameters. If you want full control on the parameters, use `destinations` directly,
     /// where you can pass parameters to destination initializers yourself.
-    public static var destinationTypes: [LogDestination.Type] = [ConsoleLogDestination.self] {
+    nonisolated(unsafe) public static var destinationTypes: [LogDestination.Type] = [ConsoleLogDestination.self] {
         didSet {
             invalidateLogger()
         }
     }
     
-    private static var _destinations: [LogDestination]?
+    nonisolated(unsafe) private static var _destinations: [LogDestination]?
     
     /// Destinations for the default logger. Please see `LogDestination`.
     /// Defaults to only `ConsoleLogDestination`, which only prints the messages.
@@ -213,7 +213,7 @@ public enum LogConfig {
     }
     
     /// Underlying logger instance to control singleton.
-    private static var _logger: Logger?
+    nonisolated(unsafe) private static var _logger: Logger?
     
     /// Logger instance to be used by StreamChat.
     ///
@@ -277,7 +277,7 @@ public class Logger {
         log(
             level,
             functionName: functionName,
-            fileName: fileName,
+            fileName: (fileName),
             lineNumber: lineNumber,
             message: message(),
             subsystems: subsystems,

@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import StreamWebRTC
+@preconcurrency import StreamWebRTC
 
-final class SimulatorScreenCapturer: RTCVideoCapturer {
+final class SimulatorScreenCapturer: RTCVideoCapturer, @unchecked Sendable {
     private var displayLink: CADisplayLink?
     private var videoURL: URL
     private let queue = DispatchQueue(label: "org.webrtc.RTCFileVideoCapturer")
@@ -96,7 +96,7 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
 
 /// Provides the default value of the `SimulatorStreamFile` class.
 enum SimulatorStreamFileKey: InjectionKey {
-    static var currentValue: URL?
+    nonisolated(unsafe) static var currentValue: URL?
 }
 
 extension InjectedValues {

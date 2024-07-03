@@ -4,6 +4,7 @@
 
 import UIKit
 
+@MainActor
 class CallViewHelper {
     
     static let shared = CallViewHelper()

@@ -26,8 +26,8 @@ protocol StreamAVPictureInPictureViewControlling {
 }
 
 @available(iOS 15.0, *)
-final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController,
-    StreamAVPictureInPictureViewControlling {
+final class StreamAVPictureInPictureVideoCallViewController:
+    AVPictureInPictureVideoCallViewController, StreamAVPictureInPictureViewControlling {
 
     private let contentView: StreamPictureInPictureVideoRenderer = .init()
 

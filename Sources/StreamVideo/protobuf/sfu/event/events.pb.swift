@@ -1036,7 +1036,7 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
 
 extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Event_VideoLayerSetting.Priority] = [
+  static let allCases: [Stream_Video_Sfu_Event_VideoLayerSetting.Priority] = [
     .highUnspecified,
     .low,
     .medium,
@@ -1881,7 +1881,7 @@ extension Stream_Video_Sfu_Event_TrackPublished: SwiftProtobuf.Message, SwiftPro
     var _type: Stream_Video_Sfu_Models_TrackType = .unspecified
     var _participant: Stream_Video_Sfu_Models_Participant? = nil
 
-    static let defaultInstance = _StorageClass()
+    nonisolated(unsafe) static let defaultInstance = _StorageClass()
 
     private init() {}
 
@@ -1975,7 +1975,7 @@ extension Stream_Video_Sfu_Event_TrackUnpublished: SwiftProtobuf.Message, SwiftP
     var _cause: Stream_Video_Sfu_Models_TrackUnpublishReason = .unspecified
     var _participant: Stream_Video_Sfu_Models_Participant? = nil
 
-    static let defaultInstance = _StorageClass()
+    nonisolated(unsafe) static let defaultInstance = _StorageClass()
 
     private init() {}
 
@@ -2077,7 +2077,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     var _migration: Stream_Video_Sfu_Event_Migration? = nil
     var _fastReconnect: Bool = false
 
-    static let defaultInstance = _StorageClass()
+    nonisolated(unsafe) static let defaultInstance = _StorageClass()
 
     private init() {}
 

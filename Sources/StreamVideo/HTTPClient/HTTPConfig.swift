@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct HTTPConfig {
+struct HTTPConfig: Sendable {
     var retryStrategy: RetryStrategy
     let maxRetries: Int
 }

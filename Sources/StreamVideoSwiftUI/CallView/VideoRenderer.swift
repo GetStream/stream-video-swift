@@ -110,11 +110,11 @@ public class VideoRenderer: RTCMTLVideoView {
     let queue = DispatchQueue(label: "video-track")
 
     /// The associated RTCVideoTrack being rendered.
-    weak var track: RTCVideoTrack?
+    nonisolated(unsafe) weak var track: RTCVideoTrack?
 
     /// Unique identifier for the video renderer instance.
     private let identifier = UUID()
-    private var cancellable: AnyCancellable?
+    nonisolated(unsafe) private var cancellable: AnyCancellable?
 
     /// Preferred frames per second for rendering.
     private(set) var preferredFramesPerSecond: Int = UIScreen.main.maximumFramesPerSecond {
@@ -162,8 +162,12 @@ public class VideoRenderer: RTCMTLVideoView {
 
     /// Cleans up resources when the VideoRenderer instance is deallocated.
     deinit {
-        cancellable?.cancel()
         log.debug("\(type(of: self)):\(identifier) deallocating", subsystems: .webRTC)
+        cleanUp()
+    }
+    
+    nonisolated func cleanUp() {
+        cancellable?.cancel()
         track?.remove(self)
     }
 
@@ -215,7 +219,7 @@ extension VideoRenderer {
                 subsystems: .webRTC
             )
             add(track: track)
-            DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
                 guard let self else { return }
                 let prev = participant.trackSize
                 if let viewSize, prev != viewSize {

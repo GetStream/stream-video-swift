@@ -6,7 +6,7 @@ import Foundation
 import PushKit
 
 /// Handles push notifications for CallKit integration.
-open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject {
+@preconcurrency open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject {
 
     /// Represents the keys that the Payload dictionary
     public enum PayloadKey: String {
@@ -157,7 +157,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
 extension CallKitPushNotificationAdapter: InjectionKey {
     /// Provides the current instance of `CallKitPushNotificationAdapter`.
-    public static var currentValue: CallKitPushNotificationAdapter = .init()
+    nonisolated(unsafe) public static var currentValue: CallKitPushNotificationAdapter = .init()
 }
 
 extension InjectedValues {

@@ -2,7 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Accelerate
+@preconcurrency import Accelerate
 import Foundation
 
 /// A class dedicated to converting YUV (YpCbCr) image data to ARGB format.

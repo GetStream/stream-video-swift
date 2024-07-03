@@ -125,6 +125,7 @@ public enum LayoutAnchorName {
     case trailing
     case width
     
+    @MainActor
     func makeConstraint(fromView: UIView, toView: UIView, constant: CGFloat = 0) -> NSLayoutConstraint {
         switch self {
         case .bottom:
@@ -154,6 +155,7 @@ public enum LayoutAnchorName {
         }
     }
     
+    @MainActor
     func makeConstraint(fromView: UIView, toLayoutGuide: UILayoutGuide, constant: CGFloat = 0) -> NSLayoutConstraint? {
         switch self {
         case .bottom:
@@ -182,6 +184,7 @@ public enum LayoutAnchorName {
         }
     }
     
+    @MainActor
     func makeConstraint(fromView: UIView, constant: CGFloat) -> NSLayoutConstraint? {
         switch self {
         case .height:

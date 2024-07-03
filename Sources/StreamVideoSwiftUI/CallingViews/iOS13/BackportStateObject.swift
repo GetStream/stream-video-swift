@@ -6,12 +6,13 @@ import Combine
 import SwiftUI
 
 /// A property wrapper type that instantiates an observable object.
-@propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
+@preconcurrency @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
+@MainActor
 public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
-    where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
+    where ObjectType: Sendable, ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
     /// Wrapper that helps with initialising without actually having an ObservableObject yet
-    private class ObservedObjectWrapper: ObservableObject {
+    @MainActor private class ObservedObjectWrapper: ObservableObject {
         @PublishedObject var wrappedObject: ObjectType? = nil
         init() {}
     }
@@ -51,7 +52,8 @@ public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
 /// Just like @Published this sends willSet events to the enclosing ObservableObject's ObjectWillChangePublisher
 /// but unlike @Published it also sends the wrapped value's published changes on to the enclosing ObservableObject
 @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
-public struct PublishedObject<Value> {
+@MainActor
+public struct PublishedObject<Value: Sendable>: @unchecked Sendable {
 
     public init(wrappedValue: Value) where Value: ObservableObject, Value.ObjectWillChangePublisher == ObservableObjectPublisher {
         self.wrappedValue = wrappedValue

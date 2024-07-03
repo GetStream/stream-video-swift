@@ -66,7 +66,7 @@ final class StreamPixelBufferRepository {
 }
 
 extension StreamPixelBufferRepository: InjectionKey {
-    static var currentValue: StreamPixelBufferRepository = .init()
+    nonisolated(unsafe) static var currentValue: StreamPixelBufferRepository = .init()
 }
 
 extension InjectedValues {

@@ -13,7 +13,7 @@ import StreamVideoNoiseCancellation
 #endif
 
 @MainActor
-final class Router: ObservableObject {
+final class Router: ObservableObject, @unchecked Sendable {
 
     // MARK: - Properties
 
@@ -234,9 +234,9 @@ final class Router: ObservableObject {
         appState.connectUser()
     }
 
-    private func refreshToken(
+    nonisolated private func refreshToken(
         for userId: String,
-        _ completionHandler: @escaping (Result<UserToken, Error>) -> Void
+        _ completionHandler: @Sendable @escaping (Result<UserToken, Error>) -> Void
     ) {
         Task {
             do {

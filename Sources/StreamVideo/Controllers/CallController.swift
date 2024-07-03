@@ -465,16 +465,18 @@ class CallController: @unchecked Sendable {
     
     private func handleParticipantsUpdated() {
         webRTCClient?.onParticipantsUpdated = { [weak self] participants in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.call?.state.participantsMap = participants
+                self.call?.state.participantsMap = participants
             }
         }
     }
     
     private func handleParticipantCountUpdated() {
         webRTCClient?.onParticipantCountUpdated = { [weak self] participantCount in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.call?.state.participantCount = participantCount
+                self.call?.state.participantCount = participantCount
             }
         }
     }

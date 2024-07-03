@@ -224,7 +224,7 @@ struct DemoTextEditor: View {
     }
 
     @ViewBuilder
-    private func withPlaceholder(
+    @MainActor private func withPlaceholder(
         @ViewBuilder content: () -> some View
     ) -> some View {
         content()

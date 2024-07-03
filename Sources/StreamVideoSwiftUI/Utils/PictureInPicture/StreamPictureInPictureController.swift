@@ -70,7 +70,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     /// background.
     ///
     /// - Returns `nil` if AVPictureInPictureController is not supported, or the controller otherwise.
-    init?(canStartPictureInPictureAutomaticallyFromInline: Bool = true) {
+    @MainActor init?(canStartPictureInPictureAutomaticallyFromInline: Bool = true) {
         guard AVPictureInPictureController.isPictureInPictureSupported() else {
             return nil
         }
@@ -189,7 +189,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         trackStateAdapter.isEnabled = isActive
     }
 
-    private func subscribeToApplicationStateNotifications() {
+    @MainActor private func subscribeToApplicationStateNotifications() {
         #if canImport(UIKit)
         /// If we are running on a UIKit application, we observe the application state in order to disable
         /// PictureInPicture when active but the app is in foreground.

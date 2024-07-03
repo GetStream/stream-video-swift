@@ -15,7 +15,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
 
     /// A coordinator class that manages snapshot triggering and handling within the
     /// `SnapshotViewContainer`.
-    final class SnapshotViewContainerCoordinator {
+    @MainActor final class SnapshotViewContainerCoordinator {
         private var trigger: SnapshotTriggering
         private let snapshotHandler: (UIImage) -> Void
         private var cancellable: AnyCancellable?

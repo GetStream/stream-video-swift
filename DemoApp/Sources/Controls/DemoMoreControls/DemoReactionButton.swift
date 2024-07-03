@@ -19,7 +19,7 @@ struct DemoReactionSelectorView: View {
     var body: some View {
 
         HStack {
-            if orientationAdapter.orientation.isLandscape {
+            if orientationAdapter.orientation?.isLandscape == true {
                 HStack {}
                     .frame(maxWidth: .infinity)
                 contentView

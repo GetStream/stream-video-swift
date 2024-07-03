@@ -8,18 +8,18 @@
 import Foundation
 
 open class CodableHelper {
-    private static var customDateFormatter: DateFormatter?
-    private static var defaultDateFormatter: DateFormatter = OpenISO8601DateFormatter()
+    nonisolated(unsafe) private static var customDateFormatter: DateFormatter?
+    nonisolated(unsafe) private static var defaultDateFormatter: DateFormatter = OpenISO8601DateFormatter()
 
-    private static var customJSONDecoder: JSONDecoder?
-    private static var defaultJSONDecoder: JSONDecoder = {
+    nonisolated(unsafe) private static var customJSONDecoder: JSONDecoder?
+    nonisolated(unsafe) private static var defaultJSONDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .formatted(CodableHelper.dateFormatter)
         return decoder
     }()
 
-    private static var customJSONEncoder: JSONEncoder?
-    private static var defaultJSONEncoder: JSONEncoder = {
+    nonisolated(unsafe) private static var customJSONEncoder: JSONEncoder?
+    nonisolated(unsafe) private static var defaultJSONEncoder: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .formatted(CodableHelper.dateFormatter)
         encoder.outputFormatting = .prettyPrinted

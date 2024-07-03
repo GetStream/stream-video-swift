@@ -9,7 +9,7 @@ import StreamVideo
 import UIKit
 
 final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDelegate,
-    AVCaptureVideoDataOutputSampleBufferDelegate {
+    AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
 
     private actor State {
         private(set) var isCapturingVideoFrame = false

@@ -54,7 +54,7 @@ final class CallCache {
 }
 
 extension CallCache: InjectionKey {
-    static var currentValue: CallCache = .init()
+    nonisolated(unsafe) static var currentValue: CallCache = .init()
 }
 
 extension InjectedValues {

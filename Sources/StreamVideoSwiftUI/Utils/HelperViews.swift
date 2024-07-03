@@ -43,7 +43,7 @@ public struct CallIconView: View {
     }
 }
 
-public struct CallIconStyle {
+public struct CallIconStyle: Sendable {
     public let backgroundColor: Color
     public let foregroundColor: Color
     public let opacity: CGFloat

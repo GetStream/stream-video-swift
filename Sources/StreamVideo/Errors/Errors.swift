@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension APIError: Error {}
+extension APIError: Error, @unchecked Sendable {}
 
 extension Stream_Video_Sfu_Models_Error: Error, CustomStringConvertible {
     var description: String {
@@ -13,7 +13,7 @@ extension Stream_Video_Sfu_Models_Error: Error, CustomStringConvertible {
 }
 
 /// A Client error.
-public class ClientError: Error, CustomStringConvertible {
+public class ClientError: Error, CustomStringConvertible, @unchecked Sendable {
     public struct Location: Equatable {
         public let file: String
         public let line: Int
@@ -73,19 +73,19 @@ public class ClientError: Error, CustomStringConvertible {
 
 extension ClientError {
     /// An unexpected error.
-    public class Unexpected: ClientError {}
+    public class Unexpected: ClientError, @unchecked Sendable {}
     
     /// An unknown error.
-    public class Unknown: ClientError {}
+    public class Unknown: ClientError, @unchecked Sendable {}
     
     /// Networking error.
-    public class NetworkError: ClientError {}
+    public class NetworkError: ClientError, @unchecked Sendable {}
     
     /// Permissions error.
-    public class MissingPermissions: ClientError {}
+    public class MissingPermissions: ClientError, @unchecked Sendable {}
     
     /// Invalid url error.
-    public class InvalidURL: ClientError {}
+    public class InvalidURL: ClientError, @unchecked Sendable {}
 }
 
 // This should probably live only in the test target since it's not "true" equatable

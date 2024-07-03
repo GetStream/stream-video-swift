@@ -32,7 +32,7 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     
     public var body: some View {
         ZStack {
-            if orientationAdapter.orientation.isPortrait {
+            if orientationAdapter.orientation?.isPortrait == true {
                 VideoParticipantsViewPortrait(
                     viewFactory: viewFactory,
                     call: call,

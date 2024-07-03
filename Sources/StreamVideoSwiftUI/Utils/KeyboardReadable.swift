@@ -10,12 +10,11 @@ import UIKit
 public protocol KeyboardReadable {
     var keyboardWillChangePublisher: AnyPublisher<Bool, Never> { get }
     var keyboardDidChangePublisher: AnyPublisher<Bool, Never> { get }
-    var keyboardHeight: AnyPublisher<CGFloat, Never> { get }
 }
 
 /// Default implementation.
 extension KeyboardReadable {
-    public var keyboardWillChangePublisher: AnyPublisher<Bool, Never> {
+    @MainActor public var keyboardWillChangePublisher: AnyPublisher<Bool, Never> {
         Publishers.Merge(
             NotificationCenter.default
                 .publisher(for: UIResponder.keyboardWillShowNotification)
@@ -28,7 +27,7 @@ extension KeyboardReadable {
         .eraseToAnyPublisher()
     }
     
-    public var keyboardDidChangePublisher: AnyPublisher<Bool, Never> {
+    @MainActor public var keyboardDidChangePublisher: AnyPublisher<Bool, Never> {
         Publishers.Merge(
             NotificationCenter.default
                 .publisher(for: UIResponder.keyboardDidShowNotification)
@@ -39,23 +38,6 @@ extension KeyboardReadable {
                 .map { _ in false }
         )
         .eraseToAnyPublisher()
-    }
-    
-    public var keyboardHeight: AnyPublisher<CGFloat, Never> {
-        NotificationCenter
-            .default
-            .publisher(for: UIResponder.keyboardDidShowNotification)
-            .map { notification in
-                if let keyboardFrame: NSValue = notification
-                    .userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-                    let keyboardRectangle = keyboardFrame.cgRectValue
-                    let keyboardHeight = keyboardRectangle.height
-                    return keyboardHeight
-                } else {
-                    return 0
-                }
-            }
-            .eraseToAnyPublisher()
     }
 }
 
@@ -81,7 +63,7 @@ public struct HideKeyboardOnTapGesture: ViewModifier {
 }
 
 /// Resigns first responder and hides the keyboard.
-public func resignFirstResponder() {
+@MainActor public func resignFirstResponder() {
     UIApplication.shared.sendAction(
         #selector(UIResponder.resignFirstResponder),
         to: nil,

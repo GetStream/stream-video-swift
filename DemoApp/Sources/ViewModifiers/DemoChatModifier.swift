@@ -36,7 +36,7 @@ struct ChatModifier: ViewModifier {
 
 extension View {
 
-    @ViewBuilder
+    @MainActor @ViewBuilder
     func chat(viewModel: CallViewModel, chatViewModel: DemoChatViewModel?) -> some View {
         if let chatViewModel {
             modifier(ChatModifier(viewModel: viewModel, chatViewModel: chatViewModel))

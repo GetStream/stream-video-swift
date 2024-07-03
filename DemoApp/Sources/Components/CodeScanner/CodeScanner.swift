@@ -214,9 +214,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         reset()
 
         if (captureSession.isRunning == false) {
-            DispatchQueue.global(qos: .userInteractive).async {
-                self.captureSession?.startRunning()
-            }
+            self.captureSession?.startRunning()
         }
     }
 
@@ -322,9 +320,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         super.viewDidDisappear(animated)
 
         if (captureSession?.isRunning == true) {
-            DispatchQueue.global(qos: .userInteractive).async {
-                self.captureSession?.stopRunning()
-            }
+            captureSession?.stopRunning()
         }
 
         NotificationCenter.default.removeObserver(self)

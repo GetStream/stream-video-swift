@@ -2,7 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import AVFoundation
+@preconcurrency import AVFoundation
 import CoreImage
 import os.log
 import UIKit
@@ -264,7 +264,7 @@ class Camera: NSObject, @unchecked Sendable {
         }
     }
 
-    private var deviceOrientation: UIDeviceOrientation {
+    @MainActor private var deviceOrientation: UIDeviceOrientation {
         UIScreen.main.orientation
     }
     
@@ -289,14 +289,16 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
     ) {
         guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
         
-        if
-            connection.isVideoOrientationSupported,
-            let videoOrientation = videoOrientationFor(deviceOrientation),
-            connection.videoOrientation != videoOrientation {
-            connection.videoOrientation = videoOrientation
-        }
+        Task { @MainActor in
+            if
+                connection.isVideoOrientationSupported,
+                let videoOrientation = videoOrientationFor(deviceOrientation),
+                connection.videoOrientation != videoOrientation {
+                connection.videoOrientation = videoOrientation
+            }
 
-        addToPreviewStream?(CIImage(cvPixelBuffer: pixelBuffer))
+            addToPreviewStream?(CIImage(cvPixelBuffer: pixelBuffer))
+        }
     }
 }
 
@@ -320,3 +322,6 @@ private extension UIScreen {
 
 @available(iOS 14.0, *)
 private let logger = Logger(subsystem: "com.apple.swiftplaygroundscontent.capturingphotos", category: "Camera")
+
+@available(iOS 14.0, *)
+extension Logger: @unchecked Sendable {}

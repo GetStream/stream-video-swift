@@ -7,8 +7,8 @@ import Foundation
 import StreamWebRTC
 import SwiftProtobuf
 
-public typealias UserTokenProvider = (@escaping (Result<UserToken, Error>) -> Void) -> Void
-public typealias UserTokenUpdater = (UserToken) -> Void
+public typealias UserTokenProvider = @Sendable(@Sendable @escaping (Result<UserToken, Error>) -> Void) -> Void
+public typealias UserTokenUpdater = @Sendable(UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
@@ -16,7 +16,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
 
-    public class State: ObservableObject {
+    public final class State: ObservableObject, @unchecked Sendable {
         @Published public internal(set) var connection: ConnectionStatus = .initialized
         @Published public internal(set) var user: User
         @Published public internal(set) var activeCall: Call? {
@@ -536,7 +536,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 customData: updatedUser.customData
             )
         }
-        let tokenProvider = { [environment = self.environment] result in
+        let tokenProvider = { @Sendable [environment = self.environment] result in
             Self.loadGuestToken(
                 userId: user.id,
                 apiKey: apiKey,
@@ -611,7 +611,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         userId: String,
         apiKey: String,
         environment: Environment,
-        result: @escaping (Result<UserToken, Error>) -> Void
+        result: @Sendable @escaping (Result<UserToken, Error>) -> Void
     ) {
         Task {
             do {
@@ -701,5 +701,5 @@ extension StreamVideo: WSEventsSubscriber {
 
 /// Returns the current value for the `StreamVideo` instance.
 struct StreamVideoProviderKey: InjectionKey {
-    static var currentValue: StreamVideo?
+    nonisolated(unsafe) static var currentValue: StreamVideo?
 }

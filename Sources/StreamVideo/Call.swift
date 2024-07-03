@@ -15,8 +15,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     private lazy var stateMachine: StreamCallStateMachine = .init(self)
 
-    @MainActor public internal(set) var state = CallState()
-
     /// The call id.
     public let callId: String
     /// The call type.
@@ -34,6 +32,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Provides access to the speaker.
     public let speaker: SpeakerManager
 
+    @MainActor public internal(set) lazy var state = CallState()
+    
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
     private var eventHandlers = [EventHandler]()

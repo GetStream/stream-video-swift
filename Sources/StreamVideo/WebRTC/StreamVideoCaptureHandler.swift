@@ -29,12 +29,14 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateRotation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
+        executeOnMain {
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(self.updateRotation),
+                name: UIDevice.orientationDidChangeNotification,
+                object: nil
+            )
+        }
         updateRotation()
     }
 
@@ -123,11 +125,13 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
+        executeOnMain {
+            NotificationCenter.default.removeObserver(
+                self,
+                name: UIDevice.orientationDidChangeNotification,
+                object: nil
+            )
+        }
     }
 }
 

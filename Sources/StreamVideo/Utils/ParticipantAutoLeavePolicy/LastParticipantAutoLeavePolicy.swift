@@ -7,7 +7,7 @@ import Foundation
 
 /// A policy that triggers an action when during a ringing flow call (incoming or outgoing) there is only one
 /// participant left in a call, after having previously had multiple participants.
-public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy {
+public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @unchecked Sendable {
 
     /// Injected dependency for accessing the stream video service.
     @Injected(\.streamVideo) private var streamVideo

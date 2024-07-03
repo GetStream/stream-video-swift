@@ -87,16 +87,18 @@ private extension DefaultConnectionRecoveryHandler {
 
 // MARK: - Event handlers
 
-extension DefaultConnectionRecoveryHandler {
+extension DefaultConnectionRecoveryHandler: @unchecked Sendable {
     private func appDidBecomeActive() {
         log.debug("App -> ✅", subsystems: .webSocket)
         
         backgroundTaskScheduler?.endTask()
         
-        reconnectIfNeeded()
+        Task { @MainActor in
+            reconnectIfNeeded()
+        }
     }
     
-    private func appDidEnterBackground() {
+    @MainActor private func appDidEnterBackground() {
         log.debug("App -> 💤", subsystems: .webSocket)
         
         guard canBeDisconnected else {
@@ -132,7 +134,9 @@ extension DefaultConnectionRecoveryHandler {
         log.debug("Internet -> \(isAvailable ? "✅" : "❌")", subsystems: .webSocket)
         
         if isAvailable {
-            reconnectIfNeeded()
+            Task { @MainActor in
+                reconnectIfNeeded()
+            }
         } else {
             disconnectIfNeeded()
         }
@@ -148,7 +152,9 @@ extension DefaultConnectionRecoveryHandler {
         case .connected:
             reconnectionStrategy.resetConsecutiveFailures()
         case .disconnected:
-            scheduleReconnectionTimerIfNeeded()
+            Task { @MainActor in
+                scheduleReconnectionTimerIfNeeded()
+            }
         case .initialized, .authenticating, .disconnecting:
             break
         }
@@ -185,13 +191,13 @@ private extension DefaultConnectionRecoveryHandler {
 // MARK: - Reconnection
 
 private extension DefaultConnectionRecoveryHandler {
-    func reconnectIfNeeded() {
+    @MainActor func reconnectIfNeeded() {
         guard canReconnectAutomatically else { return }
                 
         webSocketClient.connect()
     }
     
-    var canReconnectAutomatically: Bool {
+    @MainActor var canReconnectAutomatically: Bool {
         guard webSocketClient.connectionState.isAutomaticReconnectionEnabled else {
             log.debug("Reconnection is not required (\(webSocketClient.connectionState))", subsystems: .webSocket)
             return false
@@ -216,13 +222,13 @@ private extension DefaultConnectionRecoveryHandler {
 // MARK: - Reconnection Timer
 
 private extension DefaultConnectionRecoveryHandler {
-    func scheduleReconnectionTimerIfNeeded() {
+    @MainActor func scheduleReconnectionTimerIfNeeded() {
         guard canReconnectAutomatically else { return }
         
         scheduleReconnectionTimer()
     }
     
-    func scheduleReconnectionTimer() {
+    @MainActor func scheduleReconnectionTimer() {
         let delay = reconnectionStrategy.getDelayAfterTheFailure()
         
         log.debug("Timer ⏳ \(delay) sec", subsystems: .webSocket)

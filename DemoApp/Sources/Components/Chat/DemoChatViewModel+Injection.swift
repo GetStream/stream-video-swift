@@ -6,7 +6,7 @@ import Foundation
 import StreamVideo
 
 struct DemoChatViewModelInjectionKey: InjectionKey {
-    static var currentValue: DemoChatViewModel?
+    nonisolated(unsafe) static var currentValue: DemoChatViewModel?
 }
 
 extension InjectedValues {

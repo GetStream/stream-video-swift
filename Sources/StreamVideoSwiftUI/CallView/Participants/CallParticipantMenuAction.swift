@@ -16,7 +16,7 @@ public struct CallParticipantMenuAction: Identifiable {
     /// The name of the icon associated with the action.
     public var iconName: String
     /// The closure to execute when the action is triggered, passing the participant's ID.
-    public var action: (String) -> Void
+    public var action: @MainActor(String) -> Void
     /// Optional confirmation popup data that may be presented before executing the action.
     public var confirmationPopup: ConfirmationPopup?
     /// A flag indicating whether the action is destructive (e.g., delete).

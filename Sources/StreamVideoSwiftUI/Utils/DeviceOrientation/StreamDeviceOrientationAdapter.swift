@@ -2,7 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Combine
+@preconcurrency import Combine
 import Foundation
 import StreamVideo
 #if canImport(UIKit)
@@ -21,11 +21,11 @@ public enum StreamDeviceOrientation: Equatable {
 }
 
 /// An observable object that adapts to device orientation changes.
-open class StreamDeviceOrientationAdapter: ObservableObject {
-    public typealias Provider = () -> StreamDeviceOrientation
+public class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable {
+    public typealias Provider = @MainActor @Sendable() -> StreamDeviceOrientation
 
     /// The default provider for device orientation based on platform.
-    public static let defaultProvider: Provider = {
+    @MainActor public static let defaultProvider: Provider = {
         #if canImport(UIKit)
         switch UIDevice.current.orientation {
         case .unknown, .portrait, .portraitUpsideDown:
@@ -42,11 +42,11 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
         #endif
     }
 
-    private var provider: Provider
+    @MainActor private lazy var provider: Provider = StreamDeviceOrientationAdapter.defaultProvider
     private var notificationCancellable: AnyCancellable?
 
     /// The current orientation observed by the adapter.
-    @Published public private(set) var orientation: StreamDeviceOrientation
+    @Published public private(set) var orientation: StreamDeviceOrientation?
 
     /// Initializes an adapter for observing device orientation changes.
     /// - Parameters:
@@ -54,32 +54,40 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
     ///   - provider: A custom provider for determining device orientation.
     public init(
         notificationCenter: NotificationCenter = .default,
-        _ provider: @escaping Provider = StreamDeviceOrientationAdapter.defaultProvider
+        _ provider: Provider? = nil
     ) {
-        self.provider = provider
-        orientation = provider()
-
-        #if canImport(UIKit)
-        // Subscribe to orientation change notifications on UIKit platforms.
-        notificationCancellable = notificationCenter
-            .publisher(for: UIDevice.orientationDidChangeNotification)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                self.orientation = provider() // Update orientation based on the provider.
+        Task { @MainActor in
+            if let provider {
+                self.provider = provider
             }
-        #endif
+            orientation = self.provider()
+            
+            #if canImport(UIKit)
+            // Subscribe to orientation change notifications on UIKit platforms.
+            notificationCancellable = notificationCenter
+                .publisher(for: UIDevice.orientationDidChangeNotification)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    guard let self = self else { return }
+                    self.orientation = self.provider() // Update orientation based on the provider.
+                }
+            #endif
+        }
     }
 
     /// Cleans up resources when the adapter is deallocated.
     deinit {
+        cleanup()
+    }
+    
+    private func cleanup() {
         notificationCancellable?.cancel() // Cancel notification subscription.
     }
 }
 
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
 enum StreamDeviceOrientationAdapterKey: InjectionKey {
-    static var currentValue: StreamDeviceOrientationAdapter = .init()
+    nonisolated(unsafe) static var currentValue: StreamDeviceOrientationAdapter = .init()
 }
 
 extension InjectedValues {

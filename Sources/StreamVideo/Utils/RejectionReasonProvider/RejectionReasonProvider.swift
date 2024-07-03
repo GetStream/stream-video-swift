@@ -19,7 +19,7 @@ public protocol RejectionReasonProviding {
     ///
     /// - Note: ``ringTimeout`` being true, has an effect **only** when it's set  from the side of
     /// the caller when the callee doesn't reply the ringing call in the amount of time set on the dashboard.
-    func reason(for callCid: String, ringTimeout: Bool) -> String?
+    @MainActor func reason(for callCid: String, ringTimeout: Bool) -> String?
 }
 
 /// A provider that determines the rejection reason for a call based on its state.

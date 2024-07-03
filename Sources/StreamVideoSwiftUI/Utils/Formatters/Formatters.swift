@@ -13,7 +13,7 @@ public class Formatters {
 
 /// Provides the default value of the `Formatters` class.
 enum FormattersKey: InjectionKey {
-    static var currentValue: Formatters = .init()
+    @MainActor static var currentValue: Formatters = .init()
 }
 
 extension InjectedValues {

@@ -52,7 +52,7 @@ struct DemoChatAdapter {
 extension DemoChatAdapter {
     /// Returns the current value for the `StreamVideo` instance.
     struct InjectionKey: StreamChatSwiftUI.InjectionKey {
-        static var currentValue: DemoChatAdapter?
+        nonisolated(unsafe) static var currentValue: DemoChatAdapter?
     }
 }
 

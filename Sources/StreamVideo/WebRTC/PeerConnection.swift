@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import StreamWebRTC
+@preconcurrency import StreamWebRTC
 import SwiftProtobuf
 
 enum PeerConnectionType: String {
@@ -735,3 +735,5 @@ extension RTCSdpType: CustomStringConvertible {
         }
     }
 }
+
+extension RTCVideoTrack: @unchecked Sendable {}

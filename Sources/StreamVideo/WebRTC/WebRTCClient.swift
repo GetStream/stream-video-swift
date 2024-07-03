@@ -1488,18 +1488,20 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }()
         
         if !isiOSAppOnMac {
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(pauseTracks),
-                name: UIScene.didEnterBackgroundNotification,
-                object: nil
-            )
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(unpauseTracks),
-                name: UIScene.willEnterForegroundNotification,
-                object: nil
-            )
+            Task { @MainActor in
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(pauseTracks),
+                    name: UIScene.didEnterBackgroundNotification,
+                    object: nil
+                )
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(unpauseTracks),
+                    name: UIScene.willEnterForegroundNotification,
+                    object: nil
+                )
+            }
         }
     }
     

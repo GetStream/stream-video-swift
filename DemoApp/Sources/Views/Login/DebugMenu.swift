@@ -345,3 +345,5 @@ struct DebugMenu: View {
         }
     }
 }
+
+extension PerformanceMonitor.DisplayOptions: @unchecked Sendable {}

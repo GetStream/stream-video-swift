@@ -28,10 +28,11 @@ extension PinResponse: @unchecked Sendable {}
 extension UnpinResponse: @unchecked Sendable {}
 extension GoLiveResponse: @unchecked Sendable {}
 extension SendReactionResponse: @unchecked Sendable {}
+extension CallStateResponseFields: @unchecked Sendable {}
 
 public struct FetchingLocationError: Error {}
 
-public enum RecordingState {
+public enum RecordingState: Sendable {
     case noRecording
     case requested
     case recording

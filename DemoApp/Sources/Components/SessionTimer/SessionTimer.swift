@@ -48,8 +48,8 @@ import SwiftUI
         }
     }
 
-    private var timer: Timer?
-    private var sessionEndCountdown: Timer?
+    nonisolated(unsafe) private var timer: Timer?
+    nonisolated(unsafe) private var sessionEndCountdown: Timer?
     
     private let alertInterval: TimeInterval
     
@@ -132,8 +132,12 @@ import SwiftUI
         }
     }
     
-    deinit {
+    nonisolated private func cleanup() {
         timer?.invalidate()
         sessionEndCountdown?.invalidate()
+    }
+    
+    deinit {
+        cleanup()
     }
 }
