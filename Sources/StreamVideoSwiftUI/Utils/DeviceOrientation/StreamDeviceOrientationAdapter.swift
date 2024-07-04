@@ -80,7 +80,7 @@ public class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendab
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
 #if swift(>=6.0)
 enum StreamDeviceOrientationAdapterKey: @preconcurrency InjectionKey {
-    static var currentValue: StreamDeviceOrientationAdapter = .init()
+    @MainActor static var currentValue: StreamDeviceOrientationAdapter = .init()
 }
 #else
 enum StreamDeviceOrientationAdapterKey: InjectionKey {
