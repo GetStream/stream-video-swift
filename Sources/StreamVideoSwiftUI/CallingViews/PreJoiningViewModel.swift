@@ -39,8 +39,12 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     
     @available(iOS 14, *)
     func handleCameraPreviews() async {
-        let imageStream = (camera as? Camera)?.previewStream.dropFirst()
-            .map(\.image)
+        let previewStream = (camera as? Camera)?.previewStream
+        await handleStreamUpdates(previewStream)
+    }
+    
+    nonisolated private func handleStreamUpdates(_ previewStream: AsyncStream<CIImage>?) async {
+        let imageStream = previewStream?.dropFirst().map(\.image)
         
         guard let imageStream = imageStream else { return }
 

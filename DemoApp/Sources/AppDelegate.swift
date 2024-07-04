@@ -95,15 +95,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // MARK: - Private Helpers
 
     private func setUpRemoteNotifications() {
-        UNUserNotificationCenter
-            .current()
-            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+        Task { @MainActor in
+            do {
+                let granted = try await UNUserNotificationCenter.current().requestAuthorization()
                 if granted {
-                    DispatchQueue.main.async {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
+                    UIApplication.shared.registerForRemoteNotifications()
                 }
+            } catch {
+                log.error("Error requesting authorization: \(error.localizedDescription)")
             }
+        }
     }
 
     private func setUpPerformanceTracking() {

@@ -93,7 +93,7 @@ class Camera: NSObject, @unchecked Sendable {
     
     var isPreviewPaused = false
     
-    lazy var previewStream: AsyncStream<CIImage> = {
+    nonisolated lazy var previewStream: AsyncStream<CIImage> = {
         AsyncStream { continuation in
             addToPreviewStream = { [weak self] ciImage in
                 guard let self else { return }

@@ -125,13 +125,11 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     deinit {
-        executeOnMain {
-            NotificationCenter.default.removeObserver(
-                self,
-                name: UIDevice.orientationDidChangeNotification,
-                object: nil
-            )
-        }
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
     }
 }
 
