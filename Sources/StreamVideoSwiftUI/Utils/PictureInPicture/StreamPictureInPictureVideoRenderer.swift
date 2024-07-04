@@ -113,45 +113,49 @@ final class StreamPictureInPictureVideoRenderer: UIView {
     // MARK: - Rendering lifecycle
 
     /// This method is being called from WebRTC and asks the container to set its size to the track's size.
-    func setSize(_ size: CGSize) {
-        trackSize = size
+    nonisolated func setSize(_ size: CGSize) {
+        DispatchQueue.main.async {
+            self.trackSize = size
+        }
     }
 
-    func renderFrame(_ frame: RTCVideoFrame?) {
-        guard let frame = frame else {
-            return
-        }
-
-        // Update the trackSize and re-calculate rendering properties if the size
-        // has changed.
-        trackSize = .init(width: Int(frame.width), height: Int(frame.height))
-
-        log.debug("→ Received frame with trackSize:\(trackSize)")
-
-        defer {
-            handleFrameSkippingIfRequired()
-        }
-
-        guard shouldRenderFrame else {
-            log.debug("→ Skipping frame.")
-            return
-        }
-
-        let pixelBuffer: RTCVideoFrameBuffer? = {
-            if let i420buffer = frame.buffer as? RTCI420Buffer {
-                return i420buffer
-            } else {
-                return frame.buffer
+    nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
+        DispatchQueue.main.async {
+            guard let frame else {
+                return
             }
-        }()
 
-        if
-            let pixelBuffer = pixelBuffer,
-            let sampleBuffer = bufferTransformer.transformAndResizeIfRequired(pixelBuffer, targetSize: contentSize) {
-            log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.")
-            bufferPublisher.send(sampleBuffer)
-        } else {
-            log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.")
+            // Update the trackSize and re-calculate rendering properties if the size
+            // has changed.
+            self.trackSize = .init(width: Int(frame.width), height: Int(frame.height))
+
+            log.debug("→ Received frame with trackSize:\(self.trackSize)")
+
+            defer {
+                self.handleFrameSkippingIfRequired()
+            }
+
+            guard self.shouldRenderFrame else {
+                log.debug("→ Skipping frame.")
+                return
+            }
+
+            let pixelBuffer: RTCVideoFrameBuffer? = {
+                if let i420buffer = frame.buffer as? RTCI420Buffer {
+                    return i420buffer
+                } else {
+                    return frame.buffer
+                }
+            }()
+
+            if
+                let pixelBuffer = pixelBuffer,
+                let sampleBuffer = self.bufferTransformer.transformAndResizeIfRequired(pixelBuffer, targetSize: self.contentSize) {
+                log.debug("➕ Buffer for trackId:\(self.track?.trackId ?? "n/a") added.")
+                self.bufferPublisher.send(sampleBuffer)
+            } else {
+                log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.")
+            }
         }
     }
 
@@ -265,8 +269,5 @@ final class StreamPictureInPictureVideoRenderer: UIView {
     }
 }
 
-#if swift(>=6.0)
-extension StreamPictureInPictureVideoRenderer: @preconcurrency RTCVideoRenderer {}
-#else
 extension StreamPictureInPictureVideoRenderer: RTCVideoRenderer {}
-#endif
+extension RTCVideoFrame: @unchecked Sendable {}
