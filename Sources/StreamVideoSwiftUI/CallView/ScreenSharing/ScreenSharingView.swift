@@ -54,7 +54,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     public var body: some View {
         VStack(spacing: innerItemSpace) {
-            if !viewModel.hideUIElements, orientationAdapter.orientation?.isPortrait == true || UIDevice.current.isIpad {
+            if !viewModel.hideUIElements, orientationAdapter.orientation.isPortrait || UIDevice.current.isIpad {
                 Text("\(screenSharing.participant.name) presenting")
                     .foregroundColor(colors.text)
                     .padding()

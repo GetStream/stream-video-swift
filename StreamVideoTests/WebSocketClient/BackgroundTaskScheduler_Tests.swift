@@ -6,8 +6,8 @@
 import XCTest
 
 #if os(iOS)
-final class IOSBackgroundTaskScheduler_Tests: XCTestCase {
-    func test_notifications_foreground() {
+final class IOSBackgroundTaskScheduler_Tests: StreamVideoTestCase {
+    func test_notifications_foreground() async throws {
         // Given
         let scheduler = IOSBackgroundTaskScheduler()
         var calledBackground = false
@@ -18,14 +18,15 @@ final class IOSBackgroundTaskScheduler_Tests: XCTestCase {
         )
 
         // When
-        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        await NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        try await waitForCallEvent()
 
         // Then
         XCTAssertTrue(calledForeground)
         XCTAssertFalse(calledBackground)
     }
 
-    func test_notifications_background() {
+    func test_notifications_background() async throws {
         // Given
         let scheduler = IOSBackgroundTaskScheduler()
         var calledBackground = false
@@ -36,8 +37,9 @@ final class IOSBackgroundTaskScheduler_Tests: XCTestCase {
         )
 
         // When
-        NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
-
+        await NotificationCenter.default.post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        try await waitForCallEvent()
+        
         // Then
         XCTAssertFalse(calledForeground)
         XCTAssertTrue(calledBackground)

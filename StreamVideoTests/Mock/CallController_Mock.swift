@@ -46,8 +46,9 @@ class CallController_Mock: CallController {
         notify: Bool = false
     ) async throws -> JoinCallResponse {
         webRTCClient.onParticipantsUpdated = { [weak self] participants in
+            guard let self else { return }
             executeOnMain {
-                self?.call?.state.participantsMap = participants
+                self.call?.state.participantsMap = participants
             }
         }
         return mockResponseBuilder.makeJoinCallResponse(cid: "\(callType):\(callId)")

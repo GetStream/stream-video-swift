@@ -27,6 +27,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         cachedLocation: nil
     )
 
+    @MainActor
     override func setUp() {
         super.setUp()
         let streamVideo = StreamVideo.mock(httpClient: httpClient, callController: callController)
@@ -34,6 +35,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         InjectedValues[\.orientationAdapter] = orientationAdapter
     }
 
+    @MainActor
     override func tearDown() {
         mockedOrientation = nil
         orientationAdapter = nil

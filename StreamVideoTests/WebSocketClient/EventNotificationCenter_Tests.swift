@@ -97,7 +97,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let events = [TestEvent(), TestEvent(), TestEvent(), TestEvent()]
 
         // Feed events that should be posted and catch the completion
-        var completionCalled = false
+        nonisolated(unsafe) var completionCalled = false
         center.process(events.map { .internalEvent($0) }, postNotifications: true) {
             completionCalled = true
         }
@@ -120,7 +120,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let events = [TestEvent(), TestEvent(), TestEvent(), TestEvent()]
 
         // Feed events that should not be posted and catch the completion
-        var completionCalled = false
+        nonisolated(unsafe) var completionCalled = false
         center.process(events.map { .internalEvent($0) }, postNotifications: false) {
             completionCalled = true
         }
