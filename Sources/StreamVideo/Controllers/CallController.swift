@@ -466,7 +466,7 @@ class CallController: @unchecked Sendable {
     private func handleParticipantsUpdated() {
         webRTCClient?.onParticipantsUpdated = { [weak self] participants in
             guard let self else { return }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.call?.state.participantsMap = participants
             }
         }
@@ -475,7 +475,7 @@ class CallController: @unchecked Sendable {
     private func handleParticipantCountUpdated() {
         webRTCClient?.onParticipantCountUpdated = { [weak self] participantCount in
             guard let self else { return }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.call?.state.participantCount = participantCount
             }
         }

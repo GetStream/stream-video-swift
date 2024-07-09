@@ -42,7 +42,7 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler, @unchecked Sendable {
         var isActive = false
         let group = DispatchGroup()
         group.enter()
-        DispatchQueue.main.async {
+        Task { @MainActor in
             isActive = app?.applicationState == .active
             group.leave()
         }

@@ -83,7 +83,7 @@ final class SimulatorScreenCapturer: RTCVideoCapturer, @unchecked Sendable {
                 timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9)
             )
 
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.delegate?.capturer(self, didCapture: rtcVideoFrame)
             }

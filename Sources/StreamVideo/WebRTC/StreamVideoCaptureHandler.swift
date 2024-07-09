@@ -74,7 +74,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     @objc private func updateRotation() {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }

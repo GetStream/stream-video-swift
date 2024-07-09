@@ -63,7 +63,7 @@ public struct PublishedObject<Value: Sendable>: @unchecked Sendable {
             let parent = futureSelf.parent
             futureSelf.cancellable = wrappedValue.objectWillChange.sink { [parent] in
                 parent.objectWillChange?()
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     publisher.send(wrappedValue)
                 }
             }
@@ -81,7 +81,7 @@ public struct PublishedObject<Value: Sendable>: @unchecked Sendable {
             let parent = futureSelf.parent
             futureSelf.cancellable = wrappedValue?.objectWillChange.sink { [parent] in
                 parent.objectWillChange?()
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     publisher.send(wrappedValue)
                 }
             }

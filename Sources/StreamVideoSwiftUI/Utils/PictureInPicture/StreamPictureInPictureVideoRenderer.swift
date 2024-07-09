@@ -114,13 +114,13 @@ final class StreamPictureInPictureVideoRenderer: UIView {
 
     /// This method is being called from WebRTC and asks the container to set its size to the track's size.
     nonisolated func setSize(_ size: CGSize) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.trackSize = size
         }
     }
 
     nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             guard let frame else {
                 return
             }

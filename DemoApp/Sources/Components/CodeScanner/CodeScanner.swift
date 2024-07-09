@@ -226,7 +226,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         case .notDetermined:
             requestCameraAccess {
                 self.setupCaptureDevice()
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     self.setupSession()
                 }
             }

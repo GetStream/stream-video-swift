@@ -52,7 +52,7 @@ final class CallsViewModel: ObservableObject {
 
     func subscribeToCallsUpdates() {
         callsController.$calls.sink { calls in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.calls = calls
             }
         }
