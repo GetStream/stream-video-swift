@@ -5,10 +5,10 @@
 import Combine
 import Foundation
 import StreamVideo
-import StreamWebRTC
+@preconcurrency import StreamWebRTC
 
 /// A view that can be used to render an instance of `RTCVideoTrack`
-final class StreamPictureInPictureVideoRenderer: UIView {
+final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// The rendering track.
     var track: RTCVideoTrack? {
@@ -120,8 +120,8 @@ final class StreamPictureInPictureVideoRenderer: UIView {
     }
 
     nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
-        Task { @MainActor in
-            guard let frame else {
+        Task { @MainActor [weak self] in
+            guard let self, let frame else {
                 return
             }
 
@@ -268,6 +268,3 @@ final class StreamPictureInPictureVideoRenderer: UIView {
         startFrameStreaming(for: track, on: window)
     }
 }
-
-extension StreamPictureInPictureVideoRenderer: RTCVideoRenderer {}
-extension RTCVideoFrame: @unchecked Sendable {}
