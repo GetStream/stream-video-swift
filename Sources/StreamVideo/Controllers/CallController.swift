@@ -403,7 +403,7 @@ class CallController: @unchecked Sendable {
         migratingFrom: String?
     ) async throws {
         if let migratingFrom {
-            executeOnMain { [weak self] in
+            Task { @MainActor [weak self] in
                 self?.call?.state.reconnectionStatus = .migrating
             }
             webRTCClient?.prepareForMigration(
@@ -448,7 +448,7 @@ class CallController: @unchecked Sendable {
             migrating: migratingFrom != nil
         )
         let sessionId = webRTCClient?.sessionID ?? ""
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             self?.call?.state.sessionId = sessionId
             self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
             self?.call?.state.ownCapabilities = response.ownCapabilities
@@ -485,7 +485,7 @@ class CallController: @unchecked Sendable {
         switch state {
         case let .disconnected(source):
             log.debug("Signal channel disconnected")
-            executeOnMain { [weak self] in
+            Task { @MainActor [weak self] in
                 self?.handleSignalChannelDisconnect(source: source)
             }
         case .connected(healthCheckInfo: _):
@@ -493,7 +493,7 @@ class CallController: @unchecked Sendable {
             if reconnectionDate != nil {
                 reconnectionDate = nil
             }
-            executeOnMain { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 let status = self.call?.state.reconnectionStatus
                 if status != .migrating {

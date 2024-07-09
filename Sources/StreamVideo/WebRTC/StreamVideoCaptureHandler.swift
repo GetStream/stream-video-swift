@@ -29,7 +29,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
-        executeOnMain {
+        Task { @MainActor in
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(self.updateRotation),

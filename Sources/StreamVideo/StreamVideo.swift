@@ -690,7 +690,7 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            executeOnMain { [weak self, call] in
+            Task { @MainActor [weak self, call] in
                 guard let self else { return }
                 call.state.update(from: ringEvent)
                 self.state.ringingCall = call

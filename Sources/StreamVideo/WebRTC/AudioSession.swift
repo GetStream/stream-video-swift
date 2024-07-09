@@ -3,11 +3,11 @@
 //
 
 import Foundation
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 
 actor AudioSession {
     
-    private var rtcAudioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
+    private let rtcAudioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
 
     func configure(
         _ configuration: RTCAudioSessionConfiguration = .default,

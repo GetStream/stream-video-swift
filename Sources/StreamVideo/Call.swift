@@ -84,7 +84,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             coordinatorClient: coordinatorClient,
             callController: callController
         )
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             self?.state.update(from: response)
         }
     }
@@ -607,7 +607,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             granted: [request.permission],
             revoked: []
         )
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self.state.removePermissionRequest(request: request)
         }
@@ -1105,7 +1105,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             if reconnectionStatus != self.state.reconnectionStatus {
                 self.state.reconnectionStatus = reconnectionStatus
@@ -1114,7 +1114,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     internal func update(recordingState: RecordingState) {
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             self?.state.recordingState = recordingState
         }
     }
@@ -1126,7 +1126,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard videoEvent.forCall(cid: cId) else {
             return
         }
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self.state.updateState(from: videoEvent)
         }
@@ -1179,7 +1179,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToOwnCapabilitiesChanges() {
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self
                 .state
@@ -1193,7 +1193,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func subscribeToLocalCallSettingsChanges() {
         speaker.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task { @MainActor in
                 let newState = self.state.callSettings.withUpdatedSpeakerState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1202,7 +1202,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task { @MainActor in
                 let newState = self.state.callSettings.withUpdatedAudioOutputState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1211,7 +1211,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         camera.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task { @MainActor in
                 let newState = self.state.callSettings.withUpdatedVideoState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1220,7 +1220,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         camera.$direction.dropFirst().sink { [weak self] position in
             guard let self else { return }
-            executeOnMain {
+            Task { @MainActor in
                 let newState = self.state.callSettings.withUpdatedCameraPosition(position)
                 self.state.update(callSettings: newState)
             }
@@ -1229,7 +1229,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         microphone.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task { @MainActor in
                 let newState = self.state.callSettings.withUpdatedAudioState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1238,7 +1238,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self
                 .state
@@ -1251,7 +1251,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToTranscriptionSettingsChanges() {
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self
                 .state

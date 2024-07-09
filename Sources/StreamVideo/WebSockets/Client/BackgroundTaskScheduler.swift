@@ -60,9 +60,9 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler, @unchecked Sendable {
 
     func endTask() {
         if let activeTask = activeBackgroundTask {
-            executeOnMain {
-                self.app?.endBackgroundTask(activeTask)
-                self.activeBackgroundTask = nil
+            Task { @MainActor [weak self] in
+                self?.app?.endBackgroundTask(activeTask)
+                self?.activeBackgroundTask = nil
             }
         }
     }
@@ -77,7 +77,7 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler, @unchecked Sendable {
         self.onEnteringForeground = onEnteringForeground
         self.onEnteringBackground = onEnteringBackground
 
-        executeOnMain {
+        Task { @MainActor in
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(self.handleAppDidEnterBackground),
@@ -98,7 +98,7 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler, @unchecked Sendable {
         onEnteringForeground = {}
         onEnteringBackground = {}
         
-        executeOnMain {
+        Task { @MainActor in
             NotificationCenter.default.removeObserver(
                 self,
                 name: UIApplication.didEnterBackgroundNotification,
