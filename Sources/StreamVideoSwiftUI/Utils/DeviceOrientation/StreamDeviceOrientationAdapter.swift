@@ -84,7 +84,7 @@ enum StreamDeviceOrientationAdapterKey: @preconcurrency InjectionKey {
 }
 #else
 enum StreamDeviceOrientationAdapterKey: InjectionKey {
-    nonisolated(unsafe) static var currentValue: StreamDeviceOrientationAdapter = .init()
+    static var currentValue: StreamDeviceOrientationAdapter = .init()
 }
 #endif
 

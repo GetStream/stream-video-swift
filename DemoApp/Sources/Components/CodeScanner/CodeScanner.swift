@@ -2,7 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import AVFoundation
+@preconcurrency import AVFoundation
 import SwiftUI
 import UIKit
 
@@ -412,7 +412,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         lastTime = Date()
     }
 
-    func metadataOutput(
+    nonisolated func metadataOutput(
         _ output: AVCaptureMetadataOutput,
         didOutput metadataObjects: [AVMetadataObject],
         from connection: AVCaptureConnection
@@ -421,45 +421,47 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
 
-            guard didFinishScanning == false else { return }
+            Task { @MainActor in
+                guard didFinishScanning == false else { return }
 
-            let photoSettings = AVCapturePhotoSettings()
-            guard !isCapturing else { return }
-            isCapturing = true
+                let photoSettings = AVCapturePhotoSettings()
+                guard !isCapturing else { return }
+                isCapturing = true
 
-            handler = { [self] image in
-                let result = ScanResult(
-                    string: stringValue,
-                    type: readableObject.type,
-                    image: image,
-                    corners: readableObject.corners
-                )
+                handler = { [self] image in
+                    let result = ScanResult(
+                        string: stringValue,
+                        type: readableObject.type,
+                        image: image,
+                        corners: readableObject.corners
+                    )
 
-                switch parentView.scanMode {
-                case .once:
-                    found(result)
-                    // make sure we only trigger scan once per use
-                    didFinishScanning = true
-
-                case .manual:
-                    if !didFinishScanning, isWithinManualCaptureInterval() {
+                    switch parentView.scanMode {
+                    case .once:
                         found(result)
+                        // make sure we only trigger scan once per use
                         didFinishScanning = true
-                    }
 
-                case .oncePerCode:
-                    if !codesFound.contains(stringValue) {
-                        codesFound.insert(stringValue)
-                        found(result)
-                    }
+                    case .manual:
+                        if !didFinishScanning, isWithinManualCaptureInterval() {
+                            found(result)
+                            didFinishScanning = true
+                        }
 
-                case .continuous:
-                    if isPastScanInterval() {
-                        found(result)
+                    case .oncePerCode:
+                        if !codesFound.contains(stringValue) {
+                            codesFound.insert(stringValue)
+                            found(result)
+                        }
+
+                    case .continuous:
+                        if isPastScanInterval() {
+                            found(result)
+                        }
                     }
                 }
+                photoOutput.capturePhoto(with: photoSettings, delegate: self)
             }
-            photoOutput.capturePhoto(with: photoSettings, delegate: self)
         }
     }
 
@@ -495,31 +497,33 @@ extension ScannerViewController: AVCapturePhotoCaptureDelegate, AVCaptureMetadat
 
 extension ScannerViewController {
 
-    func photoOutput(
+    nonisolated func photoOutput(
         _ output: AVCapturePhotoOutput,
         didFinishProcessingPhoto photo: AVCapturePhoto,
         error: Error?
     ) {
-        isCapturing = false
-        guard let imageData = photo.fileDataRepresentation() else {
-            print("Error while generating image from photo capture data.")
-            return
+        Task { @MainActor in
+            isCapturing = false
+            guard let imageData = photo.fileDataRepresentation() else {
+                print("Error while generating image from photo capture data.")
+                return
+            }
+            guard let qrImage = UIImage(data: imageData) else {
+                print("Unable to generate UIImage from image data.")
+                return
+            }
+            handler?(qrImage)
         }
-        guard let qrImage = UIImage(data: imageData) else {
-            print("Unable to generate UIImage from image data.")
-            return
-        }
-        handler?(qrImage)
     }
 
-    func photoOutput(
+    nonisolated func photoOutput(
         _ output: AVCapturePhotoOutput,
         willCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings
     ) {
         AudioServicesDisposeSystemSoundID(1108)
     }
 
-    func photoOutput(
+    nonisolated func photoOutput(
         _ output: AVCapturePhotoOutput,
         didCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings
     ) {
