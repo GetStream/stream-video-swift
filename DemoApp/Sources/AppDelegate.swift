@@ -7,7 +7,7 @@ import StreamVideo
 import SwiftUI
 import UIKit
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, @unchecked Sendable {
 
     @Injected(\.streamVideo) var streamVideo
 
@@ -58,7 +58,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         AppState.shared.pushToken = deviceToken
     }
 
-    func userNotificationCenter(
+    nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
@@ -73,9 +73,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         if components.count >= 2 {
             let callType = components[0]
             let callId = components[1]
-            let call = streamVideo.call(callType: callType, callId: callId)
-            AppState.shared.activeCall = call
-            Task {
+            Task { @MainActor in
+                let streamVideo = self.streamVideo
+                let call = streamVideo.call(callType: callType, callId: callId)
+                AppState.shared.activeCall = call
                 do {
                     try Task.checkCancellation()
                     try await streamVideo.connect()
@@ -94,17 +95,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     // MARK: - Private Helpers
 
-    private func setUpRemoteNotifications() {
-        Task { @MainActor in
-            do {
-                let granted = try await UNUserNotificationCenter.current().requestAuthorization()
+    nonisolated private func setUpRemoteNotifications() {
+        UNUserNotificationCenter
+            .current()
+            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
                 if granted {
-                    UIApplication.shared.registerForRemoteNotifications()
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
                 }
-            } catch {
-                log.error("Error requesting authorization: \(error.localizedDescription)")
             }
-        }
     }
 
     private func setUpPerformanceTracking() {
@@ -119,9 +119,3 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
 }
-
-#if swift(>=6.0)
-extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {}
-#else
-extension AppDelegate: UNUserNotificationCenterDelegate {}
-#endif

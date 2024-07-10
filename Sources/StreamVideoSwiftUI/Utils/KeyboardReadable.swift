@@ -14,7 +14,7 @@ public protocol KeyboardReadable {
 
 /// Default implementation.
 extension KeyboardReadable {
-    public var keyboardWillChangePublisher: AnyPublisher<Bool, Never> {
+    @MainActor public var keyboardWillChangePublisher: AnyPublisher<Bool, Never> {
         Publishers.Merge(
             NotificationCenter.default
                 .publisher(for: UIResponder.keyboardWillShowNotification)
@@ -27,7 +27,7 @@ extension KeyboardReadable {
         .eraseToAnyPublisher()
     }
     
-    public var keyboardDidChangePublisher: AnyPublisher<Bool, Never> {
+    @MainActor public var keyboardDidChangePublisher: AnyPublisher<Bool, Never> {
         Publishers.Merge(
             NotificationCenter.default
                 .publisher(for: UIResponder.keyboardDidShowNotification)

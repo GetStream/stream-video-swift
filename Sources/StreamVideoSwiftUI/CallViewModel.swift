@@ -552,7 +552,10 @@ open class CallViewModel: ObservableObject {
         callingState = .idle
         isMinimized = false
         localVideoPrimary = false
-        Task { await audioRecorder.stopRecording() }
+        let audioRecorder = self.audioRecorder
+        Task {
+            await audioRecorder.stopRecording()
+        }
     }
 
     private func enterCall(
@@ -597,7 +600,10 @@ open class CallViewModel: ObservableObject {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 callingState = .idle
-                Task { await audioRecorder.stopRecording() }
+                let audioRecorder = self.audioRecorder
+                Task {
+                    await audioRecorder.stopRecording()
+                }
                 enteringCallTask = nil
             }
         }
@@ -628,7 +634,7 @@ open class CallViewModel: ObservableObject {
                 Task { @MainActor [weak self] in
                     guard let self = self else { return }
                     log.debug("Detected ringing timeout, hanging up...")
-                    handleCallHangUp(ringTimeout: true)
+                    self.handleCallHangUp(ringTimeout: true)
                 }
             }
         )

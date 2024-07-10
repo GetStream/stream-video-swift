@@ -89,7 +89,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ///   - localizedCallerName: The localized caller name.
     ///   - callerId: The caller's identifier.
     ///   - completion: A closure to be called upon completion.
-    @MainActor
     open func reportIncomingCall(
         _ cid: String,
         localizedCallerName: String,

@@ -288,9 +288,9 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
         didOutput sampleBuffer: CMSampleBuffer,
         from connection: AVCaptureConnection
     ) {
-        guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
-        
         Task { @MainActor in
+            guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
+            
             if
                 connection.isVideoOrientationSupported,
                 let videoOrientation = videoOrientationFor(deviceOrientation),

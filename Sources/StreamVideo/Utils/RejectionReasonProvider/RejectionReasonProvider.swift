@@ -6,7 +6,7 @@ import Combine
 import Foundation
 
 /// A protocol that provides a method to determine the rejection reason for a call.
-public protocol RejectionReasonProviding {
+public protocol RejectionReasonProviding: Sendable {
 
     /// Determines the rejection reason for a call with the specified call ID.
     ///
@@ -23,7 +23,7 @@ public protocol RejectionReasonProviding {
 }
 
 /// A provider that determines the rejection reason for a call based on its state.
-final class StreamRejectionReasonProvider: RejectionReasonProviding {
+final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked Sendable {
 
     /// The stream video associated with this provider.
     private weak var streamVideo: StreamVideo?

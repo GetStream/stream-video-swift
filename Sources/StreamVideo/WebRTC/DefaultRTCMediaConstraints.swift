@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 
 extension RTCMediaConstraints: @unchecked Sendable {
     

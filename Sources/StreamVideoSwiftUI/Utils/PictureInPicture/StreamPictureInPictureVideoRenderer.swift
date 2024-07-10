@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 import StreamVideo
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 
 /// A view that can be used to render an instance of `RTCVideoTrack`
 final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
@@ -120,11 +120,12 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     }
 
     nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
+        nonisolated(unsafe) var unsafeFrame = frame
         Task { @MainActor [weak self] in
-            guard let self, let frame else {
+            guard let self, let frame = unsafeFrame else {
                 return
             }
-
+            
             // Update the trackSize and re-calculate rendering properties if the size
             // has changed.
             self.trackSize = .init(width: Int(frame.width), height: Int(frame.height))

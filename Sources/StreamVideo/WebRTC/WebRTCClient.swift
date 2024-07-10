@@ -34,10 +34,11 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         @Published var callParticipants = [String: CallParticipant]() {
             didSet {
+                let delay = participantUpdatesDelay
                 if !scheduledUpdate {
                     scheduledUpdate = true
                     Task {
-                        try? await Task.sleep(nanoseconds: participantUpdatesDelay)
+                        try? await Task.sleep(nanoseconds: delay)
                         lastUpdate = Date().timeIntervalSince1970
                         continuation?.yield([true])
                         scheduledUpdate = false

@@ -41,6 +41,7 @@ final class CallsViewModel: ObservableObject {
     }
 
     func loadCalls() {
+        let callsController = self.callsController
         Task {
             do {
                 try await callsController.loadNextCalls()

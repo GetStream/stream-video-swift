@@ -59,6 +59,7 @@ struct LobbyView_iOS13: View {
             onCloseLobby: onCloseLobby
         )
         .onReceive(callViewModel.$callSettings) { newValue in
+            let microphoneChecker = self.microphoneChecker
             Task {
                 newValue.audioOn
                     ? await microphoneChecker.startListening(ignoreActiveCall: true)
