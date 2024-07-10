@@ -15,6 +15,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var sceneOrientation: UIInterfaceOrientation = .unknown
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
+    private var notification: NSNotification.Name?
 
     private lazy var serialActor = SerialActor()
 
@@ -30,6 +31,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
         Task { @MainActor in
+            notification = UIDevice.orientationDidChangeNotification
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(self.updateRotation),
@@ -125,11 +127,13 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
+        if let notification {
+            NotificationCenter.default.removeObserver(
+                self,
+                name: notification,
+                object: nil
+            )
+        }
     }
 }
 

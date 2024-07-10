@@ -121,3 +121,5 @@ extension StreamStatisticsReportProtocol {
         }
     }
 }
+
+extension StreamRTCStatistics.CodingKeys: @unchecked Sendable {}

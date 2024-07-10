@@ -29,6 +29,7 @@ extension UnpinResponse: @unchecked Sendable {}
 extension GoLiveResponse: @unchecked Sendable {}
 extension SendReactionResponse: @unchecked Sendable {}
 extension CallStateResponseFields: @unchecked Sendable {}
+extension KeyPath: @unchecked Sendable {}
 
 public struct FetchingLocationError: Error {}
 
