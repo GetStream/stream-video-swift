@@ -6,7 +6,6 @@
 import SwiftProtobuf
 import XCTest
 
-@MainActor
 final class CallController_Tests: ControllerTestCase {
 
     private var webRTCClient: WebRTCClient!
@@ -24,7 +23,7 @@ final class CallController_Tests: ControllerTestCase {
         )
     }
 
-    func test_callController_joinCall_webRTCClientSignalChannelUsesTheExpectedConnectURL() async throws {
+    @MainActor func test_callController_joinCall_webRTCClientSignalChannelUsesTheExpectedConnectURL() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController()
@@ -41,7 +40,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssertEqual(webRTCClient.signalChannel?.connectURL.absoluteString, "wss://test.com/ws")
     }
 
-    func test_callController_reconnectionSuccess() async throws {
+    @MainActor func test_callController_reconnectionSuccess() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController(shouldReconnect: true)
@@ -87,7 +86,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call?.state.reconnectionStatus == .connected)
     }
     
-    func test_callController_migrationSuccess() async throws {
+    @MainActor func test_callController_migrationSuccess() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController(shouldReconnect: true)
@@ -132,7 +131,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call?.state.reconnectionStatus == .connected)
     }
     
-    func test_callController_reconnectionFailure() async throws {
+    @MainActor func test_callController_reconnectionFailure() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController()
@@ -167,7 +166,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call == nil)
     }
     
-    func test_callController_updateCallInfo() async throws {
+    @MainActor func test_callController_updateCallInfo() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController()
@@ -189,8 +188,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call?.state.backstage == true)
     }
     
-    @MainActor
-    func test_callController_updateRecordingState() async throws {
+    @MainActor func test_callController_updateRecordingState() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController(recording: true)
@@ -211,8 +209,7 @@ final class CallController_Tests: ControllerTestCase {
         try await XCTAssertWithDelay(callController.call?.state.recordingState == .recording)
     }
     
-    @MainActor
-    func test_callController_updateRecordingStateDifferentCallCid() async throws {
+    @MainActor func test_callController_updateRecordingStateDifferentCallCid() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController()
@@ -233,7 +230,7 @@ final class CallController_Tests: ControllerTestCase {
         try await XCTAssertWithDelay(callController.call?.state.recordingState == .noRecording)
     }
     
-    func test_callController_cleanup() async throws {
+    @MainActor func test_callController_cleanup() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         let callController = makeCallController()
@@ -253,7 +250,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call == nil)
     }
     
-    func test_callController_changeAudioState() async throws {
+    @MainActor func test_callController_changeAudioState() async throws {
         // Given
         webRTCClient = try makeWebRTCClientWithMuteStatesResponse()
         let callController = makeCallController()
@@ -273,7 +270,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(webRTCClient.callSettings.audioOn == false)
     }
     
-    func test_callController_changeVideoState() async throws {
+    @MainActor func test_callController_changeVideoState() async throws {
         // Given
         webRTCClient = try makeWebRTCClientWithMuteStatesResponse()
         let callController = makeCallController()
@@ -293,7 +290,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(webRTCClient.callSettings.videoOn == false)
     }
     
-    func test_callController_changeTrackVisibility() async throws {
+    @MainActor func test_callController_changeTrackVisibility() async throws {
         // Given
         let sessionId = "test"
         webRTCClient = makeWebRTCClient()
@@ -317,7 +314,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(updated?.showTrack == true)
     }
     
-    func test_callController_updateTrackSize() async throws {
+    @MainActor func test_callController_updateTrackSize() async throws {
         // Given
         let sessionId = "test"
         let size = CGSize(width: 100, height: 100)
@@ -342,7 +339,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(updated?.trackSize == size)
     }
     
-    func test_callController_pinAndUnpin() async throws {
+    @MainActor func test_callController_pinAndUnpin() async throws {
         // Given
         let sessionId = "test"
         webRTCClient = makeWebRTCClient()

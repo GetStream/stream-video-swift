@@ -495,7 +495,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             }
         }
 
-        guard case let .reportCall(uuid, dateEnded, reason) = callProvider.invocations.last else {
+        guard case let .reportCall(_, _, reason) = callProvider.invocations.last else {
             XCTFail(file: file, line: line)
             return
         }
@@ -629,7 +629,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.streamVideo = mockedStreamVideo
     }
 
-    private func waitExpectation(
+    @MainActor private func waitExpectation(
         timeout: TimeInterval = defaultTimeout,
         description: String = "Wait expectation"
     ) async {

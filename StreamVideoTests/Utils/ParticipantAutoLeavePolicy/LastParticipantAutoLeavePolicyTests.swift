@@ -4,7 +4,7 @@
 
 import Combine
 @testable import StreamVideo
-@preconcurrency import XCTest
+import XCTest
 
 final class LastParticipantAutoLeavePolicyTests: XCTestCase, @unchecked Sendable {
 
@@ -90,7 +90,7 @@ final class LastParticipantAutoLeavePolicyTests: XCTestCase, @unchecked Sendable
 
     // MARK: - Private helpers
 
-    private func assertPolicyWasTriggered(
+    @MainActor private func assertPolicyWasTriggered(
         _ expectsTrigger: Bool,
         ringingCall: Call?,
         activeCall: Call,

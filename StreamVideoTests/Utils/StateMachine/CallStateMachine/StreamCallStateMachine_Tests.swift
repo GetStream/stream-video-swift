@@ -57,7 +57,6 @@ final class StreamCallStateMachineTests: StreamVideoTestCase {
 //
     func testNextStageShouldBe() async throws {
         // Given
-        let expectation = XCTestExpectation(description: "Next stage retrieved")
         let response = AcceptCallResponse(duration: "123")
 
         // When

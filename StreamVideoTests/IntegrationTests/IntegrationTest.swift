@@ -66,7 +66,7 @@ class IntegrationTest: XCTestCase {
     }
 
     // TODO: extract code between these two assertNext methods
-    func assertNext<Output: Sendable>(
+    @MainActor func assertNext<Output: Sendable>(
         _ s: AsyncStream<Output>,
         timeout seconds: TimeInterval = 1,
         _ assertion: @Sendable @escaping (Output) -> Bool
@@ -86,7 +86,7 @@ class IntegrationTest: XCTestCase {
         await safeFulfillment(of: [expectation], timeout: seconds)
     }
 
-    func assertNext<Output>(
+    @MainActor func assertNext<Output>(
         _ p: some Publisher<Output, Never>,
         timeout seconds: TimeInterval = 1,
         _ assertion: @escaping (Output) -> Bool,

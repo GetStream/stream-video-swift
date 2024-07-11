@@ -3,7 +3,7 @@
 //
 
 @testable import StreamVideo
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 import XCTest
 
 final class WebRTCClient_Tests: StreamVideoTestCase {
@@ -641,7 +641,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         XCTAssert(webRTCClient.publisher?.pendingIceCandidates.count == 1)
     }
     
-    func test_webRTCClient_changePublishQuality() async throws {
+    @MainActor func test_webRTCClient_changePublishQuality() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
         try await test_webRTCClient_connectionFlow()

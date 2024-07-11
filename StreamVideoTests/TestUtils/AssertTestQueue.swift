@@ -16,7 +16,7 @@ func AssertTestQueue(withId id: UUID, file: StaticString = #filePath, line: UInt
 }
 
 extension DispatchQueue {
-    private static let queueIdKey = DispatchSpecificKey<String>()
+    nonisolated(unsafe) private static let queueIdKey = DispatchSpecificKey<String>()
     
     /// Creates a new queue which can be later identified by the id.
     static func testQueue(withId id: UUID) -> DispatchQueue {

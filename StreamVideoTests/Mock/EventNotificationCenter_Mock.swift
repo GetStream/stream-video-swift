@@ -13,7 +13,7 @@ final class EventNotificationCenter_Mock: EventNotificationCenter {
     override func process(
         _ events: [WrappedEvent],
         postNotifications: Bool = true,
-        completion: (() -> Void)? = nil
+        completion: (@Sendable() -> Void)? = nil
     ) {
         super.process(events, postNotifications: postNotifications, completion: completion)
 

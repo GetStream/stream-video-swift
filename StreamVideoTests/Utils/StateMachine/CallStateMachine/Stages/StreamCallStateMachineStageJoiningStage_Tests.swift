@@ -3,7 +3,7 @@
 //
 
 @testable import StreamVideo
-@preconcurrency import XCTest
+import XCTest
 
 final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
@@ -37,7 +37,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
 
     // MARK: - Test Transition
 
-    func testTransition() async {
+    @MainActor func testTransition() async {
         for nextStage in allOtherStages {
             if validOtherStages.contains(nextStage.id) {
                 subject.transition = { self.transitionedToStage = $0 }
@@ -50,7 +50,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         }
     }
 
-    func testTransitionAfterError() async {
+    @MainActor func testTransitionAfterError() async {
         for nextStage in allOtherStages {
             if validOtherStages.contains(nextStage.id) {
                 subject = .joining(call) { throw TestError() }

@@ -57,7 +57,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         XCTAssert(call.callId == callId)
     }
 
-    func test_streamVideo_activeCallAndLeave() async throws {
+    @MainActor func test_streamVideo_activeCallAndLeave() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
         self.streamVideo = streamVideo
@@ -80,7 +80,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         XCTAssert(streamVideo.state.activeCall == nil)
     }
     
-    func test_streamVideo_ringCallAccept() async throws {
+    @MainActor func test_streamVideo_ringCallAccept() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         self.streamVideo = streamVideo
@@ -117,7 +117,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
     }
     
-    func test_streamVideo_ringCallReject() async throws {
+    @MainActor func test_streamVideo_ringCallReject() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let rejectCallResponse = RejectCallResponse(duration: "1")
         let data = try! JSONEncoder.default.encode(rejectCallResponse)
@@ -145,7 +145,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         }
     }
     
-    func test_streamVideo_incomingCallAccept() async throws {
+    @MainActor func test_streamVideo_incomingCallAccept() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
         self.streamVideo = streamVideo
@@ -180,7 +180,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
     }
     
-    func test_streamVideo_incomingCallReject() async throws {
+    @MainActor func test_streamVideo_incomingCallReject() async throws {
         // Given
         let httpClient = HTTPClient_Mock()
         let data = try! JSONEncoder().encode(RejectCallResponse(duration: "1"))

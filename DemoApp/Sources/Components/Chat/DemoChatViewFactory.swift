@@ -8,14 +8,13 @@ import StreamChatSwiftUI
 import class StreamVideoSwiftUI.CallViewModel
 import SwiftUI
 
-@MainActor
 final class DemoChatViewFactory {
 
     @Injected(\.chatClient) var chatClient: ChatClient
 
     private init() {}
 
-    static let shared = DemoChatViewFactory()
+    @MainActor static let shared = DemoChatViewFactory()
 
     func makeReactionsOverlayView(
         channel: ChatChannel,

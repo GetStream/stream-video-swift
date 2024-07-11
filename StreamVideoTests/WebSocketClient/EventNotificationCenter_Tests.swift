@@ -145,7 +145,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let testEvent = TestEvent()
 
         // Setup event observer
-        var observerTriggered = false
+        nonisolated(unsafe) var observerTriggered = false
 
         let observer = center.addObserver(
             forName: .NewEventReceived,
