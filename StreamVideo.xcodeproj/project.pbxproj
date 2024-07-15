@@ -15,6 +15,8 @@
 		40073B7A2C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B792C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift */; };
 		40073B7D2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */; };
 		40073B7F2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */; };
+		40073B882C458250006A2867 /* VideoRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B872C458250006A2867 /* VideoRendererView.swift */; };
+		40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B892C458259006A2867 /* LocalVideoView.swift */; };
 		400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */; };
 		400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */; };
 		400E50552BD2AAD0008C939E /* StreamAudioProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */; };
@@ -1206,6 +1208,8 @@
 		40073B792C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy_Tests.swift; sourceTree = "<group>"; };
 		40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamAVPictureInPictureViewControlling.swift; sourceTree = "<group>"; };
 		40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift; sourceTree = "<group>"; };
+		40073B872C458250006A2867 /* VideoRendererView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRendererView.swift; sourceTree = "<group>"; };
+		40073B892C458259006A2867 /* LocalVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVideoView.swift; sourceTree = "<group>"; };
 		400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserverTests.swift; sourceTree = "<group>"; };
 		400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioFilterCapturePostProcessingModule.swift; sourceTree = "<group>"; };
 		400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioProcessingModule.swift; sourceTree = "<group>"; };
@@ -2177,6 +2181,16 @@
 				40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */,
 			);
 			path = Mocks;
+			sourceTree = "<group>";
+		};
+		40073B862C458240006A2867 /* VideoRenderer */ = {
+			isa = PBXGroup;
+			children = (
+				84231E4628B2506B007985EF /* VideoRenderer.swift */,
+				40073B872C458250006A2867 /* VideoRendererView.swift */,
+				40073B892C458259006A2867 /* LocalVideoView.swift */,
+			);
+			path = VideoRenderer;
 			sourceTree = "<group>";
 		};
 		401480332A5423C70029166A /* Utils */ = {
@@ -3575,12 +3589,12 @@
 		8434C523289AA2B60001490A /* CallView */ = {
 			isa = PBXGroup;
 			children = (
+				40073B862C458240006A2867 /* VideoRenderer */,
 				40245F2E2BE269B400FCF075 /* CallControls */,
 				40C7B82A2B612D5100FB9DB2 /* ViewModifiers */,
 				40AA2EDF2ADFF61B000DCA5C /* LayoutComponents */,
 				84429930293FA4680037232A /* ScreenSharing */,
 				846FBE8728AAD81E00147F6E /* Participants */,
-				84231E4628B2506B007985EF /* VideoRenderer.swift */,
 				401480352A5447C50029166A /* LocalParticipantViewModifier.swift */,
 				8457CF9028BB835F00E8CF50 /* CallView.swift */,
 				846E4AFE29D236EA003733AB /* CallTopView.swift */,
@@ -5773,6 +5787,7 @@
 				8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */,
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
+				40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
 				844299412942394C0037232A /* VideoView_iOS13.swift in Sources */,
@@ -5853,6 +5868,7 @@
 				40A941782B4DC576006D6965 /* StreamPictureInPictureTrackStateAdapter.swift in Sources */,
 				408D29A42B6D251600885473 /* UIView+Snapshot.swift in Sources */,
 				84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */,
+				40073B882C458250006A2867 /* VideoRendererView.swift in Sources */,
 				40A941722B4D9750006D6965 /* StreamAVPictureInPictureVideoCallViewController.swift in Sources */,
 				40A941702B4D96E6006D6965 /* StreamPictureInPictureController.swift in Sources */,
 			);
