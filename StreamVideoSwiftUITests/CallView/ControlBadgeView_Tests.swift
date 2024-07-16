@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import SwiftUI
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 @MainActor
@@ -17,7 +17,7 @@ final class ControlBadgeView_Tests: StreamVideoUITestCase {
     }
 
     func test_controlBadgeView_valueIsZero_viewWasConfiguredCorrectly() throws {
-        assertSubject {makeSubject(0) }
+        assertSubject { makeSubject(0) }
     }
 
     func test_controlBadgeView_valueIsLessThan100_viewWasConfiguredCorrectly() throws {
@@ -52,4 +52,3 @@ final class ControlBadgeView_Tests: StreamVideoUITestCase {
         )
     }
 }
-

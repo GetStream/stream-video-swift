@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
-@testable import StreamVideoSwiftUI
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 final class CornerClipper_Tests: StreamVideoUITestCase {
@@ -71,10 +71,10 @@ final class CornerClipper_Tests: StreamVideoUITestCase {
             Text("Hello World!")
                 .frame(width: 100, height: 100)
                 .cornerRadius(
-                   radius,
-                   corners: corners,
-                   backgroundColor: .red
-               ),
+                    radius,
+                    corners: corners,
+                    backgroundColor: .red
+                ),
             variants: snapshotVariants,
             size: .init(width: 100, height: 100),
             line: line,

@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideoSwiftUI
 import XCTest
 
 @MainActor
@@ -18,7 +18,7 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             participant: ParticipantFactory.get(1, withAudio: true).first!,
             call: call,
             frame: .init(origin: .zero, size: defaultScreenSize),
-            onChangeTrackVisibility: {_,_ in }
+            onChangeTrackVisibility: { _, _ in }
         )
         AssertSnapshot(layout, variants: snapshotVariants)
     }
@@ -29,7 +29,7 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             participant: ParticipantFactory.get(1, withAudio: false).first!,
             call: call,
             frame: .init(origin: .zero, size: defaultScreenSize),
-            onChangeTrackVisibility: {_,_ in }
+            onChangeTrackVisibility: { _, _ in }
         )
         AssertSnapshot(layout, variants: snapshotVariants)
     }
@@ -41,7 +41,7 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
                 participant: ParticipantFactory.get(1, connectionQuality: quality).first!,
                 call: call,
                 frame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "\(quality)")
         }
@@ -53,7 +53,7 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             participant: ParticipantFactory.get(1, withAudio: true, speaking: true).first!,
             call: call,
             frame: .init(origin: .zero, size: defaultScreenSize),
-            onChangeTrackVisibility: {_,_ in }
+            onChangeTrackVisibility: { _, _ in }
         )
         AssertSnapshot(layout, variants: snapshotVariants)
     }

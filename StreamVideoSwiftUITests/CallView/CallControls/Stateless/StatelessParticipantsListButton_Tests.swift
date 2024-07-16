@@ -1,14 +1,11 @@
 //
-//  StatelessParticipantsListButton_Tests.swift
-//  StreamVideoSwiftUITests
-//
-//  Created by Ilias Pavlidakis on 1/5/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase {
@@ -104,12 +101,11 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase {
             file: file,
             line: line
         )
-        call.state.participantsMap = (0..<participantsCount).reduce(into: [String: CallParticipant](), { partialResult, _ in
+        call.state.participantsMap = (0..<participantsCount).reduce(into: [String: CallParticipant]()) { partialResult, _ in
             let userId = UUID().uuidString
             partialResult[userId] = .dummy(id: userId)
-        })
+        }
 
         return .init(call: call, isActive: .constant(isActive))
     }
 }
-

@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import SwiftUI
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 @MainActor
@@ -76,4 +76,3 @@ final class CallDurationView_Tests: StreamVideoUITestCase {
         )
     }
 }
-

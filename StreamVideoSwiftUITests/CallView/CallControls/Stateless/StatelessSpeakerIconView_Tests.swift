@@ -1,14 +1,11 @@
 //
-//  StatelessSpeakerIconView_Tests.swift
-//  StreamVideoSwiftUITests
-//
-//  Created by Ilias Pavlidakis on 1/5/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase {
@@ -100,6 +97,3 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase {
         return .init(call: call, actionHandler: actionHandler)
     }
 }
-
-
-

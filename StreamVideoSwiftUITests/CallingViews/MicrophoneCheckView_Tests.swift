@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 @MainActor
@@ -16,7 +16,7 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
             let view = MicrophoneCheckView(
                 audioLevels: (0..<count).map { 0.2 * Float($0) },
                 microphoneOn: true,
-                isSilent: false, 
+                isSilent: false,
                 isPinned: false
             )
             .frame(width: 100, height: 50)

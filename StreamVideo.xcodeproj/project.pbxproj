@@ -8,6 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40013DDB2B87AA2300915453 /* SerialActor.swift */; };
+		40073B6F2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */; };
+		40073B752C456E06006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */; };
+		40073B762C456E0E006A2867 /* StreamPictureInPictureWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */; };
+		40073B772C456E1A006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */; };
+		40073B7A2C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B792C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift */; };
+		40073B7D2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */; };
+		40073B7F2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */; };
 		400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */; };
 		400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */; };
 		400E50552BD2AAD0008C939E /* StreamAudioProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */; };
@@ -1192,6 +1199,13 @@
 
 /* Begin PBXFileReference section */
 		40013DDB2B87AA2300915453 /* SerialActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor.swift; sourceTree = "<group>"; };
+		40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureWindowSizePolicy.swift; sourceTree = "<group>"; };
+		40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureVideoRendererTests.swift; sourceTree = "<group>"; };
+		40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy.swift; sourceTree = "<group>"; };
+		40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdaptiveWindowSizePolicy.swift; sourceTree = "<group>"; };
+		40073B792C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy_Tests.swift; sourceTree = "<group>"; };
+		40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamAVPictureInPictureViewControlling.swift; sourceTree = "<group>"; };
+		40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift; sourceTree = "<group>"; };
 		400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserverTests.swift; sourceTree = "<group>"; };
 		400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioFilterCapturePostProcessingModule.swift; sourceTree = "<group>"; };
 		400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioProcessingModule.swift; sourceTree = "<group>"; };
@@ -2138,6 +2152,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		40073B702C456DE0006A2867 /* WindowSizePolicy */ = {
+			isa = PBXGroup;
+			children = (
+				40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */,
+				40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */,
+				40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */,
+			);
+			path = WindowSizePolicy;
+			sourceTree = "<group>";
+		};
+		40073B782C456E30006A2867 /* WindowSizePolicy */ = {
+			isa = PBXGroup;
+			children = (
+				40073B792C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift */,
+				40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */,
+			);
+			path = WindowSizePolicy;
+			sourceTree = "<group>";
+		};
+		40073B7B2C456F01006A2867 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
 		401480332A5423C70029166A /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -2724,8 +2765,11 @@
 		40914C962B567B6B00F6A13E /* PictureInPicture */ = {
 			isa = PBXGroup;
 			children = (
+				40073B7B2C456F01006A2867 /* Mocks */,
+				40073B782C456E30006A2867 /* WindowSizePolicy */,
 				40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */,
 				40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */,
+				40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */,
 			);
 			path = PictureInPicture;
 			sourceTree = "<group>";
@@ -2786,6 +2830,7 @@
 		40A9416C2B4D958A006D6965 /* PictureInPicture */ = {
 			isa = PBXGroup;
 			children = (
+				40073B702C456DE0006A2867 /* WindowSizePolicy */,
 				40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */,
 				40A9416F2B4D96E6006D6965 /* StreamPictureInPictureController.swift */,
 				40A941712B4D9750006D6965 /* StreamAVPictureInPictureVideoCallViewController.swift */,
@@ -5684,6 +5729,7 @@
 			files = (
 				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */,
+				40073B752C456E06006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift in Sources */,
 				84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */,
 				40A941742B4D97A1006D6965 /* StreamPictureInPictureVideoRenderer.swift in Sources */,
 				846BA2AD2A9F602C001AD0AF /* SampleBufferVideoCallView.swift in Sources */,
@@ -5771,6 +5817,7 @@
 				8458B704290ACF2A00F8E487 /* CallSoundsPlayer.swift in Sources */,
 				849EDA8F297AFE1C0072A12D /* PreJoiningViewModel.swift in Sources */,
 				8458872728A3F34D002A81BF /* HelperViews.swift in Sources */,
+				40073B772C456E1A006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift in Sources */,
 				84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */,
 				840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */,
 				840626722A37A431004B8748 /* IncomingCall.swift in Sources */,
@@ -5796,6 +5843,7 @@
 				84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */,
 				40E110472B5A9DF4007DF492 /* CallDurationView.swift in Sources */,
 				40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */,
+				40073B762C456E0E006A2867 /* StreamPictureInPictureWindowSizePolicy.swift in Sources */,
 				846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */,
 				40F18B8C2BEBAC4C00ADF76E /* CallEndedViewModifier.swift in Sources */,
 				40E110492B5A9F03007DF492 /* Formatters.swift in Sources */,
@@ -5862,6 +5910,7 @@
 				40245F5B2BE2746300FCF075 /* RingSettings+Dummy.swift in Sources */,
 				40245F5C2BE2746300FCF075 /* ThumbnailResponse+Dummy.swift in Sources */,
 				40245F5D2BE2746300FCF075 /* ThumbnailsSettings+Dummy.swift in Sources */,
+				40073B6F2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift in Sources */,
 				82E3BA422A0BAE09001AB93E /* EventBatcher_Mock.swift in Sources */,
 				84DCA2122A389167000C3411 /* AssertDelay.swift in Sources */,
 				82FF40C22A17C74600B4D95E /* CallingParticipantView_Tests.swift in Sources */,
@@ -5883,6 +5932,7 @@
 				845C09892C0DFA5E00F725B3 /* LimitsSettingsResponse+Dummy.swift in Sources */,
 				401BEC4F2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift in Sources */,
 				401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */,
+				40073B7D2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
 				84DCA20C2A38300C000C3411 /* StreamVideoTestCase.swift in Sources */,
 				82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */,
@@ -5895,8 +5945,10 @@
 				829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */,
 				82FF40C62A17C75400B4D95E /* JoiningCallView_Tests.swift in Sources */,
 				407D5D3D2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift in Sources */,
+				40073B7F2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift in Sources */,
 				82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */,
 				40245F632BE27AE900FCF075 /* StatelessHangUpIconView_Tests.swift in Sources */,
+				40073B7A2C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift in Sources */,
 				40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */,
 				82FF40C42A17C74D00B4D95E /* IncomingCallView_Tests.swift in Sources */,
 				404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */,
