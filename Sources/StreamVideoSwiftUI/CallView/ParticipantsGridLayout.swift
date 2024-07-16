@@ -215,6 +215,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     var firstRowParticipants: [CallParticipant]
     var secondRowParticipants: [CallParticipant]
     var availableFrame: CGRect
+    var innerItemSpacing: CGFloat = 8
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -311,10 +312,11 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
+    var innerItemSpacing: CGFloat = 8
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: innerItemSpacing) {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
                     participant: participant,
@@ -352,6 +354,10 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
     }
     
     private var availableWidth: CGFloat {
-        availableFrame.width / CGFloat(participants.count)
+        (availableFrame.width - totalInnerItemSpacing) / CGFloat(participants.count)
+    }
+
+    private var totalInnerItemSpacing: CGFloat {
+        CGFloat(participants.endIndex - 1) * innerItemSpacing
     }
 }
