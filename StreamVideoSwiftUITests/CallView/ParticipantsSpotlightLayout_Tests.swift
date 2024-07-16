@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideoSwiftUI
 import XCTest
 
 final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
@@ -21,7 +21,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: participants,
                 frame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
@@ -37,7 +37,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: participants,
                 frame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
@@ -53,7 +53,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: participants,
                 frame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "\(quality)")
@@ -69,7 +69,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
             call: call,
             participants: participants,
             frame: .init(origin: .zero, size: defaultScreenSize),
-            onChangeTrackVisibility: {_,_ in }
+            onChangeTrackVisibility: { _, _ in }
         )
         AssertSnapshot(layout, variants: snapshotVariants)
     }

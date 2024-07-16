@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import XCTest
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import XCTest
 
 final class CallEventsHandler_Tests: XCTestCase {
     
@@ -26,7 +26,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let callEvent = callEventsHandler.checkForCallEvents(from: event)
         
         // Then
-        if case .userBlocked(let info) = callEvent {
+        if case let .userBlocked(info) = callEvent {
             XCTAssert(info.callCid == callCid)
         } else {
             XCTFail("Wrong event type")
@@ -47,7 +47,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let callEvent = callEventsHandler.checkForCallEvents(from: event)
         
         // Then
-        if case .accepted(let info) = callEvent {
+        if case let .accepted(info) = callEvent {
             XCTAssert(info.callCid == callCid)
         } else {
             XCTFail("Wrong event type")
@@ -68,7 +68,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let callEvent = callEventsHandler.checkForCallEvents(from: event)
         
         // Then
-        if case .ended(let info) = callEvent {
+        if case let .ended(info) = callEvent {
             XCTAssert(info.callCid == callCid)
         } else {
             XCTFail("Wrong event type")
@@ -89,7 +89,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let callEvent = callEventsHandler.checkForCallEvents(from: event)
         
         // Then
-        if case .rejected(let info) = callEvent {
+        if case let .rejected(info) = callEvent {
             XCTAssert(info.callCid == callCid)
         } else {
             XCTFail("Wrong event type")
@@ -113,7 +113,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let callEvent = callEventsHandler.checkForCallEvents(from: event)
         
         // Then
-        if case .incoming(let info) = callEvent {
+        if case let .incoming(info) = callEvent {
             XCTAssert(info.id == "123")
         } else {
             XCTFail("Wrong event type")
@@ -135,7 +135,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let callEvent = callEventsHandler.checkForCallEvents(from: event)
         
         // Then
-        if case .sessionStarted(let info) = callEvent {
+        if case let .sessionStarted(info) = callEvent {
             XCTAssert(info.id == callCid)
         } else {
             XCTFail("Wrong event type")
@@ -154,7 +154,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let callEvent = callEventsHandler.checkForCallEvents(from: event)
         
         // Then
-        if case .userUnblocked(let info) = callEvent {
+        if case let .userUnblocked(info) = callEvent {
             XCTAssert(info.callCid == callCid)
         } else {
             XCTFail("Wrong event type")
@@ -232,5 +232,4 @@ final class CallEventsHandler_Tests: XCTestCase {
         // Then
         XCTAssert(callEvent == nil)
     }
-
 }

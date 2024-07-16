@@ -2,12 +2,12 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-import XCTest
-@testable import StreamVideoSwiftUI
 import AVFoundation
-import StreamVideo
 import Combine
+import Foundation
+import StreamVideo
+@testable import StreamVideoSwiftUI
+import XCTest
 
 final class MicrophoneChecker_Tests: XCTestCase {
 

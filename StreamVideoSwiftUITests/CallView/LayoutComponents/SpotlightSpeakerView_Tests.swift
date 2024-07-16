@@ -2,12 +2,12 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Foundation
+import SnapshotTesting
+import StreamSwiftTestHelpers
 import StreamVideo
 @testable import StreamVideoSwiftUI
-import StreamSwiftTestHelpers
-import SnapshotTesting
 import XCTest
-import Foundation
 
 @MainActor
 final class SpotlightSpeakerView_Tests: StreamVideoUITestCase {

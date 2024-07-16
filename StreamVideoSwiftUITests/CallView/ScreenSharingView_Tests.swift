@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 final class ScreenSharingView_Tests: StreamVideoUITestCase {
@@ -32,7 +32,5 @@ private final class MockCallViewModel: CallViewModel {
 
     var _participants: [CallParticipant] = ParticipantFactory.get(4)
 
-    override var participants: [CallParticipant] {
-        get { _participants }
-    }
+    override var participants: [CallParticipant] { _participants }
 }

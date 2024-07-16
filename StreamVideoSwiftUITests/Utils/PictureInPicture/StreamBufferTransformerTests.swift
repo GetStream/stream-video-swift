@@ -2,12 +2,12 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import XCTest
 import CoreGraphics
-import StreamWebRTC
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
+import StreamWebRTC
+import XCTest
 
 final class StreamBufferTransformerTests: XCTestCase {
 
@@ -25,7 +25,10 @@ final class StreamBufferTransformerTests: XCTestCase {
         )
         let targetSize = CGSize(width: 100, height: 100)
 
-        let resultBuffer = try XCTUnwrap(transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?.imageBuffer)
+        let resultBuffer = try XCTUnwrap(
+            transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?
+                .pixelBuffer
+        )
 
         // Assert that no resize occurred, and the output size matches the target size.
         XCTAssertEqual(CVPixelBufferGetWidth(resultBuffer), Int(targetSize.width))
@@ -44,7 +47,10 @@ final class StreamBufferTransformerTests: XCTestCase {
         )
         let targetSize = CGSize(width: 50, height: 50)
 
-        let resultBuffer = try XCTUnwrap(transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?.imageBuffer)
+        let resultBuffer = try XCTUnwrap(
+            transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?
+                .pixelBuffer
+        )
 
         // Assert that no resize occurred, and the output size matches the target size.
         XCTAssertEqual(CVPixelBufferGetWidth(resultBuffer), Int(targetSize.width))
@@ -63,7 +69,10 @@ final class StreamBufferTransformerTests: XCTestCase {
         )
         let targetSize = CGSize(width: 150, height: 75)
 
-        let resultBuffer = try XCTUnwrap(transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?.imageBuffer)
+        let resultBuffer = try XCTUnwrap(
+            transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?
+                .pixelBuffer
+        )
 
         // Assert that no resize occurred, and the output size matches the target size.
         XCTAssertEqual(CVPixelBufferGetWidth(resultBuffer), Int(targetSize.width))
@@ -78,14 +87,17 @@ final class StreamBufferTransformerTests: XCTestCase {
         let sourceBuffer = RTCCVPixelBuffer(
             pixelBuffer: try XCTUnwrap(
                 CVPixelBuffer.make(
-                    with: .init(width: 100,height: 100),
+                    with: .init(width: 100, height: 100),
                     pixelFormat: kCVPixelFormatType_32ARGB
                 )
             )
         )
         let targetSize = CGSize(width: 100, height: 100)
 
-        let resultBuffer = try XCTUnwrap(transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?.imageBuffer)
+        let resultBuffer = try XCTUnwrap(
+            transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?
+                .pixelBuffer
+        )
 
         // Assert that no resize occurred, and the output size matches the target size.
         XCTAssertEqual(CVPixelBufferGetWidth(resultBuffer), Int(targetSize.width))
@@ -105,7 +117,10 @@ final class StreamBufferTransformerTests: XCTestCase {
         )
         let targetSize = CGSize(width: 50, height: 50)
 
-        let resultBuffer = try XCTUnwrap(transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?.imageBuffer)
+        let resultBuffer = try XCTUnwrap(
+            transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?
+                .pixelBuffer
+        )
 
         // Assert that no resize occurred, and the output size matches the target size.
         XCTAssertEqual(CVPixelBufferGetWidth(resultBuffer), Int(targetSize.width))
@@ -125,7 +140,10 @@ final class StreamBufferTransformerTests: XCTestCase {
         )
         let targetSize = CGSize(width: 150, height: 75)
 
-        let resultBuffer = try XCTUnwrap(transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?.imageBuffer)
+        let resultBuffer = try XCTUnwrap(
+            transformer.transformAndResizeIfRequired(sourceBuffer, targetSize: targetSize)?
+                .pixelBuffer
+        )
 
         // Assert that no resize occurred, and the output size matches the target size.
         XCTAssertEqual(CVPixelBufferGetWidth(resultBuffer), Int(targetSize.width))
@@ -140,7 +158,7 @@ final class StreamBufferTransformerTests: XCTestCase {
             kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue
         ] as CFDictionary
 
-        var pixelBuffer : CVPixelBuffer?
+        var pixelBuffer: CVPixelBuffer?
         let status = CVPixelBufferCreate(
             kCFAllocatorDefault, Int(image.size.width),
             Int(image.size.height),

@@ -25,6 +25,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// The layer that renders the track's frames.
     var displayLayer: CALayer { contentView.layer }
 
+    /// A policy defining how the Picture in Picture window should be resized in order to better fit
+    /// the rendering frame size.
+    var pictureInPictureWindowSizePolicy: PictureInPictureWindowSizePolicy
+
     /// The publisher which is used to streamline the frames received from the track.
     private let bufferPublisher: PassthroughSubject<CMSampleBuffer, Never> = .init()
 
@@ -82,15 +86,16 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     private let resizeRequiredSizeRatioThreshold: CGFloat = 1
 
     /// A size ratio threshold used to determine if skipping frames is required.
-    private let sizeRatioThreshold: CGFloat = 3
+    private let sizeRatioThreshold: CGFloat = 15
 
     // MARK: - Lifecycle
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(windowSizePolicy: PictureInPictureWindowSizePolicy) {
+        pictureInPictureWindowSizePolicy = windowSizePolicy
+        super.init(frame: .zero)
         setUp()
     }
 
@@ -137,17 +142,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             return
         }
 
-        let pixelBuffer: RTCVideoFrameBuffer? = {
-            if let i420buffer = frame.buffer as? RTCI420Buffer {
-                return i420buffer
-            } else {
-                return frame.buffer
-            }
-        }()
-
         if
-            let pixelBuffer = pixelBuffer,
-            let sampleBuffer = bufferTransformer.transformAndResizeIfRequired(pixelBuffer, targetSize: contentSize) {
+            let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(frame, targetSize: contentSize)?
+            .buffer as? StreamRTCYUVBuffer,
+            let sampleBuffer = yuvBuffer.sampleBuffer {
             log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.")
             bufferPublisher.send(sampleBuffer)
         } else {
@@ -236,8 +234,22 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         noOfFramesToSkipAfterRendering = requiresFramesSkipping ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) :
             0
         skippedFrames = 0
+
+        /// We update the provided windowSizePolicy with the size of the track we received, transformed
+        /// to the value that fits.
+        pictureInPictureWindowSizePolicy.trackSize = trackSize
+
         log.debug(
-            "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"
+            """
+            contentSize:\(contentSize)
+            trackId:\(track?.trackId ?? "n/a")
+            trackSize:\(trackSize)
+            requiresResize:\(requiresResize)
+            noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering)
+            skippedFrames:\(skippedFrames)
+            widthDiffRatio:\(widthDiffRatio)
+            heightDiffRatio:\(heightDiffRatio)
+            """
         )
     }
 

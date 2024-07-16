@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import SnapshotTesting
+import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
-import StreamSwiftTestHelpers
-import SnapshotTesting
 import XCTest
 
 final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
@@ -53,7 +53,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: ParticipantFactory.get(count, withAudio: true),
                 availableFrame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
@@ -69,7 +69,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: ParticipantFactory.get(count, withAudio: false),
                 availableFrame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
@@ -86,7 +86,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: ParticipantFactory.get(count, connectionQuality: quality),
                 availableFrame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "\(quality)")
         }
@@ -108,7 +108,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: participants,
                 availableFrame: .init(origin: .zero, size: defaultScreenSize),
-                onChangeTrackVisibility: {_,_ in }
+                onChangeTrackVisibility: { _, _ in }
             )
             AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }

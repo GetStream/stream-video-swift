@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import SnapshotTesting
+import StreamSwiftTestHelpers
 import StreamVideo
 @testable import StreamVideoSwiftUI
-import StreamSwiftTestHelpers
-import SnapshotTesting
 import XCTest
 
 @MainActor
@@ -53,7 +53,7 @@ final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase {
                 viewFactory: DefaultViewFactory.shared,
                 participants: participants,
                 frame: .init(origin: .zero, size: .init(width: screenWidth, height: thumbnailSize)),
-                call: call, 
+                call: call,
                 showAllInfo: showAllInfo
             ).frame(width: screenWidth),
             variants: snapshotVariants,
