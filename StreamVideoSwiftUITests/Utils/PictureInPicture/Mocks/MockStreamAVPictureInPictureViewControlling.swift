@@ -1,13 +1,10 @@
 //
-//  MockStreamAVPictureInPictureViewControlling.swift
-//  StreamVideoSwiftUITests
-//
-//  Created by Ilias Pavlidakis on 15/7/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
-import StreamWebRTC
 @testable import StreamVideoSwiftUI
+import StreamWebRTC
 
 final class MockStreamAVPictureInPictureViewControlling: StreamAVPictureInPictureViewControlling {
     var onSizeUpdate: ((CGSize) -> Void)?
@@ -15,4 +12,3 @@ final class MockStreamAVPictureInPictureViewControlling: StreamAVPictureInPictur
     var preferredContentSize: CGSize = .zero
     var displayLayer: CALayer = .init()
 }
-

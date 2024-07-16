@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import XCTest
 @testable import StreamVideoSwiftUI
+import XCTest
 
 final class AudioValuePercentageNormaliser_Tests: XCTestCase {
 

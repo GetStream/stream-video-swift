@@ -3,9 +3,9 @@
 //
 
 import SnapshotTesting
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
 import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 final class CallingGroupView_Tests: StreamVideoUITestCase {

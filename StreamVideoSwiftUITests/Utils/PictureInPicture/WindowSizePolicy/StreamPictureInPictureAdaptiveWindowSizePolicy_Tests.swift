@@ -1,13 +1,10 @@
 //
-//  StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift
-//  StreamVideoSwiftUITests
-//
-//  Created by Ilias Pavlidakis on 15/7/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
-import XCTest
 @testable import StreamVideoSwiftUI
+import XCTest
 
 final class StreamPictureInPictureAdaptiveWindowSizePolicy_Tests: XCTestCase {
 
@@ -31,4 +28,3 @@ final class StreamPictureInPictureAdaptiveWindowSizePolicy_Tests: XCTestCase {
         XCTAssertEqual(controller.preferredContentSize, targetSize)
     }
 }
-

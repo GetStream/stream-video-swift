@@ -142,4 +142,3 @@ final class ReusePoolTests: XCTestCase {
         XCTAssertNotNil(object)
     }
 }
-

@@ -3,10 +3,10 @@
 //
 
 import Foundation
-import XCTest
-import StreamWebRTC
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import StreamWebRTC
+import XCTest
 
 final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Sendable {
 
