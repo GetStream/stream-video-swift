@@ -66,9 +66,10 @@ An **XCFramework** is a package that contains binaries for multiple architecture
 - No more fat binaries. No more architectures stripping
 
 :::info
-In order to manually integrate StreamVideo XCFrameworks, you need to add an additional dependency to your project.
+In order to manually integrate StreamVideo XCFrameworks, you need to add the additional dependencies to your project.
 
 ```swift
-.package(name: "StreamWebRTC", url: "https://github.com/GetStream/stream-video-swift-webrtc.git", .exact("114.5735.8"))
+.package(name: "StreamWebRTC", url: "https://github.com/GetStream/stream-video-swift-webrtc.git", .exact("114.5735.8")),
+.package(url: "https://github.com/apple/swift-protobuf.git", from: "1.18.0")
 ```
 :::
