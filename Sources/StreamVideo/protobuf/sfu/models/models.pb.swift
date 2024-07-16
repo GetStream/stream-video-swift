@@ -332,6 +332,8 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
   case flutter // = 5
   case reactNative // = 6
   case unity // = 7
+  case go // = 8
+  case plainJavascript // = 9
   case UNRECOGNIZED(Int)
 
   init() {
@@ -348,6 +350,8 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
     case 5: self = .flutter
     case 6: self = .reactNative
     case 7: self = .unity
+    case 8: self = .go
+    case 9: self = .plainJavascript
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -362,6 +366,8 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
     case .flutter: return 5
     case .reactNative: return 6
     case .unity: return 7
+    case .go: return 8
+    case .plainJavascript: return 9
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -381,6 +387,8 @@ extension Stream_Video_Sfu_Models_SdkType: CaseIterable {
     .flutter,
     .reactNative,
     .unity,
+    .go,
+    .plainJavascript,
   ]
 }
 
@@ -501,6 +509,7 @@ enum Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf.Enum {
   case ended // = 1
   case liveEnded // = 2
   case kicked // = 3
+  case sessionEnded // = 4
   case UNRECOGNIZED(Int)
 
   init() {
@@ -513,6 +522,7 @@ enum Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf.Enum {
     case 1: self = .ended
     case 2: self = .liveEnded
     case 3: self = .kicked
+    case 4: self = .sessionEnded
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -523,6 +533,7 @@ enum Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf.Enum {
     case .ended: return 1
     case .liveEnded: return 2
     case .kicked: return 3
+    case .sessionEnded: return 4
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -538,6 +549,7 @@ extension Stream_Video_Sfu_Models_CallEndedReason: CaseIterable {
     .ended,
     .liveEnded,
     .kicked,
+    .sessionEnded,
   ]
 }
 
@@ -548,7 +560,7 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
   typealias RawValue = Int
   case unspecified // = 0
 
-  /// Sent after reaching the maximum reconnection attempts, leading to permanent disconnect.
+  /// Sent after reaching the maximum reconnection attempts, or any other unrecoverable error leading to permanent disconnect.
   case disconnect // = 1
 
   /// SDK should maintaining existing publisher/subscriber pc instances
@@ -559,9 +571,9 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
   /// ensuring a clean state for the reconnection.
   case clean // = 3
 
-  /// SDK should obtain new credentials from the coordinator, drops existing pc instances, and initializes
+  /// SDK should obtain new credentials from the coordinator, drops existing pc instances, set a new session_id and initializes
   /// a completely new WebSocket connection, ensuring a comprehensive reset.
-  case full // = 4
+  case rejoin // = 4
 
   /// SDK should migrate to a new SFU instance
   case migrate // = 5
@@ -577,7 +589,7 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
     case 1: self = .disconnect
     case 2: self = .fast
     case 3: self = .clean
-    case 4: self = .full
+    case 4: self = .rejoin
     case 5: self = .migrate
     default: self = .UNRECOGNIZED(rawValue)
     }
@@ -589,7 +601,7 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
     case .disconnect: return 1
     case .fast: return 2
     case .clean: return 3
-    case .full: return 4
+    case .rejoin: return 4
     case .migrate: return 5
     case .UNRECOGNIZED(let i): return i
     }
@@ -606,7 +618,7 @@ extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: CaseIterable {
     .disconnect,
     .fast,
     .clean,
-    .full,
+    .rejoin,
     .migrate,
   ]
 }
@@ -869,60 +881,6 @@ struct Stream_Video_Sfu_Models_TrackInfo {
   init() {}
 }
 
-/// todo remove this
-struct Stream_Video_Sfu_Models_Call {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// the call type
-  var type: String = String()
-
-  /// the call id
-  var id: String = String()
-
-  /// the id of the user that created this call
-  var createdByUserID: String = String()
-
-  /// the id of the current host for this call
-  var hostUserID: String = String()
-
-  var custom: SwiftProtobuf.Google_Protobuf_Struct {
-    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
-    set {_custom = newValue}
-  }
-  /// Returns true if `custom` has been explicitly set.
-  var hasCustom: Bool {return self._custom != nil}
-  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
-  mutating func clearCustom() {self._custom = nil}
-
-  var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_createdAt = newValue}
-  }
-  /// Returns true if `createdAt` has been explicitly set.
-  var hasCreatedAt: Bool {return self._createdAt != nil}
-  /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
-  mutating func clearCreatedAt() {self._createdAt = nil}
-
-  var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_updatedAt = newValue}
-  }
-  /// Returns true if `updatedAt` has been explicitly set.
-  var hasUpdatedAt: Bool {return self._updatedAt != nil}
-  /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
-  mutating func clearUpdatedAt() {self._updatedAt = nil}
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-
-  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
-  fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-}
-
 struct Stream_Video_Sfu_Models_Error {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -1052,6 +1010,59 @@ struct Stream_Video_Sfu_Models_Device {
   init() {}
 }
 
+struct Stream_Video_Sfu_Models_Call {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// the call type
+  var type: String = String()
+
+  /// the call id
+  var id: String = String()
+
+  /// the id of the user that created this call
+  var createdByUserID: String = String()
+
+  /// the id of the current host for this call
+  var hostUserID: String = String()
+
+  var custom: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_custom = newValue}
+  }
+  /// Returns true if `custom` has been explicitly set.
+  var hasCustom: Bool {return self._custom != nil}
+  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+  mutating func clearCustom() {self._custom = nil}
+
+  var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_createdAt = newValue}
+  }
+  /// Returns true if `createdAt` has been explicitly set.
+  var hasCreatedAt: Bool {return self._createdAt != nil}
+  /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
+  mutating func clearCreatedAt() {self._createdAt = nil}
+
+  var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_updatedAt = newValue}
+  }
+  /// Returns true if `updatedAt` has been explicitly set.
+  var hasUpdatedAt: Bool {return self._updatedAt != nil}
+  /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
+  mutating func clearUpdatedAt() {self._updatedAt = nil}
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
+  fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+}
+
 /// CallGrants represents the set of permissions given
 /// to the user for the current call.
 struct Stream_Video_Sfu_Models_CallGrants {
@@ -1091,13 +1102,13 @@ extension Stream_Video_Sfu_Models_VideoLayer: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Codec: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ICETrickle: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackInfo: @unchecked Sendable {}
-extension Stream_Video_Sfu_Models_Call: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Error: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ClientDetails: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Sdk: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_OS: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Browser: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Device: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Call: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallGrants: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
@@ -1175,6 +1186,8 @@ extension Stream_Video_Sfu_Models_SdkType: SwiftProtobuf._ProtoNameProviding {
     5: .same(proto: "SDK_TYPE_FLUTTER"),
     6: .same(proto: "SDK_TYPE_REACT_NATIVE"),
     7: .same(proto: "SDK_TYPE_UNITY"),
+    8: .same(proto: "SDK_TYPE_GO"),
+    9: .same(proto: "SDK_TYPE_PLAIN_JAVASCRIPT"),
   ]
 }
 
@@ -1201,6 +1214,7 @@ extension Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf._ProtoNameProvi
     1: .same(proto: "CALL_ENDED_REASON_ENDED"),
     2: .same(proto: "CALL_ENDED_REASON_LIVE_ENDED"),
     3: .same(proto: "CALL_ENDED_REASON_KICKED"),
+    4: .same(proto: "CALL_ENDED_REASON_SESSION_ENDED"),
   ]
 }
 
@@ -1210,7 +1224,7 @@ extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf._Pro
     1: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT"),
     2: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_FAST"),
     3: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_CLEAN"),
-    4: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_FULL"),
+    4: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_REJOIN"),
     5: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_MIGRATE"),
   ]
 }
@@ -1763,78 +1777,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
   }
 }
 
-extension Stream_Video_Sfu_Models_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Call"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "type"),
-    2: .same(proto: "id"),
-    3: .standard(proto: "created_by_user_id"),
-    4: .standard(proto: "host_user_id"),
-    5: .same(proto: "custom"),
-    6: .standard(proto: "created_at"),
-    7: .standard(proto: "updated_at"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.createdByUserID) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.hostUserID) }()
-      case 5: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
-      case 6: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
-      case 7: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    if !self.type.isEmpty {
-      try visitor.visitSingularStringField(value: self.type, fieldNumber: 1)
-    }
-    if !self.id.isEmpty {
-      try visitor.visitSingularStringField(value: self.id, fieldNumber: 2)
-    }
-    if !self.createdByUserID.isEmpty {
-      try visitor.visitSingularStringField(value: self.createdByUserID, fieldNumber: 3)
-    }
-    if !self.hostUserID.isEmpty {
-      try visitor.visitSingularStringField(value: self.hostUserID, fieldNumber: 4)
-    }
-    try { if let v = self._custom {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-    } }()
-    try { if let v = self._createdAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
-    } }()
-    try { if let v = self._updatedAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-    } }()
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Stream_Video_Sfu_Models_Call, rhs: Stream_Video_Sfu_Models_Call) -> Bool {
-    if lhs.type != rhs.type {return false}
-    if lhs.id != rhs.id {return false}
-    if lhs.createdByUserID != rhs.createdByUserID {return false}
-    if lhs.hostUserID != rhs.hostUserID {return false}
-    if lhs._custom != rhs._custom {return false}
-    if lhs._createdAt != rhs._createdAt {return false}
-    if lhs._updatedAt != rhs._updatedAt {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
 extension Stream_Video_Sfu_Models_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Error"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -2098,6 +2040,78 @@ extension Stream_Video_Sfu_Models_Device: SwiftProtobuf.Message, SwiftProtobuf._
   static func ==(lhs: Stream_Video_Sfu_Models_Device, rhs: Stream_Video_Sfu_Models_Device) -> Bool {
     if lhs.name != rhs.name {return false}
     if lhs.version != rhs.version {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Call"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "type"),
+    2: .same(proto: "id"),
+    3: .standard(proto: "created_by_user_id"),
+    4: .standard(proto: "host_user_id"),
+    5: .same(proto: "custom"),
+    6: .standard(proto: "created_at"),
+    7: .standard(proto: "updated_at"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.createdByUserID) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.hostUserID) }()
+      case 5: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 6: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
+      case 7: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.type.isEmpty {
+      try visitor.visitSingularStringField(value: self.type, fieldNumber: 1)
+    }
+    if !self.id.isEmpty {
+      try visitor.visitSingularStringField(value: self.id, fieldNumber: 2)
+    }
+    if !self.createdByUserID.isEmpty {
+      try visitor.visitSingularStringField(value: self.createdByUserID, fieldNumber: 3)
+    }
+    if !self.hostUserID.isEmpty {
+      try visitor.visitSingularStringField(value: self.hostUserID, fieldNumber: 4)
+    }
+    try { if let v = self._custom {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    } }()
+    try { if let v = self._createdAt {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+    } }()
+    try { if let v = self._updatedAt {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_Call, rhs: Stream_Video_Sfu_Models_Call) -> Bool {
+    if lhs.type != rhs.type {return false}
+    if lhs.id != rhs.id {return false}
+    if lhs.createdByUserID != rhs.createdByUserID {return false}
+    if lhs.hostUserID != rhs.hostUserID {return false}
+    if lhs._custom != rhs._custom {return false}
+    if lhs._createdAt != rhs._createdAt {return false}
+    if lhs._updatedAt != rhs._updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
