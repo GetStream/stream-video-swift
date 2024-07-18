@@ -50,6 +50,12 @@ public class CallState: ObservableObject {
     @Published public internal(set) var screenSharingSession: ScreenSharingSession? = nil {
         didSet {
             let isCurrentUserSharing = screenSharingSession?.participant.id == sessionId
+            /// When screensharingSession is non-nil we need to ensure that the track is also enabled.
+            /// Otherwise, we can get in a situation where a track which was shared previously,
+            /// was disabled (due to PiP) and that will cause the track not showing on UI.
+            /// Forcing it here to be enabled, should mitigate this issue and ensure that the track is always
+            /// visible whenever screensharingSession is non-nil.
+            screenSharingSession?.track?.isEnabled = true
             if isCurrentUserSharing != isCurrentUserScreensharing {
                 isCurrentUserScreensharing = isCurrentUserSharing
             }
