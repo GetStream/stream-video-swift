@@ -129,7 +129,7 @@ struct DebugMenu: View {
                 currentValue: callExpiration,
                 additionalItems: { customCallExpirationView },
                 label: "Call Expiration"
-            ) { _ in self.callExpiration = .custom(10) }
+            ) { self.callExpiration = $0 }
 
             makeMenu(
                 for: [.enabled, .disabled],
