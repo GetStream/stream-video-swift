@@ -86,6 +86,15 @@
 		40245F652BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F642BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift */; };
 		40245F672BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F662BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift */; };
 		40245F692BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */; };
+		4026FB432C4E3CDE007C539F /* RTCIceConnectionState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB422C4E3CDE007C539F /* RTCIceConnectionState+CustomStringConvertible.swift */; };
+		4026FB452C4E3CF9007C539F /* RTCPeerConnectionState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB442C4E3CF9007C539F /* RTCPeerConnectionState+CustomStringConvertible.swift */; };
+		4026FB472C4E3D0F007C539F /* RTCSignalingState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB462C4E3D0F007C539F /* RTCSignalingState+CustomStringConvertible.swift */; };
+		4026FB492C4E3D26007C539F /* RTCRtpTransceiverDirection+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB482C4E3D26007C539F /* RTCRtpTransceiverDirection+CustomStringConvertible.swift */; };
+		4026FB4B2C4E3D38007C539F /* RTCIceGatheringState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB4A2C4E3D38007C539F /* RTCIceGatheringState+CustomStringConvertible.swift */; };
+		4026FB4D2C4E3D58007C539F /* RTCSdpType+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB4C2C4E3D58007C539F /* RTCSdpType+CustomStringConvertible.swift */; };
+		4026FB512C4E3E01007C539F /* ICECandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB502C4E3E01007C539F /* ICECandidate.swift */; };
+		4026FB532C4E3E62007C539F /* TrackType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB522C4E3E62007C539F /* TrackType.swift */; };
+		4026FB552C4E3EC3007C539F /* PeerConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4026FB542C4E3EC3007C539F /* PeerConnectionType.swift */; };
 		402778832BD13C62002F4399 /* NoiseCancellationFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */; };
 		4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
 		4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */; };
@@ -1250,6 +1259,15 @@
 		40245F642BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessAudioOutputIconView_Tests.swift; sourceTree = "<group>"; };
 		40245F662BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessSpeakerIconView_Tests.swift; sourceTree = "<group>"; };
 		40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessParticipantsListButton_Tests.swift; sourceTree = "<group>"; };
+		4026FB422C4E3CDE007C539F /* RTCIceConnectionState+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCIceConnectionState+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		4026FB442C4E3CF9007C539F /* RTCPeerConnectionState+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCPeerConnectionState+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		4026FB462C4E3D0F007C539F /* RTCSignalingState+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCSignalingState+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		4026FB482C4E3D26007C539F /* RTCRtpTransceiverDirection+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpTransceiverDirection+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		4026FB4A2C4E3D38007C539F /* RTCIceGatheringState+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCIceGatheringState+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		4026FB4C2C4E3D58007C539F /* RTCSdpType+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCSdpType+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		4026FB502C4E3E01007C539F /* ICECandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICECandidate.swift; sourceTree = "<group>"; };
+		4026FB522C4E3E62007C539F /* TrackType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackType.swift; sourceTree = "<group>"; };
+		4026FB542C4E3EC3007C539F /* PeerConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionType.swift; sourceTree = "<group>"; };
 		402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseCancellationFilter.swift; sourceTree = "<group>"; };
 		402C545A2B6BE50500672BFB /* MockStreamStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamStatistics.swift; sourceTree = "<group>"; };
 		402C545C2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsFormatter_Tests.swift; sourceTree = "<group>"; };
@@ -2319,6 +2337,38 @@
 				40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */,
 			);
 			path = Stateless;
+			sourceTree = "<group>";
+		};
+		4026FB402C4E3CC2007C539F /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				4026FB422C4E3CDE007C539F /* RTCIceConnectionState+CustomStringConvertible.swift */,
+				4026FB442C4E3CF9007C539F /* RTCPeerConnectionState+CustomStringConvertible.swift */,
+				4026FB462C4E3D0F007C539F /* RTCSignalingState+CustomStringConvertible.swift */,
+				4026FB482C4E3D26007C539F /* RTCRtpTransceiverDirection+CustomStringConvertible.swift */,
+				4026FB4A2C4E3D38007C539F /* RTCIceGatheringState+CustomStringConvertible.swift */,
+				4026FB4C2C4E3D58007C539F /* RTCSdpType+CustomStringConvertible.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		4026FB412C4E3CCA007C539F /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				4026FB502C4E3E01007C539F /* ICECandidate.swift */,
+				4026FB522C4E3E62007C539F /* TrackType.swift */,
+				4026FB542C4E3EC3007C539F /* PeerConnectionType.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		4026FB562C4E4371007C539F /* PeerConnection */ = {
+			isa = PBXGroup;
+			children = (
+				4026FB412C4E3CCA007C539F /* Models */,
+				4026FB402C4E3CC2007C539F /* Extensions */,
+			);
+			path = PeerConnection;
 			sourceTree = "<group>";
 		};
 		402778812BD13C54002F4399 /* Filters */ = {
@@ -4479,6 +4529,7 @@
 		84FC2C1C28ACF29300181490 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				4026FB562C4E4371007C539F /* PeerConnection */,
 				408679F52BD12EFC00D027E0 /* AudioFilter */,
 				406583832B87694B00B4F979 /* VideoFilters */,
 				402F04A52B70ED8600CA1986 /* Statistics */,
@@ -5252,6 +5303,7 @@
 				84DC389729ADFCFD00946713 /* StopLiveResponse.swift in Sources */,
 				40FB02052BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift in Sources */,
 				84C4004129E3F446007B69C2 /* WSClientEvent.swift in Sources */,
+				4026FB552C4E3EC3007C539F /* PeerConnectionType.swift in Sources */,
 				84AF64D5287C79320012A503 /* RawJSON.swift in Sources */,
 				40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */,
 				84F73858287C1A3400A363F4 /* ConnectionState.swift in Sources */,
@@ -5342,6 +5394,7 @@
 				8409465929AF4EEC007AF5BF /* SendReactionResponse.swift in Sources */,
 				8412903729DDD1ED00C70A6D /* UpdateCallMembersResponse.swift in Sources */,
 				8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */,
+				4026FB4B2C4E3D38007C539F /* RTCIceGatheringState+CustomStringConvertible.swift in Sources */,
 				4012B1962BFCAC26006B0031 /* StreamCallStateMachine+RejectedStage.swift in Sources */,
 				846E4AEF29CDEA66003733AB /* WSAuthMessageRequest.swift in Sources */,
 				406583992B877AB400B4F979 /* CIImage+Resize.swift in Sources */,
@@ -5420,6 +5473,8 @@
 				40FB15172BF77EA600D5E580 /* StreamCallStateMachine.swift in Sources */,
 				84DC38C829ADFCFD00946713 /* Device.swift in Sources */,
 				8412903629DDD1ED00C70A6D /* UpdateCallMembersRequest.swift in Sources */,
+				4026FB492C4E3D26007C539F /* RTCRtpTransceiverDirection+CustomStringConvertible.swift in Sources */,
+				4026FB4D2C4E3D58007C539F /* RTCSdpType+CustomStringConvertible.swift in Sources */,
 				84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
@@ -5442,6 +5497,7 @@
 				40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
+				4026FB432C4E3CDE007C539F /* RTCIceConnectionState+CustomStringConvertible.swift in Sources */,
 				841BAA412BD15CDE000C73E4 /* Subsession.swift in Sources */,
 				8454A31D2AAF41E100A012C6 /* Array+SafeSubscript.swift in Sources */,
 				842E70E12B91E90F00D2D68B /* CustomVideoEvent.swift in Sources */,
@@ -5470,6 +5526,7 @@
 				8490032729D308A000AD9BB4 /* TranscriptionSettingsRequest.swift in Sources */,
 				402778832BD13C62002F4399 /* NoiseCancellationFilter.swift in Sources */,
 				84DC38D029ADFCFD00946713 /* OwnUserResponse.swift in Sources */,
+				4026FB472C4E3D0F007C539F /* RTCSignalingState+CustomStringConvertible.swift in Sources */,
 				84DCA2212A39E380000C3411 /* URLSessionTransport.swift in Sources */,
 				84A7E1922883647200526C98 /* Event.swift in Sources */,
 				84DC38D629ADFCFD00946713 /* GeofenceSettingsRequest.swift in Sources */,
@@ -5505,6 +5562,7 @@
 				842E70D92B91BE1700D2D68B /* CallClosedCaption.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */,
+				4026FB532C4E3E62007C539F /* TrackType.swift in Sources */,
 				84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */,
 				84BAD77A2A6BFEF900733156 /* BroadcastBufferUploader.swift in Sources */,
 				40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */,
@@ -5545,11 +5603,13 @@
 				84FC2C2228ACF2E000181490 /* PeerConnection.swift in Sources */,
 				401A0F032AB1C1B600BE2DBD /* ThermalStateObserver.swift in Sources */,
 				84D2E37929DC856D001D2118 /* CallMemberAddedEvent.swift in Sources */,
+				4026FB452C4E3CF9007C539F /* RTCPeerConnectionState+CustomStringConvertible.swift in Sources */,
 				841BAA422BD15CDE000C73E4 /* Stats.swift in Sources */,
 				842B8E1D2A2DFED900863A87 /* EgressHLSResponse.swift in Sources */,
 				848CCCE82AB8ED8F002E83A2 /* StartHLSBroadcastingResponse.swift in Sources */,
 				84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
+				4026FB512C4E3E01007C539F /* ICECandidate.swift in Sources */,
 				4012B1892BFC9E6F006B0031 /* UnfairQueue.swift in Sources */,
 				840F59922A77FDCB00EF3EB2 /* UnpinResponse.swift in Sources */,
 				8487D8AD2A67F4EC00536ED4 /* ScreenshareCapturer.swift in Sources */,

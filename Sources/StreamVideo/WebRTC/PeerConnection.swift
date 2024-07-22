@@ -6,15 +6,9 @@ import Foundation
 import StreamWebRTC
 import SwiftProtobuf
 
-enum PeerConnectionType: String {
-    case subscriber
-    case publisher
-}
-
 class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 
     private let pc: RTCPeerConnection
-    private let eventDecoder: WebRTCEventDecoder
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
     private let type: PeerConnectionType
@@ -49,7 +43,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         self.signalService = signalService
         self.type = type
         self.videoOptions = videoOptions
-        eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
         log.debug(
@@ -229,7 +222,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         transceiverInit.streamIds = streamIds
         transceiverInit.sendEncodings = encodingParams(for: trackType)
         publishedTracks.append(trackType)
-        if trackType == .screenshare {
+        if trackType == .screenShare {
             if transceiverScreenshare != nil {
                 transceiverScreenshare?.stopInternal()
                 for screensharingStream in screensharingStreams {
@@ -386,7 +379,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         Task {
             do {
                 let encoder = JSONEncoder()
-                let iceCandidate = candidate.toIceCandidate()
+                let iceCandidate = ICECandidate(from: candidate)
                 let json = try encoder.encode(iceCandidate)
                 let jsonString = String(data: json, encoding: .utf8) ?? ""
                 var iceTrickle = Stream_Video_Sfu_Models_ICETrickle()
@@ -543,7 +536,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private func encodingParams(for trackType: TrackType) -> [RTCRtpEncodingParameters] {
         var codecs = videoOptions.supportedCodecs
         var encodingParams = [RTCRtpEncodingParameters]()
-        if trackType == .screenshare {
+        if trackType == .screenShare {
             codecs = [.screenshare]
         }
         for codec in codecs {
@@ -553,7 +546,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             if let scaleDownFactor = codec.scaleDownFactor {
                 encodingParam.scaleResolutionDownBy = (scaleDownFactor) as NSNumber
             }
-            if trackType == .screenshare {
+            if trackType == .screenShare {
                 encodingParam.isActive = true
             }
             encodingParams.append(encodingParam)
@@ -573,165 +566,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                     continuation.resume(returning: true)
                 }
             }
-        }
-    }
-}
-
-struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
-    let rawValue: String
-
-    init(rawValue: String) {
-        self.rawValue = rawValue
-    }
-
-    init(stringLiteral value: String) {
-        self.init(rawValue: value)
-    }
-}
-
-extension TrackType {
-    static let audio: Self = "audio"
-    static let video: Self = "video"
-    static let screenshare: Self = "screenshare"
-}
-
-struct ICECandidate: Codable {
-    let candidate: String
-    let sdpMid: String?
-    let sdpMLineIndex: Int32
-}
-
-extension RTCIceCandidate {
-
-    func toIceCandidate() -> ICECandidate {
-        ICECandidate(candidate: sdp, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex)
-    }
-}
-
-extension RTCVideoCodecInfo {
-
-    func toSfuCodec() -> Stream_Video_Sfu_Models_Codec {
-        var codec = Stream_Video_Sfu_Models_Codec()
-        codec.name = name
-        return codec
-    }
-}
-
-extension RTCIceConnectionState: CustomStringConvertible {
-
-    public var description: String {
-        switch self {
-        case .new:
-            return "new"
-        case .checking:
-            return "checking"
-        case .connected:
-            return "connected"
-        case .completed:
-            return "completed"
-        case .failed:
-            return "failed"
-        case .disconnected:
-            return "disconnected"
-        case .closed:
-            return "closed"
-        case .count:
-            return "count"
-        @unknown default:
-            return "unknown"
-        }
-    }
-}
-
-extension RTCPeerConnectionState: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .new:
-            return "new"
-        case .connecting:
-            return "connecting"
-        case .connected:
-            return "connected"
-        case .disconnected:
-            return "disconnected"
-        case .failed:
-            return "failed"
-        case .closed:
-            return "closed"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCSignalingState: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .stable:
-            return "stable"
-        case .haveLocalOffer:
-            return "haveLocalOffer"
-        case .haveLocalPrAnswer:
-            return "haveLocalPrAnswer"
-        case .haveRemoteOffer:
-            return "haveRemoteOffer"
-        case .haveRemotePrAnswer:
-            return "haveRemotePrAnswer"
-        case .closed:
-            return "closed"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCRtpTransceiverDirection: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .sendRecv:
-            return "sendRecv"
-        case .sendOnly:
-            return "sendOnly"
-        case .recvOnly:
-            return "recvOnly"
-        case .inactive:
-            return "inactive"
-        case .stopped:
-            return "stopped"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCIceGatheringState: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .new:
-            return "new"
-        case .gathering:
-            return "gathering"
-        case .complete:
-            return "complete"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCSdpType: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .offer:
-            return "offer"
-        case .prAnswer:
-            return "prAnswer"
-        case .answer:
-            return "answer"
-        case .rollback:
-            return "rollback"
-        @unknown default:
-            return "unknown/default"
         }
     }
 }

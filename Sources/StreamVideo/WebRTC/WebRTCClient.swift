@@ -604,7 +604,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 publisher?.addTransceiver(
                     screenshareTrack,
                     streamIds: ["\(sessionID)-screenshare-\(type)"],
-                    trackType: .screenshare
+                    trackType: .screenShare
                 )
                 await state.add(screensharingTrack: screenshareTrack, id: sessionID)
                 await assignTracksToParticipants()
