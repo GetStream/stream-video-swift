@@ -191,6 +191,7 @@ private extension DefaultConnectionRecoveryHandler {
 // MARK: - Reconnection
 
 private extension DefaultConnectionRecoveryHandler {
+    // TODO: improve with reconnection refactor.
     @MainActor func reconnectIfNeeded() {
         guard canReconnectAutomatically else { return }
                 

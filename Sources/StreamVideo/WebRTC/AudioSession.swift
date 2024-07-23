@@ -45,9 +45,9 @@ actor AudioSession {
     }
     
     nonisolated private func cleanup() {
-        RTCAudioSession.sharedInstance().lockForConfiguration()
-        RTCAudioSession.sharedInstance().isAudioEnabled = false
-        RTCAudioSession.sharedInstance().unlockForConfiguration()
+        rtcAudioSession.lockForConfiguration()
+        rtcAudioSession.isAudioEnabled = false
+        rtcAudioSession.unlockForConfiguration()
     }
 }
 
@@ -62,3 +62,5 @@ extension RTCAudioSessionConfiguration: @unchecked Sendable {
         return configuration
     }()
 }
+
+extension RTCAudioSession: @unchecked Sendable {}
