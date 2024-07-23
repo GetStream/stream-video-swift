@@ -3,8 +3,8 @@
 //
 
 import SnapshotTesting
-@testable import StreamVideoSwiftUI
 import StreamSwiftTestHelpers
+@testable import StreamVideoSwiftUI
 import SwiftUI
 import XCTest
 
@@ -20,7 +20,6 @@ final class ToastView_Tests: StreamVideoUITestCase {
             )
             .toastView(toast: .constant(toast))
 
-        
         // Then
         AssertSnapshot(view, variants: snapshotVariants)
     }
@@ -35,7 +34,6 @@ final class ToastView_Tests: StreamVideoUITestCase {
             )
             .toastView(toast: .constant(toast))
 
-        
         // Then
         AssertSnapshot(view, variants: snapshotVariants)
     }
@@ -50,7 +48,6 @@ final class ToastView_Tests: StreamVideoUITestCase {
             )
             .toastView(toast: .constant(toast))
 
-        
         // Then
         AssertSnapshot(view, variants: snapshotVariants)
     }
@@ -65,7 +62,6 @@ final class ToastView_Tests: StreamVideoUITestCase {
             )
             .toastView(toast: .constant(toast))
 
-        
         // Then
         AssertSnapshot(view, variants: snapshotVariants)
     }
@@ -80,9 +76,7 @@ final class ToastView_Tests: StreamVideoUITestCase {
             )
             .toastView(toast: .constant(toast))
 
-        
         // Then
         AssertSnapshot(view, variants: snapshotVariants)
     }
-
 }

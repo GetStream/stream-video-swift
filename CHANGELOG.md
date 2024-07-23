@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.0.9](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.9)
+_July 19, 2024_
+
 ### ✅ Added
 - Support for custom participant sorting in the Call object. [#438](https://github.com/GetStream/stream-video-swift/pull/438)
 - Ability to join call in advance with joinAheadTimeSeconds parameter. [#446](https://github.com/GetStream/stream-video-swift/pull/446)

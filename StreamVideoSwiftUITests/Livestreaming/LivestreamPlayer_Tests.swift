@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import SnapshotTesting
+import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
-import StreamSwiftTestHelpers
-import SnapshotTesting
 import XCTest
 
 final class LivestreamPlayer_Tests: StreamVideoTestCase {
@@ -115,7 +115,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_pauseStream() {
         // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)        
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
         
         // When
         viewModel.update(streamPaused: true)

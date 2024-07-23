@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import SwiftUI
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
+import SwiftUI
 import XCTest
 
 final class ParticipantListButton_Tests: StreamVideoUITestCase {
@@ -71,4 +71,3 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase {
         )
     }
 }
-

@@ -8,103 +8,18 @@ import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
-public struct LocalVideoView<Factory: ViewFactory>: View {
-    
-    @Injected(\.streamVideo) var streamVideo
-    
-    private let callSettings: CallSettings
-    private var viewFactory: Factory
-    private var participant: CallParticipant
-    private var idSuffix: String
-    private var call: Call?
-    private var availableFrame: CGRect
-
-    public init(
-        viewFactory: Factory,
-        participant: CallParticipant,
-        idSuffix: String = "local",
-        callSettings: CallSettings,
-        call: Call?,
-        availableFrame: CGRect
-    ) {
-        self.viewFactory = viewFactory
-        self.participant = participant
-        self.idSuffix = idSuffix
-        self.callSettings = callSettings
-        self.call = call
-        self.availableFrame = availableFrame
-    }
-            
-    public var body: some View {
-        viewFactory.makeVideoParticipantView(
-            participant: participant,
-            id: "\(streamVideo.user.id)-\(idSuffix)",
-            availableFrame: availableFrame,
-            contentMode: .scaleAspectFill,
-            customData: ["videoOn": .bool(callSettings.videoOn)],
-            call: call
-        )
-        .adjustVideoFrame(to: availableFrame.width, ratio: availableFrame.width / availableFrame.height)
-    }
-}
-
-public struct VideoRendererView: UIViewRepresentable {
-
-    public typealias UIViewType = VideoRenderer
-
-    @Injected(\.utils) var utils
-    @Injected(\.colors) var colors
-    @Injected(\.videoRendererPool) private var videoRendererPool
-
-    var id: String
-    
-    var size: CGSize
-
-    var contentMode: UIView.ContentMode
-    
-    /// The parameter is used as an optimisation that works with the ViewRenderer Cache that's in place.
-    /// In cases where there is no video available, we will render a dummy VideoRenderer that won't try
-    /// to get a handle on the cached VideoRenderer, resolving the issue where video tracks may get dark.
-    var showVideo: Bool
-
-    var handleRendering: (VideoRenderer) -> Void
-
-    public init(
-        id: String,
-        size: CGSize,
-        contentMode: UIView.ContentMode = .scaleAspectFill,
-        showVideo: Bool = true,
-        handleRendering: @escaping (VideoRenderer) -> Void
-    ) {
-        self.id = id
-        self.size = size
-        self.handleRendering = handleRendering
-        self.showVideo = showVideo
-        self.contentMode = contentMode
-    }
-
-    public func makeUIView(context: Context) -> VideoRenderer {
-        let view = videoRendererPool.acquireRenderer(size: size)
-        view.videoContentMode = contentMode
-        view.backgroundColor = colors.participantBackground
-        if showVideo {
-            handleRendering(view)
-        }
-        return view
-    }
-    
-    public func updateUIView(_ uiView: VideoRenderer, context: Context) {
-        if showVideo {
-            handleRendering(uiView)
-        }
-    }
-}
-
 /// A custom video renderer based on RTCMTLVideoView for rendering RTCVideoTrack objects.
 public class VideoRenderer: RTCMTLVideoView {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
-    @Injected(\.videoRendererPool) private var videoRendererPool
+
+    private let _windowSubject: PassthroughSubject<UIWindow?, Never> = .init()
+    private let _superviewSubject: PassthroughSubject<UIView?, Never> = .init()
+    private let _frameSubject: PassthroughSubject<CGRect, Never> = .init()
+
+    var windowPublisher: AnyPublisher<UIWindow?, Never> { _windowSubject.eraseToAnyPublisher() }
+    var superviewPublisher: AnyPublisher<UIView?, Never> { _superviewSubject.eraseToAnyPublisher() }
+    var framePublisher: AnyPublisher<CGRect, Never> { _frameSubject.eraseToAnyPublisher() }
 
     /// DispatchQueue for synchronizing access to the video track.
     let queue = DispatchQueue(label: "video-track")
@@ -190,13 +105,19 @@ public class VideoRenderer: RTCMTLVideoView {
     override public func layoutSubviews() {
         super.layoutSubviews()
         viewSize = bounds.size
+        _frameSubject.send(frame)
+    }
+
+    override public func willMove(toWindow newWindow: UIWindow?) {
+        _windowSubject.send(newWindow)
+        super.willMove(toWindow: newWindow)
     }
 
     /// Overrides the willMove(toSuperview:) method to release the renderer when removed from its superview.
     override public func willMove(toSuperview newSuperview: UIView?) {
+        _superviewSubject.send(newSuperview)
         super.willMove(toSuperview: newSuperview)
         if newSuperview == nil {
-            videoRendererPool.releaseRenderer(self)
             // Clean up any rendered frames.
             setSize(.zero)
         }

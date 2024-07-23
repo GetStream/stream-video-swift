@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'StreamVideo-XCFramework'
-  spec.version = '1.0.8'
+  spec.version = '1.0.9'
   spec.summary = 'StreamVideo iOS Video Client'
   spec.description = 'StreamVideo is the official Swift client for Stream Video, a service for building video applications.'
 
@@ -17,10 +17,10 @@ Pod::Spec.new do |spec|
 
   spec.module_name = 'StreamVideo'
   spec.source = { http: "https://github.com/GetStream/stream-video-swift/releases/download/#{spec.version}/#{spec.module_name}.zip" }
-  spec.preserve_paths = "#{spec.module_name}.xcframework/*"
+  spec.vendored_frameworks = "#{spec.module_name}.xcframework", 'Frameworks/StreamWebRTC.xcframework'
+  spec.preserve_paths = "#{spec.module_name}.xcframework/*", 'Frameworks/*'
 
   spec.dependency('SwiftProtobuf', '~> 1.18.0')
-  spec.vendored_frameworks = 'Frameworks/StreamWebRTC.xcframework'
 
   spec.prepare_command = <<-CMD
     mkdir -p Frameworks/

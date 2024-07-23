@@ -23,6 +23,20 @@ To add `StreamVideo` SDK, open Xcode and follow these steps:
 
 ![Screenshot shows selection of dependencies](../assets/spm_select.png)
 
+<details><summary>➤ Do you want to use <b>XCFrameworks</b>? (Click to read more)</summary>
+<p>
+
+:::caution
+Our XCFrameworks are built with **Swift 5.9**. In order to use them you need **Xcode 15** or above
+:::
+
+You can learn more about [our Module Stable XCFrameworks here](#xcframeworks)
+
+- Use the URL https://github.com/getstream/stream-video-swift-spm.git
+
+</p>
+</details>
+
 ### Permissions
 
 Making a video call requires the usage of the camera and the microphone of the device. Therefore, you need to request permissions to use them in your app. In order to do this, you will need to add the following keys and values in your `Info.plist` file.
@@ -52,9 +66,10 @@ An **XCFramework** is a package that contains binaries for multiple architecture
 - No more fat binaries. No more architectures stripping
 
 :::info
-In order to manually integrate StreamVideo XCFrameworks, you need to add an additional dependency to your project.
+In order to manually integrate StreamVideo XCFrameworks, you need to add the additional dependencies to your project.
 
 ```swift
-.package(name: "StreamWebRTC", url: "https://github.com/GetStream/stream-video-swift-webrtc.git", .exact("114.5735.8"))
+.package(name: "StreamWebRTC", url: "https://github.com/GetStream/stream-video-swift-webrtc.git", .exact("114.5735.8")),
+.package(url: "https://github.com/apple/swift-protobuf.git", from: "1.18.0")
 ```
 :::

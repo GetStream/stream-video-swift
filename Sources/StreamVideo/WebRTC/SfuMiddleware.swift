@@ -96,6 +96,8 @@ class SfuMiddleware: EventMiddleware, @unchecked Sendable {
                     log.debug("Received call ended event with reason \(event.reason)")
                 case let .participantUpdated(event):
                     await handleParticipantUpdated(event)
+                case .participantMigrationComplete:
+                    log.debug("Participant migration complete")
                 }
             } catch {
                 log.error(error)

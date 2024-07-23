@@ -8,7 +8,7 @@ import StreamVideo
 import StreamWebRTC
 
 /// Describes an object that can be used to present picture-in-picture content.
-protocol StreamAVPictureInPictureViewControlling {
+protocol StreamAVPictureInPictureViewControlling: AnyObject {
     
     /// The closure to call whenever the picture-in-picture window size changes.
     var onSizeUpdate: ((CGSize) -> Void)? { get set }
@@ -29,7 +29,8 @@ protocol StreamAVPictureInPictureViewControlling {
 final class StreamAVPictureInPictureVideoCallViewController:
     AVPictureInPictureVideoCallViewController {
 
-    private let contentView: StreamPictureInPictureVideoRenderer = .init()
+    private let contentView: StreamPictureInPictureVideoRenderer =
+        .init(windowSizePolicy: StreamPictureInPictureAdaptiveWindowSizePolicy())
 
     var onSizeUpdate: ((CGSize) -> Void)?
 
@@ -41,6 +42,16 @@ final class StreamAVPictureInPictureVideoCallViewController:
     var displayLayer: CALayer { contentView.displayLayer }
 
     // MARK: - Lifecycle
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    /// Initializes a new instance and sets the `preferredContentSize` to `Self.defaultPreferredContentSize`
+    /// value.
+    required init() {
+        super.init(nibName: nil, bundle: nil)
+        contentView.pictureInPictureWindowSizePolicy.controller = self
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()

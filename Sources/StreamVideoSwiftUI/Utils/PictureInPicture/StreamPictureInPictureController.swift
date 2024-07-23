@@ -75,14 +75,13 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
             return nil
         }
 
-        var contentViewController: StreamAVPictureInPictureViewControlling? = {
+        let contentViewController: StreamAVPictureInPictureViewControlling? = {
             if #available(iOS 15.0, *) {
                 return StreamAVPictureInPictureVideoCallViewController()
             } else {
                 return nil
             }
         }()
-        contentViewController?.preferredContentSize = .init(width: 640, height: 480)
         self.contentViewController = contentViewController
         self.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
         super.init()

@@ -22,7 +22,7 @@ reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
-swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoUIKitTests"]
+swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
 
 before_all do |lane|
   if is_ci
@@ -323,7 +323,7 @@ end
 
 lane :build_xcframeworks do
   match_me
-  output_directory = "#{Dir.pwd}/../Products"
+  output_directory = File.absolute_path("#{Dir.pwd}/../Products")
   team_id = File.read('Matchfile').match(/team_id\("(.*)"\)/)[1]
   codesign = ["codesign --timestamp -v --sign 'Apple Distribution: Stream.io Inc (#{team_id})'"]
   sdk_names.each do |sdk|
@@ -340,7 +340,19 @@ lane :build_xcframeworks do
     sh('../Scripts/removeUnneededSymbols.sh', sdk, output_directory)
     codesign << lane_context[SharedValues::XCFRAMEWORK_OUTPUT_PATH]
   end
+
+  remove_stream_video_module_shadow(output_directory: output_directory)
   sh(codesign.join(' ')) # We need to sign all frameworks at once
+end
+
+# Swift emits an invalid module interface when a public type has the same name as a module, see https://github.com/swiftlang/swift/issues/56573
+private_lane :remove_stream_video_module_shadow do |options|
+  Dir.glob("#{options[:output_directory]}/**/*.swiftinterface") do |file|
+    if File.file?(file)
+      UI.important("Removing the StreamVideo module's shadow at: #{file}...")
+      File.write(file, File.read(file).gsub('StreamVideo.', ''))
+    end
+  end
 end
 
 desc 'Runs e2e ui tests'
@@ -491,8 +503,11 @@ lane :merge_main_to_develop do
     ensure_git_status_clean
   end
 
-  sh('git checkout main && git pull')
-  sh('git checkout develop && git pull')
+  sh('git checkout main')
+  sh('git pull origin main')
+  sh('git checkout develop')
+  sh('git pull origin develop')
+  sh('git log develop..main')
   sh('git merge main')
   sh('git push')
 end

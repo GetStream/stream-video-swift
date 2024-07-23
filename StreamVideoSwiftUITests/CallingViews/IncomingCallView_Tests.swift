@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@testable import StreamVideoSwiftUI
-@testable import StreamVideo
-import StreamSwiftTestHelpers
 import SnapshotTesting
+import StreamSwiftTestHelpers
+@testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 @MainActor
@@ -23,8 +23,8 @@ final class IncomingCallView_Tests: StreamVideoUITestCase {
             )
             let view = IncomingCallView(
                 callInfo: callInfo,
-                onCallAccepted: {_ in },
-                onCallRejected: {_ in }
+                onCallAccepted: { _ in },
+                onCallRejected: { _ in }
             )
             AssertSnapshot(view, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }

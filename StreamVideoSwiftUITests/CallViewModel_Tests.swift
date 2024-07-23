@@ -261,13 +261,12 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter.process(wrapped)
         
         await fulfillment {
-            if case .incoming(_) = callViewModel.callingState {
+            if case .incoming = callViewModel.callingState {
                 return true
             } else {
                 return false
             }
         }
-
 
         // Then
         guard case let .incoming(call) = callViewModel.callingState else {
@@ -315,13 +314,12 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter.process(.coordinatorEvent(.typeCallRingEvent(event)))
         
         await fulfillment {
-            if case .incoming(_) = callViewModel.callingState {
+            if case .incoming = callViewModel.callingState {
                 return true
             } else {
                 return false
             }
         }
-
 
         // Then
         guard case let .incoming(call) = callViewModel.callingState else {
@@ -367,7 +365,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             members: participants
         )
         await fulfillment {
-            if case .lobby(_) = callViewModel.callingState {
+            if case .lobby = callViewModel.callingState {
                 return true
             } else {
                 return false
@@ -408,7 +406,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             members: participants
         )
         await fulfillment {
-            if case .lobby(_) = callViewModel.callingState {
+            if case .lobby = callViewModel.callingState {
                 return true
             } else {
                 return false
@@ -625,51 +623,213 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     @MainActor
     func test_participants_layoutIsGrid_validateAllVariants() async throws {
         try await assertParticipantScenarios([
-            .init(callParticipantsCount: 2, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 1),
-            .init(callParticipantsCount: 2, participantsLayout: .grid, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 1),
-            .init(callParticipantsCount: 2, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 1),
-
-            .init(callParticipantsCount: 3, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 2),
-            .init(callParticipantsCount: 3, participantsLayout: .grid, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 2),
-            .init(callParticipantsCount: 3, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 2),
-
-            .init(callParticipantsCount: 4, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 4),
-            .init(callParticipantsCount: 4, participantsLayout: .grid, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 4),
-            .init(callParticipantsCount: 4, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 4),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .grid,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 1
+            ),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .grid,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 1
+            ),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .grid,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 1
+            ),
+            
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .grid,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 2
+            ),
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .grid,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 2
+            ),
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .grid,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 2
+            ),
+            
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .grid,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 4
+            ),
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .grid,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 4
+            ),
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .grid,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 4
+            )
         ])
     }
 
     @MainActor
     func test_participants_layoutIsSpotlight_validateAllVariants() async throws {
         try await assertParticipantScenarios([
-            .init(callParticipantsCount: 2, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 2),
-            .init(callParticipantsCount: 2, participantsLayout: .spotlight, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 2),
-            .init(callParticipantsCount: 2, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 2),
-
-            .init(callParticipantsCount: 3, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 3),
-            .init(callParticipantsCount: 3, participantsLayout: .spotlight, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 3),
-            .init(callParticipantsCount: 3, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 3),
-
-            .init(callParticipantsCount: 4, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 4),
-            .init(callParticipantsCount: 4, participantsLayout: .spotlight, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 4),
-            .init(callParticipantsCount: 4, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 4),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 2
+            ),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 2
+            ),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 2
+            ),
+            
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 3
+            ),
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 3
+            ),
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 3
+            ),
+            
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 4
+            ),
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 4
+            ),
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .spotlight,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 4
+            )
         ])
     }
 
     @MainActor
     func test_participants_layoutIsFullscreen_validateAllVariants() async throws {
         try await assertParticipantScenarios([
-            .init(callParticipantsCount: 2, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 2),
-            .init(callParticipantsCount: 2, participantsLayout: .fullScreen, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 2),
-            .init(callParticipantsCount: 2, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 2),
-
-            .init(callParticipantsCount: 3, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 3),
-            .init(callParticipantsCount: 3, participantsLayout: .fullScreen, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 3),
-            .init(callParticipantsCount: 3, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 3),
-
-            .init(callParticipantsCount: 4, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 4),
-            .init(callParticipantsCount: 4, participantsLayout: .fullScreen, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 4),
-            .init(callParticipantsCount: 4, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 4),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 2
+            ),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 2
+            ),
+            .init(
+                callParticipantsCount: 2,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 2
+            ),
+            
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 3
+            ),
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 3
+            ),
+            .init(
+                callParticipantsCount: 3,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 3
+            ),
+            
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: false,
+                expectedCount: 4
+            ),
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: true,
+                isRemoteScreenSharing: false,
+                expectedCount: 4
+            ),
+            .init(
+                callParticipantsCount: 4,
+                participantsLayout: .fullScreen,
+                isLocalScreenSharing: false,
+                isRemoteScreenSharing: true,
+                expectedCount: 4
+            )
         ])
     }
 
@@ -691,7 +851,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             try await assertParticipants(
                 callParticipantsCount: scenario.callParticipantsCount,
                 participantsLayout: scenario.participantsLayout,
-                isLocalScreenSharing:scenario.isLocalScreenSharing,
+                isLocalScreenSharing: scenario.isLocalScreenSharing,
                 isRemoteScreenSharing: scenario.isRemoteScreenSharing,
                 expectedCount: scenario.expectedCount,
                 file: file,
@@ -747,7 +907,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         XCTAssertEqual(callViewModel.participants.count, expectedCount, file: file, line: line)
     }
 
-    //MARK: - private
+    // MARK: - private
     
     @MainActor
     private func callViewModelWithRingingCall(participants: [Member]) -> CallViewModel {
