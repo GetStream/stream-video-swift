@@ -213,7 +213,9 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         reset()
 
         if (captureSession.isRunning == false) {
-            self.captureSession?.startRunning()
+            Task {
+                self.captureSession?.startRunning()
+            }
         }
     }
 
@@ -319,7 +321,9 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         super.viewDidDisappear(animated)
 
         if (captureSession?.isRunning == true) {
-            captureSession?.stopRunning()
+            Task {
+                captureSession?.stopRunning()
+            }
         }
 
         NotificationCenter.default.removeObserver(self)
