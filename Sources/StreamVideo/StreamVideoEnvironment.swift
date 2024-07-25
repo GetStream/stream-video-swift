@@ -62,7 +62,7 @@ extension StreamVideo {
                 webSocketClient: $0,
                 eventNotificationCenter: $1,
                 backgroundTaskScheduler: backgroundTaskSchedulerBuilder(),
-                internetConnection: InternetConnection(monitor: InternetConnection.Monitor()),
+                internetConnection: InjectedValues[\.internetConnectionObserver],
                 reconnectionStrategy: DefaultRetryStrategy(),
                 reconnectionTimerType: DefaultTimer.self,
                 keepConnectionAliveInBackground: true

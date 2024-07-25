@@ -13,11 +13,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let sessionId: String
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
-    private(set) var transceiver: RTCRtpTransceiver?
-    private(set) var transceiverScreenshare: RTCRtpTransceiver?
-    internal var pendingIceCandidates = [RTCIceCandidate]()
+    private var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
+
+    private(set) var transceiver: RTCRtpTransceiver?
+    private(set) var transceiverScreenshare: RTCRtpTransceiver?
 
     var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?

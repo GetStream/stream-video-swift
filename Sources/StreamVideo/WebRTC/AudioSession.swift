@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-actor AudioSession {
+final class AudioSession {
     
     private let rtcAudioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
 

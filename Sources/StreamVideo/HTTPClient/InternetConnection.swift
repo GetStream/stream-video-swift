@@ -2,6 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import Network
 
@@ -28,6 +29,10 @@ extension Notification {
 class InternetConnection {
     /// The current Internet connection status.
     private(set) var status: InternetConnection.Status {
+        willSet {
+            subject.send(status)
+        }
+        
         didSet {
             guard oldValue != status else { return }
             
@@ -40,7 +45,12 @@ class InternetConnection {
             postNotification(.internetConnectionAvailabilityDidChange, with: status)
         }
     }
-    
+
+    private let subject: CurrentValueSubject<InternetConnection.Status, Never> = .init(.unknown)
+    var publisher: AnyPublisher<InternetConnection.Status, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
     /// The notification center that posts notifications when connection state changes..
     let notificationCenter: NotificationCenter
     
@@ -207,5 +217,16 @@ extension InternetConnection {
         deinit {
             stop()
         }
+    }
+}
+
+extension InternetConnection: InjectionKey {
+    static var currentValue = InternetConnection(monitor: InternetConnection.Monitor())
+}
+
+extension InjectedValues {
+    var internetConnectionObserver: InternetConnection {
+        get { Self[InternetConnection.self] }
+        set { Self[InternetConnection.self] = newValue }
     }
 }

@@ -21,7 +21,11 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
     
     weak var delegate: WebSocketEngineDelegate?
     
-    required init(request: URLRequest, sessionConfiguration: URLSessionConfiguration, callbackQueue: DispatchQueue) {
+    required init(
+        request: URLRequest,
+        sessionConfiguration: URLSessionConfiguration,
+        callbackQueue: DispatchQueue?
+    ) {
         self.request = request
         self.sessionConfiguration = sessionConfiguration
         

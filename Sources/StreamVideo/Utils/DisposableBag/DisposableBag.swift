@@ -12,6 +12,10 @@ public final class DisposableBag: Sequence {
 
     public init() {}
 
+    deinit {
+        removeAll()
+    }
+
     public func insert(_ cancellable: AnyCancellable) {
         queue.sync {
             _ = storage.insert(cancellable)
@@ -35,4 +39,8 @@ public final class DisposableBag: Sequence {
 
 extension AnyCancellable {
     public func store(in disposableBag: DisposableBag) { disposableBag.insert(self) }
+}
+
+extension Task {
+    public func store(in disposableBag: DisposableBag) { disposableBag.insert(.init(cancel)) }
 }

@@ -176,6 +176,11 @@ class SfuMiddleware: EventMiddleware {
     private func handleChangePublishQualityEvent(
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
+        /* TODO:
+         let enabledRids = Set(event.videoSenders.first?.layers.filter(\.active).map(\.name) ?? [])
+         publisher?.changeQuality(with enabledRids: enabledRids)
+         */
+
         guard let transceiver = publisher?.transceiver else { return }
         let enabledRids = event.videoSenders.first?.layers
             .filter { $0.active }
@@ -228,11 +233,13 @@ class SfuMiddleware: EventMiddleware {
             log.debug("Adding ice candidate for the subscriber")
             try await executeTask(retryPolicy: .fastAndSimple) {
                 try await subscriber.add(iceCandidate: iceCandidate)
+                // TODO: subscriber.add(.iceCandidate(iceCandidate))
             }
         } else if peerType == .publisherUnspecified, let publisher = self.publisher {
             log.debug("Adding ice candidate for the publisher")
             try await executeTask(retryPolicy: .fastAndSimple) {
                 try await publisher.add(iceCandidate: iceCandidate)
+                // TODO: subscriber.add(.iceCandidate(iceCandidate))
             }
         }
     }

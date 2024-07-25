@@ -288,12 +288,15 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             log.debug("Skipping connection, already connected or connecting", subsystems: .webRTC)
             return
         }
+
         self.videoOptions = videoOptions
         self.connectOptions = connectOptions
         self.callSettings = callSettings
         log.debug("Connecting to SFU", subsystems: .webRTC)
+        
         await state.update(connectionState: .connecting)
         log.debug("Setting user media", subsystems: .webRTC)
+        
         if !isReconnection {
             isFastReconnecting = false
             await setupUserMedia(callSettings: callSettings)
@@ -310,6 +313,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             signalChannel?.connect()
             sfuMiddleware.onSocketConnected = handleOnSocketConnected
         }
+        
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
             self?.onParticipantCountUpdated?(participantCount)
         }
@@ -372,7 +376,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     func setupUserMedia(callSettings: CallSettings) async {
         if hasCapability(.sendAudio), localAudioTrack == nil {
-            await audioSession.configure(
+            audioSession.configure(
                 audioOn: callSettings.audioOn,
                 speakerOn: callSettings.speakerOn
             )
@@ -1034,10 +1038,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         constraints: RTCMediaConstraints? = nil
     ) async throws {
         guard let peerConnection else { return }
+
         log.debug("Negotiating peer connection", subsystems: .webRTC)
         let initialOffer = try await peerConnection.createOffer(
             constraints: constraints ?? .defaultConstraints
         )
+
         log.debug("Setting local description for peer connection", subsystems: .webRTC)
         var updatedSdp = initialOffer.sdp
         if audioSettings.opusDtxEnabled {
@@ -1052,11 +1058,13 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         let offer = RTCSessionDescription(type: initialOffer.type, sdp: updatedSdp)
         try await peerConnection.setLocalDescription(offer)
+        
         var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
         request.sdp = offer.sdp
         request.sessionID = sessionID
         request.tracks = loadTracks()
         let connectURL = signalChannel?.connectURL
+
         try await executeTask(retryPolicy: .fastCheckValue { [weak self] in
             self?.sfuChanged(connectURL) == false
         }, task: {
@@ -1064,6 +1072,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             let sdp = response.sdp
             log.debug("Setting remote description", subsystems: .webRTC)
             try await peerConnection.setRemoteDescription(sdp, type: .answer)
+            // TODO: try await peerConnection.setRemoteDescription(.init(type: .answer, sdp: sdp))
         })
     }
     

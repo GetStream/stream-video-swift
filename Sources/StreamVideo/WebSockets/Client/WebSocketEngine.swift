@@ -6,10 +6,13 @@ import Foundation
 
 protocol WebSocketEngine: AnyObject {
     var request: URLRequest { get }
-    var callbackQueue: DispatchQueue { get }
     var delegate: WebSocketEngineDelegate? { get set }
-    
-    init(request: URLRequest, sessionConfiguration: URLSessionConfiguration, callbackQueue: DispatchQueue)
+//
+    init(
+        request: URLRequest,
+        sessionConfiguration: URLSessionConfiguration,
+        callbackQueue: DispatchQueue?
+    )
     
     func connect()
     func disconnect()

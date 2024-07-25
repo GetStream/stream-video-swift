@@ -2,11 +2,17 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 
 /// The type is designed to pre-process some incoming `Event` via middlewares before being published
 class EventNotificationCenter: NotificationCenter {
     private(set) var middlewares: [EventMiddleware] = []
+
+    private let _publisher = PassthroughSubject<Event, Never>()
+    var publisher: AnyPublisher<Event, Never> {
+        _publisher.eraseToAnyPublisher()
+    }
 
     var eventPostingQueue = DispatchQueue(label: "io.getstream.event-notification-center")
     
@@ -30,6 +36,8 @@ class EventNotificationCenter: NotificationCenter {
             self.middlewares.process(event: $0)
         }
         
+        eventsToPost.forEach { _publisher.send($0) }
+
         guard postNotifications else {
             completion?()
             return

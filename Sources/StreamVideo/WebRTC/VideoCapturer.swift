@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-class VideoCapturer: CameraVideoCapturing {
+class VideoCapturer: CameraVideoCapturing, @unchecked Sendable {
     
     private var videoCapturer: RTCVideoCapturer?
     private var videoOptions: VideoOptions

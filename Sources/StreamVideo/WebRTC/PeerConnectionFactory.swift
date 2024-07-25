@@ -52,8 +52,7 @@ final class PeerConnectionFactory {
     ) throws -> PeerConnection {
         let pc = try makePeerConnection(
             configuration: configuration,
-            constraints: constraints,
-            delegate: nil
+            constraints: constraints
         )
         let peerConnection = PeerConnection(
             sessionId: sessionId,
@@ -81,15 +80,14 @@ final class PeerConnectionFactory {
         factory.audioTrack(with: source, trackId: UUID().uuidString)
     }
 
-    private func makePeerConnection(
+    func makePeerConnection(
         configuration: RTCConfiguration,
-        constraints: RTCMediaConstraints,
-        delegate: RTCPeerConnectionDelegate?
+        constraints: RTCMediaConstraints
     ) throws -> RTCPeerConnection {
         guard let peerConnection = factory.peerConnection(
             with: configuration,
             constraints: constraints,
-            delegate: delegate
+            delegate: nil
         ) else {
             throw ClientError.Unexpected()
         }
