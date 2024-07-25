@@ -552,9 +552,8 @@ open class CallViewModel: ObservableObject {
         callingState = .idle
         isMinimized = false
         localVideoPrimary = false
-        let audioRecorder = self.audioRecorder
-        Task {
-            await audioRecorder.stopRecording()
+        Task { [weak self] in
+            await self?.audioRecorder.stopRecording()
         }
     }
 
@@ -600,9 +599,8 @@ open class CallViewModel: ObservableObject {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 callingState = .idle
-                let audioRecorder = self.audioRecorder
-                Task {
-                    await audioRecorder.stopRecording()
+                Task { [weak self] in
+                    await self?.audioRecorder.stopRecording()
                 }
                 enteringCallTask = nil
             }

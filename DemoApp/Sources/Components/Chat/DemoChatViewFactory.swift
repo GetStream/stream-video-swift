@@ -16,7 +16,7 @@ final class DemoChatViewFactory {
 
     @MainActor static let shared = DemoChatViewFactory()
 
-    func makeReactionsOverlayView(
+    @MainActor func makeReactionsOverlayView(
         channel: ChatChannel,
         currentSnapshot: UIImage,
         messageDisplayInfo: MessageDisplayInfo,

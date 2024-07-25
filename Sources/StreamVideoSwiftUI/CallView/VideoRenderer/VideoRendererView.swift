@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import StreamVideo
+import StreamWebRTC
 import SwiftUI
 
 /// A view that wraps a `VideoRenderer` and integrates with SwiftUI.
@@ -52,17 +53,6 @@ public struct VideoRendererView: UIViewRepresentable {
         self.contentMode = contentMode
     }
 
-    /// Dismantles the `UIView` when it is no longer needed.
-    /// - Parameters:
-    ///   - uiView: The `VideoRenderer` to dismantle.
-    ///   - coordinator: The coordinator associated with the view.
-    public static func dismantleUIView(
-        _ uiView: VideoRenderer,
-        coordinator: Coordinator
-    ) {
-        coordinator.dismantle()
-    }
-
     /// Creates the `VideoRenderer` view.
     /// - Parameter context: The context containing information about the current state of the system.
     /// - Returns: A configured `VideoRenderer` instance.
@@ -100,7 +90,7 @@ public struct VideoRendererView: UIViewRepresentable {
 /// Extension for `VideoRendererView` to define the `Coordinator` class.
 extension VideoRendererView {
     /// A class to coordinate the `VideoRendererView` and manage its lifecycle.
-    public final class Coordinator {
+    @MainActor public final class Coordinator {
         /// Injected dependency for accessing the video renderer pool.
         @Injected(\.videoRendererPool) private var videoRendererPool
 
@@ -112,24 +102,24 @@ extension VideoRendererView {
         /// The video renderer managed by this coordinator.
         fileprivate private(set) lazy var renderer: VideoRenderer = videoRendererPool
             .acquireRenderer(size: .zero)
+        
+        nonisolated(unsafe) private var dismantle: (() -> Void)?
 
         /// Initializes a new instance of the coordinator.
         /// - Parameter handleRendering: A closure to handle the rendering of the video.
         init(handleRendering: ((VideoRenderer) -> Void)?) {
             self.handleRendering = handleRendering
-            _ = renderer
             setupRendererObservation()
+            dismantle = { [weak self] in
+                guard let self else { return }
+                renderer.track?.remove(renderer)
+                disposableBag.removeAll()
+                videoRendererPool.releaseRenderer(renderer)
+            }
         }
 
         deinit {
-            dismantle()
-        }
-
-        /// Dismantles the video renderer and releases resources.
-        func dismantle() {
-            renderer.track?.remove(renderer)
-            disposableBag.removeAll()
-            videoRendererPool.releaseRenderer(renderer)
+            dismantle?()
         }
 
         // MARK: Private API

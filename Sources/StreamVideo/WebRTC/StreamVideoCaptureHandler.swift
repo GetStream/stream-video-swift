@@ -76,8 +76,8 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     @objc private func updateRotation() {
-        Task { @MainActor in
-            self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+        Task { @MainActor [weak self] in
+            self?.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
 
@@ -127,13 +127,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     deinit {
-        if let notification {
-            NotificationCenter.default.removeObserver(
-                self,
-                name: notification,
-                object: nil
-            )
-        }
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
