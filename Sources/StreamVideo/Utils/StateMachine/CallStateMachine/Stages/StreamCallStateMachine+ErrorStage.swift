@@ -26,7 +26,7 @@ extension StreamCallStateMachine.Stage {
 extension StreamCallStateMachine.Stage {
 
     /// A class representing the error stage in the `StreamCallStateMachine`.
-    final class ErrorStage: StreamCallStateMachine.Stage {
+    final class ErrorStage: StreamCallStateMachine.Stage, @unchecked Sendable {
         let error: Error
 
         /// Initializes a new error stage with the provided call and error.

@@ -11,7 +11,7 @@ import Foundation
 /// the foreground objects using a filter processor. It caches processed background images to optimize
 /// performance for matching input sizes and orientations.
 @available(iOS 15.0, *)
-public final class ImageBackgroundVideoFilter: VideoFilter {
+public final class ImageBackgroundVideoFilter: VideoFilter, @unchecked Sendable {
 
     private struct CacheValue: Hashable {
         var originalImageSize: CGSize
