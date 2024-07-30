@@ -9,8 +9,9 @@
   <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9%2B-orange.svg" /></a>
 </p>
 <p align="center">
-  <img alt="StreamVideo" src="https://img.shields.io/endpoint?url=https://stream-sdks-size-badges.onrender.com/ios/stream-video&cacheSeconds=86400"/>
-  <img alt="StreamVideoSwiftUI" src="https://img.shields.io/endpoint?url=https://stream-sdks-size-badges.onrender.com/ios/stream-video-swiftui&cacheSeconds=86400"/>
+  <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-7.11MB-blue"/>
+  <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.18MB-blue"/>
+  <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.32MB-blue"/>
 </p>
 
 ![Stream Video for iOS Header image](https://github.com/GetStream/stream-video-swift/assets/12433593/e4a44ae5-a8eb-4ac7-8910-28187aa011f6)
