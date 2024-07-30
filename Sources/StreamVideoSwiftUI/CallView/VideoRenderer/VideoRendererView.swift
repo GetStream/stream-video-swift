@@ -92,7 +92,9 @@ extension VideoRendererView {
     /// A class to coordinate the `VideoRendererView` and manage its lifecycle.
     @MainActor public final class Coordinator {
         /// Injected dependency for accessing the video renderer pool.
-        @Injected(\.videoRendererPool) private var videoRendererPool
+        private var videoRendererPool: VideoRendererPool {
+            InjectedValues[\.videoRendererPool]
+        }
 
         /// A closure to handle the rendering of the video.
         private let handleRendering: ((VideoRenderer) -> Void)?

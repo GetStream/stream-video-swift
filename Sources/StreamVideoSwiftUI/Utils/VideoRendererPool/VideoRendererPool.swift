@@ -52,13 +52,13 @@ extension VideoRendererPool: @preconcurrency InjectionKey {
     @MainActor static var currentValue: VideoRendererPool = .init()
 }
 #else
-extension VideoRendererPool: InjectionKey {
+extension VideoRendererPool: InjectionKeyMainActor {
     @MainActor static var currentValue: VideoRendererPool = .init()
 }
 #endif
 
 extension InjectedValues {
-    var videoRendererPool: VideoRendererPool {
+    @MainActor var videoRendererPool: VideoRendererPool {
         get { Self[VideoRendererPool.self] }
         set { _ = newValue }
     }

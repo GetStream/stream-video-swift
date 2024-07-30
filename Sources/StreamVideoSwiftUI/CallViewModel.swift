@@ -12,8 +12,11 @@ import SwiftUI
 open class CallViewModel: ObservableObject {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
+    
+    @MainActor var pictureInPictureAdapter: StreamPictureInPictureAdapter {
+        InjectedValues[\.pictureInPictureAdapter]
+    }
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {

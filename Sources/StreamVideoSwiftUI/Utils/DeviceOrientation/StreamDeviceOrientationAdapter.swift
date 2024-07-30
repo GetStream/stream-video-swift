@@ -2,7 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-@preconcurrency import Combine
+import Combine
 import Foundation
 import StreamVideo
 #if canImport(UIKit)
@@ -83,14 +83,14 @@ enum StreamDeviceOrientationAdapterKey: @preconcurrency InjectionKey {
     @MainActor static var currentValue: StreamDeviceOrientationAdapter = .init()
 }
 #else
-enum StreamDeviceOrientationAdapterKey: InjectionKey {
-    static var currentValue: StreamDeviceOrientationAdapter = .init()
+enum StreamDeviceOrientationAdapterKey: InjectionKeyMainActor {
+    @MainActor static var currentValue: StreamDeviceOrientationAdapter = .init()
 }
 #endif
 
 extension InjectedValues {
     /// Provides access to the `StreamDeviceOrientationAdapter` class to the views and view models.
-    public var orientationAdapter: StreamDeviceOrientationAdapter {
+    @MainActor public var orientationAdapter: StreamDeviceOrientationAdapter {
         get {
             Self[StreamDeviceOrientationAdapterKey.self]
         }

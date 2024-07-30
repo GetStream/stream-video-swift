@@ -17,14 +17,14 @@ enum FormattersKey: @preconcurrency InjectionKey {
     @MainActor static var currentValue: Formatters = .init()
 }
 #else
-enum FormattersKey: InjectionKey {
+enum FormattersKey: InjectionKeyMainActor {
     @MainActor static var currentValue: Formatters = .init()
 }
 #endif
 
 extension InjectedValues {
     /// Provides access to the `Formatters` class to the views and view models.
-    public var formatters: Formatters {
+    @MainActor public var formatters: Formatters {
         get {
             Self[FormattersKey.self]
         }

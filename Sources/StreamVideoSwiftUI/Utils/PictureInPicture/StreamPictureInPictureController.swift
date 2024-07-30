@@ -12,7 +12,7 @@ import UIKit
 #endif
 
 /// A controller class for picture-in-picture whenever that is possible.
-final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
+final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate, @unchecked Sendable {
 
     // MARK: - Properties
 
@@ -33,7 +33,9 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     /// A closure called when the picture-in-picture view's size changes.
     public var onSizeUpdate: ((CGSize) -> Void)? {
         didSet {
-            contentViewController?.onSizeUpdate = onSizeUpdate // Updates the onSizeUpdate closure of the content view controller
+            Task { @MainActor in
+                contentViewController?.onSizeUpdate = onSizeUpdate // Updates the onSizeUpdate closure of the content vc
+            }
         }
     }
 
@@ -132,8 +134,10 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     // MARK: - Private helpers
 
     private func didUpdate(_ track: RTCVideoTrack?) {
-        contentViewController?.track = track
-        trackStateAdapter.activeTrack = track
+        Task { @MainActor in
+            contentViewController?.track = track
+            trackStateAdapter.activeTrack = track
+        }
     }
 
     private func didUpdate(_ sourceView: UIView?) {

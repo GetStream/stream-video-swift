@@ -99,14 +99,14 @@ enum StreamPictureInPictureAdapterKey: @preconcurrency InjectionKey {
     @MainActor static var currentValue: StreamPictureInPictureAdapter = .init()
 }
 #else
-enum StreamPictureInPictureAdapterKey: InjectionKey {
+enum StreamPictureInPictureAdapterKey: InjectionKeyMainActor {
     @MainActor static var currentValue: StreamPictureInPictureAdapter = .init()
 }
 #endif
 
 extension InjectedValues {
     /// Provides access to the `StreamPictureInPictureAdapter` class to the views and view models.
-    var pictureInPictureAdapter: StreamPictureInPictureAdapter {
+    @MainActor var pictureInPictureAdapter: StreamPictureInPictureAdapter {
         get {
             Self[StreamPictureInPictureAdapterKey.self]
         }

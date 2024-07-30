@@ -42,10 +42,13 @@ public struct BackportStateObject<ObjectType: ObservableObject>
         self.thunk = thunk
     }
     
-    public mutating func update() {
+    nonisolated public mutating func update() {
+        guard Thread.isMainThread else { return }
         // Not sure what this does but we'll just forward it
-        _state.update()
-        _observedObject.update()
+        MainActor.assumeIsolated {
+            _state.update()
+            _observedObject.update()
+        }
     }
 }
 

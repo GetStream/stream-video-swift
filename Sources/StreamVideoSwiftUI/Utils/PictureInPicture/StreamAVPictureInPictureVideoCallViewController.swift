@@ -8,7 +8,7 @@ import StreamVideo
 import StreamWebRTC
 
 /// Describes an object that can be used to present picture-in-picture content.
-protocol StreamAVPictureInPictureViewControlling: AnyObject {
+@MainActor protocol StreamAVPictureInPictureViewControlling: AnyObject {
     
     /// The closure to call whenever the picture-in-picture window size changes.
     var onSizeUpdate: ((CGSize) -> Void)? { get set }
