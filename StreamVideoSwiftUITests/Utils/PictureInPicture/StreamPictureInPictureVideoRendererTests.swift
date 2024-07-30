@@ -8,7 +8,7 @@ import XCTest
 
 final class StreamPictureInPictureVideoRenderer_Tests: XCTestCase {
 
-    func test_didUpdateTrackSize_windowSizePolicyWasUpdated() {
+    @MainActor func test_didUpdateTrackSize_windowSizePolicyWasUpdated() {
         let spyPolicy = StreamTestSpyPictureInPictureWindowSizePolicy()
         let subject = StreamPictureInPictureVideoRenderer(windowSizePolicy: spyPolicy)
         let targetSize = CGSize(width: 100, height: 150)

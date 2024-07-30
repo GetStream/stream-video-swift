@@ -19,7 +19,7 @@ final class StreamPictureInPictureFixedWindowSizePolicy_Tests: XCTestCase {
 
     // MARK: - didSetController
 
-    func test_didSetController_setsPreferredContentSizeOnController() {
+    @MainActor func test_didSetController_setsPreferredContentSizeOnController() {
         let controller = MockStreamAVPictureInPictureViewControlling()
         subject.controller = controller
 
