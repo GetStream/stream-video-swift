@@ -214,7 +214,7 @@ public class CallState: ObservableObject {
         case .typeCallHLSBroadcastingFailedEvent:
             break
         case .typeCallRecordingFailedEvent:
-            break
+            recordingState = .noRecording
         case .typeCallRecordingReadyEvent:
             break
         case .typeClosedCaptionEvent:
