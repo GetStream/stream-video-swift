@@ -5,6 +5,11 @@ description: Push Notifications setup
 
 The `StreamVideo` SDK supports two types of push notifications: regular and VoIP notifications. You can use one of them, or both, depending on your use-case.
 
+Push notifications are sent in the following scenarios:
+- you create a call with the `ring` value set to true. In this case, a VoIP notification that shows a ringing screen is sent.
+- you create a call with the `notify` value set to true. In this case, a regular push notification is sent.
+- you haven't answered a call. In this case, a missed call notification is sent (regular push notification).
+
 ### StreamVideo setup
 
 The push notification config is provided optionally, when the SDK is initalized. By default, the config uses `apn` as a push provider, for both VoIP and regular push. The push provider name for regular push is "apn", while for VoIP, the name is "voip".
