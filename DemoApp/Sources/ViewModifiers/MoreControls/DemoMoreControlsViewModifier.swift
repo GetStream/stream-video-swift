@@ -217,7 +217,7 @@ struct DemoNoiseCancellationButtonView: View {
 
 extension View {
 
-    @ViewBuilder
+    @MainActor @ViewBuilder
     func presentsMoreControls(viewModel: CallViewModel) -> some View {
         modifier(DemoMoreControlsViewModifier(viewModel: viewModel))
     }

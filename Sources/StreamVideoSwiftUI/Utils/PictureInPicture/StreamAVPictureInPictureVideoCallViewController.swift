@@ -8,7 +8,7 @@ import StreamVideo
 import StreamWebRTC
 
 /// Describes an object that can be used to present picture-in-picture content.
-protocol StreamAVPictureInPictureViewControlling: AnyObject {
+@MainActor protocol StreamAVPictureInPictureViewControlling: AnyObject {
     
     /// The closure to call whenever the picture-in-picture window size changes.
     var onSizeUpdate: ((CGSize) -> Void)? { get set }
@@ -26,8 +26,8 @@ protocol StreamAVPictureInPictureViewControlling: AnyObject {
 }
 
 @available(iOS 15.0, *)
-final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController,
-    StreamAVPictureInPictureViewControlling {
+final class StreamAVPictureInPictureVideoCallViewController:
+    AVPictureInPictureVideoCallViewController {
 
     private let contentView: StreamPictureInPictureVideoRenderer =
         .init(windowSizePolicy: StreamPictureInPictureAdaptiveWindowSizePolicy())
@@ -82,3 +82,11 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
         contentView.bounds = view.bounds
     }
 }
+
+#if swift(>=6.0)
+@available(iOS 15.0, *)
+extension StreamAVPictureInPictureVideoCallViewController: @preconcurrency StreamAVPictureInPictureViewControlling {}
+#else
+@available(iOS 15.0, *)
+extension StreamAVPictureInPictureVideoCallViewController: StreamAVPictureInPictureViewControlling {}
+#endif

@@ -46,7 +46,7 @@ func configureSentry() {
     }
 }
 
-private final class SentryLogDestination: LogDestination {
+private final class SentryLogDestination: LogDestination, @unchecked Sendable {
     func write(message: String) {
         // TODO: remove me once this function is gone from the protocol
     }

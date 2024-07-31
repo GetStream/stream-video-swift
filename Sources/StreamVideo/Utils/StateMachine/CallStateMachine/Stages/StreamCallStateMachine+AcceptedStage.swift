@@ -26,7 +26,7 @@ extension StreamCallStateMachine.Stage {
 extension StreamCallStateMachine.Stage {
 
     /// A class representing the accepted stage in the `StreamCallStateMachine`.
-    final class AcceptedStage: StreamCallStateMachine.Stage {
+    final class AcceptedStage: StreamCallStateMachine.Stage, @unchecked Sendable {
         let response: AcceptCallResponse
 
         /// Initializes a new accepted stage with the provided call and response.

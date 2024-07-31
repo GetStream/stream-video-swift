@@ -12,7 +12,10 @@ public struct CallDurationView: View {
     @Injected(\.colors) private var colors: Colors
     @Injected(\.fonts) private var fonts: Fonts
     @Injected(\.images) private var images: Images
-    @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
+    
+    @MainActor var formatter: MediaDurationFormatter {
+        InjectedValues[\.formatters.mediaDuration]
+    }
 
     @State private var duration: TimeInterval
     @ObservedObject private var viewModel: CallViewModel

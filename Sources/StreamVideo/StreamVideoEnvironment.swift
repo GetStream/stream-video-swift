@@ -5,7 +5,7 @@
 import Foundation
 
 extension StreamVideo {
-    struct Environment {
+    struct Environment: @unchecked Sendable {
         var webSocketClientBuilder: (
             _ eventNotificationCenter: EventNotificationCenter,
             _ url: URL
@@ -69,7 +69,7 @@ extension StreamVideo {
             )
         }
         
-        private static var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
+        nonisolated(unsafe) private static var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
             if Bundle.main.isAppExtension {
                 // No background task scheduler exists for app extensions.
                 return nil

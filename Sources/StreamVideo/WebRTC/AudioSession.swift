@@ -41,13 +41,17 @@ actor AudioSession {
     }
 
     deinit {
+        cleanup()
+    }
+    
+    nonisolated private func cleanup() {
         rtcAudioSession.lockForConfiguration()
         rtcAudioSession.isAudioEnabled = false
         rtcAudioSession.unlockForConfiguration()
     }
 }
 
-extension RTCAudioSessionConfiguration {
+extension RTCAudioSessionConfiguration: @unchecked Sendable {
     
     static let `default`: RTCAudioSessionConfiguration = {
         let configuration = RTCAudioSessionConfiguration.webRTC()
@@ -58,3 +62,5 @@ extension RTCAudioSessionConfiguration {
         return configuration
     }()
 }
+
+extension RTCAudioSession: @unchecked Sendable {}

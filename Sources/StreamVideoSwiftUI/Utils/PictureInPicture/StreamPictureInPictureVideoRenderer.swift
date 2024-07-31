@@ -2,7 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Combine
+@preconcurrency import Combine
 import Foundation
 import StreamVideo
 import StreamWebRTC
@@ -30,7 +30,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     var pictureInPictureWindowSizePolicy: PictureInPictureWindowSizePolicy
 
     /// The publisher which is used to streamline the frames received from the track.
-    private let bufferPublisher: PassthroughSubject<CMSampleBuffer, Never> = .init()
+    nonisolated(unsafe) private let bufferPublisher: PassthroughSubject<CMSampleBuffer, Never> = .init()
 
     /// The view that contains the rendering layer.
     private lazy var contentView: SampleBufferVideoCallView = {
@@ -43,7 +43,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     }()
 
     /// The transformer used to transform and downsample a RTCVideoFrame's buffer.
-    private var bufferTransformer = StreamBufferTransformer()
+    nonisolated(unsafe) private var bufferTransformer = StreamBufferTransformer()
 
     /// The cancellable used to control the bufferPublisher stream.
     private var bufferUpdatesCancellable: AnyCancellable?
@@ -51,13 +51,15 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// The view's size.
     /// - Note: We are using this property instead for `frame.size` or `bounds.size` so we can
     /// access it from any thread.
-    private var contentSize: CGSize = .zero
+    nonisolated(unsafe) private var contentSize: CGSize = .zero
 
     /// The track's size.
-    private var trackSize: CGSize = .zero {
+    nonisolated(unsafe) private var trackSize: CGSize = .zero {
         didSet {
             guard trackSize != oldValue else { return }
-            didUpdateTrackSize()
+            Task { @MainActor in
+                didUpdateTrackSize()
+            }
         }
     }
 
@@ -71,14 +73,14 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// to improve performance.
     /// - Note: The number of frames to skip is being calculated based on the ``trackSize`` and
     /// ``contentSize``. It takes into account also the ``sizeRatioThreshold``
-    private var noOfFramesToSkipAfterRendering = 1
+    nonisolated(unsafe) private var noOfFramesToSkipAfterRendering = 1
 
     /// The number of frames that we have skipped so far. This is used as a step counter in the
     /// ``renderFrame(_:)``.
-    private var skippedFrames = 0
+    nonisolated(unsafe) private var skippedFrames = 0
 
     /// We render frames every time the stepper/counter value is 0 and have a valid trackSize.
-    private var shouldRenderFrame: Bool { skippedFrames == 0 && trackSize != .zero }
+    nonisolated(unsafe) private var shouldRenderFrame: Bool { skippedFrames == 0 && trackSize != .zero }
 
     /// A size ratio threshold used to determine if resizing is required.
     /// - Note: It seems that Picture-in-Picture doesn't like rendering frames that are bigger than its
@@ -118,11 +120,13 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     // MARK: - Rendering lifecycle
 
     /// This method is being called from WebRTC and asks the container to set its size to the track's size.
-    func setSize(_ size: CGSize) {
-        trackSize = size
+    nonisolated func setSize(_ size: CGSize) {
+        Task { @MainActor in
+            self.trackSize = size
+        }
     }
 
-    func renderFrame(_ frame: RTCVideoFrame?) {
+    nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
         guard let frame = frame else {
             return
         }
@@ -146,7 +150,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(frame, targetSize: contentSize)?
             .buffer as? StreamRTCYUVBuffer,
             let sampleBuffer = yuvBuffer.sampleBuffer {
-            log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.")
             bufferPublisher.send(sampleBuffer)
         } else {
             log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.")
@@ -254,7 +257,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     }
 
     /// A method used to handle the frameSkipping(step) during frame consumption.
-    private func handleFrameSkippingIfRequired() {
+    nonisolated private func handleFrameSkippingIfRequired() {
         if noOfFramesToSkipAfterRendering > 0 {
             if skippedFrames == noOfFramesToSkipAfterRendering {
                 skippedFrames = 0

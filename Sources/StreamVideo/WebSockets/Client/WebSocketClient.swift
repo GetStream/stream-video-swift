@@ -4,7 +4,7 @@
 
 import Foundation
 
-class WebSocketClient {
+class WebSocketClient: @unchecked Sendable {
     /// The notification center `WebSocketClient` uses to send notifications about incoming events.
     let eventNotificationCenter: EventNotificationCenter
 
@@ -121,7 +121,7 @@ class WebSocketClient {
     /// - Parameter source: Additional information about the source of the disconnection. Default value is `.userInitiated`.
     func disconnect(
         source: WebSocketConnectionState.DisconnectionSource = .userInitiated,
-        completion: @escaping () -> Void
+        completion: @Sendable @escaping () -> Void
     ) {
         connectionState = .disconnecting(source: source)
         engineQueue.async { [engine, eventsBatcher] in
@@ -170,7 +170,7 @@ extension WebSocketClient {
         }
         
         var eventBatcherBuilder: (
-            _ handler: @escaping ([WrappedEvent], @escaping () -> Void) -> Void
+            _ handler: @escaping ([WrappedEvent], @Sendable @escaping () -> Void) -> Void
         ) -> EventBatcher = {
             Batcher<WrappedEvent>(period: 0.0, handler: $0)
         }
@@ -314,7 +314,7 @@ extension WebSocketClient {
 #endif
 
 extension ClientError {
-    public class WebSocket: ClientError {}
+    public class WebSocket: ClientError, @unchecked Sendable {}
 }
 
 /// WebSocket Error

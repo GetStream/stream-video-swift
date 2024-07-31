@@ -8,15 +8,15 @@ import StreamChatSwiftUI
 import class StreamVideoSwiftUI.CallViewModel
 import SwiftUI
 
-final class DemoChatViewFactory: ViewFactory {
+final class DemoChatViewFactory {
 
     @Injected(\.chatClient) var chatClient: ChatClient
 
     private init() {}
 
-    static let shared = DemoChatViewFactory()
+    @MainActor static let shared = DemoChatViewFactory()
 
-    func makeReactionsOverlayView(
+    @MainActor func makeReactionsOverlayView(
         channel: ChatChannel,
         currentSnapshot: UIImage,
         messageDisplayInfo: MessageDisplayInfo,
@@ -33,3 +33,9 @@ final class DemoChatViewFactory: ViewFactory {
         )
     }
 }
+
+#if swift(>=6.0)
+extension DemoChatViewFactory: @preconcurrency ViewFactory {}
+#else
+extension DemoChatViewFactory: ViewFactory {}
+#endif

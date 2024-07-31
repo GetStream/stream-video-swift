@@ -10,7 +10,9 @@ import SwiftUI
 /// very weird if the sourceView isn't in the ViewHierarchy or doesn't have an appropriate size.
 struct StreamPictureInPictureView: UIViewRepresentable {
 
-    @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
+    @MainActor private var pictureInPictureAdapter: StreamPictureInPictureAdapter {
+        InjectedValues[\.pictureInPictureAdapter]
+    }
 
     var isActive: Bool
 

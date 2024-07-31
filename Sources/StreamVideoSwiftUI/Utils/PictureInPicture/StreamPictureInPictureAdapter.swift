@@ -10,6 +10,7 @@ import UIKit
 /// This class encapsulates the logic for managing picture-in-picture functionality during a video call. It tracks
 /// changes in the call, updates related to call participants, and changes in the source view for Picture in
 /// Picture display.
+@MainActor
 final class StreamPictureInPictureAdapter {
 
     /// The active call.
@@ -47,7 +48,7 @@ final class StreamPictureInPictureAdapter {
     private var participantUpdatesCancellable: AnyCancellable?
 
     /// The actual picture-in-picture controller.
-    private lazy var pictureInPictureController = StreamPictureInPictureController()
+    @MainActor private lazy var pictureInPictureController = StreamPictureInPictureController()
 
     // MARK: - Private Helpers
 
@@ -93,13 +94,19 @@ final class StreamPictureInPictureAdapter {
 }
 
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
-enum StreamPictureInPictureAdapterKey: InjectionKey {
-    static var currentValue: StreamPictureInPictureAdapter = .init()
+#if swift(>=6.0)
+enum StreamPictureInPictureAdapterKey: @preconcurrency InjectionKey {
+    @MainActor static var currentValue: StreamPictureInPictureAdapter = .init()
 }
+#else
+enum StreamPictureInPictureAdapterKey: InjectionKeyMainActor {
+    @MainActor static var currentValue: StreamPictureInPictureAdapter = .init()
+}
+#endif
 
 extension InjectedValues {
     /// Provides access to the `StreamPictureInPictureAdapter` class to the views and view models.
-    var pictureInPictureAdapter: StreamPictureInPictureAdapter {
+    @MainActor var pictureInPictureAdapter: StreamPictureInPictureAdapter {
         get {
             Self[StreamPictureInPictureAdapterKey.self]
         }

@@ -262,7 +262,7 @@ private struct DemoStatView<Value: Comparable>: View {
         @Published var value: Value
         @Published var previousValue: Value
 
-        init(
+        @MainActor init(
             viewModel: CallViewModel,
             title: String = "",
             value: Value,
@@ -396,7 +396,7 @@ private struct DemoLatencyChartView: View {
         @Published var values: [(offset: Int, element: Double)] = []
         @Published var visibleRange: ClosedRange<Int> = 0...0
 
-        init(
+        @MainActor init(
             viewModel: CallViewModel
         ) {
             self.viewModel = viewModel

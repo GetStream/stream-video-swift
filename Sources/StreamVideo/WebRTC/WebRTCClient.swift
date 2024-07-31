@@ -34,10 +34,11 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         @Published var callParticipants = [String: CallParticipant]() {
             didSet {
+                let delay = participantUpdatesDelay
                 if !scheduledUpdate {
                     scheduledUpdate = true
                     Task {
-                        try? await Task.sleep(nanoseconds: participantUpdatesDelay)
+                        try? await Task.sleep(nanoseconds: delay)
                         lastUpdate = Date().timeIntervalSince1970
                         continuation?.yield([true])
                         scheduledUpdate = false
@@ -1488,18 +1489,20 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }()
         
         if !isiOSAppOnMac {
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(pauseTracks),
-                name: UIScene.didEnterBackgroundNotification,
-                object: nil
-            )
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(unpauseTracks),
-                name: UIScene.willEnterForegroundNotification,
-                object: nil
-            )
+            Task { @MainActor in
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(pauseTracks),
+                    name: UIScene.didEnterBackgroundNotification,
+                    object: nil
+                )
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(unpauseTracks),
+                    name: UIScene.willEnterForegroundNotification,
+                    object: nil
+                )
+            }
         }
     }
     

@@ -28,6 +28,8 @@ extension Publisher {
                     }
                 },
                 receiveValue: { value in
+                    // TODO: check with Ilias.
+                    nonisolated(unsafe) let value = value
                     if !receivedValue {
                         continuation.resume(returning: value) // Resume only if value hasn't been received
                         receivedValue = true

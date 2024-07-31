@@ -16,7 +16,7 @@ final class VideoRendererPool {
     /// Initializes the `VideoRendererPool` with a specified initial capacity.
     ///
     /// - Parameter initialCapacity: The initial capacity of the pool (default is 2).
-    init(initialCapacity: Int = 2) {
+    @MainActor init(initialCapacity: Int = 2) {
         // Initialize the pool with a capacity and a factory closure to create `VideoRenderer` instances
         pool = ReusePool(initialCapacity: initialCapacity) {
             VideoRenderer(frame: CGRect(origin: .zero, size: .zero))
@@ -33,7 +33,7 @@ final class VideoRendererPool {
     ///
     /// - Parameter size: The desired size for the acquired `VideoRenderer`.
     /// - Returns: A `VideoRenderer` instance from the pool.
-    func acquireRenderer(size: CGSize) -> VideoRenderer {
+    @MainActor func acquireRenderer(size: CGSize) -> VideoRenderer {
         let renderer = pool.acquire()
         renderer.frame.size = size // Set the size of the renderer
         return renderer
@@ -47,12 +47,18 @@ final class VideoRendererPool {
     }
 }
 
-extension VideoRendererPool: InjectionKey {
-    static var currentValue: VideoRendererPool = .init()
+#if swift(>=6.0)
+extension VideoRendererPool: @preconcurrency InjectionKey {
+    @MainActor static var currentValue: VideoRendererPool = .init()
 }
+#else
+extension VideoRendererPool: InjectionKeyMainActor {
+    @MainActor static var currentValue: VideoRendererPool = .init()
+}
+#endif
 
 extension InjectedValues {
-    var videoRendererPool: VideoRendererPool {
+    @MainActor var videoRendererPool: VideoRendererPool {
         get { Self[VideoRendererPool.self] }
         set { _ = newValue }
     }

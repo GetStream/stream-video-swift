@@ -5,7 +5,7 @@
 import Foundation
 
 /// The type is designed to pre-process some incoming `Event` via middlewares before being published
-class EventNotificationCenter: NotificationCenter {
+class EventNotificationCenter: NotificationCenter, @unchecked Sendable {
     private(set) var middlewares: [EventMiddleware] = []
 
     var eventPostingQueue = DispatchQueue(label: "io.getstream.event-notification-center")
@@ -18,15 +18,14 @@ class EventNotificationCenter: NotificationCenter {
         middlewares.append(middleware)
     }
 
-    func process(_ events: [WrappedEvent], postNotifications: Bool = true, completion: (() -> Void)? = nil) {
+    func process(_ events: [WrappedEvent], postNotifications: Bool = true, completion: (@Sendable() -> Void)? = nil) {
         let processingEventsDebugMessage: () -> String = {
             let eventNames = events.map(\.name)
             return "Processing webSocket events: \(eventNames)/"
         }
         log.debug(processingEventsDebugMessage(), subsystems: .webSocket)
 
-        var eventsToPost = [Event]()
-        eventsToPost = events.compactMap {
+        let eventsToPost = events.compactMap {
             self.middlewares.process(event: $0)
         }
         
@@ -43,7 +42,7 @@ class EventNotificationCenter: NotificationCenter {
 }
 
 extension EventNotificationCenter {
-    func process(_ event: WrappedEvent, postNotification: Bool = true, completion: (() -> Void)? = nil) {
+    func process(_ event: WrappedEvent, postNotification: Bool = true, completion: (@Sendable() -> Void)? = nil) {
         process([event], postNotifications: postNotification, completion: completion)
     }
 }

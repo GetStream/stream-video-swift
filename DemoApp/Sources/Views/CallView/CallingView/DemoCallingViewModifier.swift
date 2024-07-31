@@ -86,6 +86,7 @@ struct DemoCallingViewModifier: ViewModifier {
             return
         }
 
+        let streamVideo = self.streamVideo
         Task {
             do {
                 try await streamVideo.connect()

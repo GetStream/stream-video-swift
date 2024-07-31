@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-open class StreamVideoTestCase: XCTestCase {
+open class StreamVideoTestCase: XCTestCase, @unchecked Sendable {
 
     public var streamVideo: StreamVideo!
     var httpClient: HTTPClient_Mock! = HTTPClient_Mock()

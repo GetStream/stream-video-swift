@@ -6,7 +6,7 @@ import Foundation
 import PushKit
 
 /// Handles push notifications for CallKit integration.
-open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject {
+@preconcurrency open class CallKitPushNotificationAdapter: NSObject, ObservableObject, PKPushRegistryDelegate, @unchecked Sendable {
 
     /// Represents the keys that the Payload dictionary
     public enum PayloadKey: String {
@@ -18,7 +18,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     }
 
     /// Represents the content of a VoIP push notification.
-    public struct Content {
+    public struct Content: Sendable {
         var cid: String
         var localizedCallerName: String
         var callerId: String
@@ -86,7 +86,6 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     }
 
     /// Delegate method called when the device receives a VoIP push notification.
-    @MainActor
     open func pushRegistry(
         _ registry: PKPushRegistry,
         didReceiveIncomingPushWith payload: PKPushPayload,
@@ -157,7 +156,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
 extension CallKitPushNotificationAdapter: InjectionKey {
     /// Provides the current instance of `CallKitPushNotificationAdapter`.
-    public static var currentValue: CallKitPushNotificationAdapter = .init()
+    nonisolated(unsafe) public static var currentValue: CallKitPushNotificationAdapter = .init()
 }
 
 extension InjectedValues {

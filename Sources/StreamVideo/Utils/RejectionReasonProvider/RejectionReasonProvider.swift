@@ -6,7 +6,7 @@ import Combine
 import Foundation
 
 /// A protocol that provides a method to determine the rejection reason for a call.
-public protocol RejectionReasonProviding {
+public protocol RejectionReasonProviding: Sendable {
 
     /// Determines the rejection reason for a call with the specified call ID.
     ///
@@ -19,11 +19,11 @@ public protocol RejectionReasonProviding {
     ///
     /// - Note: ``ringTimeout`` being true, has an effect **only** when it's set  from the side of
     /// the caller when the callee doesn't reply the ringing call in the amount of time set on the dashboard.
-    func reason(for callCid: String, ringTimeout: Bool) -> String?
+    @MainActor func reason(for callCid: String, ringTimeout: Bool) -> String?
 }
 
 /// A provider that determines the rejection reason for a call based on its state.
-final class StreamRejectionReasonProvider: RejectionReasonProviding {
+final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked Sendable {
 
     /// The stream video associated with this provider.
     private weak var streamVideo: StreamVideo?

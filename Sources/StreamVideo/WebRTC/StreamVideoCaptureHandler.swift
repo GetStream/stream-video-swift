@@ -15,6 +15,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var sceneOrientation: UIInterfaceOrientation = .unknown
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
+    private var notification: NSNotification.Name?
 
     private lazy var serialActor = SerialActor()
 
@@ -29,12 +30,15 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateRotation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
+        Task { @MainActor in
+            notification = UIDevice.orientationDidChangeNotification
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(self.updateRotation),
+                name: UIDevice.orientationDidChangeNotification,
+                object: nil
+            )
+        }
         updateRotation()
     }
 
@@ -72,8 +76,8 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     @objc private func updateRotation() {
-        DispatchQueue.main.async {
-            self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+        Task { @MainActor [weak self] in
+            self?.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
 
@@ -123,11 +127,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

@@ -12,8 +12,11 @@ import SwiftUI
 open class CallViewModel: ObservableObject {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
+    
+    @MainActor var pictureInPictureAdapter: StreamPictureInPictureAdapter {
+        InjectedValues[\.pictureInPictureAdapter]
+    }
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -552,7 +555,9 @@ open class CallViewModel: ObservableObject {
         callingState = .idle
         isMinimized = false
         localVideoPrimary = false
-        Task { await audioRecorder.stopRecording() }
+        Task { [weak self] in
+            await self?.audioRecorder.stopRecording()
+        }
     }
 
     private func enterCall(
@@ -597,7 +602,9 @@ open class CallViewModel: ObservableObject {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 callingState = .idle
-                Task { await audioRecorder.stopRecording() }
+                Task { [weak self] in
+                    await self?.audioRecorder.stopRecording()
+                }
                 enteringCallTask = nil
             }
         }
@@ -628,7 +635,7 @@ open class CallViewModel: ObservableObject {
                 Task { @MainActor [weak self] in
                     guard let self = self else { return }
                     log.debug("Detected ringing timeout, hanging up...")
-                    handleCallHangUp(ringTimeout: true)
+                    self.handleCallHangUp(ringTimeout: true)
                 }
             }
         )

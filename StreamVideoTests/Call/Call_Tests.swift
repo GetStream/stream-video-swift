@@ -5,7 +5,6 @@
 @testable import StreamVideo
 import XCTest
 
-@MainActor
 final class Call_Tests: StreamVideoTestCase {
 
     let callType = "default"
@@ -14,7 +13,7 @@ final class Call_Tests: StreamVideoTestCase {
     let userId = "test"
     let mockResponseBuilder = MockResponseBuilder()
 
-    func test_updateState_fromCallAcceptedEvent() {
+    @MainActor func test_updateState_fromCallAcceptedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callResponse = mockResponseBuilder.makeCallResponse(
@@ -41,7 +40,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.session != nil)
     }
 
-    func test_updateState_fromCallRejectedEvent() {
+    @MainActor func test_updateState_fromCallRejectedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callResponse = mockResponseBuilder.makeCallResponse(
@@ -68,7 +67,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.session != nil)
     }
 
-    func test_updateState_fromCallUpdatedEvent() {
+    @MainActor func test_updateState_fromCallUpdatedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callResponse = mockResponseBuilder.makeCallResponse(
@@ -92,7 +91,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.session != nil)
     }
 
-    func test_updateState_fromRecordingStartedEvent() {
+    @MainActor func test_updateState_fromRecordingStartedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
         let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
@@ -104,7 +103,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.recordingState == .recording)
     }
 
-    func test_updateState_fromRecordingStoppedEvent() {
+    @MainActor func test_updateState_fromRecordingStoppedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
         let event = CallRecordingStoppedEvent(callCid: callCid, createdAt: Date())
@@ -116,7 +115,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.recordingState == .noRecording)
     }
 
-    func test_updateState_fromPermissionsEvent() {
+    @MainActor func test_updateState_fromPermissionsEvent() {
         // Given
         let videoConfig = VideoConfig.dummy()
         let userResponse = mockResponseBuilder.makeUserResponse(id: "testuser")
@@ -155,7 +154,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call.currentUserHasCapability(.sendVideo) == false)
     }
 
-    func test_updateState_fromMemberAddedEvent() {
+    @MainActor func test_updateState_fromMemberAddedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callResponse = mockResponseBuilder.makeCallResponse(
@@ -177,7 +176,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.members.first?.id == userId)
     }
 
-    func test_updateState_fromMemberRemovedEvent() {
+    @MainActor func test_updateState_fromMemberRemovedEvent() {
         // Given
         let userId = "test"
         let call = streamVideo?.call(callType: callType, callId: callId)
@@ -199,7 +198,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.members.isEmpty == true)
     }
 
-    func test_updateState_fromMemberUpdatedEvent() {
+    @MainActor func test_updateState_fromMemberUpdatedEvent() {
         // Given
         let userId = "test"
         let call = streamVideo?.call(callType: callType, callId: callId)
@@ -223,7 +222,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.members.first?.user.name == "newname")
     }
 
-    func test_updateState_fromTranscriptionStoppedEvent() throws {
+    @MainActor func test_updateState_fromTranscriptionStoppedEvent() throws {
         try assertUpdateState(
             with: [
                 .init(
@@ -237,7 +236,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
     }
 
-    func test_updateState_fromTranscriptionStartedEvent() throws {
+    @MainActor func test_updateState_fromTranscriptionStartedEvent() throws {
         try assertUpdateState(
             with: [
                 .init(
@@ -251,7 +250,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
     }
 
-    func test_updateState_transcriptionStarted_fromTranscriptionFailedEvent() throws {
+    @MainActor func test_updateState_transcriptionStarted_fromTranscriptionFailedEvent() throws {
         try assertUpdateState(
             with: [
                 .init(
@@ -272,7 +271,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
     }
 
-    func test_call_duration() async throws {
+    @MainActor func test_call_duration() async throws {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
         let startDate = Date()
@@ -305,7 +304,7 @@ final class Call_Tests: StreamVideoTestCase {
 
     // MARK: - join
 
-    func test_join_callControllerWasCalledOnlyOnce() async throws {
+    @MainActor func test_join_callControllerWasCalledOnlyOnce() async throws {
         LogConfig.level = .debug
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
@@ -331,7 +330,7 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertEqual(mockCallController.timesJoinWasCalled, 1)
     }
     
-    func test_call_customSorting() async throws {
+    @MainActor func test_call_customSorting() async throws {
         // Given
         let nameComparator: StreamSortComparator<CallParticipant> = {
             comparison($0, $1, keyPath: \.name)
@@ -354,7 +353,7 @@ final class Call_Tests: StreamVideoTestCase {
 
     // MARK: - Private helpers
 
-    private func assertUpdateState(
+    @MainActor private func assertUpdateState(
         with steps: [UpdateStateStep],
         file: StaticString = #file,
         line: UInt = #line

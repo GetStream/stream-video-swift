@@ -5,7 +5,7 @@
 import Foundation
 import StreamVideo
 
-struct DeeplinkInfo: Equatable {
+struct DeeplinkInfo: Equatable, Sendable {
     var url: URL?
     var callId: String
     var callType: String

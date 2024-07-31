@@ -17,7 +17,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     var isZoomEnabled: Bool
 
     private let identifier = UUID()
-    @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
+    @ObservedObject private var orientationAdapter = MainActor.assumeIsolated { InjectedValues[\.orientationAdapter] }
 
     public init(
         viewModel: CallViewModel,

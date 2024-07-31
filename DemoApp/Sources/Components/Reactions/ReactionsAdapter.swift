@@ -214,9 +214,15 @@ final class ReactionsAdapter: ObservableObject {
     }
 }
 
+#if swift(>=6.0)
+extension ReactionsAdapter: @preconcurrency InjectionKey {
+    static var currentValue: ReactionsAdapter = .init()
+}
+#else
 extension ReactionsAdapter: InjectionKey {
     static var currentValue: ReactionsAdapter = .init()
 }
+#endif
 
 extension InjectedValues {
     var reactionsAdapter: ReactionsAdapter {

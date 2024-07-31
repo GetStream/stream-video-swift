@@ -25,7 +25,7 @@ public class Appearance {
     }
     
     /// Provider for custom localization which is dependent on App Bundle.
-    public static var localizationProvider: (_ key: String, _ table: String) -> String = { key, table in
+    nonisolated(unsafe) public static var localizationProvider: (_ key: String, _ table: String) -> String = { key, table in
         Bundle.streamVideoUI.localizedString(forKey: key, value: nil, table: table)
     }
 }
@@ -33,12 +33,12 @@ public class Appearance {
 // MARK: - Appearance + Default
 
 public extension Appearance {
-    static var `default`: Appearance = .init()
+    nonisolated(unsafe) static var `default`: Appearance = .init()
 }
 
 /// Provides the default value of the `Appearance` class.
 enum AppearanceKey: InjectionKey {
-    static var currentValue: Appearance = Appearance()
+    nonisolated(unsafe) static var currentValue: Appearance = Appearance()
 }
 
 extension InjectedValues {

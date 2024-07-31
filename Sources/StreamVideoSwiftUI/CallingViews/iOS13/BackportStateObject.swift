@@ -6,12 +6,13 @@ import Combine
 import SwiftUI
 
 /// A property wrapper type that instantiates an observable object.
-@propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
-public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
-    where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
+@preconcurrency @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
+@MainActor
+public struct BackportStateObject<ObjectType: ObservableObject>
+    where ObjectType: Sendable, ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
     /// Wrapper that helps with initialising without actually having an ObservableObject yet
-    private class ObservedObjectWrapper: ObservableObject {
+    @MainActor private class ObservedObjectWrapper: ObservableObject {
         @PublishedObject var wrappedObject: ObjectType? = nil
         init() {}
     }
@@ -41,17 +42,21 @@ public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
         self.thunk = thunk
     }
     
-    public mutating func update() {
+    nonisolated public mutating func update() {
+        guard Thread.isMainThread else { return }
         // Not sure what this does but we'll just forward it
-        _state.update()
-        _observedObject.update()
+        MainActor.assumeIsolated {
+            _state.update()
+            _observedObject.update()
+        }
     }
 }
 
 /// Just like @Published this sends willSet events to the enclosing ObservableObject's ObjectWillChangePublisher
 /// but unlike @Published it also sends the wrapped value's published changes on to the enclosing ObservableObject
 @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
-public struct PublishedObject<Value> {
+@MainActor
+public struct PublishedObject<Value: Sendable>: @unchecked Sendable {
 
     public init(wrappedValue: Value) where Value: ObservableObject, Value.ObjectWillChangePublisher == ObservableObjectPublisher {
         self.wrappedValue = wrappedValue
@@ -61,7 +66,7 @@ public struct PublishedObject<Value> {
             let parent = futureSelf.parent
             futureSelf.cancellable = wrappedValue.objectWillChange.sink { [parent] in
                 parent.objectWillChange?()
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     publisher.send(wrappedValue)
                 }
             }
@@ -79,7 +84,7 @@ public struct PublishedObject<Value> {
             let parent = futureSelf.parent
             futureSelf.cancellable = wrappedValue?.objectWillChange.sink { [parent] in
                 parent.objectWillChange?()
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     publisher.send(wrappedValue)
                 }
             }
@@ -146,3 +151,9 @@ public struct PublishedObject<Value> {
         mutating get { _projectedValue.eraseToAnyPublisher() }
     }
 }
+
+#if swift(>=6.0)
+extension BackportStateObject: @preconcurrency DynamicProperty {}
+#else
+extension BackportStateObject: DynamicProperty {}
+#endif

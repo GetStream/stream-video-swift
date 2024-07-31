@@ -2,7 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import CallKit
+@preconcurrency import CallKit
 import Combine
 import Foundation
 
@@ -89,7 +89,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ///   - localizedCallerName: The localized caller name.
     ///   - callerId: The caller's identifier.
     ///   - completion: A closure to be called upon completion.
-    @MainActor
     open func reportIncomingCall(
         _ cid: String,
         localizedCallerName: String,
@@ -341,7 +340,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 """
             )
             do {
-                let rejectionReason = streamVideo?
+                let rejectionReason = await streamVideo?
                     .rejectionReasonProvider
                     .reason(
                         for: stackEntry.call.cId,
@@ -526,7 +525,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
 extension CallKitService: InjectionKey {
     /// Provides the current instance of `CallKitService`.
-    public static var currentValue: CallKitService = .init()
+    nonisolated(unsafe) public static var currentValue: CallKitService = .init()
 }
 
 extension InjectedValues {

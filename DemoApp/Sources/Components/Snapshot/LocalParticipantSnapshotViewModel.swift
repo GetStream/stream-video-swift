@@ -9,7 +9,7 @@ import StreamVideo
 import UIKit
 
 final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDelegate,
-    AVCaptureVideoDataOutputSampleBufferDelegate {
+    AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
 
     private actor State {
         private(set) var isCapturingVideoFrame = false
@@ -173,10 +173,15 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
 }
 
 /// Provides the default value of the `LocalParticipantSnapshotViewModel` class.
-struct LocalParticipantSnapshotViewModelKey: InjectionKey {
-    @MainActor
-    static var currentValue: LocalParticipantSnapshotViewModel = .init()
+#if swift(>=6.0)
+struct LocalParticipantSnapshotViewModelKey: @preconcurrency InjectionKey {
+    @MainActor static var currentValue: LocalParticipantSnapshotViewModel = .init()
 }
+#else
+struct LocalParticipantSnapshotViewModelKey: InjectionKey {
+    @MainActor static var currentValue: LocalParticipantSnapshotViewModel = .init()
+}
+#endif
 
 extension InjectedValues {
     /// Provides access to the `LocalParticipantSnapshotViewModel` class to the views and view models.

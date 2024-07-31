@@ -5,12 +5,11 @@
 @testable import StreamVideo
 import XCTest
 
-@MainActor
 final class CallsController_Tests: ControllerTestCase {
     
     let mockResponseBuilder = MockResponseBuilder()
 
-    func test_callsController_queryCalls() async throws {
+    @MainActor func test_callsController_queryCalls() async throws {
         // Given
         let callsController = try makeTestCallsController()
         
@@ -21,7 +20,7 @@ final class CallsController_Tests: ControllerTestCase {
         XCTAssert(callsController.calls.count == 2)
     }
     
-    func test_callsController_newCall() async throws {
+    @MainActor func test_callsController_newCall() async throws {
         // Given
         let callsController = try makeTestCallsController()
         
@@ -42,7 +41,7 @@ final class CallsController_Tests: ControllerTestCase {
         try await XCTAssertWithDelay(callsController.calls.count == 3)
     }
     
-    func test_callsController_updatedCall() async throws {
+    @MainActor func test_callsController_updatedCall() async throws {
         // Given
         let callsController = try makeTestCallsController()
         
@@ -65,7 +64,7 @@ final class CallsController_Tests: ControllerTestCase {
         try await XCTAssertWithDelay(callsController.calls[0].state.backstage == true)
     }
     
-    func test_callsController_rewatchCalls() async throws {
+    @MainActor func test_callsController_rewatchCalls() async throws {
         // Given
         let callsController = try makeTestCallsController()
         
@@ -82,7 +81,7 @@ final class CallsController_Tests: ControllerTestCase {
         XCTAssertEqual(httpClient.requestCounter, 2)
     }
     
-    func test_callsController_noWatchingCalls() async throws {
+    @MainActor func test_callsController_noWatchingCalls() async throws {
         // Given
         let callsController = try makeTestCallsController(watch: false)
         

@@ -8,7 +8,7 @@ import StreamWebRTC
 
 actor BroadcastBufferUploader {
     
-    private static var imageContext = CIContext(options: nil)
+    private static let imageContext = CIContext(options: nil)
     
     private var isReady = false
     private var connection: BroadcastBufferUploadConnection

@@ -16,7 +16,7 @@ enum LogQueue {
     }
 }
 
-final class Queue<T>: ObservableObject {
+final class Queue<T>: ObservableObject, @unchecked Sendable {
 
     @Published private(set) var elements: [T] = []
     var maxCount: Int { didSet { resizeIfNeeded() } }

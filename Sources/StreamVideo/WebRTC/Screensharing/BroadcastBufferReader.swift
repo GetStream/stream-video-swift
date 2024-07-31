@@ -227,3 +227,5 @@ extension BroadcastBufferReader: StreamDelegate {
         }
     }
 }
+
+extension CIContext: @unchecked Sendable {}

@@ -57,6 +57,7 @@ public struct LobbyView: View {
             onCloseLobby: onCloseLobby
         )
         .onChange(of: callSettings) { newValue in
+            let microphoneChecker = self.microphoneChecker
             Task {
                 newValue.audioOn
                     ? await microphoneChecker.startListening(ignoreActiveCall: true)
@@ -87,7 +88,10 @@ struct LobbyContentView: View {
                 HStack {
                     Spacer()
                     Button {
-                        Task { await microphoneChecker.stopListening() }
+                        let microphoneChecker = self.microphoneChecker
+                        Task {
+                            await microphoneChecker.stopListening()
+                        }
                         onCloseLobby()
                     } label: {
                         Image(systemName: "xmark")

@@ -13,7 +13,7 @@ final class VideoRenderer_Tests: XCTestCase {
     private var mockThermalStateObserver: MockThermalStateObserver! = .init()
     private var subject: VideoRenderer!
 
-    override func setUp() {
+    @MainActor override func setUp() {
         super.setUp()
 
         InjectedValues[\.thermalStateObserver] = mockThermalStateObserver
@@ -27,22 +27,22 @@ final class VideoRenderer_Tests: XCTestCase {
 
     // MARK: - preferredFramesPerSecond
 
-    func testFPSForNominalThermalState() {
+    @MainActor func testFPSForNominalThermalState() {
         mockThermalStateObserver.state = .nominal
         XCTAssertEqual(subject.preferredFramesPerSecond, UIScreen.main.maximumFramesPerSecond)
     }
 
-    func testFPSForFairThermalState() {
+    @MainActor func testFPSForFairThermalState() {
         mockThermalStateObserver.state = .fair
         XCTAssertEqual(subject.preferredFramesPerSecond, UIScreen.main.maximumFramesPerSecond)
     }
 
-    func testFPSForSeriousThermalState() {
+    @MainActor func testFPSForSeriousThermalState() {
         mockThermalStateObserver.state = .serious
         XCTAssertEqual(subject.preferredFramesPerSecond, Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.5))
     }
 
-    func testFPSForCriticalThermalState() {
+    @MainActor func testFPSForCriticalThermalState() {
         mockThermalStateObserver.state = .critical
         XCTAssertEqual(subject.preferredFramesPerSecond, Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.4))
     }

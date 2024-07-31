@@ -6,11 +6,10 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-@MainActor
 final class CallState_Tests: XCTestCase {
 
     /// Test the `didUpdate(_:)` function by combining existing and newly added participants.
-    func test_didUpdate_combinesExistingAndNewParticipants() {
+    @MainActor func test_didUpdate_combinesExistingAndNewParticipants() {
         assertParticipantsUpdate(
             initial: [
                 CallParticipant.dummy(id: "1")
@@ -21,7 +20,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function with sorting participants using defaultComparators.
-    func test_didUpdate_sortsParticipantsUsingDefaultComparators() {
+    @MainActor func test_didUpdate_sortsParticipantsUsingDefaultComparators() {
         assertParticipantsUpdate(
             initial: [
                 CallParticipant.dummy(id: "1", name: "Zane")
@@ -32,7 +31,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by ensuring that duplicated participants are not added.
-    func test_didUpdate_avoidsDuplicateParticipants() {
+    @MainActor func test_didUpdate_avoidsDuplicateParticipants() {
         assertParticipantsUpdate(
             initial: [
                 CallParticipant.dummy(id: "1")
@@ -43,7 +42,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants using the `isSpeaking` property.
-    func test_didUpdate_sortsParticipantsBySpeaking() {
+    @MainActor func test_didUpdate_sortsParticipantsBySpeaking() {
         assertParticipantsUpdate(
             initial: [
                 .dummy(id: "1", isSpeaking: false),
@@ -62,7 +61,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants using the `hasVideo` property.
-    func test_didUpdate_sortsParticipantsByVideo() {
+    @MainActor func test_didUpdate_sortsParticipantsByVideo() {
         assertParticipantsUpdate(
             initial: [
                 .dummy(id: "1", hasVideo: false),
@@ -81,7 +80,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants using the `hasAudio` property.
-    func test_didUpdate_sortsParticipantsByAudio() {
+    @MainActor func test_didUpdate_sortsParticipantsByAudio() {
         assertParticipantsUpdate(
             initial: [
                 .dummy(id: "1", hasAudio: false),
@@ -100,7 +99,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants using the `userId` property.
-    func test_didUpdate_sortsParticipantsByUserId() {
+    @MainActor func test_didUpdate_sortsParticipantsByUserId() {
         assertParticipantsUpdate(
             initial: [
                 .dummy(id: "1", userId: "B"),
@@ -119,7 +118,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants based on speaking and video properties.
-    func test_didUpdate_sortsParticipantsBySpeakingAndVideo() {
+    @MainActor func test_didUpdate_sortsParticipantsBySpeakingAndVideo() {
         assertParticipantsUpdate(
             initial: [
                 .dummy(id: "1", hasVideo: false, isSpeaking: true),
@@ -138,7 +137,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants based on joined time and audio properties.
-    func test_didUpdate_sortsParticipantsByUserIdAndAudio() {
+    @MainActor func test_didUpdate_sortsParticipantsByUserIdAndAudio() {
         assertParticipantsUpdate(
             initial: [
                 .dummy(id: "1", hasAudio: true),
@@ -157,7 +156,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants based on userId and speaking properties.
-    func test_didUpdate_sortsParticipantsByUserIdAndSpeaking() {
+    @MainActor func test_didUpdate_sortsParticipantsByUserIdAndSpeaking() {
         assertParticipantsUpdate(
             initial: [
                 .dummy(id: "1", userId: "A", showTrack: false, isSpeaking: false),
@@ -176,7 +175,7 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the execution time of `didUpdate` with many merge/add/remove operations.
-    func test_didUpdate_performanceWithManyParticipants_timeExecutionIsLessThanMaxDuration() {
+    @MainActor func test_didUpdate_performanceWithManyParticipants_timeExecutionIsLessThanMaxDuration() {
         let subject = CallState()
         let cycleCount = 250
 
@@ -200,7 +199,7 @@ final class CallState_Tests: XCTestCase {
 
     // MARK: - Private helpers
 
-    private func assertParticipantsUpdate(
+    @MainActor private func assertParticipantsUpdate(
         initial: [CallParticipant],
         update: @escaping (_ initial: [CallParticipant]) -> [CallParticipant],
         expectedTransformer: @escaping ([CallParticipant]) -> [CallParticipant],
@@ -237,7 +236,7 @@ final class CallState_Tests: XCTestCase {
         }
     }
 
-    private func add(count: Int, namePrefix: Int = 0, in subject: CallState) {
+    @MainActor private func add(count: Int, namePrefix: Int = 0, in subject: CallState) {
         let existingParticipants = subject.participants
         let newParticipants = makeCallParticipants(count: count, nameSuffix: namePrefix)
 
@@ -245,7 +244,7 @@ final class CallState_Tests: XCTestCase {
             .reduce(into: [String: CallParticipant]()) { $0[$1.id] = $1 }
     }
 
-    private func dropFirst(count: Int, from subject: CallState) {
+    @MainActor private func dropFirst(count: Int, from subject: CallState) {
         subject.participantsMap = subject
             .participants
             .dropFirst(count)

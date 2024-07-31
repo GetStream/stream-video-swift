@@ -18,7 +18,7 @@ extension StreamCallStateMachine.Stage {
 extension StreamCallStateMachine.Stage {
 
     /// A class representing the idle stage in the `StreamCallStateMachine`.
-    final class IdleStage: StreamCallStateMachine.Stage {
+    final class IdleStage: StreamCallStateMachine.Stage, @unchecked Sendable {
 
         /// Initializes a new idle stage with the provided call.
         ///

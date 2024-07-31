@@ -41,6 +41,7 @@ final class CallsViewModel: ObservableObject {
     }
 
     func loadCalls() {
+        let callsController = self.callsController
         Task {
             do {
                 try await callsController.loadNextCalls()
@@ -52,7 +53,7 @@ final class CallsViewModel: ObservableObject {
 
     func subscribeToCallsUpdates() {
         callsController.$calls.sink { calls in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.calls = calls
             }
         }

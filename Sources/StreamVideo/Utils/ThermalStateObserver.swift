@@ -34,7 +34,7 @@ public protocol ThermalStateObserving: ObservableObject {
 /// `ThermalStateObserver` monitors the device's thermal state and provides both immediate access to the current state
 /// and a publisher for tracking state changes over time. It also offers a derived scaling factor to help adapt app behavior
 /// or features based on the current thermal conditions.
-final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
+final class ThermalStateObserver: ObservableObject, ThermalStateObserving, @unchecked Sendable {
     static let shared = ThermalStateObserver()
 
     /// Published property to observe the thermal state
@@ -110,7 +110,7 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
 
 /// Provides the default value of the `Appearance` class.
 enum ThermalStateObserverKey: InjectionKey {
-    static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared
+    nonisolated(unsafe) static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared
 }
 
 extension InjectedValues {

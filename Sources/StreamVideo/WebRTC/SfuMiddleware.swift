@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-class SfuMiddleware: EventMiddleware {
+class SfuMiddleware: EventMiddleware, @unchecked Sendable {
     private let recordingUserId = "recording-egress"
     private let participantsThreshold: Int
     private let sessionID: String

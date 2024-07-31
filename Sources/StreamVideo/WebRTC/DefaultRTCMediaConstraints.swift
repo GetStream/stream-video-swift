@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-extension RTCMediaConstraints {
+extension RTCMediaConstraints: @unchecked Sendable {
     
     static let defaultConstraints = RTCMediaConstraints(
         mandatoryConstraints: nil,

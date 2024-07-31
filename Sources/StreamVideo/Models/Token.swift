@@ -30,7 +30,7 @@ public struct UserToken: Codable, Equatable, ExpressibleByStringLiteral, Sendabl
 }
 
 extension ClientError {
-    public class InvalidToken: ClientError {}
+    public class InvalidToken: ClientError, @unchecked Sendable {}
 }
 
 public extension UserToken {

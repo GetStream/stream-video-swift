@@ -21,8 +21,8 @@ public enum StreamDeviceOrientation: Equatable {
 }
 
 /// An observable object that adapts to device orientation changes.
-open class StreamDeviceOrientationAdapter: ObservableObject {
-    public typealias Provider = () -> StreamDeviceOrientation
+public class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable {
+    public typealias Provider = @MainActor @Sendable() -> StreamDeviceOrientation
 
     /// The default provider for device orientation based on platform.
     public static let defaultProvider: Provider = {
@@ -52,7 +52,7 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
     /// - Parameters:
     ///   - notificationCenter: The notification center to observe orientation changes.
     ///   - provider: A custom provider for determining device orientation.
-    public init(
+    @MainActor public init(
         notificationCenter: NotificationCenter = .default,
         _ provider: @escaping Provider = StreamDeviceOrientationAdapter.defaultProvider
     ) {
@@ -78,13 +78,19 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
 }
 
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
-enum StreamDeviceOrientationAdapterKey: InjectionKey {
-    static var currentValue: StreamDeviceOrientationAdapter = .init()
+#if swift(>=6.0)
+enum StreamDeviceOrientationAdapterKey: @preconcurrency InjectionKey {
+    @MainActor static var currentValue: StreamDeviceOrientationAdapter = .init()
 }
+#else
+enum StreamDeviceOrientationAdapterKey: InjectionKeyMainActor {
+    @MainActor static var currentValue: StreamDeviceOrientationAdapter = .init()
+}
+#endif
 
 extension InjectedValues {
     /// Provides access to the `StreamDeviceOrientationAdapter` class to the views and view models.
-    public var orientationAdapter: StreamDeviceOrientationAdapter {
+    @MainActor public var orientationAdapter: StreamDeviceOrientationAdapter {
         get {
             Self[StreamDeviceOrientationAdapterKey.self]
         }

@@ -7,6 +7,7 @@ import Foundation
 import StreamVideo
 import SwiftUI
 
+@MainActor
 private final class CallEndedViewModifierViewModel: ObservableObject {
 
     @Injected(\.streamVideo) private var streamVideo
@@ -124,7 +125,7 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
 }
 
 @available(iOS, introduced: 13, obsoleted: 14)
-private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier {
+private struct CallEndedViewModifier_iOS13<Subview: View>: ViewModifier, @unchecked Sendable {
 
     private var presentationValidator: (Call?) -> Bool
     private var subviewProvider: (Call?, @escaping () -> Void) -> Subview
@@ -211,7 +212,7 @@ extension View {
     ///  - content: A viewBuilder that returns the modal's content. The viewModifier
     /// will provide a dismiss closure that can be called from the content to close the modal.
     @ViewBuilder
-    public func onCallEnded(
+    @MainActor public func onCallEnded(
         presentationValidator: @escaping (Call?) -> Bool = { _ in true },
         @ViewBuilder _ content: @escaping (Call?, @escaping () -> Void) -> some View
     ) -> some View {

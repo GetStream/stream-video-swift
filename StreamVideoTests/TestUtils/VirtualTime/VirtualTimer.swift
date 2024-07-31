@@ -7,7 +7,7 @@ import Foundation
 import protocol StreamVideo.Timer
 
 struct VirtualTimeTimer: Timer {
-    static var time: VirtualTime!
+    nonisolated(unsafe) static var time: VirtualTime!
 
     static func invalidate() {
         time.invalidate()

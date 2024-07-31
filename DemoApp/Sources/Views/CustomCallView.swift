@@ -49,6 +49,7 @@ struct CustomCallView<Factory: ViewFactory>: View {
     }
     
     private func updateMicrophoneChecker() async {
+        let microphoneChecker = self.microphoneChecker
         if !viewModel.callSettings.audioOn {
             await microphoneChecker.startListening()
         } else {

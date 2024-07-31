@@ -3,7 +3,7 @@
 //
 
 @testable import StreamVideo
-@preconcurrency import XCTest
+import XCTest
 
 final class StreamCallStateMachineStageAcceptedStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 

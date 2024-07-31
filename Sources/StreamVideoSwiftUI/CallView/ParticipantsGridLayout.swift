@@ -14,7 +14,7 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
 
-    @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
+    @ObservedObject private var orientationAdapter = MainActor.assumeIsolated { InjectedValues[\.orientationAdapter] }
 
     public init(
         viewFactory: Factory,

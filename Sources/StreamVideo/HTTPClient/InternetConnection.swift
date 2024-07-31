@@ -151,7 +151,7 @@ extension InternetConnection.Status {
 extension InternetConnection {
     /// The default Internet connection monitor for iOS 12+.
     /// It uses Apple Network API.
-    class Monitor: InternetConnectionMonitor {
+    class Monitor: InternetConnectionMonitor, @unchecked Sendable {
         private var monitor: NWPathMonitor?
         private let queue = DispatchQueue(label: "io.getstream.internet-monitor")
         

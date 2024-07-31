@@ -21,7 +21,7 @@ extension AppEnvironment {
         var isTest: Bool { self == .test }
     }
 
-    static var configuration: Configuration = {
+    static let configuration: Configuration = {
         #if STREAM_RELEASE
         return .release
         #elseif STREAM_E2E_TESTS
@@ -34,7 +34,7 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
-    indirect enum BaseURL: Debuggable, CaseIterable {
+    indirect enum BaseURL: Debuggable, CaseIterable, Sendable {
         case pronto
         case prontoStaging
         case staging
@@ -99,7 +99,7 @@ extension AppEnvironment {
             }
         }
 
-        static var allCases: [BaseURL] = [
+        static let allCases: [BaseURL] = [
             .pronto,
             .prontoStaging,
             .staging,
@@ -108,7 +108,7 @@ extension AppEnvironment {
         ]
     }
 
-    static var baseURL: BaseURL = {
+    nonisolated(unsafe) static var baseURL: BaseURL = {
         switch configuration {
         case .test:
             return .demo
@@ -126,7 +126,7 @@ extension AppEnvironment {
         case universal = "streamvideo"
     }
 
-    static var appURLScheme: String = { AppURLScheme.universal.rawValue }()
+    static let appURLScheme: String = { AppURLScheme.universal.rawValue }()
 }
 
 extension AppEnvironment {
@@ -137,7 +137,7 @@ extension AppEnvironment {
         var url: URL { URL(string: rawValue)! }
     }
 
-    static var authBaseURL: URL = { AuthBaseURL.universal.url }()
+    static let authBaseURL: URL = { AuthBaseURL.universal.url }()
 }
 
 extension AppEnvironment {
@@ -192,7 +192,7 @@ extension AppEnvironment {
         }
     }
 
-    static var loggedInView: LoggedInView = {
+    nonisolated(unsafe) static var loggedInView: LoggedInView = {
         switch configuration {
         case .test:
             return .detailed
@@ -223,7 +223,7 @@ extension AppEnvironment {
         }
     }
 
-    static var performanceTrackerVisibility: PerformanceTrackerVisibility = {
+    nonisolated(unsafe) static var performanceTrackerVisibility: PerformanceTrackerVisibility = {
         .hidden
     }()
 }
@@ -243,7 +243,7 @@ extension AppEnvironment {
         }
     }
 
-    static var chatIntegration: ChatIntegration = {
+    nonisolated(unsafe) static var chatIntegration: ChatIntegration = {
         .enabled
     }()
 }
@@ -283,7 +283,7 @@ extension AppEnvironment {
         }
     }
 
-    static var supportedDeeplinks: [SupportedDeeplink] = {
+    nonisolated(unsafe) static var supportedDeeplinks: [SupportedDeeplink] = {
         switch configuration {
         case .debug:
             return [.pronto, .demo, .staging, .legacy]
@@ -310,7 +310,7 @@ extension AppEnvironment {
         }
     }
 
-    static var pictureInPictureIntegration: PictureInPictureIntegration = {
+    nonisolated(unsafe) static var pictureInPictureIntegration: PictureInPictureIntegration = {
         .enabled
     }()
 }
@@ -360,7 +360,7 @@ extension AppEnvironment {
         }
     }
 
-    static var tokenExpiration: TokenExpiration = {
+    nonisolated(unsafe) static var tokenExpiration: TokenExpiration = {
         switch configuration {
         case .debug:
             return .oneMinute
@@ -412,7 +412,7 @@ extension AppEnvironment {
         }
     }
 
-    static var callExpiration: CallExpiration = .never
+    nonisolated(unsafe) static var callExpiration: CallExpiration = .never
 }
 
 extension AppEnvironment {
@@ -440,5 +440,5 @@ extension AppEnvironment {
         }
     }
 
-    static var autoLeavePolicy: AutoLeavePolicy = .default
+    nonisolated(unsafe) static var autoLeavePolicy: AutoLeavePolicy = .default
 }
