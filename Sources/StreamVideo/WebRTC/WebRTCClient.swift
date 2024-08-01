@@ -135,10 +135,19 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private(set) var state: State
 
+    weak var delegate: WebRTCClientDelegate?
+    private var reconnectionTask: Task<Void, Never>?
+    private var disconnectionCancellable: AnyCancellable?
+    private var disconnectedAt: Date?
+
     let httpClient: HTTPClient
-    var signalService: Stream_Video_Sfu_Signal_SignalServer
+    var signalService: Stream_Video_Sfu_Signal_SignalServer!
     let peerConnectionFactory: PeerConnectionFactory
-    
+    let authenticator: WebRTCClientAuthenticator
+    private let sfuReconnectionTime: CGFloat = 30
+
+    let connectionPublisher: PassthroughSubject<WebSocketConnectionState, Never> = .init()
+
     private(set) var publisher: PeerConnection? {
         didSet {
             sfuMiddleware.update(publisher: publisher)
@@ -153,9 +162,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private(set) var signalChannel: WebSocketClient?
     
-    private(set) var sessionID: String
-    private var token: String
-    
+    private(set) var sessionID: String = ""
+
+    private var token: String = ""
+
     private(set) var localVideoTrack: RTCVideoTrack?
     private(set) var localAudioTrack: RTCAudioTrack?
     private(set) var localScreenshareTrack: RTCVideoTrack?
@@ -165,9 +175,9 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private let callCid: String
     private lazy var audioSession = AudioSession()
     private var connectOptions: ConnectOptions?
-    internal var ownCapabilities: [OwnCapability]
+    internal var ownCapabilities: [OwnCapability] = []
     private let videoConfig: VideoConfig
-    private let audioSettings: AudioSettings
+    private var audioSettings: AudioSettings?
     private(set) var callSettings = CallSettings()
     private(set) var videoOptions = VideoOptions()
     private let environment: WebSocketClient.Environment
@@ -176,7 +186,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var migratingSignalService: Stream_Video_Sfu_Signal_SignalServer?
     private var migratingWSClient: WebSocketClient?
     private var migratingToken: String?
-    private var fromSfuName: String?
+    var fromSfuName: String?
     private var tempSubscriber: PeerConnection?
     private var currentScreenhsareType: ScreensharingType?
     private var isFastReconnecting = false
@@ -187,15 +197,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     @Injected(\.thermalStateObserver) private var thermalStateObserver
     
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
-    var onSignalConnectionStateChange: ((WebSocketConnectionState) -> Void)?
     var onParticipantCountUpdated: ((UInt32) -> Void)?
-    var onSessionMigrationEvent: (() -> Void)? {
-        didSet {
-            sfuMiddleware.onSessionMigrationEvent = onSessionMigrationEvent
-        }
-    }
-    
-    var onSessionMigrationCompleted: (() -> Void)?
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -213,42 +215,35 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         subscriber: subscriber,
         publisher: publisher,
         participantThreshold: Constants.participantsThreshold
-    )
-    
+    ) {
+        didSet {
+            sfuMiddleware.onSessionMigrationEvent = { [weak self] in
+                self?.handleMigrationEvent()
+            }
+        }
+    }
+
     init(
         user: User,
         apiKey: String,
-        hostname: String,
-        webSocketURLString: String,
-        token: String,
         callCid: String,
-        sessionID: String?,
-        ownCapabilities: [OwnCapability],
         videoConfig: VideoConfig,
-        audioSettings: AudioSettings,
-        environment: WebSocketClient.Environment
+        environment: WebSocketClient.Environment,
+        authenticator: WebRTCClientAuthenticator
     ) {
         state = State()
         self.user = user
-        self.token = token
         self.callCid = callCid
-        self.audioSettings = audioSettings
         self.videoConfig = videoConfig
-        self.ownCapabilities = ownCapabilities
-        self.sessionID = sessionID ?? UUID().uuidString
+        sessionID = ""
         self.environment = environment
         self.apiKey = apiKey
         httpClient = environment.httpClientBuilder()
-        
-        signalService = Stream_Video_Sfu_Signal_SignalServer(
-            httpClient: httpClient,
-            apiKey: apiKey,
-            hostname: hostname,
-            token: token
-        )
         peerConnectionFactory = PeerConnectionFactory(
             audioProcessingModule: videoConfig.audioProcessingModule
         )
+
+        self.authenticator = authenticator
         super.init()
 
         log.debug(
@@ -256,15 +251,24 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             WebRTC client was created.
             userId: \(user.id)
             callCid: \(callCid)
-            sessionID: \(sessionID ?? "nil"),
+            sessionID: \(sessionID),
             ownCapabilities: \(ownCapabilities.map(\.rawValue))
             """,
             subsystems: .webRTC
         )
 
-        if let url = URL(string: webSocketURLString) {
-            signalChannel = makeWebSocketClient(url: url, apiKey: .init(apiKey))
-        }
+        disconnectionCancellable = connectionPublisher
+            .sink { [weak self] status in
+                switch status {
+                case let .disconnected(source):
+                    self?.handleWebSocketDisconnected(source)
+                case .connected:
+                    self?.handleWebSocketConnected()
+                default:
+                    break
+                }
+            }
+        
         addOnParticipantsChangeHandler()
         subscribeToAppLifecycleChanges()
         subscribeToInternetConnectionUpdates()
@@ -321,10 +325,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     func prepareForMigration(
         url: String,
         token: String,
-        webSocketURL: String,
-        fromSfuName: String
+        webSocketURL: String
     ) {
-        self.fromSfuName = fromSfuName
         migratingToken = token
         let signalServer = Stream_Video_Sfu_Signal_SignalServer(
             httpClient: httpClient,
@@ -362,7 +364,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         await state.cleanUp()
         sfuMiddleware.cleanUp()
         onParticipantsUpdated = nil
-        onSignalConnectionStateChange = nil
         onParticipantCountUpdated = nil
     }
     
@@ -897,7 +898,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 }
                 subscriber?.onConnected = { [weak self] _ in
                     guard let self else { return }
-                    self.onSessionMigrationCompleted?()
+                    delegate?.webRTClientMigrated(self)
                     self.tempSubscriber?.close()
                     self.tempSubscriber = nil
                     self.subscriber?.onConnected = nil
@@ -938,7 +939,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             log.debug("subscriber disconnected")
             if self?.isFastReconnecting == false {
                 log.debug("notifying of subscriber disconnection")
-                self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+                self?.connectionPublisher.send(.disconnected(source: .noPongReceived))
             }
         }
         
@@ -964,7 +965,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 log.debug("publisher disconnected")
                 if self?.isFastReconnecting == false {
                     log.debug("notifying of publisher disconnection")
-                    self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+                    self?.connectionPublisher.send(.disconnected(source: .noPongReceived))
                 }
             }
         } else {
@@ -1040,14 +1041,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         )
         log.debug("Setting local description for peer connection", subsystems: .webRTC)
         var updatedSdp = initialOffer.sdp
-        if audioSettings.opusDtxEnabled {
+        if audioSettings?.opusDtxEnabled == true {
             log.debug("Setting Opus DTX for the audio", subsystems: .webRTC)
             updatedSdp = updatedSdp.replacingOccurrences(
                 of: "useinbandfec=1",
                 with: "useinbandfec=1;usedtx=1"
             )
         }
-        if audioSettings.redundantCodingEnabled {
+        if audioSettings?.redundantCodingEnabled == true {
             updatedSdp = updatedSdp.preferredRedCodec
         }
         let offer = RTCSessionDescription(type: initialOffer.type, sdp: updatedSdp)
@@ -1165,7 +1166,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         if migrating {
             joinRequest.token = migratingToken ?? token
             var migration = Stream_Video_Sfu_Event_Migration()
-            migration.fromSfuID = fromSfuName ?? signalService.hostname
+            migration.fromSfuID = signalService.hostname
             migration.announcedTracks = loadTracks()
             migration.subscriptions = await loadTrackSubscriptionDetails()
             joinRequest.migration = migration
@@ -1581,7 +1582,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             let shouldFullyReconnect = reconnectPublisher || reconnectSubscriber
             if shouldFullyReconnect {
                 log.debug("Fast reconnect failed, doing full reconnect")
-                self.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+                connectionPublisher.send(.disconnected(source: .noPongReceived))
             } else {
                 log.debug("Fast reconnect successfull")
             }
@@ -1612,19 +1613,180 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         return false
     }
+
+    func join(
+        response: JoinCallResponse
+    ) {
+        // Generate a new sessionID to ensure clean connection.
+        sessionID = UUID().uuidString
+        token = response.credentials.token
+        ownCapabilities = response.ownCapabilities
+        audioSettings = response.call.settings.audio
+
+        signalService = Stream_Video_Sfu_Signal_SignalServer(
+            httpClient: httpClient,
+            apiKey: apiKey,
+            hostname: response.credentials.server.url,
+            token: response.credentials.token
+        )
+
+        if let url = URL(string: response.credentials.server.wsEndpoint) {
+            signalChannel = makeWebSocketClient(
+                url: url,
+                apiKey: .init(apiKey)
+            )
+        }
+    }
+
+    func migrate(
+        response: JoinCallResponse
+    ) {
+        migratingToken = response.credentials.token
+        ownCapabilities = response.ownCapabilities
+        // TODO: Shall we also update audioSettings here?
+
+        let signalServer = Stream_Video_Sfu_Signal_SignalServer(
+            httpClient: httpClient,
+            apiKey: apiKey,
+            hostname: response.credentials.server.url,
+            token: response.credentials.token
+        )
+        migratingSignalService = signalServer
+        if let url = URL(string: response.credentials.server.wsEndpoint) {
+            migratingWSClient = makeWebSocketClient(
+                url: url,
+                apiKey: .init(apiKey),
+                isMigrating: true
+            )
+        }
+    }
+
+    func handleMigrationEvent() {
+        Task {
+            guard migratingWSClient == nil else {
+                log.debug("Migration already in progress")
+                return
+            }
+
+            delegate?.webRTClientMigrating(self)
+
+            // We don't want to process any events from the old SFU but as we
+            // cannot disconnect the ws (as this will cause disconnections on
+            // WebRTC connections) we are simply pausing the processing.
+            signalChannel?.updatePaused(true)
+
+            do {
+                let response = try await authenticator.join()
+                let videoOptions = VideoOptions(
+                    targetResolution: response.call.settings.video.targetResolution
+                )
+                let connectOptions = ConnectOptions(
+                    iceServers: response.credentials.iceServers
+                )
+
+                // Prepare
+                migrate(response: response)
+
+                try await connect(
+                    callSettings: callSettings,
+                    videoOptions: videoOptions,
+                    connectOptions: connectOptions,
+                    migrating: true
+                )
+            } catch {
+                log.error(error)
+            }
+        }
+    }
+
+    func handleWebSocketDisconnected(
+        _ source: WebSocketConnectionState.DisconnectionSource
+    ) {
+        guard
+            migratingWSClient == nil,
+            reconnectionTask == nil,
+            source != .userInitiated
+        else {
+            return
+        }
+
+        if
+            let disconnectedAt,
+            disconnectedAt.timeIntervalSinceNow > sfuReconnectionTime {
+            delegate?.webRTClientDisconnected(self)
+            self.disconnectedAt = nil
+            return
+        }
+
+        if disconnectedAt == nil {
+            disconnectedAt = Date()
+        }
+
+        reconnectionTask = Task {
+            do {
+                await cleanUp()
+                log.debug("Waiting to reconnect")
+
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                log.debug("Retrying to connect to the call")
+
+                delegate?.webRTClientReconnecting(self)
+
+                let response = try await authenticator.join()
+                let videoOptions = VideoOptions(
+                    targetResolution: response.call.settings.video.targetResolution
+                )
+                let connectOptions = ConnectOptions(
+                    iceServers: response.credentials.iceServers
+                )
+
+                try await connect(
+                    callSettings: callSettings,
+                    videoOptions: videoOptions,
+                    connectOptions: connectOptions,
+                    migrating: false
+                )
+            } catch {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                self.reconnectionTask = nil
+                handleWebSocketDisconnected(.serverInitiated(error: .init(with: error)))
+            }
+        }
+    }
+
+    func handleWebSocketConnected() {
+        disconnectedAt = nil
+        delegate?.webRTClientConnected(self)
+    }
 }
 
 extension WebRTCClient: ConnectionStateDelegate {
-    func webSocketClient(_ client: WebSocketClient, didUpdateConnectionState state: WebSocketConnectionState) {
+    func webSocketClient(
+        _ client: WebSocketClient,
+        didUpdateConnectionState state: WebSocketConnectionState
+    ) {
         log.debug("WS connection state changed to \(state)")
         switch state {
         case .disconnected(source: _), .disconnecting(source: _):
             handleConnectionState(isAvailable: false)
             if !isFastReconnecting && disconnectTime == nil {
-                onSignalConnectionStateChange?(state)
+                connectionPublisher.send(state)
             }
         default:
-            onSignalConnectionStateChange?(state)
+            connectionPublisher.send(state)
         }
     }
+}
+
+protocol WebRTCClientDelegate: AnyObject {
+
+    func webRTClientMigrating(_ webRTCClient: WebRTCClient)
+
+    func webRTClientMigrated(_ webRTCClient: WebRTCClient)
+
+    func webRTClientReconnecting(_ webRTCClient: WebRTCClient)
+
+    func webRTClientDisconnected(_ webRTCClient: WebRTCClient)
+
+    func webRTClientConnected(_ webRTCClient: WebRTCClient)
 }
