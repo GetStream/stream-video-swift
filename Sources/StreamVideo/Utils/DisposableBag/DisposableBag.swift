@@ -36,3 +36,7 @@ public final class DisposableBag: Sequence {
 extension AnyCancellable {
     public func store(in disposableBag: DisposableBag) { disposableBag.insert(self) }
 }
+
+extension Task {
+    public func store(in disposableBag: DisposableBag) { disposableBag.insert(.init(cancel)) }
+}

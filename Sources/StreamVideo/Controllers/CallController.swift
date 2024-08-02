@@ -569,7 +569,7 @@ class CallController: @unchecked Sendable {
                 // We don't want to process any events from the old SFU but as we
                 // cannot disconnect the ws (as this will cause disconnections on
                 // WebRTC connections) we are simply pausing the processing.
-                webRTCClient?.signalChannel?.updatePaused(true)
+                webRTCClient?.sfuAdapter.updatePaused(true)
 
                 try await joinCall(
                     callType: callType,

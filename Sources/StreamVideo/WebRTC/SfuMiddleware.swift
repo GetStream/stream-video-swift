@@ -11,7 +11,7 @@ class SfuMiddleware: EventMiddleware {
     private let sessionID: String
     private let user: User
     private let state: WebRTCClient.State
-    var signalService: Stream_Video_Sfu_Signal_SignalServer
+    weak var sfuAdapter: SFUAdapter!
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
     var onSocketConnected: ((Bool) -> Void)?
@@ -23,7 +23,6 @@ class SfuMiddleware: EventMiddleware {
         sessionID: String,
         user: User,
         state: WebRTCClient.State,
-        signalService: Stream_Video_Sfu_Signal_SignalServer,
         subscriber: PeerConnection? = nil,
         publisher: PeerConnection? = nil,
         participantThreshold: Int
@@ -31,7 +30,6 @@ class SfuMiddleware: EventMiddleware {
         self.sessionID = sessionID
         self.user = user
         self.state = state
-        self.signalService = signalService
         self.subscriber = subscriber
         self.publisher = publisher
         participantsThreshold = participantThreshold
@@ -47,9 +45,9 @@ class SfuMiddleware: EventMiddleware {
     
     func handle(event: WrappedEvent) -> WrappedEvent? {
         log.debug("Received an event \(event)")
-        Task {
+        Task { [weak self] in
             do {
-                guard case let .sfuEvent(event) = event else {
+                guard let self, case let .sfuEvent(event) = event else {
                     return
                 }
                 switch event {
@@ -118,17 +116,12 @@ class SfuMiddleware: EventMiddleware {
             try await subscriber?.setRemoteDescription(offerSdp, type: .offer)
             let answer = try await subscriber?.createAnswer()
             try await subscriber?.setLocalDescription(answer)
-            var sendAnswerRequest = Stream_Video_Sfu_Signal_SendAnswerRequest()
-            sendAnswerRequest.sessionID = sessionID
-            sendAnswerRequest.peerType = .subscriber
-            sendAnswerRequest.sdp = answer?.sdp ?? ""
-            log.debug("Sending answer for offer")
-            let hostname = signalService.hostname
-            try await executeTask(retryPolicy: .fastCheckValue { [weak self] in
-                self?.hostnameChanged(hostname) == false
-            }) {
-                _ = try await signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
-            }
+
+            try await sfuAdapter?.sendAnswer(
+                sessionDescription: answer?.sdp ?? "",
+                peerType: .subscriber,
+                for: sessionID
+            )
         } catch {
             log.error("Error handling offer event", error: error)
         }
@@ -326,9 +319,5 @@ class SfuMiddleware: EventMiddleware {
                 await state.update(callParticipant: updated)
             }
         }
-    }
-    
-    private func hostnameChanged(_ hostname: String) -> Bool {
-        signalService.hostname != hostname
     }
 }

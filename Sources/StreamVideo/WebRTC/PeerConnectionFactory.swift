@@ -46,7 +46,7 @@ final class PeerConnectionFactory {
         sessionId: String,
         configuration: RTCConfiguration,
         type: PeerConnectionType,
-        signalService: Stream_Video_Sfu_Signal_SignalServer,
+        sfuAdapter: SFUAdapter,
         constraints: RTCMediaConstraints = RTCMediaConstraints.defaultConstraints,
         videoOptions: VideoOptions
     ) throws -> PeerConnection {
@@ -59,7 +59,7 @@ final class PeerConnectionFactory {
             sessionId: sessionId,
             pc: pc,
             type: type,
-            signalService: signalService,
+            sfuAdapter: sfuAdapter,
             videoOptions: videoOptions
         )
         return peerConnection

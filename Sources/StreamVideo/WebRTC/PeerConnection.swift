@@ -15,7 +15,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
-    var signalService: Stream_Video_Sfu_Signal_SignalServer
+//    var signalService: Stream_Video_Sfu_Signal_SignalServer
+    var sfuAdapter: SFUAdapter
     private let sessionId: String
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
@@ -41,12 +42,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         sessionId: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
-        signalService: Stream_Video_Sfu_Signal_SignalServer,
+        sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions
     ) {
         self.sessionId = sessionId
         self.pc = pc
-        self.signalService = signalService
+        self.sfuAdapter = sfuAdapter
         self.type = type
         self.videoOptions = videoOptions
         eventDecoder = WebRTCEventDecoder()
@@ -55,7 +56,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         log.debug(
             """
             PeerConnection of type:\(type.rawValue) was created.
-            SignalService:\(signalService.hostname)
+            SignalService:\(sfuAdapter.hostname)
             SessionId:\(sessionId)
             PreferredFps: \(videoOptions.preferredFps)
             SupportedCodecs: \(videoOptions.supportedCodecs.map(\.quality))
@@ -294,7 +295,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         log.debug(
             """
             PeerConnection of type:\(type.rawValue) didAdd stream:
-            SFU: \(signalService.hostname)
+            SFU: \(sfuAdapter.hostname)
             StreamId: \(stream.streamId)
             """,
             subsystems: .peerConnection
@@ -313,7 +314,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         log.debug(
             """
             PeerConnection of type:\(type.rawValue) didRemove stream:
-            SFU: \(signalService.hostname)
+            SFU: \(sfuAdapter.hostname)
             StreamId: \(stream.streamId)
             """,
             subsystems: .peerConnection
@@ -389,11 +390,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 let iceCandidate = candidate.toIceCandidate()
                 let json = try encoder.encode(iceCandidate)
                 let jsonString = String(data: json, encoding: .utf8) ?? ""
-                var iceTrickle = Stream_Video_Sfu_Models_ICETrickle()
-                iceTrickle.iceCandidate = jsonString
-                iceTrickle.sessionID = sessionId
-                iceTrickle.peerType = type == .publisher ? .publisherUnspecified : .subscriber
-                _ = try await signalService.iceTrickle(iCETrickle: iceTrickle)
+                _ = try await sfuAdapter.iCETrickle(
+                    candidate: jsonString,
+                    peerType: type == .publisher ? .publisherUnspecified : .subscriber,
+                    for: sessionId
+                )
             } catch {
                 log.error(error)
             }
