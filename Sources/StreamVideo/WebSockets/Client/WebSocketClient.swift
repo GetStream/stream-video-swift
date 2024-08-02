@@ -137,6 +137,18 @@ class WebSocketClient {
         }
     }
 
+    func disconnect(source: WebSocketConnectionState.DisconnectionSource = .userInitiated) async {
+        await withCheckedContinuation { [weak self] continuation in
+            guard let self else {
+                continuation.resume()
+                return
+            }
+            disconnect {
+                continuation.resume()
+            }
+        }
+    }
+
     func updatePaused(_ isPaused: Bool) {
         self.isPaused = isPaused
     }

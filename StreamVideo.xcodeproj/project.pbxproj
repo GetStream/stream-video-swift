@@ -255,6 +255,8 @@
 		40AB34D42C5D463700B5B6B3 /* SFUMiddleware_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D32C5D463700B5B6B3 /* SFUMiddleware_Tests.swift */; };
 		40AB34DA2C5D5A7B00B5B6B3 /* WebRTCStatsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D82C5D5A5C00B5B6B3 /* WebRTCStatsReporter.swift */; };
 		40AB34DC2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34DB2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift */; };
+		40AB34DF2C5D6A7C00B5B6B3 /* CallAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34DD2C5D6A6700B5B6B3 /* CallAuthenticator.swift */; };
+		40AB34E22C5E742400B5B6B3 /* Publisher+Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34E02C5E73F900B5B6B3 /* Publisher+Logger.swift */; };
 		40AB353B2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */; };
 		40AB353C2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */; };
 		40AB353D2B738C1300E465CC /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
@@ -1394,6 +1396,8 @@
 		40AB34D32C5D463700B5B6B3 /* SFUMiddleware_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUMiddleware_Tests.swift; sourceTree = "<group>"; };
 		40AB34D82C5D5A5C00B5B6B3 /* WebRTCStatsReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsReporter.swift; sourceTree = "<group>"; };
 		40AB34DB2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsReporter_Tests.swift; sourceTree = "<group>"; };
+		40AB34DD2C5D6A6700B5B6B3 /* CallAuthenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallAuthenticator.swift; sourceTree = "<group>"; };
+		40AB34E02C5E73F900B5B6B3 /* Publisher+Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+Logger.swift"; sourceTree = "<group>"; };
 		40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoSnapshotViewModel.swift; sourceTree = "<group>"; };
 		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
@@ -3765,6 +3769,7 @@
 		8456E6C7287EC343004E180E /* Logger */ = {
 			isa = PBXGroup;
 			children = (
+				40AB34E02C5E73F900B5B6B3 /* Publisher+Logger.swift */,
 				8456E6C8287EC343004E180E /* Logger.swift */,
 				8456E6C9287EC343004E180E /* Destination */,
 				8456E6CD287EC343004E180E /* Formatter */,
@@ -4583,6 +4588,7 @@
 		84FC2C1C28ACF29300181490 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				40AB34DD2C5D6A6700B5B6B3 /* CallAuthenticator.swift */,
 				40AB34AF2C5D048800B5B6B3 /* Extensions */,
 				40AB34AC2C5D02CB00B5B6B3 /* SFU */,
 				408679F52BD12EFC00D027E0 /* AudioFilter */,
@@ -5431,6 +5437,7 @@
 				84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,
+				40AB34DF2C5D6A7C00B5B6B3 /* CallAuthenticator.swift in Sources */,
 				841BAA3A2BD15CDE000C73E4 /* Location.swift in Sources */,
 				842B8E302A2DFED900863A87 /* EgressResponse.swift in Sources */,
 				84DC38B229ADFCFD00946713 /* UnblockUserResponse.swift in Sources */,
@@ -5523,6 +5530,7 @@
 				4012B1942BFCAC1C006B0031 /* StreamCallStateMachine+RejectingStage.swift in Sources */,
 				84DCA2152A38A79E000C3411 /* Token.swift in Sources */,
 				40FB151B2BF77EEE00D5E580 /* StreamCallStateMachine+JoiningStage.swift in Sources */,
+				40AB34E22C5E742400B5B6B3 /* Publisher+Logger.swift in Sources */,
 				84F3B0DA289083E70088751D /* WebSocketConstants.swift in Sources */,
 				840F59902A77FDCB00EF3EB2 /* UnpinRequest.swift in Sources */,
 				8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */,

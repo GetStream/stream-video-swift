@@ -9,7 +9,7 @@ import Foundation
 ///
 /// The `SFUAdapter` class handles both WebSocket connections and HTTP requests to the SFU server.
 /// It provides methods for managing video tracks, updating subscriptions, and handling WebRTC signaling.
-final class SFUAdapter: ConnectionStateDelegate {
+final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
 
     /// Configuration for the SFU service.
     struct ServiceConfiguration {
@@ -42,7 +42,7 @@ final class SFUAdapter: ConnectionStateDelegate {
     private var disposableBag = DisposableBag()
 
     /// The current connection state of the WebSocket.
-    @Published var connectionState: WebSocketConnectionState = .disconnected(source: .noPongReceived)
+    @Published var connectionState: WebSocketConnectionState = .initialized
 
     /// The URL used for the WebSocket connection.
     var connectURL: URL { webSocket.connectURL }
@@ -95,13 +95,15 @@ final class SFUAdapter: ConnectionStateDelegate {
 
     /// Initiates a connection to the WebSocket server.
     func connect() {
+        log.debug("Will connect \(self)", subsystems: .sfu)
         webSocket.connect()
     }
 
     /// Disconnects from the WebSocket server and clears all disposables.
-    func disconnect() {
+    func disconnect() async {
+        log.debug("Will disconnect \(self)", subsystems: .sfu)
         disposableBag.removeAll()
-        webSocket.disconnect {}
+        await webSocket.disconnect()
     }
 
     /// Sends a health check request to the WebSocket server.
@@ -134,6 +136,8 @@ final class SFUAdapter: ConnectionStateDelegate {
     func refresh(
         webSocketConfiguration: WebSocketConfiguration
     ) {
+        log.debug("Will refresh \(self).", subsystems: .sfu)
+        webSocket.connectionStateDelegate = nil
         webSocket.disconnect {}
         disposableBag.removeAll()
         webSocket = .init(
@@ -141,9 +145,11 @@ final class SFUAdapter: ConnectionStateDelegate {
             eventDecoder: webSocketConfiguration.eventDecoder,
             eventNotificationCenter: webSocketConfiguration.eventNotificationCenter,
             webSocketClientType: .sfu,
-            connectURL: webSocketConfiguration.url
+            connectURL: webSocketConfiguration.url,
+            requiresAuth: false
         )
         webSocket.connectionStateDelegate = self
+        log.debug("Did refresh \(self).", subsystems: .sfu)
     }
 
     // MARK: - Service
@@ -387,6 +393,23 @@ final class SFUAdapter: ConnectionStateDelegate {
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
+        log.debug(
+            """
+            WebSocket connectionState changed to \(state)
+            client: \(Unmanaged.passUnretained(client).toOpaque())
+            """,
+            subsystems: .sfu
+        )
         connectionState = state
+    }
+
+    var description: String {
+        """
+        Address: \(Unmanaged.passUnretained(webSocket).toOpaque())
+        SFUAdapter is delegate: \(webSocket.connectionStateDelegate === self)
+        ConnectionState: \(connectionState)
+        ConnectURL: \(connectURL)
+        Hostname: \(hostname)
+        """
     }
 }
