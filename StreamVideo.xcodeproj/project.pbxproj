@@ -253,6 +253,8 @@
 		40AB34D02C5D443F00B5B6B3 /* MockWebSocketEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34CF2C5D443F00B5B6B3 /* MockWebSocketEngine.swift */; };
 		40AB34D22C5D445700B5B6B3 /* MockSFUAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D12C5D445700B5B6B3 /* MockSFUAdapter.swift */; };
 		40AB34D42C5D463700B5B6B3 /* SFUMiddleware_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D32C5D463700B5B6B3 /* SFUMiddleware_Tests.swift */; };
+		40AB34DA2C5D5A7B00B5B6B3 /* WebRTCStatsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D82C5D5A5C00B5B6B3 /* WebRTCStatsReporter.swift */; };
+		40AB34DC2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34DB2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift */; };
 		40AB353B2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */; };
 		40AB353C2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */; };
 		40AB353D2B738C1300E465CC /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
@@ -1390,6 +1392,8 @@
 		40AB34CF2C5D443F00B5B6B3 /* MockWebSocketEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebSocketEngine.swift; sourceTree = "<group>"; };
 		40AB34D12C5D445700B5B6B3 /* MockSFUAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSFUAdapter.swift; sourceTree = "<group>"; };
 		40AB34D32C5D463700B5B6B3 /* SFUMiddleware_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUMiddleware_Tests.swift; sourceTree = "<group>"; };
+		40AB34D82C5D5A5C00B5B6B3 /* WebRTCStatsReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsReporter.swift; sourceTree = "<group>"; };
+		40AB34DB2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsReporter_Tests.swift; sourceTree = "<group>"; };
 		40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoSnapshotViewModel.swift; sourceTree = "<group>"; };
 		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
@@ -4162,6 +4166,7 @@
 				8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */,
 				8446AF902A4D84F4002AB07B /* Retries_Tests.swift */,
 				841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */,
+				40AB34DB2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -4599,6 +4604,7 @@
 				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
 				8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */,
 				406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */,
+				40AB34D82C5D5A5C00B5B6B3 /* WebRTCStatsReporter.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -5467,6 +5473,7 @@
 				406AF2012AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift in Sources */,
 				84A7E18A2883638200526C98 /* URLSessionWebSocketEngine.swift in Sources */,
 				40C4DF492C1C2C210035DBC2 /* Publisher+WeakAssign.swift in Sources */,
+				40AB34DA2C5D5A7B00B5B6B3 /* WebRTCStatsReporter.swift in Sources */,
 				408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */,
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,
@@ -5814,6 +5821,7 @@
 				82E3BA532A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
 				40F0175B2BBEF0C100E89FD1 /* BroadcastSettingsResponse+Dummy.swift in Sources */,
 				40F017752BBEF3E700E89FD1 /* CallRejectedEvent+Dummy.swift in Sources */,
+				40AB34DC2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift in Sources */,
 				403FB1582BFE21470047A696 /* StreamCallStateMachineStageJoiningStage_Tests.swift in Sources */,
 				40F0176B2BBEF1F400E89FD1 /* EgressRTMPResponse+Dummy.swift in Sources */,
 				40AB34D42C5D463700B5B6B3 /* SFUMiddleware_Tests.swift in Sources */,

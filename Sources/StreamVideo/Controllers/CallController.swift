@@ -28,8 +28,6 @@ class CallController: @unchecked Sendable {
     private let environment: CallController.Environment
     private var cachedLocation: String?
     private var currentSFU: String?
-    private var statsInterval: TimeInterval = 5
-    private var statsCancellable: AnyCancellable?
     
     init(
         defaultAPI: DefaultAPI,
@@ -86,7 +84,8 @@ class CallController: @unchecked Sendable {
         )
 
         currentSFU = response.credentials.server.edgeName
-        statsInterval = TimeInterval(response.statsOptions.reportingIntervalMs / 1000)
+        webRTCClient?.statsReporter.interval = TimeInterval(response.statsOptions.reportingIntervalMs / 1000)
+
         let settings = callSettings ?? response.call.settings.toCallSettings
         
         try await connectToEdge(
@@ -99,11 +98,9 @@ class CallController: @unchecked Sendable {
             migratingFrom: migratingFrom
         )
         
-        setupStatsTimer()
-        
         return response
     }
-    
+
     /// Changes the audio state for the current user.
     /// - Parameter isEnabled: whether audio should be enabled.
     func changeAudioState(isEnabled: Bool) async throws {
@@ -353,8 +350,6 @@ class CallController: @unchecked Sendable {
     func cleanUp() {
         guard call != nil else { return }
         call = nil
-        statsCancellable?.cancel()
-        statsCancellable = nil
         let _webRTCClient = webRTCClient
         webRTCClient = nil
         Task { [weak _webRTCClient] in
@@ -664,32 +659,6 @@ class CallController: @unchecked Sendable {
             joinCallRequest: joinCall
         )
         return joinCallResponse
-    }
-    
-    private func setupStatsTimer() {
-        statsCancellable?.cancel()
-        statsCancellable = Foundation.Timer.publish(
-            every: statsInterval,
-            on: .main,
-            in: .default
-        )
-        .autoconnect()
-        .receive(on: DispatchQueue.main)
-        .sink { [weak self] _ in
-            self?.collectAndSendStats()
-        }
-    }
-    
-    private func collectAndSendStats() {
-        Task {
-            do {
-                let stats = try await webRTCClient?.collectStats()
-                await call?.state.update(statsReport: stats)
-                try await webRTCClient?.sendStats(report: stats)
-            } catch {
-                log.error(error)
-            }
-        }
     }
 }
 

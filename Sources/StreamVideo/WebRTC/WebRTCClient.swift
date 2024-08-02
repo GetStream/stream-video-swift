@@ -13,7 +13,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     let httpClient: HTTPClient
     let peerConnectionFactory: PeerConnectionFactory
 
-    private(set) var sfuAdapter: SFUAdapter!
+    private(set) var sfuAdapter: SFUAdapter! {
+        didSet {
+            statsReporter.sfuAdapter = sfuAdapter
+        }
+    }
+
     private var migratingSFUAdapter: SFUAdapter?
 
     private var migratingToken: String?
@@ -21,16 +26,23 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private(set) var publisher: PeerConnection? {
         didSet {
             sfuMiddleware.update(publisher: publisher)
+            statsReporter.publisher = publisher
         }
     }
 
     private(set) var subscriber: PeerConnection? {
         didSet {
             sfuMiddleware.update(subscriber: subscriber)
+            statsReporter.subscriber = subscriber
         }
     }
     
-    private(set) var sessionID: String
+    private(set) var sessionID: String {
+        didSet {
+            statsReporter.sessionID = sessionID
+        }
+    }
+
     private var token: String
     
     private(set) var localVideoTrack: RTCVideoTrack?
@@ -61,7 +73,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
 
     private var disconnectTime: Date?
     private var addOnParticipantsChangeHandlerTask: Task<Void, Error>?
-    private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
     
@@ -94,6 +105,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         publisher: publisher,
         participantThreshold: Constants.participantsThreshold
     )
+
+    // MARK: - v2
+
+    private(set) lazy var statsReporter = WebRTCStatsReporter(sessionID: sessionID)
 
     init(
         user: User,
@@ -522,21 +537,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         let updated = participant.withUpdated(pin: pin)
         await state.update(callParticipant: updated)
-    }
-    
-    func collectStats() async throws -> CallStatsReport {
-        async let statsPublisher = publisher?.statsReport()
-        async let statsSubscriber = subscriber?.statsReport()
-        let result = try await [statsPublisher, statsSubscriber]
-        return callStatisticsReporter.buildReport(
-            publisherReport: .init(result[safe: 0] ?? nil),
-            subscriberReport: .init(result[safe: 1] ?? nil),
-            datacenter: sfuAdapter.hostname
-        )
-    }
-    
-    func sendStats(report: CallStatsReport?) async throws {
-        try await sfuAdapter.sendStats(report, for: sessionID)
     }
     
     /// Starts noise cancellation for a specified session ID asynchronously.
