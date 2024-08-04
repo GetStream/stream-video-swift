@@ -38,6 +38,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         pc.connectionState
     }
 
+    private let subsystem: LogSubsystem
+
     init(
         sessionId: String,
         pc: RTCPeerConnection,
@@ -50,6 +52,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         self.sfuAdapter = sfuAdapter
         self.type = type
         self.videoOptions = videoOptions
+        subsystem = type == .publisher ? .peerConnection_publisher : .peerConnection_subscriber
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
@@ -63,7 +66,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             PreferredDimensions: \(videoOptions.preferredDimensions)
             PreferredFormat: \(videoOptions.preferredFormat?.description ?? "nil")
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -87,10 +90,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             PeerConnection of type:\(type.rawValue) is creating offer.
             Constraints: \(constraints)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
 
-        return try await withCheckedThrowingContinuation { [type] continuation in
+        return try await withCheckedThrowingContinuation { [type, subsystem] continuation in
             pc.offer(for: constraints) {
                 sdp, error in
                 if let error = error {
@@ -102,7 +105,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                         SDP: \(sdp.description)
                         Constraints: \(constraints)
                         """,
-                        subsystems: .peerConnection
+                        subsystems: subsystem
                     )
                     continuation.resume(returning: sdp)
                 } else {
@@ -119,7 +122,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func createAnswer() async throws -> RTCSessionDescription {
         log.debug(
             "PeerConnection of type:\(type.rawValue) is creating answer.",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -149,7 +152,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             PeerConnection of type:\(type.rawValue) is setting localDescription
             SDP: \(sdp)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
         return try await withCheckedThrowingContinuation { continuation in
             pc.setLocalDescription(sdp) { error in
@@ -169,7 +172,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             Type: \(type)
             SDP: \(sdp)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
 
         let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
@@ -203,7 +206,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             TrackType: \(trackType.rawValue)
             StreamIds: \(streamIds.map(\.description))
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
         publishedTracks.append(trackType)
         pc.add(track, streamIds: streamIds)
@@ -223,7 +226,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             StreamIds: \(streamIds.map(\.description))
             Direction: \(direction)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
         let transceiverInit = RTCRtpTransceiverInit()
         transceiverInit.direction = direction
@@ -254,7 +257,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 
                 Candidate will be pending to add.
                 """,
-                subsystems: .peerConnection
+                subsystems: subsystem
             )
             pendingIceCandidates.append(iceCandidate)
             return
@@ -265,7 +268,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func restartIce() {
         log.debug(
             "PeerConnection of type:\(type.rawValue) is restarting ICE.",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
         pc.restartIce()
     }
@@ -273,7 +276,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func close() {
         log.debug(
             "PeerConnection of type:\(type.rawValue) was closed.",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
         pc.close()
     }
@@ -284,7 +287,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) didChange RTCSignalingState newState:\(stateChanged)",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -298,7 +301,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             SFU: \(sfuAdapter.hostname)
             StreamId: \(stream.streamId)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
 
         if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
@@ -317,7 +320,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             SFU: \(sfuAdapter.hostname)
             StreamId: \(stream.streamId)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
         onStreamRemoved?(stream)
     }
@@ -327,7 +330,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) should negotiate.",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
         onNegotiationNeeded?(self, .defaultConstraints)
     }
@@ -340,7 +343,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             log.log(
                 level,
                 message: "PeerConnection of type:\(type.rawValue) didChange RTCIceConnectionState newState:\(newState)",
-                subsystems: .peerConnection,
+                subsystems: subsystem,
                 error: nil
             )
         }
@@ -365,7 +368,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) didChange ICEGatheringState newState:\(newState)",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -378,7 +381,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             PeerConnection of type:\(type.rawValue) didGenerate ICE candidate:
             \(candidate.description)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
 
         if paused {
@@ -410,7 +413,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             PeerConnection of type:\(type.rawValue) didRemove ICE candidates:
             \(candidates.map(\.description))
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -420,7 +423,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) didOpen dataChannel:\(dataChannel.description)",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -436,7 +439,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             Address: \(event.address)
             Port: \(event.port)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -455,7 +458,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             remote: \(remote)
             lastDataReceivedMs: \(lastDataReceivedMs)
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -465,7 +468,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) didChangeStandardizedIceConnectionState newState: \(newState)",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -475,7 +478,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) didChangeConnectionState newState: \(newState)",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -485,7 +488,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) didRemoveRTPReceiver receiverId: \(rtpReceiver.receiverId)",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -499,7 +502,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             PeerConnection of type:\(type.rawValue) didAdd stream to receiverId: \(rtpReceiver.receiverId)
             MediaStream: \(mediaStreams.map(\.streamId))
             """,
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -509,7 +512,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     ) {
         log.debug(
             "PeerConnection of type:\(type.rawValue) didStartReceivingOn transceiver:\(transceiver)",
-            subsystems: .peerConnection
+            subsystems: subsystem
         )
     }
 
@@ -564,13 +567,13 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 
     @discardableResult
     private func add(candidate: RTCIceCandidate) async throws -> Bool {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { [subsystem] continuation in
             self.pc.add(candidate) { error in
                 if let error = error {
-                    log.error("Error adding ice candidate", subsystems: .peerConnection, error: error)
+                    log.error("Error adding ice candidate", subsystems: subsystem, error: error)
                     continuation.resume(throwing: error)
                 } else {
-                    log.debug("Added ice candidate successfully", subsystems: .peerConnection)
+                    log.debug("Added ice candidate successfully", subsystems: subsystem)
                     continuation.resume(returning: true)
                 }
             }

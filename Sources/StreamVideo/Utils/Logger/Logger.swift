@@ -23,7 +23,9 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .webRTC,
         .other,
         .offlineSupport,
-        .peerConnection
+        .peerConnection_publisher,
+        .peerConnection_subscriber,
+        .sfu
     ]
 
     /// All subsystems within the SDK.
@@ -34,7 +36,9 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .webRTC,
         .other,
         .offlineSupport,
-        .peerConnection
+        .peerConnection_publisher,
+        .peerConnection_subscriber,
+        .sfu
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -52,7 +56,10 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     /// The subsystem responsible for WebRTC.
     public static let webRTC = Self(rawValue: 1 << 5)
     /// The subsystem responsible for PeerConnections.
-    public static let peerConnection = Self(rawValue: 1 << 6)
+    public static let peerConnection_publisher = Self(rawValue: 1 << 6)
+    public static let peerConnection_subscriber = Self(rawValue: 1 << 7)
+    /// The subsystem responsible for PeerConnections.
+    public static let sfu = Self(rawValue: 1 << 8)
 
     public var description: String {
         switch rawValue {
@@ -68,8 +75,12 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "offlineSupport"
         case LogSubsystem.webRTC.rawValue:
             return "webRTC"
-        case LogSubsystem.peerConnection.rawValue:
-            return "peerConnection"
+        case LogSubsystem.peerConnection_publisher.rawValue:
+            return "peerConnection-publisher"
+        case LogSubsystem.peerConnection_subscriber.rawValue:
+            return "peerConnection-subscriber"
+        case LogSubsystem.sfu.rawValue:
+            return "SFU"
         default:
             return "unknown(rawValue:\(rawValue)"
         }
