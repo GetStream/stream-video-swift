@@ -302,6 +302,11 @@
 		40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */; };
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
+		40BBC4642C5F90A0002AEF92 /* WebRTCClient+StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4532C5F90A0002AEF92 /* WebRTCClient+StateMachine.swift */; };
+		40BBC4652C5F9302002AEF92 /* WebRTCClient+Stage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4512C5F90A0002AEF92 /* WebRTCClient+Stage.swift */; };
+		40BBC4662C5F9315002AEF92 /* WebRTCClient+Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4482C5F90A0002AEF92 /* WebRTCClient+Error.swift */; };
+		40BBC4672C5F931C002AEF92 /* WebRTCClient+Idle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC44B2C5F90A0002AEF92 /* WebRTCClient+Idle.swift */; };
+		40BBC4682C5F9372002AEF92 /* WebRTCClient+Connecting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4462C5F90A0002AEF92 /* WebRTCClient+Connecting.swift */; };
 		40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */; };
 		40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */; };
 		40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */; };
@@ -1402,6 +1407,22 @@
 		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
+		40BBC4432C5F90A0002AEF92 /* WebRTCClient+CleanReconnected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+CleanReconnected.swift"; sourceTree = "<group>"; };
+		40BBC4442C5F90A0002AEF92 /* WebRTCClient+CleanReconnecting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+CleanReconnecting.swift"; sourceTree = "<group>"; };
+		40BBC4452C5F90A0002AEF92 /* WebRTCClient+Connected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Connected.swift"; sourceTree = "<group>"; };
+		40BBC4462C5F90A0002AEF92 /* WebRTCClient+Connecting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Connecting.swift"; sourceTree = "<group>"; };
+		40BBC4472C5F90A0002AEF92 /* WebRTCClient+Disconnected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Disconnected.swift"; sourceTree = "<group>"; };
+		40BBC4482C5F90A0002AEF92 /* WebRTCClient+Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Error.swift"; sourceTree = "<group>"; };
+		40BBC4492C5F90A0002AEF92 /* WebRTCClient+FastReconnected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+FastReconnected.swift"; sourceTree = "<group>"; };
+		40BBC44A2C5F90A0002AEF92 /* WebRTCClient+FastReconnecting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+FastReconnecting.swift"; sourceTree = "<group>"; };
+		40BBC44B2C5F90A0002AEF92 /* WebRTCClient+Idle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Idle.swift"; sourceTree = "<group>"; };
+		40BBC44C2C5F90A0002AEF92 /* WebRTCClient+Joined.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Joined.swift"; sourceTree = "<group>"; };
+		40BBC44D2C5F90A0002AEF92 /* WebRTCClient+Joining.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Joining.swift"; sourceTree = "<group>"; };
+		40BBC44E2C5F90A0002AEF92 /* WebRTCClient+Leaving.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Leaving.swift"; sourceTree = "<group>"; };
+		40BBC44F2C5F90A0002AEF92 /* WebRTCClient+Migrating.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Migrating.swift"; sourceTree = "<group>"; };
+		40BBC4502C5F90A0002AEF92 /* WebRTCClient+Rejoining.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Rejoining.swift"; sourceTree = "<group>"; };
+		40BBC4512C5F90A0002AEF92 /* WebRTCClient+Stage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Stage.swift"; sourceTree = "<group>"; };
+		40BBC4532C5F90A0002AEF92 /* WebRTCClient+StateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+StateMachine.swift"; sourceTree = "<group>"; };
 		40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisposableBag.swift; sourceTree = "<group>"; };
 		40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RejectCallRequest+Reason.swift"; sourceTree = "<group>"; };
 		40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RejectionReasonProvider.swift; sourceTree = "<group>"; };
@@ -2986,6 +3007,37 @@
 				40AB34D12C5D445700B5B6B3 /* MockSFUAdapter.swift */,
 			);
 			path = Mocks;
+			sourceTree = "<group>";
+		};
+		40BBC4522C5F90A0002AEF92 /* Stages */ = {
+			isa = PBXGroup;
+			children = (
+				40BBC4512C5F90A0002AEF92 /* WebRTCClient+Stage.swift */,
+				40BBC44B2C5F90A0002AEF92 /* WebRTCClient+Idle.swift */,
+				40BBC4462C5F90A0002AEF92 /* WebRTCClient+Connecting.swift */,
+				40BBC4482C5F90A0002AEF92 /* WebRTCClient+Error.swift */,
+				40BBC4432C5F90A0002AEF92 /* WebRTCClient+CleanReconnected.swift */,
+				40BBC4442C5F90A0002AEF92 /* WebRTCClient+CleanReconnecting.swift */,
+				40BBC4452C5F90A0002AEF92 /* WebRTCClient+Connected.swift */,
+				40BBC4472C5F90A0002AEF92 /* WebRTCClient+Disconnected.swift */,
+				40BBC4492C5F90A0002AEF92 /* WebRTCClient+FastReconnected.swift */,
+				40BBC44A2C5F90A0002AEF92 /* WebRTCClient+FastReconnecting.swift */,
+				40BBC44C2C5F90A0002AEF92 /* WebRTCClient+Joined.swift */,
+				40BBC44D2C5F90A0002AEF92 /* WebRTCClient+Joining.swift */,
+				40BBC44E2C5F90A0002AEF92 /* WebRTCClient+Leaving.swift */,
+				40BBC44F2C5F90A0002AEF92 /* WebRTCClient+Migrating.swift */,
+				40BBC4502C5F90A0002AEF92 /* WebRTCClient+Rejoining.swift */,
+			);
+			path = Stages;
+			sourceTree = "<group>";
+		};
+		40BBC4542C5F90A0002AEF92 /* StateMachine */ = {
+			isa = PBXGroup;
+			children = (
+				40BBC4522C5F90A0002AEF92 /* Stages */,
+				40BBC4532C5F90A0002AEF92 /* WebRTCClient+StateMachine.swift */,
+			);
+			path = StateMachine;
 			sourceTree = "<group>";
 		};
 		40C2B5B42C2B604800EC2C2D /* DisposableBag */ = {
@@ -4588,6 +4640,7 @@
 		84FC2C1C28ACF29300181490 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				40BBC4542C5F90A0002AEF92 /* StateMachine */,
 				40AB34DD2C5D6A6700B5B6B3 /* CallAuthenticator.swift */,
 				40AB34AF2C5D048800B5B6B3 /* Extensions */,
 				40AB34AC2C5D02CB00B5B6B3 /* SFU */,
@@ -5405,6 +5458,7 @@
 				84DCA21F2A39DA15000C3411 /* APIHelper.swift in Sources */,
 				84DC38D329ADFCFD00946713 /* CallEndedEvent.swift in Sources */,
 				84A737D028F4716E001A6769 /* models.pb.swift in Sources */,
+				40BBC4682C5F9372002AEF92 /* WebRTCClient+Connecting.swift in Sources */,
 				84DC388E29ADFCFD00946713 /* JSONEncodingHelper.swift in Sources */,
 				846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */,
 				842E70DB2B91BE1700D2D68B /* ListTranscriptionsResponse.swift in Sources */,
@@ -5497,6 +5551,7 @@
 				841BAA392BD15CDE000C73E4 /* UserSessionStats.swift in Sources */,
 				8409465829AF4EEC007AF5BF /* SendReactionRequest.swift in Sources */,
 				84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */,
+				40BBC4672C5F931C002AEF92 /* WebRTCClient+Idle.swift in Sources */,
 				8469593829BB6B4E00134EA0 /* GetEdgesResponse.swift in Sources */,
 				40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */,
 				84DC389A29ADFCFD00946713 /* APIError.swift in Sources */,
@@ -5526,12 +5581,14 @@
 				844ECF4F2A33458A0023263C /* Member.swift in Sources */,
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
+				40BBC4652C5F9302002AEF92 /* WebRTCClient+Stage.swift in Sources */,
 				84DC38A129ADFCFD00946713 /* BlockUserResponse.swift in Sources */,
 				4012B1942BFCAC1C006B0031 /* StreamCallStateMachine+RejectingStage.swift in Sources */,
 				84DCA2152A38A79E000C3411 /* Token.swift in Sources */,
 				40FB151B2BF77EEE00D5E580 /* StreamCallStateMachine+JoiningStage.swift in Sources */,
 				40AB34E22C5E742400B5B6B3 /* Publisher+Logger.swift in Sources */,
 				84F3B0DA289083E70088751D /* WebSocketConstants.swift in Sources */,
+				40BBC4642C5F90A0002AEF92 /* WebRTCClient+StateMachine.swift in Sources */,
 				840F59902A77FDCB00EF3EB2 /* UnpinRequest.swift in Sources */,
 				8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */,
 				40FB15172BF77EA600D5E580 /* StreamCallStateMachine.swift in Sources */,
@@ -5619,6 +5676,7 @@
 				840F59932A77FDCB00EF3EB2 /* PinResponse.swift in Sources */,
 				840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */,
 				841BAA3D2BD15CDE000C73E4 /* GetCallStatsResponse.swift in Sources */,
+				40BBC4662C5F9315002AEF92 /* WebRTCClient+Error.swift in Sources */,
 				842E70D92B91BE1700D2D68B /* CallClosedCaption.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */,

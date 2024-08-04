@@ -117,11 +117,21 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     // MARK: - v2
 
     private(set) lazy var statsReporter = WebRTCStatsReporter(sessionID: sessionID)
-    private let callAuthenticator: CallAuthenticating
+    let callAuthenticator: CallAuthenticating
     private var activeMigrationTask: Task<Void, Never>?
     private var activeReconnectionTask: Task<Void, Never>?
     private var sfuReconnectionTime: CGFloat = 30
     weak var delegate: WebRTCClientDelegate?
+    private(set) lazy var stateMachine = StateMachine(
+        .init(
+            callSettings: callSettings,
+            audioSettings: audioSettings,
+            videoOptions: videoOptions,
+            connectOptions: connectOptions
+        )
+    )
+
+    private var useStateMachine = false
 
     init(
         user: User,
@@ -1359,7 +1369,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                     )
                     updated = participant.withUpdated(pin: pin)
                 } else if !sessionIds.contains(sessionId)
-                    && (participant.pin != nil && participant.pin?.isLocal == false) {
+                            && (participant.pin != nil && participant.pin?.isLocal == false) {
                     updated = participant.withUpdated(pin: nil)
                 }
                 updatedParticipants[sessionId] = updated
@@ -1502,7 +1512,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             guard let self else { return }
             if (
                 self.isPeerConnectionConnecting(self.publisher, otherNotDisconnected: self.subscriber)
-                    || self.isPeerConnectionConnecting(self.subscriber, otherNotDisconnected: self.publisher)
+                || self.isPeerConnectionConnecting(self.subscriber, otherNotDisconnected: self.publisher)
             )
                 && retries == 0 {
                 log.debug(
@@ -1590,7 +1600,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                         audioSettings: response.call.settings.audio
                     )
                 )
-                
+
                 let videoOptions = VideoOptions(
                     targetResolution: response.call.settings.video.targetResolution
                 )
@@ -1686,6 +1696,75 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                     try? await Task.sleep(nanoseconds: 1_000_000_000)
                     self.handleSignalChannelDisconnect(source: source, isRetry: true)
                 }
+            }
+        }
+    }
+
+
+    // MARK: - v1.5
+    func _setupPeerConnections(
+        connectOptions: ConnectOptions,
+        videoOptions: VideoOptions
+    ) async throws {
+        log.debug("Creating subscriber peer connection", subsystems: .webRTC)
+        let configuration = connectOptions.rtcConfiguration
+        subscriber = try peerConnectionFactory.makePeerConnection(
+            sessionId: sessionID,
+            configuration: configuration,
+            type: .subscriber,
+            sfuAdapter: sfuAdapter,
+            videoOptions: videoOptions
+        )
+
+        subscriber?.onStreamAdded = { [weak self] in self?.handleStreamAdded($0) }
+        subscriber?.onStreamRemoved = { [weak self] in self?.handleStreamRemoved($0) }
+        subscriber?.onDisconnect = { [weak self] _ in
+            log.debug("subscriber disconnected")
+            if self?.isFastReconnecting == false {
+                log.debug("notifying of subscriber disconnection")
+                self?.delegate?.webRTCClientDisconnected()
+            }
+
+
+        }
+
+        log.debug("Updating connection status to connected", subsystems: .webRTC)
+    }
+
+    func _publishLocalTracks(
+        connectOptions: ConnectOptions,
+        callSettings: CallSettings
+    ) async throws {
+        if callSettings.shouldPublish {
+            try await publishLocalTracks(
+                configuration: connectOptions.rtcConfiguration
+            )
+        }
+    }
+
+    func _notifyLeave(
+        _ webSocketClient: WebSocketClient,
+        reason: String = ""
+    ) {
+        var payload = Stream_Video_Sfu_Event_LeaveCallRequest()
+        payload.sessionID = sessionID
+        payload.reason = reason
+
+        var event = Stream_Video_Sfu_Event_SfuRequest()
+        event.requestPayload = .leaveCallRequest(payload)
+
+        webSocketClient.engine?.send(message: event)
+    }
+
+    func _closeConnections(of types: [PeerConnectionType]) {
+        for peerConnectionType in types {
+            switch peerConnectionType {
+            case .subscriber:
+                subscriber?.close()
+                subscriber = nil
+            case .publisher:
+                publisher?.close()
+                publisher = nil
             }
         }
     }
