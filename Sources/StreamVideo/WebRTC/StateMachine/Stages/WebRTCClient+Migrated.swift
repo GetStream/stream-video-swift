@@ -6,10 +6,10 @@ import Foundation
 
 extension WebRTCClient.StateMachine.Stage {
 
-    static func connecting(
+    static func migrated(
         _ context: Context
     ) -> WebRTCClient.StateMachine.Stage {
-        ConnectingStage(
+        MigratedStage(
             context
         )
     }
@@ -17,78 +17,69 @@ extension WebRTCClient.StateMachine.Stage {
 
 extension WebRTCClient.StateMachine.Stage {
 
-    final class ConnectingStage: WebRTCClient.StateMachine.Stage {
+    final class MigratedStage: WebRTCClient.StateMachine.Stage {
 
         init(
             _ context: Context
         ) {
-            super.init(id: .connecting, context: context)
+            super.init(id: .migrated, context: context)
         }
 
         override func transition(
             from previousStage: WebRTCClient.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
-            case .idle:
-                execute(create: true, updateSession: false)
-                return self
-            case .rejoining:
-                execute(create: false, updateSession: true)
+            case .migrating:
+                execute()
                 return self
             default:
                 return nil
             }
         }
 
-        private func execute(create: Bool, updateSession: Bool) {
+        private func execute() {
             Task { [weak self] in
                 guard let self else { return }
+
                 do {
                     guard
-                        let client = context.client
+                        let client = context.client,
+                        let migratingSFUAdapter = client.migratingSFUAdapter
                     else {
                         throw ClientError(
                             "WebRCTAdapter instance not available."
                         )
                     }
-                    if updateSession {
-                        client.updateSession()
-                    }
-
-                    if !updateSession {
-                        client._closeConnections(of: [.publisher, .subscriber])
-                    }
 
                     let response = try await client
                         .callAuthenticator
-                        .authenticate(create: create, migratingFrom: nil)
+                        .authenticate(
+                            create: false,
+                            migratingFrom: client.sfuAdapter.hostname
+                        )
 
                     client.prepare(
-                        .connect(
+                        .migration(
                             url: response.credentials.server.url,
                             token: response.credentials.token,
                             webSocketURL: response.credentials.server.wsEndpoint,
+                            fromSfuName: client.sfuAdapter.hostname,
                             ownCapabilities: response.ownCapabilities,
-                            audioSettings: response.call.settings.audio,
-                            connectOptions: ConnectOptions(iceServers: response.credentials.iceServers)
+                            audioSettings: response.call.settings.audio
                         )
                     )
 
-                    let callSettings = context.callSettings ?? response.call.settings.toCallSettings
-                    context.callSettings = callSettings
-                    client.callSettings = callSettings
                     context.videoOptions = VideoOptions(
                         targetResolution: response.call.settings.video.targetResolution
                     )
-                    context.connectOptions = ConnectOptions(
-                        iceServers: response.credentials.iceServers
+                    context.connectOptions = ConnectOptions(iceServers: response.credentials.iceServers)
+
+                    client.migratingSFUAdapter?.connect()
+                    client.publisher?.update(
+                        configuration: context.connectOptions?.rtcConfiguration
                     )
 
-                    await client.setupUserMedia(callSettings: callSettings)
-                    client.sfuAdapter.connect()
-
-                    _ = try await client
-                        .sfuAdapter
+                    _ = try await migratingSFUAdapter
                         .$connectionState
                         .filter {
                             switch $0 {
@@ -98,10 +89,10 @@ extension WebRTCClient.StateMachine.Stage {
                                 return false
                             }
                         }
-                        .nextValue(timeout: 5)
+                        .nextValue(timeout: 10)
 
                     try transition?(
-                        .connected(
+                        .joining(
                             context
                         )
                     )

@@ -33,13 +33,25 @@ extension WebRTCClient.StateMachine.Stage {
         override func transition(
             from previousStage: WebRTCClient.StateMachine.Stage
         ) -> Self? {
+            if let source = context.disconnectionSource {
+                log.error(
+                    "Disconnected from \(previousStage.id) due to \(source).",
+                    subsystems: .webRTC
+                )
+            }
+
             switch previousStage.id {
             case .joined:
-                Task {
-                    // We need the task to ensure any transition will happen after
-                    // this one has completed.
-                    execute()
-                }
+                execute()
+                return self
+            case .disconnected:
+                execute()
+                return self
+            case .fastReconnecting:
+                execute()
+                return self
+            case .rejoining:
+                execute()
                 return self
             default:
                 return nil
@@ -47,22 +59,14 @@ extension WebRTCClient.StateMachine.Stage {
         }
 
         private func execute() {
-            guard
-                case .available = internetConnectionObserver.status
-            else {
+            Task {
                 observeInternetConnection()
-                return
             }
-
-            reconnect()
         }
 
         private func reconnect() {
             do {
                 switch context.reconnectionStrategy {
-                case .disconnected:
-                    break
-
                 case let .fast(disconnectedSince, deadline) where disconnectedSince.timeIntervalSinceNow <= deadline:
                     try transition?(
                         .fastReconnecting(
@@ -70,57 +74,45 @@ extension WebRTCClient.StateMachine.Stage {
                         )
                     )
                 case .fast:
-                    try transition?(
-                        .cleanReconnecting(
-//                            coordinator,
-//                            callSettings: callSettings,
-//                            videoOptions: videoOptions,
-//                            connectOptions: connectOptions,
-//                            disconnectionSource: disconnectionSource,
-//                            reconnectionStrategy: .clean(
-//                                callSettings: callSettings,
-//                                videoOptions: videoOptions,
-//                                connectOptions: connectOptions
-//                            )
-                            context
-                        )
-                    )
-                case let .clean(callSettings, videoOptions, connectOptions):
-                    try transition?(
-                        .cleanReconnecting(
-//                            coordinator,
-//                            callSettings: callSettings,
-//                            videoOptions: videoOptions,
-//                            connectOptions: connectOptions,
-//                            disconnectionSource: disconnectionSource,
-//                            reconnectionStrategy: .clean(
-//                                callSettings: callSettings,
-//                                videoOptions: videoOptions,
-//                                connectOptions: connectOptions
-//                            )
-                            context
-                        )
-                    )
-                case let .rejoin(callSettings, videoOptions, connectOptions):
-                    try transition?(
-                        .rejoining(
-                            context
-                        )
-                    )
+                    try transition?(.rejoining(context))
+
+                case .rejoin:
+                    try transition?(.rejoining(context))
+
                 case .migrate:
                     break
+
+                case .unknown:
+                    break
+
+                case .disconnected:
+                    break
                 }
-            } catch {
-                transitionErrorOrLog(error)
+            } catch (let blockError) {
+                if context.reconnectionStrategy == .disconnected {
+                    transitionErrorOrLog(blockError)
+                } else {
+                    do {
+                        try transition?(
+                            .disconnected(context)
+                        )
+                    } catch {
+                        transitionErrorOrLog(blockError)
+                    }
+                }
             }
         }
 
         private func observeInternetConnection() {
             internetObservationCancellable?.cancel()
             internetObservationCancellable = internetConnectionObserver
-                .publisher
+                .$status
+                .receive(on: DispatchQueue.main)
+                .filter { $0 != .unknown }
+                .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .filter { $0.isAvailable }
-                .sink { [weak self] _ in self?.execute() }
+                .removeDuplicates()
+                .sink { [weak self] _ in self?.reconnect() }
         }
     }
 }

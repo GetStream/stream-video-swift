@@ -1,8 +1,5 @@
 //
-//  WebRTCClient+StateMachine.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 1/8/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -23,7 +20,7 @@ extension WebRTCClient {
         ///
         /// - Parameter call: The call to be managed by the state machine.
         init(_ context: WebRTCClient.StateMachine.Stage.Context) {
-            stateMachine = .init(initialStage: .idle(context))
+            stateMachine = .init(initialStage: .idle(context), logSubsystem: .webRTC)
         }
 
         /// Transitions the state machine to the given next stage.

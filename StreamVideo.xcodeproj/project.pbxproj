@@ -307,6 +307,21 @@
 		40BBC4662C5F9315002AEF92 /* WebRTCClient+Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4482C5F90A0002AEF92 /* WebRTCClient+Error.swift */; };
 		40BBC4672C5F931C002AEF92 /* WebRTCClient+Idle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC44B2C5F90A0002AEF92 /* WebRTCClient+Idle.swift */; };
 		40BBC4682C5F9372002AEF92 /* WebRTCClient+Connecting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4462C5F90A0002AEF92 /* WebRTCClient+Connecting.swift */; };
+		40BBC4692C5FA3A2002AEF92 /* WebRTCClient+Connected.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4452C5F90A0002AEF92 /* WebRTCClient+Connected.swift */; };
+		40BBC46A2C5FA3A5002AEF92 /* WebRTCClient+Joining.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC44D2C5F90A0002AEF92 /* WebRTCClient+Joining.swift */; };
+		40BBC46B2C5FA4E8002AEF92 /* WebRTCClient+Disconnected.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4472C5F90A0002AEF92 /* WebRTCClient+Disconnected.swift */; };
+		40BBC46C2C5FA5B5002AEF92 /* WebRTCClient+Joined.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC44C2C5F90A0002AEF92 /* WebRTCClient+Joined.swift */; };
+		40BBC46D2C5FAB0A002AEF92 /* WebRTCClient+Leaving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC44E2C5F90A0002AEF92 /* WebRTCClient+Leaving.swift */; };
+		40BBC46F2C5FADFB002AEF92 /* WebRTCClient+CleanUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC46E2C5FAD5E002AEF92 /* WebRTCClient+CleanUp.swift */; };
+		40BBC4702C5FAFB5002AEF92 /* WebRTCClient+FastReconnecting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC44A2C5F90A0002AEF92 /* WebRTCClient+FastReconnecting.swift */; };
+		40BBC4712C5FB057002AEF92 /* WebRTCClient+FastReconnected.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4492C5F90A0002AEF92 /* WebRTCClient+FastReconnected.swift */; };
+		40BBC4722C5FBBED002AEF92 /* WebRTCClient+Rejoining.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4502C5F90A0002AEF92 /* WebRTCClient+Rejoining.swift */; };
+		40BBC4732C5FBE2D002AEF92 /* WebRTCClient+Migrating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC44F2C5F90A0002AEF92 /* WebRTCClient+Migrating.swift */; };
+		40BBC4752C5FBEB6002AEF92 /* WebRTCClient+Migrated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4742C5FBEB6002AEF92 /* WebRTCClient+Migrated.swift */; };
+		40BBC4772C6227D5002AEF92 /* DemoTranscriptionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */; };
+		40BBC4792C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4782C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift */; };
+		40BBC47C2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47B2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift */; };
+		40BBC47E2C62287F002AEF92 /* DemoReconnectionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */; };
 		40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */; };
 		40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */; };
 		40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */; };
@@ -1407,8 +1422,6 @@
 		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
-		40BBC4432C5F90A0002AEF92 /* WebRTCClient+CleanReconnected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+CleanReconnected.swift"; sourceTree = "<group>"; };
-		40BBC4442C5F90A0002AEF92 /* WebRTCClient+CleanReconnecting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+CleanReconnecting.swift"; sourceTree = "<group>"; };
 		40BBC4452C5F90A0002AEF92 /* WebRTCClient+Connected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Connected.swift"; sourceTree = "<group>"; };
 		40BBC4462C5F90A0002AEF92 /* WebRTCClient+Connecting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Connecting.swift"; sourceTree = "<group>"; };
 		40BBC4472C5F90A0002AEF92 /* WebRTCClient+Disconnected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Disconnected.swift"; sourceTree = "<group>"; };
@@ -1423,6 +1436,12 @@
 		40BBC4502C5F90A0002AEF92 /* WebRTCClient+Rejoining.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Rejoining.swift"; sourceTree = "<group>"; };
 		40BBC4512C5F90A0002AEF92 /* WebRTCClient+Stage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Stage.swift"; sourceTree = "<group>"; };
 		40BBC4532C5F90A0002AEF92 /* WebRTCClient+StateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+StateMachine.swift"; sourceTree = "<group>"; };
+		40BBC46E2C5FAD5E002AEF92 /* WebRTCClient+CleanUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+CleanUp.swift"; sourceTree = "<group>"; };
+		40BBC4742C5FBEB6002AEF92 /* WebRTCClient+Migrated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebRTCClient+Migrated.swift"; sourceTree = "<group>"; };
+		40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTranscriptionButtonView.swift; sourceTree = "<group>"; };
+		40BBC4782C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoNoiseCancellationButtonView.swift; sourceTree = "<group>"; };
+		40BBC47B2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+PresentDemoMoreMenu.swift"; sourceTree = "<group>"; };
+		40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoReconnectionButtonView.swift; sourceTree = "<group>"; };
 		40C2B5B52C2B605A00EC2C2D /* DisposableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisposableBag.swift; sourceTree = "<group>"; };
 		40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RejectCallRequest+Reason.swift"; sourceTree = "<group>"; };
 		40C2B5BD2C2C448200EC2C2D /* RejectionReasonProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RejectionReasonProvider.swift; sourceTree = "<group>"; };
@@ -2760,7 +2779,11 @@
 		409145F12B68FEF0007F3C17 /* MoreControls */ = {
 			isa = PBXGroup;
 			children = (
+				40BBC47A2C6227DF002AEF92 /* Extensions */,
 				409145F22B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift */,
+				40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */,
+				40BBC4782C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift */,
+				40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */,
 			);
 			path = MoreControls;
 			sourceTree = "<group>";
@@ -3015,18 +3038,18 @@
 				40BBC4512C5F90A0002AEF92 /* WebRTCClient+Stage.swift */,
 				40BBC44B2C5F90A0002AEF92 /* WebRTCClient+Idle.swift */,
 				40BBC4462C5F90A0002AEF92 /* WebRTCClient+Connecting.swift */,
-				40BBC4482C5F90A0002AEF92 /* WebRTCClient+Error.swift */,
-				40BBC4432C5F90A0002AEF92 /* WebRTCClient+CleanReconnected.swift */,
-				40BBC4442C5F90A0002AEF92 /* WebRTCClient+CleanReconnecting.swift */,
 				40BBC4452C5F90A0002AEF92 /* WebRTCClient+Connected.swift */,
-				40BBC4472C5F90A0002AEF92 /* WebRTCClient+Disconnected.swift */,
-				40BBC4492C5F90A0002AEF92 /* WebRTCClient+FastReconnected.swift */,
-				40BBC44A2C5F90A0002AEF92 /* WebRTCClient+FastReconnecting.swift */,
-				40BBC44C2C5F90A0002AEF92 /* WebRTCClient+Joined.swift */,
 				40BBC44D2C5F90A0002AEF92 /* WebRTCClient+Joining.swift */,
+				40BBC44C2C5F90A0002AEF92 /* WebRTCClient+Joined.swift */,
 				40BBC44E2C5F90A0002AEF92 /* WebRTCClient+Leaving.swift */,
-				40BBC44F2C5F90A0002AEF92 /* WebRTCClient+Migrating.swift */,
+				40BBC46E2C5FAD5E002AEF92 /* WebRTCClient+CleanUp.swift */,
+				40BBC4472C5F90A0002AEF92 /* WebRTCClient+Disconnected.swift */,
+				40BBC44A2C5F90A0002AEF92 /* WebRTCClient+FastReconnecting.swift */,
+				40BBC4492C5F90A0002AEF92 /* WebRTCClient+FastReconnected.swift */,
 				40BBC4502C5F90A0002AEF92 /* WebRTCClient+Rejoining.swift */,
+				40BBC44F2C5F90A0002AEF92 /* WebRTCClient+Migrating.swift */,
+				40BBC4742C5FBEB6002AEF92 /* WebRTCClient+Migrated.swift */,
+				40BBC4482C5F90A0002AEF92 /* WebRTCClient+Error.swift */,
 			);
 			path = Stages;
 			sourceTree = "<group>";
@@ -3038,6 +3061,14 @@
 				40BBC4532C5F90A0002AEF92 /* WebRTCClient+StateMachine.swift */,
 			);
 			path = StateMachine;
+			sourceTree = "<group>";
+		};
+		40BBC47A2C6227DF002AEF92 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40BBC47B2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		40C2B5B42C2B604800EC2C2D /* DisposableBag */ = {
@@ -5222,6 +5253,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40BBC4772C6227D5002AEF92 /* DemoTranscriptionButtonView.swift in Sources */,
 				40AB353B2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */,
 				4091460D2B690AC9007F3C17 /* DemoParticipantOptionsButton.swift in Sources */,
 				8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */,
@@ -5233,6 +5265,7 @@
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
 				845C09912C0E0B7600F725B3 /* SessionTimer.swift in Sources */,
 				403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */,
+				40BBC4792C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
 				4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */,
@@ -5241,6 +5274,7 @@
 				842D3B5C29F6A4A10051698A /* AppDelegate.swift in Sources */,
 				403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */,
 				40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */,
+				40BBC47E2C62287F002AEF92 /* DemoReconnectionButtonView.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
 				40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */,
 				409145FC2B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift in Sources */,
@@ -5303,6 +5337,7 @@
 				4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */,
 				40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */,
 				409146102B6913BA007F3C17 /* DemoStatsView.swift in Sources */,
+				40BBC47C2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift in Sources */,
 				402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */,
 				40CB9FA72B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
@@ -5431,6 +5466,7 @@
 				8454A3192AAB374B00A012C6 /* CallStatsReport.swift in Sources */,
 				84E5C51C2A013C440003A27A /* PushNotificationsConfig.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
+				40BBC4712C5FB057002AEF92 /* WebRTCClient+FastReconnected.swift in Sources */,
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
 				40149DD02B7E839500473176 /* AudioSessionProtocol.swift in Sources */,
 				8409465B29AF4EEC007AF5BF /* ListRecordingsResponse.swift in Sources */,
@@ -5480,9 +5516,12 @@
 				84A7E18C288363AC00526C98 /* EventNotificationCenter.swift in Sources */,
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,
 				84DC38DD29ADFCFD00946713 /* Models.swift in Sources */,
+				40BBC46C2C5FA5B5002AEF92 /* WebRTCClient+Joined.swift in Sources */,
 				842D3B5F29F6D3720051698A /* DeviceData.swift in Sources */,
 				842E70D02B91BE1700D2D68B /* ClosedCaptionEvent.swift in Sources */,
+				40BBC46F2C5FADFB002AEF92 /* WebRTCClient+CleanUp.swift in Sources */,
 				842D3B5829F667660051698A /* CreateDeviceRequest.swift in Sources */,
+				40BBC4702C5FAFB5002AEF92 /* WebRTCClient+FastReconnecting.swift in Sources */,
 				84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */,
 				841BAA3E2BD15CDE000C73E4 /* CollectUserFeedbackResponse.swift in Sources */,
 				402F04A92B70ED8600CA1986 /* StreamCallStatisticsReporter.swift in Sources */,
@@ -5491,6 +5530,7 @@
 				84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,
+				40BBC46B2C5FA4E8002AEF92 /* WebRTCClient+Disconnected.swift in Sources */,
 				40AB34DF2C5D6A7C00B5B6B3 /* CallAuthenticator.swift in Sources */,
 				841BAA3A2BD15CDE000C73E4 /* Location.swift in Sources */,
 				842B8E302A2DFED900863A87 /* EgressResponse.swift in Sources */,
@@ -5540,6 +5580,7 @@
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,
 				84A737D128F4716E001A6769 /* events.pb.swift in Sources */,
 				84DC38C129ADFCFD00946713 /* CallRequest.swift in Sources */,
+				40BBC4752C5FBEB6002AEF92 /* WebRTCClient+Migrated.swift in Sources */,
 				4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */,
 				84DC38A829ADFCFD00946713 /* QueryCallsResponse.swift in Sources */,
 				840F59912A77FDCB00EF3EB2 /* HLSSettingsRequest.swift in Sources */,
@@ -5566,6 +5607,7 @@
 				840F598F2A77FDCB00EF3EB2 /* PinRequest.swift in Sources */,
 				84DC389F29ADFCFD00946713 /* JoinCallResponse.swift in Sources */,
 				84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */,
+				40BBC4692C5FA3A2002AEF92 /* WebRTCClient+Connected.swift in Sources */,
 				4065839D2B877B6500B4F979 /* UIDevice+NeuralEngine.swift in Sources */,
 				40FB15142BF77D9000D5E580 /* StreamCallStateMachine+Stage.swift in Sources */,
 				84DC38D229ADFCFD00946713 /* UpdatedCallPermissionsEvent.swift in Sources */,
@@ -5574,6 +5616,7 @@
 				846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */,
 				840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */,
 				84DCA21C2A39D950000C3411 /* DefaultAPI.swift in Sources */,
+				40BBC4722C5FBBED002AEF92 /* WebRTCClient+Rejoining.swift in Sources */,
 				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
 				841BAA442BD15CDE000C73E4 /* QueryCallStatsResponse.swift in Sources */,
 				842E70D62B91BE1700D2D68B /* StartRecordingRequest.swift in Sources */,
@@ -5596,10 +5639,12 @@
 				8412903629DDD1ED00C70A6D /* UpdateCallMembersRequest.swift in Sources */,
 				84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
+				40BBC4732C5FBE2D002AEF92 /* WebRTCClient+Migrating.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
 				845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */,
 				40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */,
 				402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */,
+				40BBC46D2C5FAB0A002AEF92 /* WebRTCClient+Leaving.swift in Sources */,
 				8487D8B02A697E9A00536ED4 /* VideoCapturing.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,
 				848CCCE62AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift in Sources */,
@@ -5751,6 +5796,7 @@
 				84DC38CE29ADFCFD00946713 /* BlockUserRequest.swift in Sources */,
 				841BAA3B2BD15CDE000C73E4 /* NoiseCancellationSettingsRequest.swift in Sources */,
 				841FF51B2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift in Sources */,
+				40BBC46A2C5FA3A5002AEF92 /* WebRTCClient+Joining.swift in Sources */,
 				84DC38A329ADFCFD00946713 /* MuteUsersResponse.swift in Sources */,
 				84DC38BF29ADFCFD00946713 /* ScreensharingSettings.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,

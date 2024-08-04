@@ -33,21 +33,12 @@ extension WebRTCClient.StateMachine.Stage {
             case .connected:
                 execute(isFastReconnecting: false)
                 return self
-//            case .fastReconnected:
-//                execute(isFastReconnecting: true)
-//                return self
-//            case .cleanReconnected:
-//                execute(isFastReconnecting: false)
-//                return self
-//            case .migrated:
-//                if let fromSFUAdapter = (previousStage as? MigratedStage)?.fromSFUAdapter {
-//                    execute(isFastReconnecting: false, fromSFUAdapter: fromSFUAdapter)
-//                } else {
-//                    Task {
-//                        transitionErrorOrLog(ClientError("Invalid SFU migration details."))
-//                    }
-//                }
-//                return self
+            case .fastReconnected:
+                execute(isFastReconnecting: true)
+                return self
+            case .migrated:
+                executeMigration()
+                return self
             default:
                 return nil
             }
@@ -56,65 +47,141 @@ extension WebRTCClient.StateMachine.Stage {
         private func execute(
             isFastReconnecting: Bool
         ) {
-            Task {
-                guard 
-                    let coordinator = context.client
-                else {
-                    transitionErrorOrLog(
-                        ClientError(
-                            "WebRCTAdapter instance not available."
-                        )
-                    )
-                    return
-                }
+            Task { [weak self] in
+                guard let self else { return }
 
                 do {
-//                    let subscriberSessionDescription = try await buildSubscriberSessionDescription(
-//                        coordinator,
-//                        isFastReconnecting: isFastReconnecting
-//                    )
-
-                    if context.fromWebSocketClient != nil {
-//                        sfuAdapter.migrate(
-//                            sessionId: coordinator.authenticationAdapter.sessionId,
-//                            subscriberSessionDescription: subscriberSessionDescription,
-//                            token: coordinator.authenticationAdapter.token,
-//                            migratingFrom: fromSFUAdapter.hostname
-//                        )
-                        let subscriberSessionDescription = try await coordinator.tempOfferSdp()
-                        await join(
-                            coordinator,
-                            subscriberSessionDescription: subscriberSessionDescription,
-                            isFastReconnecting: false,
-                            isMigrating: true,
-                            webSocketClient: context.webSocketClient
-                        )
-                    } else {
-                        let subscriberSessionDescription: String
-                        if isFastReconnecting, let subscriber = coordinator.subscriber {
-                            let offer = try await subscriber.createOffer()
-                            subscriberSessionDescription = offer.sdp
-                        } else {
-                            subscriberSessionDescription = try await coordinator.tempOfferSdp()
-                        }
-//                        sfuAdapter.join(
-//                            sessionId: coordinator.authenticationAdapter.sessionId,
-//                            subscriberSessionDescription: subscriberSessionDescription,
-//                            isFastReconnecting: isFastReconnecting,
-//                            token: coordinator.authenticationAdapter.token
-//                        )
-
-                        await join(
-                            coordinator,
-                            subscriberSessionDescription: subscriberSessionDescription,
-                            isFastReconnecting: isFastReconnecting,
-                            isMigrating: false,
-                            webSocketClient: context.webSocketClient
+                    guard
+                        let client = context.client
+                    else {
+                        throw ClientError(
+                            "WebRCTAdapter instance not available."
                         )
                     }
 
-                    let joinResponse = try await context
-                        .webSocketClient
+                    let subscriberSessionDescription: String
+                    if isFastReconnecting, let subscriber = client.subscriber {
+                        let offer = try await subscriber.createOffer()
+                        subscriberSessionDescription = offer.sdp
+                    } else {
+                        subscriberSessionDescription = try await client.tempOfferSdp()
+                    }
+
+                    await join(
+                        client,
+                        subscriberSessionDescription: subscriberSessionDescription,
+                        isFastReconnecting: isFastReconnecting,
+                        isMigrating: false,
+                        sfuAdapter: client.sfuAdapter
+                    )
+
+                    let joinResponse = try await client
+                        .sfuAdapter
+                        .eventSubject
+                        .compactMap {
+                            if case let .sfuEvent(sfuEvent) = $0 {
+                                return sfuEvent
+                            } else {
+                                return nil
+                            }
+                        }
+                        .compactMap { (event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) in
+                            if case let .joinResponse(response) = event {
+                                return response
+                            } else {
+                                return nil
+                            }
+                        }
+                        .nextValue(timeout: 5)
+
+                    var context = context
+                    context.fastReconnectDeadlineSeconds = TimeInterval(joinResponse.fastReconnectDeadlineSeconds)
+
+                    if isFastReconnecting {
+                        client.publisher?.restartIce()
+                        client.subscriber?.restartIce()
+                        client.sfuAdapter.sendHealthCheck()
+                    } else {
+                        client.sfuAdapter.sendHealthCheck()
+
+                        _ = try await client
+                            .sfuAdapter
+                            .$connectionState
+                            .filter {
+                                switch $0 {
+                                case .connected:
+                                    return true
+                                default:
+                                    return false
+                                }
+                            }
+                            .nextValue(timeout: 5)
+
+                        if
+                            let connectOptions = context.connectOptions,
+                            let callSettings = context.callSettings
+                        {
+                            await client.setupUserMedia(
+                                callSettings: callSettings
+                            )
+
+                            try await client._setupPeerConnections(
+                                connectOptions: connectOptions,
+                                videoOptions: client.videoOptions
+                            )
+
+                            try await client._publishLocalTracks(
+                                connectOptions: connectOptions,
+                                callSettings: callSettings
+                            )
+                        } else {
+                            try transition?(.disconnected(context))
+                        }
+                    }
+
+                    try transition?(
+                        .joined(
+                            context
+                        )
+                    )
+                } catch {
+                    do {
+                        var context = self.context
+                        context.disconnectionSource = .serverInitiated(
+                            error: .init(error.localizedDescription)
+                        )
+                        try transition?(.disconnected(context))
+                    } catch {
+                        transitionErrorOrLog(error)
+                    }
+                }
+            }
+        }
+
+        private func executeMigration() {
+            Task { [weak self] in
+                guard let self else { return }
+
+                do {
+                    guard
+                        let client = context.client,
+                        let migratingSFUAdapter = client.migratingSFUAdapter
+                    else {
+                        throw ClientError(
+                            "WebRCTAdapter instance not available."
+                        )
+                    }
+
+                    let subscriberSessionDescription = try await client.tempOfferSdp()
+                    await join(
+                        client,
+                        subscriberSessionDescription: subscriberSessionDescription,
+                        isFastReconnecting: false,
+                        isMigrating: true,
+                        sfuAdapter: migratingSFUAdapter
+                    )
+
+                    let joinResponse = try await migratingSFUAdapter
                         .eventSubject
                         .compactMap {
                             if case let .sfuEvent(sfuEvent) = $0 {
@@ -131,33 +198,24 @@ extension WebRTCClient.StateMachine.Stage {
                             }
                         }
                         .nextValue(timeout: 15)
-//
-                    context.fromWebSocketClient?.disconnect {}
-                    context.fromWebSocketClient = nil
+                    migratingSFUAdapter.sendHealthCheck()
+
+                    var context = context
+                    context.fastReconnectDeadlineSeconds = TimeInterval(joinResponse.fastReconnectDeadlineSeconds)
+
+                    await client.completeMigration()
 
                     try transition?(
                         .joined(
-                            coordinator,
-                            sfuAdapter: sfuAdapter,
-                            callSettings: callSettings,
-                            videoOptions: videoOptions,
-                            connectOptions: connectOptions,
-                            fastReconnectDeadlineSeconds: TimeInterval(joinResponse.fastReconnectDeadlineSeconds)
+                            context
                         )
                     )
                 } catch {
                     do {
-//                        try transition?(
-//                            .disconnected(
-//                                coordinator,
-//                                sfuAdapter: sfuAdapter,
-//                                callSettings: callSettings,
-//                                videoOptions: videoOptions,
-//                                connectOptions: connectOptions,
-//                                disconnectionSource: .serverInitiated(error: ClientError(error.localizedDescription)),
-//                                reconnectionStrategy: reconnectionStrategyToUse()
-//                            )
-//                        )
+                        context.disconnectionSource = .serverInitiated(
+                            error: .init(error.localizedDescription)
+                        )
+                        try transition?(.disconnected(context))
                     } catch {
                         transitionErrorOrLog(error)
                     }
@@ -166,13 +224,13 @@ extension WebRTCClient.StateMachine.Stage {
         }
 
         private func join(
-            _ coordinator: WebRTCClient,
+            _ client: WebRTCClient,
             subscriberSessionDescription: String,
             isFastReconnecting: Bool,
             isMigrating: Bool,
-            webSocketClient: WebSocketClient
+            sfuAdapter: SFUAdapter
         ) async {
-            let payload = await coordinator.makeJoinRequest(
+            let payload = await client.makeJoinRequest(
                 subscriberSdp: subscriberSessionDescription,
                 migrating: isMigrating,
                 fastReconnect: isFastReconnecting
@@ -180,60 +238,7 @@ extension WebRTCClient.StateMachine.Stage {
             var event = Stream_Video_Sfu_Event_SfuRequest()
             event.requestPayload = .joinRequest(payload)
 
-            webSocketClient.engine?.send(message: event)
-        }
-
-        private func buildSubscriberSessionDescription(
-            _ coordinator: WebRTCCoordinator,
-            isFastReconnecting: Bool
-        ) async throws -> String {
-            if isFastReconnecting {
-                return "" // TODO: provider subscriber SessionDescription
-            } else {
-                return try await temporarySubscriberSessionDescription(coordinator)
-            }
-        }
-
-        private func temporarySubscriberSessionDescription(
-            _ coordinator: WebRTCCoordinator
-        ) async throws -> String {
-            try await coordinator.peerConnectionsAdapter.makeTemporaryOffer(
-                connectOptions: connectOptions
-            ).sdp
-        }
-
-        private func reconnectionStrategyToUse() -> ReconnectionStrategy {
-            switch sfuAdapter.preferredReconnectionStrategy {
-            case .fast:
-                return .fast(
-                    disconnectedSince: Date(),
-                    deadline: 0 // Skip
-                )
-
-            case .clean:
-                return .clean(
-                    callSettings: callSettings,
-                    videoOptions: videoOptions,
-                    connectOptions: connectOptions
-                )
-
-            case .rejoin:
-                return .rejoin(
-                    callSettings: callSettings,
-                    videoOptions: videoOptions,
-                    connectOptions: connectOptions
-                )
-
-            case .migrate:
-                return .migrate
-
-            default:
-                return .clean(
-                    callSettings: callSettings,
-                    videoOptions: videoOptions,
-                    connectOptions: connectOptions
-                )
-            }
+            sfuAdapter.send(message: event)
         }
     }
 }

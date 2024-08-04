@@ -42,7 +42,11 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
     private var disposableBag = DisposableBag()
 
     /// The current connection state of the WebSocket.
-    @Published var connectionState: WebSocketConnectionState = .initialized
+    @Published private(set) var connectionState: WebSocketConnectionState = .initialized
+
+    var eventSubject: AnyPublisher<WrappedEvent, Never> {
+        webSocket.eventSubject.eraseToAnyPublisher()
+    }
 
     /// The URL used for the WebSocket connection.
     var connectURL: URL { webSocket.connectURL }
@@ -91,6 +95,29 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         webSocket.disconnect {}
     }
 
+    private var isConnected: Bool {
+        switch connectionState {
+        case .connected:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func statusCheck(
+        functionName: StaticString = #function,
+        filename: StaticString = #file,
+        lineNumber: UInt = #line
+    ) {
+        guard !isConnected else { return }
+        log.error(
+            "Attempting to send a message before connecting to SFU.",
+            functionName: functionName,
+            fileName: filename,
+            lineNumber: lineNumber
+        )
+    }
+
     // MARK: - WebSocket
 
     /// Initiates a connection to the WebSocket server.
@@ -117,6 +144,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
     ///
     /// - Parameter isPaused: A boolean indicating whether the connection should be paused.
     func updatePaused(_ isPaused: Bool) {
+        statusCheck()
         webSocket.updatePaused(isPaused)
     }
 
@@ -124,6 +152,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
     ///
     /// - Parameter message: The message to be sent, conforming to the SendableEvent protocol.
     func send(message: SendableEvent) {
+//        statusCheck()
         webSocket.engine?.send(message: message)
     }
 
@@ -138,7 +167,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
     ) {
         log.debug("Will refresh \(self).", subsystems: .sfu)
         webSocket.connectionStateDelegate = nil
-        webSocket.disconnect {}
+        webSocket.disconnect(code: .init(rawValue: 4002)!) {}
         disposableBag.removeAll()
         webSocket = .init(
             sessionConfiguration: webSocketConfiguration.sessionConfiguration,
@@ -171,6 +200,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         for sessionId: String,
         retryPolicy: RetryPolicy = .fastAndSimple
     ) async throws {
+        statusCheck()
         var muteState = Stream_Video_Sfu_Signal_TrackMuteState()
         muteState.trackType = trackType
         muteState.muted = isMuted
@@ -202,6 +232,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         _ report: CallStatsReport?,
         for sessionId: String
     ) async throws {
+        statusCheck()
         guard let report else { return }
         var statsRequest = Stream_Video_Sfu_Signal_SendStatsRequest()
         statsRequest.sessionID = sessionId
@@ -231,6 +262,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         _ isEnabled: Bool,
         for sessionId: String
     ) async throws {
+        statusCheck()
         if isEnabled {
             var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
             request.sessionID = sessionId
@@ -279,7 +311,13 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         request.sessionID = sessionId
         request.tracks = tracks
         let task = Task { [request, service] in
-            try await service.setPublisher(setPublisherRequest: request)
+            try await executeTask(retryPolicy: .fastCheckValue { true }) { [weak self] in
+                try Task.checkCancellation()
+                guard self?.isConnected == true else {
+                    throw ClientError("Not connected.")
+                }
+                return try await service.setPublisher(setPublisherRequest: request)
+            }
         }
         task.store(in: disposableBag)
         return try await task.value
@@ -301,6 +339,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         tracks: [Stream_Video_Sfu_Signal_TrackSubscriptionDetails],
         for sessionId: String
     ) async throws {
+        statusCheck()
         var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
         request.sessionID = sessionId
         request.tracks = tracks
@@ -332,6 +371,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
+        statusCheck()
         var request = Stream_Video_Sfu_Signal_SendAnswerRequest()
         request.sessionID = sessionId
         request.peerType = peerType
@@ -344,6 +384,21 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         }
         task.store(in: disposableBag)
         _ = try await task.value
+    }
+
+    func sendLeaveRequest(
+        reason: String = "",
+        for sessionId: String
+    ) {
+        statusCheck()
+        var payload = Stream_Video_Sfu_Event_LeaveCallRequest()
+        payload.sessionID = sessionId
+        payload.reason = reason
+
+        var event = Stream_Video_Sfu_Event_SfuRequest()
+        event.requestPayload = .leaveCallRequest(payload)
+
+        webSocket.engine?.send(message: event)
     }
 
     /// Sends an ICE candidate to the SFU server using the ICE trickle technique.
@@ -363,13 +418,14 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
+        log.debug("Will trickle for peerType:\(peerType) on sessionId:\(sessionId)")
         var request = Stream_Video_Sfu_Models_ICETrickle()
         request.iceCandidate = candidate
         request.sessionID = sessionId
         request.peerType = peerType
         let task = Task { [request, service] in
             try Task.checkCancellation()
-            _ = try await service.iceTrickle(iCETrickle: request)
+            return try await service.iceTrickle(iCETrickle: request)
         }
         task.store(in: disposableBag)
         _ = try await task.value

@@ -20,6 +20,8 @@ extension WebRTCClient.StateMachine.Stage {
 
     final class JoinedStage: WebRTCClient.StateMachine.Stage {
 
+        @Injected(\.internetConnectionObserver) private var internetConnectionObserver
+
         private let disposableBag = DisposableBag()
 
         init(
@@ -41,55 +43,32 @@ extension WebRTCClient.StateMachine.Stage {
         }
 
         private func execute() {
-            Task {
-                guard let coordinator = context.client else {
-                    transitionErrorOrLog(
-                        ClientError(
+            Task { [weak self] in
+                guard let self else { return }
+                do {
+                    guard
+                        context.client != nil
+                    else {
+                        throw ClientError(
                             "WebRCTAdapter instance not available."
                         )
-                    )
-                    return
+                    }
+
+                    observeConnection()
+                    observeMigrationEvent()
+                    observeDisconnectEvent()
+                    observePreferredReconnectionStrategy()
+                    observeInternetConnection()
+                } catch {
+                    transitionErrorOrLog(error)
                 }
-
-                observeConnection()
-                observeMigrationEvent()
-                observeDisconnectEvent()
-                observePreferredReconnectionStrategy()
-
-                context.webSocketClient.engine?.send(
-                    message: Stream_Video_Sfu_Event_HealthCheckRequest()
-                )
-
-                // Setup user-media
-//                coordinator.localTracksAdapter.setupIfRequired(
-//                    callSettings: callSettings,
-//                    videoOptions: videoOptions,
-//                    connectOptions: connectOptions,
-//                    videoConfig: coordinator.videoConfig
-//                )
-                await coordinator.setupUserMedia(
-                    callSettings: context.callSettings
-                )
-
-                try await coordinator._setupPeerConnections(
-                    connectOptions: context.connectOptions,
-                    videoOptions: coordinator.videoOptions
-                )
-
-//                coordinator._sendHealthCheck(on: context.webSocketClient)
-                context.client?.sfuAdapter.sendHealthCheck()
-
-                try await coordinator._publishLocalTracks(
-                    connectOptions: context.connectOptions,
-                    callSettings: context.callSettings
-                )
             }
         }
 
         private func observeConnection() {
             context
-                .webSocketClient
-                .connectionSubject
+                .client?.sfuAdapter
+                .$connectionState
                 .compactMap {
                     switch $0 {
                     case let .disconnected(source):
@@ -100,6 +79,16 @@ extension WebRTCClient.StateMachine.Stage {
                 }
                 .sink { [weak self] (source: WebSocketConnectionState.DisconnectionSource) in
                     guard let self else { return }
+                    context.disconnectionSource = source
+                    if let sfuError = (source.serverError?.underlyingError as? Stream_Video_Sfu_Models_Error) {
+                        context.reconnectionStrategy = sfuError.shouldRetry
+                        ? .fast(
+                            disconnectedSince: .init(),
+                            deadline: context.fastReconnectDeadlineSeconds
+                        )
+                        : .rejoin
+                    }
+
                     do {
                         try transition?(
                             .disconnected(
@@ -115,7 +104,8 @@ extension WebRTCClient.StateMachine.Stage {
 
         private func observeMigrationEvent() {
             context
-                .webSocketClient
+                .client?
+                .sfuAdapter
                 .eventSubject
                 .compactMap {
                     if case let .sfuEvent(sfuEvent) = $0 {
@@ -139,15 +129,7 @@ extension WebRTCClient.StateMachine.Stage {
                 .sink { [weak self] (_: Bool) in
                     guard let self else { return }
                     do {
-//                        try transition?(
-//                            .migrating(
-//                                coordinator,
-//                                sfuAdapter: sfuAdapter,
-//                                callSettings: callSettings,
-//                                videoOptions: videoOptions,
-//                                connectOptions: connectOptions
-//                            )
-//                        )
+                        try transition?(.migrating(context))
                     } catch {
                         transitionErrorOrLog(error)
                     }
@@ -157,7 +139,8 @@ extension WebRTCClient.StateMachine.Stage {
 
         private func observeDisconnectEvent() {
             context
-                .webSocketClient
+                .client?
+                .sfuAdapter
                 .eventSubject
                 .compactMap {
                     if case let .sfuEvent(sfuEvent) = $0 {
@@ -193,7 +176,8 @@ extension WebRTCClient.StateMachine.Stage {
 
         private func observePreferredReconnectionStrategy() {
             context
-                .webSocketClient
+                .client?
+                .sfuAdapter
                 .eventSubject
                 .compactMap {
                     if case let .sfuEvent(sfuEvent) = $0 {
@@ -211,7 +195,34 @@ extension WebRTCClient.StateMachine.Stage {
                     }
                 }
                 .compactMap { [weak self] in self?.reconnectionStrategyToUse($0) }
+                .log(.debug, subsystems: .webRTC) { "Reconnection strategy updated to \($0)." }
                 .sink { [weak self] in self?.context.reconnectionStrategy = $0 }
+                .store(in: disposableBag)
+        }
+
+        private func observeInternetConnection() {
+            internetConnectionObserver
+                .$status
+                .receive(on: DispatchQueue.main)
+                .filter { $0 != .unknown }
+                .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
+                .filter { !$0.isAvailable }
+                .removeDuplicates()
+                .sink { [weak self] _ in
+                    guard let self else { return }
+                    do {
+                        context.reconnectionStrategy = .fast(
+                            disconnectedSince: .init(),
+                            deadline: context.fastReconnectDeadlineSeconds
+                        )
+                        context.disconnectionSource = .serverInitiated(error: .NetworkError("Not available"))
+                        try transition?(
+                            .disconnected(context)
+                        )
+                    } catch {
+                        transitionErrorOrLog(error)
+                    }
+                }
                 .store(in: disposableBag)
         }
 
@@ -225,29 +236,17 @@ extension WebRTCClient.StateMachine.Stage {
                     deadline: context.fastReconnectDeadlineSeconds
                 )
 
-            case .clean:
-                return .clean(
-                    callSettings: context.callSettings,
-                    videoOptions: context.videoOptions,
-                    connectOptions: context.connectOptions
-                )
-
             case .rejoin:
-                return .rejoin(
-                    callSettings: context.callSettings,
-                    videoOptions: context.videoOptions,
-                    connectOptions: context.connectOptions
-                )
+                return .rejoin
 
             case .migrate:
                 return .migrate
 
+            case .disconnect:
+                return .disconnected
+
             default:
-                return .clean(
-                    callSettings: context.callSettings,
-                    videoOptions: context.videoOptions,
-                    connectOptions: context.connectOptions
-                )
+                return .rejoin
             }
         }
     }

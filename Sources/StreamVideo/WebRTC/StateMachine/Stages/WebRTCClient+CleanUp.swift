@@ -6,10 +6,10 @@ import Foundation
 
 extension WebRTCClient.StateMachine.Stage {
 
-    static func leaving(
+    static func cleanUp(
         _ context: Context
     ) -> WebRTCClient.StateMachine.Stage {
-        LeavingStage(
+        CleanUpStage(
             context
         )
     }
@@ -17,43 +17,39 @@ extension WebRTCClient.StateMachine.Stage {
 
 extension WebRTCClient.StateMachine.Stage {
 
-    final class LeavingStage: WebRTCClient.StateMachine.Stage {
+    final class CleanUpStage: WebRTCClient.StateMachine.Stage {
 
         init(
             _ context: Context
         ) {
-            super.init(id: .leaving, context: context)
+            super.init(id: .cleanUp, context: context)
         }
 
         override func transition(
             from previousStage: WebRTCClient.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
-            case .joined:
+            case .idle:
+                return nil
+            default:
                 execute()
                 return self
-            default:
-                return nil
             }
         }
 
         private func execute() {
             Task { [weak self] in
-                guard let self else { return }
                 do {
                     guard
+                        let self,
                         let client = context.client
                     else {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
-
-                    client.sfuAdapter.sendLeaveRequest(
-                        for: client.sessionID
-                    )
-                    // TODO: further cleanup
-                    try transition?(.cleanUp(context))
+                    await client._cleanUp()
+                    try transition?(.idle(context))
                 } catch {
-                    transitionErrorOrLog(error)
+                    self?.transitionErrorOrLog(error)
                 }
             }
         }

@@ -6,12 +6,15 @@ import Foundation
 
 protocol CallAuthenticating {
 
-    func authenticate(create: Bool) async throws -> JoinCallResponse
+    func authenticate(
+        create: Bool,
+        migratingFrom: String?
+    ) async throws -> JoinCallResponse
 }
 
 final class CallAuthenticator: CallAuthenticating {
 
-    typealias Authenticator = (Bool) async throws -> JoinCallResponse
+    typealias Authenticator = (Bool, String?) async throws -> JoinCallResponse
 
     private let authenticator: Authenticator
 
@@ -21,7 +24,10 @@ final class CallAuthenticator: CallAuthenticating {
         self.authenticator = authenticator
     }
 
-    func authenticate(create: Bool) async throws -> JoinCallResponse {
-        try await authenticator(create)
+    func authenticate(
+        create: Bool,
+        migratingFrom: String?
+    ) async throws -> JoinCallResponse {
+        try await authenticator(create, migratingFrom)
     }
 }

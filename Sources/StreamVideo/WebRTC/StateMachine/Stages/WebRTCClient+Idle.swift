@@ -1,8 +1,5 @@
 //
-//  WebRTCClient+Idle.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 1/8/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -31,4 +28,3 @@ extension WebRTCClient.StateMachine.Stage {
         }
     }
 }
-

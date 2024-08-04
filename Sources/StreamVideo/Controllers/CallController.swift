@@ -16,9 +16,14 @@ class CallController: @unchecked Sendable {
             callCid(from: callId, callType: callType),
             videoConfig,
             .init(),
-            CallAuthenticator { [weak self, callId] create in
+            CallAuthenticator {
+                [weak self, callId] create,
+                    migratingFrom in
                 if let self {
-                    return try await authenticateCall(create: create)
+                    return try await authenticateCall(
+                        create: create,
+                        migratingFrom: migratingFrom
+                    )
                 } else {
                     throw ClientError("Unable to authenticate callId:\(callId).")
                 }
@@ -42,6 +47,7 @@ class CallController: @unchecked Sendable {
     private let joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Never>(nil)
     private var joinCallResponseFetchObserver: AnyCancellable?
     private var webRTCClientSessionIDObserver: AnyCancellable?
+    private var webRTCClientStateObserver: AnyCancellable?
 
     init(
         defaultAPI: DefaultAPI,
@@ -64,7 +70,6 @@ class CallController: @unchecked Sendable {
         self.cachedLocation = cachedLocation
 
         _ = webRTCClient
-        webRTCClient.delegate = self
 
         handleParticipantsUpdated()
         handleParticipantCountUpdated()
@@ -80,6 +85,17 @@ class CallController: @unchecked Sendable {
         joinCallResponseFetchObserver = joinCallResponseSubject
             .compactMap { $0 }
             .sink { [weak self] in self?.didFetch($0) }
+
+        if webRTCClient.useStateMachine {
+            webRTCClientStateObserver = webRTCClient
+                .stateMachine
+                .publisher
+                .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
+        } else {
+            webRTCClient.delegate = self
+        }
     }
 
     /// Joins a call with the provided information.
@@ -105,9 +121,9 @@ class CallController: @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
-        try await webRTCClient.connect()
-        guard let response = joinCallResponseSubject.value else {
-            await webRTCClient.cleanUp()
+        try await webRTCClient.connect(callSettings: callSettings)
+        guard let response = try await joinCallResponseSubject.nextValue(dropFirst: 1, timeout: 15) else {
+            webRTCClient.cleanUp()
             throw ClientError("Unable to connect to call callId:\(callId).")
         }
         return response
@@ -348,14 +364,17 @@ class CallController: @unchecked Sendable {
         try webRTCClient.zoom(by: factor)
     }
 
+    func leave() {
+        guard call != nil else { return }
+        call = nil
+        webRTCClient.leave()
+    }
+
     /// Cleans up the call controller.
     func cleanUp() {
         guard call != nil else { return }
         call = nil
-        let _webRTCClient = webRTCClient
-        Task { [weak _webRTCClient] in
-            await _webRTCClient?.cleanUp()
-        }
+        webRTCClient.cleanUp()
     }
 
     /// Collects user feedback asynchronously.
@@ -404,7 +423,8 @@ class CallController: @unchecked Sendable {
                 token: response.credentials.token,
                 webSocketURL: response.credentials.server.wsEndpoint,
                 ownCapabilities: response.ownCapabilities,
-                audioSettings: response.call.settings.audio
+                audioSettings: response.call.settings.audio,
+                connectOptions: ConnectOptions(iceServers: response.credentials.iceServers)
             )
         )
 
@@ -424,7 +444,7 @@ class CallController: @unchecked Sendable {
 
     private func handleParticipantsUpdated() {
         webRTCClient.onParticipantsUpdated = { [weak self] participants in
-            DispatchQueue.main.async {
+            Task { @MainActor [weak self] in
                 self?.call?.state.participantsMap = participants
             }
         }
@@ -432,7 +452,7 @@ class CallController: @unchecked Sendable {
 
     private func handleParticipantCountUpdated() {
         webRTCClient.onParticipantCountUpdated = { [weak self] participantCount in
-            DispatchQueue.main.async {
+            Task { @MainActor [weak self] in
                 self?.call?.state.participantCount = participantCount
             }
         }
@@ -461,13 +481,16 @@ class CallController: @unchecked Sendable {
         return response
     }
 
-    private func authenticateCall(create: Bool) async throws -> JoinCallResponse {
+    private func authenticateCall(
+        create: Bool,
+        migratingFrom: String?
+    ) async throws -> JoinCallResponse {
         let response = try await joinCall(
             create: create,
             callType: callType,
             callId: callId,
             options: nil,
-            migratingFrom: currentSFU,
+            migratingFrom: migratingFrom,
             ring: false,
             notify: false
         )
@@ -546,6 +569,25 @@ class CallController: @unchecked Sendable {
             self?.call?.state.update(from: response)
         }
     }
+
+    private func webRTCClientDidUpdateStage(
+        _ stage: WebRTCClient.StateMachine.Stage
+    ) {
+        switch stage.id {
+        case .idle:
+            call?.update(reconnectionStatus: .disconnected)
+        case .rejoining:
+            call?.update(reconnectionStatus: .reconnecting)
+        case .fastReconnecting:
+            call?.update(reconnectionStatus: .reconnecting)
+        case .migrating:
+            call?.update(reconnectionStatus: .migrating)
+        case .joined:
+            call?.update(reconnectionStatus: .connected)
+        default:
+            break
+        }
+    }
 }
 
 extension CallController {
@@ -573,40 +615,33 @@ extension CallController {
 }
 
 extension CallController: WebRTCClientDelegate {
-
     func webRTCClientMigrating() {
-        log.debug(#function)
-        call?.update(reconnectionStatus: .migrating)
-    }
-
-    func webRTCClientMigrated() {
-        log.debug(#function)
-        call?.update(reconnectionStatus: .connected)
-    }
-
-    func webRTCClientDisconnected() {
-        log.debug(#function)
-        call?.update(reconnectionStatus: .disconnected)
-//        cleanUp()
-    }
-
-    func webRTCClientReconnecting() {
-        log.debug(#function)
-        call?.update(reconnectionStatus: .reconnecting)
-    }
-
-    func webRTCClientConnected() {
-        log.debug(#function)
-        log.debug("Signal channel connected")
-        if reconnectionDate != nil {
-            reconnectionDate = nil
+        Task { @MainActor [weak self] in
+            self?.call?.update(reconnectionStatus: .migrating)
         }
-        executeOnMain { [weak self] in
-            guard let self else { return }
-            let status = self.call?.state.reconnectionStatus
-            if status != .migrating {
-                self.call?.update(reconnectionStatus: .connected)
-            }
+    }
+    
+    func webRTCClientMigrated() {
+        Task { @MainActor [weak self] in
+            self?.call?.update(reconnectionStatus: .connected)
+        }
+    }
+    
+    func webRTCClientDisconnected() {
+        Task { @MainActor [weak self] in
+            self?.call?.update(reconnectionStatus: .disconnected)
+        }
+    }
+    
+    func webRTCClientConnected() {
+        Task { @MainActor [weak self] in
+            self?.call?.update(reconnectionStatus: .connected)
+        }
+    }
+    
+    func webRTCClientReconnecting() {
+        Task { @MainActor [weak self] in
+            self?.call?.update(reconnectionStatus: .reconnecting)
         }
     }
 }

@@ -19,6 +19,11 @@ class SfuMiddleware: EventMiddleware {
     var onSessionMigrationEvent: (() -> Void)?
     var onPinsChanged: (([Stream_Video_Sfu_Models_Pin]) -> Void)?
     
+    private var publisherICECandidates: [RTCIceCandidate] = []
+    private var subscriberICECandidates: [RTCIceCandidate] = []
+
+    private let queue = UnfairQueue()
+
     init(
         sessionID: String,
         user: User,
@@ -37,19 +42,41 @@ class SfuMiddleware: EventMiddleware {
     
     func update(subscriber: PeerConnection?) {
         self.subscriber = subscriber
+        guard let subscriber else { return }
+        let candidates = queue.sync { subscriberICECandidates }
+        Task {
+            for candidate in candidates {
+                do {
+                    try await subscriber.add(iceCandidate: candidate)
+                } catch {
+                    log.error(error)
+                }
+            }
+        }
     }
     
     func update(publisher: PeerConnection?) {
         self.publisher = publisher
+        guard let publisher else { return }
+        let candidates = queue.sync { publisherICECandidates }
+        Task {
+            for candidate in candidates {
+                do {
+                    try await publisher.add(iceCandidate: candidate)
+                } catch {
+                    log.error(error)
+                }
+            }
+        }
     }
     
     func handle(event: WrappedEvent) -> WrappedEvent? {
-        log.debug("Received an event \(event)")
         Task { [weak self] in
             do {
                 guard let self, case let .sfuEvent(event) = event else {
                     return
                 }
+                log.debug("Received an event \(event)", subsystems: .sfu)
                 switch event {
                 case let .subscriberOffer(event):
                     await handleSubscriberEvent(event)
@@ -110,8 +137,9 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleSubscriberEvent(_ event: Stream_Video_Sfu_Event_SubscriberOffer) async {
+        /// TODO: Ensure that this is happening serially!
         do {
-            log.debug("Handling subscriber offer")
+            log.debug("Handling subscriber offer", subsystems: .webRTC)
             let offerSdp = event.sdp
             try await subscriber?.setRemoteDescription(offerSdp, type: .offer)
             let answer = try await subscriber?.createAnswer()
@@ -217,6 +245,16 @@ class SfuMiddleware: EventMiddleware {
             sdpMLineIndex: 0,
             sdpMid: nil
         )
+
+        switch peerType {
+        case .publisherUnspecified:
+            queue.sync { publisherICECandidates.append(iceCandidate) }
+        case .subscriber:
+            queue.sync { subscriberICECandidates.append(iceCandidate) }
+        case .UNRECOGNIZED(let int):
+            break
+        }
+
         if peerType == .subscriber, let subscriber = self.subscriber {
             log.debug("Adding ice candidate for the subscriber")
             try await executeTask(retryPolicy: .fastAndSimple) {

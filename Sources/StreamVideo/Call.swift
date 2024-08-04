@@ -493,7 +493,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         cancellables.removeAll()
         eventHandlers.removeAll()
-        callController.cleanUp()
+        callController.leave()
         try? stateMachine.transition(.idle(self))
         /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
         /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`

@@ -18,13 +18,15 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 //    var signalService: Stream_Video_Sfu_Signal_SignalServer
     var sfuAdapter: SFUAdapter
     private let sessionId: String
-    private let type: PeerConnectionType
+    let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private(set) var transceiver: RTCRtpTransceiver?
     private(set) var transceiverScreenshare: RTCRtpTransceiver?
-    internal var pendingIceCandidates = [RTCIceCandidate]()
+    var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
+
+    private let queue = UnfairQueue()
 
     var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?
@@ -178,15 +180,16 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
         return try await withCheckedThrowingContinuation { continuation in
             pc.setRemoteDescription(sessionDescription) { [weak self] error in
-                guard let self = self else { return }
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else {
-                    Task {
-                        for candidate in self.pendingIceCandidates {
+                    Task { [weak self] in
+                        guard let self = self else { return }
+                        let candidates = queue.sync { self.pendingIceCandidates }
+                        for candidate in candidates {
                             _ = try? await self.add(iceCandidate: candidate)
                         }
-                        self.pendingIceCandidates = []
+//                        self.pendingIceCandidates = []
                         continuation.resume(returning: ())
                     }
                 }
@@ -259,7 +262,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 """,
                 subsystems: subsystem
             )
-            pendingIceCandidates.append(iceCandidate)
+            queue.sync { pendingIceCandidates.append(iceCandidate) }
             return
         }
         try await add(candidate: iceCandidate)
@@ -399,7 +402,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                     for: sessionId
                 )
             } catch {
-                log.error(error)
+                log.error(error, subsystems: subsystem)
             }
         }
     }

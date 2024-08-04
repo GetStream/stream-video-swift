@@ -1,47 +1,27 @@
 //
-//  WebRTCClient+Stage.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 1/8/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 extension WebRTCClient.StateMachine {
     class Stage: StreamStateMachineStage {
 
-        struct Context {
+        struct Context {            
             weak var client: WebRTCClient?
-//            var callAuthenticator: CallAuthenticator
-//            var sfuAdapter: SFUAdapter
-//            var fromSFUAdapter: SFUAdapter?
-//            var currentSFU: String
-//            var apiKey: String
-            var callSettings: CallSettings
+            var callSettings: CallSettings?
             var audioSettings: AudioSettings?
             var videoOptions: VideoOptions
             var connectOptions: ConnectOptions?
-//            var webSocketClient: WebSocketClient
-//            var fastReconnectDeadlineSeconds: TimeInterval
-            var reconnectionStrategy: ReconnectionStrategy = .disconnected
+            var fastReconnectDeadlineSeconds: TimeInterval
+            var reconnectionStrategy: ReconnectionStrategy = .unknown
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource?
-//            var fromWebSocketClient: WebSocketClient?
 
             func nextReconnectionStrategy() -> ReconnectionStrategy {
                 switch reconnectionStrategy {
-                   case .fast:
-                       return .clean(
-                           callSettings: callSettings,
-                           videoOptions: videoOptions,
-                           connectOptions: connectOptions ?? .init(iceServers: [])
-                       )
-                   case let .clean(callSettings, videoOptions, connectOptions):
-                       return .rejoin(
-                           callSettings: callSettings,
-                           videoOptions: videoOptions,
-                           connectOptions: connectOptions
-                       )
-                   default:
+                case .fast:
+                    return .rejoin
+                default:
                     return reconnectionStrategy
-               }
+                }
             }
         }
 
@@ -53,11 +33,10 @@ extension WebRTCClient.StateMachine {
             case joining
             case joined
             case leaving
+            case cleanUp
             case disconnected
             case fastReconnecting
             case fastReconnected
-            case cleanReconnecting
-            case cleanReconnected
             case rejoining
             case migrating
             case migrated
@@ -102,24 +81,24 @@ extension WebRTCClient.StateMachine {
                     )
                 )
             } catch {
-                log.error(error)
+                log.error(error, subsystems: .webRTC)
+            }
+        }
+
+        func transitionOrError(_ nextStage: Stage) {
+            do {
+                try transition?(nextStage)
+            } catch {
+                transitionErrorOrLog(error)
             }
         }
     }
 }
 
-enum ReconnectionStrategy {
+enum ReconnectionStrategy: Equatable {
+    case unknown
     case disconnected
     case fast(disconnectedSince: Date, deadline: TimeInterval)
-    case clean(
-        callSettings: CallSettings,
-        videoOptions: VideoOptions,
-        connectOptions: ConnectOptions
-    )
-    case rejoin(
-        callSettings: CallSettings,
-        videoOptions: VideoOptions,
-        connectOptions: ConnectOptions
-    )
+    case rejoin
     case migrate
 }

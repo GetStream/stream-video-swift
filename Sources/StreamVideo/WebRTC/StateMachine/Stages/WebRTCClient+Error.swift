@@ -1,8 +1,5 @@
 //
-//  WebRTCClient+Error.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 1/8/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -61,13 +58,12 @@ extension WebRTCClient.StateMachine.Stage {
             Task { [error] in
                 do {
                     try transition?(.idle(context))
-                    log.error(error)
+                    log.error(error, subsystems: .webRTC)
                 } catch {
-                    log.error(error)
+                    log.error(error, subsystems: .webRTC)
                 }
             }
             return self
         }
     }
 }
-

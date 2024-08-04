@@ -39,14 +39,31 @@ extension WebRTCClient.StateMachine.Stage {
         }
 
         private func execute() {
-            Task {
+            Task { [weak self] in
+                guard let self else { return }
 
                 do {
-                    context.webSocketClient.connect()
+                    guard
+                        let client = context.client,
+                        let sfuAdapter = client.sfuAdapter
+                    else {
+                        throw ClientError("WebRCTAdapter instance not available.")
+                    }
 
-                    _ = try await context
-                        .webSocketClient
-                        .connectionSubject
+                    log.debug("Refreshing webSocket", subsystems: .webRTC)
+                    sfuAdapter.refresh(
+                        webSocketConfiguration: .init(
+                            url: sfuAdapter.connectURL,
+                            eventNotificationCenter: client.eventNotificationCenter
+                        )
+                    )
+
+                    log.debug("Connecting webSocket", subsystems: .webRTC)
+                    sfuAdapter.connect()
+
+                    log.debug("Waiting for webSocket state to change to authenticating", subsystems: .webRTC)
+                    _ = try await sfuAdapter
+                        .$connectionState
                         .filter {
                             switch $0 {
                             case .authenticating:
@@ -55,50 +72,21 @@ extension WebRTCClient.StateMachine.Stage {
                                 return false
                             }
                         }
-                        .nextValue(timeout: 15)
+                        .nextValue(timeout: 5)
 
                     try transition?(
                         .fastReconnected(
                             context
                         )
                     )
-                } catch {
+                } catch(let blockError) {
                     do {
                         context.reconnectionStrategy = context.nextReconnectionStrategy()
-                        context.disconnectionSource = .serverInitiated(error: ClientError(error.localizedDescription))
-                        
+                        context.disconnectionSource = .serverInitiated(error: ClientError(blockError.localizedDescription))
+
                         try transition?(
                             .disconnected(context)
                         )
-
-//                        try transition?(
-//                            .disconnected(
-//                                coordinator,
-//                                sfuAdapter: sfuAdapter,
-//                                callSettings: callSettings,
-//                                videoOptions: videoOptions,
-//                                connectOptions: connectOptions,
-//                                disconnectionSource: .serverInitiated(error: ClientError(error.localizedDescription)),
-//                                reconnectionStrategy: { [reconnectionStrategy, callSettings, videoOptions, connectOptions] in
-//                                    switch reconnectionStrategy {
-//                                    case .fast:
-//                                        return .clean(
-//                                            callSettings: callSettings,
-//                                            videoOptions: videoOptions,
-//                                            connectOptions: connectOptions
-//                                        )
-//                                    case let .clean(callSettings, videoOptions, connectOptions):
-//                                        return .rejoin(
-//                                            callSettings: callSettings,
-//                                            videoOptions: videoOptions,
-//                                            connectOptions: connectOptions
-//                                        )
-//                                    default:
-//                                        return reconnectionStrategy
-//                                    }
-//                                }()
-//                            )
-//                        )
                     } catch {
                         transitionErrorOrLog(error)
                     }

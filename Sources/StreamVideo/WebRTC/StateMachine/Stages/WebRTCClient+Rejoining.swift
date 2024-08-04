@@ -40,48 +40,37 @@ extension WebRTCClient.StateMachine.Stage {
 
         private func execute() {
             Task {
-                guard let coordinator = context.client else {
-                    transitionErrorOrLog(
-                        ClientError(
+                do {
+                    guard let client = context.client else {
+                        throw ClientError(
                             "WebRCTAdapter instance not available."
                         )
-                    )
-                    return
-                }
+                    }
 
-                do {
-                    let response = try await context.callAuthenticator.authenticate()
+                    if let sfuAdapter = client.sfuAdapter {
+                        sfuAdapter.sendLeaveRequest(for: client.sessionID)
+                        await sfuAdapter.disconnect()
+                    }
 
-                    context.videoOptions = VideoOptions(
-                        targetResolution: response.call.settings.video.targetResolution
-                    )
-                    context.connectOptions = ConnectOptions(
-                        iceServers: response.credentials.iceServers
-                    )
-                    context.callSettings = response.call.settings.toCallSettings
-
-                    coordinator._closeConnections(
-                        of: [
-                            .publisher,
-                            .subscriber
-                        ]
-                    )
+                    await client.partialCleanUp()
 
                     try transition?(
                         .connecting(
                             context
                         )
                     )
-                } catch {
+                } catch (let blockError) {
                     do {
-                        context.disconnectionSource = .serverInitiated(error: ClientError(error.localizedDescription))
+                        context.disconnectionSource = .serverInitiated(
+                            error: ClientError(blockError.localizedDescription)
+                        )
                         try transition?(
                             .disconnected(
                                 context
                             )
                         )
                     } catch {
-                        log.error(error)
+                        transitionErrorOrLog(blockError)
                     }
                 }
             }

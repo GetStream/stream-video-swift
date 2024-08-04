@@ -126,12 +126,13 @@ class WebSocketClient {
     /// Calling this function has no effect, if the connection is in an inactive state.
     /// - Parameter source: Additional information about the source of the disconnection. Default value is `.userInitiated`.
     func disconnect(
+        code: URLSessionWebSocketTask.CloseCode = .normalClosure,
         source: WebSocketConnectionState.DisconnectionSource = .userInitiated,
         completion: @escaping () -> Void
     ) {
         connectionState = .disconnecting(source: source)
         engineQueue.async { [engine, eventsBatcher] in
-            engine?.disconnect()
+            engine?.disconnect(with: code)
 
             eventsBatcher.processImmediately(completion: completion)
         }
