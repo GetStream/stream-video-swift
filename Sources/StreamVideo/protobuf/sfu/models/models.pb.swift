@@ -567,16 +567,12 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
   /// and establish a new WebSocket connection.
   case fast // = 2
 
-  /// SDK should drop existing pc instances and creates a fresh WebSocket connection,
-  /// ensuring a clean state for the reconnection.
-  case clean // = 3
-
   /// SDK should obtain new credentials from the coordinator, drops existing pc instances, set a new session_id and initializes
   /// a completely new WebSocket connection, ensuring a comprehensive reset.
-  case rejoin // = 4
+  case rejoin // = 3
 
   /// SDK should migrate to a new SFU instance
-  case migrate // = 5
+  case migrate // = 4
   case UNRECOGNIZED(Int)
 
   init() {
@@ -588,9 +584,8 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
     case 0: self = .unspecified
     case 1: self = .disconnect
     case 2: self = .fast
-    case 3: self = .clean
-    case 4: self = .rejoin
-    case 5: self = .migrate
+    case 3: self = .rejoin
+    case 4: self = .migrate
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -600,9 +595,8 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
     case .unspecified: return 0
     case .disconnect: return 1
     case .fast: return 2
-    case .clean: return 3
-    case .rejoin: return 4
-    case .migrate: return 5
+    case .rejoin: return 3
+    case .migrate: return 4
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -617,7 +611,6 @@ extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: CaseIterable {
     .unspecified,
     .disconnect,
     .fast,
-    .clean,
     .rejoin,
     .migrate,
   ]
@@ -1223,9 +1216,8 @@ extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf._Pro
     0: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED"),
     1: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT"),
     2: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_FAST"),
-    3: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_CLEAN"),
-    4: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_REJOIN"),
-    5: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_MIGRATE"),
+    3: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_REJOIN"),
+    4: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_MIGRATE"),
   ]
 }
 
