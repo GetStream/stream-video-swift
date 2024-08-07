@@ -84,7 +84,7 @@ extension WebRTCClient.StateMachine.Stage {
                         iceServers: response.credentials.iceServers
                     )
 
-                    await client.setupUserMedia(callSettings: callSettings)
+                    try await client.setupUserMedia(callSettings: callSettings)
                     client.sfuAdapter.connect()
 
                     _ = try await client

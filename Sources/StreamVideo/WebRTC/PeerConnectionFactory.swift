@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-final class PeerConnectionFactory {
+final class PeerConnectionFactory: @unchecked Sendable {
 
     private let audioProcessingModule: RTCAudioProcessingModule
     private lazy var factory: RTCPeerConnectionFactory = {
@@ -81,7 +81,7 @@ final class PeerConnectionFactory {
         factory.audioTrack(with: source, trackId: UUID().uuidString)
     }
 
-    private func makePeerConnection(
+    func makePeerConnection(
         configuration: RTCConfiguration,
         constraints: RTCMediaConstraints,
         delegate: RTCPeerConnectionDelegate?

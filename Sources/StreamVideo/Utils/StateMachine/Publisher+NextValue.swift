@@ -5,10 +5,6 @@
 import Combine
 import Foundation
 
-enum TimeoutError: Error {
-    case timedOut
-}
-
 extension Publisher {
 
     /// Retrieves the next value from the publisher after optionally skipping the initial values.
@@ -18,7 +14,10 @@ extension Publisher {
     /// - Throws: An error if the publisher completes with a failure.
     func nextValue(
         dropFirst: Int = 0,
-        timeout: TimeInterval? = nil
+        timeout: TimeInterval? = nil,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
     ) async throws -> Output {
         try await withCheckedThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
@@ -28,7 +27,13 @@ extension Publisher {
             if let timeout = timeout {
                 let workItem = DispatchWorkItem {
                     if !receivedValue {
-                        continuation.resume(throwing: TimeoutError.timedOut)
+                        continuation.resume(
+                            throwing: ClientError(
+                                "Operation timed out",
+                                file,
+                                line
+                            )
+                        )
                         cancellable?.cancel()
                     }
                 }

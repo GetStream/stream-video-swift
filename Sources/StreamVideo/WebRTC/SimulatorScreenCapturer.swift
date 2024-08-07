@@ -83,9 +83,11 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
                 timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9)
             )
 
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                self.delegate?.capturer(self, didCapture: rtcVideoFrame)
+            Task { @MainActor [weak self] in
+                guard let self else {
+                    return
+                }
+                delegate?.capturer(self, didCapture: rtcVideoFrame)
             }
         } else {
             // Reached the end of the video file, restart from the beginning

@@ -9,27 +9,45 @@ import StreamWebRTC
 /// Class that handles a particular call.
 class CallController: @unchecked Sendable {
 
-    private lazy var webRTCClient: WebRTCClient = {
-        environment.webRTCBuilder(
-            user,
-            apiKey,
-            callCid(from: callId, callType: callType),
-            videoConfig,
-            .init(),
-            CallAuthenticator {
-                [weak self, callId] create,
-                    migratingFrom in
-                if let self {
-                    return try await authenticateCall(
-                        create: create,
-                        migratingFrom: migratingFrom
-                    )
-                } else {
-                    throw ClientError("Unable to authenticate callId:\(callId).")
-                }
+//    private lazy var webRTCClient: WebRTCClient = {
+//        environment.webRTCBuilder(
+//            user,
+//            apiKey,
+//            callCid(from: callId, callType: callType),
+//            videoConfig,
+//            .init(),
+//            CallAuthenticator {
+//                [weak self, callId] create,
+//                    migratingFrom in
+//                if let self {
+//                    return try await authenticateCall(
+//                        create: create,
+//                        migratingFrom: migratingFrom
+//                    )
+//                } else {
+//                    throw ClientError("Unable to authenticate callId:\(callId).")
+//                }
+//            }
+//        )
+//    }()
+    private lazy var webRTCCoordinator = WebRTCCoordinator(
+        user: user,
+        apiKey: apiKey,
+        callCid: callCid(from: callId, callType: callType),
+        videoConfig: videoConfig,
+        callAuthenticator: CallAuthenticator {
+            [weak self, callId] create,
+                migratingFrom in
+            if let self {
+                return try await authenticateCall(
+                    create: create,
+                    migratingFrom: migratingFrom
+                )
+            } else {
+                throw ClientError("Unable to authenticate callId:\(callId).")
             }
-        )
-    }()
+        }
+    )
 
     weak var call: Call?
     private let user: User
@@ -48,6 +66,10 @@ class CallController: @unchecked Sendable {
     private var joinCallResponseFetchObserver: AnyCancellable?
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
+    private var webRTCParticipantsObserver: AnyCancellable?
+    private var debouncedParticipants: CollectionDebouncedUpdateObserver<[String: CallParticipant]>!
+
+    private let disposableBag = DisposableBag()
 
     init(
         defaultAPI: DefaultAPI,
@@ -69,33 +91,87 @@ class CallController: @unchecked Sendable {
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
 
-        _ = webRTCClient
+//        _ = webRTCClient
+        _ = webRTCCoordinator
 
-        handleParticipantsUpdated()
-        handleParticipantCountUpdated()
-        webRTCClientSessionIDObserver = webRTCClient
-            .$sessionID
-            .sink { [weak self] sessionID in
-                Task { @MainActor [weak self] in
-                    guard let self else { return }
-                    call?.state.sessionId = sessionID
+//        webRTCClientSessionIDObserver = webRTCClient
+//            .$sessionID
+//            .sink { [weak self] sessionID in
+//                Task { @MainActor [weak self] in
+//                    guard let self else { return }
+//                    call?.state.sessionId = sessionID
+//                }
+//            }
+
+        Task {
+            await handleParticipantCountUpdated()
+
+            let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
+            self .debouncedParticipants = CollectionDebouncedUpdateObserver(
+                publisher: participantsPublisher.eraseToAnyPublisher(),
+                initial: [:]
+            )
+            handleParticipantsUpdated()
+
+            webRTCClientSessionIDObserver = await webRTCCoordinator
+                .stateAdapter
+                .$sessionID
+                .sink { [weak self] sessionID in
+                    Task { @MainActor [weak self] in
+                        guard let self else { return }
+                        call?.state.sessionId = sessionID
+                    }
                 }
-            }
+
+            await webRTCCoordinator
+                .stateAdapter
+                .$statsReporter
+                .compactMap { $0 }
+                .sink { [disposableBag] statsReporter in
+                    statsReporter
+                        .latestReportPublisher
+                        .sink { [weak self] report in
+                            Task { @MainActor [weak self] in
+                                self?.call?.state.statsReport = report
+                            }
+                        }
+                        .store(in: disposableBag)
+                }
+                .store(in: disposableBag)
+
+            await webRTCCoordinator
+                .stateAdapter
+                .$callSettings
+                .removeDuplicates()
+                .sinkTask { @MainActor [weak self] in self?.call?.state.callSettings = $0 }
+                .store(in: disposableBag)
+
+        }
+
 
         joinCallResponseFetchObserver = joinCallResponseSubject
             .compactMap { $0 }
-            .sink { [weak self] in self?.didFetch($0) }
+            .sinkTask { [weak self] in await self?.didFetch($0) }
 
-        if webRTCClient.useStateMachine {
-            webRTCClientStateObserver = webRTCClient
-                .stateMachine
-                .publisher
-                .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
-        } else {
-            webRTCClient.delegate = self
-        }
+        webRTCClientStateObserver = webRTCCoordinator
+            .stateMachine
+            .publisher
+            .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
+
+
+
+//        if webRTCClient.useStateMachine {
+//            webRTCClientStateObserver = webRTCClient
+//                .stateMachine
+//                .publisher
+//                .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
+//                .receive(on: DispatchQueue.main)
+//                .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
+//        } else {
+//            webRTCClient.delegate = self
+//        }
     }
 
     /// Joins a call with the provided information.
@@ -121,9 +197,10 @@ class CallController: @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
-        try await webRTCClient.connect(callSettings: callSettings)
+        try await webRTCCoordinator.connect(callSettings: callSettings)
+//        try await webRTCClient.connect(callSettings: callSettings)
         guard let response = try await joinCallResponseSubject.nextValue(dropFirst: 1, timeout: 15) else {
-            webRTCClient.cleanUp()
+            await webRTCCoordinator.cleanUp()
             throw ClientError("Unable to connect to call callId:\(callId).")
         }
         return response
@@ -132,32 +209,37 @@ class CallController: @unchecked Sendable {
     /// Changes the audio state for the current user.
     /// - Parameter isEnabled: whether audio should be enabled.
     func changeAudioState(isEnabled: Bool) async throws {
-        try await webRTCClient.changeAudioState(isEnabled: isEnabled)
+//        try await webRTCClient.changeAudioState(isEnabled: isEnabled)
+        await webRTCCoordinator.changeAudioState(isEnabled: isEnabled)
     }
 
     /// Changes the video state for the current user.
     /// - Parameter isEnabled: whether video should be enabled.
     func changeVideoState(isEnabled: Bool) async throws {
-        try await webRTCClient.changeVideoState(isEnabled: isEnabled)
+//        try await webRTCClient.changeVideoState(isEnabled: isEnabled)
+        await webRTCCoordinator.changeVideoState(isEnabled: isEnabled)
     }
 
     /// Changes the availability of sound during the call.
     /// - Parameter isEnabled: whether the sound should be enabled.
     func changeSoundState(isEnabled: Bool) async throws {
-        try await webRTCClient.changeSoundState(isEnabled: isEnabled)
+//        try await webRTCClient.changeSoundState(isEnabled: isEnabled)
+        await webRTCCoordinator.changeSoundState(isEnabled: isEnabled)
     }
 
     /// Changes the camera position (front/back) for the current user.
     /// - Parameters:
     ///  - position: the new camera position.
     func changeCameraMode(position: CameraPosition) async throws {
-        try await webRTCClient.changeCameraMode(position: position)
+//        try await webRTCClient.changeCameraMode(position: position)
+        try await webRTCCoordinator.changeCameraMode(position: position)
     }
 
     /// Changes the speaker state.
     /// - Parameter isEnabled: whether the speaker should be enabled.
     func changeSpeakerState(isEnabled: Bool) async throws {
-        try await webRTCClient.changeSpeakerState(isEnabled: isEnabled)
+//        try await webRTCClient.changeSpeakerState(isEnabled: isEnabled)
+        await webRTCCoordinator.changeSpeakerState(isEnabled: isEnabled)
     }
 
     /// Changes the track visibility for a participant (not visible if they go off-screen).
@@ -165,40 +247,55 @@ class CallController: @unchecked Sendable {
     ///  - participant: the participant whose track visibility would be changed.
     ///  - isVisible: whether the track should be visible.
     func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
-        await webRTCClient.changeTrackVisibility(for: participant, isVisible: isVisible)
+//        await webRTCClient.changeTrackVisibility(for: participant, isVisible: isVisible)
+        await webRTCCoordinator.changeTrackVisibility(
+            for: participant,
+            isVisible: isVisible
+        )
     }
 
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
-        webRTCClient.setVideoFilter(videoFilter)
+//        webRTCClient.setVideoFilter(videoFilter)
+        Task {
+            await webRTCCoordinator.setVideoFilter(videoFilter)
+        }
     }
 
     func startScreensharing(type: ScreensharingType) async throws {
-        try await webRTCClient.startScreensharing(type: type)
+//        try await webRTCClient.startScreensharing(type: type)
+        try await webRTCCoordinator.startScreensharing(type: type)
     }
 
     func stopScreensharing() async throws {
-        try await webRTCClient.stopScreensharing()
+//        try await webRTCClient.stopScreensharing()
+        try await webRTCCoordinator.stopScreensharing()
     }
 
     /// Starts noise cancellation asynchronously.
     /// - Throws: An error if starting noise cancellation fails.
     func startNoiseCancellation(_ sessionID: String) async throws {
-        try await webRTCClient.startNoiseCancellation(sessionID)
+//        try await webRTCClient.startNoiseCancellation(sessionID)
+        try await webRTCCoordinator.startNoiseCancellation(sessionID)
     }
 
     /// Stops noise cancellation asynchronously.
     /// - Throws: An error if stopping noise cancellation fails.
     func stopNoiseCancellation(_ sessionID: String) async throws {
-        try await webRTCClient.stopNoiseCancellation(sessionID)
+//        try await webRTCClient.stopNoiseCancellation(sessionID)
+        try await webRTCCoordinator.stopNoiseCancellation(sessionID)
     }
 
     func changePinState(
         isEnabled: Bool,
         sessionId: String
     ) async throws {
-        try await webRTCClient.changePinState(
+//        try await webRTCClient.changePinState(
+//            isEnabled: isEnabled,
+//            sessionId: sessionId
+//        )
+        try await webRTCCoordinator.changePinState(
             isEnabled: isEnabled,
             sessionId: sessionId
         )
@@ -209,18 +306,22 @@ class CallController: @unchecked Sendable {
     ///  - trackSize: the size of the track.
     ///  - participant: the call participant.
     func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) async {
-        await webRTCClient.updateTrackSize(trackSize, for: participant)
+        guard participant.trackSize != trackSize else { return }
+//        await webRTCClient.updateTrackSize(trackSize, for: participant)
+        await webRTCCoordinator.updateTrackSize(trackSize, for: participant)
     }
 
-    func updateOwnCapabilities(ownCapabilities: [OwnCapability]) {
-        let oldValue = Set(webRTCClient.ownCapabilities)
+    func updateOwnCapabilities(ownCapabilities: [OwnCapability]) async {
+//        let oldValue = Set(webRTCClient.ownCapabilities)
+        let oldValue = await webRTCCoordinator.stateAdapter.ownCapabilities
         let newValue = Set(ownCapabilities)
 
         guard oldValue != newValue else {
             return
         }
 
-        webRTCClient.ownCapabilities = ownCapabilities
+//        webRTCClient.ownCapabilities = ownCapabilities
+        await webRTCCoordinator.stateAdapter.set(.init(ownCapabilities))
     }
 
     /// Initiates a focus operation at a specific point on the camera's view.
@@ -240,8 +341,9 @@ class CallController: @unchecked Sendable {
     /// - Note: Before calling this method, ensure that the device's camera supports tap to focus
     /// functionality and that the current WebRTC client is properly configured and connected. Otherwise,
     /// the method may throw an error.
-    func focus(at point: CGPoint) throws {
-        try webRTCClient.focus(at: point)
+    func focus(at point: CGPoint) async throws {
+//        try webRTCClient.focus(at: point)
+        try await webRTCCoordinator.focus(at: point)
     }
 
     /// Adds the `AVCapturePhotoOutput` on the `CameraVideoCapturer` to enable photo
@@ -261,8 +363,9 @@ class CallController: @unchecked Sendable {
     /// will be thrown to indicate that the operation is not supported.
     ///
     /// - Warning: A maximum of one output of each type may be added.
-    func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
-        try webRTCClient.addCapturePhotoOutput(capturePhotoOutput)
+    func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) async throws {
+//        try webRTCClient.addCapturePhotoOutput(capturePhotoOutput)
+        try await webRTCCoordinator.addCapturePhotoOutput(capturePhotoOutput)
     }
 
     /// Removes the `AVCapturePhotoOutput` from the `CameraVideoCapturer` to disable photo
@@ -287,8 +390,9 @@ class CallController: @unchecked Sendable {
     /// - Note: Ensure that the `AVCapturePhotoOutput` being removed was previously added to the
     /// `CameraVideoCapturer`. Attempting to remove an output that is not currently added will not
     /// affect the capture session but may result in unnecessary processing.
-    func removeCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
-        try webRTCClient.removeCapturePhotoOutput(capturePhotoOutput)
+    func removeCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) async throws {
+//        try webRTCClient.removeCapturePhotoOutput(capturePhotoOutput)
+        try await webRTCCoordinator.removeCapturePhotoOutput(capturePhotoOutput)
     }
 
     /// Adds an `AVCaptureVideoDataOutput` to the `CameraVideoCapturer` for video frame
@@ -311,8 +415,9 @@ class CallController: @unchecked Sendable {
     /// - Warning: A maximum of one output of each type may be added. For applications linked on or
     /// after iOS 16.0, this restriction no longer applies to AVCaptureVideoDataOutputs. When adding more
     /// than one AVCaptureVideoDataOutput, AVCaptureSession.hardwareCost must be taken into account.
-    func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
-        try webRTCClient.addVideoOutput(videoOutput)
+    func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) async throws {
+//        try webRTCClient.addVideoOutput(videoOutput)
+        try await webRTCCoordinator.addVideoOutput(videoOutput)
     }
 
     /// Removes an `AVCaptureVideoDataOutput` from the `CameraVideoCapturer` to disable
@@ -338,8 +443,9 @@ class CallController: @unchecked Sendable {
     /// has been previously added to the `CameraVideoCapturer`. Trying to remove an output that is
     /// not part of the capture session will have no negative impact but could lead to unnecessary processing
     /// and confusion.
-    func removeVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
-        try webRTCClient.removeVideoOutput(videoOutput)
+    func removeVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) async throws {
+//        try webRTCClient.removeVideoOutput(videoOutput)
+        try await webRTCCoordinator.removeVideoOutput(videoOutput)
     }
 
     /// Zooms the camera video by the specified factor.
@@ -360,21 +466,26 @@ class CallController: @unchecked Sendable {
     ///
     /// - Note: This method should be used cautiously, as setting a zoom factor significantly beyond the
     /// optimal range can degrade video quality.
-    func zoom(by factor: CGFloat) throws {
-        try webRTCClient.zoom(by: factor)
+    func zoom(by factor: CGFloat) async throws {
+//        try webRTCClient.zoom(by: factor)
+        try await webRTCCoordinator.zoom(by: factor)
     }
 
     func leave() {
         guard call != nil else { return }
         call = nil
-        webRTCClient.leave()
+//        webRTCClient.leave()
+        webRTCCoordinator.leave()
     }
 
     /// Cleans up the call controller.
     func cleanUp() {
         guard call != nil else { return }
         call = nil
-        webRTCClient.cleanUp()
+//        webRTCClient.cleanUp()
+        Task {
+            await webRTCCoordinator.cleanUp()
+        }
     }
 
     /// Collects user feedback asynchronously.
@@ -408,54 +519,71 @@ class CallController: @unchecked Sendable {
 
     // MARK: - private
 
-    private func connectToEdge(
-        _ response: JoinCallResponse,
-        sessionID: String?,
-        callType: String,
-        callId: String,
-        callSettings: CallSettings,
-        ring: Bool,
-        migratingFrom: String?
-    ) async throws {
-        webRTCClient.prepare(
-            .connect(
-                url: response.credentials.server.url,
-                token: response.credentials.token,
-                webSocketURL: response.credentials.server.wsEndpoint,
-                ownCapabilities: response.ownCapabilities,
-                audioSettings: response.call.settings.audio,
-                connectOptions: ConnectOptions(iceServers: response.credentials.iceServers)
-            )
-        )
-
-        let videoOptions = VideoOptions(
-            targetResolution: response.call.settings.video.targetResolution
-        )
-        let connectOptions = ConnectOptions(
-            iceServers: response.credentials.iceServers
-        )
-
-        try await webRTCClient.connect(
-            callSettings: callSettings,
-            videoOptions: videoOptions,
-            connectOptions: connectOptions
-        )
-    }
+//    private func connectToEdge(
+//        _ response: JoinCallResponse,
+//        sessionID: String?,
+//        callType: String,
+//        callId: String,
+//        callSettings: CallSettings,
+//        ring: Bool,
+//        migratingFrom: String?
+//    ) async throws {
+//        webRTCClient.prepare(
+//            .connect(
+//                url: response.credentials.server.url,
+//                token: response.credentials.token,
+//                webSocketURL: response.credentials.server.wsEndpoint,
+//                ownCapabilities: response.ownCapabilities,
+//                audioSettings: response.call.settings.audio,
+//                connectOptions: ConnectOptions(iceServers: response.credentials.iceServers)
+//            )
+//        )
+//
+//        let videoOptions = VideoOptions(
+//            targetResolution: response.call.settings.video.targetResolution
+//        )
+//        let connectOptions = ConnectOptions(
+//            iceServers: response.credentials.iceServers
+//        )
+//
+//        try await webRTCClient.connect(
+//            callSettings: callSettings,
+//            videoOptions: videoOptions,
+//            connectOptions: connectOptions
+//        )
+//    }
 
     private func handleParticipantsUpdated() {
-        webRTCClient.onParticipantsUpdated = { [weak self] participants in
-            Task { @MainActor [weak self] in
-                self?.call?.state.participantsMap = participants
+//        webRTCClient.onParticipantsUpdated = { [weak self] participants in
+//            Task { @MainActor [weak self] in
+//                self?.call?.state.participantsMap = participants
+//            }
+//        }
+
+        webRTCParticipantsObserver = debouncedParticipants
+            .$value
+            .sink { [weak self] participants in
+                Task { @MainActor [weak self] in
+                    self?.call?.state.participantsMap = participants
+                }
             }
-        }
     }
 
-    private func handleParticipantCountUpdated() {
-        webRTCClient.onParticipantCountUpdated = { [weak self] participantCount in
-            Task { @MainActor [weak self] in
-                self?.call?.state.participantCount = participantCount
+    private func handleParticipantCountUpdated() async {
+//        webRTCClient.onParticipantCountUpdated = { [weak self] participantCount in
+//            Task { @MainActor [weak self] in
+//                self?.call?.state.participantCount = participantCount
+//            }
+//        }
+        let participantsCountPublisher = await webRTCCoordinator
+            .stateAdapter
+            .$participantsCount
+            .sink { [weak self] participantsCount in
+                Task { @MainActor [weak self] in
+                    self?.call?.state.participantCount = participantsCount
+                }
             }
-        }
+            .store(in: disposableBag)
     }
 
     private func joinCall(
@@ -558,10 +686,11 @@ class CallController: @unchecked Sendable {
         return joinCallResponse
     }
 
-    private func didFetch(_ response: JoinCallResponse) {
-        let sessionId = webRTCClient.sessionID
+    private func didFetch(_ response: JoinCallResponse) async {
+//        let sessionId = webRTCClient.sessionID
+        let sessionId = await webRTCCoordinator.stateAdapter.sessionID
         currentSFU = response.credentials.server.edgeName
-        webRTCClient.statsReporter.interval = TimeInterval(response.statsOptions.reportingIntervalMs / 1000)
+//        webRTCClient.statsReporter.interval = TimeInterval(response.statsOptions.reportingIntervalMs / 1000)
         executeOnMain { [weak self] in
             self?.call?.state.sessionId = sessionId
             self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
@@ -570,8 +699,26 @@ class CallController: @unchecked Sendable {
         }
     }
 
+//    private func webRTCClientDidUpdateStage(
+//        _ stage: WebRTCClient.StateMachine.Stage
+//    ) {
+//        switch stage.id {
+//        case .idle:
+//            call?.update(reconnectionStatus: .disconnected)
+//        case .rejoining:
+//            call?.update(reconnectionStatus: .reconnecting)
+//        case .fastReconnecting:
+//            call?.update(reconnectionStatus: .reconnecting)
+//        case .migrating:
+//            call?.update(reconnectionStatus: .migrating)
+//        case .joined:
+//            call?.update(reconnectionStatus: .connected)
+//        default:
+//            break
+//        }
+//    }
     private func webRTCClientDidUpdateStage(
-        _ stage: WebRTCClient.StateMachine.Stage
+        _ stage: WebRTCCoordinator.StateMachine.Stage
     ) {
         switch stage.id {
         case .idle:
@@ -642,6 +789,70 @@ extension CallController: WebRTCClientDelegate {
     func webRTCClientReconnecting() {
         Task { @MainActor [weak self] in
             self?.call?.update(reconnectionStatus: .reconnecting)
+        }
+    }
+}
+
+final class CollectionDebouncedUpdateObserver<Value: Collection> {
+    private enum DebounceInterval: TimeInterval {
+        case none = 0
+        case low = 0.25
+        case medium = 0.5
+        case high = 1
+
+        init(_ value: Value) {
+            let count = value.count
+            switch count {
+            case _ where count < 16:
+                self = .none
+            case _ where count < 50:
+                self = .low
+            case _ where count < 100:
+                self = .medium
+            default:
+                self = .high
+            }
+        }
+    }
+
+    private var interval: DebounceInterval = .none {
+        didSet { if interval != oldValue { configure(with: interval) } }
+    }
+
+    private let publisher: AnyPublisher<Value, Never>
+    private let scheduler: DispatchQueue
+    private var cancellable: AnyCancellable?
+
+    @Published private(set) var value: Value
+
+    init(
+        publisher: AnyPublisher<Value, Never>,
+        initial value: Value,
+        on scheduler: DispatchQueue = DispatchQueue.main
+    ) {
+        self.publisher = publisher
+        self.value = value
+        self.scheduler = scheduler
+        self.interval = .init(value)
+        configure(with: interval)
+    }
+
+    private func configure(with interval: DebounceInterval) {
+        log.debug("Updating debouncedUpdated interval to \(interval):\(interval.rawValue) seconds.")
+        cancellable?.cancel()
+        if interval == .none {
+            cancellable = publisher
+                .sink { [weak self] in
+                    self?.value = $0
+                    self?.interval = .init($0)
+                }
+        } else {
+            cancellable = publisher
+                .debounce(for: .seconds(interval.rawValue), scheduler: scheduler)
+                .sink { [weak self] in
+                    self?.value = $0
+                    self?.interval = .init($0)
+                }
         }
     }
 }

@@ -5,9 +5,14 @@
 import Foundation
 import StreamWebRTC
 
+extension RTCAudioSessionConfiguration: @unchecked Sendable {}
+
 actor AudioSession {
     
     private let rtcAudioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
+
+    var isActive: Bool { rtcAudioSession.isActive }
+    var isAudioEnabled: Bool { rtcAudioSession.isAudioEnabled }
 
     func configure(
         _ configuration: RTCAudioSessionConfiguration = .default,

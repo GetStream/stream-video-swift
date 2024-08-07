@@ -1,0 +1,343 @@
+//
+//  WebRTCCoordinator.swift
+//  StreamVideo
+//
+//  Created by Ilias Pavlidakis on 7/8/24.
+//
+
+import Foundation
+import Combine
+import StreamWebRTC
+
+final class WebRTCCoordinator: @unchecked Sendable {
+    private static let recordingUserId = "recording-egress"
+    private static let participantsThreshold = 10
+
+    let stateAdapter: WebRTCStateAdapter
+    let callAuthenticator: CallAuthenticating
+    private(set) lazy var stateMachine: StateMachine = .init(.init(coordinator: self))
+
+    private let disposableBag = DisposableBag()
+    private let sfuEventsDisposableBag = DisposableBag()
+
+    private var didUpdateParticipantsCancellable: AnyCancellable?
+
+    init(
+        user: User,
+        apiKey: String,
+        callCid: String,
+        videoConfig: VideoConfig,
+        callAuthenticator: CallAuthenticating
+    ) {
+        self.stateAdapter = .init(
+            user: user,
+            apiKey: apiKey,
+            callCid: callCid,
+            videoConfig: videoConfig
+        )
+        self.callAuthenticator = callAuthenticator
+
+        _ = stateMachine
+
+        stateMachine
+            .publisher
+            .sink { [weak self] in self?.didTransition(to: $0.id) }
+            .store(in: disposableBag)
+
+        observeForceReconnectionRequests()
+    }
+
+    // MARK: - Connection
+
+    func connect(callSettings: CallSettings?) async throws {
+        await stateAdapter.set(callSettings ?? .init())
+        try stateMachine.transition(
+            .connecting(stateMachine.currentStage.context)
+        )
+    }
+
+    func cleanUp() async {
+        await stateAdapter.cleanUp()
+    }
+
+    func leave() {
+        do {
+            try stateMachine.transition(
+                .leaving(stateMachine.currentStage.context)
+            )
+        } catch {
+            log.error(error, subsystems: .webRTC)
+        }
+    }
+
+    // MARK: - Media
+
+    func changeCameraMode(
+        position: CameraPosition
+    ) async throws {
+        try await stateAdapter.publisher?.didUpdateCameraPosition(
+            position == .front ? .front : .back
+        )
+    }
+
+    func changeAudioState(isEnabled: Bool) async {
+        await stateAdapter.set(
+            stateAdapter
+            .callSettings
+            .withUpdatedAudioState(isEnabled)
+        )
+    }
+
+    func changeVideoState(isEnabled: Bool) async {
+        await stateAdapter.set(
+            stateAdapter
+                .callSettings
+                .withUpdatedVideoState(isEnabled)
+        )
+    }
+
+    func changeSoundState(isEnabled: Bool) async {
+        await stateAdapter.set(
+            stateAdapter
+                .callSettings
+                .withUpdatedAudioOutputState(isEnabled)
+        )
+    }
+
+    func changeSpeakerState(isEnabled: Bool) async {
+        await stateAdapter.set(
+            stateAdapter
+                .callSettings
+                .withUpdatedSpeakerState(isEnabled)
+        )
+    }
+
+    func changeTrackVisibility(
+        for participant: CallParticipant,
+        isVisible: Bool
+    ) async {
+        var participants = await stateAdapter.participants
+
+        guard
+            let _participant = participants[participant.id],
+            _participant.showTrack != isVisible
+        else {
+            return
+        }
+
+        let track = await stateAdapter.track(
+            for: participant.trackLookupPrefix ?? participant.id,
+            of: .video
+        ) as? RTCVideoTrack
+        track?.isEnabled = isVisible
+
+        participants[participant.id] = participant
+            .withUpdated(showTrack: isVisible)
+            .withUpdated(track: track)
+
+        //        stateAdapter.participantsUpdateSubject.send(participants)
+        await stateAdapter.didUpdateParticipants(participants)
+    }
+
+    func updateTrackSize(
+        _ trackSize: CGSize,
+        for participant: CallParticipant
+    ) async {
+        var participants = await stateAdapter.participants
+
+        guard
+            let _participant = participants[participant.id],
+            _participant.trackSize != trackSize
+        else {
+            return
+        }
+
+        participants[participant.id] = participant
+            .withUpdated(trackSize: trackSize)
+
+        //        stateAdapter.participantsUpdateSubject.send(participants)
+        await stateAdapter.didUpdateParticipants(participants)
+    }
+
+    func setVideoFilter(_ videoFilter: VideoFilter?) async {
+        await stateAdapter.publisher?.setVideoFilter(videoFilter)
+    }
+
+    func startScreensharing(
+        type: ScreensharingType
+    ) async throws {
+        try await stateAdapter.publisher?.beginScreenSharing(
+            of: type,
+            ownCapabilities: Array(stateAdapter.ownCapabilities)
+        )
+    }
+
+    func stopScreensharing() async throws {
+        await stateAdapter.publisher?.stopScreenSharing()
+        await stateAdapter.didRemoveTrack(for: stateAdapter.sessionID)
+    }
+
+    func changePinState(
+        isEnabled: Bool,
+        sessionId: String
+    ) async throws {
+        var participants = await stateAdapter.participants
+
+        guard
+            let participant = participants[sessionId]
+        else {
+            throw ClientError.Unexpected()
+        }
+
+        participants[sessionId] = participant.withUpdated(
+            pin: isEnabled
+            ? PinInfo(isLocal: true, pinnedAt: Date())
+            : nil
+        )
+
+        await stateAdapter.didUpdateParticipants(participants)
+    }
+
+    func startNoiseCancellation(
+        _ sessionID: String
+    ) async throws {
+        try await stateAdapter
+            .sfuAdapter?
+            .toggleNoiseCancellation(true, for: sessionID)
+    }
+
+    func stopNoiseCancellation(
+        _ sessionID: String
+    ) async throws {
+        try await stateAdapter
+            .sfuAdapter?
+            .toggleNoiseCancellation(false, for: sessionID)
+    }
+
+    func focus(at point: CGPoint) async throws {
+        try await stateAdapter.publisher?.focus(at: point)
+    }
+
+    func addCapturePhotoOutput(
+        _ capturePhotoOutput: AVCapturePhotoOutput
+    ) async throws {
+        try await stateAdapter
+            .publisher?
+            .addCapturePhotoOutput(capturePhotoOutput)
+    }
+
+    func removeCapturePhotoOutput(
+        _ capturePhotoOutput: AVCapturePhotoOutput
+    ) async throws {
+        try await stateAdapter
+            .publisher?
+            .removeCapturePhotoOutput(capturePhotoOutput)
+    }
+
+    func addVideoOutput(
+        _ videoOutput: AVCaptureVideoDataOutput
+    ) async throws {
+        try await stateAdapter
+            .publisher?
+            .addVideoOutput(videoOutput)
+    }
+
+    func removeVideoOutput(
+        _ videoOutput: AVCaptureVideoDataOutput
+    ) async throws {
+        try await stateAdapter
+            .publisher?
+            .removeVideoOutput(videoOutput)
+    }
+
+    func zoom(by factor: CGFloat) async throws {
+        try await stateAdapter
+            .publisher?
+            .zoom(by: factor)
+    }
+
+    // MARK: - SFU Events Handling
+
+    // MARK: - Private
+
+    private func makeStateMachine() async -> WebRTCClient.StateMachine {
+        .init(
+            .init(
+                client: nil,
+                callSettings: await stateAdapter.callSettings,
+                audioSettings: await stateAdapter.audioSettings,
+                videoOptions: await stateAdapter.videoOptions,
+                connectOptions: await stateAdapter.connectOptions,
+                fastReconnectDeadlineSeconds: 0,
+                reconnectionStrategy: .unknown,
+                disconnectionSource: nil
+            )
+        )
+    }
+
+    private func didTransition(
+        to stageId: StateMachine.Stage.ID
+    ) {
+        switch stageId {
+        default:
+            break
+        }
+    }
+
+    private func observeForceReconnectionRequests() {
+        NotificationCenter
+            .default
+            .publisher(for: .init("video.getstream.io.reconnect.fast"))
+            .sink { [weak self] _ in
+                guard let self else { return }
+                stateMachine.currentStage.context.reconnectionStrategy = .fast(
+                    disconnectedSince: .init(),
+                    deadline: stateMachine.currentStage.context.fastReconnectDeadlineSeconds
+                )
+                do {
+                    try stateMachine.transition(
+                        .disconnected(stateMachine.currentStage.context)
+                    )
+                } catch {
+                    log.error(error, subsystems: .webRTC)
+                }
+            }
+            .store(in: disposableBag)
+
+        NotificationCenter
+            .default
+            .publisher(for: .init("video.getstream.io.reconnect.rejoin"))
+            .sink { [weak self] _ in
+                guard let self else { return }
+                stateMachine.currentStage.context.reconnectionStrategy = .rejoin
+                do {
+                    try stateMachine.transition(
+                        .disconnected(stateMachine.currentStage.context)
+                    )
+                } catch {
+                    log.error(error, subsystems: .webRTC)
+                }
+            }
+            .store(in: disposableBag)
+
+        NotificationCenter
+            .default
+            .publisher(for: .init("video.getstream.io.reconnect.migrate"))
+            .sink { [weak self] _ in
+                guard let self else { return }
+                stateMachine.currentStage.context.reconnectionStrategy = .migrate
+                do {
+                    try stateMachine.transition(
+                        .disconnected(stateMachine.currentStage.context)
+                    )
+                } catch {
+                    log.error(error, subsystems: .webRTC)
+                }
+            }
+            .store(in: disposableBag)
+    }
+}
+
+extension Published.Publisher: @unchecked Sendable {}
+extension RTCMediaStreamTrack: @unchecked Sendable {}
+extension AudioSettings: @unchecked Sendable {}

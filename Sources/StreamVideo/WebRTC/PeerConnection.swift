@@ -6,27 +6,27 @@ import Foundation
 import StreamWebRTC
 import SwiftProtobuf
 
-enum PeerConnectionType: String {
-    case subscriber
-    case publisher
-}
+//enum PeerConnectionType: String {
+//    case subscriber
+//    case publisher
+//}
 
-class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
+class PeerConnection: NSObject, @unchecked Sendable {
 
-    private let pc: RTCPeerConnection
+    let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
-//    var signalService: Stream_Video_Sfu_Signal_SignalServer
     var sfuAdapter: SFUAdapter
     private let sessionId: String
     let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private(set) var transceiver: RTCRtpTransceiver?
     private(set) var transceiverScreenshare: RTCRtpTransceiver?
-    var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
 
     private let queue = UnfairQueue()
+    private let iceAdapter: ICEAdapter
+    private let disposableBag = DisposableBag()
 
     var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?
@@ -56,8 +56,87 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         self.videoOptions = videoOptions
         subsystem = type == .publisher ? .peerConnection_publisher : .peerConnection_subscriber
         eventDecoder = WebRTCEventDecoder()
+        self.iceAdapter = ICEAdapter(
+            sessionID: sessionId,
+            peerType: type,
+            peerConnection: pc,
+            sfuAdapter: sfuAdapter
+        )
         super.init()
-        self.pc.delegate = self
+//        self.pc.delegate = self
+
+        pc
+            .publisher(eventType: RTCPeerConnection.AddedStreamEvent.self)
+            .sink { [weak self] event in
+                guard let self else { return }
+                if event.stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
+                    screensharingStreams.append(event.stream)
+                }
+                onStreamAdded?(event.stream)
+            }
+            .store(in: disposableBag)
+        pc
+            .publisher(eventType: RTCPeerConnection.RemovedStreamEvent.self)
+            .sink { [weak self] event in self?.onStreamRemoved?(event.stream) }
+            .store(in: disposableBag)
+
+        pc
+            .publisher(eventType: RTCPeerConnection.ShouldNegotiateEvent.self)
+            .sink { [weak self] event in
+                guard let self else { return }
+                onNegotiationNeeded?(self, .defaultConstraints)
+            }
+            .store(in: disposableBag)
+
+        pc
+            .publisher(eventType: RTCPeerConnection.DidChangeConnectionStateEvent.self)
+            .filter { $0.state == .disconnected }
+            .map { _ in () }
+            .sink { [weak self] in
+                guard let self else { return }
+                onDisconnect?(self)
+            }
+            .store(in: disposableBag)
+
+        pc
+            .publisher(eventType: RTCPeerConnection.DidChangeConnectionStateEvent.self)
+            .filter { $0.state == .connected }
+            .map { _ in () }
+            .sink { [weak self] in
+                guard let self else { return }
+                onConnected?(self)
+            }
+            .store(in: disposableBag)
+
+        if type == .subscriber {
+            sfuAdapter
+                .publisher(eventType: Stream_Video_Sfu_Event_SubscriberOffer.self)
+                .log(.debug, subsystems: subsystem)
+                .sinkTask { [weak self] event in
+                    guard let self else { return }
+                    do {
+                        let offerSdp = event.sdp
+                        try await setRemoteDescription(offerSdp, type: .offer)
+
+                        let answer = try await createAnswer()
+                        try await setLocalDescription(answer)
+
+                        try await sfuAdapter.sendAnswer(
+                            sessionDescription: answer.sdp,
+                            peerType: .subscriber,
+                            for: sessionId
+                        )
+                    } catch {
+                        log.error(
+                            "Error handling offer event",
+                            subsystems: subsystem,
+                            error: error
+                        )
+                    }
+                }
+                .store(in: disposableBag)
+        }
+
         log.debug(
             """
             PeerConnection of type:\(type.rawValue) was created.
@@ -87,57 +166,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func createOffer(
         constraints: RTCMediaConstraints = .defaultConstraints
     ) async throws -> RTCSessionDescription {
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) is creating offer.
-            Constraints: \(constraints)
-            """,
-            subsystems: subsystem
-        )
-
-        return try await withCheckedThrowingContinuation { [type, subsystem] continuation in
-            pc.offer(for: constraints) {
-                sdp, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else if let sdp = sdp {
-                    log.debug(
-                        """
-                        PeerConnection of type:\(type.rawValue) created offer.
-                        SDP: \(sdp.description)
-                        Constraints: \(constraints)
-                        """,
-                        subsystems: subsystem
-                    )
-                    continuation.resume(returning: sdp)
-                } else {
-                    continuation.resume(
-                        throwing: ClientError.Unknown(
-                            "PeerConnection of type:\(type.rawValue) failed to create offer."
-                        )
-                    )
-                }
-            }
-        }
+        try await pc.createOffer(constraints: constraints)
     }
 
     func createAnswer() async throws -> RTCSessionDescription {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) is creating answer.",
-            subsystems: subsystem
-        )
-
-        return try await withCheckedThrowingContinuation { continuation in
-            pc.answer(for: .defaultConstraints) { sdp, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else if let sdp = sdp {
-                    continuation.resume(returning: sdp)
-                } else {
-                    continuation.resume(throwing: ClientError.Unknown())
-                }
-            }
-        }
+        try await pc.answer(for: .defaultConstraints)
     }
 
     func setLocalDescription(_ sdp: RTCSessionDescription?) async throws {
@@ -149,52 +182,14 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 """
             ) // TODO: add appropriate errors
         }
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) is setting localDescription
-            SDP: \(sdp)
-            """,
-            subsystems: subsystem
-        )
-        return try await withCheckedThrowingContinuation { continuation in
-            pc.setLocalDescription(sdp) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
-                }
-            }
-        }
+        try await pc.setLocalDescription(sdp)
     }
 
-    func setRemoteDescription(_ sdp: String, type: RTCSdpType) async throws {
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) is setting remoteDescription
-            Type: \(type)
-            SDP: \(sdp)
-            """,
-            subsystems: subsystem
-        )
-
-        let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
-        return try await withCheckedThrowingContinuation { continuation in
-            pc.setRemoteDescription(sessionDescription) { [weak self] error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    Task { [weak self] in
-                        guard let self = self else { return }
-                        let candidates = queue.sync { self.pendingIceCandidates }
-                        for candidate in candidates {
-                            _ = try? await self.add(iceCandidate: candidate)
-                        }
-//                        self.pendingIceCandidates = []
-                        continuation.resume(returning: ())
-                    }
-                }
-            }
-        }
+    func setRemoteDescription(
+        _ sdp: String,
+        type: RTCSdpType
+    ) async throws {
+        try await pc.setRemoteDescription(.init(type: type, sdp: sdp))
     }
 
     func addTrack(
@@ -250,24 +245,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
     }
 
-    func add(iceCandidate: RTCIceCandidate) async throws {
-        guard pc.remoteDescription != nil else {
-            log.debug(
-                """
-                PeerConnection of type:\(type.rawValue) cannot add ICE candidate
-                because remoteDescription was not set.
-                ICECandidate: \(iceCandidate.description)
-
-                Candidate will be pending to add.
-                """,
-                subsystems: subsystem
-            )
-            queue.sync { pendingIceCandidates.append(iceCandidate) }
-            return
-        }
-        try await add(candidate: iceCandidate)
-    }
-    
     func restartIce() {
         log.debug(
             "PeerConnection of type:\(type.rawValue) is restarting ICE.",
@@ -282,241 +259,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             subsystems: subsystem
         )
         pc.close()
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange stateChanged: RTCSignalingState
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) didChange RTCSignalingState newState:\(stateChanged)",
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didAdd stream: RTCMediaStream
-    ) {
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) didAdd stream:
-            SFU: \(sfuAdapter.hostname)
-            StreamId: \(stream.streamId)
-            """,
-            subsystems: subsystem
-        )
-
-        if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
-            screensharingStreams.append(stream)
-        }
-        onStreamAdded?(stream)
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didRemove stream: RTCMediaStream
-    ) {
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) didRemove stream:
-            SFU: \(sfuAdapter.hostname)
-            StreamId: \(stream.streamId)
-            """,
-            subsystems: subsystem
-        )
-        onStreamRemoved?(stream)
-    }
-
-    func peerConnectionShouldNegotiate(
-        _ peerConnection: RTCPeerConnection
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) should negotiate.",
-            subsystems: subsystem
-        )
-        onNegotiationNeeded?(self, .defaultConstraints)
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange newState: RTCIceConnectionState
-    ) {
-        func logMessage(_ level: LogLevel) {
-            log.log(
-                level,
-                message: "PeerConnection of type:\(type.rawValue) didChange RTCIceConnectionState newState:\(newState)",
-                subsystems: subsystem,
-                error: nil
-            )
-        }
-
-        switch newState {
-        case .failed:
-            logMessage(.error)
-        case .disconnected:
-            onDisconnect?(self)
-            logMessage(.debug)
-        case .connected:
-            onConnected?(self)
-            logMessage(.debug)
-        default:
-            logMessage(.debug)
-        }
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange newState: RTCIceGatheringState
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) didChange ICEGatheringState newState:\(newState)",
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didGenerate candidate: RTCIceCandidate
-    ) {
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) didGenerate ICE candidate:
-            \(candidate.description)
-            """,
-            subsystems: subsystem
-        )
-
-        if paused {
-            return
-        }
-        Task {
-            do {
-                let encoder = JSONEncoder()
-                let iceCandidate = candidate.toIceCandidate()
-                let json = try encoder.encode(iceCandidate)
-                let jsonString = String(data: json, encoding: .utf8) ?? ""
-                _ = try await sfuAdapter.iCETrickle(
-                    candidate: jsonString,
-                    peerType: type == .publisher ? .publisherUnspecified : .subscriber,
-                    for: sessionId
-                )
-            } catch {
-                log.error(error, subsystems: subsystem)
-            }
-        }
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didRemove candidates: [RTCIceCandidate]
-    ) {
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) didRemove ICE candidates:
-            \(candidates.map(\.description))
-            """,
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didOpen dataChannel: RTCDataChannel
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) didOpen dataChannel:\(dataChannel.description)",
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didFailToGatherIceCandidate event: RTCIceCandidateErrorEvent
-    ) {
-        let message = event.errorText.isEmpty ? "<unavailable>" : event.errorText
-        log.error(
-            """
-            PeerConnection of type:\(type.rawValue) produced an error with code:\(event.errorCode) message:\(message)
-            URL: \(event.url)
-            Address: \(event.address)
-            Port: \(event.port)
-            """,
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChangeLocalCandidate local: RTCIceCandidate,
-        remoteCandidate remote: RTCIceCandidate,
-        lastReceivedMs lastDataReceivedMs: Int32,
-        changeReason reason: String
-    ) {
-        let reason = reason.isEmpty ? "<unavailable>" : reason
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) didChangeLocalCandidate with reason:\(reason):
-            local: \(local)
-            remote: \(remote)
-            lastDataReceivedMs: \(lastDataReceivedMs)
-            """,
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChangeStandardizedIceConnectionState newState: RTCIceConnectionState
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) didChangeStandardizedIceConnectionState newState: \(newState)",
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didChange newState: RTCPeerConnectionState
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) didChangeConnectionState newState: \(newState)",
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didRemove rtpReceiver: RTCRtpReceiver
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) didRemoveRTPReceiver receiverId: \(rtpReceiver.receiverId)",
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didAdd rtpReceiver: RTCRtpReceiver,
-        streams mediaStreams: [RTCMediaStream]
-    ) {
-        log.debug(
-            """
-            PeerConnection of type:\(type.rawValue) didAdd stream to receiverId: \(rtpReceiver.receiverId)
-            MediaStream: \(mediaStreams.map(\.streamId))
-            """,
-            subsystems: subsystem
-        )
-    }
-
-    func peerConnection(
-        _ peerConnection: RTCPeerConnection,
-        didStartReceivingOn transceiver: RTCRtpTransceiver
-    ) {
-        log.debug(
-            "PeerConnection of type:\(type.rawValue) didStartReceivingOn transceiver:\(transceiver)",
-            subsystems: subsystem
-        )
     }
 
     func findScreensharingTrack(for trackLookupPrefix: String?) -> RTCVideoTrack? {
@@ -567,51 +309,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
         return encodingParams
     }
-
-    @discardableResult
-    private func add(candidate: RTCIceCandidate) async throws -> Bool {
-        try await withCheckedThrowingContinuation { [subsystem] continuation in
-            self.pc.add(candidate) { error in
-                if let error = error {
-                    log.error("Error adding ice candidate", subsystems: subsystem, error: error)
-                    continuation.resume(throwing: error)
-                } else {
-                    log.debug("Added ice candidate successfully", subsystems: subsystem)
-                    continuation.resume(returning: true)
-                }
-            }
-        }
-    }
-}
-
-struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
-    let rawValue: String
-
-    init(rawValue: String) {
-        self.rawValue = rawValue
-    }
-
-    init(stringLiteral value: String) {
-        self.init(rawValue: value)
-    }
-}
-
-extension TrackType {
-    static let audio: Self = "audio"
-    static let video: Self = "video"
-    static let screenshare: Self = "screenshare"
-}
-
-struct ICECandidate: Codable {
-    let candidate: String
-    let sdpMid: String?
-    let sdpMLineIndex: Int32
 }
 
 extension RTCIceCandidate {
 
     func toIceCandidate() -> ICECandidate {
-        ICECandidate(candidate: sdp, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex)
+        .init(from: self)
     }
 }
 
@@ -621,124 +324,5 @@ extension RTCVideoCodecInfo {
         var codec = Stream_Video_Sfu_Models_Codec()
         codec.name = name
         return codec
-    }
-}
-
-extension RTCIceConnectionState: CustomStringConvertible {
-
-    public var description: String {
-        switch self {
-        case .new:
-            return "new"
-        case .checking:
-            return "checking"
-        case .connected:
-            return "connected"
-        case .completed:
-            return "completed"
-        case .failed:
-            return "failed"
-        case .disconnected:
-            return "disconnected"
-        case .closed:
-            return "closed"
-        case .count:
-            return "count"
-        @unknown default:
-            return "unknown"
-        }
-    }
-}
-
-extension RTCPeerConnectionState: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .new:
-            return "new"
-        case .connecting:
-            return "connecting"
-        case .connected:
-            return "connected"
-        case .disconnected:
-            return "disconnected"
-        case .failed:
-            return "failed"
-        case .closed:
-            return "closed"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCSignalingState: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .stable:
-            return "stable"
-        case .haveLocalOffer:
-            return "haveLocalOffer"
-        case .haveLocalPrAnswer:
-            return "haveLocalPrAnswer"
-        case .haveRemoteOffer:
-            return "haveRemoteOffer"
-        case .haveRemotePrAnswer:
-            return "haveRemotePrAnswer"
-        case .closed:
-            return "closed"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCRtpTransceiverDirection: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .sendRecv:
-            return "sendRecv"
-        case .sendOnly:
-            return "sendOnly"
-        case .recvOnly:
-            return "recvOnly"
-        case .inactive:
-            return "inactive"
-        case .stopped:
-            return "stopped"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCIceGatheringState: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .new:
-            return "new"
-        case .gathering:
-            return "gathering"
-        case .complete:
-            return "complete"
-        @unknown default:
-            return "unknown/default"
-        }
-    }
-}
-
-extension RTCSdpType: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .offer:
-            return "offer"
-        case .prAnswer:
-            return "prAnswer"
-        case .answer:
-            return "answer"
-        case .rollback:
-            return "rollback"
-        @unknown default:
-            return "unknown/default"
-        }
     }
 }

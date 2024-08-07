@@ -25,7 +25,9 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .offlineSupport,
         .peerConnection_publisher,
         .peerConnection_subscriber,
-        .sfu
+        .sfu,
+        .iceAdapter,
+        .mediaAdapter
     ]
 
     /// All subsystems within the SDK.
@@ -38,7 +40,9 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .offlineSupport,
         .peerConnection_publisher,
         .peerConnection_subscriber,
-        .sfu
+        .sfu,
+        .iceAdapter,
+        .mediaAdapter
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -60,6 +64,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     public static let peerConnection_subscriber = Self(rawValue: 1 << 7)
     /// The subsystem responsible for PeerConnections.
     public static let sfu = Self(rawValue: 1 << 8)
+    public static let iceAdapter = Self(rawValue: 1 << 9)
+    public static let mediaAdapter = Self(rawValue: 1 << 10)
 
     public var description: String {
         switch rawValue {
@@ -81,6 +87,10 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "peerConnection-subscriber"
         case LogSubsystem.sfu.rawValue:
             return "SFU"
+        case LogSubsystem.iceAdapter.rawValue:
+            return "ICEAdapter"
+        case LogSubsystem.iceAdapter.rawValue:
+            return "MediaAdapter"
         default:
             return "unknown(rawValue:\(rawValue)"
         }

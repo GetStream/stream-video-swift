@@ -19,10 +19,10 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     var sessionID: String
 
     /// The publisher peer connection from which to collect statistics.
-    var publisher: PeerConnection?
+    var publisher: RTCPeerConnectionCoordinator?
 
     /// The subscriber peer connection from which to collect statistics.
-    var subscriber: PeerConnection?
+    var subscriber: RTCPeerConnectionCoordinator?
 
     /// The interval at which statistics are collected and reported, in seconds.
     ///
@@ -53,7 +53,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     private let latestReportSubject = PassthroughSubject<CallStatsReport, Never>()
 
     /// A publisher for the latest statistics report.
-    private var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
+    var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
         latestReportSubject.eraseToAnyPublisher()
     }
 
@@ -72,6 +72,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     }
 
     deinit {
+        sfuAdapter = nil
         // Cancel all active tasks and subscriptions
         activeCollectionTask?.cancel()
         collectionCancellable?.cancel()
@@ -86,17 +87,17 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// This method cancels any existing tasks and subscriptions, and sets up new ones if an adapter
     /// is provided.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
+        activeDeliveryTask?.cancel()
+        deliveryCancellable?.cancel()
         activeCollectionTask?.cancel()
         collectionCancellable?.cancel()
-        deliveryCancellable?.cancel()
-        activeDeliveryTask?.cancel()
 
         guard sfuAdapter != nil else {
             return
         }
 
         scheduleCollection(with: interval)
-        deliveryCancellable = latestReportPublisher
+        deliveryCancellable = latestReportSubject
             .sink { [weak self] in self?.deliverStats(report: $0) }
     }
 
@@ -115,6 +116,8 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             .publish(every: interval, on: .main, in: .default)
             .autoconnect()
             .sink { [weak self] _ in self?.collectStats() }
+
+        log.debug("Stats collection is now scheduled with interval:\(interval).")
     }
 
     /// Collects statistics from the publisher and subscriber peer connections.

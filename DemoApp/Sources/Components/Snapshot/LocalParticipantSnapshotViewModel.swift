@@ -32,16 +32,18 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
         didSet {
             guard call?.cId != oldValue?.cId else { return }
             do {
-                #if !targetEnvironment(simulator)
-                if #available(iOS 16.0, *) {
-                    try call?.addVideoOutput(videoOutput)
-                    /// Following Apple guidelines for videoOutputs from here:
-                    /// https://developer.apple.com/library/archive/technotes/tn2445/_index.html
-                    videoOutput.alwaysDiscardsLateVideoFrames = true
-                } else {
-                    try call?.addCapturePhotoOutput(photoOutput)
+                Task {
+                    #if !targetEnvironment(simulator)
+                    if #available(iOS 16.0, *) {
+                        try await call?.addVideoOutput(videoOutput)
+                        /// Following Apple guidelines for videoOutputs from here:
+                        /// https://developer.apple.com/library/archive/technotes/tn2445/_index.html
+                        videoOutput.alwaysDiscardsLateVideoFrames = true
+                    } else {
+                        try await call?.addCapturePhotoOutput(photoOutput)
+                    }
+                    #endif
                 }
-                #endif
             } catch {
                 log.error("Failed to setup for localParticipant snapshot", error: error)
             }
@@ -67,10 +69,10 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
             do {
                 if await state.zoomFactor > 1 {
                     await state.setZoomFactor(1)
-                    try call?.zoom(by: 1)
+                    try await call?.zoom(by: 1)
                 } else {
                     await state.setZoomFactor(1.5)
-                    try call?.zoom(by: 1.5)
+                    try await call?.zoom(by: 1.5)
                 }
             } catch {
                 log.error(error)

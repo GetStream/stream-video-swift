@@ -44,30 +44,30 @@ class SfuMiddleware: EventMiddleware {
         self.subscriber = subscriber
         guard let subscriber else { return }
         let candidates = queue.sync { subscriberICECandidates }
-        Task {
-            for candidate in candidates {
-                do {
-                    try await subscriber.add(iceCandidate: candidate)
-                } catch {
-                    log.error(error)
-                }
-            }
-        }
+//        Task {
+//            for candidate in candidates {
+//                do {
+//                    try await subscriber.add(iceCandidate: candidate)
+//                } catch {
+//                    log.error(error)
+//                }
+//            }
+//        }
     }
     
     func update(publisher: PeerConnection?) {
         self.publisher = publisher
         guard let publisher else { return }
         let candidates = queue.sync { publisherICECandidates }
-        Task {
-            for candidate in candidates {
-                do {
-                    try await publisher.add(iceCandidate: candidate)
-                } catch {
-                    log.error(error)
-                }
-            }
-        }
+//        Task {
+//            for candidate in candidates {
+//                do {
+//                    try await publisher.add(iceCandidate: candidate)
+//                } catch {
+//                    log.error(error)
+//                }
+//            }
+//        }
     }
     
     func handle(event: WrappedEvent) -> WrappedEvent? {
@@ -78,51 +78,70 @@ class SfuMiddleware: EventMiddleware {
                 }
                 log.debug("Received an event \(event)", subsystems: .sfu)
                 switch event {
-                case let .subscriberOffer(event):
-                    await handleSubscriberEvent(event)
+//                case let .subscriberOffer(event):
+//                    await handleSubscriberEvent(event)
                 case .publisherAnswer:
                     log.warning("Publisher answer event shouldn't be sent")
                 case let .connectionQualityChanged(event):
                     await handleConnectionQualityChangedEvent(event)
                 case let .audioLevelChanged(event):
                     await handleAudioLevelsChanged(event)
+
                 case let .iceTrickle(event):
                     try await handleICETrickle(event)
+
                 case let .changePublishQuality(event):
                     handleChangePublishQualityEvent(event)
+
                 case let .participantJoined(event):
                     await handleParticipantJoined(event)
+
                 case let .participantLeft(event):
                     await handleParticipantLeft(event)
+
                 case let .dominantSpeakerChanged(event):
                     await handleDominantSpeakerChanged(event)
+
                 case let .joinResponse(event):
                     onSocketConnected?(event.reconnected)
                     await loadParticipants(from: event)
+
                 case let .healthCheckResponse(event):
                     onParticipantCountUpdated?(event.participantCount.total)
+                    
                 case let .trackPublished(event):
                     await handleTrackPublishedEvent(event)
+
                 case let .trackUnpublished(event):
                     await handleTrackUnpublishedEvent(event)
+                    
                 case let .error(event):
                     log.error(event.error.message, error: event.error)
+
                 case .callGrantsUpdated:
                     log.warning("TODO: callGrantsUpdated")
+                    
                 case let .goAway(event):
                     log.info("Received go away event with reason: \(event.reason.rawValue)")
                     onSessionMigrationEvent?()
+
                 case .iceRestart:
                     log.info("Received ice restart message")
+
                 case let .pinsUpdated(event):
                     log.debug("Pins changed \(event.pins.map(\.sessionID))")
                     onPinsChanged?(event.pins)
+
                 case let .callEnded(event):
                     log.debug("Received call ended event with reason \(event.reason)")
+
                 case let .participantUpdated(event):
                     await handleParticipantUpdated(event)
+
                 case .participantMigrationComplete:
                     log.debug("Participant migration complete")
+                default:
+                    break
                 }
             } catch {
                 log.error(error)
@@ -136,24 +155,24 @@ class SfuMiddleware: EventMiddleware {
         onParticipantCountUpdated = nil
     }
     
-    private func handleSubscriberEvent(_ event: Stream_Video_Sfu_Event_SubscriberOffer) async {
-        /// TODO: Ensure that this is happening serially!
-        do {
-            log.debug("Handling subscriber offer", subsystems: .webRTC)
-            let offerSdp = event.sdp
-            try await subscriber?.setRemoteDescription(offerSdp, type: .offer)
-            let answer = try await subscriber?.createAnswer()
-            try await subscriber?.setLocalDescription(answer)
-
-            try await sfuAdapter?.sendAnswer(
-                sessionDescription: answer?.sdp ?? "",
-                peerType: .subscriber,
-                for: sessionID
-            )
-        } catch {
-            log.error("Error handling offer event", error: error)
-        }
-    }
+//    private func handleSubscriberEvent(_ event: Stream_Video_Sfu_Event_SubscriberOffer) async {
+//        /// TODO: Ensure that this is happening serially!
+//        do {
+//            log.debug("Handling subscriber offer", subsystems: .webRTC)
+//            let offerSdp = event.sdp
+//            try await subscriber?.setRemoteDescription(offerSdp, type: .offer)
+//            let answer = try await subscriber?.createAnswer()
+//            try await subscriber?.setLocalDescription(answer)
+//
+//            try await sfuAdapter?.sendAnswer(
+//                sessionDescription: answer?.sdp ?? "",
+//                peerType: .subscriber,
+//                for: sessionID
+//            )
+//        } catch {
+//            log.error("Error handling offer event", error: error)
+//        }
+//    }
     
     private func handleParticipantJoined(_ event: Stream_Video_Sfu_Event_ParticipantJoined) async {
         guard event.participant.userID != recordingUserId else {
@@ -226,46 +245,46 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleICETrickle(_ event: Stream_Video_Sfu_Models_ICETrickle) async throws {
-        log.debug("Handling ice trickle")
-        let peerType = event.peerType
-        guard let data = event.iceCandidate.data(
-            using: .utf8,
-            allowLossyConversion: false
-        ) else {
-            throw ClientError.Unexpected()
-        }
-        guard let json = try JSONSerialization.jsonObject(
-            with: data,
-            options: .mutableContainers
-        ) as? [String: Any], let sdp = json["candidate"] as? String else {
-            throw ClientError.Unexpected()
-        }
-        let iceCandidate = RTCIceCandidate(
-            sdp: sdp,
-            sdpMLineIndex: 0,
-            sdpMid: nil
-        )
-
-        switch peerType {
-        case .publisherUnspecified:
-            queue.sync { publisherICECandidates.append(iceCandidate) }
-        case .subscriber:
-            queue.sync { subscriberICECandidates.append(iceCandidate) }
-        case .UNRECOGNIZED(let int):
-            break
-        }
-
-        if peerType == .subscriber, let subscriber = self.subscriber {
-            log.debug("Adding ice candidate for the subscriber")
-            try await executeTask(retryPolicy: .fastAndSimple) {
-                try await subscriber.add(iceCandidate: iceCandidate)
-            }
-        } else if peerType == .publisherUnspecified, let publisher = self.publisher {
-            log.debug("Adding ice candidate for the publisher")
-            try await executeTask(retryPolicy: .fastAndSimple) {
-                try await publisher.add(iceCandidate: iceCandidate)
-            }
-        }
+//        log.debug("Handling ice trickle")
+//        let peerType = event.peerType
+//        guard let data = event.iceCandidate.data(
+//            using: .utf8,
+//            allowLossyConversion: false
+//        ) else {
+//            throw ClientError.Unexpected()
+//        }
+//        guard let json = try JSONSerialization.jsonObject(
+//            with: data,
+//            options: .mutableContainers
+//        ) as? [String: Any], let sdp = json["candidate"] as? String else {
+//            throw ClientError.Unexpected()
+//        }
+//        let iceCandidate = RTCIceCandidate(
+//            sdp: sdp,
+//            sdpMLineIndex: 0,
+//            sdpMid: nil
+//        )
+//
+//        switch peerType {
+//        case .publisherUnspecified:
+//            queue.sync { publisherICECandidates.append(iceCandidate) }
+//        case .subscriber:
+//            queue.sync { subscriberICECandidates.append(iceCandidate) }
+//        case .UNRECOGNIZED(let int):
+//            break
+//        }
+//
+//        if peerType == .subscriber, let subscriber = self.subscriber {
+//            log.debug("Adding ice candidate for the subscriber")
+//            try await executeTask(retryPolicy: .fastAndSimple) {
+//                try await subscriber.add(iceCandidate: iceCandidate)
+//            }
+//        } else if peerType == .publisherUnspecified, let publisher = self.publisher {
+//            log.debug("Adding ice candidate for the publisher")
+//            try await executeTask(retryPolicy: .fastAndSimple) {
+//                try await publisher.add(iceCandidate: iceCandidate)
+//            }
+//        }
     }
     
     private func handleTrackPublishedEvent(_ event: Stream_Video_Sfu_Event_TrackPublished) async {

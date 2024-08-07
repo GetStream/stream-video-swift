@@ -9,7 +9,7 @@ import Foundation
 ///
 /// The `SFUAdapter` class handles both WebSocket connections and HTTP requests to the SFU server.
 /// It provides methods for managing video tracks, updating subscriptions, and handling WebRTC signaling.
-final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
+final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unchecked Sendable {
 
     /// Configuration for the SFU service.
     struct ServiceConfiguration {
@@ -38,15 +38,18 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
     }
 
     private let service: Stream_Video_Sfu_Signal_SignalServer
+    private let refreshSubject = PassthroughSubject<Void, Never>()
     private var webSocket: WebSocketClient
     private var disposableBag = DisposableBag()
 
     /// The current connection state of the WebSocket.
     @Published private(set) var connectionState: WebSocketConnectionState = .initialized
 
-    var eventSubject: AnyPublisher<WrappedEvent, Never> {
+    var eventPublisher: AnyPublisher<WrappedEvent, Never> {
         webSocket.eventSubject.eraseToAnyPublisher()
     }
+
+    var refreshPublisher: AnyPublisher<Void, Never> { refreshSubject.eraseToAnyPublisher() }
 
     /// The URL used for the WebSocket connection.
     var connectURL: URL { webSocket.connectURL }
@@ -88,6 +91,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         self.webSocket = webSocket
 
         webSocket.connectionStateDelegate = self
+
+        setUpPublishers()
     }
 
     deinit {
@@ -116,9 +121,28 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
             fileName: filename,
             lineNumber: lineNumber
         )
+        assert(false)
     }
 
     // MARK: - WebSocket
+
+    func publisher<T>(
+        eventType: T.Type,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> AnyPublisher<T, Never> {
+        eventPublisher
+            .compactMap {
+                switch $0 {
+                case let .sfuEvent(event):
+                    return event.payload(T.self)
+                default:
+                    return nil
+                }
+            }
+            .eraseToAnyPublisher()
+    }
 
     /// Initiates a connection to the WebSocket server.
     func connect() {
@@ -152,7 +176,14 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
     ///
     /// - Parameter message: The message to be sent, conforming to the SendableEvent protocol.
     func send(message: SendableEvent) {
-//        statusCheck()
+        //        statusCheck()
+        log.debug(
+            """
+            Type: \(type(of: message))
+            \(message)
+            """,
+            subsystems: .sfu
+        )
         webSocket.engine?.send(message: message)
     }
 
@@ -178,7 +209,35 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
             requiresAuth: false
         )
         webSocket.connectionStateDelegate = self
+
+        disposableBag.removeAll()
+
+        refreshSubject.send(())
+
         log.debug("Did refresh \(self).", subsystems: .sfu)
+    }
+
+    func sendJoinRequest(
+        _ payload: Stream_Video_Sfu_Event_JoinRequest
+    ) {
+        var event = Stream_Video_Sfu_Event_SfuRequest()
+        event.requestPayload = .joinRequest(payload)
+        send(message: event)
+    }
+
+    func sendLeaveRequest(
+        reason: String = "",
+        for sessionId: String
+    ) {
+        statusCheck()
+        var payload = Stream_Video_Sfu_Event_LeaveCallRequest()
+        payload.sessionID = sessionId
+        payload.reason = reason
+
+        var event = Stream_Video_Sfu_Event_SfuRequest()
+        event.requestPayload = .leaveCallRequest(payload)
+
+        webSocket.engine?.send(message: event)
     }
 
     // MARK: - Service
@@ -209,6 +268,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         request.muteStates = [muteState]
         request.sessionID = sessionId
 
+        service.subject.send(request)
+
         let task = Task { [request, service, retryPolicy] in
             try await executeTask(retryPolicy: retryPolicy) {
                 try Task.checkCancellation()
@@ -216,7 +277,11 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
             }
         }
         task.store(in: disposableBag)
-        _ = try await task.value
+        let response = try await task.value
+        if response.error.code != .unspecified && !response.error.message.isEmpty {
+            throw response.error
+        }
+        service.subject.send(response)
     }
 
     /// Sends call statistics to the SFU server.
@@ -243,10 +308,14 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         statsRequest.subscriberStats = report.subscriberRawStats?.jsonString ?? ""
         let task = Task { [statsRequest, service] in
             try Task.checkCancellation()
-            _ = try await service.sendStats(sendStatsRequest: statsRequest)
+            return try await service.sendStats(sendStatsRequest: statsRequest)
         }
         task.store(in: disposableBag)
-        _ = try await task.value
+        let response = try await task.value
+        service.subject.send(response)
+        if response.error.code != .unspecified && !response.error.message.isEmpty {
+            throw response.error
+        }
     }
 
     /// Toggles noise cancellation for the current session.
@@ -268,23 +337,28 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
             request.sessionID = sessionId
             let task = Task { [request, service] in
                 try Task.checkCancellation()
-                _ = try await service.startNoiseCancellation(
+                return try await service.startNoiseCancellation(
                     startNoiseCancellationRequest: request
                 )
             }
             task.store(in: disposableBag)
-            _ = try await task.value
+            let response = try await task.value
+            service.subject.send(response)
         } else {
             var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
             request.sessionID = sessionId
             let task = Task { [request, service] in
                 try Task.checkCancellation()
-                _ = try await service.stopNoiseCancellation(
+                return try await service.stopNoiseCancellation(
                     stopNoiseCancellationRequest: request
                 )
             }
             task.store(in: disposableBag)
-            _ = try await task.value
+            let response = try await task.value
+            service.subject.send(response)
+            if response.error.code != .unspecified && !response.error.message.isEmpty {
+                throw response.error
+            }
         }
     }
 
@@ -319,8 +393,22 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
                 return try await service.setPublisher(setPublisherRequest: request)
             }
         }
+        log.debug(
+            """
+            Type: Stream_Video_Sfu_Signal_SetPublisherRequest
+                sdp: \(request.sdp)
+                sessionID: \(request.sessionID)
+                tracks: \(request.tracks)
+            """,
+            subsystems: .sfu
+        )
         task.store(in: disposableBag)
-        return try await task.value
+        let response = try await task.value
+        service.subject.send(response)
+        if response.error.code != .unspecified && !response.error.message.isEmpty {
+            throw response.error
+        }
+        return response
     }
 
     /// Updates the subscriptions for tracks in the current session.
@@ -344,14 +432,21 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         request.sessionID = sessionId
         request.tracks = tracks
 
+        try Task.checkCancellation()
+
         let task = Task { [request, service] in
-            try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {
+            try Task.checkCancellation()
+            return try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {
                 try Task.checkCancellation()
                 return try await service.updateSubscriptions(updateSubscriptionsRequest: request)
             }
         }
         task.store(in: disposableBag)
-        _ = try await task.value
+        let response = try await task.value
+        service.subject.send(response)
+        if response.error.code != .unspecified && !response.error.message.isEmpty {
+            throw response.error
+        }
     }
 
     /// Sends an SDP answer to the SFU server as part of the WebRTC negotiation process.
@@ -371,7 +466,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
-        statusCheck()
         var request = Stream_Video_Sfu_Signal_SendAnswerRequest()
         request.sessionID = sessionId
         request.peerType = peerType
@@ -383,22 +477,11 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
             }
         }
         task.store(in: disposableBag)
-        _ = try await task.value
-    }
-
-    func sendLeaveRequest(
-        reason: String = "",
-        for sessionId: String
-    ) {
-        statusCheck()
-        var payload = Stream_Video_Sfu_Event_LeaveCallRequest()
-        payload.sessionID = sessionId
-        payload.reason = reason
-
-        var event = Stream_Video_Sfu_Event_SfuRequest()
-        event.requestPayload = .leaveCallRequest(payload)
-
-        webSocket.engine?.send(message: event)
+        let response = try await task.value
+        service.subject.send(response)
+        if response.error.code != .unspecified && !response.error.message.isEmpty {
+            throw response.error
+        }
     }
 
     /// Sends an ICE candidate to the SFU server using the ICE trickle technique.
@@ -428,7 +511,11 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
             return try await service.iceTrickle(iCETrickle: request)
         }
         task.store(in: disposableBag)
-        _ = try await task.value
+        let response = try await task.value
+        service.subject.send(response)
+        if response.error.code != .unspecified && !response.error.message.isEmpty {
+            throw response.error
+        }
     }
 
     // MARK: - ConnectionStateDelegate
@@ -467,5 +554,267 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible {
         ConnectURL: \(connectURL)
         Hostname: \(hostname)
         """
+    }
+
+    private func setUpPublishers() {
+        log.debug("Registering ...")
+        disposableBag.removeAll()
+
+        refreshPublisher
+            .sink { [weak self] in self?.setUpPublishers() }
+            .store(in: disposableBag)
+
+        eventPublisher
+            .log(.debug, subsystems: .sfu) {
+                """
+                SFU received event
+                \($0)
+                """
+            }
+            .sink { _ in }
+            .store(in: disposableBag)
+
+        service
+            .subject
+            .log(.debug, subsystems: .sfu)
+            .sink { _ in }
+            .store(in: disposableBag)
+    }
+}
+
+extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
+    func payload<T>(_ payloadType: T.Type) -> T? {
+        switch self {
+        case .subscriberOffer(let payload):
+            return payload as? T
+        case .publisherAnswer(let payload):
+            return payload as? T
+        case .connectionQualityChanged(let payload):
+            return payload as? T
+        case .audioLevelChanged(let payload):
+            return payload as? T
+        case .iceTrickle(let payload):
+            return payload as? T
+        case .changePublishQuality(let payload):
+            return payload as? T
+        case .participantJoined(let payload):
+            return payload as? T
+        case .participantLeft(let payload):
+            return payload as? T
+        case .dominantSpeakerChanged(let payload):
+            return payload as? T
+        case .joinResponse(let payload):
+            return payload as? T
+        case .healthCheckResponse(let payload):
+            return payload as? T
+        case .trackPublished(let payload):
+            return payload as? T
+        case .trackUnpublished(let payload):
+            return payload as? T
+        case .error(let payload):
+            return payload as? T
+        case .callGrantsUpdated(let payload):
+            return payload as? T
+        case .goAway(let payload):
+            return payload as? T
+        case .iceRestart(let payload):
+            return payload as? T
+        case .pinsUpdated(let payload):
+            return payload as? T
+        case .callEnded(let payload):
+            return payload as? T
+        case .participantUpdated(let payload):
+            return payload as? T
+        case .participantMigrationComplete(let payload):
+            return payload as? T
+        }
+    }
+}
+
+extension Stream_Video_Sfu_Event_SfuRequest: CustomStringConvertible {
+    var description: String {
+        """
+        Type: \(type(of: self))
+        \((requestPayload as? CustomStringConvertible)?.description ?? String(describing: requestPayload))
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Event_JoinRequest: CustomStringConvertible {
+    var description: String {
+        """
+        Type: \(type(of: self))
+            token: 
+                \(token)
+            sessionID:
+                \(sessionID)
+            subscriberSdp: 
+                \(subscriberSdp)
+            clientDetails: 
+                \(clientDetails)
+            migration: 
+                \(migration)
+            fastReconnect: 
+                \(fastReconnect)
+            reconnectDetails: 
+                \(reconnectDetails)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_ClientDetails: CustomStringConvertible {
+    var description: String {
+        """
+        sdk: \(sdk)
+        os: \(os)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_OS: CustomStringConvertible {
+    var description: String {
+        """
+        name: \(name)
+        version: \(version)
+        architecture: \(architecture)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_Sdk: CustomStringConvertible {
+    var description: String {
+        """
+        type: \(type)
+        major: \(major)
+        minor: \(minor)
+        patch: \(patch)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_Device: CustomStringConvertible {
+    var description: String {
+        """
+        name: \(name)
+        version: \(version)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Event_Migration: CustomStringConvertible {
+    var description: String {
+        """
+        fromSfuID: \(fromSfuID)
+        announcedTracks: \(announcedTracks)
+        subscriptions: \(subscriptions)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_TrackInfo: CustomStringConvertible {
+    var description: String {
+        """
+        trackID: \(trackID)
+        trackType: \(trackType)
+        layers: \(layers)
+        mid: \(mid)
+        dtx: \(dtx)
+        red: \(red)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_VideoLayer: CustomStringConvertible {
+    var description: String {
+        """
+        rid: \(rid)
+        videoDimension: \(videoDimension)
+        bitrate: \(bitrate)
+        fps: \(fps)
+        quality: \(quality)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Signal_TrackSubscriptionDetails: CustomStringConvertible {
+    var description: String {
+        """
+        userID: \(userID)
+        sessionID: \(sessionID)
+        trackType: \(trackType)
+        dimension: \(dimension)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_TrackType: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .unspecified:
+            return "unspecified"
+        case .audio:
+            return "audio"
+        case .video:
+            return "video"
+        case .screenShare:
+            return "screenShare"
+        case .screenShareAudio:
+            return "screenShareAudio"
+        case .UNRECOGNIZED(let int):
+            return "UNRECOGNIZED(\(int)"
+        }
+    }
+}
+
+extension Stream_Video_Sfu_Models_VideoDimension: CustomStringConvertible {
+    var description: String { "\(width)x\(height)" }
+}
+
+extension Stream_Video_Sfu_Models_VideoQuality: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .lowUnspecified:
+            return "lowUnspecified"
+        case .mid:
+            return "mid"
+        case .high:
+            return "high"
+        case .off:
+            return "off"
+        case .UNRECOGNIZED(let int):
+            return "UNRECOGNIZED(\(int))"
+        }
+    }
+}
+
+extension Stream_Video_Sfu_Event_ReconnectDetails: CustomStringConvertible {
+    var description: String {
+        """
+        strategy: \(strategy)
+        announcedTracks: \(announcedTracks)
+        subscriptions: \(subscriptions)
+        reconnectAttempt: \(reconnectAttempt)
+        fromSfuID: \(fromSfuID)
+        previousSessionID: \(previousSessionID)
+        """
+    }
+}
+
+extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .unspecified:
+            return "unspecified"
+        case .disconnect:
+            return "disconnect"
+        case .fast:
+            return "fast"
+        case .rejoin:
+            return "rejoin"
+        case .migrate:
+            return "migrate"
+        case .UNRECOGNIZED(let int):
+            return "UNRECOGNIZED(\(int))"
+        }
     }
 }

@@ -23,6 +23,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private(set) var migratingSFUAdapter: SFUAdapter?
     private var migratingToken: String?
 
+    private var mediaAdapters: [PeerConnectionType: MediaAdapter] = [:]
+    private var publisherMediaAdapter: MediaAdapter? { mediaAdapters[.publisher] }
+    private var subscriberMediaAdapter: MediaAdapter? { mediaAdapters[.subscriber] }
+
     private(set) var publisher: PeerConnection? {
         didSet {
             log.debug(
@@ -31,8 +35,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 """,
                 subsystems: .webRTC
             )
+            if let peerConnection = publisher?.pc {
+                makeMediaAdapter(for: .publisher, peerConnection: peerConnection)
+                handlePeerConnectionStream(.publisher)
+            }
             sfuMiddleware.update(publisher: publisher)
-            statsReporter.publisher = publisher
+//            statsReporter.publisher = publisher
         }
     }
 
@@ -44,8 +52,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 """,
                 subsystems: .webRTC
             )
+            if let peerConnection = publisher?.pc {
+                makeMediaAdapter(for: .subscriber, peerConnection: peerConnection)
+                handlePeerConnectionStream(.subscriber)
+            }
             sfuMiddleware.update(subscriber: subscriber)
-            statsReporter.subscriber = subscriber
+//            statsReporter.subscriber = subscriber
         }
     }
 
@@ -58,19 +70,29 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var previousSessionID: String?
     private var token: String
 
-    private(set) var localVideoTrack: RTCVideoTrack?
-    private(set) var localAudioTrack: RTCAudioTrack?
-    private(set) var localScreenshareTrack: RTCVideoTrack?
-    private(set) var videoCapturer: CameraVideoCapturing?
-    private var screenshareCapturer: VideoCapturing?
+//    private(set) var localVideoTrack: RTCVideoTrack?
+//    private(set) var localAudioTrack: RTCAudioTrack?
+//    private(set) var localScreenshareTrack: RTCVideoTrack?
+//    private(set) var videoCapturer: CameraVideoCapturing?
+//    private var screenshareCapturer: VideoCapturing?
+    
     private let user: User
     private let callCid: String
-    private lazy var audioSession = AudioSession()
+//    private lazy var audioSession = AudioSession()
     private(set) var connectOptions: ConnectOptions?
     internal var ownCapabilities: [OwnCapability] = []
     private let videoConfig: VideoConfig
     private var audioSettings: AudioSettings?
-    var callSettings: CallSettings?
+    var callSettings: CallSettings? {
+        didSet {
+            if let callSettings {
+                Task {
+                    try await publisherMediaAdapter?.didUpdateCallSettings(callSettings)
+                    try await subscriberMediaAdapter?.didUpdateCallSettings(callSettings)
+                }
+            }
+        }
+    }
     private(set) var videoOptions = VideoOptions()
     private let environment: WebSocketClient.Environment
     private let apiKey: String
@@ -277,7 +299,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         log.debug("Setting user media", subsystems: .webRTC)
         if !isReconnection {
             isFastReconnecting = false
-            await setupUserMedia(callSettings: callSettings)
+            try await setupUserMedia(callSettings: callSettings)
             log.debug("Connecting WS channel", subsystems: .webRTC)
             sfuAdapter.connect()
             sfuMiddleware.onSocketConnected = { [weak self] in self?.handleOnSocketConnected(reconnected: $0) }
@@ -400,20 +422,20 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
 
     func partialCleanUp() async {
-        try? await videoCapturer?.stopCapture()
-        try? await screenshareCapturer?.stopCapture()
-        localAudioTrack?.isEnabled = false
-        localAudioTrack = nil
-        localVideoTrack?.isEnabled = false
-        localVideoTrack = nil
+//        try? await videoCapturer?.stopCapture()
+//        try? await screenshareCapturer?.stopCapture()
+//        localAudioTrack?.isEnabled = false
+//        localAudioTrack = nil
+//        localVideoTrack?.isEnabled = false
+//        localVideoTrack = nil
         await state.partialCleanUp()
     }
 
     func _cleanUp() async {
         log.debug("Cleaning up WebRTCClient", subsystems: .webRTC)
-        try? await videoCapturer?.stopCapture()
-        try? await screenshareCapturer?.stopCapture()
-        videoCapturer = nil
+//        try? await videoCapturer?.stopCapture()
+//        try? await screenshareCapturer?.stopCapture()
+//        videoCapturer = nil
         publisher?.close()
         subscriber?.close()
         publisher = nil
@@ -421,10 +443,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         if let sfuAdapter {
             await sfuAdapter.disconnect()
         }
-        localAudioTrack?.isEnabled = false
-        localAudioTrack = nil
-        localVideoTrack?.isEnabled = false
-        localVideoTrack = nil
+//        localAudioTrack?.isEnabled = false
+//        localAudioTrack = nil
+//        localVideoTrack?.isEnabled = false
+//        localVideoTrack = nil
         await state.cleanUp()
         sfuMiddleware.cleanUp()
         onParticipantsUpdated = nil
@@ -443,185 +465,198 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         try await setCameraPosition(position == .front ? .front : .back)
     }
 
-    func setupUserMedia(callSettings: CallSettings) async {
-        if hasCapability(.sendAudio), localAudioTrack == nil {
-            await audioSession.configure(
-                audioOn: callSettings.audioOn,
-                speakerOn: callSettings.speakerOn
-            )
-
-            // Audio
-            let audioTrack = await makeAudioTrack()
-            localAudioTrack = audioTrack
-        }
-
-        if hasCapability(.sendVideo), localVideoTrack == nil {
-            // Video
-            let videoTrack = await makeVideoTrack()
-            localVideoTrack = videoTrack
-            await state.add(track: localVideoTrack, id: sessionID)
-        }
+    func setupUserMedia(callSettings: CallSettings) async throws {
+        try await publisherMediaAdapter?.setUp(
+            with: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+//        if hasCapability(.sendAudio), localAudioTrack == nil {
+//            await audioSession.configure(
+//                audioOn: callSettings.audioOn,
+//                speakerOn: callSettings.speakerOn
+//            )
+//
+//            // Audio
+//            let audioTrack = await makeAudioTrack()
+//            localAudioTrack = audioTrack
+//        }
+//
+//        if hasCapability(.sendVideo), localVideoTrack == nil {
+//            // Video
+//            let videoTrack = await makeVideoTrack()
+//            localVideoTrack = videoTrack
+//            await state.add(track: localVideoTrack, id: sessionID)
+//        }
     }
 
     func publishUserMedia(callSettings: CallSettings) {
-        guard let publisher else {
-            log.warning(
-                "Trying to publish userMedia but publisher is not available.",
-                subsystems: .webRTC
-            )
-            return
-        }
+//        Task {
+//            try await publisherMediaAdapter?.didUpdateCallSettings(callSettings)
+//        }
 
-        let canSendAudio = hasCapability(.sendAudio)
-
-        if canSendAudio,
-           let audioTrack = localAudioTrack,
-           callSettings.audioOn,
-           publisher.audioTrackPublished == false {
-            let streamIds = ["\(sessionID):audio"]
-            log.debug(
-                """
-                Publishing user audio
-                StreamIds: \(streamIds)
-                hasCapability: \(canSendAudio)
-                isAudioTrackAvailable: \(localAudioTrack != nil)
-                isCallSettingsAudioOn: \(callSettings.audioOn),
-                isAudioTrackNotPublished: \(publisher.audioTrackPublished == false)
-                """,
-                subsystems: .webRTC
-            )
-
-            publisher.addTrack(
-                audioTrack,
-                streamIds: streamIds,
-                trackType: .audio
-            )
-        } else {
-            log.debug(
-                """
-                User audio wasn't published
-                hasCapability: \(canSendAudio)
-                ownCapabilities: \(ownCapabilities.map(\.rawValue))
-                isAudioTrackAvailable: \(localAudioTrack != nil)
-                isCallSettingsAudioOn: \(callSettings.audioOn),
-                isAudioTrackNotPublished: \(publisher.audioTrackPublished == false)
-                """,
-                subsystems: .webRTC
-            )
-        }
-
-        let canSendVideo = hasCapability(.sendVideo)
-
-        if hasCapability(.sendVideo),
-           callSettings.videoOn,
-           let videoTrack = localVideoTrack,
-           publisher.videoTrackPublished == false {
-            let streamIds = ["\(sessionID):video"]
-            log.debug(
-                """
-                Publishing user video
-                StreamIds: \(streamIds)
-                hasCapability: \(canSendVideo)
-                isVideoTrackAvailable: \(localVideoTrack != nil)
-                isCallSettingsVideoOn: \(callSettings.videoOn),
-                isVideoTrackNotPublished: \(publisher.videoTrackPublished == false)
-                """,
-                subsystems: .webRTC
-            )
-
-            // TODO: Cache the transceiver when mute/unmute
-            publisher.addTransceiver(
-                videoTrack,
-                streamIds: streamIds,
-                trackType: .video
-            )
-        } else {
-            log.debug(
-                """
-                User video wasn't published
-                hasCapability: \(canSendVideo)
-                ownCapabilities: \(ownCapabilities.map(\.rawValue))
-                isVideoTrackAvailable: \(localVideoTrack != nil)
-                isCallSettingsVideoOn: \(callSettings.videoOn),
-                isVideoTrackNotPublished: \(publisher.videoTrackPublished == false)
-                """,
-                subsystems: .webRTC
-            )
-        }
+//        guard let publisher else {
+//            log.warning(
+//                "Trying to publish userMedia but publisher is not available.",
+//                subsystems: .webRTC
+//            )
+//            return
+//        }
+//
+//        let canSendAudio = hasCapability(.sendAudio)
+//
+//        if canSendAudio,
+//           let audioTrack = localAudioTrack,
+//           callSettings.audioOn,
+//           publisher.audioTrackPublished == false {
+//            let streamIds = ["\(sessionID):audio"]
+//            log.debug(
+//                """
+//                Publishing user audio
+//                StreamIds: \(streamIds)
+//                hasCapability: \(canSendAudio)
+//                isAudioTrackAvailable: \(localAudioTrack != nil)
+//                isCallSettingsAudioOn: \(callSettings.audioOn),
+//                isAudioTrackNotPublished: \(publisher.audioTrackPublished == false)
+//                """,
+//                subsystems: .webRTC
+//            )
+//
+//            publisher.addTrack(
+//                audioTrack,
+//                streamIds: streamIds,
+//                trackType: .audio
+//            )
+//        } else {
+//            log.debug(
+//                """
+//                User audio wasn't published
+//                hasCapability: \(canSendAudio)
+//                ownCapabilities: \(ownCapabilities.map(\.rawValue))
+//                isAudioTrackAvailable: \(localAudioTrack != nil)
+//                isCallSettingsAudioOn: \(callSettings.audioOn),
+//                isAudioTrackNotPublished: \(publisher.audioTrackPublished == false)
+//                """,
+//                subsystems: .webRTC
+//            )
+//        }
+//
+//        let canSendVideo = hasCapability(.sendVideo)
+//
+//        if hasCapability(.sendVideo),
+//           callSettings.videoOn,
+//           let videoTrack = localVideoTrack,
+//           publisher.videoTrackPublished == false {
+//            let streamIds = ["\(sessionID):video"]
+//            log.debug(
+//                """
+//                Publishing user video
+//                StreamIds: \(streamIds)
+//                hasCapability: \(canSendVideo)
+//                isVideoTrackAvailable: \(localVideoTrack != nil)
+//                isCallSettingsVideoOn: \(callSettings.videoOn),
+//                isVideoTrackNotPublished: \(publisher.videoTrackPublished == false)
+//                """,
+//                subsystems: .webRTC
+//            )
+//
+//            // TODO: Cache the transceiver when mute/unmute
+//            publisher.addTransceiver(
+//                videoTrack,
+//                streamIds: streamIds,
+//                trackType: .video
+//            )
+//        } else {
+//            log.debug(
+//                """
+//                User video wasn't published
+//                hasCapability: \(canSendVideo)
+//                ownCapabilities: \(ownCapabilities.map(\.rawValue))
+//                isVideoTrackAvailable: \(localVideoTrack != nil)
+//                isCallSettingsVideoOn: \(callSettings.videoOn),
+//                isVideoTrackNotPublished: \(publisher.videoTrackPublished == false)
+//                """,
+//                subsystems: .webRTC
+//            )
+//        }
     }
 
     func changeAudioState(isEnabled: Bool) async throws {
-        if isEnabled && (publisher == nil || publisher?.audioTrackPublished == false),
-           let configuration = connectOptions?.rtcConfiguration {
-            let callSettings = (callSettings ?? .init())
-                .withUpdatedAudioState(isEnabled)
-            self.callSettings = callSettings
-            try await publishLocalTracks(
-                configuration: configuration,
-                callSettings: callSettings
-            )
-        }
-
-        try await sfuAdapter.updateTrackMuteState(
-            .audio,
-            isMuted: !isEnabled,
-            for: sessionID,
-            retryPolicy: .neverGonnaGiveYouUp { [weak self] in
-                let result = self?.callSettings?.audioOn == !isEnabled
-                return result
-            }
-        )
+//        if isEnabled && (publisher == nil || publisher?.audioTrackPublished == false),
+//           let configuration = connectOptions?.rtcConfiguration {
+//            let callSettings = (callSettings ?? .init())
+//                .withUpdatedAudioState(isEnabled)
+//            self.callSettings = callSettings
+//            try await publishLocalTracks(
+//                configuration: configuration,
+//                callSettings: callSettings
+//            )
+//        }
+//
+//        try await sfuAdapter.updateTrackMuteState(
+//            .audio,
+//            isMuted: !isEnabled,
+//            for: sessionID,
+//            retryPolicy: .neverGonnaGiveYouUp { [weak self] in
+//                let result = self?.callSettings?.audioOn == !isEnabled
+//                return result
+//            }
+//        )
         callSettings = callSettings?.withUpdatedAudioState(isEnabled)
-        localAudioTrack?.isEnabled = isEnabled
+//        localAudioTrack?.isEnabled = isEnabled
     }
 
-    func changeScreensharingState(isEnabled: Bool) async throws {
-        try await sfuAdapter.updateTrackMuteState(
-            .screenShare,
-            isMuted: !isEnabled,
-            for: sessionID
-        )
-        localScreenshareTrack?.isEnabled = isEnabled
-    }
+//    func changeScreensharingState(isEnabled: Bool) async throws {
+//        try await sfuAdapter.updateTrackMuteState(
+//            .screenShare,
+//            isMuted: !isEnabled,
+//            for: sessionID
+//        )
+//        localScreenshareTrack?.isEnabled = isEnabled
+//    }
 
     func changeVideoState(isEnabled: Bool) async throws {
-        if isEnabled && (publisher == nil || publisher?.videoTrackPublished == false),
-           let configuration = connectOptions?.rtcConfiguration {
-            let callSettings = (callSettings ?? .init())
-                .withUpdatedVideoState(isEnabled)
-            self.callSettings = callSettings
-            try await publishLocalTracks(
-                configuration: configuration,
-                callSettings: callSettings
-            )
-        }
-
-        try await sfuAdapter.updateTrackMuteState(
-            .video,
-            isMuted: !isEnabled,
-            for: sessionID,
-            retryPolicy: .neverGonnaGiveYouUp { [weak self] in
-                self?.callSettings?.videoOn == !isEnabled
-            }
-        )
+//        if isEnabled && (publisher == nil || publisher?.videoTrackPublished == false),
+//           let configuration = connectOptions?.rtcConfiguration {
+//            let callSettings = (callSettings ?? .init())
+//                .withUpdatedVideoState(isEnabled)
+//            self.callSettings = callSettings
+//            try await publishLocalTracks(
+//                configuration: configuration,
+//                callSettings: callSettings
+//            )
+//        }
+//
+//        try await sfuAdapter.updateTrackMuteState(
+//            .video,
+//            isMuted: !isEnabled,
+//            for: sessionID,
+//            retryPolicy: .neverGonnaGiveYouUp { [weak self] in
+//                self?.callSettings?.videoOn == !isEnabled
+//            }
+//        )
         callSettings = callSettings?.withUpdatedVideoState(isEnabled)
-        localVideoTrack?.isEnabled = isEnabled
+//        localVideoTrack?.isEnabled = isEnabled
     }
 
     func changeSoundState(isEnabled: Bool) async throws {
-        await audioSession.setAudioSessionEnabled(isEnabled)
-        let audioTracks = await state.audioTracks
-        for track in audioTracks.values {
-            track.isEnabled = isEnabled
-        }
+        await publisherMediaAdapter?.didUpdateAudioSessionState(isEnabled)
+//        await audioSession.setAudioSessionEnabled(isEnabled)
+//        let audioTracks = await state.audioTracks
+//        for track in audioTracks.values {
+//            track.isEnabled = isEnabled
+//        }
         callSettings = callSettings?.withUpdatedAudioOutputState(isEnabled)
     }
 
     func changeSpeakerState(isEnabled: Bool) async throws {
-        await audioSession.configure(
-            audioOn: callSettings?.audioOn ?? false,
-            speakerOn: isEnabled
+        await publisherMediaAdapter?.didUpdateAudioSessionSpeakerState(
+            isEnabled,
+            with: callSettings?.audioOn ?? false
         )
+//        await audioSession.configure(
+//            audioOn: callSettings?.audioOn ?? false,
+//            speakerOn: isEnabled
+//        )
         callSettings = callSettings?.withUpdatedSpeakerState(isEnabled)
     }
 
@@ -653,51 +688,56 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
 
     func setVideoFilter(_ videoFilter: VideoFilter?) {
-        videoCapturer?.setVideoFilter(videoFilter)
+        publisherMediaAdapter?.setVideoFilter(videoFilter)
     }
 
     func startScreensharing(type: ScreensharingType) async throws {
-        if hasCapability(.screenshare) {
-            if 
-                publisher == nil,
-                let configuration = connectOptions?.rtcConfiguration,
-                let callSettings = self.callSettings
-            {
-                try await publishLocalTracks(
-                    configuration: configuration,
-                    callSettings: callSettings
-                )
-            }
-            if localScreenshareTrack == nil || type != currentScreenhsareType {
-                // Screenshare
-                let screenshareTrack = await makeVideoTrack(screenshareType: type)
-                localScreenshareTrack = screenshareTrack
-                publisher?.addTransceiver(
-                    screenshareTrack,
-                    streamIds: ["\(sessionID)-screenshare-\(type)"],
-                    trackType: .screenshare
-                )
-                await state.add(screensharingTrack: screenshareTrack, id: sessionID)
-                await assignTracksToParticipants()
-            } else if localScreenshareTrack?.isEnabled == false {
-                localScreenshareTrack?.isEnabled = true
-                await state.add(screensharingTrack: localScreenshareTrack, id: sessionID)
-                await assignTracksToParticipants()
-            }
-            try await changeScreensharingState(isEnabled: true)
-        } else {
-            throw ClientError.MissingPermissions()
-        }
-        currentScreenhsareType = type
-        try await screenshareCapturer?.startCapture(device: nil)
+        try await publisherMediaAdapter?.beginScreenSharing(
+            of: type,
+            ownCapabilities: ownCapabilities
+        )
+//        if hasCapability(.screenshare) {
+//            if 
+//                publisher == nil,
+//                let configuration = connectOptions?.rtcConfiguration,
+//                let callSettings = self.callSettings
+//            {
+//                try await publishLocalTracks(
+//                    configuration: configuration,
+//                    callSettings: callSettings
+//                )
+//            }
+//            if localScreenshareTrack == nil || type != currentScreenhsareType {
+//                // Screenshare
+//                let screenshareTrack = await makeVideoTrack(screenshareType: type)
+//                localScreenshareTrack = screenshareTrack
+//                publisher?.addTransceiver(
+//                    screenshareTrack,
+//                    streamIds: ["\(sessionID)-screenshare-\(type)"],
+//                    trackType: .screenshare
+//                )
+//                await state.add(screensharingTrack: screenshareTrack, id: sessionID)
+//                await assignTracksToParticipants()
+//            } else if localScreenshareTrack?.isEnabled == false {
+//                localScreenshareTrack?.isEnabled = true
+//                await state.add(screensharingTrack: localScreenshareTrack, id: sessionID)
+//                await assignTracksToParticipants()
+//            }
+//            try await changeScreensharingState(isEnabled: true)
+//        } else {
+//            throw ClientError.MissingPermissions()
+//        }
+//        currentScreenhsareType = type
+//        try await screenshareCapturer?.startCapture(device: nil)
     }
 
     func stopScreensharing() async throws {
+        publisherMediaAdapter?.stopScreenSharing()
         await state.removeScreensharingTrack(id: sessionID)
-        localScreenshareTrack?.isEnabled = false
         await assignTracksToParticipants()
-        try await changeScreensharingState(isEnabled: false)
-        try? await screenshareCapturer?.stopCapture()
+//        localScreenshareTrack?.isEnabled = false
+//        try await changeScreensharingState(isEnabled: false)
+//        try? await screenshareCapturer?.stopCapture()
     }
 
     func changePinState(
@@ -718,182 +758,66 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         await state.update(callParticipant: updated)
     }
 
-    /// Starts noise cancellation for a specified session ID asynchronously.
-    /// - Parameters:
-    ///   - sessionID: The session ID for which noise cancellation should be started.
-    /// - Throws: An error if starting noise cancellation fails.
     func startNoiseCancellation(_ sessionID: String) async throws {
         try await sfuAdapter.toggleNoiseCancellation(true, for: sessionID)
     }
 
-    /// Stops noise cancellation for a specified session ID asynchronously.
-    /// - Parameters:
-    ///   - sessionID: The session ID for which noise cancellation should be stopped.
-    /// - Throws: An error if stopping noise cancellation fails.
     func stopNoiseCancellation(_ sessionID: String) async throws {
         try await sfuAdapter.toggleNoiseCancellation(false, for: sessionID)
     }
 
-    /// Initiates a camera focus operation at the specified point.
-    ///
-    /// This method attempts to focus the camera at a specific point on the screen.
-    /// It requires the `videoCapturer` property to be properly cast to `VideoCapturer` type.
-    /// If the casting fails, it throws a `ClientError.Unexpected` error.
-    ///
-    /// - Parameter point: A `CGPoint` representing the location within the view where the camera
-    ///  should focus.
-    /// - Throws: A `ClientError.Unexpected` error if `videoCapturer` cannot be cast to
-    /// `VideoCapturer`.
-    ///
-    /// - Note: The `point` parameter should be provided in the coordinate space of the view, where
-    /// (0,0) is the top-left corner, and (1,1) is the bottom-right corner. Make sure the camera supports
-    /// tap-to-focus functionality before invoking this method.
     func focus(at point: CGPoint) throws {
-        guard let videoCapturer = videoCapturer as? VideoCapturer else {
-            throw ClientError.Unexpected()
-        }
-
-        try videoCapturer.focus(at: point)
+//        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+//            throw ClientError.Unexpected()
+//        }
+//
+//        try videoCapturer.focus(at: point)
+        try publisherMediaAdapter?.focus(at: point)
     }
 
-    /// Adds the `AVCapturePhotoOutput` on the `CameraVideoCapturer` to enable photo
-    /// capturing capabilities.
-    ///
-    /// This method configures the local user's `CameraVideoCapturer` with an
-    /// `AVCapturePhotoOutput` for capturing photos. This enhancement allows applications to capture
-    /// still images while video capturing is ongoing.
-    ///
-    /// - Parameter capturePhotoOutput: The `AVCapturePhotoOutput` instance to be added
-    /// to the `CameraVideoCapturer`. This output enables the capture of photos alongside video
-    /// capturing.
-    ///
-    /// - Throws: An error if the `CameraVideoCapturer` does not support adding an `AVCapturePhotoOutput`.
-    /// This method is specifically designed for `RTCCameraVideoCapturer` instances. If the
-    /// `CameraVideoCapturer` in use does not support photo output functionality, an appropriate error
-    /// will be thrown to indicate that the operation is not supported.
-    ///
-    /// - Warning: A maximum of one output of each type may be added.
     func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
-        guard let videoCapturer = videoCapturer as? VideoCapturer else {
-            throw ClientError.Unexpected()
-        }
-
-        try videoCapturer.addCapturePhotoOutput(capturePhotoOutput)
+//        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+//            throw ClientError.Unexpected()
+//        }
+//
+//        try videoCapturer.addCapturePhotoOutput(capturePhotoOutput)
+        try publisherMediaAdapter?.addCapturePhotoOutput(capturePhotoOutput)
     }
 
-    /// Removes the `AVCapturePhotoOutput` from the `CameraVideoCapturer` to disable photo
-    /// capturing capabilities.
-    ///
-    /// This method configures the local user's `CameraVideoCapturer` by removing an
-    /// `AVCapturePhotoOutput` previously added for capturing photos. This action is necessary when
-    /// the application needs to stop capturing still images or when adjusting the capturing setup. It ensures
-    /// that the video capturing process can continue without the overhead or interference of photo
-    /// capturing capabilities.
-    ///
-    /// - Parameter capturePhotoOutput: The `AVCapturePhotoOutput` instance to be removed
-    /// from the `CameraVideoCapturer`. Removing this output disables the capture of photos alongside
-    /// video capturing.
-    ///
-    /// - Throws: An error if the `CameraVideoCapturer` does not support removing an
-    /// `AVCapturePhotoOutput`.
-    /// This method is specifically designed for `RTCCameraVideoCapturer` instances. If the
-    /// `CameraVideoCapturer` in use does not support the removal of photo output functionality, an
-    /// appropriate error will be thrown to indicate that the operation is not supported.
-    ///
-    /// - Note: Ensure that the `AVCapturePhotoOutput` being removed was previously added to the
-    /// `CameraVideoCapturer`. Attempting to remove an output that is not currently added will not
-    /// affect the capture session but may result in unnecessary processing.
     func removeCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
-        guard let videoCapturer = videoCapturer as? VideoCapturer else {
-            throw ClientError.Unexpected()
-        }
-
-        try videoCapturer.removeCapturePhotoOutput(capturePhotoOutput)
+//        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+//            throw ClientError.Unexpected()
+//        }
+//
+//        try videoCapturer.removeCapturePhotoOutput(capturePhotoOutput)
+        try publisherMediaAdapter?.removeCapturePhotoOutput(capturePhotoOutput)
     }
 
-    /// Adds an `AVCaptureVideoDataOutput` to the `CameraVideoCapturer` for video frame
-    /// processing capabilities.
-    ///
-    /// This method configures the local user's `CameraVideoCapturer` with an
-    /// `AVCaptureVideoDataOutput`, enabling the processing of video frames. This is particularly
-    /// useful for applications that require access to raw video data for analysis, filtering, or other processing
-    /// tasks while video capturing is in progress.
-    ///
-    /// - Parameter videoOutput: The `AVCaptureVideoDataOutput` instance to be added to
-    /// the `CameraVideoCapturer`. This output facilitates the capture and processing of live video
-    /// frames.
-    ///
-    /// - Throws: An error if the `CameraVideoCapturer` does not support adding an
-    /// `AVCaptureVideoDataOutput`. This functionality is specific to `RTCCameraVideoCapturer`
-    /// instances. If the current `CameraVideoCapturer` does not accommodate video output, an error
-    /// will be thrown to signify the unsupported operation.
-    ///
-    /// - Warning: A maximum of one output of each type may be added. For applications linked on or
-    /// after iOS 16.0, this restriction no longer applies to AVCaptureVideoDataOutputs. When adding more
-    /// than one AVCaptureVideoDataOutput, AVCaptureSession.hardwareCost must be taken into account.
     func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
-        guard let videoCapturer = videoCapturer as? VideoCapturer else {
-            throw ClientError.Unexpected()
-        }
-
-        try videoCapturer.addVideoOutput(videoOutput)
+//        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+//            throw ClientError.Unexpected()
+//        }
+//
+//        try videoCapturer.addVideoOutput(videoOutput)
+        try publisherMediaAdapter?.addVideoOutput(videoOutput)
     }
 
-    /// Removes an `AVCaptureVideoDataOutput` from the `CameraVideoCapturer` to disable
-    /// video frame processing capabilities.
-    ///
-    /// This method reconfigures the local user's `CameraVideoCapturer` by removing an
-    /// `AVCaptureVideoDataOutput` that was previously added. This change is essential when the
-    /// application no longer requires access to raw video data for analysis, filtering, or other processing
-    /// tasks, or when adjusting the video capturing setup for different operational requirements. It ensures t
-    /// hat video capturing can proceed without the additional processing overhead associated with
-    /// handling video frame outputs.
-    ///
-    /// - Parameter videoOutput: The `AVCaptureVideoDataOutput` instance to be removed
-    /// from the `CameraVideoCapturer`. Removing this output stops the capture and processing of live video
-    /// frames through the specified output, simplifying the capture session.
-    ///
-    /// - Throws: An error if the `CameraVideoCapturer` does not support removing an
-    /// `AVCaptureVideoDataOutput`. This functionality is tailored for `RTCCameraVideoCapturer`
-    /// instances. If the `CameraVideoCapturer` being used does not permit the removal of video outputs,
-    /// an error will be thrown to indicate the unsupported operation.
-    ///
-    /// - Note: It is crucial to ensure that the `AVCaptureVideoDataOutput` intended for removal
-    /// has been previously added to the `CameraVideoCapturer`. Trying to remove an output that is
-    /// not part of the capture session will have no negative impact but could lead to unnecessary processing
-    /// and confusion.
     func removeVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
-        guard let videoCapturer = videoCapturer as? VideoCapturer else {
-            throw ClientError.Unexpected()
-        }
-
-        try videoCapturer.removeVideoOutput(videoOutput)
+//        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+//            throw ClientError.Unexpected()
+//        }
+//
+//        try videoCapturer.removeVideoOutput(videoOutput)
+        try publisherMediaAdapter?.removeVideoOutput(videoOutput)
     }
 
-    /// Zooms the camera video by the specified factor.
-    ///
-    /// This method attempts to zoom the camera's video feed by adjusting the `videoZoomFactor` of
-    /// the camera's active device. It first checks if the video capturer is of type `RTCCameraVideoCapturer`
-    /// and if the current camera device supports zoom by verifying that the `videoMaxZoomFactor` of
-    /// the active format is greater than 1.0. If these conditions are met, it proceeds to apply the requested
-    /// zoom factor, clamping it within the supported range to avoid exceeding the device's capabilities.
-    ///
-    /// - Parameter factor: The desired zoom factor. A value of 1.0 represents no zoom, while values
-    /// greater than 1.0 increase the zoom level. The factor is clamped to the maximum zoom factor supported
-    /// by the device to ensure it remains within valid bounds.
-    ///
-    /// - Throws: `ClientError.Unexpected` if the video capturer is not of type
-    /// `RTCCameraVideoCapturer`, or if the device does not support zoom. Also, throws an error if
-    /// locking the device for configuration fails.
-    ///
-    /// - Note: This method should be used cautiously, as setting a zoom factor significantly beyond the
-    /// optimal range can degrade video quality.
     func zoom(by factor: CGFloat) throws {
-        guard let videoCapturer = videoCapturer as? VideoCapturer else {
-            throw ClientError.Unexpected()
-        }
-
-        try videoCapturer.zoom(by: factor)
+//        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+//            throw ClientError.Unexpected()
+//        }
+//
+//        try videoCapturer.zoom(by: factor)
+        try publisherMediaAdapter?.zoom(by: factor)
     }
 
     // MARK: - private
@@ -985,8 +909,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             videoOptions: videoOptions
         )
 
-        subscriber?.onStreamAdded = { [weak self] in self?.handleStreamAdded($0) }
-        subscriber?.onStreamRemoved = { [weak self] in self?.handleStreamRemoved($0) }
+//        subscriber?.onStreamAdded = { [weak self] in self?.handleStreamAdded($0) }
+//        subscriber?.onStreamRemoved = { [weak self] in self?.handleStreamRemoved($0) }
         subscriber?.onDisconnect = { [weak self] _ in
             guard let self else { return }
             log.debug(
@@ -1087,7 +1011,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         } else {
             publisher?.sfuAdapter = sfuAdapter
         }
-        await setupUserMedia(callSettings: callSettings)
+        try await setupUserMedia(callSettings: callSettings)
         publishUserMedia(callSettings: callSettings)
     }
 
@@ -1126,10 +1050,11 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
 
     private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws {
-        guard let capturer = videoCapturer else {
-            throw ClientError.Unexpected()
-        }
-        try await capturer.setCameraPosition(cameraPosition)
+//        guard let capturer = videoCapturer else {
+//            throw ClientError.Unexpected()
+//        }
+//        try await capturer.setCameraPosition(cameraPosition)
+        try await publisherMediaAdapter?.didUpdateCameraPosition(cameraPosition)
     }
 
     private func handleParticipantsUpdated() async {
@@ -1207,7 +1132,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         var tracks = [Stream_Video_Sfu_Models_TrackInfo]()
         if callSettings?.videoOn == true {
             var videoTrack = Stream_Video_Sfu_Models_TrackInfo()
-            videoTrack.trackID = localVideoTrack?.trackId ?? ""
+            videoTrack.trackID = publisherMediaAdapter?.localTrack(of: .video)?.trackId ?? "" //localVideoTrack?.trackId ?? ""
             videoTrack.layers = loadLayers(supportedCodecs: videoOptions.supportedCodecs)
             videoTrack.mid = publisher?.transceiver?.mid ?? ""
             videoTrack.trackType = .video
@@ -1215,11 +1140,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         if callSettings?.audioOn == true {
             var audioTrack = Stream_Video_Sfu_Models_TrackInfo()
-            audioTrack.trackID = localAudioTrack?.trackId ?? ""
+            audioTrack.trackID = publisherMediaAdapter?.localTrack(of: .audio)?.trackId ?? "" ///localAudioTrack?.trackId ?? ""
             audioTrack.trackType = .audio
             tracks.append(audioTrack)
         }
-        if let localScreenshareTrack, localScreenshareTrack.isEnabled {
+        if
+            let localScreenshareTrack = publisherMediaAdapter?.localTrack(of: .screenshare),
+            localScreenshareTrack.isEnabled
+        {
             var screenshareTrack = Stream_Video_Sfu_Models_TrackInfo()
             screenshareTrack.trackID = localScreenshareTrack.trackId
             screenshareTrack.trackType = .screenShare
@@ -1260,28 +1188,28 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private func makeVideoTrack(screenshareType: ScreensharingType? = nil) async -> RTCVideoTrack {
         let videoSource = peerConnectionFactory.makeVideoSource(forScreenShare: screenshareType != nil)
         if let screenshareType {
-            if screenshareType == .inApp {
-                screenshareCapturer = ScreenshareCapturer(
-                    videoSource: videoSource,
-                    videoOptions: videoOptions,
-                    videoFilters: videoConfig.videoFilters
-                )
-            } else if screenshareType == .broadcast {
-                screenshareCapturer = BroadcastScreenCapturer(
-                    videoSource: videoSource,
-                    videoOptions: videoOptions,
-                    videoFilters: videoConfig.videoFilters
-                )
-            }
+//            if screenshareType == .inApp {
+//                screenshareCapturer = ScreenshareCapturer(
+//                    videoSource: videoSource,
+//                    videoOptions: videoOptions,
+//                    videoFilters: videoConfig.videoFilters
+//                )
+//            } else if screenshareType == .broadcast {
+//                screenshareCapturer = BroadcastScreenCapturer(
+//                    videoSource: videoSource,
+//                    videoOptions: videoOptions,
+//                    videoFilters: videoConfig.videoFilters
+//                )
+//            }
         } else {
-            videoCapturer = VideoCapturer(
-                videoSource: videoSource,
-                videoOptions: videoOptions,
-                videoFilters: videoConfig.videoFilters
-            )
-            let position: AVCaptureDevice.Position = callSettings?.cameraPosition == .front ? .front : .back
-            let device = videoCapturer?.capturingDevice(for: position)
-            try? await videoCapturer?.startCapture(device: device)
+//            videoCapturer = VideoCapturer(
+//                videoSource: videoSource,
+//                videoOptions: videoOptions,
+//                videoFilters: videoConfig.videoFilters
+//            )
+//            let position: AVCaptureDevice.Position = callSettings?.cameraPosition == .front ? .front : .back
+//            let device = videoCapturer?.capturingDevice(for: position)
+//            try? await videoCapturer?.startCapture(device: device)
         }
         let videoTrack = peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
@@ -1351,35 +1279,15 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         guard let connectOptions = connectOptions else {
             throw ClientError.Unexpected()
         }
-
-        let tempPeerConnection = try peerConnectionFactory.makePeerConnection(
-            sessionId: sessionID,
+        return try await RTCTemporaryPeerConnection(
+            sessionID: sessionID,
+            peerConnectionFactory: peerConnectionFactory,
             configuration: connectOptions.rtcConfiguration,
-            type: .subscriber,
-            sfuAdapter: migratingSFUAdapter ?? sfuAdapter,
-            videoOptions: videoOptions
-        )
-
-        if let localAudioTrack {
-            tempPeerConnection.addTrack(
-                localAudioTrack,
-                streamIds: ["temp-audio"],
-                trackType: .audio
-            )
-        }
-
-        if let localVideoTrack {
-            tempPeerConnection.addTransceiver(
-                localVideoTrack,
-                streamIds: ["temp-video"],
-                direction: .recvOnly,
-                trackType: .video
-            )
-        }
-        let offer = try await tempPeerConnection.createOffer()
-        tempPeerConnection.transceiver?.stopInternal()
-        tempPeerConnection.close()
-        return offer.sdp
+            sfuAdapter: sfuAdapter,
+            videoOptions: videoOptions,
+            localAudioTrack: publisherMediaAdapter?.localTrack(of: .audio) as? RTCAudioTrack, //localAudioTrack,
+            localVideoTrack: publisherMediaAdapter?.localTrack(of: .video) as? RTCVideoTrack //localVideoTrack
+        ).createOffer().sdp
     }
 
     private func sendJoinRequest(
@@ -1483,7 +1391,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
             if participant.isScreensharing && screenshareTrack == nil {
                 if participant.sessionId == sessionID {
-                    screenshareTrack = localScreenshareTrack
+                    screenshareTrack = publisherMediaAdapter?.localTrack(of: .screenshare) as? RTCVideoTrack
                 } else {
                     screenshareTrack = subscriber?.findScreensharingTrack(
                         for: participant.trackLookupPrefix
@@ -1938,27 +1846,27 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 videoOptions: videoOptions
             )
 
-            subscriber?.onStreamAdded = { [weak self] in self?.handleStreamAdded($0) }
-            subscriber?.onStreamRemoved = { [weak self] in self?.handleStreamRemoved($0) }
+//            subscriber?.onStreamAdded = { [weak self] in self?.handleStreamAdded($0) }
+//            subscriber?.onStreamRemoved = { [weak self] in self?.handleStreamRemoved($0) }
             subscriber?.onDisconnect = { peerConnection in
                 peerConnection.restartIce()
                 // If that fails, rejoin by observing ice state
             }
         }
 
-//        if publisher?.shouldRestartIce == true {
-//            try await negotiate(
-//                peerConnection: publisher,
-//                constraints: .iceRestartConstraints
-//            )
-//        }
-
-        if subscriber?.shouldRestartIce == true {
+        if publisher?.shouldRestartIce == true {
             try await negotiate(
-                peerConnection: subscriber,
+                peerConnection: publisher,
                 constraints: .iceRestartConstraints
             )
         }
+
+//        if subscriber?.shouldRestartIce == true {
+//            try await negotiate(
+//                peerConnection: subscriber,
+//                constraints: .iceRestartConstraints
+//            )
+//        }
 
         subscriber?.onConnected = { [weak self] _ in
             self?.tempSubscriber?.close()
@@ -1980,11 +1888,17 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         connectOptions: ConnectOptions,
         callSettings: CallSettings
     ) async throws {
+        do {
         if callSettings.shouldPublish {
             try await publishLocalTracks(
                 configuration: connectOptions.rtcConfiguration,
                 callSettings: callSettings
             )
+        }
+            try await publisherMediaAdapter?.didUpdateCallSettings(callSettings)
+            try await subscriberMediaAdapter?.didUpdateCallSettings(callSettings)
+        } catch {
+            log.error(error, subsystems: .webRTC)
         }
     }
 
@@ -2115,6 +2029,90 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                     )
                 } catch {
                     log.error(error, subsystems: .webRTC)
+                }
+            }
+            .store(in: disposableBag)
+    }
+
+    private func makeMediaAdapter(
+        for peerConnectionType: PeerConnectionType,
+        peerConnection: RTCPeerConnection
+    ) {
+        let mediaAdapter = MediaAdapter(
+            sessionID: sessionID,
+            peerConnectionType: peerConnectionType,
+            peerConnection: peerConnection,
+            peerConnectionFactory: peerConnectionFactory,
+            sfuAdapter: sfuAdapter,
+            videoOptions: videoOptions,
+            videoConfig: videoConfig,
+            audioSession: .init()
+        )
+        mediaAdapters[peerConnectionType] = mediaAdapter
+    }
+
+    private func handlePeerConnectionStream(_ peerConnectionType: PeerConnectionType) {
+        guard 
+            let mediaAdapter = peerConnectionType == .publisher
+                ? publisherMediaAdapter
+                : subscriberMediaAdapter
+        else {
+            return
+        }
+
+        mediaAdapter
+            .trackPublisher
+            .receive(on: DispatchQueue.main)
+            .compactMap {
+                switch $0 {
+                case let .added(id, trackType, track):
+                    return (id, trackType, track)
+                case .removed:
+                    return nil
+                }
+            }
+            .sink { [weak self] (event: (id: String, trackType: TrackType, track: RTCMediaStreamTrack)) in
+                Task { [weak self] in
+                    guard let self else { return }
+                    switch event.trackType {
+                    case .audio:
+                        if let audioTrack = event.track as? RTCAudioTrack {
+                            await state.add(audioTrack: audioTrack, id: event.id)
+                        }
+
+                    case .video:
+                        if let videoTrack = event.track as? RTCVideoTrack {
+                            await state.add(track: videoTrack, id: event.id)
+                        }
+
+                    case .screenshare:
+                        if let videoTrack = event.track as? RTCVideoTrack {
+                            await state.add(screensharingTrack: videoTrack, id: event.id)
+                        }
+
+                    default:
+                        break
+                    }
+
+                    await assignTracksToParticipants()
+                }
+            }
+            .store(in: disposableBag)
+
+        mediaAdapter
+            .trackPublisher
+            .compactMap {
+                switch $0 {
+                case let .removed(_, _, track):
+                    return track.trackId
+                case .added:
+                    return nil
+                }
+            }
+            .sink { [weak self] (trackId: String) in
+                Task { [weak self] in
+                    guard let self else { return }
+                    await state.removeCallParticipant(with: trackId)
                 }
             }
             .store(in: disposableBag)

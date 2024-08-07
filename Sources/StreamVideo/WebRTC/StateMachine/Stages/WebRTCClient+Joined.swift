@@ -106,27 +106,9 @@ extension WebRTCClient.StateMachine.Stage {
             context
                 .client?
                 .sfuAdapter
-                .eventSubject
-                .compactMap {
-                    if case let .sfuEvent(sfuEvent) = $0 {
-                        return sfuEvent
-                    } else {
-                        return nil
-                    }
-                }
-                .compactMap { (event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) in
-                    switch event {
-                    case let .error(error):
-                        if error.reconnectStrategy == .migrate {
-                            return true
-                        } else {
-                            return nil
-                        }
-                    default:
-                        return nil
-                    }
-                }
-                .sink { [weak self] (_: Bool) in
+                .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
+                .filter { $0.reconnectStrategy == .migrate }
+                .sink { [weak self] _ in
                     guard let self else { return }
                     do {
                         try transition?(.migrating(context))
@@ -141,27 +123,9 @@ extension WebRTCClient.StateMachine.Stage {
             context
                 .client?
                 .sfuAdapter
-                .eventSubject
-                .compactMap {
-                    if case let .sfuEvent(sfuEvent) = $0 {
-                        return sfuEvent
-                    } else {
-                        return nil
-                    }
-                }
-                .compactMap { (event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) in
-                    switch event {
-                    case let .error(error):
-                        if error.reconnectStrategy == .disconnect {
-                            return true
-                        } else {
-                            return nil
-                        }
-                    default:
-                        return nil
-                    }
-                }
-                .sink { [weak self] (_: Bool) in
+                .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
+                .filter { $0.reconnectStrategy == .disconnect }
+                .sink { [weak self] _ in
                     guard let self else { return }
                     do {
                         try transition?(
@@ -178,22 +142,8 @@ extension WebRTCClient.StateMachine.Stage {
             context
                 .client?
                 .sfuAdapter
-                .eventSubject
-                .compactMap {
-                    if case let .sfuEvent(sfuEvent) = $0 {
-                        return sfuEvent
-                    } else {
-                        return nil
-                    }
-                }
-                .compactMap { (event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) in
-                    switch event {
-                    case let .error(error):
-                        return error.reconnectStrategy
-                    default:
-                        return nil
-                    }
-                }
+                .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
+                .map { $0.reconnectStrategy }
                 .compactMap { [weak self] in self?.reconnectionStrategyToUse($0) }
                 .log(.debug, subsystems: .webRTC) { "Reconnection strategy updated to \($0)." }
                 .sink { [weak self] in self?.context.reconnectionStrategy = $0 }

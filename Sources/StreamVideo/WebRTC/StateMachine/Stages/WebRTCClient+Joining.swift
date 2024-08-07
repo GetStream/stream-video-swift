@@ -77,7 +77,7 @@ extension WebRTCClient.StateMachine.Stage {
 
                     let joinResponse = try await client
                         .sfuAdapter
-                        .eventSubject
+                        .eventPublisher
                         .compactMap {
                             if case let .sfuEvent(sfuEvent) = $0 {
                                 return sfuEvent
@@ -121,14 +121,14 @@ extension WebRTCClient.StateMachine.Stage {
                             let connectOptions = context.connectOptions,
                             let callSettings = context.callSettings
                         {
-                            await client.setupUserMedia(
-                                callSettings: callSettings
-                            )
-
                             try await client._setupPeerConnections(
                                 connectOptions: connectOptions,
                                 videoOptions: client.videoOptions
                             )
+
+//                            try await client.setupUserMedia(
+//                                callSettings: callSettings
+//                            )
 
                             try await client._publishLocalTracks(
                                 connectOptions: connectOptions,
@@ -182,22 +182,8 @@ extension WebRTCClient.StateMachine.Stage {
                     )
 
                     let joinResponse = try await migratingSFUAdapter
-                        .eventSubject
-                        .compactMap {
-                            if case let .sfuEvent(sfuEvent) = $0 {
-                                return sfuEvent
-                            } else {
-                                return nil
-                            }
-                        }
-                        .compactMap { (event: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) in
-                            if case let .joinResponse(response) = event {
-                                return response
-                            } else {
-                                return nil
-                            }
-                        }
-                        .nextValue(timeout: 15)
+                        .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
+                        .nextValue(timeout: 5)
                     migratingSFUAdapter.sendHealthCheck()
 
                     var context = context

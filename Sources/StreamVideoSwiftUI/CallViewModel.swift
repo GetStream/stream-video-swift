@@ -109,7 +109,6 @@ open class CallViewModel: ObservableObject {
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
-            log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkCallSettingsForCurrentUser()
         }

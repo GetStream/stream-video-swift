@@ -5,30 +5,41 @@
 import Combine
 import Foundation
 
-public final class DisposableBag: Sequence {
+public final class DisposableBag: Sequence, @unchecked Sendable {
 
     private let queue = UnfairQueue()
-    private var storage: Set<AnyCancellable> = []
+    private var storage: [String: AnyCancellable] = [:]
 
     public init() {}
 
-    public func insert(_ cancellable: AnyCancellable) {
+    public func insert(
+        _ cancellable: AnyCancellable,
+        with key: String = UUID().uuidString
+    ) {
         queue.sync {
-            _ = storage.insert(cancellable)
+            storage[key]?.cancel()
+            storage[key] = cancellable
+        }
+    }
+
+    public func remove(_ key: String) {
+        queue.sync {
+            storage[key]?.cancel()
+            storage[key] = nil
         }
     }
 
     public func removeAll() {
         queue.sync {
-            storage.forEach { $0.cancel() }
-            storage = []
+            storage.values.forEach { $0.cancel() }
+            storage = [:]
         }
     }
 
     // Sequence conformance
     public func makeIterator() -> Set<AnyCancellable>.Iterator {
         queue.sync {
-            storage.makeIterator()
+            Set(storage.values).makeIterator()
         }
     }
 }
@@ -38,5 +49,11 @@ extension AnyCancellable {
 }
 
 extension Task {
-    public func store(in disposableBag: DisposableBag) { disposableBag.insert(.init(cancel)) }
+    
+    func eraseToAnyCancellable() -> AnyCancellable { .init(cancel) }
+
+    public func store(
+        in disposableBag: DisposableBag,
+        key: String = UUID().uuidString
+    ) { disposableBag.insert(.init(cancel), with: key) }
 }
