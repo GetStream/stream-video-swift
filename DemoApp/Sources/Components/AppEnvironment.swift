@@ -113,7 +113,7 @@ extension AppEnvironment {
         case .test:
             return .demo
         case .debug:
-            return .pronto
+            return .prontoStaging
         case .release:
             return .demo
         }

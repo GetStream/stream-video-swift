@@ -55,7 +55,7 @@ class VideoCapturer: CameraVideoCapturing {
     func startCapture(device: AVCaptureDevice?) async throws {
         try await withCheckedThrowingContinuation { continuation in
             guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else {
-                continuation.resume(throwing: ClientError.Unexpected())
+                continuation.resume()
                 return
             }
             let outputFormat = VideoCapturingUtils.outputFormat(
@@ -90,7 +90,7 @@ class VideoCapturer: CameraVideoCapturing {
                     continuation.resume(returning: ())
                 }
             }
-        } as Void
+        }
     }
     
     func stopCapture() async throws {

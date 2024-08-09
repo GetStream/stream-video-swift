@@ -5,7 +5,7 @@
 import Foundation
 
 /// Provides information about the connection quality of participants.
-public enum ConnectionQuality: Sendable {
+public enum ConnectionQuality: Equatable, Sendable {
     case unknown
     case poor
     case good

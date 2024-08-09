@@ -8,7 +8,15 @@ extension APIError: Error {}
 
 extension Stream_Video_Sfu_Models_Error: Error, CustomStringConvertible {
     var description: String {
-        "SFU error code: \(code.rawValue) message: \(message) shouldRetry: \(shouldRetry)"
+        if code == .unspecified {
+            return "No Error"
+        } else {
+            return """
+            code: \(code)
+            message: \(message)
+            shouldRetry: \(shouldRetry)
+            """
+        }
     }
 }
 

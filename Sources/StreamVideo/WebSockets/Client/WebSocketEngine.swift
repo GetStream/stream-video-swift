@@ -13,6 +13,7 @@ protocol WebSocketEngine: AnyObject {
     
     func connect()
     func disconnect()
+    func disconnect(with code: URLSessionWebSocketTask.CloseCode)
     func send(message: SendableEvent)
     func send(jsonMessage: Codable)
     func sendPing()

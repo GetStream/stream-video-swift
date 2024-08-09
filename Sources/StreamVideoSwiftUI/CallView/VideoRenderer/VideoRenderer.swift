@@ -27,6 +27,8 @@ public class VideoRenderer: RTCMTLVideoView {
     /// The associated RTCVideoTrack being rendered.
     weak var track: RTCVideoTrack?
 
+    var participant: CallParticipant?
+
     /// Unique identifier for the video renderer instance.
     private let identifier = UUID()
     private var cancellable: AnyCancellable?
@@ -78,7 +80,7 @@ public class VideoRenderer: RTCMTLVideoView {
     /// Cleans up resources when the VideoRenderer instance is deallocated.
     deinit {
         cancellable?.cancel()
-        log.debug("\(type(of: self)):\(identifier) deallocating", subsystems: .webRTC)
+        log.debug("\(type(of: self)):\(identifier) deallocating", subsystems: .other)
         track?.remove(self)
     }
 
@@ -93,7 +95,7 @@ public class VideoRenderer: RTCMTLVideoView {
             self.track = nil
             self.track = track
             track.add(self)
-            log.info("\(type(of: self)):\(identifier) was added on track:\(track.trackId)", subsystems: .webRTC)
+            log.info("\(type(of: self)):\(identifier) was added on track:\(track.trackId)", subsystems: .other)
         }
     }
 
@@ -132,9 +134,10 @@ extension VideoRenderer {
     ) {
         if let track = participant.track {
             log.info(
-                "Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier))",
-                subsystems: .webRTC
+                "Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier)) isMuted:\(!track.isEnabled)",
+                subsystems: .other
             )
+            self.participant = participant
             add(track: track)
             DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
                 guard let self else { return }
@@ -142,11 +145,16 @@ extension VideoRenderer {
                 if let viewSize, prev != viewSize {
                     log.debug(
                         "Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(identifier)), \(prev) → \(viewSize)",
-                        subsystems: .webRTC
+                        subsystems: .other
                     )
                     onTrackSizeUpdate(viewSize, participant)
                 }
             }
+        } else {
+            log.debug(
+                "Participant id:\(participant.id) doesn't have a track. trackLookUpPrefix:\(participant.trackLookupPrefix ?? "n/a").",
+                subsystems: .webRTC
+            )
         }
     }
 }

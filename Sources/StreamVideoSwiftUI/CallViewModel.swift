@@ -23,7 +23,9 @@ open class CallViewModel: ObservableObject {
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] in self?.callParticipants = $0 })
+                .sink(receiveValue: { [weak self] participants in
+                    self?.callParticipants = participants
+                })
 
             blockedUserUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
@@ -36,6 +38,7 @@ open class CallViewModel: ObservableObject {
                     self?.recordingState = newState
                 })
             reconnectionUpdates = call?.state.$reconnectionStatus
+                .dropFirst()
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
                     if reconnectionStatus == .reconnecting {
@@ -106,7 +109,6 @@ open class CallViewModel: ObservableObject {
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
-            log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkCallSettingsForCurrentUser()
         }
