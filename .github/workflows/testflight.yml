@@ -31,7 +31,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.number }}
     steps:
-    - name: Connect iOS Bot
+    - name: Connect Bot
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
