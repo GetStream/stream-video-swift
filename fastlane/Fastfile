@@ -839,11 +839,13 @@ lane :update_img_shields_sdk_sizes do
   stream_video_size = "#{sizes[:StreamVideo]}MB"
   stream_video_swiftui_size = "#{sizes[:StreamVideoSwiftUI]}MB"
   stream_video_uikit_size = "#{sizes[:StreamVideoUIKit]}MB"
+  stream_web_rtc_size = "#{sizes[:StreamWebRTC]}MB"
 
   # Replace the value in the badge URL
   readme_content.gsub!(%r{(https://img.shields.io/badge/StreamVideo-)(.*?)(-blue)}, "\\1#{stream_video_size}\\3")
   readme_content.gsub!(%r{(https://img.shields.io/badge/StreamVideoSwiftUI-)(.*?)(-blue)}, "\\1#{stream_video_swiftui_size}\\3")
   readme_content.gsub!(%r{(https://img.shields.io/badge/StreamVideoUIKit-)(.*?)(-blue)}, "\\1#{stream_video_uikit_size}\\3")
+  readme_content.gsub!(%r{(https://img.shields.io/badge/StreamWebRTC-)(.*?)(-blue)}, "\\1#{stream_web_rtc_size}\\3")
 
   # Write the updated content back to the file
   File.write(readme_path, readme_content)
@@ -874,11 +876,14 @@ def frameworks_sizes
   stream_video_swiftui_size_mb = (stream_video_swiftui_size.to_f / 1024 / 1024).round(2)
   stream_video_uikit_size = File.size("#{frameworks_path}/StreamVideoUIKit.framework/StreamVideoUIKit")
   stream_video_uikit_size_mb = ((stream_video_uikit_size + stream_video_swiftui_size).to_f / 1024 / 1024).round(2)
+  stream_web_rtc_size = File.size("#{frameworks_path}/StreamWebRTC.framework/StreamWebRTC")
+  stream_web_rtc_size_mb = (stream_web_rtc_size.to_f / 1024 / 1024).round(2)
 
   {
     StreamVideo: stream_video_size_mb,
     StreamVideoSwiftUI: stream_video_swiftui_size_mb,
-    StreamVideoUIKit: stream_video_uikit_size_mb
+    StreamVideoUIKit: stream_video_uikit_size_mb,
+    StreamWebRTC: stream_web_rtc_size_mb
   }
 end
 
