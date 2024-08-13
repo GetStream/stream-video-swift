@@ -71,6 +71,20 @@ let cancellable = call.state.$participants.sink { participants in
     // ..
 }
 
+Filtering of the participants is also supported. You can get all the participants with the role "host", with the following code:
+
+```swift
+var hosts: [CallParticipant] {
+    call.state.participants.filter { $0.roles.contains("host") }
+}
+```
+
+When you join a call with many participants, maximum of 250 participants are returned in the join response. The list of participants is updated dynamically when there are join call events.
+
+The participants that are publishing video, audio or screensharing are always prioritized in the list over regular viewers.
+
+The total number of participants is updated realtime via the health check events. This value is available from the call state's `participantCount` property.
+
 // you
 let localParticipant: CallParticipant? = call.state.localParticipant
 ```
