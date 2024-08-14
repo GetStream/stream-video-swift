@@ -12,6 +12,7 @@
   <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-7.11MB-blue"/>
   <img id="stream-video-swiftui-label" alt="StreamVideoSwiftUI" src="https://img.shields.io/badge/StreamVideoSwiftUI-2.18MB-blue"/>
   <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.32MB-blue"/>
+  <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-8.69MB-blue"/>
 </p>
 
 ![Stream Video for iOS Header image](https://github.com/GetStream/stream-video-swift/assets/12433593/e4a44ae5-a8eb-4ac7-8910-28187aa011f6)

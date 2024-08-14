@@ -783,10 +783,13 @@ def frameworks_sizes
   stream_video_swiftui_size_kb = stream_video_swiftui_size.to_f / 1024
   stream_video_uikit_size = File.size("#{frameworks_path}/StreamVideoUIKit.framework/StreamVideoUIKit")
   stream_video_uikit_size_kb = (stream_video_uikit_size + stream_video_swiftui_size).to_f / 1024
+  stream_web_rtc_size = File.size("#{frameworks_path}/StreamWebRTC.framework/StreamWebRTC")
+  stream_web_rtc_size_kb = stream_web_rtc_size.to_f / 1024
 
   {
     StreamVideo: stream_video_size_kb,
     StreamVideoSwiftUI: stream_video_swiftui_size_kb,
-    StreamVideoUIKit: stream_video_uikit_size_kb
+    StreamVideoUIKit: stream_video_uikit_size_kb,
+    StreamWebRTC: stream_web_rtc_size_kb
   }
 end
