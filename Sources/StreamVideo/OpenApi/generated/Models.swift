@@ -62,26 +62,6 @@ extension NullEncodable: Codable where Wrapped: Codable {
     }
 }
 
-public enum ErrorResponse: Error {
-    case error(Int, Data?, URLResponse?, Error)
-}
-
-public enum DownloadException: Error {
-    case responseDataMissing
-    case responseFailed
-    case requestMissing
-    case requestMissingPath
-    case requestMissingURL
-}
-
-public enum DecodableRequestBuilderError: Error {
-    case emptyDataResponse
-    case nilHTTPResponse
-    case unsuccessfulHTTPStatusCode
-    case jsonDecoding(DecodingError)
-    case generalError(Error)
-}
-
 open class Response<T> {
     public let statusCode: Int
     public let header: [String: String]
@@ -104,23 +84,5 @@ open class Response<T> {
             }
         }
         self.init(statusCode: response.statusCode, header: header, body: body, bodyData: bodyData)
-    }
-}
-
-public final class RequestTask: @unchecked Sendable {
-    private var lock = NSRecursiveLock()
-    private var task: URLSessionTask?
-
-    internal func set(task: URLSessionTask) {
-        lock.lock()
-        defer { lock.unlock() }
-        self.task = task
-    }
-
-    public func cancel() {
-        lock.lock()
-        defer { lock.unlock() }
-        task?.cancel()
-        task = nil
     }
 }
