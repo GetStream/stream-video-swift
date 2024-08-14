@@ -75,7 +75,7 @@ fastlane/screenshots
 fastlane/test_output
 fastlane/allurectl
 fastlane/xcresults
-fastlane/metrics
+**/metrics/
 recordings
 *.coverage.txt
 vendor/bundle/
