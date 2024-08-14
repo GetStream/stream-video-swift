@@ -790,6 +790,6 @@ def frameworks_sizes
     StreamVideo: stream_video_size_kb,
     StreamVideoSwiftUI: stream_video_swiftui_size_kb,
     StreamVideoUIKit: stream_video_uikit_size_kb,
-    StreamWebRTC: stream_web_rtc_size_mb
+    StreamWebRTC: stream_web_rtc_size_kb
   }
 end
