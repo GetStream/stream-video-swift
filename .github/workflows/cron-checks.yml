@@ -2,8 +2,9 @@ name: Cron Checks
 
 on:
   schedule:
-    # Runs "At 01:00 every night"
-    - cron: '0 1 * * *'
+    # Runs "At 01:00 every night except weekends"
+    - cron: '0 1 * * 1-5'
+
   workflow_dispatch:
 
 concurrency:
