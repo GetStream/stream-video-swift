@@ -1,0 +1,12 @@
+# Location
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**continentCode** | **String** |  | 
+**countryIsoCode** | **String** |  | 
+**subdivisionIsoCode** | **String** |  | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
