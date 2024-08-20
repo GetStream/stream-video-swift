@@ -12,13 +12,15 @@ public struct GoLiveRequest: Codable, JSONEncodable, Hashable {
     public var recordingStorageName: String?
     public var startHls: Bool?
     public var startRecording: Bool?
+    public var startRtmpBroadcasts: Bool?
     public var startTranscription: Bool?
     public var transcriptionStorageName: String?
 
-    public init(recordingStorageName: String? = nil, startHls: Bool? = nil, startRecording: Bool? = nil, startTranscription: Bool? = nil, transcriptionStorageName: String? = nil) {
+    public init(recordingStorageName: String? = nil, startHls: Bool? = nil, startRecording: Bool? = nil, startRtmpBroadcasts: Bool? = nil, startTranscription: Bool? = nil, transcriptionStorageName: String? = nil) {
         self.recordingStorageName = recordingStorageName
         self.startHls = startHls
         self.startRecording = startRecording
+        self.startRtmpBroadcasts = startRtmpBroadcasts
         self.startTranscription = startTranscription
         self.transcriptionStorageName = transcriptionStorageName
     }
@@ -27,6 +29,7 @@ public struct GoLiveRequest: Codable, JSONEncodable, Hashable {
         case recordingStorageName = "recording_storage_name"
         case startHls = "start_hls"
         case startRecording = "start_recording"
+        case startRtmpBroadcasts = "start_rtmp_broadcasts"
         case startTranscription = "start_transcription"
         case transcriptionStorageName = "transcription_storage_name"
     }
@@ -38,6 +41,7 @@ public struct GoLiveRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(recordingStorageName, forKey: .recordingStorageName)
         try container.encodeIfPresent(startHls, forKey: .startHls)
         try container.encodeIfPresent(startRecording, forKey: .startRecording)
+        try container.encodeIfPresent(startRtmpBroadcasts, forKey: .startRtmpBroadcasts)
         try container.encodeIfPresent(startTranscription, forKey: .startTranscription)
         try container.encodeIfPresent(transcriptionStorageName, forKey: .transcriptionStorageName)
     }

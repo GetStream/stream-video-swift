@@ -272,7 +272,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Parameter id: the id of the device that will be deleted.
     @discardableResult
     public func deleteDevice(id: String) async throws -> ModelResponse {
-        try await coordinatorClient.deleteDevice(id: id, userId: user.id)
+        try await coordinatorClient.deleteDevice(id: id)
     }
     
     /// Lists the devices registered for the user.
