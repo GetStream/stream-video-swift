@@ -67,6 +67,16 @@ final class CallKitAdapterTests: XCTestCase {
         XCTAssertTrue(callKitPushNotificationAdapter.unregisterWasCalled)
     }
 
+    // MARK: - callSettings updated
+
+    func test_callSettings_callKitServiceReceivedTheUpdatedValue() {
+        let callSettings = CallSettings(audioOn: false, videoOn: true)
+
+        subject.callSettings = callSettings
+
+        XCTAssertEqual(callKitService.callSettings, callSettings)
+    }
+
     // MARK: - Private Helpers
 
     private func makeStreamVideo() async throws -> StreamVideo {
