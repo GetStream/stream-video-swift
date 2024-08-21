@@ -7,13 +7,8 @@ import XCTest
 
 open class StreamVideoTestCase: XCTestCase {
 
-    public var streamVideo: StreamVideo!
+    public internal(set) lazy var streamVideo: StreamVideo! = StreamVideo.mock(httpClient: httpClient)
     var httpClient: HTTPClient_Mock! = HTTPClient_Mock()
-
-    override open func setUp() {
-        super.setUp()
-        streamVideo = StreamVideo.mock(httpClient: httpClient)
-    }
     
     override open func tearDown() async throws {
         try await super.tearDown()
@@ -29,7 +24,7 @@ open class StreamVideoTestCase: XCTestCase {
     }
 
     // TODO: replace this with something a bit better
-    func waitForCallEvent(nanoseconds: UInt64 = 500_000_000) async throws {
+    func waitForCallEvent(nanoseconds: UInt64 = 5_000_000_000) async throws {
         try await Task.sleep(nanoseconds: nanoseconds)
     }
 }

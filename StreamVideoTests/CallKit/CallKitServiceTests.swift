@@ -306,7 +306,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         await waitExpectation(timeout: 1)
 
-        let input = try XCTUnwrap(call.stubbedFunctionInput[.join])
+        XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
+        let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
         switch input {
         case let .join(_, _, _, _, callSettings):
             XCTAssertEqual(callSettings, customCallSettings)
