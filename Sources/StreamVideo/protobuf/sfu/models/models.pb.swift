@@ -869,6 +869,8 @@ struct Stream_Video_Sfu_Models_TrackInfo {
 
   var red: Bool = false
 
+  var muted: Bool = false
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1711,6 +1713,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     7: .same(proto: "dtx"),
     8: .same(proto: "stereo"),
     9: .same(proto: "red"),
+    10: .same(proto: "muted"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1726,6 +1729,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 7: try { try decoder.decodeSingularBoolField(value: &self.dtx) }()
       case 8: try { try decoder.decodeSingularBoolField(value: &self.stereo) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.red) }()
+      case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
       default: break
       }
     }
@@ -1753,6 +1757,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.red != false {
       try visitor.visitSingularBoolField(value: self.red, fieldNumber: 9)
     }
+    if self.muted != false {
+      try visitor.visitSingularBoolField(value: self.muted, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1764,6 +1771,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.dtx != rhs.dtx {return false}
     if lhs.stereo != rhs.stereo {return false}
     if lhs.red != rhs.red {return false}
+    if lhs.muted != rhs.muted {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
