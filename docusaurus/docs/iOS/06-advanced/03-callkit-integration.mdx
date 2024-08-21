@@ -161,6 +161,16 @@ If none of the fields above are being set, the property will be an empty string.
 - **created_by_display_name**
 The property is always set and contains the name of the user who created the call.
 
+#### Call Settings when accepting a call
+
+Dependign on your business logic, you may need users to join call with different `CallSettings`(e.g auioOn=true while videoOn=false). In order to achieve that when using the `CallKitAdapter` you can provide your custom `CallSettings` at any point before received a call:
+
+```swift
+@Injected(\.callKitAdapter) var callKitAdapter
+
+callKitAdapter.callSettings = CallSettings(audioOn: true, videoOn: false)
+```
+
 #### Call's type suffix
 
 Depending on the `Call` type `CallKit` adds a suffix in the push notification's subtitle (which contains the application name). That suffix can either be `Audio` or `Video`. `CallKitService` allows you to configure what the supported call types are, by setting the `CallKitService.supportsVideo` property like below:
