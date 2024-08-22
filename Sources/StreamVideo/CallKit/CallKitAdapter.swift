@@ -20,6 +20,12 @@ open class CallKitAdapter {
         set { callKitService.iconTemplateImageData = newValue }
     }
 
+    /// The callSettings to use when joining a call (after accepting it on CallKit)
+    /// default: nil
+    open var callSettings: CallSettings? {
+        didSet { callKitService.callSettings = callSettings }
+    }
+
     /// The currently active StreamVideo client.
     /// - Important: We need to update it whenever a user logins.
     public var streamVideo: StreamVideo? {

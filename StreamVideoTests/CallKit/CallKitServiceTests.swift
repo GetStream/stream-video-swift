@@ -276,6 +276,44 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - accept
+
+    @MainActor
+    func test_accept_callWasJoinedAsExpected() async throws {
+        let customCallSettings = CallSettings(audioOn: false, videoOn: true)
+        subject.callSettings = customCallSettings
+
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
+            )
+        )
+
+        await waitExpectation(timeout: 1)
+
+        XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
+        let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
+        switch input {
+        case let .join(_, _, _, _, callSettings):
+            XCTAssertEqual(callSettings, customCallSettings)
+        }
+    }
+
     // MARK: - callAccepted
 
     @MainActor

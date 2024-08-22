@@ -58,6 +58,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Note: defaults to `false`.
     open var supportsVideo: Bool = false
 
+    var callSettings: CallSettings?
+
     /// The call controller used for managing calls.
     open internal(set) lazy var callController = CXCallController()
     /// The call provider responsible for handling call-related actions.
@@ -307,7 +309,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
 
             do {
-                try await callToJoinEntry.call.join()
+                try await callToJoinEntry.call.join(callSettings: callSettings)
                 action.fulfill()
             } catch {
                 callToJoinEntry.call.leave()

@@ -9,14 +9,27 @@ final class MockCall: Call, Mockable {
 
     typealias FunctionKey = MockCallFunctionKey
 
-    enum MockCallFunctionKey: Hashable {
+    enum MockCallFunctionKey: Hashable, CaseIterable {
         case get
         case accept
         case join
     }
 
+    enum MockCallFunctionInputKey {
+        case join(
+            create: Bool,
+            options: CreateCallOptions?,
+            ring: Bool,
+            notify: Bool,
+            callSettings: CallSettings?
+        )
+    }
+
     var stubbedProperty: [String: Any]
     var stubbedFunction: [FunctionKey: Any] = [:]
+    @Atomic var stubbedFunctionInput: [FunctionKey: [MockCallFunctionInputKey]] = MockCallFunctionKey
+        .allCases
+        .reduce(into: [FunctionKey: [MockCallFunctionInputKey]]()) { $0[$1] = [] }
 
     override var state: CallState {
         get { self[dynamicMember: \.state] }
@@ -66,6 +79,15 @@ final class MockCall: Call, Mockable {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
+        stubbedFunctionInput[.join]?.append(
+            .join(
+                create: create,
+                options: options,
+                ring: ring,
+                notify: notify,
+                callSettings: callSettings
+            )
+        )
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
             return stub
         } else {
