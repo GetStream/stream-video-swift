@@ -21,6 +21,7 @@ gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
+swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
 swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
 
@@ -43,7 +44,6 @@ desc "Release a new version"
 lane :release do |options|
   previous_version_number = last_git_tag
   artifacts_path = File.absolute_path('../StreamVideoArtifacts.json')
-  swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
   extra_changes = lambda do |release_version|
     # Set the framework version on the artifacts
     artifacts = JSON.parse(File.read(artifacts_path))
@@ -76,8 +76,12 @@ end
 
 desc "Publish a new release to GitHub and CocoaPods"
 lane :publish_release do |options|
-  xcversion(version: '15.0.1')
+  release_version = File.read(swift_environment_path).match(/String\s+=\s+"([\d.]+)"/)[1]
+  UI.user_error!("Release #{release_version} has already been published.") if git_tag_exists(tag: release_version, remote: true)
+  UI.user_error!('Release version cannot be empty') if release_version.to_s.empty?
+  ensure_git_branch(branch: 'main')
 
+  xcversion(version: '15.0.1')
   clean_products
   build_xcframeworks
   compress_frameworks
@@ -85,14 +89,14 @@ lane :publish_release do |options|
 
   publish_ios_sdk(
     skip_git_status_check: false,
-    version: options[:version],
+    version: release_version,
     sdk_names: sdk_names,
     podspec_names: podspec_names,
     github_repo: github_repo,
     upload_assets: ['Products/StreamVideo.zip', 'Products/StreamVideoSwiftUI.zip', 'Products/StreamVideoUIKit.zip', 'Products/StreamVideo-All.zip']
   )
 
-  update_spm(version: options[:version])
+  update_spm(version: release_version)
 
   merge_main_to_develop
 end
@@ -581,25 +585,6 @@ end
 lane :code_generation do
   Dir.chdir('..') { sh('sh Scripts/generateCode.sh') }
   sync_xcodeproj_references
-end
-
-private_lane :git_status do |options|
-  UI.user_error!('Extension should be provided') unless options[:ext]
-
-  untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
-  UI.important("Git Status: #{untracked_files}")
-
-  deleted_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: 'D')
-  added_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: ['A', '??'])
-  renamed_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: 'R')
-  modified_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: 'M')
-
-  renamed_files.each do |renamed_file|
-    content = renamed_file.split.drop(1).join.split('->').map(&:strip)
-    deleted_files << content.first
-    added_files << content.last
-  end
-  { a: added_files, d: deleted_files, m: modified_files }
 end
 
 lane :sync_xcodeproj_references do
