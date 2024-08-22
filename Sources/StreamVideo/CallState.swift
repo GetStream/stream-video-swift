@@ -427,10 +427,17 @@ public class CallState: ObservableObject {
     }
     
     private func didUpdate(_ session: CallSessionResponse?) {
-        if startedAt != session?.liveStartedAt {
-            startedAt = session?.liveStartedAt
+        guard let session else { return }
+        if let startedAt = session.startedAt {
+            self.startedAt = startedAt
+        } else if let liveStartedAt = session.liveStartedAt {
+            startedAt = liveStartedAt
+        } else if startedAt == nil {
+            /// If we don't receive a value from the SFU we start the timer on the current date.
+            startedAt = Date()
         }
-        if session?.liveEndedAt != nil {
+
+        if session.liveEndedAt != nil {
             resetTimer()
         }
     }
