@@ -89,14 +89,14 @@ lane :publish_release do |options|
 
   publish_ios_sdk(
     skip_git_status_check: false,
-    version: options[:version],
+    version: release_version,
     sdk_names: sdk_names,
     podspec_names: podspec_names,
     github_repo: github_repo,
     upload_assets: ['Products/StreamVideo.zip', 'Products/StreamVideoSwiftUI.zip', 'Products/StreamVideoUIKit.zip', 'Products/StreamVideo-All.zip']
   )
 
-  update_spm(version: options[:version])
+  update_spm(version: release_version)
 
   merge_main_to_develop
 end
