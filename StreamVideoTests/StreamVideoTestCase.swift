@@ -7,9 +7,14 @@ import XCTest
 
 open class StreamVideoTestCase: XCTestCase {
 
-    public internal(set) lazy var streamVideo: StreamVideo! = StreamVideo.mock(httpClient: httpClient)
+    public internal(set) var streamVideo: StreamVideo!
     var httpClient: HTTPClient_Mock! = HTTPClient_Mock()
-    
+
+    override open func setUp() {
+        super.setUp()
+        streamVideo = StreamVideo.mock(httpClient: httpClient)
+    }
+
     override open func tearDown() async throws {
         try await super.tearDown()
         await streamVideo?.disconnect()
