@@ -233,6 +233,10 @@ public class CallState: ObservableObject {
             break
         case .typeCallUserMutedEvent:
             break
+        case .typeCallRtmpBroadcastFailedEvent:
+            break
+        case .typeCallSessionParticipantCountsUpdatedEvent:
+            break
         }
     }
 
