@@ -37,9 +37,11 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallRecordingStoppedEvent(CallRecordingStoppedEvent)
     case typeCallRejectedEvent(CallRejectedEvent)
     case typeCallRingEvent(CallRingEvent)
+    case typeCallRtmpBroadcastFailedEvent(CallRtmpBroadcastFailedEvent)
     case typeCallRtmpBroadcastStartedEvent(CallRtmpBroadcastStartedEvent)
     case typeCallRtmpBroadcastStoppedEvent(CallRtmpBroadcastStoppedEvent)
     case typeCallSessionEndedEvent(CallSessionEndedEvent)
+    case typeCallSessionParticipantCountsUpdatedEvent(CallSessionParticipantCountsUpdatedEvent)
     case typeCallSessionParticipantJoinedEvent(CallSessionParticipantJoinedEvent)
     case typeCallSessionParticipantLeftEvent(CallSessionParticipantLeftEvent)
     case typeCallSessionStartedEvent(CallSessionStartedEvent)
@@ -101,11 +103,15 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value.type
         case .typeCallRingEvent(let value):
             return value.type
+        case .typeCallRtmpBroadcastFailedEvent(let value):
+            return value.type
         case .typeCallRtmpBroadcastStartedEvent(let value):
             return value.type
         case .typeCallRtmpBroadcastStoppedEvent(let value):
             return value.type
         case .typeCallSessionEndedEvent(let value):
+            return value.type
+        case .typeCallSessionParticipantCountsUpdatedEvent(let value):
             return value.type
         case .typeCallSessionParticipantJoinedEvent(let value):
             return value.type
@@ -189,11 +195,15 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value
         case .typeCallRingEvent(let value):
             return value
+        case .typeCallRtmpBroadcastFailedEvent(let value):
+            return value
         case .typeCallRtmpBroadcastStartedEvent(let value):
             return value
         case .typeCallRtmpBroadcastStoppedEvent(let value):
             return value
         case .typeCallSessionEndedEvent(let value):
+            return value
+        case .typeCallSessionParticipantCountsUpdatedEvent(let value):
             return value
         case .typeCallSessionParticipantJoinedEvent(let value):
             return value
@@ -278,11 +288,15 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             try container.encode(value)
         case .typeCallRingEvent(let value):
             try container.encode(value)
+        case .typeCallRtmpBroadcastFailedEvent(let value):
+            try container.encode(value)
         case .typeCallRtmpBroadcastStartedEvent(let value):
             try container.encode(value)
         case .typeCallRtmpBroadcastStoppedEvent(let value):
             try container.encode(value)
         case .typeCallSessionEndedEvent(let value):
+            try container.encode(value)
+        case .typeCallSessionParticipantCountsUpdatedEvent(let value):
             try container.encode(value)
         case .typeCallSessionParticipantJoinedEvent(let value):
             try container.encode(value)
@@ -399,6 +413,9 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.ring" {
             let value = try container.decode(CallRingEvent.self)
             self = .typeCallRingEvent(value)
+        } else if dto.type == "call.rtmp_broadcast_failed" {
+            let value = try container.decode(CallRtmpBroadcastFailedEvent.self)
+            self = .typeCallRtmpBroadcastFailedEvent(value)
         } else if dto.type == "call.rtmp_broadcast_started" {
             let value = try container.decode(CallRtmpBroadcastStartedEvent.self)
             self = .typeCallRtmpBroadcastStartedEvent(value)
@@ -408,6 +425,9 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.session_ended" {
             let value = try container.decode(CallSessionEndedEvent.self)
             self = .typeCallSessionEndedEvent(value)
+        } else if dto.type == "call.session_participant_count_updated" {
+            let value = try container.decode(CallSessionParticipantCountsUpdatedEvent.self)
+            self = .typeCallSessionParticipantCountsUpdatedEvent(value)
         } else if dto.type == "call.session_participant_joined" {
             let value = try container.decode(CallSessionParticipantJoinedEvent.self)
             self = .typeCallSessionParticipantJoinedEvent(value)
@@ -456,4 +476,3 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     }
 
 }
-

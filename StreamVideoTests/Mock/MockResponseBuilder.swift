@@ -175,10 +175,12 @@ class MockResponseBuilder {
     ) -> CallSessionResponse {
         CallSessionResponse(
             acceptedBy: acceptedBy,
+            anonymousParticipantCount: 0,
             endedAt: liveEndedAt,
             id: cid,
             liveEndedAt: liveEndedAt,
             liveStartedAt: liveStartedAt,
+            missedBy: [:],
             participants: [],
             participantsCountByRole: [:],
             rejectedBy: rejectedBy,
