@@ -5,9 +5,39 @@ description: Overview of the UI components
 
 ## Introduction
 
-The StreamVideo SDK provides UI components to facilitate the integration of video capabilities into your apps. You can either use our out-of-the-box solution (and customize theming and some views), or completely build your own UI, while reusing our lower-level components whenever you see them fit.
+The StreamVideo SDK provides UI components to facilitate the integration of video capabilities into your apps. 
 
 The UI components are provided in SwiftUI. If you use UIKit, we also provide UIKit wrappers, that can make it easier for you to integrate video in UIKit-based apps.
+
+## UI components vs Custom
+
+StreamVideo provides both ready made components to use directly in your app, as well as extension points that you can use to inject your own custom UI. If you just need the calling functionality and completely custom UI, you can use only our low-level client.
+
+Let's explore the different possibilities and how they would impact your app and the integration efforts.
+
+## Using only the low-level client
+
+If your app needs a completely custom UI and calling flow, you can use only our low-level client that implements the WebRTC protocol and communicates with our backend services. If you go with this approach, you can either use our stateful `CallViewModel` that allows you to observe the call state (list of participants, camera & microphone state, etc), or use our lower level `Call` object and implement your own presentation objects.
+
+Additionally, if you go with this approach, you can still use some components from our UI SDKs (if they fit your use-case), to facilitate your development. We have several examples for this in [our cookbook](../../ui-cookbook/overview).
+
+This approach would require some familiarity with our low-level client, and the highest development efforts compared to the other two options. On the other hand, it gives you a maximum flexibility to customize the calling flow according to your needs.
+
+In any case, our view components are highly customizable and flexible for many video/audio calling cases, and they can save big development efforts. Therefore, we recommend that you consider the other two options below, before deciding on starting from scratch.
+
+## Mix & match
+
+The mix & match approach is ideal if you need one of the standard calling flows, but with a possibility to replace parts of the UI with your own implementation. Our UI SDK allows you to completely swap views with your own custom interface elements.
+
+For example, if you are building an app with incoming / outgoing calling screens, you can easily swap only those screens. For building your custom screens, you can still reuse our lower level components.
+
+This approach provides a nice balance between levels of customization and development efforts. Find examples and extension slots to get started in our docs [here](../view-slots).
+
+## Simple theming
+
+If you need a standard video calling experience that needs to match the rest of your app's look and feel, you can use our theming customizations.
+
+This is the fastest way to add calling support to your app, just setup our video client and attach our `CallModifier` to your hosting view. You can change the fonts, colors, icons, texts and sounds used in the SDK, by interacting with our `Appearance` class.
 
 ## StreamVideoUI object
 
@@ -55,3 +85,56 @@ Find more details on how to do this on [this page](../video-theme).
 ### Changing Views
 
 Apart from the basic theming customizations, you can also swap certain views, with your implementation. You can find more details on how to do that on this [page](../customizing-views).
+
+## Dependency Injection
+
+For injecting dependencies in the SwiftUI SDK, we are using an approach based on [this article](https://www.avanderlee.com/swift/dependency-injection/). It works similarly to the @Environment in SwiftUI, but it also allows access to the dependencies in non-view related code.
+
+When you initialize the SDK (by creating the `StreamVideoUI` object), all the dependencies are created too, and you can use them anywhere in your code. In order to access a particular type, you need to use the `@Injected(\.keyPath)` property wrapper:
+
+```swift
+@Injected(\.streamVideo) var streamVideo
+@Injected(\.fonts) var fonts
+@Injected(\.colors) var colors
+@Injected(\.images) var images
+@Injected(\.sounds) var sounds
+@Injected(\.utils) var utils
+```
+
+### Extending the DI with Custom Types
+
+In some cases, you might also need to extend our DI mechanism with your own types. For example, you may want to be able to access your custom types like this:
+
+```swift
+@Injected(\.customType) var customType
+```
+
+In order to achieve this, you first need to define your own `InjectionKey`, and define it's `currentValue`, which basically creates the new instance of your type.
+
+```swift
+class CustomType {
+	// your custom logic here
+}
+
+struct CustomInjectionKey: InjectionKey {
+    static var currentValue: CustomType = CustomType()
+}
+```
+
+Next, you need to extend our `InjectedValues` with your own custom type, by defining its getter and setter.
+
+```swift
+extension InjectedValues {
+    /// Provides access to the `CustomType` instance in the views and view models.
+    var customType: CustomType {
+        get {
+            Self[CustomInjectionKey.self]
+        }
+        set {
+            Self[CustomInjectionKey.self] = newValue
+        }
+    }
+}
+```
+
+With these few simple steps, you can now access your custom functionality in both your app code and in your custom implementations of the views used throughout the SDK.
