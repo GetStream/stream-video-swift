@@ -117,6 +117,7 @@ public class CallState: ObservableObject {
     }
 
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
+    @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings = CallSettings()
@@ -235,8 +236,12 @@ public class CallState: ObservableObject {
             break
         case .typeCallRtmpBroadcastFailedEvent:
             break
-        case .typeCallSessionParticipantCountsUpdatedEvent:
-            break
+        case let .typeCallSessionParticipantCountsUpdatedEvent(event):
+            participantCount = event.participantsCountByRole
+                .values
+                .map(UInt32.init)
+                .reduce(0) { $0 + $1 }
+            anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
         }
     }
 
