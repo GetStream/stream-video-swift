@@ -182,9 +182,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let response = try await coordinatorClient.getCall(
             type: callType,
             id: callId,
+            connectionId: nil,
             membersLimit: membersLimit,
             ring: ring,
-            notify: notify
+            notify: notify,
+            video: false
         )
         await state.update(from: response)
         if ring {
@@ -276,6 +278,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let response = try await coordinatorClient.getOrCreateCall(
             type: callType,
             id: callId,
+            connectionId: nil,
             getOrCreateCallRequest: request
         )
         await state.update(from: response)
@@ -789,7 +792,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.sendEvent(
             type: callType,
             id: callId,
-            sendEventRequest: SendEventRequest(custom: data)
+            sendCallEventRequest: SendEventRequest(custom: data)
         )
     }
 
@@ -821,7 +824,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             sort: sort,
             type: callType
         )
-        let response = try await coordinatorClient.queryMembers(queryMembersRequest: request)
+        let response = try await coordinatorClient.queryCallMembers(queryCallMembersRequest: request)
         await state.mergeMembers(response.members)
         return response
     }
@@ -1086,7 +1089,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     @MainActor
     public func collectUserFeedback(
-        rating: Int? = nil,
+        rating: Int,
         reason: String? = nil,
         custom: [String: RawJSON]? = nil
     ) async throws -> CollectUserFeedbackResponse {

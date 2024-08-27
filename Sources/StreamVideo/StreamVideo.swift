@@ -281,7 +281,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     /// Lists the devices registered for the user.
     /// - Returns: an array of `Device`s.
-    public func listDevices() async throws -> [Device] {
+    public func listDevices() async throws -> [Device?] {
         try await coordinatorClient.listDevices().devices
     }
     
@@ -391,7 +391,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     internal func queryCalls(
         request: QueryCallsRequest
     ) async throws -> QueryCallsResponse {
-        try await coordinatorClient.queryCalls(queryCallsRequest: request)
+        try await coordinatorClient.queryCalls(connectionId: nil, queryCallsRequest: request)
     }
 
     // MARK: - private
@@ -559,7 +559,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     ) async throws -> ModelResponse {
         let createDeviceRequest = CreateDeviceRequest(
             id: id,
-            pushProvider: .init(rawValue: pushProvider.rawValue),
+            pushProvider: .init(rawValue: pushProvider.rawValue)!,
             pushProviderName: name,
             voipToken: isVoip
         )

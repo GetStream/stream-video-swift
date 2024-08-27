@@ -34,7 +34,7 @@ struct VideoOptions: Sendable {
                     preferredFormat: preferredFormat,
                     preferredDimensions: preferredDimensions,
                     preferredFps: preferredFps,
-                    preferredBitrate: targetResolution.bitrate
+                    preferredBitrate: targetResolution.bitrate!
                 )
             } catch {
                 supportedCodecs = VideoCodec.defaultCodecs

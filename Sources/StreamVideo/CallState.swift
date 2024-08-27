@@ -208,6 +208,8 @@ public class CallState: ObservableObject {
         case .typeHealthCheckEvent:
             // note: health checks are not relevant for call state sync'ing
             break
+        case .typeCallUserMutedEvent:
+            break
         case .typeCallDeletedEvent:
             break
         case .typeCallHLSBroadcastingFailedEvent:
@@ -237,6 +239,20 @@ public class CallState: ObservableObject {
         case .typeCallRtmpBroadcastFailedEvent:
             break
         case .typeCallSessionParticipantCountsUpdatedEvent:
+            break
+        case .typeUserBannedEvent:
+            break
+        case .typeUserDeactivatedEvent:
+            break
+        case .typeUserDeletedEvent:
+            break
+        case .typeUserMutedEvent:
+            break
+        case .typeUserPresenceChangedEvent:
+            break
+        case .typeUserReactivatedEvent:
+            break
+        case .typeUserUnbannedEvent:
             break
         }
     }

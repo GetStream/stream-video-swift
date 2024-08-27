@@ -384,7 +384,7 @@ class CallController: @unchecked Sendable {
     func collectUserFeedback(
         sessionID: String,
         custom: [String: RawJSON]? = nil,
-        rating: Int? = nil,
+        rating: Int,
         reason: String? = nil
     ) async throws -> CollectUserFeedbackResponse {
         try await defaultAPI.collectUserFeedback(
@@ -684,7 +684,8 @@ class CallController: @unchecked Sendable {
         let joinCallResponse = try await defaultAPI.joinCall(
             type: type,
             id: callId,
-            joinCallRequest: joinCall
+            joinCallRequest: joinCall,
+            connectionId: nil
         )
         return joinCallResponse
     }

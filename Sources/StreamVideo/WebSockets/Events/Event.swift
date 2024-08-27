@@ -52,6 +52,7 @@ internal enum WrappedEvent: Event {
             if case let .typeConnectedEvent(connectedEvent) = event {
                 return HealthCheckInfo(
                     coordinatorHealthCheck: .init(
+                        cid: "",
                         connectionId: connectedEvent.connectionId,
                         createdAt: connectedEvent.createdAt,
                         type: connectedEvent.type
