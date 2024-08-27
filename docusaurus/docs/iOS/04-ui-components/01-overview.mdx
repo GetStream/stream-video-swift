@@ -138,3 +138,5 @@ extension InjectedValues {
 ```
 
 With these few simple steps, you can now access your custom functionality in both your app code and in your custom implementations of the views used throughout the SDK.
+
+Additionally, DI entries can be accessed by using the `InjectedValues[\.<keypath>]` syntax (for example `InjectedValues[\.customType]`). This approach can be useful in case you want to override our default injected values.
