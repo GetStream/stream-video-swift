@@ -31,6 +31,33 @@ let call = streamVideo.call(callType: "default", callId: "123")
 let result = try await call.join()
 ```
 
+### Create and join a call
+
+For convenience, you can create and join a call in a single operation. One of the flags you can provide there is `create`.
+Set this to `true` if you want to enable creating new call. Set it to `false` if you only want to join an existing call.
+
+```swift
+try await call.join(create: true)
+```
+
+### Leave call
+
+To leave a call, you can use the `leave` method:
+
+```swift
+call.leave()
+```
+
+### End call
+
+Ending a call requires a [special permission](../permissions-and-moderation). This action terminates the call for everyone.
+
+```typescript
+try await call.end()
+```
+
+Only users with special permission can join an ended call.
+
 ### Call CRUD
 
 Basic CRUD operations are available on the call object
@@ -132,3 +159,40 @@ You can filter the member list on these fields, and sort on the selected fields.
 | `custom` | The custom data on the member. | No |
 | `created_at` | When the member was created. | Yes |
 | `updated_at` | When the member was last updated. | No |
+
+## Restricting access
+
+You can restrict access to a call by tweaking the [Call Type](../configuring-call-types/) permissions and roles.
+A typical use case is to restrict access to a call to a specific set of users -> call members.
+
+#### Step 1: Set up the roles and permissions
+
+On our [dashboard](https://dashboard.getstream.io/), navigate to the **Video & Audio -> Roles & Permissions** section and select the appropriate role and scope.
+In this example, we will use `my-call-type` scope.
+
+By default, all users unless specified otherwise, have the `user` role.
+
+We start by removing the `JoinCall` permission from the `user` role for the `my-call-type` scope.
+It will prevent regular users from joining a call of this type.
+
+![Revoke JoinCall for user role](../assets/user-revoke-joincall.png)
+
+Next, let's ensure that the `call_member` role has the `JoinCall` permission for the `my-call-type` scope.
+It will allow users with the `call_member` role to join a call of this type.
+
+![Grant JoinCall for call_member role](../assets/call_member-grant-joincall.png)
+
+Once this is set, we can proceed with setting up a `call` instance.
+
+#### Step 2: Set up the call
+
+```swift
+let call = streamVideo.call(callType: "my-call-type", callId: "my-call-id")
+try await call.create(members: [.init(role: "call_member", userId: "alice")])
+
+// and if necessary, to grant access to more users
+try await call.addMembers(members: [.init(role: "call_member", userId: "charlie")])
+
+// or, to remove access from some users
+try await call.removeMembers(ids: ["charlie"])
+```
