@@ -236,12 +236,8 @@ public class CallState: ObservableObject {
             break
         case .typeCallRtmpBroadcastFailedEvent:
             break
-        case let .typeCallSessionParticipantCountsUpdatedEvent(event):
-            participantCount = event.participantsCountByRole
-                .values
-                .map(UInt32.init)
-                .reduce(0) { $0 + $1 }
-            anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+        case .typeCallSessionParticipantCountsUpdatedEvent:
+            break
         }
     }
 
