@@ -16,6 +16,7 @@ class SfuMiddleware: EventMiddleware {
     private var publisher: PeerConnection?
     var onSocketConnected: ((Bool) -> Void)?
     var onParticipantCountUpdated: ((UInt32) -> Void)?
+    var onAnonymousParticipantCountUpdated: ((UInt32) -> Void)?
     var onSessionMigrationEvent: (() -> Void)?
     var onPinsChanged: (([Stream_Video_Sfu_Models_Pin]) -> Void)?
     
@@ -76,6 +77,7 @@ class SfuMiddleware: EventMiddleware {
                     await loadParticipants(from: event)
                 case let .healthCheckResponse(event):
                     onParticipantCountUpdated?(event.participantCount.total)
+                    onAnonymousParticipantCountUpdated?(event.participantCount.anonymous)
                 case let .trackPublished(event):
                     await handleTrackPublishedEvent(event)
                 case let .trackUnpublished(event):

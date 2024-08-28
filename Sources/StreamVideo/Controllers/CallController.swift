@@ -13,10 +13,20 @@ class CallController: @unchecked Sendable {
         didSet {
             handleParticipantsUpdated()
             handleParticipantCountUpdated()
+            handleAnonymousParticipantCountUpdated()
         }
     }
 
-    weak var call: Call?
+    weak var call: Call? {
+        didSet {
+            participantsCountUpdatesTask?.cancel()
+            participantsCountUpdatesTask = nil
+            if let call {
+                participantsCountUpdatesTask = subscribeToParticipantsCountUpdatesEvent(call)
+            }
+        }
+    }
+
     private let user: User
     private let callId: String
     private let callType: String
@@ -30,7 +40,8 @@ class CallController: @unchecked Sendable {
     private var currentSFU: String?
     private var statsInterval: TimeInterval = 5
     private var statsCancellable: AnyCancellable?
-    
+    private var participantsCountUpdatesTask: Task<Void, Never>?
+
     init(
         defaultAPI: DefaultAPI,
         user: User,
@@ -478,7 +489,15 @@ class CallController: @unchecked Sendable {
             }
         }
     }
-    
+
+    private func handleAnonymousParticipantCountUpdated() {
+        webRTCClient?.onAnonymousParticipantCountUpdated = { [weak self] participantCount in
+            Task { @MainActor [weak self] in
+                self?.call?.state.anonymousParticipantCount = participantCount
+            }
+        }
+    }
+
     private func handleSignalChannelConnectionStateChange(_ state: WebSocketConnectionState) {
         switch state {
         case let .disconnected(source):
@@ -487,6 +506,10 @@ class CallController: @unchecked Sendable {
                 self?.handleSignalChannelDisconnect(source: source)
             }
         case .connected(healthCheckInfo: _):
+            /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
+            /// updates and only rely on the healthCheck event.
+            participantsCountUpdatesTask?.cancel()
+            participantsCountUpdatesTask = nil
             log.debug("Signal channel connected")
             if reconnectionDate != nil {
                 reconnectionDate = nil
@@ -688,6 +711,20 @@ class CallController: @unchecked Sendable {
                 try await webRTCClient?.sendStats(report: stats)
             } catch {
                 log.error(error)
+            }
+        }
+    }
+
+    private func subscribeToParticipantsCountUpdatesEvent(_ call: Call) -> Task<Void, Never> {
+        Task {
+            for await event in call.subscribe(for: CallSessionParticipantCountsUpdatedEvent.self) {
+                Task { @MainActor in
+                    call.state.participantCount = event.participantsCountByRole
+                        .values
+                        .map(UInt32.init)
+                        .reduce(0) { $0 + $1 }
+                    call.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+                }
             }
         }
     }

@@ -117,6 +117,7 @@ public class CallState: ObservableObject {
     }
 
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
+    @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings = CallSettings()
