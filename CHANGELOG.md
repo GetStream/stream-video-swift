@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- Participants (regular and anonymous) count, can be accessed - before or after joining a call - from the `Call.state.participantCount` & `Call.state.anonymousParticipantCount` respectively. [#496](https://github.com/GetStream/stream-video-swift/pull/496)
 
 # [1.0.9](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.9)
 _July 19, 2024_
