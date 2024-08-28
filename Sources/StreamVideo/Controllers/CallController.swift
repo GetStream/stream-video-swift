@@ -13,6 +13,7 @@ class CallController: @unchecked Sendable {
         didSet {
             handleParticipantsUpdated()
             handleParticipantCountUpdated()
+            handleAnonymousParticipantCountUpdated()
         }
     }
 
@@ -478,7 +479,15 @@ class CallController: @unchecked Sendable {
             }
         }
     }
-    
+
+    private func handleAnonymousParticipantCountUpdated() {
+        webRTCClient?.onAnonymousParticipantCountUpdated = { [weak self] participantCount in
+            Task { @MainActor [weak self] in
+                self?.call?.state.anonymousParticipantCount = participantCount
+            }
+        }
+    }
+
     private func handleSignalChannelConnectionStateChange(_ state: WebSocketConnectionState) {
         switch state {
         case let .disconnected(source):

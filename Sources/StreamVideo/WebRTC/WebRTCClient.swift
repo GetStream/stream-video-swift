@@ -189,6 +189,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> Void)?
     var onParticipantCountUpdated: ((UInt32) -> Void)?
+    var onAnonymousParticipantCountUpdated: ((UInt32) -> Void)?
     var onSessionMigrationEvent: (() -> Void)? {
         didSet {
             sfuMiddleware.onSessionMigrationEvent = onSessionMigrationEvent
@@ -313,6 +314,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
             self?.onParticipantCountUpdated?(participantCount)
         }
+        sfuMiddleware.onAnonymousParticipantCountUpdated = { [weak self] in
+            self?.onAnonymousParticipantCountUpdated?($0)
+        }
+
         sfuMiddleware.onPinsChanged = { [weak self] pins in
             self?.handlePinsChanged(pins)
         }
