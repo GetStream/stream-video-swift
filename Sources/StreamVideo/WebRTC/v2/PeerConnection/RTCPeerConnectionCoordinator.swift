@@ -84,8 +84,8 @@ final class RTCPeerConnectionCoordinator: @unchecked Sendable {
         self.peerConnection = peerConnection
         self.sfuAdapter = sfuAdapter
         subsystem = peerType == .publisher
-            ? .peerConnection_publisher
-            : .peerConnection_subscriber
+            ? .peerConnectionPublisher
+            : .peerConnectionSubscriber
         self.audioSession = audioSession
 
         iceAdapter = .init(

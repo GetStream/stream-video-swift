@@ -49,7 +49,7 @@ class CallController: @unchecked Sendable {
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
     private var webRTCParticipantsObserver: AnyCancellable?
-    private var debouncedParticipants: CollectionDebouncedUpdateObserver<[String: CallParticipant]>!
+    private var debouncedParticipants: CollectionDebouncedUpdateObserver<[String: CallParticipant]>?
 
     private let disposableBag = DisposableBag()
 
@@ -75,37 +75,15 @@ class CallController: @unchecked Sendable {
 
         Task {
             await handleParticipantCountUpdated()
-
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
             self.debouncedParticipants = CollectionDebouncedUpdateObserver(
                 publisher: participantsPublisher.eraseToAnyPublisher(),
                 initial: [:]
             )
             handleParticipantsUpdated()
-
-            webRTCClientSessionIDObserver = await webRTCCoordinator
-                .stateAdapter
-                .$sessionID
-                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.sessionId = $0 }
-
-            await webRTCCoordinator
-                .stateAdapter
-                .$statsReporter
-                .compactMap { $0 }
-                .sink { [weak disposableBag, weak self] statsReporter in
-                    statsReporter
-                        .latestReportPublisher
-                        .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }
-                        .store(in: disposableBag)
-                }
-                .store(in: disposableBag)
-
-            await webRTCCoordinator
-                .stateAdapter
-                .$callSettings
-                .removeDuplicates()
-                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.callSettings = $0 }
-                .store(in: disposableBag)
+            await observeSessionIDUpdates()
+            await observeStatsReporterUpdates()
+            await observeCallSettingsUpdates()
         }
         .store(in: disposableBag)
 
@@ -447,7 +425,7 @@ class CallController: @unchecked Sendable {
     // MARK: - private
 
     private func handleParticipantsUpdated() {
-        webRTCParticipantsObserver = debouncedParticipants
+        webRTCParticipantsObserver = debouncedParticipants?
             .$value
             .sink { [weak self] participants in
                 Task { @MainActor [weak self] in
@@ -575,7 +553,7 @@ class CallController: @unchecked Sendable {
     private func didFetch(_ response: JoinCallResponse) async {
         let sessionId = await webRTCCoordinator.stateAdapter.sessionID
         currentSFU = response.credentials.server.edgeName
-        executeOnMain { [weak self] in
+        Task { @MainActor [weak self] in
             self?.call?.state.sessionId = sessionId
             self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
             self?.call?.state.ownCapabilities = response.ownCapabilities
@@ -632,5 +610,35 @@ class CallController: @unchecked Sendable {
                 }
             }
         }
+    }
+
+    private func observeSessionIDUpdates() async {
+        webRTCClientSessionIDObserver = await webRTCCoordinator
+            .stateAdapter
+            .$sessionID
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.sessionId = $0 }
+    }
+
+    private func observeStatsReporterUpdates() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$statsReporter
+            .compactMap { $0 }
+            .sink { [weak disposableBag, weak self] statsReporter in
+                statsReporter
+                    .latestReportPublisher
+                    .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }
+                    .store(in: disposableBag)
+            }
+            .store(in: disposableBag)
+    }
+
+    private func observeCallSettingsUpdates() async {
+        await webRTCCoordinator
+            .stateAdapter
+            .$callSettings
+            .removeDuplicates()
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.callSettings = $0 }
+            .store(in: disposableBag)
     }
 }

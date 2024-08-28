@@ -30,30 +30,5 @@ extension WebRTCCoordinator {
         func transition(_ nextStage: Stage) throws {
             try stateMachine.transition(to: nextStage)
         }
-
-        /// Waits for the next stage of the specified type after optionally skipping initial stages.
-        ///
-        /// - Parameters:
-        ///   - stageType: The expected type of the next stage.
-        ///   - dropFirst: The number of initial stages to skip. Defaults to 0.
-        /// - Returns: The next stage of the specified type.
-        /// - Throws: An error if the next stage is not of the expected type or if the state machine transitions to an error stage.
-        func nextStageShouldBe<S: Stage>(
-            _ stageType: S.Type,
-            dropFirst: Int = 0
-        ) async throws -> S {
-            let stage = try await stateMachine.publisher.nextValue(dropFirst: dropFirst)
-            guard let expected = stage as? S else {
-                if let errorState = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
-                    throw errorState.error
-                } else {
-                    throw ClientError
-                        .Unexpected(
-                            "\(type(of: self)) was expecting next state (after dropping \(dropFirst)) to be \(S.self) but it is \(type(of: stage))."
-                        )
-                }
-            }
-            return expected
-        }
     }
 }

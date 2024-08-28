@@ -127,8 +127,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     func beginScreenSharing(
         of type: ScreensharingType,
-        ownCapabilities: [OwnCapability],
-        removeAllScreenSharingStreams: @escaping () -> Void
+        ownCapabilities: [OwnCapability]
     ) async throws {
         let hasScreenShare = ownCapabilities.contains(.screenshare)
 

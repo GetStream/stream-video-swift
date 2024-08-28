@@ -81,8 +81,8 @@ actor ICEAdapter: @unchecked Sendable {
                 log.error(
                     error,
                     subsystems: peerType == .publisher
-                        ? .peerConnection_publisher
-                        : .peerConnection_subscriber
+                        ? .peerConnectionPublisher
+                        : .peerConnectionSubscriber
                 )
             }
         }
@@ -136,8 +136,8 @@ actor ICEAdapter: @unchecked Sendable {
             log.error(
                 error,
                 subsystems: peerType == .publisher
-                    ? .peerConnection_publisher
-                    : .peerConnection_subscriber
+                    ? .peerConnectionPublisher
+                    : .peerConnectionSubscriber
             )
         }
     }
@@ -159,8 +159,8 @@ actor ICEAdapter: @unchecked Sendable {
                             log.error(
                                 error,
                                 subsystems: peerType == .publisher
-                                    ? .peerConnection_publisher
-                                    : .peerConnection_subscriber
+                                    ? .peerConnectionPublisher
+                                    : .peerConnectionSubscriber
                             )
                         }
                     }
@@ -182,8 +182,8 @@ actor ICEAdapter: @unchecked Sendable {
                 log.error(
                     error,
                     subsystems: peerType == .publisher
-                        ? .peerConnection_publisher
-                        : .peerConnection_subscriber
+                        ? .peerConnectionPublisher
+                        : .peerConnectionSubscriber
                 )
             }
         }

@@ -158,13 +158,13 @@ actor WebRTCStateAdapter: ObservableObject {
 
         publisher
             .trackPublisher
-            .log(.debug, subsystems: .peerConnection_publisher)
+            .log(.debug, subsystems: .peerConnectionPublisher)
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.peerConnectionReceivedTrackEvent(.publisher, event: $0) }
             .store(in: disposableBag)
 
         subscriber
             .trackPublisher
-            .log(.debug, subsystems: .peerConnection_subscriber)
+            .log(.debug, subsystems: .peerConnectionSubscriber)
             .sinkTask { [weak self] in await self?.peerConnectionReceivedTrackEvent(.subscriber, event: $0) }
             .store(in: disposableBag)
 

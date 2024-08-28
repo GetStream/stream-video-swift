@@ -115,13 +115,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localScreenShareMediaManager.beginScreenSharing(
             of: type,
             ownCapabilities: ownCapabilities
-        ) { [weak self] in
-//            self?.queue.sync { [weak self] in
-//                guard let self else { return }
-//                streams.forEach { self.peerConnection.remove($0) }
-//                streams = []
-//            }
-        }
+        )
     }
 
     func stopScreenSharing() async throws {

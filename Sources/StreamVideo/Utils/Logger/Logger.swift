@@ -23,8 +23,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .webRTC,
         .other,
         .offlineSupport,
-        .peerConnection_publisher,
-        .peerConnection_subscriber,
+        .peerConnectionPublisher,
+        .peerConnectionSubscriber,
         .sfu,
         .iceAdapter,
         .mediaAdapter
@@ -38,8 +38,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .webRTC,
         .other,
         .offlineSupport,
-        .peerConnection_publisher,
-        .peerConnection_subscriber,
+        .peerConnectionPublisher,
+        .peerConnectionSubscriber,
         .sfu,
         .iceAdapter,
         .mediaAdapter
@@ -60,8 +60,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     /// The subsystem responsible for WebRTC.
     public static let webRTC = Self(rawValue: 1 << 5)
     /// The subsystem responsible for PeerConnections.
-    public static let peerConnection_publisher = Self(rawValue: 1 << 6)
-    public static let peerConnection_subscriber = Self(rawValue: 1 << 7)
+    public static let peerConnectionPublisher = Self(rawValue: 1 << 6)
+    public static let peerConnectionSubscriber = Self(rawValue: 1 << 7)
     /// The subsystem responsible for PeerConnections.
     public static let sfu = Self(rawValue: 1 << 8)
     public static let iceAdapter = Self(rawValue: 1 << 9)
@@ -81,9 +81,9 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "offlineSupport"
         case LogSubsystem.webRTC.rawValue:
             return "webRTC"
-        case LogSubsystem.peerConnection_publisher.rawValue:
+        case LogSubsystem.peerConnectionPublisher.rawValue:
             return "peerConnection-publisher"
-        case LogSubsystem.peerConnection_subscriber.rawValue:
+        case LogSubsystem.peerConnectionSubscriber.rawValue:
             return "peerConnection-subscriber"
         case LogSubsystem.sfu.rawValue:
             return "SFU"
