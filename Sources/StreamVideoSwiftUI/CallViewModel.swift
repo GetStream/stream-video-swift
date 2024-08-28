@@ -351,8 +351,11 @@ open class CallViewModel: ObservableObject {
                 backstage: backstage
             )
         } else {
-            let call = streamVideo.call(callType: callType, callId: callId)
-            self.call = call
+            let call = streamVideo.call(
+                callType: callType,
+                callId: callId,
+                callSettings: callSettings
+            )
             Task {
                 do {
                     let callData = try await call.create(
@@ -572,7 +575,11 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = Task {
             do {
                 log.debug("Starting call")
-                let call = call ?? streamVideo.call(callType: callType, callId: callId)
+                let call = call ?? streamVideo.call(
+                    callType: callType,
+                    callId: callId,
+                    callSettings: callSettings
+                )
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
                 if maxDuration != nil || maxParticipants != nil {

@@ -215,10 +215,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the all.
+    ///  - callSettings: the initial CallSettings to use. If `nil` is provided, the default CallSettings
+    ///  will be used.
     /// - Returns: `Call` object.
     public func call(
         callType: String,
-        callId: String
+        callId: String,
+        callSettings: CallSettings? = nil
     ) -> Call {
         callCache.call(for: callCid(from: callId, callType: callType)) {
             let callController = makeCallController(callType: callType, callId: callId)
@@ -226,7 +229,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 callType: callType,
                 callId: callId,
                 coordinatorClient: coordinatorClient,
-                callController: callController
+                callController: callController,
+                callSettings: callSettings
             )
             eventsMiddleware.add(subscriber: call)
             return call
