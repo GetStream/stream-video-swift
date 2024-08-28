@@ -62,7 +62,15 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
         if call?.state.sessionId == participant.sessionId, participant.hasVideo {
             content().longPressToFocus(
                 availableFrame: availableFrame
-            ) { try? call?.focus(at: $0) }
+            ) { [weak call] point in
+                Task { [weak call] in
+                    do {
+                        try await call?.focus(at: point)
+                    } catch {
+                        log.error(error)
+                    }
+                }
+            }
         } else {
             content()
         }
