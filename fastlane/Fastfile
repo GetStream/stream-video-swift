@@ -700,7 +700,7 @@ lane :show_frameworks_sizes do |options|
   update_img_shields_sdk_sizes(sizes: sizes, open_pr: options[:open_pr]) if options[:update_readme]
 end
 
-lane :update_img_shields_sdk_sizes do
+lane :update_img_shields_sdk_sizes do |options|
   update_sdk_size_in_readme(
     open_pr: options[:open_pr] || false,
     readme_path: 'README.md',
