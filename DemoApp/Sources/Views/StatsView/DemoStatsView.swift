@@ -279,7 +279,6 @@ private struct DemoStatView<Value: Comparable>: View {
                 .$statsReport
                 .receive(on: DispatchQueue.global(qos: .utility))
                 .map(valueTransformer)
-//                .removeDuplicates()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] value in
                     guard let self else { return }
