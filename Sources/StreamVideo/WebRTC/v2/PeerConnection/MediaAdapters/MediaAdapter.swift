@@ -95,20 +95,30 @@ final class MediaAdapter {
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        try await audioMediaAdapter.setUp(
-            with: settings,
-            ownCapabilities: ownCapabilities
-        )
+        try await withThrowingTaskGroup(of: Void.self) { [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
+            group.addTask {
+                try await audioMediaAdapter.setUp(
+                    with: settings,
+                    ownCapabilities: ownCapabilities
+                )
+            }
 
-        try await videoMediaAdapter.setUp(
-            with: settings,
-            ownCapabilities: ownCapabilities
-        )
+            group.addTask {
+                try await videoMediaAdapter.setUp(
+                    with: settings,
+                    ownCapabilities: ownCapabilities
+                )
+            }
 
-        try await screenShareMediaAdapter.setUp(
-            with: settings,
-            ownCapabilities: ownCapabilities
-        )
+            group.addTask {
+                try await screenShareMediaAdapter.setUp(
+                    with: settings,
+                    ownCapabilities: ownCapabilities
+                )
+            }
+
+            while try await group.next() != nil {}
+        }
     }
 
     func didUpdateCallSettings(

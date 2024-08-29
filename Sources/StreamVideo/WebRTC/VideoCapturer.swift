@@ -54,7 +54,12 @@ class VideoCapturer: CameraVideoCapturing {
     
     func startCapture(device: AVCaptureDevice?) async throws {
         try await withCheckedThrowingContinuation { continuation in
-            guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else {
+            guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer else {
+                continuation.resume()
+                return
+            }
+
+            guard let device else {
                 continuation.resume(throwing: ClientError.Unexpected())
                 return
             }

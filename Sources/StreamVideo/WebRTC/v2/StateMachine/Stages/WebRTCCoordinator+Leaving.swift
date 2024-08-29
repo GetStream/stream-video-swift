@@ -32,6 +32,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             case .joined:
                 execute()
                 return self
+            case .disconnected:
+                execute()
+                return self
             default:
                 return nil
             }

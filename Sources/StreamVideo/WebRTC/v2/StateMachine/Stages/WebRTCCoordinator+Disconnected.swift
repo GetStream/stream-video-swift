@@ -32,6 +32,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         override func willTransitionAway() {
             internetObservationCancellable?.cancel()
+            context.disconnectionSource = nil
+            context.flowError = nil
         }
 
         override func transition(
@@ -42,13 +44,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     "WebSocket disconnected from \(previousStage.id) due to \(source).",
                     subsystems: .webRTC
                 )
-                context.disconnectionSource = nil
             } else if let error = context.flowError {
                 log.error(
                     "Disconnected from \(previousStage.id) due to \(error).",
                     subsystems: .webRTC
                 )
-                context.flowError = nil
             }
 
             switch previousStage.id {
@@ -103,7 +103,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try transition?(.migrating(context))
 
                 case .unknown:
-                    try transition?(.leaving(context))
+                    if let error = context.flowError {
+                        try transition?(.error(context, error: error))
+                    } else {
+                        try transition?(.leaving(context))
+                    }
 
                 case .disconnected:
                     try transition?(.leaving(context))

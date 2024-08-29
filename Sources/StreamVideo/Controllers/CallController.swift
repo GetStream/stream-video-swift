@@ -578,6 +578,8 @@ class CallController: @unchecked Sendable {
             participantsCountUpdatesTask = nil
 
             call?.update(reconnectionStatus: .connected)
+        case .error:
+            call?.leave()
         default:
             break
         }

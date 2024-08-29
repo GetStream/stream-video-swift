@@ -303,39 +303,5 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try await coordinator.stateAdapter.restoreScreenSharing()
         }
-
-        private func mergeOldAndParticipants(
-            old: [String: CallParticipant],
-            new: [String: CallParticipant],
-            newSessionID: String
-        ) -> [String: CallParticipant] {
-            guard !old.isEmpty else {
-                return new
-            }
-
-            let oldParticipant = {
-                if let previousSession = context.isRejoiningFromSessionID {
-                    return old[previousSession]
-                } else {
-                    return old[newSessionID]
-                }
-            }()
-
-            guard
-                let oldParticipant,
-                var newParticipant = new[newSessionID]
-            else {
-                return new
-            }
-
-            newParticipant.hasAudio = oldParticipant.hasAudio
-            newParticipant.hasVideo = oldParticipant.hasVideo
-            newParticipant.isScreensharing = oldParticipant.isScreensharing
-
-            var new = new
-            new[newSessionID] = newParticipant
-
-            return new
-        }
     }
 }
