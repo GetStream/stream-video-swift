@@ -60,7 +60,11 @@ final class MockStreamVideo: StreamVideo, Mockable {
         stubbedFunction[function] = value
     }
 
-    override func call(callType: String, callId: String) -> Call {
+    override func call(
+        callType: String,
+        callId: String,
+        callSettings: CallSettings? = nil
+    ) -> Call {
         stubbedFunction[.call] as! Call
     }
 

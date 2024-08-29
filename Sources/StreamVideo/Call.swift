@@ -43,7 +43,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callType: String,
         callId: String,
         coordinatorClient: DefaultAPI,
-        callController: CallController
+        callController: CallController,
+        callSettings: CallSettings? = nil
     ) {
         self.callId = callId
         self.callType = callType
@@ -63,6 +64,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             initialSpeakerStatus: .enabled,
             initialAudioOutputStatus: .enabled
         )
+
+        /// If we received a non-nil initial callSettings, we updated them here.
+        if let callSettings {
+            Task { @MainActor [weak self] in
+                self?.state.update(callSettings: callSettings)
+            }
+        }
+
         self.callController.call = self
         // It's important to instantiate the stateMachine as soon as possible
         // to ensure it's uniqueness.
