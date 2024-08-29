@@ -356,6 +356,7 @@ open class CallViewModel: ObservableObject {
                 callId: callId,
                 callSettings: callSettings
             )
+            self.call = call
             Task {
                 do {
                     let callData = try await call.create(
