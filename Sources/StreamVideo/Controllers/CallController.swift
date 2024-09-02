@@ -717,13 +717,24 @@ class CallController: @unchecked Sendable {
 
     private func subscribeToParticipantsCountUpdatesEvent(_ call: Call) -> Task<Void, Never> {
         Task {
+            let anonymousUserRoleKey = "anonymous"
             for await event in call.subscribe(for: CallSessionParticipantCountsUpdatedEvent.self) {
                 Task { @MainActor in
-                    call.state.participantCount = event.participantsCountByRole
+                    call.state.participantCount = event
+                        .participantsCountByRole
+                        .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
                         .values
                         .map(UInt32.init)
                         .reduce(0) { $0 + $1 }
-                    call.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+
+                    // TODO: Workaround. To be removed
+                    if event.anonymousParticipantCount > 0 {
+                        call.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+                    } else if let anonymousCount = event.participantsCountByRole[anonymousUserRoleKey] {
+                        call.state.anonymousParticipantCount = UInt32(anonymousCount)
+                    } else {
+                        call.state.anonymousParticipantCount = 0
+                    }
                 }
             }
         }
