@@ -21,7 +21,7 @@ class EventNotificationCenter: NotificationCenter {
     func process(_ events: [WrappedEvent], postNotifications: Bool = true, completion: (() -> Void)? = nil) {
         let processingEventsDebugMessage: () -> String = {
             let eventNames = events.map(\.name)
-            return "Processing webSocket events: \(eventNames)/"
+            return "Processing webSocket events: \(eventNames)"
         }
         log.debug(processingEventsDebugMessage(), subsystems: .webSocket)
 

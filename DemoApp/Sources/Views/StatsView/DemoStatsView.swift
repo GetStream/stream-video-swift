@@ -28,6 +28,7 @@ struct DemoStatsView: View {
                     description: "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
                 ) {
                     DemoLatencyChartView(viewModel)
+                        .frame(height: 150)
                 }
                 .withoutListSeparator()
             }
@@ -36,7 +37,7 @@ struct DemoStatsView: View {
                 viewModel: viewModel,
                 iconName: "chart.bar.xaxis",
                 title: "Call Performance",
-                description: "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
+                description: "Review the key data points below to assess call performance"
             ) {
                 VStack(spacing: 16) {
                     row {
@@ -278,7 +279,6 @@ private struct DemoStatView<Value: Comparable>: View {
                 .$statsReport
                 .receive(on: DispatchQueue.global(qos: .utility))
                 .map(valueTransformer)
-                .removeDuplicates()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] value in
                     guard let self else { return }
