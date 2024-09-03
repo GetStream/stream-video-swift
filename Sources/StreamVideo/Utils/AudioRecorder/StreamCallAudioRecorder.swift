@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamWebRTC
 
 /// This class abstracts the usage of AVAudioRecorder, providing a convenient way to record and manage
 /// audio streams. It handles setting up the recording environment, starting and stopping recording, and

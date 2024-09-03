@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-final class PeerConnectionFactory {
+final class PeerConnectionFactory: @unchecked Sendable {
 
     private let audioProcessingModule: RTCAudioProcessingModule
     private lazy var factory: RTCPeerConnectionFactory = {
@@ -41,29 +41,6 @@ final class PeerConnectionFactory {
     deinit {
         RTCCleanupSSL()
     }
-
-    func makePeerConnection(
-        sessionId: String,
-        configuration: RTCConfiguration,
-        type: PeerConnectionType,
-        signalService: Stream_Video_Sfu_Signal_SignalServer,
-        constraints: RTCMediaConstraints = RTCMediaConstraints.defaultConstraints,
-        videoOptions: VideoOptions
-    ) throws -> PeerConnection {
-        let pc = try makePeerConnection(
-            configuration: configuration,
-            constraints: constraints,
-            delegate: nil
-        )
-        let peerConnection = PeerConnection(
-            sessionId: sessionId,
-            pc: pc,
-            type: type,
-            signalService: signalService,
-            videoOptions: videoOptions
-        )
-        return peerConnection
-    }
     
     func makeVideoSource(forScreenShare: Bool) -> RTCVideoSource {
         factory.videoSource(forScreenCast: forScreenShare)
@@ -74,14 +51,29 @@ final class PeerConnectionFactory {
     }
 
     func makeAudioSource(_ constraints: RTCMediaConstraints?) -> RTCAudioSource {
-        factory.audioSource(with: constraints)
+        let result = factory.audioSource(with: constraints)
+        log.debug(
+            """
+            AudioSource was created \(Unmanaged.passUnretained(result).toOpaque())
+            """,
+            subsystems: .webRTC
+        )
+        return result
     }
 
     func makeAudioTrack(source: RTCAudioSource) -> RTCAudioTrack {
-        factory.audioTrack(with: source, trackId: UUID().uuidString)
+        let result = factory.audioTrack(with: source, trackId: UUID().uuidString)
+        log.debug(
+            """
+            AudioTrack was created \(Unmanaged.passUnretained(result).toOpaque())
+            trackId: \(result.trackId)
+            """,
+            subsystems: .webRTC
+        )
+        return result
     }
 
-    private func makePeerConnection(
+    func makePeerConnection(
         configuration: RTCConfiguration,
         constraints: RTCMediaConstraints,
         delegate: RTCPeerConnectionDelegate?
