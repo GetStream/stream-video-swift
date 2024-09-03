@@ -269,6 +269,7 @@ actor WebRTCStateAdapter: ObservableObject {
 
         assignTracksToParticipants(
             participants,
+            originalParticipants: self.participants,
             fileName: #file,
             functionName: #function,
             line: #line
@@ -284,6 +285,7 @@ actor WebRTCStateAdapter: ObservableObject {
 
         assignTracksToParticipants(
             participants,
+            originalParticipants: self.participants,
             fileName: #file,
             functionName: #function,
             line: #line
@@ -333,14 +335,55 @@ actor WebRTCStateAdapter: ObservableObject {
     ) {
         assignTracksToParticipants(
             participants,
+            originalParticipants: self.participants,
             fileName: fileName,
             functionName: functionName,
             line: line
         )
     }
 
+    func didUpdateParticipant(
+        _ participant: CallParticipant,
+        isVisible: Bool
+    ) {
+        var updatedParticipants = self.participants
+
+        guard
+            let _participant = updatedParticipants[participant.id],
+            _participant.showTrack != isVisible
+        else {
+            return
+        }
+
+        log.debug("Will toggle visibility for name:\(_participant.name) to isVisible:\(isVisible).")
+        updatedParticipants[_participant.id] = _participant
+            .withUpdated(showTrack: isVisible)
+
+        didUpdateParticipants(updatedParticipants)
+    }
+
+    func didUpdateParticipant(
+        _ participant: CallParticipant,
+        trackSize: CGSize
+    ) async {
+        var updatedParticipants = self.participants
+
+        guard
+            let _participant = participants[participant.id],
+            _participant.trackSize != trackSize
+        else {
+            return
+        }
+
+        updatedParticipants[participant.id] = _participant
+            .withUpdated(trackSize: trackSize)
+
+        didUpdateParticipants(updatedParticipants)
+    }
+
     private func assignTracksToParticipants(
         _ participants: [String: CallParticipant],
+        originalParticipants: [String: CallParticipant],
         fileName: StaticString,
         functionName: StaticString,
         line: UInt
@@ -413,6 +456,16 @@ actor WebRTCStateAdapter: ObservableObject {
                     .withUpdated(screensharingTrack: nil)
             }
 
+            if !isLocalUser, let track = updatedParticipant.track {
+                if track.isEnabled != updatedParticipant.showTrack {
+                    log.debug(
+                        "Will toggle track for name:\(participant.name) to isEnabled:\(updatedParticipant.showTrack).",
+                        subsystems: .webRTC
+                    )
+                    updatedParticipant.track?.isEnabled = updatedParticipant.showTrack
+                }
+            }
+
             updatedParticipants[key] = updatedParticipant
         }
 
@@ -424,6 +477,8 @@ actor WebRTCStateAdapter: ObservableObject {
 
         let usersWithScreenSharingTracks = updatedParticipants
             .filter { $0.value.screenshareTrack != nil }
+
+        guard updatedParticipants != originalParticipants else { return }
 
         log.debug(
             """
