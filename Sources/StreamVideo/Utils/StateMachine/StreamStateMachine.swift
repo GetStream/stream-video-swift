@@ -16,11 +16,13 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
 
     /// A queue to ensure thread-safe operations.
     private let queue: UnfairQueue = .init()
+    private let logSubsystem: LogSubsystem
 
     /// Initializes the state machine with an initial stage.
     ///
     /// - Parameter initialStage: The initial stage of the state machine.
-    public init(initialStage: StageType) {
+    public init(initialStage: StageType, logSubsystem: LogSubsystem = .other) {
+        self.logSubsystem = logSubsystem
         publisher = .init(initialStage)
     }
 
@@ -32,6 +34,10 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         try queue.sync {
             var nextStage = nextStage
             nextStage.transition = { [weak self] in try self?.transition(to: $0) }
+
+            let transitioningFromStage = currentStage
+            transitioningFromStage.willTransitionAway()
+            
             guard
                 let newStage = nextStage.transition(from: currentStage),
                 newStage.id.hashValue != currentStage.id.hashValue
@@ -39,7 +45,12 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
                 throw ClientError.InvalidStateMachineTransition(from: currentStage, to: nextStage)
             }
 
-            log.debug("Transition \(String(describing: currentStage.description)) → \(newStage.description)")
+            transitioningFromStage.didTransitionAway()
+
+            log.debug(
+                "Transition \(String(describing: currentStage.description)) → \(newStage.description)",
+                subsystems: logSubsystem
+            )
             publisher.send(nextStage)
         }
     }

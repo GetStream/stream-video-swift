@@ -43,7 +43,19 @@ enum VideoCapturingUtils {
             let codec = VideoCodec(
                 dimensions: dimensions,
                 quality: quality,
-                maxBitrate: bitrate
+                maxBitrate: bitrate,
+                sfuQuality: {
+                    switch quality {
+                    case "f":
+                        return .high
+                    case "h":
+                        return .mid
+                    case "q":
+                        return .lowUnspecified
+                    default:
+                        return .lowUnspecified
+                    }
+                }()
             )
             codecs.append(codec)
             scaleDownFactor *= 2
