@@ -501,6 +501,38 @@ public class Logger {
             error: nil
         )
     }
+
+    public func difference<T>(
+        _ lhs: @autoclosure () -> T,
+        _ rhs: @autoclosure () -> T,
+        level: LogLevel,
+        message: @autoclosure () -> String,
+        subsystems: LogSubsystem = .other,
+        functionName: StaticString = #function,
+        fileName: StaticString = #file,
+        lineNumber: UInt = #line
+    ) {
+        let differences = dumpDiff(lhs(), rhs()).joined(separator: "\n")
+        var generatedMessage = message()
+        if !generatedMessage.isEmpty {
+            generatedMessage = """
+            \(generatedMessage)
+            \(differences)
+            """
+        } else {
+            generatedMessage = differences
+        }
+
+        log(
+            level,
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber,
+            message: generatedMessage,
+            subsystems: subsystems,
+            error: nil
+        )
+    }
 }
 
 private extension Logger {
