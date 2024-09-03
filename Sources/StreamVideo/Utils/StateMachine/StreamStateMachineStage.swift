@@ -15,11 +15,15 @@ public protocol StreamStateMachineStage: CustomStringConvertible {
     /// The transition function that handles the transition logic.
     var transition: Transition? { get set }
 
+    func willTransitionAway()
+
     /// Defines the transition logic from a previous stage to the current stage.
     ///
     /// - Parameter previousStage: The previous stage.
     /// - Returns: The new stage if the transition is allowed, `nil` otherwise.
     func transition(from previousStage: Self) -> Self?
+
+    func didTransitionAway()
 }
 
 /// An extension to provide a default description for stages.
