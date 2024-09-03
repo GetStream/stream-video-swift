@@ -352,7 +352,7 @@ public struct VideoCallParticipantView: View {
                 size: availableFrame.size,
                 contentMode: contentMode,
                 showVideo: showVideo && isVisible,
-                handleRendering: { [weak call] view in
+                handleRendering: { [weak call, participant] view in
                     guard call != nil else { return }
                     view.handleViewRendering(for: participant) { [weak call] size, participant in
                         Task { [weak call] in
@@ -361,7 +361,7 @@ public struct VideoCallParticipantView: View {
                     }
                 }
             )
-            .id(participant.id)
+            .id(participant.renderingId)
         }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }

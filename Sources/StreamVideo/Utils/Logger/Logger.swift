@@ -23,7 +23,11 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .webRTC,
         .other,
         .offlineSupport,
-        .peerConnection
+        .peerConnectionPublisher,
+        .peerConnectionSubscriber,
+        .sfu,
+        .iceAdapter,
+        .mediaAdapter
     ]
 
     /// All subsystems within the SDK.
@@ -34,7 +38,11 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .webRTC,
         .other,
         .offlineSupport,
-        .peerConnection
+        .peerConnectionPublisher,
+        .peerConnectionSubscriber,
+        .sfu,
+        .iceAdapter,
+        .mediaAdapter
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -52,7 +60,12 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     /// The subsystem responsible for WebRTC.
     public static let webRTC = Self(rawValue: 1 << 5)
     /// The subsystem responsible for PeerConnections.
-    public static let peerConnection = Self(rawValue: 1 << 6)
+    public static let peerConnectionPublisher = Self(rawValue: 1 << 6)
+    public static let peerConnectionSubscriber = Self(rawValue: 1 << 7)
+    /// The subsystem responsible for PeerConnections.
+    public static let sfu = Self(rawValue: 1 << 8)
+    public static let iceAdapter = Self(rawValue: 1 << 9)
+    public static let mediaAdapter = Self(rawValue: 1 << 10)
 
     public var description: String {
         switch rawValue {
@@ -68,8 +81,16 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "offlineSupport"
         case LogSubsystem.webRTC.rawValue:
             return "webRTC"
-        case LogSubsystem.peerConnection.rawValue:
-            return "peerConnection"
+        case LogSubsystem.peerConnectionPublisher.rawValue:
+            return "peerConnection-publisher"
+        case LogSubsystem.peerConnectionSubscriber.rawValue:
+            return "peerConnection-subscriber"
+        case LogSubsystem.sfu.rawValue:
+            return "SFU"
+        case LogSubsystem.iceAdapter.rawValue:
+            return "ICEAdapter"
+        case LogSubsystem.iceAdapter.rawValue:
+            return "MediaAdapter"
         default:
             return "unknown(rawValue:\(rawValue)"
         }
