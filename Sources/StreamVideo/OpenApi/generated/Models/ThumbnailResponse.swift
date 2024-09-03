@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ThumbnailResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ThumbnailResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var imageUrl: String
 

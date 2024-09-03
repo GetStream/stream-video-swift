@@ -4,11 +4,11 @@
 
 import Foundation
     
-public struct TypingIndicators: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct TypingIndicators: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var enabled: Bool
+    public var enabled: Bool? = nil
 
-    public init(enabled: Bool) {
+    public init(enabled: Bool? = nil) {
         self.enabled = enabled
     }
     

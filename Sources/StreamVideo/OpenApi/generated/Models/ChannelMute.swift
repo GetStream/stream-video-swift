@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ChannelMute: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ChannelMute: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var channel: ChannelResponse? = nil
     public var createdAt: Date

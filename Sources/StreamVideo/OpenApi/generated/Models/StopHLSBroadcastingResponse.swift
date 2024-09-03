@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StopHLSBroadcastingResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StopHLSBroadcastingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

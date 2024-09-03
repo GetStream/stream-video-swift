@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct OwnUser: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct OwnUser: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banned: Bool
     public var blockedUserIds: [String]? = nil
@@ -13,7 +13,7 @@ public struct OwnUser: @unchecked Sendable, Event, Codable, JSONEncodable, Hasha
     public var custom: [String: RawJSON]
     public var deactivatedAt: Date? = nil
     public var deletedAt: Date? = nil
-    public var devices: [Device?]
+    public var devices: [Device]
     public var id: String
     public var invisible: Bool? = nil
     public var language: String
@@ -39,7 +39,7 @@ public struct OwnUser: @unchecked Sendable, Event, Codable, JSONEncodable, Hasha
         custom: [String: RawJSON],
         deactivatedAt: Date? = nil,
         deletedAt: Date? = nil,
-        devices: [Device?],
+        devices: [Device],
         id: String,
         invisible: Bool? = nil,
         language: String,

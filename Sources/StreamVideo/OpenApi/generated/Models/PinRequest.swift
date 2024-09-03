@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PinRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct PinRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var sessionId: String
     public var userId: String

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct LimitsSettingsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct LimitsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var maxDurationSeconds: Int? = nil
     public var maxParticipants: Int? = nil

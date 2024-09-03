@@ -4,11 +4,12 @@
 
 import Foundation
     
-public struct GoLiveRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var recordingStorageName: String? = nil
     public var startHls: Bool? = nil
     public var startRecording: Bool? = nil
+    public var startRtmpBroadcasts: Bool? = nil
     public var startTranscription: Bool? = nil
     public var transcriptionStorageName: String? = nil
 
@@ -16,6 +17,7 @@ public struct GoLiveRequest: @unchecked Sendable, Event, Codable, JSONEncodable,
         recordingStorageName: String? = nil,
         startHls: Bool? = nil,
         startRecording: Bool? = nil,
+        startRtmpBroadcasts: Bool? = nil,
         startTranscription: Bool? = nil,
         transcriptionStorageName: String? = nil
     ) {

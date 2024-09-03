@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RejectCallRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct RejectCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var reason: String? = nil
 

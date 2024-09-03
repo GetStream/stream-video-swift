@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PinResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct PinResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

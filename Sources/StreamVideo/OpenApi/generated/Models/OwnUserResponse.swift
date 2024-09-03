@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct OwnUserResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banned: Bool
     public var blockedUserIds: [String]? = nil
@@ -13,18 +13,18 @@ public struct OwnUserResponse: @unchecked Sendable, Event, Codable, JSONEncodabl
     public var custom: [String: RawJSON]
     public var deactivatedAt: Date? = nil
     public var deletedAt: Date? = nil
-    public var devices: [Device?]
+    public var devices: [Device]
     public var id: String
     public var image: String? = nil
     public var invisible: Bool
     public var language: String
     public var lastActive: Date? = nil
     public var latestHiddenChannels: [String]? = nil
-    public var mutes: [UserMute?]
+    public var mutes: [UserMuteResponse?]
     public var name: String? = nil
     public var online: Bool
-    public var privacySettings: PrivacySettings? = nil
-    public var pushNotifications: PushNotificationSettings? = nil
+    public var privacySettings: PrivacySettingsResponse? = nil
+    public var pushNotifications: PushNotificationSettingsResponse? = nil
     public var revokeTokensIssuedBefore: Date? = nil
     public var role: String
     public var teams: [String]
@@ -41,18 +41,18 @@ public struct OwnUserResponse: @unchecked Sendable, Event, Codable, JSONEncodabl
         custom: [String: RawJSON],
         deactivatedAt: Date? = nil,
         deletedAt: Date? = nil,
-        devices: [Device?],
+        devices: [Device],
         id: String,
         image: String? = nil,
         invisible: Bool,
         language: String,
         lastActive: Date? = nil,
         latestHiddenChannels: [String]? = nil,
-        mutes: [UserMute?],
+        mutes: [UserMuteResponse?],
         name: String? = nil,
         online: Bool,
-        privacySettings: PrivacySettings? = nil,
-        pushNotifications: PushNotificationSettings? = nil,
+        privacySettings: PrivacySettingsResponse? = nil,
+        pushNotifications: PushNotificationSettingsResponse? = nil,
         revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],

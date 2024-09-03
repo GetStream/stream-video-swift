@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GetOrCreateCallResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GetOrCreateCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse
     public var created: Bool

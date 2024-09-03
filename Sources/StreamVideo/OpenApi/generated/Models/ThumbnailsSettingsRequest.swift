@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ThumbnailsSettingsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ThumbnailsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool? = nil
 

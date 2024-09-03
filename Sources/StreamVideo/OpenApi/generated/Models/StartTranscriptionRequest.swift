@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StartTranscriptionRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StartTranscriptionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var transcriptionExternalStorage: String? = nil
 

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StatsOptions: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StatsOptions: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var reportingIntervalMs: Int
 

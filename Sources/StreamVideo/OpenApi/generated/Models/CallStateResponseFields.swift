@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallStateResponseFields: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse
     public var members: [MemberResponse]

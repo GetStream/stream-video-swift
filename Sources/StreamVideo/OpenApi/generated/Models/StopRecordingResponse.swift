@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StopRecordingResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StopRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

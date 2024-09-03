@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct QueryCallStatsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct QueryCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
     public var next: String? = nil

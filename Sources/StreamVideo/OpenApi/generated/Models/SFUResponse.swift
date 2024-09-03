@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SFUResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct SFUResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var edgeName: String
     public var url: String

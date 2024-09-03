@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Command: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct Command: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var args: String
     public var createdAt: Date? = nil

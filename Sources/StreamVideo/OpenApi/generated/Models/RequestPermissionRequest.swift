@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RequestPermissionRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct RequestPermissionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var permissions: [String]
 

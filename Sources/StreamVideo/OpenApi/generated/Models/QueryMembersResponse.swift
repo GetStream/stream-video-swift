@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct QueryMembersResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct QueryMembersResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
     public var members: [MemberResponse]

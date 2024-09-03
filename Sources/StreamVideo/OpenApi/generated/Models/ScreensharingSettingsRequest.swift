@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ScreensharingSettingsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ScreensharingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accessRequestEnabled: Bool? = nil
     public var enabled: Bool? = nil

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StopLiveRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StopLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public init() {}
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallRecording: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallRecording: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endTime: Date
     public var filename: String

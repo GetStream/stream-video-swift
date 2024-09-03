@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RTMPIngress: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct RTMPIngress: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var address: String
 

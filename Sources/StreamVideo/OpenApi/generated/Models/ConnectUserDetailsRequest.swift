@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ConnectUserDetailsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]? = nil
     public var id: String

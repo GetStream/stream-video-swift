@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MemberRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct MemberRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]? = nil
     public var role: String? = nil

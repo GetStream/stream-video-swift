@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct DeleteTranscriptionResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct DeleteTranscriptionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

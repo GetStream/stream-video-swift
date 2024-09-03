@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ICEServer: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ICEServer: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var password: String
     public var urls: [String]

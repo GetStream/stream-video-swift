@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserInfoResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UserInfoResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]
     public var image: String

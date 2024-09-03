@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Coordinates: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct Coordinates: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var latitude: Double
     public var longitude: Double

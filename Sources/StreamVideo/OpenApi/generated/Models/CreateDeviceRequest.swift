@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CreateDeviceRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CreateDeviceRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum PushProvider: String, Codable, CaseIterable {
         case apn

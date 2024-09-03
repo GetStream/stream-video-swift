@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserSessionStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var browser: String? = nil
     public var browserVersion: String? = nil
@@ -15,8 +15,8 @@ public struct UserSessionStats: @unchecked Sendable, Event, Codable, JSONEncodab
     public var distanceToSfuKilometers: Double? = nil
     public var freezeDurationSeconds: Int
     public var geolocation: GeolocationResult? = nil
-    public var jitter: TimeStats? = nil
-    public var latency: TimeStats? = nil
+    public var jitter: Stats? = nil
+    public var latency: Stats? = nil
     public var maxFirPerSecond: Double? = nil
     public var maxFreezeFraction: Double
     public var maxFreezesDurationSeconds: Int
@@ -31,8 +31,8 @@ public struct UserSessionStats: @unchecked Sendable, Event, Codable, JSONEncodab
     public var pubSubHints: MediaPubSubHint? = nil
     public var publishedTracks: [PublishedTrackInfo]? = nil
     public var publisherAudioMos: MOSStats? = nil
-    public var publisherJitter: TimeStats? = nil
-    public var publisherLatency: TimeStats? = nil
+    public var publisherJitter: Stats? = nil
+    public var publisherLatency: Stats? = nil
     public var publisherNoiseCancellationSeconds: Double? = nil
     public var publisherPacketLossFraction: Double
     public var publisherQualityLimitationFraction: Double? = nil
@@ -48,8 +48,8 @@ public struct UserSessionStats: @unchecked Sendable, Event, Codable, JSONEncodab
     public var sdkVersion: String? = nil
     public var sessionId: String
     public var subscriberAudioMos: MOSStats? = nil
-    public var subscriberJitter: TimeStats? = nil
-    public var subscriberLatency: TimeStats? = nil
+    public var subscriberJitter: Stats? = nil
+    public var subscriberLatency: Stats? = nil
     public var subscriberVideoQualityThrottledDurationSeconds: Double? = nil
     public var subsessions: [Subsession?]? = nil
     public var timeline: CallTimeline? = nil
@@ -68,8 +68,8 @@ public struct UserSessionStats: @unchecked Sendable, Event, Codable, JSONEncodab
         distanceToSfuKilometers: Double? = nil,
         freezeDurationSeconds: Int,
         geolocation: GeolocationResult? = nil,
-        jitter: TimeStats? = nil,
-        latency: TimeStats? = nil,
+        jitter: Stats? = nil,
+        latency: Stats? = nil,
         maxFirPerSecond: Double? = nil,
         maxFreezeFraction: Double,
         maxFreezesDurationSeconds: Int,
@@ -84,8 +84,8 @@ public struct UserSessionStats: @unchecked Sendable, Event, Codable, JSONEncodab
         pubSubHints: MediaPubSubHint? = nil,
         publishedTracks: [PublishedTrackInfo]? = nil,
         publisherAudioMos: MOSStats? = nil,
-        publisherJitter: TimeStats? = nil,
-        publisherLatency: TimeStats? = nil,
+        publisherJitter: Stats? = nil,
+        publisherLatency: Stats? = nil,
         publisherNoiseCancellationSeconds: Double? = nil,
         publisherPacketLossFraction: Double,
         publisherQualityLimitationFraction: Double? = nil,
@@ -101,8 +101,8 @@ public struct UserSessionStats: @unchecked Sendable, Event, Codable, JSONEncodab
         sdkVersion: String? = nil,
         sessionId: String,
         subscriberAudioMos: MOSStats? = nil,
-        subscriberJitter: TimeStats? = nil,
-        subscriberLatency: TimeStats? = nil,
+        subscriberJitter: Stats? = nil,
+        subscriberLatency: Stats? = nil,
         subscriberVideoQualityThrottledDurationSeconds: Double? = nil,
         subsessions: [Subsession?]? = nil,
         timeline: CallTimeline? = nil,

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PushNotificationSettings: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct PushNotificationSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var disabled: Bool? = nil
     public var disabledUntil: Date? = nil

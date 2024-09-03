@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct DeleteCallRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct DeleteCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var hard: Bool? = nil
 

@@ -4,12 +4,12 @@
 
 import Foundation
     
-public struct ListDevicesResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ListDevicesResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var devices: [Device?]
+    public var devices: [Device]
     public var duration: String
 
-    public init(devices: [Device?], duration: String) {
+    public init(devices: [Device], duration: String) {
         self.devices = devices
         self.duration = duration
     }

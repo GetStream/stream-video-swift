@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PublisherAggregateStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct PublisherAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var byTrackType: [String: Count]? = nil
     public var total: Count? = nil

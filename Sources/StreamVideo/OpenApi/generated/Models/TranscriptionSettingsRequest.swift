@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TranscriptionSettingsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct TranscriptionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Mode: String, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -23,11 +23,11 @@ public struct TranscriptionSettingsResponse: @unchecked Sendable, Event, Codable
         }
     }
     
-    public var closedCaptionMode: String
-    public var languages: [String]
+    public var closedCaptionMode: String? = nil
+    public var languages: [String]? = nil
     public var mode: Mode
 
-    public init(closedCaptionMode: String, languages: [String], mode: Mode) {
+    public init(closedCaptionMode: String? = nil, languages: [String]? = nil, mode: Mode) {
         self.closedCaptionMode = closedCaptionMode
         self.languages = languages
         self.mode = mode

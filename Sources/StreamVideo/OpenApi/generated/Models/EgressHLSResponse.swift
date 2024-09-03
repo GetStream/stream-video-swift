@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct EgressHLSResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var playlistUrl: String
 

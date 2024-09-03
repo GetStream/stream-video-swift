@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CollectUserFeedbackResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CollectUserFeedbackResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

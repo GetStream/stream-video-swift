@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct NullTime: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct NullTime: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var hasValue: Bool? = nil
     public var value: Date? = nil

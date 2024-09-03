@@ -4,20 +4,20 @@
 
 import Foundation
     
-public struct CountrywiseAggregateStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CountrywiseAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var participantCount: Count? = nil
-    public var publisherJitter: TimeStats? = nil
-    public var publisherLatency: TimeStats? = nil
-    public var subscriberJitter: TimeStats? = nil
-    public var subscriberLatency: TimeStats? = nil
+    public var publisherJitter: Stats? = nil
+    public var publisherLatency: Stats? = nil
+    public var subscriberJitter: Stats? = nil
+    public var subscriberLatency: Stats? = nil
 
     public init(
         participantCount: Count? = nil,
-        publisherJitter: TimeStats? = nil,
-        publisherLatency: TimeStats? = nil,
-        subscriberJitter: TimeStats? = nil,
-        subscriberLatency: TimeStats? = nil
+        publisherJitter: Stats? = nil,
+        publisherLatency: Stats? = nil,
+        subscriberJitter: Stats? = nil,
+        subscriberLatency: Stats? = nil
     ) {
         self.participantCount = participantCount
         self.publisherJitter = publisherJitter

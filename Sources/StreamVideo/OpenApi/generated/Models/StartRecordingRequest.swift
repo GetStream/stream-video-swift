@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StartRecordingRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StartRecordingRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var recordingExternalStorage: String? = nil
 

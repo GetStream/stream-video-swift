@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GetEdgesResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GetEdgesResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
     public var edges: [EdgeResponse]

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UpdateCallMembersRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var removeMembers: [String]? = nil
     public var updateMembers: [MemberRequest]? = nil

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserObject: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UserObject: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banExpires: Date? = nil
     public var banned: Bool

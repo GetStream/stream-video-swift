@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct QueryMembersRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var filterConditions: [String: RawJSON]? = nil
     public var id: String

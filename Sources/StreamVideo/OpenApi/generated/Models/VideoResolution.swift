@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct VideoResolution: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct VideoResolution: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var height: Int
     public var width: Int

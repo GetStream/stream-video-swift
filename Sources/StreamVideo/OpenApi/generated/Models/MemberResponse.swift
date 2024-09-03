@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MemberResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var custom: [String: RawJSON]

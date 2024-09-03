@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct VideoSettingsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accessRequestEnabled: Bool? = nil
     public var cameraDefaultOn: Bool? = nil

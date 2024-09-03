@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GetOrCreateCallRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var data: CallRequest? = nil
     public var membersLimit: Int? = nil

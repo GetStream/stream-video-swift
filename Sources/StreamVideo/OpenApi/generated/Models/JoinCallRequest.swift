@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct JoinCallRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var create: Bool? = nil
     public var data: CallRequest? = nil

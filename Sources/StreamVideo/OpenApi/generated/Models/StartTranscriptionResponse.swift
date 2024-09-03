@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StartTranscriptionResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StartTranscriptionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

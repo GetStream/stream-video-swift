@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RecordSettingsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct RecordSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audioOnly: Bool
     public var mode: String

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var additional: [String: RawJSON]? = nil
     public var component: String? = nil

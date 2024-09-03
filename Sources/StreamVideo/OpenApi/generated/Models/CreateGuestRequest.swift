@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CreateGuestRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CreateGuestRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var user: UserRequest
 

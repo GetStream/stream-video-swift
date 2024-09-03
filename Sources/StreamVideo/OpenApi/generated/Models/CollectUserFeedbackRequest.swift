@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CollectUserFeedbackRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]? = nil
     public var rating: Int

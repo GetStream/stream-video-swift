@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GeofenceSettingsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GeofenceSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var names: [String]
 

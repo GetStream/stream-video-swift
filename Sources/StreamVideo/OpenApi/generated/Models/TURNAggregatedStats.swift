@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TURNAggregatedStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct TURNAggregatedStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var tcp: Count? = nil
     public var total: Count? = nil

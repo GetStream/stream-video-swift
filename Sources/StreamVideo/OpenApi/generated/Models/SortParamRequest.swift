@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SortParamRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct SortParamRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var direction: Int? = nil
     public var field: String? = nil

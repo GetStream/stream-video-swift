@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MuteUsersRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audio: Bool? = nil
     public var muteAllUsers: Bool? = nil

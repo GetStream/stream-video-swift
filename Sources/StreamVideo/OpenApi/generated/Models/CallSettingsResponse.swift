@@ -4,32 +4,32 @@
 
 import Foundation
     
-public struct CallSettingsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audio: AudioSettings
-    public var backstage: BackstageSettingsResponse
+    public var backstage: BackstageSettings
     public var broadcasting: BroadcastSettingsResponse
-    public var geofencing: GeofenceSettingsResponse
+    public var geofencing: GeofenceSettings
     public var limits: LimitsSettingsResponse
     public var recording: RecordSettingsResponse
-    public var ring: RingSettingsResponse
-    public var screensharing: ScreensharingSettingsResponse
-    public var thumbnails: ThumbnailsSettingsResponse
-    public var transcription: TranscriptionSettingsResponse
-    public var video: VideoSettingsResponse
+    public var ring: RingSettings
+    public var screensharing: ScreensharingSettings
+    public var thumbnails: ThumbnailsSettings
+    public var transcription: TranscriptionSettings
+    public var video: VideoSettings
 
     public init(
         audio: AudioSettings,
-        backstage: BackstageSettingsResponse,
+        backstage: BackstageSettings,
         broadcasting: BroadcastSettingsResponse,
-        geofencing: GeofenceSettingsResponse,
+        geofencing: GeofenceSettings,
         limits: LimitsSettingsResponse,
         recording: RecordSettingsResponse,
-        ring: RingSettingsResponse,
-        screensharing: ScreensharingSettingsResponse,
-        thumbnails: ThumbnailsSettingsResponse,
-        transcription: TranscriptionSettingsResponse,
-        video: VideoSettingsResponse
+        ring: RingSettings,
+        screensharing: ScreensharingSettings,
+        thumbnails: ThumbnailsSettings,
+        transcription: TranscriptionSettings,
+        video: VideoSettings
     ) {
         self.audio = audio
         self.backstage = backstage

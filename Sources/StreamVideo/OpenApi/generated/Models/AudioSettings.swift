@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct AudioSettings: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct AudioSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum DefaultDevice: String, Codable, CaseIterable {
         case earpiece

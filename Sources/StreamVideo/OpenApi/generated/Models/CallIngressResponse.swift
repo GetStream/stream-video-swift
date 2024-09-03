@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallIngressResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var rtmp: RTMPIngress
 

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SFULocationResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct SFULocationResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var coordinates: Coordinates
     public var datacenter: String

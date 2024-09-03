@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct BackstageSettingsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct BackstageSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool? = nil
     public var joinAheadTimeSeconds: Int? = nil

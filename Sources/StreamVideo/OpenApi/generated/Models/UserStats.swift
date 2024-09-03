@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UserStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var info: UserInfoResponse
     public var minEventTs: Int

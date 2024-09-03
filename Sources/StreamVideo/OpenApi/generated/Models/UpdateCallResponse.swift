@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UpdateCallResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UpdateCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse
     public var duration: String

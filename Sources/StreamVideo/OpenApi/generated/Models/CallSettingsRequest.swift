@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallSettingsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audio: AudioSettingsRequest? = nil
     public var backstage: BackstageSettingsRequest? = nil
@@ -15,7 +15,7 @@ public struct CallSettingsRequest: @unchecked Sendable, Event, Codable, JSONEnco
     public var ring: RingSettingsRequest? = nil
     public var screensharing: ScreensharingSettingsRequest? = nil
     public var thumbnails: ThumbnailsSettingsRequest? = nil
-    public var transcription: TranscriptionSettings? = nil
+    public var transcription: TranscriptionSettingsRequest? = nil
     public var video: VideoSettingsRequest? = nil
 
     public init(
@@ -28,7 +28,7 @@ public struct CallSettingsRequest: @unchecked Sendable, Event, Codable, JSONEnco
         ring: RingSettingsRequest? = nil,
         screensharing: ScreensharingSettingsRequest? = nil,
         thumbnails: ThumbnailsSettingsRequest? = nil,
-        transcription: TranscriptionSettings? = nil,
+        transcription: TranscriptionSettingsRequest? = nil,
         video: VideoSettingsRequest? = nil
     ) {
         self.audio = audio

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct EgressResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct EgressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var broadcasting: Bool
     public var hls: EgressHLSResponse? = nil

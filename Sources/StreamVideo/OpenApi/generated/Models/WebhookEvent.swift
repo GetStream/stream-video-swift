@@ -34,6 +34,7 @@ public enum WebhookEvent: Codable, Hashable {
     case typeCallRecordingStoppedEvent(CallRecordingStoppedEvent)
     case typeCallRejectedEvent(CallRejectedEvent)
     case typeCallRingEvent(CallRingEvent)
+    case typeCallRtmpBroadcastFailedEvent(CallRtmpBroadcastFailedEvent)
     case typeCallRtmpBroadcastStartedEvent(CallRtmpBroadcastStartedEvent)
     case typeCallRtmpBroadcastStoppedEvent(CallRtmpBroadcastStoppedEvent)
     case typeCallSessionEndedEvent(CallSessionEndedEvent)
@@ -109,6 +110,8 @@ public enum WebhookEvent: Codable, Hashable {
         case let .typeCallRejectedEvent(value):
             return value.type
         case let .typeCallRingEvent(value):
+            return value.type
+        case let .typeCallRtmpBroadcastFailedEvent(value):
             return value.type
         case let .typeCallRtmpBroadcastStartedEvent(value):
             return value.type
@@ -211,6 +214,8 @@ public enum WebhookEvent: Codable, Hashable {
             return value
         case let .typeCallRingEvent(value):
             return value
+        case let .typeCallRtmpBroadcastFailedEvent(value):
+            return value
         case let .typeCallRtmpBroadcastStartedEvent(value):
             return value
         case let .typeCallRtmpBroadcastStoppedEvent(value):
@@ -312,6 +317,8 @@ public enum WebhookEvent: Codable, Hashable {
         case let .typeCallRejectedEvent(value):
             try container.encode(value)
         case let .typeCallRingEvent(value):
+            try container.encode(value)
+        case let .typeCallRtmpBroadcastFailedEvent(value):
             try container.encode(value)
         case let .typeCallRtmpBroadcastStartedEvent(value):
             try container.encode(value)
@@ -440,6 +447,9 @@ public enum WebhookEvent: Codable, Hashable {
         } else if dto.type == "call.ring" {
             let value = try container.decode(CallRingEvent.self)
             self = .typeCallRingEvent(value)
+        } else if dto.type == "call.rtmp_broadcast_failed" {
+            let value = try container.decode(CallRtmpBroadcastFailedEvent.self)
+            self = .typeCallRtmpBroadcastFailedEvent(value)
         } else if dto.type == "call.rtmp_broadcast_started" {
             let value = try container.decode(CallRtmpBroadcastStartedEvent.self)
             self = .typeCallRtmpBroadcastStartedEvent(value)

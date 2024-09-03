@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ChannelMember: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ChannelMember: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banExpires: Date? = nil
     public var banned: Bool

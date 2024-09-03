@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SendEventRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct SendEventRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]? = nil
 

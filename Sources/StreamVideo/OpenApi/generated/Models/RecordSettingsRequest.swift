@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RecordSettingsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Mode: String, Codable, CaseIterable {
         case autoOn = "auto-on"

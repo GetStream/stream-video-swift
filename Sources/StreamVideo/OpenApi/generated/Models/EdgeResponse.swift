@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct EdgeResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var continentCode: String
     public var countryIsoCode: String

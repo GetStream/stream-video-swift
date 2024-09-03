@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallStatsReportSummaryResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var callCid: String
     public var callDurationSeconds: Int

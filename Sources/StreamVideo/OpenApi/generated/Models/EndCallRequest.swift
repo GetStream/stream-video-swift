@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct EndCallRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct EndCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public init() {}
 }

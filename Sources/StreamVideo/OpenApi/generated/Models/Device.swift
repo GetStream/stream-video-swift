@@ -4,31 +4,13 @@
 
 import Foundation
     
-public struct Device: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
-    
-    public enum PushProvider: String, Codable, CaseIterable {
-        case apn
-        case firebase
-        case huawei
-        case xiaomi
-        case unknown = "_unknown"
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            if let decodedValue = try? container.decode(String.self),
-               let value = Self(rawValue: decodedValue) {
-                self = value
-            } else {
-                self = .unknown
-            }
-        }
-    }
+public struct Device: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var disabled: Bool? = nil
     public var disabledReason: String? = nil
     public var id: String
-    public var pushProvider: PushProvider
+    public var pushProvider: String
     public var pushProviderName: String? = nil
     public var userId: String
     public var voip: Bool? = nil
@@ -38,7 +20,7 @@ public struct Device: @unchecked Sendable, Event, Codable, JSONEncodable, Hashab
         disabled: Bool? = nil,
         disabledReason: String? = nil,
         id: String,
-        pushProvider: PushProvider,
+        pushProvider: String,
         pushProviderName: String? = nil,
         userId: String,
         voip: Bool? = nil

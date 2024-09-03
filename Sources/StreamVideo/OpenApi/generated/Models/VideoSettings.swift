@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct VideoSettingsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct VideoSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum CameraFacing: String, Codable, CaseIterable {
         case back

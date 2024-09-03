@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct HLSSettingsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct HLSSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var autoOn: Bool
     public var enabled: Bool

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct BlockUserResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct BlockUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PublishedTrackInfo: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct PublishedTrackInfo: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var codecMimeType: String? = nil
     public var durationSeconds: Int? = nil

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StartHLSBroadcastingResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StartHLSBroadcastingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
     public var playlistUrl: String

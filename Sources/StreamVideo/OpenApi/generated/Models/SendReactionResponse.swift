@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SendReactionResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct SendReactionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
     public var reaction: ReactionResponse

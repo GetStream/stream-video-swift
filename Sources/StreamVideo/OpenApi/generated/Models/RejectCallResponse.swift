@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RejectCallResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct RejectCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GeolocationResult: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GeolocationResult: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accuracyRadius: Int
     public var city: String

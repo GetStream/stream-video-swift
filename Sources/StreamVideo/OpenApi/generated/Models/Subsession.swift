@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Subsession: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct Subsession: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endedAt: Int
     public var joinedAt: Int

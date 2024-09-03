@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GoLiveResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GoLiveResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse
     public var duration: String

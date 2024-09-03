@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TargetResolution: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct TargetResolution: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var bitrate: Int? = nil
     public var height: Int

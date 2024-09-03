@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallTimeline: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallTimeline: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var events: [CallEvent?]
 

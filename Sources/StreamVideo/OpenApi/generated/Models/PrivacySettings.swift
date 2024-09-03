@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PrivacySettings: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct PrivacySettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var readReceipts: ReadReceipts? = nil
     public var typingIndicators: TypingIndicators? = nil

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct LabelThresholds: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct LabelThresholds: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var block: Double? = nil
     public var flag: Double? = nil

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct BlockListOptions: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct BlockListOptions: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Behavior: String, Codable, CaseIterable {
         case block

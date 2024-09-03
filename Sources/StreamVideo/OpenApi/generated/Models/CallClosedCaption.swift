@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallClosedCaption: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallClosedCaption: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endTime: Date
     public var speakerId: String

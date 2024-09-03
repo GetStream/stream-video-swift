@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MediaPubSubHint: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct MediaPubSubHint: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audioPublished: Bool
     public var audioSubscribed: Bool

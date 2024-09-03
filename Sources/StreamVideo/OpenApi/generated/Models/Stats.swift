@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TimeStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct Stats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var averageSeconds: Double
     public var maxSeconds: Double

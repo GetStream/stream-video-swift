@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct BlockUserRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct BlockUserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var userId: String
 

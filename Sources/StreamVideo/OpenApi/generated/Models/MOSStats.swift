@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MOSStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct MOSStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var averageScore: Double
     public var histogramDurationSeconds: [Double]

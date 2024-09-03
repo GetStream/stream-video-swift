@@ -4,10 +4,10 @@
 
 import Foundation
     
-public struct ChannelConfigWithInfo: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ChannelConfigWithInfo: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Automod: String, Codable, CaseIterable {
-        case aI = "AI"
+        case ai = "AI"
         case disabled
         case simple
         case unknown = "_unknown"
@@ -56,6 +56,8 @@ public struct ChannelConfigWithInfo: @unchecked Sendable, Event, Codable, JSONEn
     public var maxMessageLength: Int
     public var mutes: Bool
     public var name: String
+    public var partitionSize: Int? = nil
+    public var partitionTtl: Int? = nil
     public var polls: Bool
     public var pushNotifications: Bool
     public var quotes: Bool
@@ -86,6 +88,8 @@ public struct ChannelConfigWithInfo: @unchecked Sendable, Event, Codable, JSONEn
         maxMessageLength: Int,
         mutes: Bool,
         name: String,
+        partitionSize: Int? = nil,
+        partitionTtl: Int? = nil,
         polls: Bool,
         pushNotifications: Bool,
         quotes: Bool,
@@ -115,6 +119,8 @@ public struct ChannelConfigWithInfo: @unchecked Sendable, Event, Codable, JSONEn
         self.maxMessageLength = maxMessageLength
         self.mutes = mutes
         self.name = name
+        self.partitionSize = partitionSize
+        self.partitionTtl = partitionTtl
         self.polls = polls
         self.pushNotifications = pushNotifications
         self.quotes = quotes
@@ -146,6 +152,8 @@ public struct ChannelConfigWithInfo: @unchecked Sendable, Event, Codable, JSONEn
         case maxMessageLength = "max_message_length"
         case mutes
         case name
+        case partitionSize = "partition_size"
+        case partitionTtl = "partition_ttl"
         case polls
         case pushNotifications = "push_notifications"
         case quotes

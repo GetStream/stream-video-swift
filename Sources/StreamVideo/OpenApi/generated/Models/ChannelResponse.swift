@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ChannelResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct ChannelResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var autoTranslationEnabled: Bool? = nil
     public var autoTranslationLanguage: String? = nil

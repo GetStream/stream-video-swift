@@ -4,9 +4,10 @@
 
 import Foundation
     
-public struct CallSessionResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var acceptedBy: [String: Date]
+    public var anonymousParticipantCount: Int
     public var endedAt: Date? = nil
     public var id: String
     public var liveEndedAt: Date? = nil
@@ -20,6 +21,7 @@ public struct CallSessionResponse: @unchecked Sendable, Event, Codable, JSONEnco
 
     public init(
         acceptedBy: [String: Date],
+        anonymousParticipantCount: Int,
         endedAt: Date? = nil,
         id: String,
         liveEndedAt: Date? = nil,
@@ -60,4 +62,3 @@ public struct CallSessionResponse: @unchecked Sendable, Event, Codable, JSONEnco
         case timerEndsAt = "timer_ends_at"
     }
 }
-

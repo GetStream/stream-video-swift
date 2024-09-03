@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var backstage: Bool
     public var blockedUserIds: [String]

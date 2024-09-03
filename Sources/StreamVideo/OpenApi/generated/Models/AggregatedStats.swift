@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct AggregatedStats: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct AggregatedStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var countrywiseAggregateStats: [String: CountrywiseAggregateStats?]? = nil
     public var publisherAggregateStats: PublisherAggregateStats? = nil

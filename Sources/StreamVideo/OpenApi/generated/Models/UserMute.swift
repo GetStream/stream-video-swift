@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserMute: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UserMute: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var expires: Date? = nil

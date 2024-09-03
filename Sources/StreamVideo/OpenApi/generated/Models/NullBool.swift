@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct NullBool: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct NullBool: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var hasValue: Bool? = nil
     public var value: Bool? = nil

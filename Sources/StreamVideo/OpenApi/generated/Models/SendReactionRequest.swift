@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SendReactionRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct SendReactionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]? = nil
     public var emojiCode: String? = nil

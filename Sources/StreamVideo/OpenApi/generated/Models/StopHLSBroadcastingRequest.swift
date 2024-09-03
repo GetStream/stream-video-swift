@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StopHLSBroadcastingRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct StopHLSBroadcastingRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public init() {}
 }

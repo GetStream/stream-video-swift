@@ -4,15 +4,15 @@
 
 import Foundation
     
-public struct GetCallStatsResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var aggregated: AggregatedStats? = nil
     public var callDurationSeconds: Int
     public var callStatus: String
     public var callTimeline: CallTimeline? = nil
     public var duration: String
-    public var jitter: TimeStats? = nil
-    public var latency: TimeStats? = nil
+    public var jitter: Stats? = nil
+    public var latency: Stats? = nil
     public var maxFreezesDurationSeconds: Int
     public var maxParticipants: Int
     public var maxTotalQualityLimitationDurationSeconds: Int
@@ -28,8 +28,8 @@ public struct GetCallStatsResponse: @unchecked Sendable, Event, Codable, JSONEnc
         callStatus: String,
         callTimeline: CallTimeline? = nil,
         duration: String,
-        jitter: TimeStats? = nil,
-        latency: TimeStats? = nil,
+        jitter: Stats? = nil,
+        latency: Stats? = nil,
         maxFreezesDurationSeconds: Int,
         maxParticipants: Int,
         maxTotalQualityLimitationDurationSeconds: Int,

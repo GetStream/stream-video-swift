@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct APIError: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var code: Int
     public var details: [Int]
@@ -13,6 +13,7 @@ public struct APIError: @unchecked Sendable, Event, Codable, JSONEncodable, Hash
     public var message: String
     public var moreInfo: String
     public var statusCode: Int
+    public var unrecoverable: Bool? = nil
 
     public init(
         code: Int,
@@ -21,7 +22,8 @@ public struct APIError: @unchecked Sendable, Event, Codable, JSONEncodable, Hash
         exceptionFields: [String: String]? = nil,
         message: String,
         moreInfo: String,
-        statusCode: Int
+        statusCode: Int,
+        unrecoverable: Bool? = nil
     ) {
         self.code = code
         self.details = details
@@ -30,6 +32,7 @@ public struct APIError: @unchecked Sendable, Event, Codable, JSONEncodable, Hash
         self.message = message
         self.moreInfo = moreInfo
         self.statusCode = statusCode
+        self.unrecoverable = unrecoverable
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -40,5 +43,6 @@ public struct APIError: @unchecked Sendable, Event, Codable, JSONEncodable, Hash
         case message
         case moreInfo = "more_info"
         case statusCode = "StatusCode"
+        case unrecoverable
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct QueryCallsRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct QueryCallsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var filterConditions: [String: RawJSON]? = nil
     public var limit: Int? = nil

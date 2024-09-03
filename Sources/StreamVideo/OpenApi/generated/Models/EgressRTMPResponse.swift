@@ -4,21 +4,24 @@
 
 import Foundation
     
-public struct EgressRTMPResponse: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var name: String
-    public var streamKey: String
-    public var url: String
+    public var startedAt: Date
+    public var streamKey: String? = nil
+    public var streamUrl: String? = nil
 
-    public init(name: String, streamKey: String, url: String) {
+    public init(name: String, startedAt: Date, streamKey: String? = nil, streamUrl: String? = nil) {
         self.name = name
+        self.startedAt = startedAt
         self.streamKey = streamKey
-        self.url = url
+        self.streamUrl = streamUrl
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case name
+        case startedAt = "started_at"
         case streamKey = "stream_key"
-        case url
+        case streamUrl = "stream_url"
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Count: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct Count: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var approximate: Bool
     public var value: Int

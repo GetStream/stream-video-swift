@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UpdateCallRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]? = nil
     public var settingsOverride: CallSettingsRequest? = nil

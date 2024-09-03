@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct WSAuthMessageRequest: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public struct WSAuthMessageRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var products: [String]? = nil
     public var token: String
