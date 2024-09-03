@@ -52,17 +52,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.callController = callController
         microphone = MicrophoneManager(
             callController: callController,
-            initialStatus: .enabled
+            initialStatus: callSettings?.audioOn == false ? .disabled : .enabled
         )
         camera = CameraManager(
             callController: callController,
-            initialStatus: .enabled,
+            initialStatus: callSettings?.videoOn == false ? .disabled : .enabled,
             initialDirection: .front
         )
         speaker = SpeakerManager(
             callController: callController,
-            initialSpeakerStatus: .enabled,
-            initialAudioOutputStatus: .enabled
+            initialSpeakerStatus: callSettings?.speakerOn == false ? .disabled : .enabled,
+            initialAudioOutputStatus: callSettings?.audioOutputOn == false ? .disabled : .enabled
         )
 
         /// If we received a non-nil initial callSettings, we updated them here.
