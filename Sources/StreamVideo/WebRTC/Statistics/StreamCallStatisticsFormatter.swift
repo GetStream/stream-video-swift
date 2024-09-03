@@ -105,7 +105,7 @@ struct StreamCallStatisticsFormatter {
         /// 1. Look for all `RTCStatistics` instances that match the `direction` we are looking for
         /// (in this case it will be `outbound`). The number of instances we will discover will be equal
         /// to the number of resolutions we are publishing.
-        /// 2. Those instances, won't contain a `trackIdentifier` which means that we cannot related
+        /// 2. Those instances, won't contain a `trackIdentifier` which means that we cannot relate
         /// them to a participant in the same way we do for `subscribers`. To fix that, we are looking -
         /// in the remaining `RTCStatistic` instances we got from the Publisher PeerConnection - for
         /// an instance that contains a `trackIdentifier` value. The found `trackIdentifier`
@@ -222,7 +222,9 @@ struct StreamCallStatisticsFormatter {
             result.averageJitterInMs *= 1000
             result.averageRoundTripTimeInMs *= 1000
         }
-        result.qualityLimitationReasons = qualityLimitationReasons.sorted().joined(separator: ",")
+        result.qualityLimitationReasons = qualityLimitationReasons
+            .sorted()
+            .joined(separator: ",")
 
         return result
     }
