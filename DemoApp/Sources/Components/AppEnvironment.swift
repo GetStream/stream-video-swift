@@ -113,7 +113,7 @@ extension AppEnvironment {
         case .test:
             return .demo
         case .debug:
-            return .pronto
+            return .prontoStaging
         case .release:
             return .demo
         }
@@ -363,7 +363,7 @@ extension AppEnvironment {
     static var tokenExpiration: TokenExpiration = {
         switch configuration {
         case .debug:
-            return .oneMinute
+            return .never
         case .test:
             return .oneMinute
         case .release:

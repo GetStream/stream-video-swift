@@ -20,7 +20,7 @@ import SwiftUI
 struct VisibilityThresholdModifier: ViewModifier {
     /// State to track if the content view is on screen.
     @State private var isOnScreen = false {
-        didSet { changeHandler(isOnScreen) }
+        didSet { if isOnScreen != oldValue { changeHandler(isOnScreen) } }
     }
 
     /// The bounds of the parent view or viewport.
@@ -100,12 +100,13 @@ extension View {
         threshold: CGFloat = 0.3,
         changeHandler: @escaping (Bool) -> Void
     ) -> some View {
-        modifier(
-            VisibilityThresholdModifier(
-                in: bounds,
-                threshold: threshold,
-                changeHandler: changeHandler
-            )
-        )
+//        modifier(
+//            VisibilityThresholdModifier(
+//                in: bounds,
+//                threshold: threshold,
+//                changeHandler: changeHandler
+//            )
+//        )
+        self
     }
 }

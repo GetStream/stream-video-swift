@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Participants (regular and anonymous) count, can be accessed - before or after joining a call - from the `Call.state.participantCount` & `Call.state.anonymousParticipantCount` respectively. [#496](https://github.com/GetStream/stream-video-swift/pull/496)
 - You can now provide the `CallSettings` when you start a ringing call [#497](https://github.com/GetStream/stream-video-swift/pull/497)
 
+### 🔄 Changed
+- The following `Call` APIs have been now marked as async to provide better observability.
+    - `func focus(at point: CGPoint)`
+    - `func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput)`
+    - `func removeCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput)`
+    - `func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput)`
+    - `func removeVideoOutput(_ videoOutput: AVCaptureVideoDataOutput)`
+    - `func zoom(by factor: CGFloat)`
+
 # [1.0.9](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.9)
 _July 19, 2024_
 
