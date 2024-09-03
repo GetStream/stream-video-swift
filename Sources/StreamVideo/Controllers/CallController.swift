@@ -592,6 +592,7 @@ class CallController: @unchecked Sendable {
         guard let call else { return }
 
         participantsCountUpdatesTask = Task {
+            let anonymousUserRoleKey = "anonymous"
             for await event in call.subscribe(for: CallSessionParticipantCountsUpdatedEvent.self) {
                 Task { @MainActor in
                     call.state.participantCount = event
