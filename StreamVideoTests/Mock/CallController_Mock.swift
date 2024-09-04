@@ -9,27 +9,6 @@ class CallController_Mock: CallController {
 
     let mockResponseBuilder = MockResponseBuilder()
 
-    internal lazy var webRTCClient = WebRTCClient(
-        user: StreamVideo.mockUser,
-        apiKey: "key1",
-        hostname: "localhost",
-        webSocketURLString: "wss://localhost/ws",
-        token: StreamVideo.mockToken.rawValue,
-        callCid: "default:test",
-        sessionID: nil,
-        ownCapabilities: [.sendAudio, .sendVideo],
-        videoConfig: .dummy(),
-        audioSettings: AudioSettings(
-            accessRequestEnabled: true,
-            defaultDevice: .speaker,
-            micDefaultOn: true,
-            opusDtxEnabled: true,
-            redundantCodingEnabled: true,
-            speakerDefaultOn: true
-        ),
-        environment: WebSocketClient.Environment.mock
-    )
-
     @MainActor func update(participants: [String: CallParticipant]) {
         call?.state.participantsMap = participants
     }
@@ -45,12 +24,7 @@ class CallController_Mock: CallController {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
-        webRTCClient.onParticipantsUpdated = { [weak self] participants in
-            executeOnMain {
-                self?.call?.state.participantsMap = participants
-            }
-        }
-        return mockResponseBuilder.makeJoinCallResponse(cid: "\(callType):\(callId)")
+        mockResponseBuilder.makeJoinCallResponse(cid: "\(callType):\(callId)")
     }
 
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }

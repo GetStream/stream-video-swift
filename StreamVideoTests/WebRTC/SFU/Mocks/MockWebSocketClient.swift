@@ -8,12 +8,23 @@ import Foundation
 final class MockWebSocketClient: WebSocketClient, Mockable {
     typealias FunctionKey = MockFunctionKey
 
-    enum MockFunctionKey: Hashable {
+    enum MockFunctionKey: Hashable, CaseIterable {
         case connect
         case disconnect
     }
 
+    enum FunctionInput {
+        case disconnect(
+            code: URLSessionWebSocketTask.CloseCode,
+            source: WebSocketConnectionState.DisconnectionSource,
+            completion: () -> Void
+        )
+    }
+
     var stubbedProperty: [String: Any] = [:]
+    @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInput]] = MockFunctionKey
+        .allCases
+        .reduce(into: [FunctionKey: [FunctionInput]]()) { $0[$1] = [] }
 
     let mockEngine: MockWebSocketEngine = .init()
     var stubbedFunction: [FunctionKey: Any] = [:]
@@ -53,17 +64,38 @@ final class MockWebSocketClient: WebSocketClient, Mockable {
     }
 
     override func disconnect(
+        code: URLSessionWebSocketTask.CloseCode = .normalClosure,
         source: WebSocketConnectionState.DisconnectionSource = .userInitiated,
         completion: @escaping () -> Void
     ) {
+        stubbedFunctionInput[.disconnect]?.append(
+            .disconnect(
+                code: code,
+                source: source,
+                completion: completion
+            )
+        )
+        
         if let value = timesFunctionWasCalled[.disconnect] {
             timesFunctionWasCalled[.disconnect] = value + 1
         } else {
             timesFunctionWasCalled[.disconnect] = 1
         }
+
+        completion()
     }
 
     override func updatePaused(_ isPaused: Bool) {
         updatePausedWasCalled = isPaused
+    }
+
+    // MARK: - Helpers
+
+    func simulate(state: WebSocketConnectionState) {
+        stub(for: \.connectionState, with: state)
+        connectionStateDelegate?.webSocketClient(
+            self,
+            didUpdateConnectionState: state
+        )
     }
 }
