@@ -21,7 +21,7 @@ fileprivate func content() {
         let focusPoint: CGPoint = CGPoint(x: 50, y: 50)
 
         // and pass it to our call
-        try call.focus(at: focusPoint)
+        try await call.focus(at: focusPoint)
     }
 
     container {
@@ -77,9 +77,11 @@ fileprivate func content() {
                     customData: customData,
                     call: call
                 )
-                .longPressToFocus(availableFrame: availableFrame) {
-                    guard call?.state.sessionId == participant.sessionId else { return } // We are using this to only allow long pressing on our local video feed
-                    try? call?.focus(at: $0)
+                .longPressToFocus(availableFrame: availableFrame) { point in
+                    Task {
+                        guard call?.state.sessionId == participant.sessionId else { return } // We are using this to only allow long pressing on our local video feed
+                        try await call?.focus(at: point)
+                    }
                 }
             }
 
