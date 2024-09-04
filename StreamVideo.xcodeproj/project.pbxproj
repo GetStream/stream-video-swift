@@ -110,6 +110,10 @@
 		4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */; };
 		4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4035913B2BC53D2A00B5B767 /* Accelerate.framework */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
+		40382F222C889E5500C2D00F /* DemoTranscriptionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */; };
+		40382F232C889E6500C2D00F /* DemoReconnectionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */; };
+		40382F242C889EA000C2D00F /* DemoNoiseCancellationButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4782C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift */; };
+		40382F252C889EB200C2D00F /* View+PresentDemoMoreMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47B2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
 		403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403EFCA02BDC003A0057C248 /* DemoFeedbackView.swift */; };
@@ -5596,10 +5600,13 @@
 				40AB35502B738C6000E465CC /* LongPressToFocusViewModifier.swift in Sources */,
 				40AB354C2B738C5700E465CC /* DemoMoreControlsViewModifier.swift in Sources */,
 				406A8E9E2AA1D7E9001F598A /* URL+Convenience.swift in Sources */,
+				40382F222C889E5500C2D00F /* DemoTranscriptionButtonView.swift in Sources */,
 				40AB353F2B738C1500E465CC /* CodeScanner.swift in Sources */,
+				40382F252C889EB200C2D00F /* View+PresentDemoMoreMenu.swift in Sources */,
 				406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */,
 				406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */,
 				40AB35602B738C7D00E465CC /* ReactionIcon.swift in Sources */,
+				40382F232C889E6500C2D00F /* DemoReconnectionButtonView.swift in Sources */,
 				40AB354B2B738C5400E465CC /* DemoCallModifier.swift in Sources */,
 				40EDA17C2C13792D00583A65 /* View+AlertWithTextField.swift in Sources */,
 				40AB35422B738C3700E465CC /* CallViewModel+Snapshot.swift in Sources */,
@@ -5637,6 +5644,7 @@
 				40AB355E2B738C7900E465CC /* DemoCallTopView.swift in Sources */,
 				406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */,
 				406A8E992AA1D7E9001F598A /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
+				40382F242C889EA000C2D00F /* DemoNoiseCancellationButtonView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

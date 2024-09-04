@@ -6,7 +6,7 @@ import AVFoundation
 
 @MainActor
 fileprivate func content() {
-    container {
-        try call.zoom(by: 1.5)
+    asyncContainer {
+        try await call.zoom(by: 1.5)
     }
 }

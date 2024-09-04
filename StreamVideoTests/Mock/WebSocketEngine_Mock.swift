@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 
 final class WebSocketEngine_Mock: WebSocketEngine {
-    
+
     var request: URLRequest
     var sessionConfiguration: URLSessionConfiguration
     var isConnected: Bool = false
@@ -37,6 +37,10 @@ final class WebSocketEngine_Mock: WebSocketEngine {
     }
 
     func disconnect() {
+        disconnect_calledCount += 1
+    }
+
+    func disconnect(with code: URLSessionWebSocketTask.CloseCode) {
         disconnect_calledCount += 1
     }
 
