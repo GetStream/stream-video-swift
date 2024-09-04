@@ -6,17 +6,26 @@ import Foundation
 @testable import StreamVideo
 
 final class MockWebSocketEngine: WebSocketEngine {
+
     typealias FunctionKey = MockFunctionKey
 
-    enum MockFunctionKey: Hashable {
+    enum MockFunctionKey: Hashable, CaseIterable {
         case connect
         case disconnect
+        case disconnectWithCode
         case sendPing
+        case send
+    }
+
+    enum FunctionInput {
+        case send(message: SendableEvent?, json: Codable?)
+        case disconnectWithCode(URLSessionWebSocketTask.CloseCode)
     }
 
     private(set) var timesFunctionWasCalled: [FunctionKey: Int] = [:]
-    private(set) var sendWasCalledWithMessage: SendableEvent?
-    private(set) var sendWasCalledWithJSON: Codable?
+    @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInput]] = MockFunctionKey
+        .allCases
+        .reduce(into: [FunctionKey: [FunctionInput]]()) { $0[$1] = [] }
 
     let request: URLRequest
     let callbackQueue: DispatchQueue
@@ -55,12 +64,21 @@ final class MockWebSocketEngine: WebSocketEngine {
         }
     }
 
+    func disconnect(with code: URLSessionWebSocketTask.CloseCode) {
+        stubbedFunctionInput[.disconnectWithCode]?.append(.disconnectWithCode(code))
+        if let value = timesFunctionWasCalled[.disconnectWithCode] {
+            timesFunctionWasCalled[.disconnectWithCode] = value + 1
+        } else {
+            timesFunctionWasCalled[.disconnectWithCode] = 1
+        }
+    }
+
     func send(message: any SendableEvent) {
-        sendWasCalledWithMessage = message
+        stubbedFunctionInput[.send]?.append(.send(message: message, json: nil))
     }
 
     func send(jsonMessage: any Codable) {
-        sendWasCalledWithJSON = jsonMessage
+        stubbedFunctionInput[.send]?.append(.send(message: nil, json: jsonMessage))
     }
 
     func sendPing() {

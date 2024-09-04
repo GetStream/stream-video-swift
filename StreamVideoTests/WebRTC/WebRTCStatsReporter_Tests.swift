@@ -10,7 +10,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
 
     private var mockSFUAdapter: SFUAdapter!
     private var mockSFUService: MockSignalServer!
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .init(audioProcessingModule: MockAudioProcessingModule())
+    private var mockWebSocketClient: MockWebSocketClient!
     private lazy var sessionID: String! = .unique
     private lazy var subject: WebRTCStatsReporter! = .init(
         interval: 2,
@@ -22,12 +22,15 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
         let mockSFUStack = SFUAdapter.mock(webSocketClientType: .sfu)
         mockSFUAdapter = mockSFUStack.sfuAdapter
         mockSFUService = mockSFUStack.mockService
+        mockWebSocketClient = mockSFUStack.mockWebSocketClient
+
+        mockWebSocketClient.simulate(state: .connected(healthCheckInfo: .init()))
     }
 
     override func tearDown() {
         sessionID = nil
-        peerConnectionFactory = nil
         mockSFUAdapter = nil
+        mockWebSocketClient = nil
         mockSFUService = nil
         subject = nil
         super.tearDown()
@@ -52,15 +55,15 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
-    func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompleters(
+    func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
-
         subject.sfuAdapter = mockSFUAdapter
         await wait(for: subject.interval - 1)
         
         let sfuStack = SFUAdapter.mock(webSocketClientType: .sfu)
         subject.sfuAdapter = sfuStack.sfuAdapter
-        
+        sfuStack.mockWebSocketClient.simulate(state: .connected(healthCheckInfo: .init()))
+
         await wait(for: 1)
         XCTAssertNil(mockSFUService.sendStatsWasCalledWithRequest)
         XCTAssertNil(sfuStack.mockService.sendStatsWasCalledWithRequest)
