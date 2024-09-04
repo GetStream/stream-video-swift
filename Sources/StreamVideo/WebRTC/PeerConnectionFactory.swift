@@ -39,7 +39,11 @@ final class PeerConnectionFactory: @unchecked Sendable {
     }
 
     deinit {
+        /// We are disabling cleaning up on SSL when running tests as it seems that rapid cleanUp/init
+        /// is causing fatal errors on WebRTC.
+        #if !STREAM_TESTS
         RTCCleanupSSL()
+        #endif
     }
     
     func makeVideoSource(forScreenShare: Bool) -> RTCVideoSource {

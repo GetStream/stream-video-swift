@@ -186,7 +186,7 @@ fileprivate func content() {
             .toastView(toast: $snapshotViewModel.toast)
     }
 
-    container {
+    asyncContainer {
         final class Delegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {}
         let call: Call? = call
 
@@ -195,12 +195,12 @@ fileprivate func content() {
 
         do {
             if #available(iOS 16.0, *) {
-                try call?.addVideoOutput(videoOutput)
+                try await call?.addVideoOutput(videoOutput)
                 /// Following Apple guidelines for videoOutputs from here:
                 /// https://developer.apple.com/library/archive/technotes/tn2445/_index.html
                 videoOutput.alwaysDiscardsLateVideoFrames = true
             } else {
-                try call?.addCapturePhotoOutput(photoOutput)
+                try await call?.addCapturePhotoOutput(photoOutput)
             }
         } catch {
             log.error("Failed to setup for localParticipant snapshot", error: error)
