@@ -57,6 +57,8 @@ protocol DefaultAPIClientMiddleware: Sendable {
     ) async throws -> (Data, URLResponse)
 }
 
+struct EmptyResponse: Codable {}
+
 open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     internal var transport: DefaultAPITransport
     internal var middlewares: [DefaultAPIClientMiddleware]
@@ -1120,6 +1122,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(CreateGuestResponse.self, from: $0)
         }
     }
+
+    open func videoConnect() async throws {
+        let path = "/video/longpoll"
+        
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            
+            httpMethod: "GET"
+        )
+        _ = try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(EmptyResponse.self, from: $0)
+        }
+    }
 }
 
 protocol DefaultAPIEndpoints {
@@ -1239,4 +1254,6 @@ protocol DefaultAPIEndpoints {
     func getEdges() async throws -> GetEdgesResponse
         
     func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
+        
+    func videoConnect() async throws -> Void
 }
