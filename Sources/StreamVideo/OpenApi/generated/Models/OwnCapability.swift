@@ -4,7 +4,7 @@
 
 import Foundation
     
-public enum OwnCapability: Sendable, String, Codable, CaseIterable {
+public enum OwnCapability: String, Sendable, Codable, CaseIterable {
     case blockUsers = "block-users"
     case changeMaxDuration = "change-max-duration"
     case createCall = "create-call"
@@ -18,7 +18,7 @@ public enum OwnCapability: Sendable, String, Codable, CaseIterable {
     case pinForEveryone = "pin-for-everyone"
     case readCall = "read-call"
     case removeCallMember = "remove-call-member"
-    case screenshare = "screenshare"
+    case screenshare
     case sendAudio = "send-audio"
     case sendVideo = "send-video"
     case startBroadcastCall = "start-broadcast-call"
