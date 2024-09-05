@@ -120,11 +120,7 @@
 		40382F302C88C34600C2D00F /* SFUEventAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F2F2C88C34300C2D00F /* SFUEventAdapter_Tests.swift */; };
 		40382F332C89A66000C2D00F /* RTCPeerConnectionCoordinatorProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F322C89A66000C2D00F /* RTCPeerConnectionCoordinatorProviding.swift */; };
 		40382F352C89A6C500C2D00F /* AudioSettings+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F342C89A6C500C2D00F /* AudioSettings+Convenience.swift */; };
-		40382F372C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F362C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift */; };
 		40382F382C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F362C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift */; };
-		40382F392C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F362C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift */; };
-		40382F3B2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F3A2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift */; };
-		40382F3C2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F3A2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift */; };
 		40382F3D2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F3A2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift */; };
 		40382F3F2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F3E2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift */; };
 		40382F402C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F3E2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift */; };
@@ -6451,7 +6447,6 @@
 				407AF7182B61619900E9E3E7 /* ParticipantListButton_Tests.swift in Sources */,
 				407AF7162B61602B00E9E3E7 /* ControlBadgeView_Tests.swift in Sources */,
 				841FF5152A5E99B400809BBB /* CallEventsHandler_Tests.swift in Sources */,
-				40382F392C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift in Sources */,
 				82E3BA462A0BAE1E001AB93E /* VirtualTime.swift in Sources */,
 				40382F422C89CF9700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */,
 				82FF40B72A17C6CD00B4D95E /* ReconnectionView_Tests.swift in Sources */,
@@ -6477,7 +6472,6 @@
 				40245F492BE2746300FCF075 /* EgressHLSResponse+Dummy.swift in Sources */,
 				40245F4A2BE2746300FCF075 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */,
 				40245F4B2BE2746300FCF075 /* RecordSettingsResponse+Dummy.swift in Sources */,
-				40382F3B2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */,
 				40245F4C2BE2746300FCF075 /* AudioSettings+Dummy.swift in Sources */,
 				40245F4D2BE2746300FCF075 /* CallSessionResponse+Dummy.swift in Sources */,
 				40245F4E2BE2746300FCF075 /* CallSettingsResponse+Dummy.swift in Sources */,
@@ -6569,11 +6563,9 @@
 				82E3BA3D2A0BADCB001AB93E /* MockResponseBuilder.swift in Sources */,
 				8493227A290938440013C029 /* CallViewController_Tests.swift in Sources */,
 				82E3BA4B2A0BAE34001AB93E /* UniqueValues.swift in Sources */,
-				40382F3C2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */,
 				82E3BA512A0BAEAB001AB93E /* MockFunc.swift in Sources */,
 				82E3BA472A0BAE1F001AB93E /* VirtualTime.swift in Sources */,
 				82E3BA392A0BADB9001AB93E /* CallController_Mock.swift in Sources */,
-				40382F372C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift in Sources */,
 				40382F482C89D03700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */,
 				408CE0F92BD95F1B0052EC3A /* VideoConfig+Dummy.swift in Sources */,
 				40382F462C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */,
