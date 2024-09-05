@@ -450,6 +450,8 @@
 		4159F1992C86FA41002B94D3 /* CountrywiseAggregateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1672C86FA41002B94D3 /* CountrywiseAggregateStats.swift */; };
 		4159F19A2C86FA41002B94D3 /* UserReactivatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1682C86FA41002B94D3 /* UserReactivatedEvent.swift */; };
 		4159F19B2C86FA41002B94D3 /* LabelThresholds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1692C86FA41002B94D3 /* LabelThresholds.swift */; };
+		4159F19E2C89CC53002B94D3 /* ReadReceiptsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F19C2C89CC53002B94D3 /* ReadReceiptsResponse.swift */; };
+		4159F19F2C89CC53002B94D3 /* TypingIndicatorsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F19D2C89CC53002B94D3 /* TypingIndicatorsResponse.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
@@ -1583,6 +1585,8 @@
 		4159F1672C86FA41002B94D3 /* CountrywiseAggregateStats.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CountrywiseAggregateStats.swift; sourceTree = "<group>"; };
 		4159F1682C86FA41002B94D3 /* UserReactivatedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserReactivatedEvent.swift; sourceTree = "<group>"; };
 		4159F1692C86FA41002B94D3 /* LabelThresholds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LabelThresholds.swift; sourceTree = "<group>"; };
+		4159F19C2C89CC53002B94D3 /* ReadReceiptsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadReceiptsResponse.swift; sourceTree = "<group>"; };
+		4159F19D2C89CC53002B94D3 /* TypingIndicatorsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypingIndicatorsResponse.swift; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
 		4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTest.swift; sourceTree = "<group>"; };
 		4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
@@ -4113,10 +4117,10 @@
 		84B57D3A2981645900E4E709 /* OpenApi */ = {
 			isa = PBXGroup;
 			children = (
-				435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */,
-				84A8B79E29927830003AA570 /* generated */,
-				84DCA2202A39E380000C3411 /* URLSessionTransport.swift */,
 				84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */,
+				435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */,
+				84DCA2202A39E380000C3411 /* URLSessionTransport.swift */,
+				84A8B79E29927830003AA570 /* generated */,
 			);
 			path = OpenApi;
 			sourceTree = "<group>";
@@ -4192,6 +4196,8 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				4159F19C2C89CC53002B94D3 /* ReadReceiptsResponse.swift */,
+				4159F19D2C89CC53002B94D3 /* TypingIndicatorsResponse.swift */,
 				4159F14C2C86FA3F002B94D3 /* AcceptCallRequest.swift */,
 				842B8E002A2DFED700863A87 /* AcceptCallResponse.swift */,
 				4159F1632C86FA41002B94D3 /* AggregatedStats.swift */,
@@ -5461,6 +5467,7 @@
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
 				40149DD02B7E839500473176 /* AudioSessionProtocol.swift in Sources */,
 				8409465B29AF4EEC007AF5BF /* ListRecordingsResponse.swift in Sources */,
+				4159F19E2C89CC53002B94D3 /* ReadReceiptsResponse.swift in Sources */,
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
@@ -5660,6 +5667,7 @@
 				842B8E2D2A2DFED900863A87 /* StopTranscriptionResponse.swift in Sources */,
 				400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */,
 				40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */,
+				4159F19F2C89CC53002B94D3 /* TypingIndicatorsResponse.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
 				4159F1702C86FA41002B94D3 /* UserMutedEvent.swift in Sources */,
