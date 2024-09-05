@@ -73,7 +73,7 @@ actor WebRTCStateAdapter: ObservableObject {
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        self.peerConnectionFactory = PeerConnectionFactory(
+        self.peerConnectionFactory = PeerConnectionFactory.build(
             audioProcessingModule: videoConfig.audioProcessingModule
         )
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
