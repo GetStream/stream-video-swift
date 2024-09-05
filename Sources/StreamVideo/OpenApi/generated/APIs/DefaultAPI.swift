@@ -153,14 +153,14 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         return r
     }
 
-    open func queryCallMembers(queryCallMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse {
+    open func queryCallMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse {
         let path = "/video/call/members"
         
         let urlRequest = try makeRequest(
             uriPath: path,
             
             httpMethod: "POST",
-            request: queryCallMembersRequest
+            request: queryMembersRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(QueryMembersResponse.self, from: $0)
@@ -330,7 +330,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func sendEvent(type: String, id: String, sendCallEventRequest: SendEventRequest) async throws -> SendEventResponse {
+    open func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse {
         var path = "/video/call/{type}/{id}/event"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -344,7 +344,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             uriPath: path,
             
             httpMethod: "POST",
-            request: sendCallEventRequest
+            request: sendEventRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(SendEventResponse.self, from: $0)
@@ -1123,7 +1123,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 }
 
 protocol DefaultAPIEndpoints {
-    func queryCallMembers(queryCallMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse
+    func queryCallMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse
         
     func queryCallStats(queryCallStatsRequest: QueryCallStatsRequest) async throws -> QueryCallStatsResponse
         
@@ -1152,7 +1152,7 @@ protocol DefaultAPIEndpoints {
         
     func deleteCall(type: String, id: String, deleteCallRequest: DeleteCallRequest) async throws -> DeleteCallResponse
         
-    func sendEvent(type: String, id: String, sendCallEventRequest: SendEventRequest) async throws -> SendEventResponse
+    func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse
         
     func collectUserFeedback(
         type: String,
