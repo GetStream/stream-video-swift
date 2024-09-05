@@ -132,13 +132,6 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
                 XCTAssertEqual(activeEncodings, .init(["q"]))
             }
         }
-
-//        let event = Stream_Video_Sfu_Event_ChangePublishQuality.dummy()
-//
-//        await sfuAdapter.publishEvent(event)
-//
-//        XCTAssertEqual(stateAdapter.publisherChangeQualityCallCount, 1)
-//        XCTAssertEqual(stateAdapter.lastPublishQualityChange?.enabledRids, ["h", "m"])
     }
 
     // MARK: participantJoined
@@ -345,20 +338,6 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertTrue($0[participantA.sessionId]?.isDominantSpeaker ?? false)
             XCTAssertFalse($0[participantB.sessionId]?.isDominantSpeaker ?? false)
         }
-
-//        let event = Stream_Video_Sfu_Event_DominantSpeakerChanged.dummy()
-//        let participant1 = CallParticipant.dummy()
-//        let participant2 = CallParticipant.dummy()
-//        await stateAdapter.setParticipants([
-//            participant1.sessionId: participant1,
-//            participant2.sessionId: participant2
-//        ])
-//
-//        await sfuAdapter.publishEvent(event)
-//
-//        let updatedParticipants = await stateAdapter.participants
-//        XCTAssertEqual(updatedParticipants[event.sessionID]?.isDominantSpeaker, true)
-//        XCTAssertEqual(updatedParticipants[participant2.sessionId]?.isDominantSpeaker, false)
     }
 
     // MARK: joinResponse
