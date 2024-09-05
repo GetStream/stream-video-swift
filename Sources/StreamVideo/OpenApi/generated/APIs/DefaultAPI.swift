@@ -160,7 +160,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: queryMembersRequest
         )
@@ -174,7 +173,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: queryCallStatsRequest
         )
@@ -231,7 +229,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "PATCH",
             request: updateCallRequest
         )
@@ -282,7 +279,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -302,7 +298,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: blockUserRequest
         )
@@ -323,7 +318,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: deleteCallRequest
         )
@@ -344,7 +338,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: sendEventRequest
         )
@@ -378,7 +371,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: collectUserFeedbackRequest
         )
@@ -399,7 +391,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: goLiveRequest
         )
@@ -450,7 +441,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -474,7 +464,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: updateCallMembersRequest
         )
@@ -495,7 +484,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: muteUsersRequest
         )
@@ -516,7 +504,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: pinRequest
         )
@@ -541,7 +528,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: sendReactionRequest
         )
@@ -562,7 +548,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "GET"
         )
         return try await send(request: urlRequest) {
@@ -582,7 +567,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: rejectCallRequest
         )
@@ -607,7 +591,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: requestPermissionRequest
         )
@@ -632,7 +615,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: startRTMPBroadcastsRequest
         )
@@ -653,7 +635,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -681,7 +662,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: stopRTMPBroadcastsRequest
         )
@@ -702,7 +682,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -726,7 +705,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: startRecordingRequest
         )
@@ -751,7 +729,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: startTranscriptionRequest
         )
@@ -780,7 +757,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "GET"
         )
         return try await send(request: urlRequest) {
@@ -800,7 +776,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -820,7 +795,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -840,7 +814,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -860,7 +833,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
@@ -880,7 +852,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "GET"
         )
         return try await send(request: urlRequest) {
@@ -900,7 +871,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: unblockUserRequest
         )
@@ -921,7 +891,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: unpinRequest
         )
@@ -946,7 +915,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: updateUserPermissionsRequest
         )
@@ -983,7 +951,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "DELETE"
         )
         return try await send(request: urlRequest) {
@@ -1024,7 +991,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "DELETE"
         )
         return try await send(request: urlRequest) {
@@ -1074,7 +1040,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "GET"
         )
         return try await send(request: urlRequest) {
@@ -1087,7 +1052,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: createDeviceRequest
         )
@@ -1101,7 +1065,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "GET"
         )
         return try await send(request: urlRequest) {
@@ -1114,7 +1077,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "POST",
             request: createGuestRequest
         )
@@ -1128,7 +1090,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            
             httpMethod: "GET"
         )
         _ = try await send(request: urlRequest) {
