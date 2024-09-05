@@ -792,7 +792,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.sendEvent(
             type: callType,
             id: callId,
-            sendCallEventRequest: SendEventRequest(custom: data)
+            sendEventRequest: SendEventRequest(custom: data)
         )
     }
 
@@ -824,7 +824,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             sort: sort,
             type: callType
         )
-        let response = try await coordinatorClient.queryCallMembers(queryCallMembersRequest: request)
+        let response = try await coordinatorClient.queryCallMembers(queryMembersRequest: request)
         await state.mergeMembers(response.members)
         return response
     }
