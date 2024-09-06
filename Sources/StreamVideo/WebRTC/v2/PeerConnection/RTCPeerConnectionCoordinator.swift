@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import StreamWebRTC
 
-final class RTCPeerConnectionCoordinator: @unchecked Sendable {
+class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     enum Action {
         case addTrack(
