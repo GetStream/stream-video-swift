@@ -38,18 +38,17 @@ open class CallViewModel: ObservableObject {
                     self?.recordingState = newState
                 })
             reconnectionUpdates = call?.state.$reconnectionStatus
-                .dropFirst()
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
-                    if reconnectionStatus == .reconnecting {
-                        if self?.callingState != .reconnecting {
-                            self?.callingState = .reconnecting
-                        }
-                    } else if reconnectionStatus == .disconnected {
-                        self?.leaveCall()
-                    } else {
-                        if self?.callingState != .inCall && self?.callingState != .outgoing {
-                            self?.callingState = .inCall
+                    guard let self else { return }
+                    switch reconnectionStatus {
+                    case .reconnecting where callingState != .reconnecting:
+                        callingState = .reconnecting
+                    case .disconnected where callingState == .inCall:
+                        leaveCall()
+                    default:
+                        if callingState != .inCall, callingState != .outgoing {
+                            callingState = .inCall
                         }
                     }
                 })
