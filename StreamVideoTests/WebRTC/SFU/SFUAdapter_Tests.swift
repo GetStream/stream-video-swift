@@ -9,10 +9,12 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     private lazy var mockService: MockSignalServer! = .init()
     private lazy var mockWebSocket: MockWebSocketClient! = .init(webSocketClientType: .sfu)
     private lazy var subject: SFUAdapter! = .init(
-        service: mockService,
+        signalService: mockService,
         webSocket: mockWebSocket
     )
 
+    // MARK: - Lifecycle
+    
     override func setUp() {
         super.setUp()
     }
@@ -45,7 +47,8 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - disconnect
 
     func test_disconnect_givenConnectedState_thenCallsWebSocketDisconnect() async {
-        simulateConnect()
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
 
         // When
         await subject.disconnect()
@@ -70,22 +73,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-//    // MARK: - updatePaused
-
-    func test_updatePaused_webSocketWasCalledCorrectly() throws {
-        simulateConnect()
-
-        // When
-        subject.updatePaused(true)
-
-        // Then
-        XCTAssertTrue(mockWebSocket.updatePausedWasCalled ?? false)
-    }
-
     // MARK: - sendMessage
 
     func test_sendMessage_webSocketEngineWasCalled() throws {
-        simulateConnect()
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
 
         // When
         subject.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
@@ -114,7 +105,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_refresh_oldWebSocketDisconnectsNoLongerReceivesCalls() throws {
-        simulateConnect()
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
 
         subject.refresh(
             webSocketConfiguration: .init(
@@ -131,7 +122,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - updateTrackMuteState
 
     func test_updateTrackMuteState_serviceWasCalledWithCorrectRequest() async throws {
-        simulateConnect()
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
         
         try await subject.updateTrackMuteState(
@@ -152,7 +143,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - sendStats
 
     func test_sendStats_serviceWasCalledWithCorrectRequest() async throws {
-        simulateConnect()
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
 
         try await subject.sendStats(
@@ -170,7 +161,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - toggleNoiseCancellation
 
     func test_toggleNoiseCancellation_enabled_serviceWasCalledWithCorrectRequest() async throws {
-        simulateConnect()
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
 
         // When
@@ -182,7 +173,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_toggleNoiseCancellation_disabled_serviceWasCalledWithCorrectRequest() async throws {
-        simulateConnect()
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
 
         // When
@@ -196,7 +187,8 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - setPublisher
 
     func test_setPublisher_serviceWasCalledWithCorrectRequest() async throws {
-        simulateConnect()
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionDescription = String.unique
         let sessionID = String.unique
 
@@ -216,7 +208,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     // MARK: - updateSubscriptions
 
     func test_updateSubscriptions_serviceWasCalledWithCorrectRequest() async throws {
-        simulateConnect()
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
 
         // When
@@ -285,14 +277,5 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
             XCTAssertEqual(subject.connectionState, state)
         }
-    }
-
-    // MARK: - Private helpers
-
-    private func simulateConnect() {
-        subject.webSocketClient(
-            mockWebSocket,
-            didUpdateConnectionState: .authenticating
-        )
     }
 }
