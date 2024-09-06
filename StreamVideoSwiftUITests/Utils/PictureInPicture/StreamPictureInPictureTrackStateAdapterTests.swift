@@ -10,7 +10,7 @@ import XCTest
 
 final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Sendable {
 
-    private var factory: PeerConnectionFactory! = .init(audioProcessingModule: MockAudioProcessingModule())
+    private var factory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule())
     private var adapter: StreamPictureInPictureTrackStateAdapter! = .init()
 
     private lazy var trackA: RTCVideoTrack! = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))

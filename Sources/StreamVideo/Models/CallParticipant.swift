@@ -445,8 +445,10 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
 }
 
 extension Stream_Video_Sfu_Models_Participant {
-
-    func toCallParticipant(showTrack: Bool = true, pin: PinInfo? = nil) -> CallParticipant {
+    func toCallParticipant(
+        showTrack: Bool = true,
+        pin: PinInfo? = nil
+    ) -> CallParticipant {
         CallParticipant(
             id: sessionID,
             userId: userID,
