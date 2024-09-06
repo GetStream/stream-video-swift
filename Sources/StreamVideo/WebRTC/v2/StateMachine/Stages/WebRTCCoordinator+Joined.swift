@@ -48,6 +48,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         override func didTransitionAway() {
             disposableBag.removeAll()
+            context.subscriptionsAdapter = nil
         }
 
         private func execute() {

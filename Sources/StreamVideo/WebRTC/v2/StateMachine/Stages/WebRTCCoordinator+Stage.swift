@@ -23,6 +23,7 @@ extension WebRTCCoordinator.StateMachine {
             var previousSessionPublisher: RTCPeerConnectionCoordinator?
             var previousSessionSubscriber: RTCPeerConnectionCoordinator?
             var previousSFUAdapter: SFUAdapter?
+            var subscriptionsAdapter: CallParticipantsSubscriptionsAdapter?
 
             func nextReconnectionStrategy() -> ReconnectionStrategy {
                 switch reconnectionStrategy {

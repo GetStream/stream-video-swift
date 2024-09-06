@@ -301,6 +301,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .stateAdapter
                 .didUpdateParticipants(participants)
 
+            let sessionId = await coordinator.stateAdapter.sessionID
+            context.subscriptionsAdapter = await .init(
+                sfuAdapter: sfuAdapter,
+                participantsPublisher: coordinator
+                    .stateAdapter
+                    .$participants
+                    .map { Array($0.values) }
+                    .map { participants in participants.filter { $0.sessionId != sessionId } }
+                    .eraseToAnyPublisher()
+            )
+
             try await coordinator.stateAdapter.restoreScreenSharing()
         }
     }
