@@ -158,7 +158,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     }
 
     func setVideoFilter(_ videoFilter: VideoFilter?) async {
-        await stateAdapter.publisher?.setVideoFilter(videoFilter)
+        await stateAdapter.set(videoFilter)
     }
 
     func startScreensharing(
@@ -172,7 +172,6 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     func stopScreensharing() async throws {
         try await stateAdapter.publisher?.stopScreenSharing()
-//        await stateAdapter.didRemoveTrack(for: stateAdapter.sessionID)
     }
 
     func changePinState(
