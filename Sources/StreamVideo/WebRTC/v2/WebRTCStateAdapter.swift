@@ -54,6 +54,7 @@ actor WebRTCStateAdapter: ObservableObject {
     private var audioTracks: [String: RTCAudioTrack] = [:]
     private var videoTracks: [String: RTCVideoTrack] = [:]
     private var screenShareTracks: [String: RTCVideoTrack] = [:]
+    private var videoFilter: VideoFilter?
 
     private let audioSession: AudioSession = .init()
     private let disposableBag = DisposableBag()
@@ -97,6 +98,10 @@ actor WebRTCStateAdapter: ObservableObject {
     func set(anonymous value: UInt32) { self.anonymousCount = value }
     func set(_ value: [PinInfo]) { self.participantPins = value }
     func set(token value: String) { self.token = value }
+    func set(_ value: VideoFilter?) {
+        videoFilter = value
+        publisher?.setVideoFilter(value)
+    }
 
     // MARK: - Session
 
@@ -174,6 +179,7 @@ actor WebRTCStateAdapter: ObservableObject {
                 ownCapabilities
             )
         )
+        publisher.setVideoFilter(videoFilter)
 
         try await subscriber.setUp(
             with: callSettings,
