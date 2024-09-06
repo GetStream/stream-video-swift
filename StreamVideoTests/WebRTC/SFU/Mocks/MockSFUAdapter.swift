@@ -16,7 +16,10 @@ extension SFUAdapter {
     ) {
         let mockWebSocketClient = MockWebSocketClient(webSocketClientType: webSocketClientType)
         let mockService = MockSignalServer()
-        let mockSFUAdapter = SFUAdapter(service: mockService, webSocket: mockWebSocketClient)
+        let mockSFUAdapter = SFUAdapter(
+            signalService: mockService,
+            webSocket: mockWebSocketClient
+        )
         return (
             sfuAdapter: mockSFUAdapter,
             mockService: mockService,

@@ -4,14 +4,29 @@
 
 import Foundation
 
+/// A class that adapts SFU (Selective Forwarding Unit) events to the application's state.
 final class SFUEventAdapter {
 
+    /// The SFU adapter instance. Observes events when set.
     var sfuAdapter: SFUAdapter { didSet { observeEvents() } }
+
+    /// The WebRTC state adapter instance.
     private let stateAdapter: WebRTCStateAdapter
+
+    /// A bag to store disposable resources.
     private let disposableBag: DisposableBag = .init()
+
+    /// The user ID used for recording.
     private let recordingUserId = "recording-egress"
+
+    /// The threshold of participants above which certain behaviors change.
     private let participantsThreshold = 10
 
+    /// Initializes a new instance of SFUEventAdapter.
+    ///
+    /// - Parameters:
+    ///   - sfuAdapter: The SFU adapter to use.
+    ///   - stateAdapter: The WebRTC state adapter to use.
     init(
         sfuAdapter: SFUAdapter,
         stateAdapter: WebRTCStateAdapter
@@ -21,6 +36,7 @@ final class SFUEventAdapter {
         observeEvents()
     }
 
+    /// Observes various SFU events and sets up handlers for each.
     private func observeEvents() {
         disposableBag.removeAll()
 
@@ -85,28 +101,38 @@ final class SFUEventAdapter {
             .store(in: disposableBag)
     }
 
+    // MARK: - Event handlers
+
+    /// Handles a ConnectionQualityChanged event.
+    ///
+    /// - Parameter event: The ConnectionQualityChanged event to handle.
+    /// - Note: The handler will **only** update if the event is for the localParticipant.
     private func handle(
         _ event: Stream_Video_Sfu_Event_ConnectionQualityChanged
     ) async {
-        guard
-            let connectionQualityInfo = event.connectionQualityUpdates.last
-        else {
+        guard !event.connectionQualityUpdates.isEmpty else {
             return
         }
 
-        let sessionID = connectionQualityInfo.sessionID
-        var participants = await stateAdapter.participants
-        guard let participant = participants[sessionID] else {
-            return
-        }
+        var updatedParticipants = await stateAdapter.participants
+        for connectionQualityUpdate in event.connectionQualityUpdates {
+            let sessionID = connectionQualityUpdate.sessionID
+            guard let participant = updatedParticipants[sessionID] else {
+                return
+            }
 
-        let updatedParticipant = participant.withUpdated(
-            connectionQuality: connectionQualityInfo.connectionQuality.mapped
-        )
-        participants[sessionID] = updatedParticipant
-        await stateAdapter.didUpdateParticipants(participants)
+            let updatedParticipant = participant.withUpdated(
+                connectionQuality: connectionQualityUpdate.connectionQuality.mapped
+            )
+            updatedParticipants[sessionID] = updatedParticipant
+        }
+        await stateAdapter.didUpdateParticipants(updatedParticipants)
     }
 
+    /// Handles an AudioLevelChanged event.
+    ///
+    /// - Parameter event: The AudioLevelChanged event to handle.
+    /// - Note: The handler will update all the participants in the event.
     private func handle(
         _ event: Stream_Video_Sfu_Event_AudioLevelChanged
     ) async {
@@ -124,10 +150,12 @@ final class SFUEventAdapter {
                 audioLevel: level.level
             )
         }
-        //        stateAdapter.participantsUpdateSubject.send(participants)
         await stateAdapter.didUpdateParticipants(participants)
     }
 
+    /// Handles a ChangePublishQuality event.
+    ///
+    /// - Parameter event: The ChangePublishQuality event to handle.
     private func handle(
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) async {
@@ -147,6 +175,12 @@ final class SFUEventAdapter {
             .changePublishQuality(with: .init(enabledRIds))
     }
 
+    /// Handles a ParticipantJoined event.
+    ///
+    /// - Parameter event: The ParticipantJoined event to handle.
+    /// - Note: The handler will ignore the participant if the userID matches the `recordingUserId`.
+    /// Additionally, the `showTrack` property will be set based on the number of the current participants
+    /// and the `participantsThreshold`.
     private func handle(
         _ event: Stream_Video_Sfu_Event_ParticipantJoined
     ) async {
@@ -168,6 +202,11 @@ final class SFUEventAdapter {
         await stateAdapter.didUpdateParticipants(participants)
     }
 
+    /// Handles a ParticipantLeft event.
+    ///
+    /// - Parameter event: The ParticipantLeft event to handle.
+    /// - Note: The handler will also post a notification with name `CallNotification.participantLeft`.
+    /// ignoring the user if the `userId` matches the `recordingUserId`.
     private func handle(
         _ event: Stream_Video_Sfu_Event_ParticipantLeft
     ) async {
@@ -193,6 +232,11 @@ final class SFUEventAdapter {
         )
     }
 
+    /// Handles a DominantSpeakerChanged event.
+    ///
+    /// - Parameter event: The DominantSpeakerChanged event to handle.
+    /// - Note: The handler will set the participant in the event as dominant speaker and every other
+    /// participant in the call as not.
     private func handle(
         _ event: Stream_Video_Sfu_Event_DominantSpeakerChanged
     ) async {
@@ -204,6 +248,9 @@ final class SFUEventAdapter {
         await stateAdapter.didUpdateParticipants(participants)
     }
 
+    /// Handles a JoinResponse event.
+    ///
+    /// - Parameter event: The JoinResponse event to handle.
     private func handle(
         _ event: Stream_Video_Sfu_Event_JoinResponse
     ) async {
@@ -214,20 +261,19 @@ final class SFUEventAdapter {
 
         // For more than threshold participants, the activation of track is on
         // view appearance.
-        let showTrack = participants.count < participantsThreshold
         let pins = event
             .callState
             .pins
             .map(\.sessionID)
 
         var callParticipants: [String: CallParticipant] = [:]
-        for participant in participants {
+        for (index, participant) in participants.enumerated() {
             let pin: PinInfo? = pins.contains(participant.sessionID)
                 ? PinInfo(isLocal: false, pinnedAt: .init())
                 : nil
 
             let callParticipant = participant.toCallParticipant(
-                showTrack: showTrack,
+                showTrack: index < participantsThreshold,
                 pin: pin
             )
             callParticipants[callParticipant.sessionId] = callParticipant
@@ -236,6 +282,10 @@ final class SFUEventAdapter {
         await stateAdapter.didUpdateParticipants(callParticipants)
     }
 
+    /// Handles a HealthCheckResponse event and updates the `participantCount` and the
+    /// `anonymousParticipantCount`.
+    ///
+    /// - Parameter event: The HealthCheckResponse event to handle.
     private func handle(
         _ event: Stream_Video_Sfu_Event_HealthCheckResponse
     ) async {
@@ -243,6 +293,9 @@ final class SFUEventAdapter {
         await stateAdapter.set(anonymous: event.participantCount.anonymous)
     }
 
+    /// Handles a TrackPublished event.
+    ///
+    /// - Parameter event: The TrackPublished event to handle.
     private func handle(
         _ event: Stream_Video_Sfu_Event_TrackPublished
     ) async {
@@ -290,6 +343,9 @@ final class SFUEventAdapter {
         }
     }
 
+    /// Handles a TrackUnpublished event.
+    ///
+    /// - Parameter event: The TrackUnpublished event to handle.
     private func handle(
         _ event: Stream_Video_Sfu_Event_TrackUnpublished
     ) async {
@@ -344,6 +400,9 @@ final class SFUEventAdapter {
         }
     }
 
+    /// Handles a PinsChanged event.
+    ///
+    /// - Parameter event: The PinsChanged event to handle.
     private func handle(
         _ event: Stream_Video_Sfu_Event_PinsChanged
     ) async {
@@ -365,6 +424,9 @@ final class SFUEventAdapter {
         await stateAdapter.didUpdateParticipants(participants)
     }
 
+    /// Handles a ParticipantUpdated event.
+    ///
+    /// - Parameter event: The ParticipantUpdated event to handle.
     private func handle(
         _ event: Stream_Video_Sfu_Event_ParticipantUpdated
     ) async {

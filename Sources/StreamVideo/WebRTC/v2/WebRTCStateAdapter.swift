@@ -56,6 +56,7 @@ actor WebRTCStateAdapter: ObservableObject {
     private var screenShareTracks: [String: RTCVideoTrack] = [:]
     private var videoFilter: VideoFilter?
 
+    private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let audioSession: AudioSession = .init()
     private let disposableBag = DisposableBag()
 
@@ -66,15 +67,17 @@ actor WebRTCStateAdapter: ObservableObject {
         user: User,
         apiKey: String,
         callCid: String,
-        videoConfig: VideoConfig
+        videoConfig: VideoConfig,
+        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory()
     ) {
         self.user = user
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        self.peerConnectionFactory = PeerConnectionFactory(
+        self.peerConnectionFactory = PeerConnectionFactory.build(
             audioProcessingModule: videoConfig.audioProcessingModule
         )
+        self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         let sessionID = UUID().uuidString
 
         Task { await set(sessionID) }
@@ -125,7 +128,7 @@ actor WebRTCStateAdapter: ObservableObject {
             subsystems: .webRTC
         )
 
-        let publisher = RTCPeerConnectionCoordinator(
+        let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,
             peerConnection: try peerConnectionFactory.makePeerConnection(
@@ -143,7 +146,7 @@ actor WebRTCStateAdapter: ObservableObject {
             screenShareSessionProvider: screenShareSessionProvider
         )
 
-        let subscriber = RTCPeerConnectionCoordinator(
+        let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .subscriber,
             peerConnection: try peerConnectionFactory.makePeerConnection(
@@ -462,17 +465,5 @@ actor WebRTCStateAdapter: ObservableObject {
         )
 
         self.participants = updatedParticipants
-    }
-}
-
-extension AudioSettings {
-    init() {
-        accessRequestEnabled = false
-        defaultDevice = .unknown
-        micDefaultOn = false
-        noiseCancellation = nil
-        opusDtxEnabled = false
-        redundantCodingEnabled = false
-        speakerDefaultOn = false
     }
 }
