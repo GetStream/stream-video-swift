@@ -9,11 +9,9 @@ class WebSocketClient {
     /// The notification center `WebSocketClient` uses to send notifications about incoming events.
     let eventNotificationCenter: EventNotificationCenter
 
-    private var isPaused: Bool = false
-
     /// The batch of events received via the web-socket that wait to be processed.
     private(set) lazy var eventsBatcher = environment.eventBatcherBuilder { [weak self] events, completion in
-        guard let self, !isPaused else { return }
+        guard let self else { return }
         events.forEach { [eventSubject] in eventSubject.send($0) }
         eventNotificationCenter.process(events, completion: completion)
     }
@@ -148,10 +146,6 @@ class WebSocketClient {
                 continuation.resume()
             }
         }
-    }
-
-    func updatePaused(_ isPaused: Bool) {
-        self.isPaused = isPaused
     }
 }
 

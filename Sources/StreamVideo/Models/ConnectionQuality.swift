@@ -13,7 +13,7 @@ public enum ConnectionQuality: Equatable, Sendable {
 }
 
 extension Stream_Video_Sfu_Models_ConnectionQuality {
-    
+
     var mapped: ConnectionQuality {
         switch self {
         case .poor:

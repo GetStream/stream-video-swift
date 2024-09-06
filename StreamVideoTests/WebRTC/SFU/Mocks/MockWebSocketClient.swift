@@ -29,7 +29,6 @@ final class MockWebSocketClient: WebSocketClient, Mockable {
     let mockEngine: MockWebSocketEngine = .init()
     var stubbedFunction: [FunctionKey: Any] = [:]
     private(set) var timesFunctionWasCalled: [FunctionKey: Int] = [:]
-    private(set) var updatePausedWasCalled: Bool?
 
     func stub<T>(for keyPath: KeyPath<MockWebSocketClient, T>, with value: T) {
         stubbedProperty[propertyKey(for: keyPath)] = value
@@ -83,10 +82,6 @@ final class MockWebSocketClient: WebSocketClient, Mockable {
         }
 
         completion()
-    }
-
-    override func updatePaused(_ isPaused: Bool) {
-        updatePausedWasCalled = isPaused
     }
 
     // MARK: - Helpers
