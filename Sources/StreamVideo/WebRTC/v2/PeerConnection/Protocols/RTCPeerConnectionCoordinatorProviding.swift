@@ -1,0 +1,91 @@
+//
+// Copyright © 2024 Stream.io Inc. All rights reserved.
+//
+
+import StreamWebRTC
+
+/// A protocol that defines a factory method for creating RTCPeerConnectionCoordinator instances.
+///
+/// The `RTCPeerConnectionCoordinatorProviding` protocol is designed to abstract the creation of
+/// `RTCPeerConnectionCoordinator` objects. This allows for flexibility in how these coordinators
+/// are instantiated and configured, which can be particularly useful for dependency injection and testing.
+protocol RTCPeerConnectionCoordinatorProviding {
+
+    /// Builds and returns an RTCPeerConnectionCoordinator with the specified parameters.
+    /// - Parameters:
+    ///   - sessionId: A unique identifier for the peer connection session.
+    ///   - peerType: The type of peer connection (e.g., publisher, subscriber).
+    ///   - peerConnection: The RTCPeerConnection instance to be managed.
+    ///   - peerConnectionFactory: The factory used to create WebRTC-related objects.
+    ///   - videoOptions: Options for configuring video behavior.
+    ///   - videoConfig: Configuration settings for video.
+    ///   - callSettings: Settings related to the overall call.
+    ///   - audioSettings: Settings for audio configuration.
+    ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
+    ///   - audioSession: The audio session to be used.
+    ///   - screenShareSessionProvider: Provider for screen sharing functionality.
+    /// - Returns: An initialized `RTCPeerConnectionCoordinator` instance.
+    func buildCoordinator(
+        sessionId: String,
+        peerType: PeerConnectionType,
+        peerConnection: RTCPeerConnection,
+        peerConnectionFactory: PeerConnectionFactory,
+        videoOptions: VideoOptions,
+        videoConfig: VideoConfig,
+        callSettings: CallSettings,
+        audioSettings: AudioSettings,
+        sfuAdapter: SFUAdapter,
+        audioSession: AudioSession,
+        screenShareSessionProvider: ScreenShareSessionProvider
+    ) -> RTCPeerConnectionCoordinator
+}
+
+/// A concrete implementation of the RTCPeerConnectionCoordinatorProviding protocol.
+///
+/// The `StreamRTCPeerConnectionCoordinatorFactory` class provides a specific implementation for creating
+/// `RTCPeerConnectionCoordinator` instances. It adheres to the `RTCPeerConnectionCoordinatorProviding`
+/// protocol and offers a straightforward way to instantiate coordinators with the given parameters.
+final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding {
+    /// Creates and returns an RTCPeerConnectionCoordinator with the specified parameters.
+    /// - Parameters:
+    ///   - sessionId: A unique identifier for the peer connection session.
+    ///   - peerType: The type of peer connection (e.g., publisher, subscriber).
+    ///   - peerConnection: The RTCPeerConnection instance to be managed.
+    ///   - peerConnectionFactory: The factory used to create WebRTC-related objects.
+    ///   - videoOptions: Options for configuring video behavior.
+    ///   - videoConfig: Configuration settings for video.
+    ///   - callSettings: Settings related to the overall call.
+    ///   - audioSettings: Settings for audio configuration.
+    ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
+    ///   - audioSession: The audio session to be used.
+    ///   - screenShareSessionProvider: Provider for screen sharing functionality.
+    /// - Returns: A newly created `RTCPeerConnectionCoordinator` instance.
+    /// - Note: This implementation always sets the `peerType` to `.publisher` regardless of the input parameter.
+    func buildCoordinator(
+        sessionId: String,
+        peerType: PeerConnectionType,
+        peerConnection: RTCPeerConnection,
+        peerConnectionFactory: PeerConnectionFactory,
+        videoOptions: VideoOptions,
+        videoConfig: VideoConfig,
+        callSettings: CallSettings,
+        audioSettings: AudioSettings,
+        sfuAdapter: SFUAdapter,
+        audioSession: AudioSession,
+        screenShareSessionProvider: ScreenShareSessionProvider
+    ) -> RTCPeerConnectionCoordinator {
+        RTCPeerConnectionCoordinator(
+            sessionId: sessionId,
+            peerType: .publisher,
+            peerConnection: peerConnection,
+            peerConnectionFactory: peerConnectionFactory,
+            videoOptions: videoOptions,
+            videoConfig: videoConfig,
+            callSettings: callSettings,
+            audioSettings: audioSettings,
+            sfuAdapter: sfuAdapter,
+            audioSession: audioSession,
+            screenShareSessionProvider: screenShareSessionProvider
+        )
+    }
+}

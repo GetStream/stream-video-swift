@@ -37,25 +37,43 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         var eventDecoder: WebRTCEventDecoder = WebRTCEventDecoder()
     }
 
-    private let service: Stream_Video_Sfu_Signal_SignalServer
+    private let signalService: SFUSignalService
     private let refreshSubject = PassthroughSubject<Void, Never>()
     private var webSocket: WebSocketClient
     private var disposableBag = DisposableBag()
     private var requestDisposableBag = DisposableBag()
+    private var isConnected: Bool {
+        switch connectionState {
+        case .connected, .authenticating:
+            return true
+        default:
+            return false
+        }
+    }
 
     /// The current connection state of the WebSocket.
     @Published private(set) var connectionState: WebSocketConnectionState = .initialized
 
-    var eventPublisher: AnyPublisher<WrappedEvent, Never> {
-        webSocket.eventSubject.eraseToAnyPublisher()
-    }
-
+    /// A publisher that is used to inform subscribers that the SFUAdapter has refreshed its webSocket
+    /// connection.
     var refreshPublisher: AnyPublisher<Void, Never> { refreshSubject.eraseToAnyPublisher() }
 
     /// The URL used for the WebSocket connection.
     var connectURL: URL { webSocket.connectURL }
     /// The hostname of the SFU service.
-    var hostname: String { service.hostname }
+    var hostname: String { signalService.hostname }
+
+    // MARK: - CustomStringConvertible
+
+    var description: String {
+        """
+        Address: \(Unmanaged.passUnretained(webSocket).toOpaque())
+        SFUAdapter is delegate: \(webSocket.connectionStateDelegate === self)
+        ConnectionState: \(connectionState)
+        ConnectURL: \(connectURL)
+        Hostname: \(hostname)
+        """
+    }
 
     /// Initializes a new SFUAdapter instance.
     ///
@@ -67,7 +85,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocketConfiguration: WebSocketConfiguration
     ) {
         self.init(
-            service: .init(
+            signalService: .init(
                 httpClient: serviceConfiguration.httpClient,
                 apiKey: serviceConfiguration.apiKey,
                 hostname: serviceConfiguration.url.absoluteString,
@@ -85,10 +103,10 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     }
 
     init(
-        service: Stream_Video_Sfu_Signal_SignalServer,
+        signalService: SFUSignalService,
         webSocket: WebSocketClient
     ) {
-        self.service = service
+        self.signalService = signalService
         self.webSocket = webSocket
 
         webSocket.connectionStateDelegate = self
@@ -102,39 +120,23 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocket.disconnect {}
     }
 
-    private var isConnected: Bool {
-        switch connectionState {
-        case .connected, .authenticating:
-            return true
-        default:
-            return false
-        }
-    }
-
-    private func statusCheck(
-        functionName: StaticString = #function,
-        filename: StaticString = #file,
-        lineNumber: UInt = #line
-    ) {
-        guard !isConnected else { return }
-        log.error(
-            "Attempting to send a message before connecting to SFU.",
-            functionName: functionName,
-            fileName: filename,
-            lineNumber: lineNumber
-        )
-        assert(false)
-    }
-
     // MARK: - WebSocket
 
+    /// Returns a publisher that will be triggered every time the specified event type is being received.
+    ///
+    /// - Parameters:
+    ///   - eventType: The event type to listen for
+    ///   - file: The file from which we are requesting the publisher. Used for logging.
+    ///   - function: The function from which we are requesting the publisher. Used for logging.
+    ///   - line: The line from which we are requesting the publisher. Used for logging.
     func publisher<T>(
         eventType: T.Type,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
     ) -> AnyPublisher<T, Never> {
-        eventPublisher
+        webSocket
+            .eventSubject
             .compactMap {
                 switch $0 {
                 case let .sfuEvent(event):
@@ -153,6 +155,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     }
 
     /// Disconnects from the WebSocket server and clears all disposables.
+    ///
+    /// - Note: the disconnection will send the `.userInitiated` DisconnectionSource.
     func disconnect() async {
         guard isConnected else { return }
         log.debug("Will disconnect \(self)", subsystems: .sfu)
@@ -167,26 +171,12 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             .send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
     }
 
-    /// Updates the paused state of the WebSocket connection.
-    ///
-    /// - Parameter isPaused: A boolean indicating whether the connection should be paused.
-    func updatePaused(_ isPaused: Bool) {
-        statusCheck()
-        webSocket.updatePaused(isPaused)
-    }
-
     /// Sends a message through the WebSocket connection.
     ///
     /// - Parameter message: The message to be sent, conforming to the SendableEvent protocol.
     func send(message: SendableEvent) {
-        //        statusCheck()
-        log.debug(
-            """
-            Type: \(type(of: message))
-            \(message)
-            """,
-            subsystems: .sfu
-        )
+        statusCheck()
+        log.debug(message, subsystems: .sfu)
         webSocket.engine?.send(message: message)
     }
 
@@ -269,12 +259,12 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.muteStates = [muteState]
         request.sessionID = sessionId
 
-        service.subject.send(request)
+        signalService.subject.send(request)
 
-        let task = Task { [request, service, retryPolicy] in
+        let task = Task { [request, signalService, retryPolicy] in
             try await executeTask(retryPolicy: retryPolicy) {
                 try Task.checkCancellation()
-                return try await service.updateMuteStates(updateMuteStatesRequest: request)
+                return try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             }
         }
         task.store(in: requestDisposableBag)
@@ -282,7 +272,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
         }
-        service.subject.send(response)
+        signalService.subject.send(response)
     }
 
     /// Sends call statistics to the SFU server.
@@ -307,13 +297,13 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         statsRequest.webrtcVersion = SystemEnvironment.webRTCVersion
         statsRequest.publisherStats = report.publisherRawStats?.jsonString ?? ""
         statsRequest.subscriberStats = report.subscriberRawStats?.jsonString ?? ""
-        let task = Task { [statsRequest, service] in
+        let task = Task { [statsRequest, signalService] in
             try Task.checkCancellation()
-            return try await service.sendStats(sendStatsRequest: statsRequest)
+            return try await signalService.sendStats(sendStatsRequest: statsRequest)
         }
         task.store(in: requestDisposableBag)
         let response = try await task.value
-        service.subject.send(response)
+        signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
         }
@@ -336,27 +326,27 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         if isEnabled {
             var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
             request.sessionID = sessionId
-            let task = Task { [request, service] in
+            let task = Task { [request, signalService] in
                 try Task.checkCancellation()
-                return try await service.startNoiseCancellation(
+                return try await signalService.startNoiseCancellation(
                     startNoiseCancellationRequest: request
                 )
             }
             task.store(in: requestDisposableBag)
             let response = try await task.value
-            service.subject.send(response)
+            signalService.subject.send(response)
         } else {
             var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
             request.sessionID = sessionId
-            let task = Task { [request, service] in
+            let task = Task { [request, signalService] in
                 try Task.checkCancellation()
-                return try await service.stopNoiseCancellation(
+                return try await signalService.stopNoiseCancellation(
                     stopNoiseCancellationRequest: request
                 )
             }
             task.store(in: requestDisposableBag)
             let response = try await task.value
-            service.subject.send(response)
+            signalService.subject.send(response)
             if response.error.code != .unspecified && !response.error.message.isEmpty {
                 throw response.error
             }
@@ -385,27 +375,19 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.sdp = sessionDescription
         request.sessionID = sessionId
         request.tracks = tracks
-        let task = Task { [request, service] in
+        let task = Task { [request, signalService] in
             try await executeTask(retryPolicy: .fastCheckValue { true }) { [weak self] in
                 try Task.checkCancellation()
                 guard self?.isConnected == true else {
                     throw ClientError("Not connected.")
                 }
-                return try await service.setPublisher(setPublisherRequest: request)
+                return try await signalService.setPublisher(setPublisherRequest: request)
             }
         }
-        log.debug(
-            """
-            Type: Stream_Video_Sfu_Signal_SetPublisherRequest
-                sdp: \(request.sdp)
-                sessionID: \(request.sessionID)
-                tracks: \(request.tracks)
-            """,
-            subsystems: .sfu
-        )
+        log.debug(request, subsystems: .sfu)
         task.store(in: requestDisposableBag)
         let response = try await task.value
-        service.subject.send(response)
+        signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
         }
@@ -435,16 +417,16 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
         try Task.checkCancellation()
 
-        let task = Task { [request, service] in
+        let task = Task { [request, signalService] in
             try Task.checkCancellation()
             return try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {
                 try Task.checkCancellation()
-                return try await service.updateSubscriptions(updateSubscriptionsRequest: request)
+                return try await signalService.updateSubscriptions(updateSubscriptionsRequest: request)
             }
         }
         task.store(in: requestDisposableBag)
         let response = try await task.value
-        service.subject.send(response)
+        signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
         }
@@ -471,15 +453,15 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.sessionID = sessionId
         request.peerType = peerType
         request.sdp = sessionDescription
-        let task = Task { [request, service] in
+        let task = Task { [request, signalService] in
             try await executeTask(retryPolicy: .fastCheckValue { true }) {
                 try Task.checkCancellation()
-                return try await service.sendAnswer(sendAnswerRequest: request)
+                return try await signalService.sendAnswer(sendAnswerRequest: request)
             }
         }
         task.store(in: requestDisposableBag)
         let response = try await task.value
-        service.subject.send(response)
+        signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
         }
@@ -502,18 +484,21 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
-        log.debug("Will trickle for peerType:\(peerType) on sessionId:\(sessionId)")
+        log.debug(
+            "Will trickle for peerType:\(peerType) on sessionId:\(sessionId)",
+            subsystems: .sfu
+        )
         var request = Stream_Video_Sfu_Models_ICETrickle()
         request.iceCandidate = candidate
         request.sessionID = sessionId
         request.peerType = peerType
-        let task = Task { [request, service] in
+        let task = Task { [request, signalService] in
             try Task.checkCancellation()
-            return try await service.iceTrickle(iCETrickle: request)
+            return try await signalService.iceTrickle(iCETrickle: request)
         }
         task.store(in: requestDisposableBag)
         let response = try await task.value
-        service.subject.send(response)
+        signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
         }
@@ -547,25 +532,18 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         connectionState = state
     }
 
-    var description: String {
-        """
-        Address: \(Unmanaged.passUnretained(webSocket).toOpaque())
-        SFUAdapter is delegate: \(webSocket.connectionStateDelegate === self)
-        ConnectionState: \(connectionState)
-        ConnectURL: \(connectURL)
-        Hostname: \(hostname)
-        """
-    }
+    // MARK: - Private helpers
 
     private func setUpPublishers() {
-        log.debug("Registering ...")
         disposableBag.removeAll()
 
         refreshPublisher
+            .log(.debug, subsystems: .sfu) { "SFUAdapter refreshed its webSocket connection." }
             .sink { [weak self] in self?.setUpPublishers() }
             .store(in: disposableBag)
 
-        eventPublisher
+        webSocket
+            .eventSubject
             .log(.debug, subsystems: .sfu) {
                 """
                 SFU received event
@@ -575,247 +553,29 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             .sink { _ in }
             .store(in: disposableBag)
 
-        service
+        signalService
             .subject
             .log(.debug, subsystems: .sfu)
             .sink { _ in }
             .store(in: disposableBag)
     }
-}
 
-extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
-    func payload<T>(_ payloadType: T.Type) -> T? {
-        switch self {
-        case let .subscriberOffer(payload):
-            return payload as? T
-        case let .publisherAnswer(payload):
-            return payload as? T
-        case let .connectionQualityChanged(payload):
-            return payload as? T
-        case let .audioLevelChanged(payload):
-            return payload as? T
-        case let .iceTrickle(payload):
-            return payload as? T
-        case let .changePublishQuality(payload):
-            return payload as? T
-        case let .participantJoined(payload):
-            return payload as? T
-        case let .participantLeft(payload):
-            return payload as? T
-        case let .dominantSpeakerChanged(payload):
-            return payload as? T
-        case let .joinResponse(payload):
-            return payload as? T
-        case let .healthCheckResponse(payload):
-            return payload as? T
-        case let .trackPublished(payload):
-            return payload as? T
-        case let .trackUnpublished(payload):
-            return payload as? T
-        case let .error(payload):
-            return payload as? T
-        case let .callGrantsUpdated(payload):
-            return payload as? T
-        case let .goAway(payload):
-            return payload as? T
-        case let .iceRestart(payload):
-            return payload as? T
-        case let .pinsUpdated(payload):
-            return payload as? T
-        case let .callEnded(payload):
-            return payload as? T
-        case let .participantUpdated(payload):
-            return payload as? T
-        case let .participantMigrationComplete(payload):
-            return payload as? T
-        }
-    }
-}
-
-extension Stream_Video_Sfu_Event_SfuRequest: CustomStringConvertible {
-    var description: String {
-        """
-        Type: \(type(of: self))
-        \((requestPayload as? CustomStringConvertible)?.description ?? String(describing: requestPayload))
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Event_JoinRequest: CustomStringConvertible {
-    var description: String {
-        """
-        Type: \(type(of: self))
-            token: 
-                \(token)
-            sessionID:
-                \(sessionID)
-            subscriberSdp: 
-                \(subscriberSdp)
-            clientDetails: 
-                \(clientDetails)
-            migration: 
-                \(migration)
-            fastReconnect: 
-                \(fastReconnect)
-            reconnectDetails: 
-                \(reconnectDetails)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_ClientDetails: CustomStringConvertible {
-    var description: String {
-        """
-        sdk: \(sdk)
-        os: \(os)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_OS: CustomStringConvertible {
-    var description: String {
-        """
-        name: \(name)
-        version: \(version)
-        architecture: \(architecture)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_Sdk: CustomStringConvertible {
-    var description: String {
-        """
-        type: \(type)
-        major: \(major)
-        minor: \(minor)
-        patch: \(patch)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_Device: CustomStringConvertible {
-    var description: String {
-        """
-        name: \(name)
-        version: \(version)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Event_Migration: CustomStringConvertible {
-    var description: String {
-        """
-        fromSfuID: \(fromSfuID)
-        announcedTracks: \(announcedTracks)
-        subscriptions: \(subscriptions)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_TrackInfo: CustomStringConvertible {
-    var description: String {
-        """
-        trackID: \(trackID)
-        trackType: \(trackType)
-        layers: \(layers)
-        mid: \(mid)
-        dtx: \(dtx)
-        red: \(red)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_VideoLayer: CustomStringConvertible {
-    var description: String {
-        """
-        rid: \(rid)
-        videoDimension: \(videoDimension)
-        bitrate: \(bitrate)
-        fps: \(fps)
-        quality: \(quality)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Signal_TrackSubscriptionDetails: CustomStringConvertible {
-    var description: String {
-        """
-        userID: \(userID)
-        sessionID: \(sessionID)
-        trackType: \(trackType)
-        dimension: \(dimension)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_TrackType: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case .unspecified:
-            return "unspecified"
-        case .audio:
-            return "audio"
-        case .video:
-            return "video"
-        case .screenShare:
-            return "screenShare"
-        case .screenShareAudio:
-            return "screenShareAudio"
-        case let .UNRECOGNIZED(int):
-            return "UNRECOGNIZED(\(int)"
-        }
-    }
-}
-
-extension Stream_Video_Sfu_Models_VideoDimension: CustomStringConvertible {
-    var description: String { "\(width)x\(height)" }
-}
-
-extension Stream_Video_Sfu_Models_VideoQuality: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case .lowUnspecified:
-            return "lowUnspecified"
-        case .mid:
-            return "mid"
-        case .high:
-            return "high"
-        case .off:
-            return "off"
-        case let .UNRECOGNIZED(int):
-            return "UNRECOGNIZED(\(int))"
-        }
-    }
-}
-
-extension Stream_Video_Sfu_Event_ReconnectDetails: CustomStringConvertible {
-    var description: String {
-        """
-        strategy: \(strategy)
-        announcedTracks: \(announcedTracks)
-        subscriptions: \(subscriptions)
-        reconnectAttempt: \(reconnectAttempt)
-        fromSfuID: \(fromSfuID)
-        previousSessionID: \(previousSessionID)
-        """
-    }
-}
-
-extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case .unspecified:
-            return "unspecified"
-        case .disconnect:
-            return "disconnect"
-        case .fast:
-            return "fast"
-        case .rejoin:
-            return "rejoin"
-        case .migrate:
-            return "migrate"
-        case let .UNRECOGNIZED(int):
-            return "UNRECOGNIZED(\(int))"
-        }
+    private func statusCheck(
+        functionName: StaticString = #function,
+        filename: StaticString = #file,
+        lineNumber: UInt = #line
+    ) {
+        guard !isConnected else { return }
+        log.assert(
+            false,
+            """
+            Attempting to send a message before connecting to SFU
+            hostname: \(hostname)
+            """,
+            subsystems: .sfu,
+            functionName: functionName,
+            fileName: filename,
+            lineNumber: lineNumber
+        )
     }
 }

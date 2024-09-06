@@ -89,7 +89,7 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "SFU"
         case LogSubsystem.iceAdapter.rawValue:
             return "ICEAdapter"
-        case LogSubsystem.iceAdapter.rawValue:
+        case LogSubsystem.mediaAdapter.rawValue:
             return "MediaAdapter"
         default:
             return "unknown(rawValue:\(rawValue)"

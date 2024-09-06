@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockSignalServer: Stream_Video_Sfu_Signal_SignalServer, Mockable {
+final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     typealias FunctionKey = MockFunctionKey
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [MockFunctionKey: Any] = [:]

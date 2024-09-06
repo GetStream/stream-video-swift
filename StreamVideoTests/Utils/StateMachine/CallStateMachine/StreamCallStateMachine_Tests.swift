@@ -29,6 +29,7 @@ final class StreamCallStateMachineTests: StreamVideoTestCase {
     func testValidTransition() {
         // Given
         let nextState = StreamCallStateMachine.Stage.AcceptingStage(mockCall, actionBlock: { .init(duration: "") })
+        XCTAssertEqual(subject.currentStage.id, .idle)
 
         // When
         XCTAssertNoThrow(try subject.transition(nextState), "Transition should not throw")
