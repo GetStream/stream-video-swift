@@ -5,8 +5,14 @@
 import Foundation
 import StreamWebRTC
 
+/// Extension to add async/await support to RTCPeerConnection methods.
 extension RTCPeerConnection {
 
+    /// Creates an offer asynchronously with the given media constraints.
+    ///
+    /// - Parameter constraints: The media constraints to use when creating the offer. Defaults to `.defaultConstraints`.
+    /// - Returns: The created RTCSessionDescription.
+    /// - Throws: An error if the offer creation fails or if the RTCPeerConnection instance becomes unavailable.
     func createOffer(
         constraints: RTCMediaConstraints = .defaultConstraints
     ) async throws -> RTCSessionDescription {
@@ -31,6 +37,10 @@ extension RTCPeerConnection {
         }
     }
 
+    /// Sets the local description asynchronously.
+    ///
+    /// - Parameter sessionDescription: The RTCSessionDescription to set as the local description.
+    /// - Throws: An error if setting the local description fails or if the RTCPeerConnection instance becomes unavailable.
     func setLocalDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
@@ -52,6 +62,10 @@ extension RTCPeerConnection {
         } as ()
     }
 
+    /// Sets the remote description asynchronously.
+    ///
+    /// - Parameter sessionDescription: The RTCSessionDescription to set as the remote description.
+    /// - Throws: An error if setting the remote description fails or if the RTCPeerConnection instance becomes unavailable.
     func setRemoteDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {

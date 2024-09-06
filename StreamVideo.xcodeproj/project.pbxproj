@@ -130,6 +130,7 @@
 		40382F462C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F442C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift */; };
 		40382F472C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F442C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift */; };
 		40382F482C89D03700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F412C89CF9300C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift */; };
+		40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
 		403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403EFCA02BDC003A0057C248 /* DemoFeedbackView.swift */; };
@@ -1380,6 +1381,7 @@
 		40382F3E2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCMediaStreamTrack+dummy.swift"; sourceTree = "<group>"; };
 		40382F412C89CF9300C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift"; sourceTree = "<group>"; };
 		40382F442C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_Participant+Convenience.swift"; sourceTree = "<group>"; };
+		40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRTCPeerConnection.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
 		403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEndedViewModifier.swift; sourceTree = "<group>"; };
@@ -3226,6 +3228,7 @@
 		40BBC48A2C623C6E002AEF92 /* PeerConnection */ = {
 			isa = PBXGroup;
 			children = (
+				40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */,
 				40382F312C89A65C00C2D00F /* Protocols */,
 				40BBC4B82C627F76002AEF92 /* MediaAdapters */,
 				40BBC4922C623CF5002AEF92 /* Extensions */,
@@ -5936,6 +5939,7 @@
 				845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */,
 				40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */,
 				402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */,
+				40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */,
 				8487D8B02A697E9A00536ED4 /* VideoCapturing.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,
 				40BBC4D42C639371002AEF92 /* WebRTCCoordinator+Connected.swift in Sources */,

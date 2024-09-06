@@ -15,7 +15,7 @@ protocol RTCPeerConnectionCoordinatorProviding {
     /// - Parameters:
     ///   - sessionId: A unique identifier for the peer connection session.
     ///   - peerType: The type of peer connection (e.g., publisher, subscriber).
-    ///   - peerConnection: The RTCPeerConnection instance to be managed.
+    ///   - peerConnection: The StreamRTCPeerConnection instance to be managed.
     ///   - peerConnectionFactory: The factory used to create WebRTC-related objects.
     ///   - videoOptions: Options for configuring video behavior.
     ///   - videoConfig: Configuration settings for video.
@@ -28,7 +28,7 @@ protocol RTCPeerConnectionCoordinatorProviding {
     func buildCoordinator(
         sessionId: String,
         peerType: PeerConnectionType,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnection,
         peerConnectionFactory: PeerConnectionFactory,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
@@ -50,7 +50,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     /// - Parameters:
     ///   - sessionId: A unique identifier for the peer connection session.
     ///   - peerType: The type of peer connection (e.g., publisher, subscriber).
-    ///   - peerConnection: The RTCPeerConnection instance to be managed.
+    ///   - peerConnection: The StreamRTCPeerConnection instance to be managed.
     ///   - peerConnectionFactory: The factory used to create WebRTC-related objects.
     ///   - videoOptions: Options for configuring video behavior.
     ///   - videoConfig: Configuration settings for video.
@@ -63,7 +63,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     func buildCoordinator(
         sessionId: String,
         peerType: PeerConnectionType,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnection,
         peerConnectionFactory: PeerConnectionFactory,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,

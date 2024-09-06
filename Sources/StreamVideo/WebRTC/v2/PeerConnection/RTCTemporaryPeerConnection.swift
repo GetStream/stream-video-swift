@@ -7,7 +7,7 @@ import StreamWebRTC
 
 final class RTCTemporaryPeerConnection {
 
-    private let peerConnection: RTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnection
     private let localAudioTrack: RTCAudioTrack?
     private let localVideoTrack: RTCVideoTrack?
     private let videoOptions: VideoOptions

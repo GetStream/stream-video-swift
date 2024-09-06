@@ -9,7 +9,7 @@ actor ICEAdapter: @unchecked Sendable {
     private let sessionID: String
     private let encoder = JSONEncoder()
     private let peerType: PeerConnectionType
-    private let peerConnection: RTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnection
 
     private var disposableBag: DisposableBag = .init()
     private var trickledCandidates: [RTCIceCandidate] = []
@@ -20,7 +20,7 @@ actor ICEAdapter: @unchecked Sendable {
     init(
         sessionID: String,
         peerType: PeerConnectionType,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnection,
         sfuAdapter: SFUAdapter
     ) {
         self.sessionID = sessionID
@@ -235,7 +235,6 @@ actor ICEAdapter: @unchecked Sendable {
 }
 
 extension RTCIceCandidate: @unchecked Sendable {}
-extension RTCPeerConnection: @unchecked Sendable {}
 
 extension Stream_Video_Sfu_Models_ICETrickle {
 

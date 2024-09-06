@@ -116,7 +116,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
     ///   - constraints: The RTCMediaConstraints to apply.
     ///   - delegate: The RTCPeerConnectionDelegate to set.
     /// - Throws: ClientError.Unexpected if the peer connection creation fails.
-    /// - Returns: An RTCPeerConnection instance.
+    /// - Returns: An StreamRTCPeerConnection instance.
     func makePeerConnection(
         configuration: RTCConfiguration,
         constraints: RTCMediaConstraints,

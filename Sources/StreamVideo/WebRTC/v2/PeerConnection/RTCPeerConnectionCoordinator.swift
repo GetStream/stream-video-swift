@@ -28,7 +28,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let identifier = UUID()
     private let sessionId: String
     private let peerType: PeerConnectionType
-    private let peerConnection: RTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnection
     private let subsystem: LogSubsystem
     private let disposableBag: DisposableBag = .init()
     private let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection.serial.offer.queue")
@@ -66,7 +66,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     init(
         sessionId: String,
         peerType: PeerConnectionType,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnection,
         peerConnectionFactory: PeerConnectionFactory,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,

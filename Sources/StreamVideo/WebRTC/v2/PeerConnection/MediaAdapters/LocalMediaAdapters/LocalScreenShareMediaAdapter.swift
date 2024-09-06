@@ -9,7 +9,7 @@ import StreamWebRTC
 final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private let sessionID: String
-    private let peerConnection: RTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnection
     private let peerConnectionFactory: PeerConnectionFactory
     private var sfuAdapter: SFUAdapter
     private let videoOptions: VideoOptions
@@ -27,7 +27,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     init(
         sessionID: String,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnection,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
