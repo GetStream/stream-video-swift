@@ -8,7 +8,6 @@ public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hash
     
     public var banned: Bool
     public var blockedUserIds: [String]? = nil
-    public var channelMutes: [ChannelMute?]
     public var createdAt: Date
     public var custom: [String: RawJSON]
     public var deactivatedAt: Date? = nil
@@ -36,7 +35,6 @@ public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hash
     public init(
         banned: Bool,
         blockedUserIds: [String]? = nil,
-        channelMutes: [ChannelMute?],
         createdAt: Date,
         custom: [String: RawJSON],
         deactivatedAt: Date? = nil,
@@ -63,7 +61,6 @@ public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hash
     ) {
         self.banned = banned
         self.blockedUserIds = blockedUserIds
-        self.channelMutes = channelMutes
         self.createdAt = createdAt
         self.custom = custom
         self.deactivatedAt = deactivatedAt
@@ -92,7 +89,6 @@ public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hash
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case banned
         case blockedUserIds = "blocked_user_ids"
-        case channelMutes = "channel_mutes"
         case createdAt = "created_at"
         case custom
         case deactivatedAt = "deactivated_at"
