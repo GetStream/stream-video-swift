@@ -6,8 +6,8 @@ import Foundation
     
 public struct PushNotificationSettingsInput: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var disabled: NullBool? = nil
-    public var disabledUntil: NullTime? = nil
+    public var disabled: NullBool?
+    public var disabledUntil: NullTime?
 
     public init(disabled: NullBool? = nil, disabledUntil: NullTime? = nil) {
         self.disabled = disabled

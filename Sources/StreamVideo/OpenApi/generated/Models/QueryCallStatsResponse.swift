@@ -7,8 +7,8 @@ import Foundation
 public struct QueryCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
-    public var next: String? = nil
-    public var prev: String? = nil
+    public var next: String?
+    public var prev: String?
     public var reports: [CallStatsReportSummaryResponse]
 
     public init(duration: String, next: String? = nil, prev: String? = nil, reports: [CallStatsReportSummaryResponse]) {

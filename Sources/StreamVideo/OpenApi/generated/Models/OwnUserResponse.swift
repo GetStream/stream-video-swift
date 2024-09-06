@@ -7,24 +7,24 @@ import Foundation
 public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banned: Bool
-    public var blockedUserIds: [String]? = nil
+    public var blockedUserIds: [String]?
     public var createdAt: Date
     public var custom: [String: RawJSON]
-    public var deactivatedAt: Date? = nil
-    public var deletedAt: Date? = nil
+    public var deactivatedAt: Date?
+    public var deletedAt: Date?
     public var devices: [Device]
     public var id: String
-    public var image: String? = nil
+    public var image: String?
     public var invisible: Bool
     public var language: String
-    public var lastActive: Date? = nil
-    public var latestHiddenChannels: [String]? = nil
+    public var lastActive: Date?
+    public var latestHiddenChannels: [String]?
     public var mutes: [UserMuteResponse?]
-    public var name: String? = nil
+    public var name: String?
     public var online: Bool
-    public var privacySettings: PrivacySettingsResponse? = nil
-    public var pushNotifications: PushNotificationSettingsResponse? = nil
-    public var revokeTokensIssuedBefore: Date? = nil
+    public var privacySettings: PrivacySettingsResponse?
+    public var pushNotifications: PushNotificationSettingsResponse?
+    public var revokeTokensIssuedBefore: Date?
     public var role: String
     public var teams: [String]
     public var totalUnreadCount: Int

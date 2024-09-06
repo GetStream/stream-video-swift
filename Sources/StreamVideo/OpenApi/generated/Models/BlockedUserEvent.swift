@@ -6,7 +6,7 @@ import Foundation
     
 public struct BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
-    public var blockedByUser: UserResponse? = nil
+    public var blockedByUser: UserResponse?
     public var callCid: String
     public var createdAt: Date
     public var type: String

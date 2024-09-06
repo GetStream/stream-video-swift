@@ -25,10 +25,10 @@ public struct LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, Hasha
         }
     }
     
-    public var externalAppUrl: String? = nil
-    public var externalCssUrl: String? = nil
+    public var externalAppUrl: String?
+    public var externalCssUrl: String?
     public var name: Name
-    public var options: [String: RawJSON]? = nil
+    public var options: [String: RawJSON]?
 
     public init(externalAppUrl: String? = nil, externalCssUrl: String? = nil, name: Name, options: [String: RawJSON]? = nil) {
         self.externalAppUrl = externalAppUrl

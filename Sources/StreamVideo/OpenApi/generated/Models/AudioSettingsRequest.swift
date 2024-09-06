@@ -22,13 +22,13 @@ public struct AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncodable,
         }
     }
     
-    public var accessRequestEnabled: Bool? = nil
+    public var accessRequestEnabled: Bool?
     public var defaultDevice: DefaultDevice
-    public var micDefaultOn: Bool? = nil
-    public var noiseCancellation: NoiseCancellationSettings? = nil
-    public var opusDtxEnabled: Bool? = nil
-    public var redundantCodingEnabled: Bool? = nil
-    public var speakerDefaultOn: Bool? = nil
+    public var micDefaultOn: Bool?
+    public var noiseCancellation: NoiseCancellationSettings?
+    public var opusDtxEnabled: Bool?
+    public var redundantCodingEnabled: Bool?
+    public var speakerDefaultOn: Bool?
 
     public init(
         accessRequestEnabled: Bool? = nil,

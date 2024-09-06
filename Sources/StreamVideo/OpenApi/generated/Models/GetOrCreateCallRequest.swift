@@ -6,11 +6,11 @@ import Foundation
     
 public struct GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var data: CallRequest? = nil
-    public var membersLimit: Int? = nil
-    public var notify: Bool? = nil
-    public var ring: Bool? = nil
-    public var video: Bool? = nil
+    public var data: CallRequest?
+    public var membersLimit: Int?
+    public var notify: Bool?
+    public var ring: Bool?
+    public var video: Bool?
 
     public init(data: CallRequest? = nil, membersLimit: Int? = nil, notify: Bool? = nil, ring: Bool? = nil, video: Bool? = nil) {
         self.data = data

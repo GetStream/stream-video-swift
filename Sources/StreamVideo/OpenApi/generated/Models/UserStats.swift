@@ -8,7 +8,7 @@ public struct UserStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var info: UserInfoResponse
     public var minEventTs: Int
-    public var rating: Int? = nil
+    public var rating: Int?
     public var sessionStats: [UserSessionStats]
 
     public init(info: UserInfoResponse, minEventTs: Int, rating: Int? = nil, sessionStats: [UserSessionStats]) {

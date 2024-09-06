@@ -9,7 +9,7 @@ public struct CallRejectedEvent: @unchecked Sendable, Event, Codable, JSONEncoda
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
-    public var reason: String? = nil
+    public var reason: String?
     public var type: String
     public var user: UserResponse
 

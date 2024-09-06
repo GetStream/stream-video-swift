@@ -6,14 +6,14 @@ import Foundation
     
 public struct ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var custom: [String: RawJSON]? = nil
+    public var custom: [String: RawJSON]?
     public var id: String
-    public var image: String? = nil
-    public var invisible: Bool? = nil
-    public var language: String? = nil
-    public var name: String? = nil
-    public var privacySettings: PrivacySettings? = nil
-    public var pushNotifications: PushNotificationSettingsInput? = nil
+    public var image: String?
+    public var invisible: Bool?
+    public var language: String?
+    public var name: String?
+    public var privacySettings: PrivacySettings?
+    public var pushNotifications: PushNotificationSettingsInput?
 
     public init(
         custom: [String: RawJSON]? = nil,

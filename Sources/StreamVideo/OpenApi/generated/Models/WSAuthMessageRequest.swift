@@ -6,7 +6,7 @@ import Foundation
     
 public struct WSAuthMessageRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var products: [String]? = nil
+    public var products: [String]?
     public var token: String
     public var userDetails: ConnectUserDetailsRequest
 

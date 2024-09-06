@@ -8,7 +8,7 @@ public struct ScreensharingSettings: @unchecked Sendable, Codable, JSONEncodable
     
     public var accessRequestEnabled: Bool
     public var enabled: Bool
-    public var targetResolution: TargetResolution? = nil
+    public var targetResolution: TargetResolution?
 
     public init(accessRequestEnabled: Bool, enabled: Bool, targetResolution: TargetResolution? = nil) {
         self.accessRequestEnabled = accessRequestEnabled

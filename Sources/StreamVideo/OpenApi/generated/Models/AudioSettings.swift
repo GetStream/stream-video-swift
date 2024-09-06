@@ -25,7 +25,7 @@ public struct AudioSettings: @unchecked Sendable, Codable, JSONEncodable, Hashab
     public var accessRequestEnabled: Bool
     public var defaultDevice: DefaultDevice
     public var micDefaultOn: Bool
-    public var noiseCancellation: NoiseCancellationSettings? = nil
+    public var noiseCancellation: NoiseCancellationSettings?
     public var opusDtxEnabled: Bool
     public var redundantCodingEnabled: Bool
     public var speakerDefaultOn: Bool

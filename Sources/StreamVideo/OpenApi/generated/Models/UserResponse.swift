@@ -10,15 +10,15 @@ public struct UserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashabl
     public var blockedUserIds: [String]
     public var createdAt: Date
     public var custom: [String: RawJSON]
-    public var deactivatedAt: Date? = nil
-    public var deletedAt: Date? = nil
+    public var deactivatedAt: Date?
+    public var deletedAt: Date?
     public var id: String
-    public var image: String? = nil
+    public var image: String?
     public var language: String
-    public var lastActive: Date? = nil
-    public var name: String? = nil
+    public var lastActive: Date?
+    public var name: String?
     public var online: Bool
-    public var revokeTokensIssuedBefore: Date? = nil
+    public var revokeTokensIssuedBefore: Date?
     public var role: String
     public var teams: [String]
     public var updatedAt: Date

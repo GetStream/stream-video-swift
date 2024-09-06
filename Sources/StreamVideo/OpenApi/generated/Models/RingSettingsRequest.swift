@@ -8,7 +8,7 @@ public struct RingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, 
     
     public var autoCancelTimeoutMs: Int
     public var incomingCallTimeoutMs: Int
-    public var missedCallTimeoutMs: Int? = nil
+    public var missedCallTimeoutMs: Int?
 
     public init(autoCancelTimeoutMs: Int, incomingCallTimeoutMs: Int, missedCallTimeoutMs: Int? = nil) {
         self.autoCancelTimeoutMs = autoCancelTimeoutMs

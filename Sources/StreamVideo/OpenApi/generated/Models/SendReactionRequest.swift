@@ -6,8 +6,8 @@ import Foundation
     
 public struct SendReactionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var custom: [String: RawJSON]? = nil
-    public var emojiCode: String? = nil
+    public var custom: [String: RawJSON]?
+    public var emojiCode: String?
     public var type: String
 
     public init(custom: [String: RawJSON]? = nil, emojiCode: String? = nil, type: String) {

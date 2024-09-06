@@ -6,8 +6,8 @@ import Foundation
     
 public struct PublisherAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var byTrackType: [String: Count]? = nil
-    public var total: Count? = nil
+    public var byTrackType: [String: Count]?
+    public var total: Count?
 
     public init(byTrackType: [String: Count]? = nil, total: Count? = nil) {
         self.byTrackType = byTrackType

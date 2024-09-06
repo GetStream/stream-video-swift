@@ -6,8 +6,8 @@ import Foundation
     
 public struct RTMPSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var enabled: Bool? = nil
-    public var quality: String? = nil
+    public var enabled: Bool?
+    public var quality: String?
 
     public init(enabled: Bool? = nil, quality: String? = nil) {
         self.enabled = enabled

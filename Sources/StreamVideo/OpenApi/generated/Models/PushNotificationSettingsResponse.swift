@@ -6,8 +6,8 @@ import Foundation
     
 public struct PushNotificationSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var disabled: Bool? = nil
-    public var disabledUntil: Date? = nil
+    public var disabled: Bool?
+    public var disabledUntil: Date?
 
     public init(disabled: Bool? = nil, disabledUntil: Date? = nil) {
         self.disabled = disabled

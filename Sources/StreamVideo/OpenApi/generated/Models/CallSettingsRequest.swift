@@ -6,17 +6,17 @@ import Foundation
     
 public struct CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var audio: AudioSettingsRequest? = nil
-    public var backstage: BackstageSettingsRequest? = nil
-    public var broadcasting: BroadcastSettingsRequest? = nil
-    public var geofencing: GeofenceSettingsRequest? = nil
-    public var limits: LimitsSettingsRequest? = nil
-    public var recording: RecordSettingsRequest? = nil
-    public var ring: RingSettingsRequest? = nil
-    public var screensharing: ScreensharingSettingsRequest? = nil
-    public var thumbnails: ThumbnailsSettingsRequest? = nil
-    public var transcription: TranscriptionSettingsRequest? = nil
-    public var video: VideoSettingsRequest? = nil
+    public var audio: AudioSettingsRequest?
+    public var backstage: BackstageSettingsRequest?
+    public var broadcasting: BroadcastSettingsRequest?
+    public var geofencing: GeofenceSettingsRequest?
+    public var limits: LimitsSettingsRequest?
+    public var recording: RecordSettingsRequest?
+    public var ring: RingSettingsRequest?
+    public var screensharing: ScreensharingSettingsRequest?
+    public var thumbnails: ThumbnailsSettingsRequest?
+    public var transcription: TranscriptionSettingsRequest?
+    public var video: VideoSettingsRequest?
 
     public init(
         audio: AudioSettingsRequest? = nil,

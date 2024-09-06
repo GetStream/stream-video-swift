@@ -6,8 +6,8 @@ import Foundation
     
 public struct TURNAggregatedStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var tcp: Count? = nil
-    public var total: Count? = nil
+    public var tcp: Count?
+    public var total: Count?
 
     public init(tcp: Count? = nil, total: Count? = nil) {
         self.tcp = tcp

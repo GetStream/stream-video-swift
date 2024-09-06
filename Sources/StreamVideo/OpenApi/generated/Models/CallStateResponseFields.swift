@@ -8,7 +8,7 @@ public struct CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodab
     
     public var call: CallResponse
     public var members: [MemberResponse]
-    public var membership: MemberResponse? = nil
+    public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
 
     public init(

@@ -6,8 +6,8 @@ import Foundation
     
 public struct HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var autoOn: Bool? = nil
-    public var enabled: Bool? = nil
+    public var autoOn: Bool?
+    public var enabled: Bool?
     public var qualityTracks: [String]
 
     public init(autoOn: Bool? = nil, enabled: Bool? = nil, qualityTracks: [String]) {

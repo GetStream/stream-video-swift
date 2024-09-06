@@ -7,7 +7,7 @@ import Foundation
 public struct EgressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var broadcasting: Bool
-    public var hls: EgressHLSResponse? = nil
+    public var hls: EgressHLSResponse?
     public var rtmps: [EgressRTMPResponse]
 
     public init(broadcasting: Bool, hls: EgressHLSResponse? = nil, rtmps: [EgressRTMPResponse]) {

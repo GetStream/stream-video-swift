@@ -6,9 +6,9 @@ import Foundation
     
 public struct ScreensharingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var accessRequestEnabled: Bool? = nil
-    public var enabled: Bool? = nil
-    public var targetResolution: TargetResolution? = nil
+    public var accessRequestEnabled: Bool?
+    public var enabled: Bool?
+    public var targetResolution: TargetResolution?
 
     public init(accessRequestEnabled: Bool? = nil, enabled: Bool? = nil, targetResolution: TargetResolution? = nil) {
         self.accessRequestEnabled = accessRequestEnabled

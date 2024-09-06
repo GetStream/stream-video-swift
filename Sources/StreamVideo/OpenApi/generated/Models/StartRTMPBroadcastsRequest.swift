@@ -6,10 +6,10 @@ import Foundation
     
 public struct StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var layout: LayoutSettings? = nil
+    public var layout: LayoutSettings?
     public var name: String
-    public var quality: String? = nil
-    public var streamKey: String? = nil
+    public var quality: String?
+    public var streamKey: String?
     public var streamUrl: String
 
     public init(layout: LayoutSettings? = nil, name: String, quality: String? = nil, streamKey: String? = nil, streamUrl: String) {

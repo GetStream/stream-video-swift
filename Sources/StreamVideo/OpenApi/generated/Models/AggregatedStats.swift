@@ -6,9 +6,9 @@ import Foundation
     
 public struct AggregatedStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var countrywiseAggregateStats: [String: CountrywiseAggregateStats?]? = nil
-    public var publisherAggregateStats: PublisherAggregateStats? = nil
-    public var turn: TURNAggregatedStats? = nil
+    public var countrywiseAggregateStats: [String: CountrywiseAggregateStats?]?
+    public var publisherAggregateStats: PublisherAggregateStats?
+    public var turn: TURNAggregatedStats?
 
     public init(
         countrywiseAggregateStats: [String: CountrywiseAggregateStats?]? = nil,

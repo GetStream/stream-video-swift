@@ -6,8 +6,8 @@ import Foundation
     
 public struct NullTime: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var hasValue: Bool? = nil
-    public var value: Date? = nil
+    public var hasValue: Bool?
+    public var value: Date?
 
     public init(hasValue: Bool? = nil, value: Date? = nil) {
         self.hasValue = hasValue

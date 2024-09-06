@@ -8,8 +8,8 @@ public struct QueryMembersResponse: @unchecked Sendable, Codable, JSONEncodable,
     
     public var duration: String
     public var members: [MemberResponse]
-    public var next: String? = nil
-    public var prev: String? = nil
+    public var next: String?
+    public var prev: String?
 
     public init(duration: String, members: [MemberResponse], next: String? = nil, prev: String? = nil) {
         self.duration = duration

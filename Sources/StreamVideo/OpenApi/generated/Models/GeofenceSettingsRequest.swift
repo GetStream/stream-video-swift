@@ -6,7 +6,7 @@ import Foundation
     
 public struct GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var names: [String]? = nil
+    public var names: [String]?
 
     public init(names: [String]? = nil) {
         self.names = names

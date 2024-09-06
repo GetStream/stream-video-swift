@@ -7,13 +7,13 @@ import Foundation
 public struct Device: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
-    public var disabled: Bool? = nil
-    public var disabledReason: String? = nil
+    public var disabled: Bool?
+    public var disabledReason: String?
     public var id: String
     public var pushProvider: String
-    public var pushProviderName: String? = nil
+    public var pushProviderName: String?
     public var userId: String
-    public var voip: Bool? = nil
+    public var voip: Bool?
 
     public init(
         createdAt: Date,

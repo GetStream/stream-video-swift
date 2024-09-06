@@ -11,9 +11,9 @@ public struct UserUnbannedEvent: @unchecked Sendable, Event, Codable, JSONEncoda
     public var cid: String
     public var createdAt: Date
     public var shadow: Bool
-    public var team: String? = nil
+    public var team: String?
     public var type: String
-    public var user: UserObject? = nil
+    public var user: UserObject?
 
     public init(
         channelId: String,

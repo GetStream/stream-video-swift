@@ -6,9 +6,9 @@ import Foundation
     
 public struct CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var custom: [String: RawJSON]? = nil
+    public var custom: [String: RawJSON]?
     public var rating: Int
-    public var reason: String? = nil
+    public var reason: String?
     public var sdk: String
     public var sdkVersion: String
     public var userSessionId: String

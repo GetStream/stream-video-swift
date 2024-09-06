@@ -11,12 +11,12 @@ public struct UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEncodabl
     public var cid: String
     public var createdAt: Date
     public var createdBy: UserObject
-    public var expiration: Date? = nil
-    public var reason: String? = nil
+    public var expiration: Date?
+    public var reason: String?
     public var shadow: Bool
-    public var team: String? = nil
+    public var team: String?
     public var type: String
-    public var user: UserObject? = nil
+    public var user: UserObject?
 
     public init(
         channelId: String,

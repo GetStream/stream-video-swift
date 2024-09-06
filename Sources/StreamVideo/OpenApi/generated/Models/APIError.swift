@@ -9,11 +9,11 @@ public struct APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     public var code: Int
     public var details: [Int]
     public var duration: String
-    public var exceptionFields: [String: String]? = nil
+    public var exceptionFields: [String: String]?
     public var message: String
     public var moreInfo: String
     public var statusCode: Int
-    public var unrecoverable: Bool? = nil
+    public var unrecoverable: Bool?
 
     public init(
         code: Int,

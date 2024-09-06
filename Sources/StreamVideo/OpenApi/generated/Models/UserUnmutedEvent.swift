@@ -7,10 +7,10 @@ import Foundation
 public struct UserUnmutedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
-    public var targetUser: String? = nil
-    public var targetUsers: [String]? = nil
+    public var targetUser: String?
+    public var targetUsers: [String]?
     public var type: String
-    public var user: UserObject? = nil
+    public var user: UserObject?
 
     public init(createdAt: Date, targetUser: String? = nil, targetUsers: [String]? = nil, type: String, user: UserObject? = nil) {
         self.createdAt = createdAt

@@ -6,7 +6,7 @@ import Foundation
     
 public struct RejectCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var reason: String? = nil
+    public var reason: String?
 
     public init(reason: String? = nil) {
         self.reason = reason

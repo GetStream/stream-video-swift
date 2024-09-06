@@ -7,7 +7,7 @@ import Foundation
 public struct UserUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
-    public var receivedAt: Date? = nil
+    public var receivedAt: Date?
     public var type: String
     public var user: UserEventPayload
 

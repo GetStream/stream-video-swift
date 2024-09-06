@@ -23,9 +23,9 @@ public struct RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable
         }
     }
     
-    public var audioOnly: Bool? = nil
+    public var audioOnly: Bool?
     public var mode: Mode
-    public var quality: String? = nil
+    public var quality: String?
 
     public init(audioOnly: Bool? = nil, mode: Mode, quality: String? = nil) {
         self.audioOnly = audioOnly

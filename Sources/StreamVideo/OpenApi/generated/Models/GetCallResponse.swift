@@ -9,7 +9,7 @@ public struct GetCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hash
     public var call: CallResponse
     public var duration: String
     public var members: [MemberResponse]
-    public var membership: MemberResponse? = nil
+    public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
 
     public init(

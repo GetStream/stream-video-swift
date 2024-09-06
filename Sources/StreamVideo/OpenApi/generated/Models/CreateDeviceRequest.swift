@@ -26,8 +26,8 @@ public struct CreateDeviceRequest: @unchecked Sendable, Codable, JSONEncodable, 
     
     public var id: String
     public var pushProvider: PushProvider
-    public var pushProviderName: String? = nil
-    public var voipToken: Bool? = nil
+    public var pushProviderName: String?
+    public var voipToken: Bool?
 
     public init(id: String, pushProvider: PushProvider, pushProviderName: String? = nil, voipToken: Bool? = nil) {
         self.id = id

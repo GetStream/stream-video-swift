@@ -14,16 +14,16 @@ public struct CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashabl
     public var currentSessionId: String
     public var custom: [String: RawJSON]
     public var egress: EgressResponse
-    public var endedAt: Date? = nil
+    public var endedAt: Date?
     public var id: String
     public var ingress: CallIngressResponse
-    public var joinAheadTimeSeconds: Int? = nil
+    public var joinAheadTimeSeconds: Int?
     public var recording: Bool
-    public var session: CallSessionResponse? = nil
+    public var session: CallSessionResponse?
     public var settings: CallSettingsResponse
-    public var startsAt: Date? = nil
-    public var team: String? = nil
-    public var thumbnails: ThumbnailResponse? = nil
+    public var startsAt: Date?
+    public var team: String?
+    public var thumbnails: ThumbnailResponse?
     public var transcribing: Bool
     public var type: String
     public var updatedAt: Date

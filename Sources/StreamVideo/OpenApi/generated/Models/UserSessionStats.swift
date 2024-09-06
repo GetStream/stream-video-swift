@@ -6,57 +6,57 @@ import Foundation
     
 public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var browser: String? = nil
-    public var browserVersion: String? = nil
-    public var currentIp: String? = nil
-    public var currentSfu: String? = nil
-    public var deviceModel: String? = nil
-    public var deviceVersion: String? = nil
-    public var distanceToSfuKilometers: Float? = nil
+    public var browser: String?
+    public var browserVersion: String?
+    public var currentIp: String?
+    public var currentSfu: String?
+    public var deviceModel: String?
+    public var deviceVersion: String?
+    public var distanceToSfuKilometers: Float?
     public var freezeDurationSeconds: Int
-    public var geolocation: GeolocationResult? = nil
-    public var jitter: Stats? = nil
-    public var latency: Stats? = nil
-    public var maxFirPerSecond: Float? = nil
+    public var geolocation: GeolocationResult?
+    public var jitter: Stats?
+    public var latency: Stats?
+    public var maxFirPerSecond: Float?
     public var maxFreezeFraction: Float
     public var maxFreezesDurationSeconds: Int
-    public var maxFreezesPerSecond: Float? = nil
-    public var maxNackPerSecond: Float? = nil
-    public var maxPliPerSecond: Float? = nil
-    public var maxPublishingVideoQuality: VideoQuality? = nil
-    public var maxReceivingVideoQuality: VideoQuality? = nil
-    public var os: String? = nil
-    public var osVersion: String? = nil
+    public var maxFreezesPerSecond: Float?
+    public var maxNackPerSecond: Float?
+    public var maxPliPerSecond: Float?
+    public var maxPublishingVideoQuality: VideoQuality?
+    public var maxReceivingVideoQuality: VideoQuality?
+    public var os: String?
+    public var osVersion: String?
     public var packetLossFraction: Float
-    public var pubSubHints: MediaPubSubHint? = nil
-    public var publishedTracks: [PublishedTrackInfo]? = nil
-    public var publisherAudioMos: MOSStats? = nil
-    public var publisherJitter: Stats? = nil
-    public var publisherLatency: Stats? = nil
-    public var publisherNoiseCancellationSeconds: Float? = nil
+    public var pubSubHints: MediaPubSubHint?
+    public var publishedTracks: [PublishedTrackInfo]?
+    public var publisherAudioMos: MOSStats?
+    public var publisherJitter: Stats?
+    public var publisherLatency: Stats?
+    public var publisherNoiseCancellationSeconds: Float?
     public var publisherPacketLossFraction: Float
-    public var publisherQualityLimitationFraction: Float? = nil
-    public var publisherVideoQualityLimitationDurationSeconds: [String: Float]? = nil
-    public var publishingAudioCodec: String? = nil
+    public var publisherQualityLimitationFraction: Float?
+    public var publisherVideoQualityLimitationDurationSeconds: [String: Float]?
+    public var publishingAudioCodec: String?
     public var publishingDurationSeconds: Int
-    public var publishingVideoCodec: String? = nil
+    public var publishingVideoCodec: String?
     public var qualityScore: Float
-    public var receivingAudioCodec: String? = nil
+    public var receivingAudioCodec: String?
     public var receivingDurationSeconds: Int
-    public var receivingVideoCodec: String? = nil
-    public var sdk: String? = nil
-    public var sdkVersion: String? = nil
+    public var receivingVideoCodec: String?
+    public var sdk: String?
+    public var sdkVersion: String?
     public var sessionId: String
-    public var subscriberAudioMos: MOSStats? = nil
-    public var subscriberJitter: Stats? = nil
-    public var subscriberLatency: Stats? = nil
-    public var subscriberVideoQualityThrottledDurationSeconds: Float? = nil
-    public var subsessions: [Subsession?]? = nil
-    public var timeline: CallTimeline? = nil
+    public var subscriberAudioMos: MOSStats?
+    public var subscriberJitter: Stats?
+    public var subscriberLatency: Stats?
+    public var subscriberVideoQualityThrottledDurationSeconds: Float?
+    public var subsessions: [Subsession?]?
+    public var timeline: CallTimeline?
     public var totalPixelsIn: Int
     public var totalPixelsOut: Int
-    public var truncated: Bool? = nil
-    public var webrtcVersion: String? = nil
+    public var truncated: Bool?
+    public var webrtcVersion: String?
 
     public init(
         browser: String? = nil,

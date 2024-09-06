@@ -8,7 +8,7 @@ public struct Subsession: @unchecked Sendable, Codable, JSONEncodable, Hashable 
     
     public var endedAt: Int
     public var joinedAt: Int
-    public var pubSubHint: MediaPubSubHint? = nil
+    public var pubSubHint: MediaPubSubHint?
     public var sfuId: String
 
     public init(endedAt: Int, joinedAt: Int, pubSubHint: MediaPubSubHint? = nil, sfuId: String) {

@@ -6,8 +6,8 @@ import Foundation
     
 public struct CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var additional: [String: RawJSON]? = nil
-    public var component: String? = nil
+    public var additional: [String: RawJSON]?
+    public var component: String?
     public var description: String
     public var endTimestamp: Int
     public var severity: Int

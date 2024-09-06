@@ -6,7 +6,7 @@ import Foundation
     
 public struct ReadReceipts: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var enabled: Bool? = nil
+    public var enabled: Bool?
 
     public init(enabled: Bool? = nil) {
         self.enabled = enabled

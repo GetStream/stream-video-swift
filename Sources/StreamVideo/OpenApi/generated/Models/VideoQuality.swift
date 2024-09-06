@@ -6,8 +6,8 @@ import Foundation
     
 public struct VideoQuality: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var resolution: VideoResolution? = nil
-    public var usageType: String? = nil
+    public var resolution: VideoResolution?
+    public var usageType: String?
 
     public init(resolution: VideoResolution? = nil, usageType: String? = nil) {
         self.resolution = resolution

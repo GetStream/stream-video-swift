@@ -6,8 +6,8 @@ import Foundation
     
 public struct NullBool: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var hasValue: Bool? = nil
-    public var value: Bool? = nil
+    public var hasValue: Bool?
+    public var value: Bool?
 
     public init(hasValue: Bool? = nil, value: Bool? = nil) {
         self.hasValue = hasValue

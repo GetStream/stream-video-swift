@@ -6,11 +6,11 @@ import Foundation
     
 public struct CountrywiseAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var participantCount: Count? = nil
-    public var publisherJitter: Stats? = nil
-    public var publisherLatency: Stats? = nil
-    public var subscriberJitter: Stats? = nil
-    public var subscriberLatency: Stats? = nil
+    public var participantCount: Count?
+    public var publisherJitter: Stats?
+    public var publisherLatency: Stats?
+    public var subscriberJitter: Stats?
+    public var subscriberLatency: Stats?
 
     public init(
         participantCount: Count? = nil,

@@ -6,8 +6,8 @@ import Foundation
     
 public struct UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var removeMembers: [String]? = nil
-    public var updateMembers: [MemberRequest]? = nil
+    public var removeMembers: [String]?
+    public var updateMembers: [MemberRequest]?
 
     public init(removeMembers: [String]? = nil, updateMembers: [MemberRequest]? = nil) {
         self.removeMembers = removeMembers

@@ -23,8 +23,8 @@ public struct TranscriptionSettingsRequest: @unchecked Sendable, Codable, JSONEn
         }
     }
     
-    public var closedCaptionMode: String? = nil
-    public var languages: [String]? = nil
+    public var closedCaptionMode: String?
+    public var languages: [String]?
     public var mode: Mode
 
     public init(closedCaptionMode: String? = nil, languages: [String]? = nil, mode: Mode) {

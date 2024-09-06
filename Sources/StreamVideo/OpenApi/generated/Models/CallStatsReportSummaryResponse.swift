@@ -10,9 +10,9 @@ public struct CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSON
     public var callDurationSeconds: Int
     public var callSessionId: String
     public var callStatus: String
-    public var createdAt: Date? = nil
+    public var createdAt: Date?
     public var firstStatsTime: Date
-    public var qualityScore: Int? = nil
+    public var qualityScore: Int?
 
     public init(
         callCid: String,

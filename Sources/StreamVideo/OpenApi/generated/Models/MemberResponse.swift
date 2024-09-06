@@ -8,8 +8,8 @@ public struct MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hasha
     
     public var createdAt: Date
     public var custom: [String: RawJSON]
-    public var deletedAt: Date? = nil
-    public var role: String? = nil
+    public var deletedAt: Date?
+    public var role: String?
     public var updatedAt: Date
     public var user: UserResponse
     public var userId: String

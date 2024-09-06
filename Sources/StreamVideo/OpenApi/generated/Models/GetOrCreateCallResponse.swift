@@ -10,7 +10,7 @@ public struct GetOrCreateCallResponse: @unchecked Sendable, Codable, JSONEncodab
     public var created: Bool
     public var duration: String
     public var members: [MemberResponse]
-    public var membership: MemberResponse? = nil
+    public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
 
     public init(

@@ -6,8 +6,8 @@ import Foundation
     
 public struct LimitsSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var maxDurationSeconds: Int? = nil
-    public var maxParticipants: Int? = nil
+    public var maxDurationSeconds: Int?
+    public var maxParticipants: Int?
 
     public init(maxDurationSeconds: Int? = nil, maxParticipants: Int? = nil) {
         self.maxDurationSeconds = maxDurationSeconds

@@ -6,11 +6,11 @@ import Foundation
     
 public struct VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var accessRequestEnabled: Bool? = nil
-    public var cameraDefaultOn: Bool? = nil
-    public var cameraFacing: String? = nil
-    public var enabled: Bool? = nil
-    public var targetResolution: TargetResolution? = nil
+    public var accessRequestEnabled: Bool?
+    public var cameraDefaultOn: Bool?
+    public var cameraFacing: String?
+    public var enabled: Bool?
+    public var targetResolution: TargetResolution?
 
     public init(
         accessRequestEnabled: Bool? = nil,

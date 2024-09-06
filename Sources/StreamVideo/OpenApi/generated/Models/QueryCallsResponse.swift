@@ -8,8 +8,8 @@ public struct QueryCallsResponse: @unchecked Sendable, Codable, JSONEncodable, H
     
     public var calls: [CallStateResponseFields]
     public var duration: String
-    public var next: String? = nil
-    public var prev: String? = nil
+    public var next: String?
+    public var prev: String?
 
     public init(calls: [CallStateResponseFields], duration: String, next: String? = nil, prev: String? = nil) {
         self.calls = calls

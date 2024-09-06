@@ -8,8 +8,8 @@ public struct EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodable, H
     
     public var name: String
     public var startedAt: Date
-    public var streamKey: String? = nil
-    public var streamUrl: String? = nil
+    public var streamKey: String?
+    public var streamUrl: String?
 
     public init(name: String, startedAt: Date, streamKey: String? = nil, streamUrl: String? = nil) {
         self.name = name

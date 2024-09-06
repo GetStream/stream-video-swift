@@ -8,7 +8,7 @@ public struct UserPresenceChangedEvent: @unchecked Sendable, Event, Codable, JSO
     
     public var createdAt: Date
     public var type: String
-    public var user: UserObject? = nil
+    public var user: UserObject?
 
     public init(createdAt: Date, type: String, user: UserObject? = nil) {
         self.createdAt = createdAt

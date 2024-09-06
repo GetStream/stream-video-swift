@@ -6,7 +6,7 @@ import Foundation
     
 public struct StartTranscriptionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var transcriptionExternalStorage: String? = nil
+    public var transcriptionExternalStorage: String?
 
     public init(transcriptionExternalStorage: String? = nil) {
         self.transcriptionExternalStorage = transcriptionExternalStorage

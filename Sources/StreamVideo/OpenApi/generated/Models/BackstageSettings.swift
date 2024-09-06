@@ -7,7 +7,7 @@ import Foundation
 public struct BackstageSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool
-    public var joinAheadTimeSeconds: Int? = nil
+    public var joinAheadTimeSeconds: Int?
 
     public init(enabled: Bool, joinAheadTimeSeconds: Int? = nil) {
         self.enabled = enabled

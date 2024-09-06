@@ -6,7 +6,7 @@ import Foundation
     
 public struct StartRecordingRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var recordingExternalStorage: String? = nil
+    public var recordingExternalStorage: String?
 
     public init(recordingExternalStorage: String? = nil) {
         self.recordingExternalStorage = recordingExternalStorage

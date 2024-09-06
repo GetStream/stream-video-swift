@@ -10,7 +10,7 @@ public struct CallEndedEvent: @unchecked Sendable, Event, Codable, JSONEncodable
     public var callCid: String
     public var createdAt: Date
     public var type: String
-    public var user: UserResponse? = nil
+    public var user: UserResponse?
 
     public init(call: CallResponse, callCid: String, createdAt: Date, type: String, user: UserResponse? = nil) {
         self.call = call

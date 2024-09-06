@@ -7,10 +7,10 @@ import Foundation
 public struct UserMute: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
-    public var expires: Date? = nil
-    public var target: UserObject? = nil
+    public var expires: Date?
+    public var target: UserObject?
     public var updatedAt: Date
-    public var user: UserObject? = nil
+    public var user: UserObject?
 
     public init(createdAt: Date, expires: Date? = nil, target: UserObject? = nil, updatedAt: Date, user: UserObject? = nil) {
         self.createdAt = createdAt

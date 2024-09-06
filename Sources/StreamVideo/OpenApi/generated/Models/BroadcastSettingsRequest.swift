@@ -6,9 +6,9 @@ import Foundation
     
 public struct BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var enabled: Bool? = nil
-    public var hls: HLSSettingsRequest? = nil
-    public var rtmp: RTMPSettingsRequest? = nil
+    public var enabled: Bool?
+    public var hls: HLSSettingsRequest?
+    public var rtmp: RTMPSettingsRequest?
 
     public init(enabled: Bool? = nil, hls: HLSSettingsRequest? = nil, rtmp: RTMPSettingsRequest? = nil) {
         self.enabled = enabled

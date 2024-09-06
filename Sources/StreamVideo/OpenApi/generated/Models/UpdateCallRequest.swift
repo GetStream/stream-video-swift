@@ -6,9 +6,9 @@ import Foundation
     
 public struct UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var custom: [String: RawJSON]? = nil
-    public var settingsOverride: CallSettingsRequest? = nil
-    public var startsAt: Date? = nil
+    public var custom: [String: RawJSON]?
+    public var settingsOverride: CallSettingsRequest?
+    public var startsAt: Date?
 
     public init(custom: [String: RawJSON]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil) {
         self.custom = custom

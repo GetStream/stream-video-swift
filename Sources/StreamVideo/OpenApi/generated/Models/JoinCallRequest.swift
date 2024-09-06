@@ -6,14 +6,14 @@ import Foundation
     
 public struct JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var create: Bool? = nil
-    public var data: CallRequest? = nil
+    public var create: Bool?
+    public var data: CallRequest?
     public var location: String
-    public var membersLimit: Int? = nil
-    public var migratingFrom: String? = nil
-    public var notify: Bool? = nil
-    public var ring: Bool? = nil
-    public var video: Bool? = nil
+    public var membersLimit: Int?
+    public var migratingFrom: String?
+    public var notify: Bool?
+    public var ring: Bool?
+    public var video: Bool?
 
     public init(
         create: Bool? = nil,

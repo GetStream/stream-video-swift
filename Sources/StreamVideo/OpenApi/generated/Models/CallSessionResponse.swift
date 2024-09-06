@@ -8,16 +8,16 @@ public struct CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, 
     
     public var acceptedBy: [String: Date]
     public var anonymousParticipantCount: Int
-    public var endedAt: Date? = nil
+    public var endedAt: Date?
     public var id: String
-    public var liveEndedAt: Date? = nil
-    public var liveStartedAt: Date? = nil
+    public var liveEndedAt: Date?
+    public var liveStartedAt: Date?
     public var missedBy: [String: Date]
     public var participants: [CallParticipantResponse]
     public var participantsCountByRole: [String: Int]
     public var rejectedBy: [String: Date]
-    public var startedAt: Date? = nil
-    public var timerEndsAt: Date? = nil
+    public var startedAt: Date?
+    public var timerEndsAt: Date?
 
     public init(
         acceptedBy: [String: Date],

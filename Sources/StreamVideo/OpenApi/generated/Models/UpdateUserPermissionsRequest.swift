@@ -6,8 +6,8 @@ import Foundation
     
 public struct UpdateUserPermissionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var grantPermissions: [String]? = nil
-    public var revokePermissions: [String]? = nil
+    public var grantPermissions: [String]?
+    public var revokePermissions: [String]?
     public var userId: String
 
     public init(grantPermissions: [String]? = nil, revokePermissions: [String]? = nil, userId: String) {

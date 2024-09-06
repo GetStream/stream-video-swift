@@ -6,8 +6,8 @@ import Foundation
     
 public struct PrivacySettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var readReceipts: ReadReceipts? = nil
-    public var typingIndicators: TypingIndicators? = nil
+    public var readReceipts: ReadReceipts?
+    public var typingIndicators: TypingIndicators?
 
     public init(readReceipts: ReadReceipts? = nil, typingIndicators: TypingIndicators? = nil) {
         self.readReceipts = readReceipts

@@ -6,23 +6,23 @@ import Foundation
     
 public struct UserObject: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var banExpires: Date? = nil
+    public var banExpires: Date?
     public var banned: Bool
-    public var createdAt: Date? = nil
+    public var createdAt: Date?
     public var custom: [String: RawJSON]
-    public var deactivatedAt: Date? = nil
-    public var deletedAt: Date? = nil
+    public var deactivatedAt: Date?
+    public var deletedAt: Date?
     public var id: String
-    public var invisible: Bool? = nil
-    public var language: String? = nil
-    public var lastActive: Date? = nil
+    public var invisible: Bool?
+    public var language: String?
+    public var lastActive: Date?
     public var online: Bool
-    public var privacySettings: PrivacySettings? = nil
-    public var pushNotifications: PushNotificationSettings? = nil
-    public var revokeTokensIssuedBefore: Date? = nil
+    public var privacySettings: PrivacySettings?
+    public var pushNotifications: PushNotificationSettings?
+    public var revokeTokensIssuedBefore: Date?
     public var role: String
-    public var teams: [String]? = nil
-    public var updatedAt: Date? = nil
+    public var teams: [String]?
+    public var updatedAt: Date?
 
     public init(
         banExpires: Date? = nil,

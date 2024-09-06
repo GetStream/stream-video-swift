@@ -6,8 +6,8 @@ import Foundation
     
 public struct MemberRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var custom: [String: RawJSON]? = nil
-    public var role: String? = nil
+    public var custom: [String: RawJSON]?
+    public var role: String?
     public var userId: String
 
     public init(custom: [String: RawJSON]? = nil, role: String? = nil, userId: String) {

@@ -6,12 +6,12 @@ import Foundation
     
 public struct QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var filterConditions: [String: RawJSON]? = nil
+    public var filterConditions: [String: RawJSON]?
     public var id: String
-    public var limit: Int? = nil
-    public var next: String? = nil
-    public var prev: String? = nil
-    public var sort: [SortParamRequest?]? = nil
+    public var limit: Int?
+    public var next: String?
+    public var prev: String?
+    public var sort: [SortParamRequest?]?
     public var type: String
 
     public init(

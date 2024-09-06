@@ -9,7 +9,7 @@ public struct UserDeactivatedEvent: @unchecked Sendable, Event, Codable, JSONEnc
     public var createdAt: Date
     public var createdBy: UserObject
     public var type: String
-    public var user: UserObject? = nil
+    public var user: UserObject?
 
     public init(createdAt: Date, createdBy: UserObject, type: String, user: UserObject? = nil) {
         self.createdAt = createdAt

@@ -8,7 +8,7 @@ public struct DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodable, H
     
     public var call: CallResponse
     public var duration: String
-    public var taskId: String? = nil
+    public var taskId: String?
 
     public init(call: CallResponse, duration: String, taskId: String? = nil) {
         self.call = call

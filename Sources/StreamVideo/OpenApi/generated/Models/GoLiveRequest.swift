@@ -6,12 +6,12 @@ import Foundation
     
 public struct GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var recordingStorageName: String? = nil
-    public var startHls: Bool? = nil
-    public var startRecording: Bool? = nil
-    public var startRtmpBroadcasts: Bool? = nil
-    public var startTranscription: Bool? = nil
-    public var transcriptionStorageName: String? = nil
+    public var recordingStorageName: String?
+    public var startHls: Bool?
+    public var startRecording: Bool?
+    public var startRtmpBroadcasts: Bool?
+    public var startTranscription: Bool?
+    public var transcriptionStorageName: String?
 
     public init(
         recordingStorageName: String? = nil,

@@ -6,7 +6,7 @@ import Foundation
     
 public struct DeleteCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var hard: Bool? = nil
+    public var hard: Bool?
 
     public init(hard: Bool? = nil) {
         self.hard = hard

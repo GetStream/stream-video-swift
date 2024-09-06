@@ -6,8 +6,8 @@ import Foundation
     
 public struct SortParamRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var direction: Int? = nil
-    public var field: String? = nil
+    public var direction: Int?
+    public var field: String?
 
     public init(direction: Int? = nil, field: String? = nil) {
         self.direction = direction

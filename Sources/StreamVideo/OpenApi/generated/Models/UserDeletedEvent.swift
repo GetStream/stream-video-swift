@@ -11,7 +11,7 @@ public struct UserDeletedEvent: @unchecked Sendable, Event, Codable, JSONEncodab
     public var hardDelete: Bool
     public var markMessagesDeleted: Bool
     public var type: String
-    public var user: UserObject? = nil
+    public var user: UserObject?
 
     public init(
         createdAt: Date,

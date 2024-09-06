@@ -6,12 +6,12 @@ import Foundation
     
 public struct MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var audio: Bool? = nil
-    public var muteAllUsers: Bool? = nil
-    public var screenshare: Bool? = nil
-    public var screenshareAudio: Bool? = nil
-    public var userIds: [String]? = nil
-    public var video: Bool? = nil
+    public var audio: Bool?
+    public var muteAllUsers: Bool?
+    public var screenshare: Bool?
+    public var screenshareAudio: Bool?
+    public var userIds: [String]?
+    public var video: Bool?
 
     public init(
         audio: Bool? = nil,

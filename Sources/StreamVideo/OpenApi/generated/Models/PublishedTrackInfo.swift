@@ -6,9 +6,9 @@ import Foundation
     
 public struct PublishedTrackInfo: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var codecMimeType: String? = nil
-    public var durationSeconds: Int? = nil
-    public var trackType: String? = nil
+    public var codecMimeType: String?
+    public var durationSeconds: Int?
+    public var trackType: String?
 
     public init(codecMimeType: String? = nil, durationSeconds: Int? = nil, trackType: String? = nil) {
         self.codecMimeType = codecMimeType

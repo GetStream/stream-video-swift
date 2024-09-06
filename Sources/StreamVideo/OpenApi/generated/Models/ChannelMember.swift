@@ -6,21 +6,21 @@ import Foundation
     
 public struct ChannelMember: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var banExpires: Date? = nil
+    public var banExpires: Date?
     public var banned: Bool
     public var channelRole: String
     public var createdAt: Date
-    public var deletedAt: Date? = nil
-    public var inviteAcceptedAt: Date? = nil
-    public var inviteRejectedAt: Date? = nil
-    public var invited: Bool? = nil
-    public var isModerator: Bool? = nil
+    public var deletedAt: Date?
+    public var inviteAcceptedAt: Date?
+    public var inviteRejectedAt: Date?
+    public var invited: Bool?
+    public var isModerator: Bool?
     public var notificationsMuted: Bool
     public var shadowBanned: Bool
-    public var status: String? = nil
+    public var status: String?
     public var updatedAt: Date
-    public var user: UserObject? = nil
-    public var userId: String? = nil
+    public var user: UserObject?
+    public var userId: String?
 
     public init(
         banExpires: Date? = nil,

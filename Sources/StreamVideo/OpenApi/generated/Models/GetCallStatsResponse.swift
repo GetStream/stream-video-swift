@@ -6,13 +6,13 @@ import Foundation
     
 public struct GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var aggregated: AggregatedStats? = nil
+    public var aggregated: AggregatedStats?
     public var callDurationSeconds: Int
     public var callStatus: String
-    public var callTimeline: CallTimeline? = nil
+    public var callTimeline: CallTimeline?
     public var duration: String
-    public var jitter: Stats? = nil
-    public var latency: Stats? = nil
+    public var jitter: Stats?
+    public var latency: Stats?
     public var maxFreezesDurationSeconds: Int
     public var maxParticipants: Int
     public var maxTotalQualityLimitationDurationSeconds: Int

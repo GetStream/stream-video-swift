@@ -6,12 +6,12 @@ import Foundation
     
 public struct CallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var custom: [String: RawJSON]? = nil
-    public var members: [MemberRequest]? = nil
-    public var settingsOverride: CallSettingsRequest? = nil
-    public var startsAt: Date? = nil
-    public var team: String? = nil
-    public var video: Bool? = nil
+    public var custom: [String: RawJSON]?
+    public var members: [MemberRequest]?
+    public var settingsOverride: CallSettingsRequest?
+    public var startsAt: Date?
+    public var team: String?
+    public var video: Bool?
 
     public init(
         custom: [String: RawJSON]? = nil,
