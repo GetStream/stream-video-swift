@@ -479,3 +479,10 @@ public struct PinInfo: Sendable, Hashable {
     /// The date of pinning.
     public let pinnedAt: Date
 }
+
+extension CGSize: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(width)
+        hasher.combine(height)
+    }
+}

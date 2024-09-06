@@ -84,7 +84,7 @@ public extension UserResponse {
     }
 }
 
-public enum UserAuthType: Sendable, Codable {
+public enum UserAuthType: Sendable, Codable, Hashable {
     case regular
     case anonymous
     case guest
