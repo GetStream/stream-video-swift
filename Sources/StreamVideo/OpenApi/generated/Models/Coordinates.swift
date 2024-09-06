@@ -6,10 +6,10 @@ import Foundation
     
 public struct Coordinates: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var latitude: Double
-    public var longitude: Double
+    public var latitude: Float
+    public var longitude: Float
 
-    public init(latitude: Double, longitude: Double) {
+    public init(latitude: Float, longitude: Float) {
         self.latitude = latitude
         self.longitude = longitude
     }

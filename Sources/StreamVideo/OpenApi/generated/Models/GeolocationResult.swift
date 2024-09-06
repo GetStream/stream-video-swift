@@ -12,8 +12,8 @@ public struct GeolocationResult: @unchecked Sendable, Codable, JSONEncodable, Ha
     public var continentCode: String
     public var country: String
     public var countryIsoCode: String
-    public var latitude: Double
-    public var longitude: Double
+    public var latitude: Float
+    public var longitude: Float
     public var subdivision: String
     public var subdivisionIsoCode: String
 
@@ -24,8 +24,8 @@ public struct GeolocationResult: @unchecked Sendable, Codable, JSONEncodable, Ha
         continentCode: String,
         country: String,
         countryIsoCode: String,
-        latitude: Double,
-        longitude: Double,
+        latitude: Float,
+        longitude: Float,
         subdivision: String,
         subdivisionIsoCode: String
     ) {

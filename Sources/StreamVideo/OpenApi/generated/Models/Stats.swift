@@ -6,10 +6,10 @@ import Foundation
     
 public struct Stats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var averageSeconds: Double
-    public var maxSeconds: Double
+    public var averageSeconds: Float
+    public var maxSeconds: Float
 
-    public init(averageSeconds: Double, maxSeconds: Double) {
+    public init(averageSeconds: Float, maxSeconds: Float) {
         self.averageSeconds = averageSeconds
         self.maxSeconds = maxSeconds
     }

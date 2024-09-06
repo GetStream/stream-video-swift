@@ -12,35 +12,35 @@ public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Has
     public var currentSfu: String? = nil
     public var deviceModel: String? = nil
     public var deviceVersion: String? = nil
-    public var distanceToSfuKilometers: Double? = nil
+    public var distanceToSfuKilometers: Float? = nil
     public var freezeDurationSeconds: Int
     public var geolocation: GeolocationResult? = nil
     public var jitter: Stats? = nil
     public var latency: Stats? = nil
-    public var maxFirPerSecond: Double? = nil
-    public var maxFreezeFraction: Double
+    public var maxFirPerSecond: Float? = nil
+    public var maxFreezeFraction: Float
     public var maxFreezesDurationSeconds: Int
-    public var maxFreezesPerSecond: Double? = nil
-    public var maxNackPerSecond: Double? = nil
-    public var maxPliPerSecond: Double? = nil
+    public var maxFreezesPerSecond: Float? = nil
+    public var maxNackPerSecond: Float? = nil
+    public var maxPliPerSecond: Float? = nil
     public var maxPublishingVideoQuality: VideoQuality? = nil
     public var maxReceivingVideoQuality: VideoQuality? = nil
     public var os: String? = nil
     public var osVersion: String? = nil
-    public var packetLossFraction: Double
+    public var packetLossFraction: Float
     public var pubSubHints: MediaPubSubHint? = nil
     public var publishedTracks: [PublishedTrackInfo]? = nil
     public var publisherAudioMos: MOSStats? = nil
     public var publisherJitter: Stats? = nil
     public var publisherLatency: Stats? = nil
-    public var publisherNoiseCancellationSeconds: Double? = nil
-    public var publisherPacketLossFraction: Double
-    public var publisherQualityLimitationFraction: Double? = nil
-    public var publisherVideoQualityLimitationDurationSeconds: [String: Double]? = nil
+    public var publisherNoiseCancellationSeconds: Float? = nil
+    public var publisherPacketLossFraction: Float
+    public var publisherQualityLimitationFraction: Float? = nil
+    public var publisherVideoQualityLimitationDurationSeconds: [String: Float]? = nil
     public var publishingAudioCodec: String? = nil
     public var publishingDurationSeconds: Int
     public var publishingVideoCodec: String? = nil
-    public var qualityScore: Double
+    public var qualityScore: Float
     public var receivingAudioCodec: String? = nil
     public var receivingDurationSeconds: Int
     public var receivingVideoCodec: String? = nil
@@ -50,7 +50,7 @@ public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Has
     public var subscriberAudioMos: MOSStats? = nil
     public var subscriberJitter: Stats? = nil
     public var subscriberLatency: Stats? = nil
-    public var subscriberVideoQualityThrottledDurationSeconds: Double? = nil
+    public var subscriberVideoQualityThrottledDurationSeconds: Float? = nil
     public var subsessions: [Subsession?]? = nil
     public var timeline: CallTimeline? = nil
     public var totalPixelsIn: Int
@@ -65,35 +65,35 @@ public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Has
         currentSfu: String? = nil,
         deviceModel: String? = nil,
         deviceVersion: String? = nil,
-        distanceToSfuKilometers: Double? = nil,
+        distanceToSfuKilometers: Float? = nil,
         freezeDurationSeconds: Int,
         geolocation: GeolocationResult? = nil,
         jitter: Stats? = nil,
         latency: Stats? = nil,
-        maxFirPerSecond: Double? = nil,
-        maxFreezeFraction: Double,
+        maxFirPerSecond: Float? = nil,
+        maxFreezeFraction: Float,
         maxFreezesDurationSeconds: Int,
-        maxFreezesPerSecond: Double? = nil,
-        maxNackPerSecond: Double? = nil,
-        maxPliPerSecond: Double? = nil,
+        maxFreezesPerSecond: Float? = nil,
+        maxNackPerSecond: Float? = nil,
+        maxPliPerSecond: Float? = nil,
         maxPublishingVideoQuality: VideoQuality? = nil,
         maxReceivingVideoQuality: VideoQuality? = nil,
         os: String? = nil,
         osVersion: String? = nil,
-        packetLossFraction: Double,
+        packetLossFraction: Float,
         pubSubHints: MediaPubSubHint? = nil,
         publishedTracks: [PublishedTrackInfo]? = nil,
         publisherAudioMos: MOSStats? = nil,
         publisherJitter: Stats? = nil,
         publisherLatency: Stats? = nil,
-        publisherNoiseCancellationSeconds: Double? = nil,
-        publisherPacketLossFraction: Double,
-        publisherQualityLimitationFraction: Double? = nil,
-        publisherVideoQualityLimitationDurationSeconds: [String: Double]? = nil,
+        publisherNoiseCancellationSeconds: Float? = nil,
+        publisherPacketLossFraction: Float,
+        publisherQualityLimitationFraction: Float? = nil,
+        publisherVideoQualityLimitationDurationSeconds: [String: Float]? = nil,
         publishingAudioCodec: String? = nil,
         publishingDurationSeconds: Int,
         publishingVideoCodec: String? = nil,
-        qualityScore: Double,
+        qualityScore: Float,
         receivingAudioCodec: String? = nil,
         receivingDurationSeconds: Int,
         receivingVideoCodec: String? = nil,
@@ -103,7 +103,7 @@ public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Has
         subscriberAudioMos: MOSStats? = nil,
         subscriberJitter: Stats? = nil,
         subscriberLatency: Stats? = nil,
-        subscriberVideoQualityThrottledDurationSeconds: Double? = nil,
+        subscriberVideoQualityThrottledDurationSeconds: Float? = nil,
         subsessions: [Subsession?]? = nil,
         timeline: CallTimeline? = nil,
         totalPixelsIn: Int,

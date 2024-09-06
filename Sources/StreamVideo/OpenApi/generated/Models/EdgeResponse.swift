@@ -11,8 +11,8 @@ public struct EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashabl
     public var green: Int
     public var id: String
     public var latencyTestUrl: String
-    public var latitude: Double
-    public var longitude: Double
+    public var latitude: Float
+    public var longitude: Float
     public var red: Int
     public var subdivisionIsoCode: String
     public var yellow: Int
@@ -23,8 +23,8 @@ public struct EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashabl
         green: Int,
         id: String,
         latencyTestUrl: String,
-        latitude: Double,
-        longitude: Double,
+        latitude: Float,
+        longitude: Float,
         red: Int,
         subdivisionIsoCode: String,
         yellow: Int
