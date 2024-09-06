@@ -13,7 +13,8 @@ final class ReconnectionTests: StreamTestCase {
         try super.tearDownWithError()
     }
     
-    func testReconnectingMessage() {
+    func testReconnectingMessage() throws {
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/stream-video-swift/pull/503")
         linkToScenario(withId: 2030)
         
         GIVEN("user starts a new call") {
