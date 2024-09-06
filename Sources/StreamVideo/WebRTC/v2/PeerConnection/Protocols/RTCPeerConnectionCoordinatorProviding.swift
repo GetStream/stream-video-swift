@@ -60,7 +60,6 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - audioSession: The audio session to be used.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     /// - Returns: A newly created `RTCPeerConnectionCoordinator` instance.
-    /// - Note: This implementation always sets the `peerType` to `.publisher` regardless of the input parameter.
     func buildCoordinator(
         sessionId: String,
         peerType: PeerConnectionType,
@@ -76,7 +75,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ) -> RTCPeerConnectionCoordinator {
         RTCPeerConnectionCoordinator(
             sessionId: sessionId,
-            peerType: .publisher,
+            peerType: peerType,
             peerConnection: peerConnection,
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
