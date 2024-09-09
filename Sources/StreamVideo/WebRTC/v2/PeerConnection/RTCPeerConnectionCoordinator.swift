@@ -32,7 +32,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let identifier = UUID()
     private let sessionId: String
     private let peerType: PeerConnectionType
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
     private let subsystem: LogSubsystem
     private let disposableBag: DisposableBag = .init()
     private let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection.serial.offer.queue")
@@ -81,10 +81,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - sfuAdapter: Adapter for communicating with the SFU.
     ///   - audioSession: The audio session to be used.
     ///   - screenShareSessionProvider: Provider for screen sharing sessions.
-    init(
+    convenience init(
         sessionId: String,
         peerType: PeerConnectionType,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
@@ -93,6 +93,40 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         audioSession: AudioSession,
         screenShareSessionProvider: ScreenShareSessionProvider
+    ) {
+        self.init(
+            sessionId: sessionId,
+            peerType: peerType,
+            peerConnection: peerConnection,
+            videoOptions: videoOptions,
+            callSettings: callSettings,
+            audioSettings: audioSettings,
+            sfuAdapter: sfuAdapter,
+            audioSession: audioSession,
+            mediaAdapter: .init(
+                sessionID: sessionId,
+                peerConnectionType: peerType,
+                peerConnection: peerConnection,
+                peerConnectionFactory: peerConnectionFactory,
+                sfuAdapter: sfuAdapter,
+                videoOptions: videoOptions,
+                videoConfig: videoConfig,
+                audioSession: audioSession,
+                screenShareSessionProvider: screenShareSessionProvider
+            )
+        )
+    }
+
+    init(
+        sessionId: String,
+        peerType: PeerConnectionType,
+        peerConnection: StreamRTCPeerConnectionProtocol,
+        videoOptions: VideoOptions,
+        callSettings: CallSettings,
+        audioSettings: AudioSettings,
+        sfuAdapter: SFUAdapter,
+        audioSession: AudioSession,
+        mediaAdapter: MediaAdapter
     ) {
         self.sessionId = sessionId
         self.peerType = peerType
@@ -105,24 +139,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             ? .peerConnectionPublisher
             : .peerConnectionSubscriber
         self.audioSession = audioSession
+        self.mediaAdapter = mediaAdapter
 
         iceAdapter = .init(
             sessionID: sessionId,
             peerType: peerType,
             peerConnection: peerConnection,
             sfuAdapter: sfuAdapter
-        )
-
-        mediaAdapter = .init(
-            sessionID: sessionId,
-            peerConnectionType: peerType,
-            peerConnection: peerConnection,
-            peerConnectionFactory: peerConnectionFactory,
-            sfuAdapter: sfuAdapter,
-            videoOptions: videoOptions,
-            videoConfig: videoConfig,
-            audioSession: audioSession,
-            screenShareSessionProvider: screenShareSessionProvider
         )
 
         peerConnection
@@ -380,7 +403,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Returns: An RTCStatisticsReport containing the connection statistics.
     /// - Throws: An error if retrieving statistics fails.
-    func statsReport() async throws -> RTCStatisticsReport {
+    func statsReport() async throws -> RTCStatisticsReport? {
         try await peerConnection.statistics()
     }
 

@@ -15,7 +15,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// The unique identifier for the current session.
     private let sessionID: String
     /// The peer connection used for WebRTC communication.
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
     /// Factory for creating peer connection related objects.
     private let peerConnectionFactory: PeerConnectionFactory
     /// Adapter for communicating with the Selective Forwarding Unit (SFU).
@@ -24,6 +24,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     private let videoOptions: VideoOptions
     /// Configuration settings for video.
     private let videoConfig: VideoConfig
+    /// The factory for creating the capturer.
+    private let capturerFactory: VideoCapturerProviding
     /// Provider for screen sharing session information.
     private let screenShareSessionProvider: ScreenShareSessionProvider
 
@@ -55,13 +57,14 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///   - screenShareSessionProvider: Provider for screen sharing session information.
     init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
         subject: PassthroughSubject<TrackEvent, Never>,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -71,6 +74,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.videoConfig = videoConfig
         self.subject = subject
         self.screenShareSessionProvider = screenShareSessionProvider
+        self.capturerFactory = capturerFactory
 
         localTrack = screenShareSessionProvider.activeSession?.localTrack
         capturer = screenShareSessionProvider.activeSession?.capturer
@@ -251,19 +255,11 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             )
         )
 
-        switch screenSharingType {
-        case .inApp:
-            capturer = ScreenshareCapturer(
-                videoSource: videoSource,
-                videoOptions: videoOptions,
-                videoFilters: videoConfig.videoFilters
-            )
-        case .broadcast:
-            capturer = BroadcastScreenCapturer(
-                videoSource: videoSource,
-                videoOptions: videoOptions,
-                videoFilters: videoConfig.videoFilters
-            )
-        }
+        capturer = capturerFactory.buildScreenCapturer(
+            screenSharingType,
+            source: videoSource,
+            options: videoOptions,
+            filters: videoConfig.videoFilters
+        )
     }
 }

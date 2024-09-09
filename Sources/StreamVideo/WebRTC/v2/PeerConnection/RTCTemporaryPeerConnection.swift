@@ -8,7 +8,7 @@ import StreamWebRTC
 /// A temporary peer connection used for creating offers with specific tracks.
 final class RTCTemporaryPeerConnection {
 
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
     private let localAudioTrack: RTCAudioTrack?
     private let localVideoTrack: RTCVideoTrack?
     private let videoOptions: VideoOptions
@@ -34,7 +34,10 @@ final class RTCTemporaryPeerConnection {
         localAudioTrack: RTCAudioTrack?,
         localVideoTrack: RTCVideoTrack?
     ) throws {
-        peerConnection = try .init(peerConnectionFactory, configuration: configuration)
+        peerConnection = try StreamRTCPeerConnection(
+            peerConnectionFactory,
+            configuration: configuration
+        )
         self.localAudioTrack = localAudioTrack
         self.localVideoTrack = localVideoTrack
         self.videoOptions = videoOptions
@@ -76,6 +79,6 @@ final class RTCTemporaryPeerConnection {
                 )
             )
         }
-        return try await peerConnection.createOffer()
+        return try await peerConnection.createOffer(constraints: .defaultConstraints)
     }
 }

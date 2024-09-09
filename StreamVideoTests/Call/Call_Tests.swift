@@ -388,8 +388,9 @@ private struct UpdateStateStep {
 
 private final class MockCallController: CallController, Mockable {
     typealias FunctionKey = MockFunctionKey
+    typealias FunctionInputKey = EmptyPayloadable
 
-    enum MockFunctionKey: Hashable {
+    enum MockFunctionKey: Hashable, CaseIterable {
         case join
     }
 
@@ -397,6 +398,7 @@ private final class MockCallController: CallController, Mockable {
     var timesJoinWasCalled: Int = 0
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
+    var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = [:]
 
     convenience init() {
         self.init(

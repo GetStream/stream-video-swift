@@ -16,7 +16,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     private let sessionID: String
 
     /// The WebRTC peer connection.
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
 
     /// The factory for creating WebRTC peer connection components.
     private let peerConnectionFactory: PeerConnectionFactory
@@ -53,7 +53,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         audioSession: AudioSession,
@@ -97,7 +97,10 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     ) async throws {
         let hasAudio = ownCapabilities.contains(.sendAudio)
 
-        if hasAudio, localTrack == nil || localTrack?.isEnabled == false {
+        if
+            hasAudio,
+            localTrack == nil || localTrack?.isEnabled == false
+        {
             let audioConstrains = RTCMediaConstraints(
                 mandatoryConstraints: nil,
                 optionalConstraints: nil

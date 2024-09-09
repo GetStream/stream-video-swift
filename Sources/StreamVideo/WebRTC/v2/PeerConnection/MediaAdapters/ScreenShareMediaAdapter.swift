@@ -13,7 +13,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     private let sessionID: String
 
     /// The WebRTC peer connection.
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
 
     /// The factory for creating WebRTC peer connection components.
     private let peerConnectionFactory: PeerConnectionFactory
@@ -56,7 +56,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
     convenience init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
@@ -92,7 +92,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - subject: A subject for publishing track events.
     init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         localMediaManager: LocalMediaAdapting,
         subject: PassthroughSubject<TrackEvent, Never>

@@ -13,7 +13,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     private let sessionID: String
 
     /// The WebRTC peer connection.
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
 
     /// The factory for creating WebRTC peer connection components.
     private let peerConnectionFactory: PeerConnectionFactory
@@ -55,7 +55,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - audioSession: The audio session manager.
     convenience init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         subject: PassthroughSubject<TrackEvent, Never>,
@@ -89,7 +89,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - audioSession: The audio session manager.
     init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         localMediaManager: LocalMediaAdapting,
         subject: PassthroughSubject<TrackEvent, Never>,
@@ -171,12 +171,12 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter stream: The audio stream to add.
     private func add(_ stream: RTCMediaStream) {
         queue.sync { streams.append(stream) }
-        if let audioTrack = stream.audioTracks.first {
+        stream.audioTracks.forEach {
             subject.send(
                 .added(
                     id: stream.trackId,
                     trackType: .audio,
-                    track: audioTrack
+                    track: $0
                 )
             )
         }

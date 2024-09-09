@@ -15,7 +15,7 @@ final class MockCall: Call, Mockable {
         case join
     }
 
-    enum MockCallFunctionInputKey {
+    enum MockCallFunctionInputKey: Payloadable {
         case join(
             create: Bool,
             options: CreateCallOptions?,
@@ -23,6 +23,13 @@ final class MockCall: Call, Mockable {
             notify: Bool,
             callSettings: CallSettings?
         )
+
+        var payload: Any {
+            switch self {
+            case let .join(create, options, ring, notify, callSettings):
+                return (create, options, ring, notify, callSettings)
+            }
+        }
     }
 
     var stubbedProperty: [String: Any]

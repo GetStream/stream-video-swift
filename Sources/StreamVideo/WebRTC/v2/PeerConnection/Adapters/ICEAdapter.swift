@@ -15,7 +15,7 @@ actor ICEAdapter: @unchecked Sendable {
     private let sessionID: String
     private let encoder = JSONEncoder()
     private let peerType: PeerConnectionType
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
     private let sfuAdapter: SFUAdapter
 
     private var disposableBag: DisposableBag = .init()
@@ -32,7 +32,7 @@ actor ICEAdapter: @unchecked Sendable {
     init(
         sessionID: String,
         peerType: PeerConnectionType,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         sfuAdapter: SFUAdapter
     ) {
         self.sessionID = sessionID

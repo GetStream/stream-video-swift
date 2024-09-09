@@ -13,7 +13,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     private let sessionID: String
 
     /// The WebRTC peer connection.
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
 
     /// The factory for creating WebRTC peer connection components.
     private let peerConnectionFactory: PeerConnectionFactory
@@ -55,7 +55,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - subject: A subject for publishing track events.
     convenience init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
@@ -89,7 +89,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - subject: A subject for publishing track events.
     init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         localMediaManager: LocalMediaAdapting,
         subject: PassthroughSubject<TrackEvent, Never>
@@ -146,49 +146,30 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func didUpdateCameraPosition(
         _ position: AVCaptureDevice.Position
     ) async throws {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-
-        try await localVideoMediaManager.didUpdateCameraPosition(position)
+        try await(localMediaManager as? LocalVideoMediaAdapter)?
+            .didUpdateCameraPosition(position)
     }
 
     /// Sets a video filter.
     ///
     /// - Parameter videoFilter: The video filter to apply.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-        localVideoMediaManager.setVideoFilter(videoFilter)
+        (localMediaManager as? LocalVideoMediaAdapter)?
+            .setVideoFilter(videoFilter)
     }
 
     /// Zooms the camera by a given factor.
     ///
     /// - Parameter factor: The zoom factor.
     func zoom(by factor: CGFloat) throws {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-        try localVideoMediaManager.zoom(by: factor)
+        try (localMediaManager as? LocalVideoMediaAdapter)?.zoom(by: factor)
     }
 
     /// Focuses the camera at a given point.
     ///
     /// - Parameter point: The point to focus on.
     func focus(at point: CGPoint) throws {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-        try localVideoMediaManager.focus(at: point)
+        try (localMediaManager as? LocalVideoMediaAdapter)?.focus(at: point)
     }
 
     /// Adds a video output to the capture session.
@@ -197,12 +178,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-        try localVideoMediaManager.addVideoOutput(videoOutput)
+        try (localMediaManager as? LocalVideoMediaAdapter)?.addVideoOutput(videoOutput)
     }
 
     /// Removes a video output from the capture session.
@@ -211,12 +187,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-        try localVideoMediaManager.removeVideoOutput(videoOutput)
+        try (localMediaManager as? LocalVideoMediaAdapter)?.removeVideoOutput(videoOutput)
     }
 
     /// Adds a photo output to the capture session.
@@ -225,12 +196,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-        try localVideoMediaManager.addCapturePhotoOutput(capturePhotoOutput)
+        try (localMediaManager as? LocalVideoMediaAdapter)?
+            .addCapturePhotoOutput(capturePhotoOutput)
     }
 
     /// Removes a photo output from the capture session.
@@ -239,12 +206,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
-        guard
-            let localVideoMediaManager = localMediaManager as? LocalVideoMediaAdapter
-        else {
-            return
-        }
-        try localVideoMediaManager.removeCapturePhotoOutput(capturePhotoOutput)
+        try (localMediaManager as? LocalVideoMediaAdapter)?
+            .removeCapturePhotoOutput(capturePhotoOutput)
     }
 
     /// Changes the publishing quality based on active encodings.

@@ -4,13 +4,21 @@
 
 import Foundation
 
+protocol Payloadable {
+    var payload: Any { get }
+}
+
+enum EmptyPayloadable: Payloadable { var payload: Any { () } }
+
 @dynamicMemberLookup
 protocol Mockable {
 
-    associatedtype FunctionKey: Hashable
+    associatedtype FunctionKey: Hashable & CaseIterable
+    associatedtype FunctionInputKey: Payloadable
 
     var stubbedProperty: [String: Any] { get set }
     var stubbedFunction: [FunctionKey: Any] { get set }
+    var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] { get set }
 
     func propertyKey<T>(for keyPath: KeyPath<Self, T>) -> String
 
@@ -35,4 +43,10 @@ extension Mockable {
         let value = stubbedProperty[propertyKey(for: keyPath)]
         return value as! T
     }
+
+    func recordedInputPayload<T>(_ ofType: T.Type, for key: FunctionKey) -> [T]? {
+        stubbedFunctionInput[key]?.map(\.payload) as? [T]
+    }
+
+    func timesCalled(_ key: FunctionKey) -> Int { stubbedFunctionInput[key]?.count ?? 0 }
 }

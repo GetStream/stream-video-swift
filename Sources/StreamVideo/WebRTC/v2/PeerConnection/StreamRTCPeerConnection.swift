@@ -7,7 +7,7 @@ import Foundation
 import StreamWebRTC
 
 /// Represents a WebRTC peer connection with additional Stream-specific functionality.
-final class StreamRTCPeerConnection: @unchecked Sendable {
+final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked Sendable {
 
     /// The remote session description of the peer connection.
     var remoteDescription: RTCSessionDescription? { source.remoteDescription }
@@ -163,7 +163,7 @@ final class StreamRTCPeerConnection: @unchecked Sendable {
     ///
     /// - Returns: An RTCStatisticsReport containing the connection statistics.
     /// - Throws: An error if retrieving statistics fails.
-    func statistics() async throws -> RTCStatisticsReport {
+    func statistics() async throws -> RTCStatisticsReport? {
         try await withCheckedThrowingContinuation { [weak self] continuation in
             guard let self else {
                 return continuation.resume(throwing: ClientError.Unexpected())

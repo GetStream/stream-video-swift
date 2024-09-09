@@ -38,10 +38,10 @@ final class MediaAdapter {
     ///   - videoConfig: The video configuration for the call.
     ///   - audioSession: The audio session manager.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
-    init(
+    convenience init(
         sessionID: String,
         peerConnectionType: PeerConnectionType,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
@@ -50,68 +50,79 @@ final class MediaAdapter {
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
         let subject = PassthroughSubject<TrackEvent, Never>()
-        self.subject = subject
 
         switch peerConnectionType {
         case .subscriber:
-            // Initialize adapters for subscriber role
-            audioMediaAdapter = .init(
-                sessionID: sessionID,
-                peerConnection: peerConnection,
-                peerConnectionFactory: peerConnectionFactory,
-                localMediaManager: LocalNoOpMediaAdapter(subject: subject),
+            self.init(
                 subject: subject,
-                audioSession: audioSession
-            )
-
-            videoMediaAdapter = .init(
-                sessionID: sessionID,
-                peerConnection: peerConnection,
-                peerConnectionFactory: peerConnectionFactory,
-                localMediaManager: LocalNoOpMediaAdapter(subject: subject),
-                subject: subject
-            )
-
-            screenShareMediaAdapter = .init(
-                sessionID: sessionID,
-                peerConnection: peerConnection,
-                peerConnectionFactory: peerConnectionFactory,
-                localMediaManager: LocalNoOpMediaAdapter(subject: subject),
-                subject: subject
+                audioMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    localMediaManager: LocalNoOpMediaAdapter(subject: subject),
+                    subject: subject,
+                    audioSession: audioSession
+                ),
+                videoMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    localMediaManager: LocalNoOpMediaAdapter(subject: subject),
+                    subject: subject
+                ),
+                screenShareMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    localMediaManager: LocalNoOpMediaAdapter(subject: subject),
+                    subject: subject
+                )
             )
 
         case .publisher:
-            // Initialize adapters for publisher role
-            audioMediaAdapter = .init(
-                sessionID: sessionID,
-                peerConnection: peerConnection,
-                peerConnectionFactory: peerConnectionFactory,
-                sfuAdapter: sfuAdapter,
+            self.init(
                 subject: subject,
-                audioSession: audioSession
-            )
-
-            videoMediaAdapter = .init(
-                sessionID: sessionID,
-                peerConnection: peerConnection,
-                peerConnectionFactory: peerConnectionFactory,
-                sfuAdapter: sfuAdapter,
-                videoOptions: videoOptions,
-                videoConfig: videoConfig,
-                subject: subject
-            )
-
-            screenShareMediaAdapter = .init(
-                sessionID: sessionID,
-                peerConnection: peerConnection,
-                peerConnectionFactory: peerConnectionFactory,
-                sfuAdapter: sfuAdapter,
-                videoOptions: videoOptions,
-                videoConfig: videoConfig,
-                subject: subject,
-                screenShareSessionProvider: screenShareSessionProvider
+                audioMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    sfuAdapter: sfuAdapter,
+                    subject: subject,
+                    audioSession: audioSession
+                ),
+                videoMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    sfuAdapter: sfuAdapter,
+                    videoOptions: videoOptions,
+                    videoConfig: videoConfig,
+                    subject: subject
+                ),
+                screenShareMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    sfuAdapter: sfuAdapter,
+                    videoOptions: videoOptions,
+                    videoConfig: videoConfig,
+                    subject: subject,
+                    screenShareSessionProvider: screenShareSessionProvider
+                )
             )
         }
+    }
+
+    init(
+        subject: PassthroughSubject<TrackEvent, Never>,
+        audioMediaAdapter: AudioMediaAdapter,
+        videoMediaAdapter: VideoMediaAdapter,
+        screenShareMediaAdapter: ScreenShareMediaAdapter
+    ) {
+        self.subject = subject
+        self.audioMediaAdapter = audioMediaAdapter
+        self.videoMediaAdapter = videoMediaAdapter
+        self.screenShareMediaAdapter = screenShareMediaAdapter
     }
 
     /// Sets up the media adapters with the given settings and capabilities.

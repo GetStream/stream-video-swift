@@ -13,7 +13,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private let sessionID: String
 
     /// The WebRTC peer connection.
-    private let peerConnection: StreamRTCPeerConnection
+    private let peerConnection: StreamRTCPeerConnectionProtocol
 
     /// The factory for creating WebRTC peer connection components.
     private let peerConnectionFactory: PeerConnectionFactory
@@ -26,6 +26,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The video configuration for the call.
     private let videoConfig: VideoConfig
+
+    /// The factory for creating the capturer.
+    private let capturerFactory: VideoCapturerProviding
 
     /// The stream identifiers for this video adapter.
     private let streamIds: [String]
@@ -57,12 +60,13 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
-        peerConnection: StreamRTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -71,6 +75,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.videoOptions = videoOptions
         self.videoConfig = videoConfig
         self.subject = subject
+        self.capturerFactory = capturerFactory
         streamIds = ["\(sessionID):video"]
     }
 
@@ -198,13 +203,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCameraPosition(
         _ position: AVCaptureDevice.Position
     ) async throws {
-        guard
-            let capturer
-        else {
-            log.debug("Cannot update cameraPosition as track isn't being captured.")
-            return
-        }
-        try await capturer.setCameraPosition(position)
+        try await capturer?.setCameraPosition(position)
     }
 
     /// Sets a video filter.
@@ -218,14 +217,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter factor: The zoom factor.
     func zoom(by factor: CGFloat) throws {
-        try (capturer as? VideoCapturer)?.zoom(by: factor)
+        try capturer?.zoom(by: factor)
     }
 
     /// Focuses the camera at a given point.
     ///
     /// - Parameter point: The point to focus on.
     func focus(at point: CGPoint) throws {
-        try (capturer as? VideoCapturer)?.focus(at: point)
+        try capturer?.focus(at: point)
     }
 
     /// Adds a video output to the capture session.
@@ -234,7 +233,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
-        try (capturer as? VideoCapturer)?.addVideoOutput(videoOutput)
+        try capturer?.addVideoOutput(videoOutput)
     }
 
     /// Removes a video output from the capture session.
@@ -243,7 +242,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
-        try (capturer as? VideoCapturer)?.removeVideoOutput(videoOutput)
+        try capturer?.removeVideoOutput(videoOutput)
     }
 
     /// Adds a photo output to the capture session.
@@ -252,7 +251,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
-        try (capturer as? VideoCapturer)?
+        try capturer?
             .addCapturePhotoOutput(capturePhotoOutput)
     }
 
@@ -262,7 +261,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
-        try (capturer as? VideoCapturer)?
+        try capturer?
             .removeCapturePhotoOutput(capturePhotoOutput)
     }
 
@@ -290,14 +289,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
             switch (shouldEnable, encoding.isActive) {
             case (true, true):
-                updatedEncodings.append(encoding)
+                break
             case (false, false):
-                updatedEncodings.append(encoding)
+                break
             default:
                 hasChanges = true
                 encoding.isActive = shouldEnable
-                updatedEncodings.append(encoding)
             }
+            updatedEncodings.append(encoding)
         }
 
         guard hasChanges else {
@@ -339,10 +338,10 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
 
         try await capturer?.stopCapture()
-        let cameraCapturer = VideoCapturer(
-            videoSource: videoSource,
-            videoOptions: videoOptions,
-            videoFilters: videoConfig.videoFilters
+        let cameraCapturer = capturerFactory.buildCameraCapturer(
+            source: videoSource,
+            options: videoOptions,
+            filters: videoConfig.videoFilters
         )
         capturer = cameraCapturer
 
