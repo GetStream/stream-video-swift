@@ -131,7 +131,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
             for: sessionID
         )
 
-        let request = try XCTUnwrap(mockService.updateMuteStatesWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.updateTrackMuteState]?.first?
+                .value(as: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest.self)
+        )
         XCTAssertEqual(request.muteStates.endIndex, 1)
         XCTAssertEqual(request.sessionID, sessionID)
 
@@ -151,7 +154,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
             for: sessionID
         )
 
-        let request = try XCTUnwrap(mockService.sendStatsWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.sendStats]?.first?
+                .value(as: Stream_Video_Sfu_Signal_SendStatsRequest.self)
+        )
         XCTAssertEqual(request.sessionID, sessionID)
         XCTAssertEqual(request.sdk, "stream-ios")
         XCTAssertEqual(request.sdkVersion, SystemEnvironment.version)
@@ -168,7 +174,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         try await subject.toggleNoiseCancellation(true, for: sessionID)
 
         // Then
-        let request = try XCTUnwrap(mockService.startNoiseCancellationWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.startNoiseCancellation]?.first?
+                .value(as: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest.self)
+        )
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
@@ -180,7 +189,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         try await subject.toggleNoiseCancellation(false, for: sessionID)
 
         // Then
-        let request = try XCTUnwrap(mockService.stopNoiseCancellationWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.stopNoiseCancellation]?.first?
+                .value(as: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest.self)
+        )
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
@@ -200,7 +212,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         )
 
         // Then
-        let request = try XCTUnwrap(mockService.setPublisherWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.setPublisher]?.first?
+                .value(as: Stream_Video_Sfu_Signal_SetPublisherRequest.self)
+        )
         XCTAssertEqual(request.sessionID, sessionID)
         XCTAssertEqual(request.sdp, sessionDescription)
     }
@@ -218,7 +233,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         )
 
         // Then
-        let request = try XCTUnwrap(mockService.updateSubscriptionsWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.updateSubscriptions]?.first?
+                .value(as: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest.self)
+        )
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
@@ -236,7 +254,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         )
 
         // Then
-        let request = try XCTUnwrap(mockService.sendAnswerWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.sendAnswer]?.first?
+                .value(as: Stream_Video_Sfu_Signal_SendAnswerRequest.self)
+        )
         XCTAssertEqual(request.sdp, sessionDescription)
         XCTAssertEqual(request.peerType, .subscriber)
         XCTAssertEqual(request.sessionID, sessionID)
@@ -256,7 +277,10 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         )
 
         // Then
-        let request = try XCTUnwrap(mockService.iCETrickleWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockService.stubbedFunctionInput[.iCETrickle]?.first?
+                .value(as: Stream_Video_Sfu_Models_ICETrickle.self)
+        )
         XCTAssertEqual(request.iceCandidate, candidate)
         XCTAssertEqual(request.peerType, .subscriber)
         XCTAssertEqual(request.sessionID, sessionID)

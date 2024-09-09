@@ -63,16 +63,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
             }
         }
     }
-
-    private(set) var updateMuteStatesWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest?
-    private(set) var sendStatsWasCalledWithRequest: Stream_Video_Sfu_Signal_SendStatsRequest?
-    private(set) var startNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest?
-    private(set) var stopNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest?
-    private(set) var setPublisherWasCalledWithRequest: Stream_Video_Sfu_Signal_SetPublisherRequest?
-    private(set) var updateSubscriptionsWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest?
-    private(set) var sendAnswerWasCalledWithRequest: Stream_Video_Sfu_Signal_SendAnswerRequest?
-    private(set) var iCETrickleWasCalledWithRequest: Stream_Video_Sfu_Models_ICETrickle?
-
+    
     convenience init() {
         self.init(
             httpClient: HTTPClient_Mock(),

@@ -41,7 +41,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
     func test_sfuAdapterNil_reportWasNotCollectedAndSentCorrectly() async throws {
         await wait(for: subject.interval + 1)
 
-        XCTAssertNil(mockSFUService.sendStatsWasCalledWithRequest)
+        XCTAssertNil(mockSFUService.stubbedFunctionInput[.sendStats]?.first)
     }
 
     func test_sfuAdapterNotNil_reportWasCollectedAndSentCorrectly() async throws {
@@ -49,7 +49,10 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
 
         await wait(for: subject.interval + 1)
 
-        let request = try XCTUnwrap(mockSFUService.sendStatsWasCalledWithRequest)
+        let request = try XCTUnwrap(
+            mockSFUService.stubbedFunctionInput[.sendStats]?.first?
+                .value(as: Stream_Video_Sfu_Signal_SendStatsRequest.self)
+        )
         XCTAssertTrue(request.subscriberStats.isEmpty)
         XCTAssertTrue(request.publisherStats.isEmpty)
         XCTAssertEqual(request.sessionID, sessionID)
@@ -65,12 +68,12 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
         sfuStack.mockWebSocketClient.simulate(state: .connected(healthCheckInfo: .init()))
 
         await wait(for: 1)
-        XCTAssertNil(mockSFUService.sendStatsWasCalledWithRequest)
-        XCTAssertNil(sfuStack.mockService.sendStatsWasCalledWithRequest)
+        XCTAssertNil(mockSFUService.stubbedFunctionInput[.sendStats]?.first)
+        XCTAssertNil(sfuStack.mockService.stubbedFunctionInput[.sendStats]?.first)
 
         await wait(for: subject.interval)
-        XCTAssertNil(mockSFUService.sendStatsWasCalledWithRequest)
-        XCTAssertNotNil(sfuStack.mockService.sendStatsWasCalledWithRequest)
+        XCTAssertNil(mockSFUService.stubbedFunctionInput[.sendStats]?.first)
+        XCTAssertNotNil(sfuStack.mockService.stubbedFunctionInput[.sendStats]?.first)
     }
 }
 
