@@ -5,18 +5,30 @@
 import Foundation
 import StreamWebRTC
 
+/// Manages ICE (Interactive Connectivity Establishment) operations for WebRTC. The adapter is bound to
+/// the SFUAdapter and PeerConnection instance.
+/// One of the main tasks the adapter fulfils, is to maintain a storage of already trickled ICE candidates
+/// and include them to the peer connection if that's needed again.
+///
+/// Handles trickle ICE, candidate addition, and coordinates with SFU adapter.
 actor ICEAdapter: @unchecked Sendable {
     private let sessionID: String
     private let encoder = JSONEncoder()
     private let peerType: PeerConnectionType
     private let peerConnection: StreamRTCPeerConnection
+    private let sfuAdapter: SFUAdapter
 
     private var disposableBag: DisposableBag = .init()
     private var trickledCandidates: [RTCIceCandidate] = []
     private var untrickledCandidates: [RTCIceCandidate] = []
 
-    var sfuAdapter: SFUAdapter
-
+    /// Initializes the ICEAdapter.
+    ///
+    /// - Parameters:
+    ///   - sessionID: Unique identifier for the session.
+    ///   - peerType: Type of peer connection (publisher or subscriber).
+    ///   - peerConnection: The WebRTC peer connection.
+    ///   - sfuAdapter: Adapter for SFU communication.
     init(
         sessionID: String,
         peerType: PeerConnectionType,
@@ -33,6 +45,9 @@ actor ICEAdapter: @unchecked Sendable {
         }
     }
 
+    /// Trickles an ICE candidate.
+    ///
+    /// - Parameter candidate: The ICE candidate to trickle.
     func trickle(_ candidate: RTCIceCandidate) {
         guard case .connected = sfuAdapter.connectionState else {
             untrickledCandidates.append(candidate)
@@ -42,12 +57,16 @@ actor ICEAdapter: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
+    /// Creates a task to trickle an ICE candidate.
+    ///
+    /// - Parameter candidate: The ICE candidate to trickle.
+    /// - Returns: A task that performs the trickle operation.
     private func trickleTask(
         for candidate: RTCIceCandidate
     ) -> Task<Void, Never> {
         Task {
             do {
-                let iceCandidate = candidate.toIceCandidate()
+                let iceCandidate = ICECandidate(from: candidate)
                 let json = try encoder.encode(iceCandidate)
                 guard
                     let jsonString = String(data: json, encoding: .utf8)
@@ -88,6 +107,9 @@ actor ICEAdapter: @unchecked Sendable {
         }
     }
 
+    /// Adds an ICE candidate to the peer connection.
+    ///
+    /// - Parameter candidate: The ICE candidate to add.
     func add(_ candidate: RTCIceCandidate) {
         trickledCandidates.append(candidate)
         guard
@@ -116,11 +138,14 @@ actor ICEAdapter: @unchecked Sendable {
 
     // MARK: - Private helpers
 
+    /// Handles an ICE trickle event from the SFU.
+    ///
+    /// - Parameter event: The ICE trickle event to handle.
     private func handleICETrickle(
         _ event: Stream_Video_Sfu_Models_ICETrickle
     ) {
         do {
-            let iceCandidate = try event.toICECandidate()
+            let iceCandidate = try RTCIceCandidate(event)
             trickledCandidates.append(iceCandidate)
 
             guard
@@ -142,6 +167,7 @@ actor ICEAdapter: @unchecked Sendable {
         }
     }
 
+    /// Adds all trickled ICE candidates to the peer connection.
     private func addTrickledICECandidates() {
         Task {
             await withTaskGroup(of: Void.self) { [weak self] group in
@@ -170,6 +196,10 @@ actor ICEAdapter: @unchecked Sendable {
         .store(in: disposableBag)
     }
 
+    /// Creates a task to add an ICE candidate to the peer connection.
+    ///
+    /// - Parameter candidate: The ICE candidate to add.
+    /// - Returns: A task that adds the candidate to the peer connection.
     private func task(
         for candidate: RTCIceCandidate
     ) -> Task<Void, Never> {
@@ -189,6 +219,7 @@ actor ICEAdapter: @unchecked Sendable {
         }
     }
 
+    /// Configures the ICE adapter, setting up necessary publishers and subscriptions.
     private func configure() async {
         disposableBag.removeAll()
 
@@ -206,13 +237,13 @@ actor ICEAdapter: @unchecked Sendable {
             .store(in: disposableBag)
 
         peerConnection
-            .publisher(eventType: RTCPeerConnection.DidGenerateICECandidateEvent.self)
+            .publisher(eventType: StreamRTCPeerConnection.DidGenerateICECandidateEvent.self)
             .log(.debug, subsystems: .iceAdapter) { [peerType] in "PeerConnection type:\(peerType) generated \($0)." }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trickle($0.candidate) }
             .store(in: disposableBag)
 
         peerConnection
-            .publisher(eventType: RTCPeerConnection.HasRemoteDescription.self)
+            .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
             .log(.debug, subsystems: .iceAdapter)
             .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.addTrickledICECandidates() }
             .store(in: disposableBag)
@@ -231,47 +262,5 @@ actor ICEAdapter: @unchecked Sendable {
             .refreshPublisher
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.configure() }
             .store(in: disposableBag)
-    }
-}
-
-extension RTCIceCandidate: @unchecked Sendable {}
-
-extension Stream_Video_Sfu_Models_ICETrickle {
-
-    func toICECandidate() throws -> RTCIceCandidate {
-        guard let data = iceCandidate.data(
-            using: .utf8,
-            allowLossyConversion: false
-        ) else {
-            throw ClientError.Unexpected()
-        }
-        guard let json = try JSONSerialization.jsonObject(
-            with: data,
-            options: .mutableContainers
-        ) as? [String: Any], let sdp = json["candidate"] as? String else {
-            throw ClientError.Unexpected()
-        }
-
-        return RTCIceCandidate(
-            sdp: sdp,
-            sdpMLineIndex: 0,
-            sdpMid: nil
-        )
-    }
-}
-
-extension RTCIceCandidate {
-
-    func toIceCandidate() -> ICECandidate {
-        .init(from: self)
-    }
-}
-
-extension RTCVideoCodecInfo {
-
-    func toSfuCodec() -> Stream_Video_Sfu_Models_Codec {
-        var codec = Stream_Video_Sfu_Models_Codec()
-        codec.name = name
-        return codec
     }
 }

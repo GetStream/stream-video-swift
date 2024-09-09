@@ -10,7 +10,7 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
     func buildCoordinator(
         sessionId: String,
         peerType: PeerConnectionType,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnection,
         peerConnectionFactory: PeerConnectionFactory,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,

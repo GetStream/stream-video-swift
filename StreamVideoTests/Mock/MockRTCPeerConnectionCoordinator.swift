@@ -52,11 +52,7 @@ final class MockRTCPeerConnectionCoordinator: RTCPeerConnectionCoordinator, Mock
         self.init(
             sessionId: .unique,
             peerType: peerType,
-            peerConnection: try peerConnectionFactory.makePeerConnection(
-                configuration: .init(),
-                constraints: .defaultConstraints,
-                delegate: nil
-            ),
+            peerConnection: try .init(peerConnectionFactory, configuration: .init()),
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
             videoConfig: videoConfig,

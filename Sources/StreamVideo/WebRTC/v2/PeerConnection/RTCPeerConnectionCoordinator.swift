@@ -6,8 +6,10 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+/// Coordinates the peer connection, managing media, ICE, and SFU interactions.
 class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
+    /// Represents actions that can be performed on the peer connection.
     enum Action {
         case addTrack(
             RTCMediaStreamTrack,
@@ -24,6 +26,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
         case restartICE
     }
+
+    // MARK: - Properties
 
     private let identifier = UUID()
     private let sessionId: String
@@ -49,7 +53,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     var trackPublisher: AnyPublisher<TrackEvent, Never> { mediaAdapter.trackPublisher }
     var disconnectedPublisher: AnyPublisher<Void, Never> {
         peerConnection
-            .publisher(eventType: RTCPeerConnection.DidChangeConnectionStateEvent.self)
+            .publisher(eventType: StreamRTCPeerConnection.DidChangeConnectionStateEvent.self)
             .filter { $0.state == .disconnected }
             .map { _ in () }
             .eraseToAnyPublisher()
@@ -63,6 +67,20 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         mediaAdapter.mid(for: type)
     }
 
+    /// Initializes the RTCPeerConnectionCoordinator with necessary dependencies.
+    ///
+    /// - Parameters:
+    ///   - sessionId: The unique identifier for the session.
+    ///   - peerType: The type of peer connection (publisher or subscriber).
+    ///   - peerConnection: The underlying WebRTC peer connection.
+    ///   - peerConnectionFactory: Factory for creating WebRTC objects.
+    ///   - videoOptions: Configuration options for video.
+    ///   - videoConfig: Configuration for video processing.
+    ///   - callSettings: Settings for the current call.
+    ///   - audioSettings: Settings for audio processing.
+    ///   - sfuAdapter: Adapter for communicating with the SFU.
+    ///   - audioSession: The audio session to be used.
+    ///   - screenShareSessionProvider: Provider for screen sharing sessions.
     init(
         sessionId: String,
         peerType: PeerConnectionType,
@@ -110,7 +128,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         peerConnection
             .publisher
             .sink { [identifier, subsystem] in
-                if let failedToGatherEvent = $0 as? RTCPeerConnection.ICECandidateFailedToGatherEvent {
+                if let failedToGatherEvent = $0 as? StreamRTCPeerConnection.ICECandidateFailedToGatherEvent {
                     log.warning(
                         """
                         PeerConnection failed to gather ICE candidates:
@@ -140,7 +158,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
         if peerType == .publisher {
             peerConnection
-                .publisher(eventType: RTCPeerConnection.ShouldNegotiateEvent.self)
+                .publisher(eventType: StreamRTCPeerConnection.ShouldNegotiateEvent.self)
                 .receive(on: dispatchQueue)
                 .map { _ in () }
                 .sink { [weak self] in self?.negotiate() }
@@ -169,6 +187,12 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         peerConnection.close()
     }
 
+    /// Sets up the peer connection with given settings and capabilities.
+    ///
+    /// - Parameters:
+    ///   - settings: The call settings to apply.
+    ///   - ownCapabilities: The capabilities of the local participant.
+    /// - Throws: An error if the setup process fails.
     func setUp(
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
@@ -180,13 +204,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             Session ID: \(sessionId)
             Connection type: \(peerType)
             SFU: \(sfuAdapter.hostname)
-
+            
             CallSettings:
                 audioOn: \(settings.audioOn)
                 videoOn: \(settings.videoOn)
                 audioOutputOn: \(settings.audioOutputOn)
                 speakerOn: \(settings.speakerOn)
-
+            
             ownCapabilities:
                 hasAudio: \(ownCapabilities.contains(.sendAudio))
                 hasVideo: \(ownCapabilities.contains(.sendVideo))
@@ -199,6 +223,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Updates the call settings.
+    ///
+    /// - Parameter settings: The new call settings to apply.
+    /// - Throws: An error if updating the settings fails.
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
@@ -216,7 +244,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoOn: \(settings.videoOn)
                 audioOutputOn: \(settings.audioOutputOn)
                 speakerOn: \(settings.speakerOn)
-
+            
             AudioSession enabled: \(isActive)
             """,
             subsystems: subsystem
@@ -227,6 +255,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     // MARK: - Actions
 
+    /// Creates an offer for the peer connection.
+    ///
+    /// - Parameter constraints: The media constraints to use when creating the offer.
+    /// - Returns: The created RTCSessionDescription.
+    /// - Throws: An error if the offer creation fails.
     func createOffer(
         constraints: RTCMediaConstraints = .defaultConstraints
     ) async throws -> RTCSessionDescription {
@@ -243,6 +276,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         return try await peerConnection.offer(for: constraints)
     }
 
+    /// Creates an answer for the peer connection.
+    ///
+    /// - Parameter constraints: The media constraints to use when creating the answer.
+    /// - Returns: The created RTCSessionDescription.
+    /// - Throws: An error if the answer creation fails.
     func createAnswer(
         constraints: RTCMediaConstraints = .defaultConstraints
     ) async throws -> RTCSessionDescription {
@@ -259,6 +297,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         return try await peerConnection.answer(for: constraints)
     }
 
+    /// Sets the local description for the peer connection.
+    ///
+    /// - Parameter sessionDescription: The RTCSessionDescription to set as the local description.
+    /// - Throws: An error if setting the local description fails.
     func setLocalDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
@@ -275,6 +317,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         return try await peerConnection.setLocalDescription(sessionDescription)
     }
 
+    /// Sets the remote description for the peer connection.
+    ///
+    /// - Parameter sessionDescription: The RTCSessionDescription to set as the remote description.
+    /// - Throws: An error if setting the remote description fails.
     func setRemoteDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
@@ -291,6 +337,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         return try await peerConnection.setRemoteDescription(sessionDescription)
     }
 
+    /// Closes the peer connection.
     func close() {
         log.debug(
             """
@@ -306,6 +353,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         peerConnection.close()
     }
 
+    /// Restarts ICE for the peer connection.
+    ///
+    /// - Note: For publisher connections, this will trigger a new offer. For subscriber
+    ///         connections, it will directly restart ICE on the peer connection.
     func restartICE() {
         log.debug(
             """
@@ -325,19 +376,19 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         }
     }
 
+    /// Retrieves the statistics report for the peer connection.
+    ///
+    /// - Returns: An RTCStatisticsReport containing the connection statistics.
+    /// - Throws: An error if retrieving statistics fails.
     func statsReport() async throws -> RTCStatisticsReport {
-        try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard let self else {
-                return continuation.resume(throwing: ClientError.Unexpected())
-            }
-            peerConnection.statistics { report in
-                continuation.resume(returning: report)
-            }
-        }
+        try await peerConnection.statistics()
     }
 
     // MARK: - Audio
 
+    /// Updates the audio session state.
+    ///
+    /// - Parameter isEnabled: Whether the audio session should be enabled or disabled.
     func didUpdateAudioSessionState(_ isEnabled: Bool) async {
         log.debug(
             """
@@ -353,6 +404,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         await mediaAdapter.didUpdateAudioSessionState(isEnabled)
     }
 
+    /// Updates the audio session speaker state.
+    ///
+    /// - Parameters:
+    ///   - isEnabled: Whether the speaker should be enabled or disabled.
+    ///   - audioSessionEnabled: Whether the audio session is currently enabled.
     func didUpdateAudioSessionSpeakerState(
         _ isEnabled: Bool,
         with audioSessionEnabled: Bool
@@ -376,6 +432,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     // MARK: - Video
 
+    /// Updates the camera position.
+    ///
+    /// - Parameter position: The new camera position to use.
+    /// - Throws: An error if changing the camera position fails.
     func didUpdateCameraPosition(
         _ position: AVCaptureDevice.Position
     ) async throws {
@@ -393,6 +453,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         try await mediaAdapter.didUpdateCameraPosition(position)
     }
 
+    /// Sets the video filter.
+    ///
+    /// - Parameter videoFilter: The video filter to apply, or nil to remove the current filter.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         log.debug(
             """
@@ -408,38 +471,65 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         mediaAdapter.setVideoFilter(videoFilter)
     }
 
+    /// Zooms the camera by a given factor.
+    ///
+    /// - Parameter factor: The zoom factor to apply.
+    /// - Throws: An error if zooming fails or is not supported by the current device.
     func zoom(by factor: CGFloat) throws {
         try mediaAdapter.zoom(by: factor)
     }
 
+    /// Focuses the camera at a given point.
+    ///
+    /// - Parameter point: The point in the camera's coordinate system to focus on.
+    /// - Throws: An error if focusing fails or is not supported by the current device.
     func focus(at point: CGPoint) throws {
         try mediaAdapter.focus(at: point)
     }
 
+    /// Adds a video output to the capture session.
+    ///
+    /// - Parameter videoOutput: The video output to add.
+    /// - Throws: An error if adding the video output fails.
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
         try mediaAdapter.addVideoOutput(videoOutput)
     }
 
+    /// Removes a video output from the capture session.
+    ///
+    /// - Parameter videoOutput: The video output to remove.
+    /// - Throws: An error if removing the video output fails.
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
         try mediaAdapter.removeVideoOutput(videoOutput)
     }
 
+    /// Adds a photo output to the capture session.
+    ///
+    /// - Parameter capturePhotoOutput: The photo output to add.
+    /// - Throws: An error if adding the photo output fails.
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
         try mediaAdapter.addCapturePhotoOutput(capturePhotoOutput)
     }
 
+    /// Removes a photo output from the capture session.
+    ///
+    /// - Parameter capturePhotoOutput: The photo output to remove.
+    /// - Throws: An error if removing the photo output fails.
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
         try mediaAdapter.removeCapturePhotoOutput(capturePhotoOutput)
     }
 
+    /// Changes the publish quality with active encodings.
+    ///
+    /// - Parameter activeEncodings: A set of active encoding identifiers.
     func changePublishQuality(
         with activeEncodings: Set<String>
     ) {
@@ -448,6 +538,12 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
     // MARK: - ScreenSharing
 
+    /// Begins screen sharing of a specified type.
+    ///
+    /// - Parameters:
+    ///   - type: The type of screen sharing to begin.
+    ///   - ownCapabilities: The capabilities of the local participant.
+    /// - Throws: An error if starting screen sharing fails.
     func beginScreenSharing(
         of type: ScreensharingType,
         ownCapabilities: [OwnCapability]
@@ -458,12 +554,18 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Stops screen sharing.
+    ///
+    /// - Throws: An error if stopping screen sharing fails.
     func stopScreenSharing() async throws {
         try await mediaAdapter.stopScreenSharing()
     }
 
     // MARK: - Private helpers
 
+    /// Negotiates the peer connection.
+    ///
+    /// - Parameter constraints: The media constraints to use for negotiation.
     private func negotiate(
         constraints: RTCMediaConstraints = .defaultConstraints
     ) {
@@ -525,6 +627,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         }
     }
 
+    /// Handles a subscriber offer event.
+    ///
+    /// - Parameter event: The subscriber offer event to handle.
     private func handleSubscriberOffer(
         _ event: Stream_Video_Sfu_Event_SubscriberOffer
     ) {
@@ -569,6 +674,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         }
     }
 
+    /// Configures the subscriber offer observer.
     private func configureSubscriberOfferObserver() {
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_SubscriberOffer.self)

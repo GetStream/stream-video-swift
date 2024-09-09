@@ -89,7 +89,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - audioSession: The audio session manager.
     init(
         sessionID: String,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnection,
         peerConnectionFactory: PeerConnectionFactory,
         localMediaManager: LocalMediaAdapting,
         subject: PassthroughSubject<TrackEvent, Never>,
@@ -104,13 +104,13 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
 
         // Set up observers for added and removed streams
         peerConnection
-            .publisher(eventType: RTCPeerConnection.AddedStreamEvent.self)
+            .publisher(eventType: StreamRTCPeerConnection.AddedStreamEvent.self)
             .filter { $0.stream.trackType == .audio }
             .sink { [weak self] in self?.add($0.stream) }
             .store(in: disposableBag)
 
         peerConnection
-            .publisher(eventType: RTCPeerConnection.RemovedStreamEvent.self)
+            .publisher(eventType: StreamRTCPeerConnection.RemovedStreamEvent.self)
             .filter { $0.stream.trackType == .audio }
             .sink { [weak self] in self?.remove($0.stream) }
             .store(in: disposableBag)
