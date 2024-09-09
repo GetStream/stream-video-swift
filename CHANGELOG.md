@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- Updated the default sorting for Participants during a call to minimize the movement of already visible tiles [#515](https://github.com/GetStream/stream-video-swift/pull/515)
 
 # [1.10.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.10.0)
 _August 29, 2024_
