@@ -115,46 +115,18 @@ final class WebRTCCoordinator: @unchecked Sendable {
         for participant: CallParticipant,
         isVisible: Bool
     ) async {
-        var participants = await stateAdapter.participants
-
-        guard
-            let _participant = participants[participant.id],
-            _participant.showTrack != isVisible
-        else {
-            return
-        }
-
-        let track = await stateAdapter.track(
-            for: participant.trackLookupPrefix ?? participant.id,
-            of: .video
-        ) as? RTCVideoTrack
-        track?.isEnabled = isVisible
-
-        participants[participant.id] = participant
-            .withUpdated(showTrack: isVisible)
-            .withUpdated(track: track)
-
-        await stateAdapter.didUpdateParticipants(participants)
+        await stateAdapter
+            .didUpdateParticipant(participant, isVisible: isVisible)
     }
 
     func updateTrackSize(
         _ trackSize: CGSize,
         for participant: CallParticipant
     ) async {
-        var participants = await stateAdapter.participants
-
-        guard
-            let _participant = participants[participant.id],
-            _participant.trackSize != trackSize
-        else {
-            return
-        }
-
-        participants[participant.id] = participant
-            .withUpdated(trackSize: trackSize)
-
-        //        stateAdapter.participantsUpdateSubject.send(participants)
-        await stateAdapter.didUpdateParticipants(participants)
+        await stateAdapter.didUpdateParticipant(
+            participant,
+            trackSize: trackSize
+        )
     }
 
     func setVideoFilter(_ videoFilter: VideoFilter?) async {
