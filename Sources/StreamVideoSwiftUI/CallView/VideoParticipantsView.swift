@@ -360,7 +360,6 @@ public struct VideoCallParticipantView: View {
                     }
                 }
             )
-            .id(participant)
         }
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
