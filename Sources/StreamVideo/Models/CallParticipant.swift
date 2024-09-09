@@ -6,7 +6,7 @@ import Foundation
 @preconcurrency import StreamWebRTC
 
 /// Represents a participant in the call.
-public struct CallParticipant: Identifiable, Sendable, Equatable {
+public struct CallParticipant: Identifiable, Sendable, Hashable {
     /// The `User` object for the participant.
     public var user: User
     /// The unique call id of the participant.
@@ -145,7 +145,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
 
     /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
-        hasVideo && track != nil && showTrack
+        hasVideo && showTrack && track?.isEnabled == true
     }
 
     public func withUpdated(trackSize: CGSize) -> CallParticipant {
@@ -473,9 +473,16 @@ extension Stream_Video_Sfu_Models_Participant {
 }
 
 /// Provides info whether the user is pinned.
-public struct PinInfo: Sendable, Equatable {
+public struct PinInfo: Sendable, Hashable {
     /// Determines if it's a local or a remote pin.
     public let isLocal: Bool
     /// The date of pinning.
     public let pinnedAt: Date
+}
+
+extension CGSize: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(width)
+        hasher.combine(height)
+    }
 }
