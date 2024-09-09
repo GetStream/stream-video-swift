@@ -17,11 +17,13 @@ public typealias StreamSortComparator<Value> = (Value, Value) -> ComparisonResul
 public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
     pinned,
     screensharing,
-    dominantSpeaker,
-    ifInvisible(isSpeaking),
-    ifInvisible(publishingVideo),
-    ifInvisible(publishingAudio),
-    ifInvisible(userId)
+    ifInvisible(combineComparators([
+        dominantSpeaker,
+        isSpeaking,
+        isSpeaking,
+        publishingVideo,
+        publishingAudio
+    ]))
 ]
 
 /// The set of comparators used for sorting `CallParticipant` objects during livestreams.
