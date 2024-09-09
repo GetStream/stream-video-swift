@@ -345,7 +345,7 @@
 		40BBC48C2C623C6E002AEF92 /* MediaAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4822C623C6E002AEF92 /* MediaAdapter.swift */; };
 		40BBC48D2C623C6E002AEF92 /* ICECandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4842C623C6E002AEF92 /* ICECandidate.swift */; };
 		40BBC48E2C623C6E002AEF92 /* PeerConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4852C623C6E002AEF92 /* PeerConnectionType.swift */; };
-		40BBC48F2C623C6E002AEF92 /* RTCPeerConnectionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4862C623C6E002AEF92 /* RTCPeerConnectionEvent.swift */; };
+		40BBC48F2C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4862C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift */; };
 		40BBC49E2C623D03002AEF92 /* RTCIceConnectionState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4932C623D02002AEF92 /* RTCIceConnectionState+CustomStringConvertible.swift */; };
 		40BBC49F2C623D03002AEF92 /* RTCPeerConnectionState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4942C623D02002AEF92 /* RTCPeerConnectionState+CustomStringConvertible.swift */; };
 		40BBC4A02C623D03002AEF92 /* RTCSdpType+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4952C623D02002AEF92 /* RTCSdpType+CustomStringConvertible.swift */; };
@@ -1529,7 +1529,7 @@
 		40BBC4822C623C6E002AEF92 /* MediaAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaAdapter.swift; sourceTree = "<group>"; };
 		40BBC4842C623C6E002AEF92 /* ICECandidate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ICECandidate.swift; sourceTree = "<group>"; };
 		40BBC4852C623C6E002AEF92 /* PeerConnectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeerConnectionType.swift; sourceTree = "<group>"; };
-		40BBC4862C623C6E002AEF92 /* RTCPeerConnectionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RTCPeerConnectionEvent.swift; sourceTree = "<group>"; };
+		40BBC4862C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StreamRTCPeerConnection+Events.swift"; sourceTree = "<group>"; };
 		40BBC4872C623C6E002AEF92 /* TrackType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackType.swift; sourceTree = "<group>"; };
 		40BBC4892C623C6E002AEF92 /* RTCPeerConnectionCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RTCPeerConnectionCoordinator.swift; sourceTree = "<group>"; };
 		40BBC4932C623D02002AEF92 /* RTCIceConnectionState+CustomStringConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RTCIceConnectionState+CustomStringConvertible.swift"; sourceTree = "<group>"; };
@@ -3241,7 +3241,7 @@
 				40BBC4B92C627F83002AEF92 /* TrackEvent.swift */,
 				40BBC4842C623C6E002AEF92 /* ICECandidate.swift */,
 				40BBC4852C623C6E002AEF92 /* PeerConnectionType.swift */,
-				40BBC4862C623C6E002AEF92 /* RTCPeerConnectionEvent.swift */,
+				40BBC4862C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift */,
 				40BBC4872C623C6E002AEF92 /* TrackType.swift */,
 			);
 			path = Models;
@@ -5773,7 +5773,7 @@
 				8409465B29AF4EEC007AF5BF /* ListRecordingsResponse.swift in Sources */,
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				40382F2E2C88B87D00C2D00F /* ReflectiveStringConvertible.swift in Sources */,
-				40BBC48F2C623C6E002AEF92 /* RTCPeerConnectionEvent.swift in Sources */,
+				40BBC48F2C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
 				406B3BD92C8F337000FC93A1 /* MediaAdapting.swift in Sources */,
