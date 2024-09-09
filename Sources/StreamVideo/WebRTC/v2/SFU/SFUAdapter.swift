@@ -408,13 +408,11 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     /// retry until successful.
     func updateSubscriptions(
         tracks: [Stream_Video_Sfu_Signal_TrackSubscriptionDetails],
-        for sessionId: String?
+        for sessionId: String
     ) async throws {
         statusCheck()
         var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
-        if let sessionId {
-            request.sessionID = sessionId
-        }
+        request.sessionID = sessionId
         request.tracks = tracks
 
         try Task.checkCancellation()

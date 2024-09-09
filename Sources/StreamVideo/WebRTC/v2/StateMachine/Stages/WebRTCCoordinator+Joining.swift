@@ -302,13 +302,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .didUpdateParticipants(participants)
 
             let sessionId = await coordinator.stateAdapter.sessionID
-            context.subscriptionsAdapter = await .init(
+            context.participantsSubscriptionsAdapter = await .init(
+                sessionId: sessionId,
                 sfuAdapter: sfuAdapter,
                 participantsPublisher: coordinator
                     .stateAdapter
                     .$participants
-                    .map { Array($0.values) }
-                    .map { participants in participants.filter { $0.sessionId != sessionId } }
+                    .map {
+                        $0
+                            .values
+                            /// We ignore the local participant as we don't need the SFU to tell us
+                            /// what info to render.
+                            .filter { $0.sessionId != sessionId }
+                            /// We sort to maintain simple order to avoid subscriptions updates when
+                            /// the order changes but callParticipants haven't been updated.
+                            .sorted { $0.sessionId < $1.sessionId }
+                    }
                     .eraseToAnyPublisher()
             )
 
