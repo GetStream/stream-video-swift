@@ -131,10 +131,9 @@ actor WebRTCStateAdapter: ObservableObject {
         let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,
-            peerConnection: try peerConnectionFactory.makePeerConnection(
-                configuration: connectOptions.rtcConfiguration,
-                constraints: .defaultConstraints,
-                delegate: nil
+            peerConnection: try StreamRTCPeerConnection(
+                peerConnectionFactory,
+                configuration: connectOptions.rtcConfiguration
             ),
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
@@ -149,10 +148,9 @@ actor WebRTCStateAdapter: ObservableObject {
         let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .subscriber,
-            peerConnection: try peerConnectionFactory.makePeerConnection(
-                configuration: connectOptions.rtcConfiguration,
-                constraints: .defaultConstraints,
-                delegate: nil
+            peerConnection: try StreamRTCPeerConnection(
+                peerConnectionFactory,
+                configuration: connectOptions.rtcConfiguration
             ),
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
