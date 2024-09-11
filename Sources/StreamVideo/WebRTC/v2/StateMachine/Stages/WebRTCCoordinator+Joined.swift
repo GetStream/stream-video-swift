@@ -160,6 +160,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                                 deadline: context.fastReconnectDeadlineSeconds
                             )
                             : .rejoin
+                    } else {
+                        context.reconnectionStrategy = .fast(
+                            disconnectedSince: .init(),
+                            deadline: context.fastReconnectDeadlineSeconds
+                        )
                     }
                     log
                         .warning(
