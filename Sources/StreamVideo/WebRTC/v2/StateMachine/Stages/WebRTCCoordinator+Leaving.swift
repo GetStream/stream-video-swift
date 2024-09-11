@@ -6,6 +6,11 @@ import Foundation
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
+    /// Creates and returns a leaving stage for the WebRTC coordinator state
+    /// machine.
+    /// - Parameter context: The context for the leaving stage.
+    /// - Returns: A `LeavingStage` instance representing the leaving state of
+    ///   the WebRTC coordinator.
     static func leaving(
         _ context: Context
     ) -> WebRTCCoordinator.StateMachine.Stage {
@@ -17,22 +22,30 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    final class LeavingStage: WebRTCCoordinator.StateMachine.Stage {
-
+    /// Represents the leaving stage in the WebRTC coordinator state machine.
+    final class LeavingStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
+        /// Initializes a new instance of `LeavingStage`.
+        /// - Parameter context: The context for the leaving stage.
         init(
             _ context: Context
         ) {
             super.init(id: .leaving, context: context)
         }
 
+        /// Performs the transition from a previous stage to this leaving stage.
+        /// - Parameter previousStage: The stage from which the transition is
+        ///   occurring.
+        /// - Returns: This `LeavingStage` instance if the transition is valid,
+        ///   otherwise `nil`.
+        /// - Note: Valid transition from: `.joined`, `.disconnected`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
-            case .joined:
-                execute()
-                return self
-            case .disconnected:
+            case .joined, .disconnected:
                 execute()
                 return self
             default:
@@ -40,20 +53,26 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the leaving process.
         private func execute() {
             Task { [weak self] in
                 guard let self else { return }
                 do {
                     guard
-                        let coordinator = context.coordinator,
-                        let sfuAdapter = await coordinator.stateAdapter.sfuAdapter
+                        let coordinator = context.coordinator
                     else {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
 
-                    sfuAdapter.sendLeaveRequest(
-                        for: await coordinator.stateAdapter.sessionID
-                    )
+                    if let sfuAdapter = await coordinator.stateAdapter.sfuAdapter {
+                        if case .connected = sfuAdapter.connectionState {
+                            await sfuAdapter.sendLeaveRequest(
+                                for: coordinator.stateAdapter.sessionID
+                            )
+                        }
+                        await sfuAdapter.disconnect()
+                    }
+
                     // TODO: further cleanup
                     try transition?(.cleanUp(context))
                 } catch {

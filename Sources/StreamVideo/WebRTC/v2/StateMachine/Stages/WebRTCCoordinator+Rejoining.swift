@@ -7,6 +7,11 @@ import Foundation
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
+    /// Creates and returns a rejoining stage for the WebRTC coordinator state
+    /// machine.
+    /// - Parameter context: The context for the rejoining stage.
+    /// - Returns: A `RejoiningStage` instance representing the rejoining state
+    ///   of the WebRTC coordinator.
     static func rejoining(
         _ context: Context
     ) -> WebRTCCoordinator.StateMachine.Stage {
@@ -18,16 +23,28 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    final class RejoiningStage: WebRTCCoordinator.StateMachine.Stage {
-
+    /// Represents the rejoining stage in the WebRTC coordinator state machine.
+    final class RejoiningStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
         private let disposableBag = DisposableBag()
 
+        /// Initializes a new instance of `RejoiningStage`.
+        /// - Parameter context: The context for the rejoining stage.
         init(
             _ context: Context
         ) {
             super.init(id: .rejoining, context: context)
         }
 
+        /// Performs the transition from a previous stage to this rejoining
+        /// stage.
+        /// - Parameter previousStage: The stage from which the transition is
+        ///   occurring.
+        /// - Returns: This `RejoiningStage` instance if the transition is
+        ///   valid, otherwise `nil`.
+        /// - Note: Valid transition from: `.disconnected`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
@@ -40,12 +57,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the rejoining process.
         private func execute() {
             Task {
                 do {
                     guard let coordinator = context.coordinator else {
                         throw ClientError(
-                            "WebRCTAdapter instance not available."
+                            "WebRCTCoordinator instance not available."
                         )
                     }
 
@@ -69,12 +87,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await coordinator
-                        .stateAdapter
-                        .cleanUpForReconnection()
-
-                    try Task.checkCancellation()
-
                     context.previousSessionPublisher = await context
                         .coordinator?
                         .stateAdapter
@@ -86,6 +98,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .coordinator?
                         .stateAdapter
                         .subscriber
+
+                    try Task.checkCancellation()
+
+                    await coordinator
+                        .stateAdapter
+                        .cleanUpForReconnection()
 
                     try Task.checkCancellation()
 

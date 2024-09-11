@@ -5,7 +5,7 @@
 import Combine
 @testable import StreamVideo
 import StreamWebRTC
-@preconcurrency import XCTest
+import XCTest
 
 final class LocalVideoMediaAdapter_Tests: XCTestCase {
     private let mockActiveCallProvider: MockActiveCallProvider! = .init()
@@ -13,18 +13,14 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     private lazy var sessionId: String! = .unique
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
-    private lazy var mockSFUStack: (
-        sfuAdapter: SFUAdapter,
-        mockService: MockSignalServer,
-        mockWebSocketClient: MockWebSocketClient
-    )! = SFUAdapter.mock(webSocketClientType: .sfu)
+    private lazy var mockSFUStack: MockSFUStack! = MockSFUStack()
     private lazy var mockCapturerFactory: MockVideoCapturerFactory! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var subject: LocalVideoMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
-        sfuAdapter: mockSFUStack.sfuAdapter,
+        sfuAdapter: mockSFUStack.adapter,
         videoOptions: .init(),
         videoConfig: .dummy(),
         subject: spySubject,
@@ -165,7 +161,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         try await subject.didUpdateCallSettings(.init(videoOn: false))
 
-        XCTAssertNil(mockSFUStack.mockService.updateSubscriptionsWasCalledWithRequest)
+        XCTAssertNil(mockSFUStack.service.updateSubscriptionsWasCalledWithRequest)
     }
 
     func test_didUpdateCallSettings_isEnabledFalseCallSettingsTrue_SFUWasCalled() async throws {
@@ -176,7 +172,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         try await subject.didUpdateCallSettings(.init(videoOn: true))
 
-        let request = try XCTUnwrap(mockSFUStack.mockService.updateMuteStatesWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .video)
@@ -192,7 +188,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         try await subject.didUpdateCallSettings(.init(videoOn: false))
 
-        let request = try XCTUnwrap(mockSFUStack.mockService.updateMuteStatesWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .video)

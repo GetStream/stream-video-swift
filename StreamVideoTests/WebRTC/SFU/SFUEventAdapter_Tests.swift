@@ -12,7 +12,8 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var mockWebSocket: MockWebSocketClient! = .init(webSocketClientType: .sfu)
     private lazy var sfuAdapter: SFUAdapter! = .init(
         signalService: mockService,
-        webSocket: mockWebSocket
+        webSocket: mockWebSocket,
+        webSocketFactory: MockWebSocketClientFactory()
     )
     private lazy var stateAdapter: WebRTCStateAdapter! = .init(
         user: .dummy(),
@@ -127,10 +128,10 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
             let changePublishQualityCall = try XCTUnwrap(mockPublisher.stubbedFunctionInput[.changePublishQuality]?.first)
 
-            switch changePublishQualityCall {
-            case let .changePublishQuality(activeEncodings):
-                XCTAssertEqual(activeEncodings, .init(["q"]))
-            }
+            XCTAssertEqual(
+                mockPublisher.recordedInputPayload(Set<String>.self, for: .changePublishQuality)?.first,
+                .init(["q"])
+            )
         }
     }
 
@@ -588,7 +589,22 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             .sink { _ in eventExpectation.fulfill() }
         mockWebSocket.eventSubject.send(wrappedEvent)
         await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
+        _ = cancellable
 
-        try await handler(await stateAdapter.participants)
+        let updatedParticipants = await stateAdapter.participants
+        try await handler(updatedParticipants)
+        /// We add a group that concurrently updates the participants and awaits for an update as internally
+        /// the stateAdapter spins up another task to complete the update.
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                await self.stateAdapter.didUpdateParticipants(initialState)
+            }
+            group.addTask {
+                _ = try? await self.stateAdapter.$participants.nextValue(
+                    timeout: defaultTimeout
+                )
+            }
+            await group.waitForAll()
+        }
     }
 }

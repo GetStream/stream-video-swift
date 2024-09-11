@@ -6,6 +6,13 @@ import Foundation
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
+    /// Creates and returns a connecting stage for the WebRTC coordinator state
+    /// machine.
+    /// - Parameters:
+    ///   - context: The context for the connecting stage.
+    ///   - ring: A Boolean indicating whether to ring the other participants.
+    /// - Returns: A `ConnectingStage` instance representing the connecting
+    ///   state of the WebRTC coordinator.
     static func connecting(
         _ context: Context,
         ring: Bool
@@ -19,10 +26,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    final class ConnectingStage: WebRTCCoordinator.StateMachine.Stage {
-
+    /// Represents the connecting stage in the WebRTC coordinator state machine.
+    final class ConnectingStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
+        /// Indicates whether to ring the other participants.
         private let ring: Bool
 
+        /// Initializes a new instance of `ConnectingStage`.
+        /// - Parameters:
+        ///   - context: The context for the connecting stage.
+        ///   - ring: A Boolean indicating whether to ring other participants.
         init(
             _ context: Context,
             ring: Bool
@@ -31,6 +46,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
             super.init(id: .connecting, context: context)
         }
 
+        /// Performs the transition from a previous stage to this connecting
+        /// stage.
+        /// - Parameter previousStage: The stage from which the transition is
+        ///   occurring.
+        /// - Returns: This `ConnectingStage` instance if the transition is
+        ///   valid, otherwise `nil`.
+        /// - Note: Valid transition from: `.idle`,  `.rejoining`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
@@ -46,6 +68,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the call connecting process.
+        /// - Parameters:
+        ///   - create: A Boolean indicating whether to create a new session.
+        ///   - updateSession: A Boolean indicating whether to update the
+        ///     existing session.
         private func execute(create: Bool, updateSession: Bool) {
             Task { [weak self] in
                 guard let self else { return }
@@ -53,17 +80,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     guard
                         let coordinator = context.coordinator
                     else {
-                        throw ClientError(
-                            "WebRCTAdapter instance not available."
-                        )
+                        throw ClientError("WebRTCCoordinator instance not available in stage id:\(id).")
                     }
 
                     if updateSession {
+                        /// By refreshing the session, we are asking the stateAdapter to update
+                        /// the sessionId to a new one.
                         await coordinator.stateAdapter.refreshSession()
                     }
 
-                    let authenticator = Authenticator()
-                    let (sfuAdapter, response) = try await authenticator
+                    /// The authenticator will fetch a ``JoinCallResponse`` and will use it to
+                    /// create an ``SFUAdapter`` instance that we can later use in our flow.
+                    let (sfuAdapter, response) = try await context
+                        .authenticator
                         .authenticate(
                             coordinator: coordinator,
                             currentSFU: nil,
@@ -71,13 +100,26 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             ring: ring
                         )
 
-                    try await authenticator.connect(sfuAdapter: sfuAdapter)
+                    /// We provide the ``SFUAdapter`` to the authenticator which will ensure
+                    /// that we will continue only when the WS `connectionState` on the
+                    /// ``SFUAdapter`` has changed to `.authenticating`.
+                    try await context.authenticator.waitForAuthentication(on: sfuAdapter)
 
+                    /// With the ``SFUAdapter`` having a `connectionState` to
+                    /// `.authenticating`, we store the instance on the ``WebRTCStateAdapter``.
                     await coordinator.stateAdapter.set(sfuAdapter: sfuAdapter)
+                    /// From the ``JoinCallResponse`` we got from the authenticator, we extract
+                    /// the name of the SFU we are currently connected, so we can use it later on
+                    /// during `migration`.
                     context.currentSFU = response.credentials.server.edgeName
 
+                    /// We are going to transition to the next stage ``.connected``. If that transition
+                    /// fail for any reason, we will transition to ``.disconnected`` to allow for
+                    /// reconnection.
                     transitionOrDisconnect(.connected(context))
                 } catch {
+                    /// In case of an error, we transition to ``.disconnected`` with the error
+                    /// stored in the context, in order to allow for reconnection.
                     transitionDisconnectOrError(error)
                 }
             }

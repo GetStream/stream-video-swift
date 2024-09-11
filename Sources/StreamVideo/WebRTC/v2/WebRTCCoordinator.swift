@@ -23,13 +23,15 @@ final class WebRTCCoordinator: @unchecked Sendable {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
-        callAuthenticator: CallAuthenticating
+        callAuthenticator: CallAuthenticating,
+        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory()
     ) {
         stateAdapter = .init(
             user: user,
             apiKey: apiKey,
             callCid: callCid,
-            videoConfig: videoConfig
+            videoConfig: videoConfig,
+            rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
         )
         self.callAuthenticator = callAuthenticator
 
