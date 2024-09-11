@@ -80,8 +80,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     )
                 } catch {
                     context.reconnectionStrategy = context.nextReconnectionStrategy()
-                    context.flowError = error
-                    transitionOrError(.disconnected(context))
+                    transitionDisconnectOrError(error)
                 }
             }
         }

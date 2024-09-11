@@ -76,9 +76,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     await coordinator.stateAdapter.set(sfuAdapter: sfuAdapter)
                     context.currentSFU = response.credentials.server.edgeName
 
-                    transitionOrError(.connected(context))
+                    transitionOrDisconnect(.connected(context))
                 } catch {
-                    transitionErrorOrLog(error)
+                    transitionDisconnectOrError(error)
                 }
             }
         }

@@ -116,13 +116,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 if context.reconnectionStrategy == .disconnected {
                     transitionErrorOrLog(blockError)
                 } else {
-                    do {
-                        try transition?(
-                            .disconnected(context)
-                        )
-                    } catch {
-                        transitionErrorOrLog(blockError)
-                    }
+                    transitionOrDisconnect(.disconnected(context))
                 }
             }
         }

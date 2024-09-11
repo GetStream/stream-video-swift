@@ -88,7 +88,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 } catch {
                     context.flowError = error
                     disconnect()
-//                    transitionErrorOrLog(error)
                 }
             }
         }
@@ -247,9 +246,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .$participants
                 .removeDuplicates()
                 .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
-                .map { Array($0.values) }
-                .map { values in values.filter { $0.id != sessionID } }
-                .map { values in values.flatMap(\.trackSubscriptionDetails) }
+                .map { participants in
+                    Array(participants.values)
+                        .filter { $0.id != sessionID }
+                        .flatMap(\.trackSubscriptionDetails)
+                }
                 .sinkTask(storeIn: disposableBag) { [weak self] tracks in
                     guard let self else { return }
                     do {
@@ -259,7 +260,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             for: sessionID
                         )
                     } catch {
-                        transitionErrorOrLog(error)
+                        transitionDisconnectOrError(error)
                     }
                 }
                 .store(in: disposableBag)
