@@ -233,6 +233,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoOn: \(settings.videoOn)
                 audioOutputOn: \(settings.audioOutputOn)
                 speakerOn: \(settings.speakerOn)
+                cameraPosition: \(settings.cameraPosition)
             
             ownCapabilities:
                 hasAudio: \(ownCapabilities.contains(.sendAudio))
