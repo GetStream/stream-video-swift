@@ -184,7 +184,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     open func getCall(
         type: String,
         id: String,
-        connectionId: String?,
         membersLimit: Int?,
         ring: Bool?,
         notify: Bool?,
@@ -199,7 +198,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
         let queryParams = APIHelper.mapValuesToQueryItems([
-            "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: true),
             "members_limit": (wrappedValue: membersLimit?.encodeToJSON(), isExplode: true),
             "ring": (wrappedValue: ring?.encodeToJSON(), isExplode: true),
             "notify": (wrappedValue: notify?.encodeToJSON(), isExplode: true),
@@ -240,7 +238,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     open func getOrCreateCall(
         type: String,
         id: String,
-        connectionId: String?,
         getOrCreateCallRequest: GetOrCreateCallRequest
     ) async throws -> GetOrCreateCallResponse {
         var path = "/video/call/{type}/{id}"
@@ -251,14 +248,9 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
-        let queryParams = APIHelper.mapValuesToQueryItems([
-            "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: true)
-            
-        ])
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            queryParams: queryParams ?? [],
             httpMethod: "POST",
             request: getOrCreateCallRequest
         )
@@ -399,12 +391,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func joinCall(
-        type: String,
-        id: String,
-        joinCallRequest: JoinCallRequest,
-        connectionId: String?
-    ) async throws -> JoinCallResponse {
+    open func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest) async throws -> JoinCallResponse {
         var path = "/video/call/{type}/{id}/join"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -413,14 +400,9 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
-        let queryParams = APIHelper.mapValuesToQueryItems([
-            "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: true)
-            
-        ])
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            queryParams: queryParams ?? [],
             httpMethod: "POST",
             request: joinCallRequest
         )
@@ -998,17 +980,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func queryCalls(connectionId: String?, queryCallsRequest: QueryCallsRequest) async throws -> QueryCallsResponse {
+    open func queryCalls(queryCallsRequest: QueryCallsRequest) async throws -> QueryCallsResponse {
         let path = "/video/calls"
-        
-        let queryParams = APIHelper.mapValuesToQueryItems([
-            "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: true)
-            
-        ])
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            queryParams: queryParams ?? [],
             httpMethod: "POST",
             request: queryCallsRequest
         )
@@ -1103,24 +1079,13 @@ protocol DefaultAPIEndpoints {
         
     func queryCallStats(queryCallStatsRequest: QueryCallStatsRequest) async throws -> QueryCallStatsResponse
         
-    func getCall(
-        type: String,
-        id: String,
-        connectionId: String?,
-        membersLimit: Int?,
-        ring: Bool?,
-        notify: Bool?,
-        video: Bool?
-    ) async throws -> GetCallResponse
+    func getCall(type: String, id: String, membersLimit: Int?, ring: Bool?, notify: Bool?, video: Bool?) async throws
+        -> GetCallResponse
         
     func updateCall(type: String, id: String, updateCallRequest: UpdateCallRequest) async throws -> UpdateCallResponse
         
-    func getOrCreateCall(
-        type: String,
-        id: String,
-        connectionId: String?,
-        getOrCreateCallRequest: GetOrCreateCallRequest
-    ) async throws -> GetOrCreateCallResponse
+    func getOrCreateCall(type: String, id: String, getOrCreateCallRequest: GetOrCreateCallRequest) async throws
+        -> GetOrCreateCallResponse
         
     func acceptCall(type: String, id: String) async throws -> AcceptCallResponse
         
@@ -1139,8 +1104,7 @@ protocol DefaultAPIEndpoints {
         
     func goLive(type: String, id: String, goLiveRequest: GoLiveRequest) async throws -> GoLiveResponse
         
-    func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest, connectionId: String?) async throws
-        -> JoinCallResponse
+    func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest) async throws -> JoinCallResponse
         
     func endCall(type: String, id: String) async throws -> EndCallResponse
         
@@ -1204,7 +1168,7 @@ protocol DefaultAPIEndpoints {
     func deleteTranscription(type: String, id: String, session: String, filename: String) async throws
         -> DeleteTranscriptionResponse
         
-    func queryCalls(connectionId: String?, queryCallsRequest: QueryCallsRequest) async throws -> QueryCallsResponse
+    func queryCalls(queryCallsRequest: QueryCallsRequest) async throws -> QueryCallsResponse
         
     func deleteDevice(id: String) async throws -> ModelResponse
         
