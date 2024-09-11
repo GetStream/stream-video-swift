@@ -13,12 +13,19 @@ final class MockWebSocketClient: WebSocketClient, Mockable {
         case disconnect
     }
 
-    enum FunctionInput {
+    enum FunctionInput: Payloadable {
         case disconnect(
             code: URLSessionWebSocketTask.CloseCode,
             source: WebSocketConnectionState.DisconnectionSource,
             completion: () -> Void
         )
+
+        var payload: Any {
+            switch self {
+            case let .disconnect(code, source, completion):
+                return (code, source, completion)
+            }
+        }
     }
 
     var stubbedProperty: [String: Any] = [:]
