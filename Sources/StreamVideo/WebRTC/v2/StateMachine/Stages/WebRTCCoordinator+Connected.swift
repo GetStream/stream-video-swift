@@ -30,7 +30,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .connecting:
-                Task { transitionOrError(.joining(context)) }
+                Task { transitionOrDisconnect(.joining(context)) }
                 return self
             default:
                 return nil
