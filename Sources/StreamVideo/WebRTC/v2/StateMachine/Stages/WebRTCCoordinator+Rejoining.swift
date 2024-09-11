@@ -99,8 +99,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     if error is CancellationError {
                         /* No-op */
                     } else {
-                        context.flowError = error
-                        transitionOrError(.disconnected(context))
+                        transitionDisconnectOrError(error)
                     }
                 }
             }
