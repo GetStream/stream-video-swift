@@ -8,8 +8,10 @@ import StreamWebRTC
 
 final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     typealias FunctionKey = MockFunctionKey
+    typealias FunctionInputKey = EmptyPayloadable
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [MockFunctionKey: Any] = [:]
+    var stubbedFunctionInput: [MockFunctionKey: [FunctionInputKey]] = [:]
     func stub<T>(for keyPath: KeyPath<MockSignalServer, T>, with value: T) {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
@@ -18,7 +20,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         stubbedFunction[function] = value
     }
 
-    enum MockFunctionKey: Hashable {
+    enum MockFunctionKey: Hashable, CaseIterable {
         case updateTrackMuteState
         case sendStats
         case startNoiseCancellation

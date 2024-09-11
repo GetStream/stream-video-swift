@@ -13,6 +13,7 @@ actor AudioSession {
 
     var isActive: Bool { rtcAudioSession.isActive }
     var isAudioEnabled: Bool { rtcAudioSession.isAudioEnabled }
+    var isSpeakerOn: Bool { rtcAudioSession.categoryOptions.contains(.defaultToSpeaker) }
 
     func configure(
         _ configuration: RTCAudioSessionConfiguration = .default,

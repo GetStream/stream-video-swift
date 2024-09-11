@@ -6,6 +6,10 @@ import Foundation
 import StreamWebRTC
 
 extension RTCSessionDescription: @unchecked Sendable {
+    /// Enables or disables Opus DTX in the session description.
+    ///
+    /// - Parameter isEnabled: Whether to enable Opus DTX.
+    /// - Returns: A new RTCSessionDescription with Opus DTX enabled or disabled.
     func withOpusDTX(_ isEnabled: Bool) -> RTCSessionDescription {
         guard isEnabled else { return self }
         let updatedSDP = sdp.replacingOccurrences(
@@ -15,6 +19,11 @@ extension RTCSessionDescription: @unchecked Sendable {
         return .init(type: type, sdp: updatedSDP)
     }
 
+    /// Enables or disables redundant coding in the session description.
+    ///
+    /// - Parameter isEnabled: Whether to enable redundant coding.
+    /// - Returns: A new RTCSessionDescription with redundant coding enabled or
+    ///            disabled.
     func withRedundantCoding(_ isEnabled: Bool) -> RTCSessionDescription {
         guard isEnabled else { return self }
         return .init(type: type, sdp: sdp.preferredRedCodec)
