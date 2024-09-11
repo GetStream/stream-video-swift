@@ -102,8 +102,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     context.reconnectionStrategy = context
                         .reconnectionStrategy
                         .next
-                    context.flowError = error
-                    transitionOrError(.disconnected(context))
+                    transitionDisconnectOrError(error)
                 }
             }
         }
@@ -161,9 +160,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     if let clientError = error as? ClientError {
                         log.error(clientError)
                     }
-                    context.flowError = error
                     context.reconnectionStrategy = .rejoin
-                    transitionOrError(.disconnected(context))
+                    transitionDisconnectOrError(error)
                 }
             }
         }
@@ -213,8 +211,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
                 } catch {
-                    context.flowError = error
-                    transitionOrError(.disconnected(context))
+                    transitionDisconnectOrError(error)
                 }
             }
         }

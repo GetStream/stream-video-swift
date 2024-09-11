@@ -76,7 +76,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
                 } catch {
-                    transitionErrorOrLog(error)
+                    transitionDisconnectOrError(error)
                 }
             }
         }
