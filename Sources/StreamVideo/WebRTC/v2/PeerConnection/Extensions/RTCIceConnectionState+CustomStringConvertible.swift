@@ -5,8 +5,10 @@
 import Foundation
 import StreamWebRTC
 
+/// Extension to make RTCIceConnectionState conform to CustomStringConvertible.
 extension RTCIceConnectionState: CustomStringConvertible {
 
+    /// A textual representation of the ICE connection state.
     public var description: String {
         switch self {
         case .new:
