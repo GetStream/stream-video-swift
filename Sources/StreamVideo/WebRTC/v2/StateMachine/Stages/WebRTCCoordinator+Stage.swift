@@ -84,6 +84,8 @@ extension WebRTCCoordinator.StateMachine {
             nil // No-op
         }
 
+        // MARK: - Helper transitions
+
         func transitionErrorOrLog(_ error: Error) {
             do {
                 try transition?(
@@ -97,11 +99,25 @@ extension WebRTCCoordinator.StateMachine {
             }
         }
 
+        func transitionDisconnectOrError(_ error: Error) {
+            context.flowError = error
+            transitionOrError(.disconnected(context))
+        }
+
         func transitionOrError(_ nextStage: Stage) {
             do {
                 try transition?(nextStage)
             } catch {
                 transitionErrorOrLog(error)
+            }
+        }
+
+        func transitionOrDisconnect(_ nextStage: Stage) {
+            do {
+                try transition?(nextStage)
+            } catch let initialError {
+                nextStage.context.flowError = initialError
+                transitionOrError(.disconnected(nextStage.context))
             }
         }
     }
