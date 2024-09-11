@@ -74,6 +74,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
     func changeCameraMode(
         position: CameraPosition
     ) async throws {
+        await stateAdapter.set(
+            stateAdapter
+                .callSettings
+                .withUpdatedCameraPosition(position)
+        )
         try await stateAdapter.publisher?.didUpdateCameraPosition(
             position == .front ? .front : .back
         )
