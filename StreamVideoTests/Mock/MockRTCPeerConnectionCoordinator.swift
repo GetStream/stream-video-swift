@@ -15,8 +15,14 @@ final class MockRTCPeerConnectionCoordinator: RTCPeerConnectionCoordinator, Mock
         case changePublishQuality
     }
 
-    enum MockFunctionInputKey {
+    enum MockFunctionInputKey: Payloadable {
         case changePublishQuality(activeEncodings: Set<String>)
+        var payload: Any {
+            switch self {
+            case let .changePublishQuality(activeEncodings):
+                return activeEncodings
+            }
+        }
     }
 
     var stubbedProperty: [String: Any] = [:]
@@ -52,11 +58,7 @@ final class MockRTCPeerConnectionCoordinator: RTCPeerConnectionCoordinator, Mock
         self.init(
             sessionId: .unique,
             peerType: peerType,
-            peerConnection: try peerConnectionFactory.makePeerConnection(
-                configuration: .init(),
-                constraints: .defaultConstraints,
-                delegate: nil
-            ),
+            peerConnection: MockRTCPeerConnection(),
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
             videoConfig: videoConfig,

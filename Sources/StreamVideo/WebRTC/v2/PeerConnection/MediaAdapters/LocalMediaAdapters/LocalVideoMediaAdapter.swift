@@ -6,32 +6,67 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+/// A class that manages local video media for a call session.
 final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
+    /// The unique identifier for the current session.
     private let sessionID: String
-    private let peerConnection: RTCPeerConnection
+
+    /// The WebRTC peer connection.
+    private let peerConnection: StreamRTCPeerConnectionProtocol
+
+    /// The factory for creating WebRTC peer connection components.
     private let peerConnectionFactory: PeerConnectionFactory
+
+    /// The adapter for communicating with the Selective Forwarding Unit (SFU).
     private var sfuAdapter: SFUAdapter
+
+    /// The video options for the call.
     private let videoOptions: VideoOptions
+
+    /// The video configuration for the call.
     private let videoConfig: VideoConfig
+
+    /// The factory for creating the capturer.
+    private let capturerFactory: VideoCapturerProviding
+
+    /// The stream identifiers for this video adapter.
     private let streamIds: [String]
 
+    /// The local video track.
     private(set) var localTrack: RTCVideoTrack?
+
+    /// The video capturer.
     private var capturer: CameraVideoCapturing?
+
+    /// The RTP transceiver for sending video.
     private var sender: RTCRtpTransceiver?
 
+    /// The mid (Media Stream Identification) of the sender.
     var mid: String? { sender?.mid }
 
+    /// A publisher that emits track events.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// Initializes a new instance of the local video media adapter.
+    ///
+    /// - Parameters:
+    ///   - sessionID: The unique identifier for the current session.
+    ///   - peerConnection: The WebRTC peer connection.
+    ///   - peerConnectionFactory: The factory for creating WebRTC peer connection components.
+    ///   - sfuAdapter: The adapter for communicating with the SFU.
+    ///   - videoOptions: The video options for the call.
+    ///   - videoConfig: The video configuration for the call.
+    ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
-        peerConnection: RTCPeerConnection,
+        peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory()
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -40,9 +75,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.videoOptions = videoOptions
         self.videoConfig = videoConfig
         self.subject = subject
+        self.capturerFactory = capturerFactory
         streamIds = ["\(sessionID):video"]
     }
 
+    /// Cleans up resources when the instance is deallocated.
     deinit {
         Task { [capturer] in try? await capturer?.stopCapture() }
         localTrack?.isEnabled = false
@@ -60,6 +97,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     // MARK: - LocalMediaManaging
 
+    /// Sets up the local video media with the given settings and capabilities.
+    ///
+    /// - Parameters:
+    ///   - settings: The call settings to configure the video.
+    ///   - ownCapabilities: The capabilities of the local participant.
     func setUp(
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
@@ -93,6 +135,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
     }
 
+    /// Starts publishing the local video track.
     func publish() {
         guard
             let localTrack,
@@ -118,6 +161,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         log.debug("Local videoTrack trackId:\(localTrack.trackId) is now published.")
     }
 
+    /// Stops publishing the local video track.
     func unpublish() {
         guard let sender, let localTrack else { return }
         sender.sender.track = nil
@@ -125,6 +169,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         log.debug("Local videoTrack trackId:\(localTrack.trackId) is now unpublished.")
     }
 
+    /// Updates the local video media based on new call settings.
+    ///
+    /// - Parameter settings: The updated call settings.
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
@@ -147,59 +194,80 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             publish()
         }
     }
-    
+
     // MARK: - Camera Video
 
+    /// Updates the camera position.
+    ///
+    /// - Parameter position: The new camera position.
     func didUpdateCameraPosition(
         _ position: AVCaptureDevice.Position
     ) async throws {
-        guard
-            let capturer
-        else {
-            log.debug("Cannot update cameraPosition as track isn't being captured.")
-            return
-        }
-        try await capturer.setCameraPosition(position)
+        try await capturer?.setCameraPosition(position)
     }
 
+    /// Sets a video filter.
+    ///
+    /// - Parameter videoFilter: The video filter to apply.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         capturer?.setVideoFilter(videoFilter)
     }
 
+    /// Zooms the camera by a given factor.
+    ///
+    /// - Parameter factor: The zoom factor.
     func zoom(by factor: CGFloat) throws {
-        try (capturer as? VideoCapturer)?.zoom(by: factor)
+        try capturer?.zoom(by: factor)
     }
 
+    /// Focuses the camera at a given point.
+    ///
+    /// - Parameter point: The point to focus on.
     func focus(at point: CGPoint) throws {
-        try (capturer as? VideoCapturer)?.focus(at: point)
+        try capturer?.focus(at: point)
     }
 
+    /// Adds a video output to the capture session.
+    ///
+    /// - Parameter videoOutput: The video output to add.
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
-        try (capturer as? VideoCapturer)?.addVideoOutput(videoOutput)
+        try capturer?.addVideoOutput(videoOutput)
     }
 
+    /// Removes a video output from the capture session.
+    ///
+    /// - Parameter videoOutput: The video output to remove.
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) throws {
-        try (capturer as? VideoCapturer)?.removeVideoOutput(videoOutput)
+        try capturer?.removeVideoOutput(videoOutput)
     }
 
+    /// Adds a photo output to the capture session.
+    ///
+    /// - Parameter capturePhotoOutput: The photo output to add.
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
-        try (capturer as? VideoCapturer)?
+        try capturer?
             .addCapturePhotoOutput(capturePhotoOutput)
     }
 
+    /// Removes a photo output from the capture session.
+    ///
+    /// - Parameter capturePhotoOutput: The photo output to remove.
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) throws {
-        try (capturer as? VideoCapturer)?
+        try capturer?
             .removeCapturePhotoOutput(capturePhotoOutput)
     }
 
+    /// Changes the publishing quality based on active encodings.
+    ///
+    /// - Parameter activeEncodings: The set of active encoding identifiers.
     func changePublishQuality(
         with activeEncodings: Set<String>
     ) {
@@ -221,14 +289,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
             switch (shouldEnable, encoding.isActive) {
             case (true, true):
-                updatedEncodings.append(encoding)
+                break
             case (false, false):
-                updatedEncodings.append(encoding)
+                break
             default:
                 hasChanges = true
                 encoding.isActive = shouldEnable
-                updatedEncodings.append(encoding)
             }
+            updatedEncodings.append(encoding)
         }
 
         guard hasChanges else {
@@ -240,6 +308,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     // MARK: - Private helpers
 
+    /// Creates a new video track with the specified camera position.
+    ///
+    /// - Parameter position: The camera position to use.
     private func makeVideoTrack(
         _ position: AVCaptureDevice.Position
     ) async throws {
@@ -267,10 +338,10 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
 
         try await capturer?.stopCapture()
-        let cameraCapturer = VideoCapturer(
-            videoSource: videoSource,
-            videoOptions: videoOptions,
-            videoFilters: videoConfig.videoFilters
+        let cameraCapturer = capturerFactory.buildCameraCapturer(
+            source: videoSource,
+            options: videoOptions,
+            filters: videoConfig.videoFilters
         )
         capturer = cameraCapturer
 

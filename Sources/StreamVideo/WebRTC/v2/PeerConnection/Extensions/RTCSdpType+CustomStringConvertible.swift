@@ -6,6 +6,14 @@ import Foundation
 import StreamWebRTC
 
 extension RTCSdpType: CustomStringConvertible {
+    /// A textual representation of the SDP type.
+    ///
+    /// - Returns: A string describing the SDP type:
+    ///   - "offer" for an offer
+    ///   - "prAnswer" for a provisional answer
+    ///   - "answer" for a final answer
+    ///   - "rollback" for a rollback operation
+    ///   - "unknown/default" for any future, undefined types
     public var description: String {
         switch self {
         case .offer:

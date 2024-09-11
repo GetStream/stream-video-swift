@@ -5,7 +5,12 @@
 import Foundation
 import StreamWebRTC
 
+/// Extends `RTCPeerConnectionState` to conform to the `CustomStringConvertible` protocol.
 extension RTCPeerConnectionState: CustomStringConvertible {
+    /// A textual representation of the peer connection state.
+    ///
+    /// This property provides a human-readable string for each possible state of an RTCPeerConnection.
+    /// It's useful for debugging, logging, and displaying the current state to users.
     public var description: String {
         switch self {
         case .new:
