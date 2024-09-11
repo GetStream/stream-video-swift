@@ -52,6 +52,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
 
             switch previousStage.id {
+            case .connecting:
+                execute()
+                return self
             case .joining:
                 execute()
                 return self
@@ -65,6 +68,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 execute()
                 return self
             case .rejoining:
+                execute()
+                return self
+            case .migrated:
                 execute()
                 return self
             default:
