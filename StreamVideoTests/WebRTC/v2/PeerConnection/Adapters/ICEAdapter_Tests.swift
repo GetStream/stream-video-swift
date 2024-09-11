@@ -45,7 +45,7 @@ final class ICEAdapterTests: XCTestCase {
 
     // MARK: - trickle(_:)
 
-    func test_trickle_given_connected_when_calledWithCandidate_then_tricklesToSFU() async throws {
+    func test_trickle_connected_calledWithCandidate_tricklesToSFU() async throws {
         // Given
         mockSFUStack
             .mockWebSocketClient
@@ -70,7 +70,7 @@ final class ICEAdapterTests: XCTestCase {
         XCTAssertFalse(request.iceCandidate.isEmpty)
     }
 
-    func test_trickle_given_disconnected_when_calledWithCandidate_then_tricklesToSFU() async throws {
+    func test_trickle_disconnected_calledWithCandidate_tricklesToSFU() async throws {
         // Given
         mockSFUStack
             .mockWebSocketClient

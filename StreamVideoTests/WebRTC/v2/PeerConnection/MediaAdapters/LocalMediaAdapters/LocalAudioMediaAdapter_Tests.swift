@@ -45,7 +45,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
     // MARK: - setUp(with:ownCapabilities:)
 
-    func test_setUp_given_hasAudioCapabilityAndAudioOn_when_noLocalTrack_then_createsAndAddsTrackAndTransceiver() async throws {
+    func test_setUp_hasAudioCapabilityAndAudioOn_noLocalTrack_createsAndAddsTrackAndTransceiver() async throws {
         // Given
         let eventExpectation = assertAsyncOperation { [spySubject] in
             try await spySubject!.nextValue(timeout: defaultTimeout)
@@ -73,7 +73,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
-    func test_setUp_given_hasAudioCapabilityAudioIsOff_when_noLocalTrack_then_createsTrackWithoutTransceiver() async throws {
+    func test_setUp_hasAudioCapabilityAudioIsOff_noLocalTrack_createsTrackWithoutTransceiver() async throws {
         // Given
         let eventExpectation = assertAsyncOperation { [spySubject] in
             try await spySubject!.nextValue(timeout: defaultTimeout)
@@ -102,7 +102,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
-    func test_setUp_given_doesNotHavesAudioCapability_when_noLocalTrack_then_doesNotCreateTrack() async throws {
+    func test_setUp_doesNotHavesAudioCapability_noLocalTrack_doesNotCreateTrack() async throws {
         // Given
         let eventExpectation = assertAsyncOperation { [spySubject] in
             try await spySubject!.nextValue(timeout: defaultTimeout)

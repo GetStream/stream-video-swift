@@ -50,7 +50,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
     // MARK: - setUp(with:ownCapabilities:)
 
-    func test_setUp_given_hasVideoCapabilityAndVideoOn_when_noLocalTrack_then_createsAndAddsTrackAndTransceiver() async throws {
+    func test_setUp_hasVideoCapabilityAndVideoOn_noLocalTrack_createsAndAddsTrackAndTransceiver() async throws {
         // Given
         let eventExpectation = assertAsyncOperation { [spySubject] in
             try await spySubject!.nextValue(timeout: defaultTimeout)
@@ -78,7 +78,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
-    func test_setUp_given_hasVideoCapabilityVideoOff_when_noLocalTrack_then_createsTrackWithoutTransceiver() async throws {
+    func test_setUp_hasVideoCapabilityVideoOff_noLocalTrack_createsTrackWithoutTransceiver() async throws {
         // Given
         let eventExpectation = assertAsyncOperation { [spySubject] in
             try await spySubject!.nextValue(timeout: defaultTimeout)
@@ -107,7 +107,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
-    func test_setUp_given_doesNotHavesVideoCapability_when_noLocalTrack_then_doesNotCreateTrack() async throws {
+    func test_setUp_doesNotHavesVideoCapability_noLocalTrack_doesNotCreateTrack() async throws {
         // Given
         let mockCapturer = MockCameraVideoCapturer()
         mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
@@ -140,7 +140,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         XCTAssertEqual(mockCapturer.stubbedFunctionInput[.startCapture]?.count, 0)
     }
 
-    func test_setUp_given_hasVideoCapabilityAndVideoOn_when_noLocalTrack_then_capturerWasCorrectlyConfigured() async throws {
+    func test_setUp_hasVideoCapabilityAndVideoOn_noLocalTrack_capturerWasCorrectlyConfigured() async throws {
         let mockCapturer = MockCameraVideoCapturer()
         mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
 
