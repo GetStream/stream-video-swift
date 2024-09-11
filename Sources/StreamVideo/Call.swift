@@ -186,7 +186,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             membersLimit: membersLimit,
             ring: ring,
             notify: notify,
-            video: false
+            video: nil
         )
         await state.update(from: response)
         if ring {
