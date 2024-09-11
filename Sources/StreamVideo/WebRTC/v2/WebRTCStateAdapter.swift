@@ -124,6 +124,7 @@ actor WebRTCStateAdapter: ObservableObject {
             callSettings
                 audioOn: \(callSettings.audioOn)
                 videoOn: \(callSettings.videoOn)
+                cameraPosition: \(callSettings.cameraPosition)
             """,
             subsystems: .webRTC
         )
