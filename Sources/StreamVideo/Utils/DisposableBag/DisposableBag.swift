@@ -7,8 +7,9 @@ import Foundation
 
 public final class DisposableBag: @unchecked Sendable {
 
-    private actor Storage {
+    private final class Storage {
         private var storage: [String: AnyCancellable] = [:]
+        private let queue = UnfairQueue()
 
         deinit {
             storage.values.forEach { $0.cancel() }
@@ -18,18 +19,24 @@ public final class DisposableBag: @unchecked Sendable {
             _ cancellable: AnyCancellable,
             with key: String = UUID().uuidString
         ) {
-            storage[key]?.cancel()
-            storage[key] = cancellable
+            queue.sync {
+                storage[key]?.cancel()
+                storage[key] = cancellable
+            }
         }
 
         public func remove(_ key: String) {
-            storage[key]?.cancel()
-            storage[key] = nil
+            queue.sync {
+                storage[key]?.cancel()
+                storage[key] = nil
+            }
         }
 
         public func removeAll() {
-            storage.values.forEach { $0.cancel() }
-            storage = [:]
+            queue.sync {
+                storage.values.forEach { $0.cancel() }
+                storage = [:]
+            }
         }
     }
 
@@ -41,21 +48,15 @@ public final class DisposableBag: @unchecked Sendable {
         _ cancellable: AnyCancellable,
         with key: String = UUID().uuidString
     ) {
-        Task {
-            await storage.insert(cancellable, with: key)
-        }
+        storage.insert(cancellable, with: key)
     }
 
     public func remove(_ key: String) {
-        Task {
-            await storage.remove(key)
-        }
+        storage.remove(key)
     }
 
     public func removeAll() {
-        Task {
-            await storage.removeAll()
-        }
+        storage.removeAll()
     }
 }
 
