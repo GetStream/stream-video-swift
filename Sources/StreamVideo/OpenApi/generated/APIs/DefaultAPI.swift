@@ -624,12 +624,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func stopRTMPBroadcast(
-        type: String,
-        id: String,
-        name: String,
-        stopRTMPBroadcastsRequest: StopRTMPBroadcastsRequest
-    ) async throws -> StopRTMPBroadcastsResponse {
+    open func stopRTMPBroadcast(type: String, id: String, name: String) async throws -> StopRTMPBroadcastsResponse {
         var path = "/video/call/{type}/{id}/rtmp_broadcasts/{name}/stop"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -644,8 +639,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST",
-            request: stopRTMPBroadcastsRequest
+            httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopRTMPBroadcastsResponse.self, from: $0)
@@ -1129,12 +1123,7 @@ protocol DefaultAPIEndpoints {
         
     func stopAllRTMPBroadcasts(type: String, id: String) async throws -> StopAllRTMPBroadcastsResponse
         
-    func stopRTMPBroadcast(
-        type: String,
-        id: String,
-        name: String,
-        stopRTMPBroadcastsRequest: StopRTMPBroadcastsRequest
-    ) async throws -> StopRTMPBroadcastsResponse
+    func stopRTMPBroadcast(type: String, id: String, name: String) async throws -> StopRTMPBroadcastsResponse
         
     func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
         

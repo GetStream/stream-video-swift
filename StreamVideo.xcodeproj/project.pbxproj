@@ -398,8 +398,6 @@
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
 		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
 		4159F1332C861404002B94D3 /* VideoEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1322C861404002B94D3 /* VideoEvent.swift */; };
-		4159F1362C861443002B94D3 /* StopAllRTMPBroadcastsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1342C861443002B94D3 /* StopAllRTMPBroadcastsRequest.swift */; };
-		4159F1372C861443002B94D3 /* StopHLSBroadcastingRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1352C861443002B94D3 /* StopHLSBroadcastingRequest.swift */; };
 		4159F16A2C86FA41002B94D3 /* PrivacySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1382C86FA3D002B94D3 /* PrivacySettings.swift */; };
 		4159F16B2C86FA41002B94D3 /* UserBannedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1392C86FA3D002B94D3 /* UserBannedEvent.swift */; };
 		4159F16C2C86FA41002B94D3 /* TURNAggregatedStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13A2C86FA3D002B94D3 /* TURNAggregatedStats.swift */; };
@@ -408,9 +406,7 @@
 		4159F1702C86FA41002B94D3 /* UserMutedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13E2C86FA3E002B94D3 /* UserMutedEvent.swift */; };
 		4159F1712C86FA41002B94D3 /* UserDeactivatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13F2C86FA3E002B94D3 /* UserDeactivatedEvent.swift */; };
 		4159F1722C86FA41002B94D3 /* PublishedTrackInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1402C86FA3E002B94D3 /* PublishedTrackInfo.swift */; };
-		4159F1732C86FA41002B94D3 /* StopLiveRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1412C86FA3E002B94D3 /* StopLiveRequest.swift */; };
 		4159F1742C86FA41002B94D3 /* MediaPubSubHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1422C86FA3E002B94D3 /* MediaPubSubHint.swift */; };
-		4159F1752C86FA41002B94D3 /* StartHLSBroadcastingRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1432C86FA3E002B94D3 /* StartHLSBroadcastingRequest.swift */; };
 		4159F1762C86FA41002B94D3 /* RTMPSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1442C86FA3E002B94D3 /* RTMPSettingsResponse.swift */; };
 		4159F1782C86FA41002B94D3 /* PushNotificationSettingsInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1462C86FA3E002B94D3 /* PushNotificationSettingsInput.swift */; };
 		4159F1792C86FA41002B94D3 /* TypingIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1472C86FA3F002B94D3 /* TypingIndicators.swift */; };
@@ -430,13 +426,10 @@
 		4159F18E2C86FA41002B94D3 /* NullTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15C2C86FA40002B94D3 /* NullTime.swift */; };
 		4159F18F2C86FA41002B94D3 /* WebhookEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15D2C86FA40002B94D3 /* WebhookEvent.swift */; };
 		4159F1902C86FA41002B94D3 /* PublisherAggregateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15E2C86FA40002B94D3 /* PublisherAggregateStats.swift */; };
-		4159F1912C86FA41002B94D3 /* StopRTMPBroadcastsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15F2C86FA40002B94D3 /* StopRTMPBroadcastsRequest.swift */; };
 		4159F1922C86FA41002B94D3 /* ChannelMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1602C86FA40002B94D3 /* ChannelMember.swift */; };
 		4159F1932C86FA41002B94D3 /* UserMuteResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1612C86FA41002B94D3 /* UserMuteResponse.swift */; };
-		4159F1942C86FA41002B94D3 /* StopTranscriptionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1622C86FA41002B94D3 /* StopTranscriptionRequest.swift */; };
 		4159F1952C86FA41002B94D3 /* AggregatedStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1632C86FA41002B94D3 /* AggregatedStats.swift */; };
 		4159F1962C86FA41002B94D3 /* PrivacySettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1642C86FA41002B94D3 /* PrivacySettingsResponse.swift */; };
-		4159F1972C86FA41002B94D3 /* StopRecordingRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1652C86FA41002B94D3 /* StopRecordingRequest.swift */; };
 		4159F1982C86FA41002B94D3 /* UserUnbannedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1662C86FA41002B94D3 /* UserUnbannedEvent.swift */; };
 		4159F1992C86FA41002B94D3 /* CountrywiseAggregateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1672C86FA41002B94D3 /* CountrywiseAggregateStats.swift */; };
 		4159F19A2C86FA41002B94D3 /* UserReactivatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1682C86FA41002B94D3 /* UserReactivatedEvent.swift */; };
@@ -5437,7 +5430,6 @@
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
-				4159F1912C86FA41002B94D3 /* StopRTMPBroadcastsRequest.swift in Sources */,
 				4065839B2B877ADA00B4F979 /* CIImage+Sendable.swift in Sources */,
 				84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */,
 				84A737CE28F4716E001A6769 /* signal.pb.swift in Sources */,
@@ -5451,7 +5443,6 @@
 				842B8E292A2DFED900863A87 /* StartTranscriptionResponse.swift in Sources */,
 				843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */,
 				842B8E2A2A2DFED900863A87 /* CallSessionResponse.swift in Sources */,
-				4159F1942C86FA41002B94D3 /* StopTranscriptionRequest.swift in Sources */,
 				841BAA452BD15CDE000C73E4 /* UserInfoResponse.swift in Sources */,
 				8490032129D308A000AD9BB4 /* RingSettingsRequest.swift in Sources */,
 				846A06CE29E056C40084C264 /* StringExtensions.swift in Sources */,
@@ -5498,7 +5489,6 @@
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,
 				4159F18E2C86FA41002B94D3 /* NullTime.swift in Sources */,
 				841BAA3A2BD15CDE000C73E4 /* Location.swift in Sources */,
-				4159F1752C86FA41002B94D3 /* StartHLSBroadcastingRequest.swift in Sources */,
 				842B8E302A2DFED900863A87 /* EgressResponse.swift in Sources */,
 				84DC38B229ADFCFD00946713 /* UnblockUserResponse.swift in Sources */,
 				4159F16D2C86FA41002B94D3 /* UserUpdatedEvent.swift in Sources */,
@@ -5716,7 +5706,6 @@
 				841BAA322BD15CDE000C73E4 /* CallTranscriptionStoppedEvent.swift in Sources */,
 				84DC38D429ADFCFD00946713 /* CallSettingsResponse.swift in Sources */,
 				84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */,
-				4159F1372C861443002B94D3 /* StopHLSBroadcastingRequest.swift in Sources */,
 				842B8E2E2A2DFED900863A87 /* RejectCallResponse.swift in Sources */,
 				845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */,
 				4159F1952C86FA41002B94D3 /* AggregatedStats.swift in Sources */,
@@ -5728,7 +5717,6 @@
 				84DC38A929ADFCFD00946713 /* CallUpdatedEvent.swift in Sources */,
 				841BAA3C2BD15CDE000C73E4 /* VideoResolution.swift in Sources */,
 				843DAB9A29E695CF00E0EB63 /* CreateGuestRequest.swift in Sources */,
-				4159F1732C86FA41002B94D3 /* StopLiveRequest.swift in Sources */,
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
 				4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */,
 				84DC38B429ADFCFD00946713 /* ICEServer.swift in Sources */,
@@ -5773,7 +5761,6 @@
 				8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */,
 				4159F1892C86FA41002B94D3 /* PushNotificationSettings.swift in Sources */,
 				84CD12202C73831000056640 /* CallMissedEvent.swift in Sources */,
-				4159F1972C86FA41002B94D3 /* StopRecordingRequest.swift in Sources */,
 				842B8E1C2A2DFED900863A87 /* AcceptCallResponse.swift in Sources */,
 				40F18B8E2BEBB65100ADF76E /* View+OptionalPublisher.swift in Sources */,
 				842B8E262A2DFED900863A87 /* CallParticipantResponse.swift in Sources */,
@@ -5786,7 +5773,6 @@
 				84DC38BF29ADFCFD00946713 /* ScreensharingSettings.swift in Sources */,
 				4159F1882C86FA41002B94D3 /* UserDeletedEvent.swift in Sources */,
 				4159F17F2C86FA41002B94D3 /* UserPresenceChangedEvent.swift in Sources */,
-				4159F1362C861443002B94D3 /* StopAllRTMPBroadcastsRequest.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
