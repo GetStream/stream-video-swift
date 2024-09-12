@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct VideoResolution: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class VideoResolution: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var height: Int
     public var width: Int
@@ -17,5 +17,15 @@ public struct VideoResolution: @unchecked Sendable, Codable, JSONEncodable, Hash
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case height
         case width
+    }
+    
+    public static func == (lhs: VideoResolution, rhs: VideoResolution) -> Bool {
+        lhs.height == rhs.height &&
+            lhs.width == rhs.width
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(height)
+        hasher.combine(width)
     }
 }

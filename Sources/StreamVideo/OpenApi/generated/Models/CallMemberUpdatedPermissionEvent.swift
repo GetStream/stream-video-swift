@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var call: CallResponse
     public var callCid: String
@@ -36,5 +36,23 @@ public struct CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Coda
         case createdAt = "created_at"
         case members
         case type
+    }
+    
+    public static func == (lhs: CallMemberUpdatedPermissionEvent, rhs: CallMemberUpdatedPermissionEvent) -> Bool {
+        lhs.call == rhs.call &&
+            lhs.callCid == rhs.callCid &&
+            lhs.capabilitiesByRole == rhs.capabilitiesByRole &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.members == rhs.members &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(call)
+        hasher.combine(callCid)
+        hasher.combine(capabilitiesByRole)
+        hasher.combine(createdAt)
+        hasher.combine(members)
+        hasher.combine(type)
     }
 }

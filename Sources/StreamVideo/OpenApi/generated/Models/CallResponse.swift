@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var backstage: Bool
     public var blockedUserIds: [String]
@@ -96,5 +96,53 @@ public struct CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashabl
         case transcribing
         case type
         case updatedAt = "updated_at"
+    }
+    
+    public static func == (lhs: CallResponse, rhs: CallResponse) -> Bool {
+        lhs.backstage == rhs.backstage &&
+            lhs.blockedUserIds == rhs.blockedUserIds &&
+            lhs.cid == rhs.cid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.createdBy == rhs.createdBy &&
+            lhs.currentSessionId == rhs.currentSessionId &&
+            lhs.custom == rhs.custom &&
+            lhs.egress == rhs.egress &&
+            lhs.endedAt == rhs.endedAt &&
+            lhs.id == rhs.id &&
+            lhs.ingress == rhs.ingress &&
+            lhs.joinAheadTimeSeconds == rhs.joinAheadTimeSeconds &&
+            lhs.recording == rhs.recording &&
+            lhs.session == rhs.session &&
+            lhs.settings == rhs.settings &&
+            lhs.startsAt == rhs.startsAt &&
+            lhs.team == rhs.team &&
+            lhs.thumbnails == rhs.thumbnails &&
+            lhs.transcribing == rhs.transcribing &&
+            lhs.type == rhs.type &&
+            lhs.updatedAt == rhs.updatedAt
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(backstage)
+        hasher.combine(blockedUserIds)
+        hasher.combine(cid)
+        hasher.combine(createdAt)
+        hasher.combine(createdBy)
+        hasher.combine(currentSessionId)
+        hasher.combine(custom)
+        hasher.combine(egress)
+        hasher.combine(endedAt)
+        hasher.combine(id)
+        hasher.combine(ingress)
+        hasher.combine(joinAheadTimeSeconds)
+        hasher.combine(recording)
+        hasher.combine(session)
+        hasher.combine(settings)
+        hasher.combine(startsAt)
+        hasher.combine(team)
+        hasher.combine(thumbnails)
+        hasher.combine(transcribing)
+        hasher.combine(type)
+        hasher.combine(updatedAt)
     }
 }

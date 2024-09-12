@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserEventPayload: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banned: Bool
     public var blockedUserIds: [String]
@@ -84,5 +84,47 @@ public struct UserEventPayload: @unchecked Sendable, Codable, JSONEncodable, Has
         case role
         case teams
         case updatedAt = "updated_at"
+    }
+    
+    public static func == (lhs: UserEventPayload, rhs: UserEventPayload) -> Bool {
+        lhs.banned == rhs.banned &&
+            lhs.blockedUserIds == rhs.blockedUserIds &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.custom == rhs.custom &&
+            lhs.deactivatedAt == rhs.deactivatedAt &&
+            lhs.deletedAt == rhs.deletedAt &&
+            lhs.id == rhs.id &&
+            lhs.image == rhs.image &&
+            lhs.invisible == rhs.invisible &&
+            lhs.language == rhs.language &&
+            lhs.lastActive == rhs.lastActive &&
+            lhs.name == rhs.name &&
+            lhs.online == rhs.online &&
+            lhs.privacySettings == rhs.privacySettings &&
+            lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
+            lhs.role == rhs.role &&
+            lhs.teams == rhs.teams &&
+            lhs.updatedAt == rhs.updatedAt
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(banned)
+        hasher.combine(blockedUserIds)
+        hasher.combine(createdAt)
+        hasher.combine(custom)
+        hasher.combine(deactivatedAt)
+        hasher.combine(deletedAt)
+        hasher.combine(id)
+        hasher.combine(image)
+        hasher.combine(invisible)
+        hasher.combine(language)
+        hasher.combine(lastActive)
+        hasher.combine(name)
+        hasher.combine(online)
+        hasher.combine(privacySettings)
+        hasher.combine(revokeTokensIssuedBefore)
+        hasher.combine(role)
+        hasher.combine(teams)
+        hasher.combine(updatedAt)
     }
 }

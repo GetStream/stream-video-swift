@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserMute: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserMute: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var expires: Date?
@@ -26,5 +26,21 @@ public struct UserMute: @unchecked Sendable, Codable, JSONEncodable, Hashable {
         case target
         case updatedAt = "updated_at"
         case user
+    }
+    
+    public static func == (lhs: UserMute, rhs: UserMute) -> Bool {
+        lhs.createdAt == rhs.createdAt &&
+            lhs.expires == rhs.expires &&
+            lhs.target == rhs.target &&
+            lhs.updatedAt == rhs.updatedAt &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(createdAt)
+        hasher.combine(expires)
+        hasher.combine(target)
+        hasher.combine(updatedAt)
+        hasher.combine(user)
     }
 }

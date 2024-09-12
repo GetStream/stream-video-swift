@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var additional: [String: RawJSON]?
     public var component: String?
@@ -40,5 +40,25 @@ public struct CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
         case severity
         case timestamp
         case type
+    }
+    
+    public static func == (lhs: CallEvent, rhs: CallEvent) -> Bool {
+        lhs.additional == rhs.additional &&
+            lhs.component == rhs.component &&
+            lhs.description == rhs.description &&
+            lhs.endTimestamp == rhs.endTimestamp &&
+            lhs.severity == rhs.severity &&
+            lhs.timestamp == rhs.timestamp &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(additional)
+        hasher.combine(component)
+        hasher.combine(description)
+        hasher.combine(endTimestamp)
+        hasher.combine(severity)
+        hasher.combine(timestamp)
+        hasher.combine(type)
     }
 }

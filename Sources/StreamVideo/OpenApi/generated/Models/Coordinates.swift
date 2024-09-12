@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Coordinates: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class Coordinates: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var latitude: Float
     public var longitude: Float
@@ -17,5 +17,15 @@ public struct Coordinates: @unchecked Sendable, Codable, JSONEncodable, Hashable
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case latitude
         case longitude
+    }
+    
+    public static func == (lhs: Coordinates, rhs: Coordinates) -> Bool {
+        lhs.latitude == rhs.latitude &&
+            lhs.longitude == rhs.longitude
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(latitude)
+        hasher.combine(longitude)
     }
 }

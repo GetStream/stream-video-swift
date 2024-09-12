@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var names: [String]?
 
@@ -14,5 +14,13 @@ public struct GeofenceSettingsRequest: @unchecked Sendable, Codable, JSONEncodab
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case names
+    }
+    
+    public static func == (lhs: GeofenceSettingsRequest, rhs: GeofenceSettingsRequest) -> Bool {
+        lhs.names == rhs.names
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(names)
     }
 }

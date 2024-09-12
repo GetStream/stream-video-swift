@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audio: Bool?
     public var muteAllUsers: Bool?
@@ -36,5 +36,23 @@ public struct MuteUsersRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         case screenshareAudio = "screenshare_audio"
         case userIds = "user_ids"
         case video
+    }
+    
+    public static func == (lhs: MuteUsersRequest, rhs: MuteUsersRequest) -> Bool {
+        lhs.audio == rhs.audio &&
+            lhs.muteAllUsers == rhs.muteAllUsers &&
+            lhs.screenshare == rhs.screenshare &&
+            lhs.screenshareAudio == rhs.screenshareAudio &&
+            lhs.userIds == rhs.userIds &&
+            lhs.video == rhs.video
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audio)
+        hasher.combine(muteAllUsers)
+        hasher.combine(screenshare)
+        hasher.combine(screenshareAudio)
+        hasher.combine(userIds)
+        hasher.combine(video)
     }
 }

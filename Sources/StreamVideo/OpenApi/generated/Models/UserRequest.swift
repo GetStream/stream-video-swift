@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var id: String
@@ -44,5 +44,27 @@ public struct UserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable
         case name
         case privacySettings = "privacy_settings"
         case pushNotifications = "push_notifications"
+    }
+    
+    public static func == (lhs: UserRequest, rhs: UserRequest) -> Bool {
+        lhs.custom == rhs.custom &&
+            lhs.id == rhs.id &&
+            lhs.image == rhs.image &&
+            lhs.invisible == rhs.invisible &&
+            lhs.language == rhs.language &&
+            lhs.name == rhs.name &&
+            lhs.privacySettings == rhs.privacySettings &&
+            lhs.pushNotifications == rhs.pushNotifications
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
+        hasher.combine(id)
+        hasher.combine(image)
+        hasher.combine(invisible)
+        hasher.combine(language)
+        hasher.combine(name)
+        hasher.combine(privacySettings)
+        hasher.combine(pushNotifications)
     }
 }

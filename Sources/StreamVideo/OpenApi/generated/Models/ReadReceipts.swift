@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ReadReceipts: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ReadReceipts: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool?
 
@@ -14,5 +14,13 @@ public struct ReadReceipts: @unchecked Sendable, Codable, JSONEncodable, Hashabl
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
+    }
+    
+    public static func == (lhs: ReadReceipts, rhs: ReadReceipts) -> Bool {
+        lhs.enabled == rhs.enabled
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(enabled)
     }
 }

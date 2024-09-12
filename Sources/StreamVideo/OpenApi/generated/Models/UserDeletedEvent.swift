@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserDeletedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public final class UserDeletedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var deleteConversationChannels: Bool
@@ -36,5 +36,23 @@ public struct UserDeletedEvent: @unchecked Sendable, Event, Codable, JSONEncodab
         case markMessagesDeleted = "mark_messages_deleted"
         case type
         case user
+    }
+    
+    public static func == (lhs: UserDeletedEvent, rhs: UserDeletedEvent) -> Bool {
+        lhs.createdAt == rhs.createdAt &&
+            lhs.deleteConversationChannels == rhs.deleteConversationChannels &&
+            lhs.hardDelete == rhs.hardDelete &&
+            lhs.markMessagesDeleted == rhs.markMessagesDeleted &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(createdAt)
+        hasher.combine(deleteConversationChannels)
+        hasher.combine(hardDelete)
+        hasher.combine(markMessagesDeleted)
+        hasher.combine(type)
+        hasher.combine(user)
     }
 }

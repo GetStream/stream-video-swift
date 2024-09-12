@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var rtmp: RTMPIngress
 
@@ -14,5 +14,13 @@ public struct CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable, 
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case rtmp
+    }
+    
+    public static func == (lhs: CallIngressResponse, rhs: CallIngressResponse) -> Bool {
+        lhs.rtmp == rhs.rtmp
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(rtmp)
     }
 }

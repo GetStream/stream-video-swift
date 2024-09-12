@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallTimeline: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallTimeline: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var events: [CallEvent?]
 
@@ -14,5 +14,13 @@ public struct CallTimeline: @unchecked Sendable, Codable, JSONEncodable, Hashabl
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case events
+    }
+    
+    public static func == (lhs: CallTimeline, rhs: CallTimeline) -> Bool {
+        lhs.events == rhs.events
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(events)
     }
 }

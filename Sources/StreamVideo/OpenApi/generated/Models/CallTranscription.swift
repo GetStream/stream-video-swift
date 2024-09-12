@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallTranscription: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallTranscription: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endTime: Date
     public var filename: String
@@ -23,5 +23,19 @@ public struct CallTranscription: @unchecked Sendable, Codable, JSONEncodable, Ha
         case filename
         case startTime = "start_time"
         case url
+    }
+    
+    public static func == (lhs: CallTranscription, rhs: CallTranscription) -> Bool {
+        lhs.endTime == rhs.endTime &&
+            lhs.filename == rhs.filename &&
+            lhs.startTime == rhs.startTime &&
+            lhs.url == rhs.url
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(endTime)
+        hasher.combine(filename)
+        hasher.combine(startTime)
+        hasher.combine(url)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var createdAt: Date
@@ -26,5 +26,21 @@ public struct UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Codable, 
         case ownCapabilities = "own_capabilities"
         case type
         case user
+    }
+    
+    public static func == (lhs: UpdatedCallPermissionsEvent, rhs: UpdatedCallPermissionsEvent) -> Bool {
+        lhs.callCid == rhs.callCid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.ownCapabilities == rhs.ownCapabilities &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(callCid)
+        hasher.combine(createdAt)
+        hasher.combine(ownCapabilities)
+        hasher.combine(type)
+        hasher.combine(user)
     }
 }

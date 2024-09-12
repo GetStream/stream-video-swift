@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var playlistUrl: String
 
@@ -14,5 +14,13 @@ public struct EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case playlistUrl = "playlist_url"
+    }
+    
+    public static func == (lhs: EgressHLSResponse, rhs: EgressHLSResponse) -> Bool {
+        lhs.playlistUrl == rhs.playlistUrl
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(playlistUrl)
     }
 }

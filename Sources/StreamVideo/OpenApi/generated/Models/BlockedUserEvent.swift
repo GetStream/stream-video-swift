@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var blockedByUser: UserResponse?
     public var callCid: String
@@ -26,5 +26,21 @@ public struct BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodab
         case createdAt = "created_at"
         case type
         case user
+    }
+    
+    public static func == (lhs: BlockedUserEvent, rhs: BlockedUserEvent) -> Bool {
+        lhs.blockedByUser == rhs.blockedByUser &&
+            lhs.callCid == rhs.callCid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(blockedByUser)
+        hasher.combine(callCid)
+        hasher.combine(createdAt)
+        hasher.combine(type)
+        hasher.combine(user)
     }
 }

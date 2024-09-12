@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse
     public var duration: String
@@ -20,5 +20,17 @@ public struct DeleteCallResponse: @unchecked Sendable, Codable, JSONEncodable, H
         case call
         case duration
         case taskId = "task_id"
+    }
+    
+    public static func == (lhs: DeleteCallResponse, rhs: DeleteCallResponse) -> Bool {
+        lhs.call == rhs.call &&
+            lhs.duration == rhs.duration &&
+            lhs.taskId == rhs.taskId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(call)
+        hasher.combine(duration)
+        hasher.combine(taskId)
     }
 }

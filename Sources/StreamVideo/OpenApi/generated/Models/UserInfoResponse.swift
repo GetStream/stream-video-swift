@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserInfoResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserInfoResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]
     public var image: String
@@ -23,5 +23,19 @@ public struct UserInfoResponse: @unchecked Sendable, Codable, JSONEncodable, Has
         case image
         case name
         case roles
+    }
+    
+    public static func == (lhs: UserInfoResponse, rhs: UserInfoResponse) -> Bool {
+        lhs.custom == rhs.custom &&
+            lhs.image == rhs.image &&
+            lhs.name == rhs.name &&
+            lhs.roles == rhs.roles
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
+        hasher.combine(image)
+        hasher.combine(name)
+        hasher.combine(roles)
     }
 }

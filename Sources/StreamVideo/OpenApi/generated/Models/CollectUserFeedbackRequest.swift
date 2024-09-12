@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var rating: Int
@@ -36,5 +36,23 @@ public struct CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSONEnco
         case sdk
         case sdkVersion = "sdk_version"
         case userSessionId = "user_session_id"
+    }
+    
+    public static func == (lhs: CollectUserFeedbackRequest, rhs: CollectUserFeedbackRequest) -> Bool {
+        lhs.custom == rhs.custom &&
+            lhs.rating == rhs.rating &&
+            lhs.reason == rhs.reason &&
+            lhs.sdk == rhs.sdk &&
+            lhs.sdkVersion == rhs.sdkVersion &&
+            lhs.userSessionId == rhs.userSessionId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
+        hasher.combine(rating)
+        hasher.combine(reason)
+        hasher.combine(sdk)
+        hasher.combine(sdkVersion)
+        hasher.combine(userSessionId)
     }
 }

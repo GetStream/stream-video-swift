@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audio: AudioSettingsRequest?
     public var backstage: BackstageSettingsRequest?
@@ -56,5 +56,33 @@ public struct CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, 
         case thumbnails
         case transcription
         case video
+    }
+    
+    public static func == (lhs: CallSettingsRequest, rhs: CallSettingsRequest) -> Bool {
+        lhs.audio == rhs.audio &&
+            lhs.backstage == rhs.backstage &&
+            lhs.broadcasting == rhs.broadcasting &&
+            lhs.geofencing == rhs.geofencing &&
+            lhs.limits == rhs.limits &&
+            lhs.recording == rhs.recording &&
+            lhs.ring == rhs.ring &&
+            lhs.screensharing == rhs.screensharing &&
+            lhs.thumbnails == rhs.thumbnails &&
+            lhs.transcription == rhs.transcription &&
+            lhs.video == rhs.video
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audio)
+        hasher.combine(backstage)
+        hasher.combine(broadcasting)
+        hasher.combine(geofencing)
+        hasher.combine(limits)
+        hasher.combine(recording)
+        hasher.combine(ring)
+        hasher.combine(screensharing)
+        hasher.combine(thumbnails)
+        hasher.combine(transcription)
+        hasher.combine(video)
     }
 }

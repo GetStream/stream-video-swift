@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TranscriptionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class TranscriptionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Mode: String, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -37,5 +37,17 @@ public struct TranscriptionSettingsRequest: @unchecked Sendable, Codable, JSONEn
         case closedCaptionMode = "closed_caption_mode"
         case languages
         case mode
+    }
+    
+    public static func == (lhs: TranscriptionSettingsRequest, rhs: TranscriptionSettingsRequest) -> Bool {
+        lhs.closedCaptionMode == rhs.closedCaptionMode &&
+            lhs.languages == rhs.languages &&
+            lhs.mode == rhs.mode
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(closedCaptionMode)
+        hasher.combine(languages)
+        hasher.combine(mode)
     }
 }

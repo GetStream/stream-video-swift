@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TypingIndicatorsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class TypingIndicatorsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool
 
@@ -14,5 +14,13 @@ public struct TypingIndicatorsResponse: @unchecked Sendable, Codable, JSONEncoda
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
+    }
+    
+    public static func == (lhs: TypingIndicatorsResponse, rhs: TypingIndicatorsResponse) -> Bool {
+        lhs.enabled == rhs.enabled
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(enabled)
     }
 }

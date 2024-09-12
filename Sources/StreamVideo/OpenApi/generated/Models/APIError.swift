@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var code: Int
     public var details: [Int]
@@ -44,5 +44,27 @@ public struct APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable {
         case moreInfo = "more_info"
         case statusCode = "StatusCode"
         case unrecoverable
+    }
+    
+    public static func == (lhs: APIError, rhs: APIError) -> Bool {
+        lhs.code == rhs.code &&
+            lhs.details == rhs.details &&
+            lhs.duration == rhs.duration &&
+            lhs.exceptionFields == rhs.exceptionFields &&
+            lhs.message == rhs.message &&
+            lhs.moreInfo == rhs.moreInfo &&
+            lhs.statusCode == rhs.statusCode &&
+            lhs.unrecoverable == rhs.unrecoverable
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(code)
+        hasher.combine(details)
+        hasher.combine(duration)
+        hasher.combine(exceptionFields)
+        hasher.combine(message)
+        hasher.combine(moreInfo)
+        hasher.combine(statusCode)
+        hasher.combine(unrecoverable)
     }
 }

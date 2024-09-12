@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var closedCaption: CallClosedCaption
@@ -23,5 +23,19 @@ public struct ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncod
         case closedCaption = "closed_caption"
         case createdAt = "created_at"
         case type
+    }
+    
+    public static func == (lhs: ClosedCaptionEvent, rhs: ClosedCaptionEvent) -> Bool {
+        lhs.callCid == rhs.callCid &&
+            lhs.closedCaption == rhs.closedCaption &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(callCid)
+        hasher.combine(closedCaption)
+        hasher.combine(createdAt)
+        hasher.combine(type)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserPresenceChangedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public final class UserPresenceChangedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var type: String
@@ -20,5 +20,17 @@ public struct UserPresenceChangedEvent: @unchecked Sendable, Event, Codable, JSO
         case createdAt = "created_at"
         case type
         case user
+    }
+    
+    public static func == (lhs: UserPresenceChangedEvent, rhs: UserPresenceChangedEvent) -> Bool {
+        lhs.createdAt == rhs.createdAt &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(createdAt)
+        hasher.combine(type)
+        hasher.combine(user)
     }
 }

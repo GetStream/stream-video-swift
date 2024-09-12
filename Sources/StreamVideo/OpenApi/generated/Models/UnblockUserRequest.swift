@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UnblockUserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UnblockUserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var userId: String
 
@@ -14,5 +14,13 @@ public struct UnblockUserRequest: @unchecked Sendable, Codable, JSONEncodable, H
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case userId = "user_id"
+    }
+    
+    public static func == (lhs: UnblockUserRequest, rhs: UnblockUserRequest) -> Bool {
+        lhs.userId == rhs.userId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(userId)
     }
 }

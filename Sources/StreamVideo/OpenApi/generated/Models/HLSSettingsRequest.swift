@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var autoOn: Bool?
     public var enabled: Bool?
@@ -20,5 +20,17 @@ public struct HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, H
         case autoOn = "auto_on"
         case enabled
         case qualityTracks = "quality_tracks"
+    }
+    
+    public static func == (lhs: HLSSettingsRequest, rhs: HLSSettingsRequest) -> Bool {
+        lhs.autoOn == rhs.autoOn &&
+            lhs.enabled == rhs.enabled &&
+            lhs.qualityTracks == rhs.qualityTracks
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(autoOn)
+        hasher.combine(enabled)
+        hasher.combine(qualityTracks)
     }
 }

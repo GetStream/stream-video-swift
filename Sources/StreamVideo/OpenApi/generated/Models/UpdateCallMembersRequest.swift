@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var removeMembers: [String]?
     public var updateMembers: [MemberRequest]?
@@ -17,5 +17,15 @@ public struct UpdateCallMembersRequest: @unchecked Sendable, Codable, JSONEncoda
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case removeMembers = "remove_members"
         case updateMembers = "update_members"
+    }
+    
+    public static func == (lhs: UpdateCallMembersRequest, rhs: UpdateCallMembersRequest) -> Bool {
+        lhs.removeMembers == rhs.removeMembers &&
+            lhs.updateMembers == rhs.updateMembers
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(removeMembers)
+        hasher.combine(updateMembers)
     }
 }

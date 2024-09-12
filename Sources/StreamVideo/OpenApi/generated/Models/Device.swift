@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Device: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class Device: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var disabled: Bool?
@@ -44,5 +44,27 @@ public struct Device: @unchecked Sendable, Codable, JSONEncodable, Hashable {
         case pushProviderName = "push_provider_name"
         case userId = "user_id"
         case voip
+    }
+    
+    public static func == (lhs: Device, rhs: Device) -> Bool {
+        lhs.createdAt == rhs.createdAt &&
+            lhs.disabled == rhs.disabled &&
+            lhs.disabledReason == rhs.disabledReason &&
+            lhs.id == rhs.id &&
+            lhs.pushProvider == rhs.pushProvider &&
+            lhs.pushProviderName == rhs.pushProviderName &&
+            lhs.userId == rhs.userId &&
+            lhs.voip == rhs.voip
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(createdAt)
+        hasher.combine(disabled)
+        hasher.combine(disabledReason)
+        hasher.combine(id)
+        hasher.combine(pushProvider)
+        hasher.combine(pushProviderName)
+        hasher.combine(userId)
+        hasher.combine(voip)
     }
 }

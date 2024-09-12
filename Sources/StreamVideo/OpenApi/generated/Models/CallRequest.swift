@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var members: [MemberRequest]?
@@ -36,5 +36,23 @@ public struct CallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable
         case startsAt = "starts_at"
         case team
         case video
+    }
+    
+    public static func == (lhs: CallRequest, rhs: CallRequest) -> Bool {
+        lhs.custom == rhs.custom &&
+            lhs.members == rhs.members &&
+            lhs.settingsOverride == rhs.settingsOverride &&
+            lhs.startsAt == rhs.startsAt &&
+            lhs.team == rhs.team &&
+            lhs.video == rhs.video
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
+        hasher.combine(members)
+        hasher.combine(settingsOverride)
+        hasher.combine(startsAt)
+        hasher.combine(team)
+        hasher.combine(video)
     }
 }

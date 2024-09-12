@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UpdateUserPermissionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UpdateUserPermissionsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var grantPermissions: [String]?
     public var revokePermissions: [String]?
@@ -20,5 +20,17 @@ public struct UpdateUserPermissionsRequest: @unchecked Sendable, Codable, JSONEn
         case grantPermissions = "grant_permissions"
         case revokePermissions = "revoke_permissions"
         case userId = "user_id"
+    }
+    
+    public static func == (lhs: UpdateUserPermissionsRequest, rhs: UpdateUserPermissionsRequest) -> Bool {
+        lhs.grantPermissions == rhs.grantPermissions &&
+            lhs.revokePermissions == rhs.revokePermissions &&
+            lhs.userId == rhs.userId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(grantPermissions)
+        hasher.combine(revokePermissions)
+        hasher.combine(userId)
     }
 }

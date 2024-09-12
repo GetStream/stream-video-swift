@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CountrywiseAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CountrywiseAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var participantCount: Count?
     public var publisherJitter: Stats?
@@ -32,5 +32,21 @@ public struct CountrywiseAggregateStats: @unchecked Sendable, Codable, JSONEncod
         case publisherLatency = "publisher_latency"
         case subscriberJitter = "subscriber_jitter"
         case subscriberLatency = "subscriber_latency"
+    }
+    
+    public static func == (lhs: CountrywiseAggregateStats, rhs: CountrywiseAggregateStats) -> Bool {
+        lhs.participantCount == rhs.participantCount &&
+            lhs.publisherJitter == rhs.publisherJitter &&
+            lhs.publisherLatency == rhs.publisherLatency &&
+            lhs.subscriberJitter == rhs.subscriberJitter &&
+            lhs.subscriberLatency == rhs.subscriberLatency
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(participantCount)
+        hasher.combine(publisherJitter)
+        hasher.combine(publisherLatency)
+        hasher.combine(subscriberJitter)
+        hasher.combine(subscriberLatency)
     }
 }

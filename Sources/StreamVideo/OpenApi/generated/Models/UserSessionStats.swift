@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var browser: String?
     public var browserVersion: String?
@@ -216,5 +216,113 @@ public struct UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Has
         case totalPixelsOut = "total_pixels_out"
         case truncated
         case webrtcVersion = "webrtc_version"
+    }
+    
+    public static func == (lhs: UserSessionStats, rhs: UserSessionStats) -> Bool {
+        lhs.browser == rhs.browser &&
+            lhs.browserVersion == rhs.browserVersion &&
+            lhs.currentIp == rhs.currentIp &&
+            lhs.currentSfu == rhs.currentSfu &&
+            lhs.deviceModel == rhs.deviceModel &&
+            lhs.deviceVersion == rhs.deviceVersion &&
+            lhs.distanceToSfuKilometers == rhs.distanceToSfuKilometers &&
+            lhs.freezeDurationSeconds == rhs.freezeDurationSeconds &&
+            lhs.geolocation == rhs.geolocation &&
+            lhs.jitter == rhs.jitter &&
+            lhs.latency == rhs.latency &&
+            lhs.maxFirPerSecond == rhs.maxFirPerSecond &&
+            lhs.maxFreezeFraction == rhs.maxFreezeFraction &&
+            lhs.maxFreezesDurationSeconds == rhs.maxFreezesDurationSeconds &&
+            lhs.maxFreezesPerSecond == rhs.maxFreezesPerSecond &&
+            lhs.maxNackPerSecond == rhs.maxNackPerSecond &&
+            lhs.maxPliPerSecond == rhs.maxPliPerSecond &&
+            lhs.maxPublishingVideoQuality == rhs.maxPublishingVideoQuality &&
+            lhs.maxReceivingVideoQuality == rhs.maxReceivingVideoQuality &&
+            lhs.os == rhs.os &&
+            lhs.osVersion == rhs.osVersion &&
+            lhs.packetLossFraction == rhs.packetLossFraction &&
+            lhs.pubSubHints == rhs.pubSubHints &&
+            lhs.publishedTracks == rhs.publishedTracks &&
+            lhs.publisherAudioMos == rhs.publisherAudioMos &&
+            lhs.publisherJitter == rhs.publisherJitter &&
+            lhs.publisherLatency == rhs.publisherLatency &&
+            lhs.publisherNoiseCancellationSeconds == rhs.publisherNoiseCancellationSeconds &&
+            lhs.publisherPacketLossFraction == rhs.publisherPacketLossFraction &&
+            lhs.publisherQualityLimitationFraction == rhs.publisherQualityLimitationFraction &&
+            lhs.publisherVideoQualityLimitationDurationSeconds == rhs.publisherVideoQualityLimitationDurationSeconds &&
+            lhs.publishingAudioCodec == rhs.publishingAudioCodec &&
+            lhs.publishingDurationSeconds == rhs.publishingDurationSeconds &&
+            lhs.publishingVideoCodec == rhs.publishingVideoCodec &&
+            lhs.qualityScore == rhs.qualityScore &&
+            lhs.receivingAudioCodec == rhs.receivingAudioCodec &&
+            lhs.receivingDurationSeconds == rhs.receivingDurationSeconds &&
+            lhs.receivingVideoCodec == rhs.receivingVideoCodec &&
+            lhs.sdk == rhs.sdk &&
+            lhs.sdkVersion == rhs.sdkVersion &&
+            lhs.sessionId == rhs.sessionId &&
+            lhs.subscriberAudioMos == rhs.subscriberAudioMos &&
+            lhs.subscriberJitter == rhs.subscriberJitter &&
+            lhs.subscriberLatency == rhs.subscriberLatency &&
+            lhs.subscriberVideoQualityThrottledDurationSeconds == rhs.subscriberVideoQualityThrottledDurationSeconds &&
+            lhs.subsessions == rhs.subsessions &&
+            lhs.timeline == rhs.timeline &&
+            lhs.totalPixelsIn == rhs.totalPixelsIn &&
+            lhs.totalPixelsOut == rhs.totalPixelsOut &&
+            lhs.truncated == rhs.truncated &&
+            lhs.webrtcVersion == rhs.webrtcVersion
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(browser)
+        hasher.combine(browserVersion)
+        hasher.combine(currentIp)
+        hasher.combine(currentSfu)
+        hasher.combine(deviceModel)
+        hasher.combine(deviceVersion)
+        hasher.combine(distanceToSfuKilometers)
+        hasher.combine(freezeDurationSeconds)
+        hasher.combine(geolocation)
+        hasher.combine(jitter)
+        hasher.combine(latency)
+        hasher.combine(maxFirPerSecond)
+        hasher.combine(maxFreezeFraction)
+        hasher.combine(maxFreezesDurationSeconds)
+        hasher.combine(maxFreezesPerSecond)
+        hasher.combine(maxNackPerSecond)
+        hasher.combine(maxPliPerSecond)
+        hasher.combine(maxPublishingVideoQuality)
+        hasher.combine(maxReceivingVideoQuality)
+        hasher.combine(os)
+        hasher.combine(osVersion)
+        hasher.combine(packetLossFraction)
+        hasher.combine(pubSubHints)
+        hasher.combine(publishedTracks)
+        hasher.combine(publisherAudioMos)
+        hasher.combine(publisherJitter)
+        hasher.combine(publisherLatency)
+        hasher.combine(publisherNoiseCancellationSeconds)
+        hasher.combine(publisherPacketLossFraction)
+        hasher.combine(publisherQualityLimitationFraction)
+        hasher.combine(publisherVideoQualityLimitationDurationSeconds)
+        hasher.combine(publishingAudioCodec)
+        hasher.combine(publishingDurationSeconds)
+        hasher.combine(publishingVideoCodec)
+        hasher.combine(qualityScore)
+        hasher.combine(receivingAudioCodec)
+        hasher.combine(receivingDurationSeconds)
+        hasher.combine(receivingVideoCodec)
+        hasher.combine(sdk)
+        hasher.combine(sdkVersion)
+        hasher.combine(sessionId)
+        hasher.combine(subscriberAudioMos)
+        hasher.combine(subscriberJitter)
+        hasher.combine(subscriberLatency)
+        hasher.combine(subscriberVideoQualityThrottledDurationSeconds)
+        hasher.combine(subsessions)
+        hasher.combine(timeline)
+        hasher.combine(totalPixelsIn)
+        hasher.combine(totalPixelsOut)
+        hasher.combine(truncated)
+        hasher.combine(webrtcVersion)
     }
 }

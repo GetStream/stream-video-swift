@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var createdAt: Date
@@ -26,5 +26,21 @@ public struct CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodab
         case custom
         case type
         case user
+    }
+    
+    public static func == (lhs: CustomVideoEvent, rhs: CustomVideoEvent) -> Bool {
+        lhs.callCid == rhs.callCid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.custom == rhs.custom &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(callCid)
+        hasher.combine(createdAt)
+        hasher.combine(custom)
+        hasher.combine(type)
+        hasher.combine(user)
     }
 }

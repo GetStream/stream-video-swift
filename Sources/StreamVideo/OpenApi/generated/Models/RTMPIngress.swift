@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RTMPIngress: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RTMPIngress: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var address: String
 
@@ -14,5 +14,13 @@ public struct RTMPIngress: @unchecked Sendable, Codable, JSONEncodable, Hashable
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case address
+    }
+    
+    public static func == (lhs: RTMPIngress, rhs: RTMPIngress) -> Bool {
+        lhs.address == rhs.address
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(address)
     }
 }

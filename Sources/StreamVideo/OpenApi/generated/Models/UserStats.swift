@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var info: UserInfoResponse
     public var minEventTs: Int
@@ -23,5 +23,19 @@ public struct UserStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
         case minEventTs = "min_event_ts"
         case rating
         case sessionStats = "session_stats"
+    }
+    
+    public static func == (lhs: UserStats, rhs: UserStats) -> Bool {
+        lhs.info == rhs.info &&
+            lhs.minEventTs == rhs.minEventTs &&
+            lhs.rating == rhs.rating &&
+            lhs.sessionStats == rhs.sessionStats
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(info)
+        hasher.combine(minEventTs)
+        hasher.combine(rating)
+        hasher.combine(sessionStats)
     }
 }

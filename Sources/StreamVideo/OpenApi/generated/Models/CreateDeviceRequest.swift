@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CreateDeviceRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CreateDeviceRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum PushProvider: String, Codable, CaseIterable {
         case apn
@@ -41,5 +41,19 @@ public struct CreateDeviceRequest: @unchecked Sendable, Codable, JSONEncodable, 
         case pushProvider = "push_provider"
         case pushProviderName = "push_provider_name"
         case voipToken = "voip_token"
+    }
+    
+    public static func == (lhs: CreateDeviceRequest, rhs: CreateDeviceRequest) -> Bool {
+        lhs.id == rhs.id &&
+            lhs.pushProvider == rhs.pushProvider &&
+            lhs.pushProviderName == rhs.pushProviderName &&
+            lhs.voipToken == rhs.voipToken
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(pushProvider)
+        hasher.combine(pushProviderName)
+        hasher.combine(voipToken)
     }
 }

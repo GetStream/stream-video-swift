@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var filterConditions: [String: RawJSON]?
     public var id: String
@@ -40,5 +40,25 @@ public struct QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, 
         case prev
         case sort
         case type
+    }
+    
+    public static func == (lhs: QueryMembersRequest, rhs: QueryMembersRequest) -> Bool {
+        lhs.filterConditions == rhs.filterConditions &&
+            lhs.id == rhs.id &&
+            lhs.limit == rhs.limit &&
+            lhs.next == rhs.next &&
+            lhs.prev == rhs.prev &&
+            lhs.sort == rhs.sort &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(filterConditions)
+        hasher.combine(id)
+        hasher.combine(limit)
+        hasher.combine(next)
+        hasher.combine(prev)
+        hasher.combine(sort)
+        hasher.combine(type)
     }
 }

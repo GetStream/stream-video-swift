@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TURNAggregatedStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class TURNAggregatedStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var tcp: Count?
     public var total: Count?
@@ -17,5 +17,15 @@ public struct TURNAggregatedStats: @unchecked Sendable, Codable, JSONEncodable, 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case tcp
         case total
+    }
+    
+    public static func == (lhs: TURNAggregatedStats, rhs: TURNAggregatedStats) -> Bool {
+        lhs.tcp == rhs.tcp &&
+            lhs.total == rhs.total
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(tcp)
+        hasher.combine(total)
     }
 }

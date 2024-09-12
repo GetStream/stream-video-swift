@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var callCid: String
     public var callDurationSeconds: Int
@@ -40,5 +40,25 @@ public struct CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSON
         case createdAt = "created_at"
         case firstStatsTime = "first_stats_time"
         case qualityScore = "quality_score"
+    }
+    
+    public static func == (lhs: CallStatsReportSummaryResponse, rhs: CallStatsReportSummaryResponse) -> Bool {
+        lhs.callCid == rhs.callCid &&
+            lhs.callDurationSeconds == rhs.callDurationSeconds &&
+            lhs.callSessionId == rhs.callSessionId &&
+            lhs.callStatus == rhs.callStatus &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.firstStatsTime == rhs.firstStatsTime &&
+            lhs.qualityScore == rhs.qualityScore
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(callCid)
+        hasher.combine(callDurationSeconds)
+        hasher.combine(callSessionId)
+        hasher.combine(callStatus)
+        hasher.combine(createdAt)
+        hasher.combine(firstStatsTime)
+        hasher.combine(qualityScore)
     }
 }

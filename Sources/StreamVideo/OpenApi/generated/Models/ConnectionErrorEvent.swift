@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public final class ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var connectionId: String
     public var createdAt: Date
@@ -23,5 +23,19 @@ public struct ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JSONEnc
         case createdAt = "created_at"
         case error
         case type
+    }
+    
+    public static func == (lhs: ConnectionErrorEvent, rhs: ConnectionErrorEvent) -> Bool {
+        lhs.connectionId == rhs.connectionId &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.error == rhs.error &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(connectionId)
+        hasher.combine(createdAt)
+        hasher.combine(error)
+        hasher.combine(type)
     }
 }

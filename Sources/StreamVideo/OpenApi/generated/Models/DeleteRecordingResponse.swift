@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct DeleteRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class DeleteRecordingResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
 
@@ -14,5 +14,13 @@ public struct DeleteRecordingResponse: @unchecked Sendable, Codable, JSONEncodab
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case duration
+    }
+    
+    public static func == (lhs: DeleteRecordingResponse, rhs: DeleteRecordingResponse) -> Bool {
+        lhs.duration == rhs.duration
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(duration)
     }
 }

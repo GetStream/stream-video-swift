@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var createdAt: Date
@@ -26,5 +26,21 @@ public struct PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONE
         case permissions
         case type
         case user
+    }
+    
+    public static func == (lhs: PermissionRequestEvent, rhs: PermissionRequestEvent) -> Bool {
+        lhs.callCid == rhs.callCid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.permissions == rhs.permissions &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(callCid)
+        hasher.combine(createdAt)
+        hasher.combine(permissions)
+        hasher.combine(type)
+        hasher.combine(user)
     }
 }

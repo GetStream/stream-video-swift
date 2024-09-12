@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct AudioSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum DefaultDevice: String, Codable, CaseIterable {
         case earpiece
@@ -56,5 +56,25 @@ public struct AudioSettings: @unchecked Sendable, Codable, JSONEncodable, Hashab
         case opusDtxEnabled = "opus_dtx_enabled"
         case redundantCodingEnabled = "redundant_coding_enabled"
         case speakerDefaultOn = "speaker_default_on"
+    }
+    
+    public static func == (lhs: AudioSettings, rhs: AudioSettings) -> Bool {
+        lhs.accessRequestEnabled == rhs.accessRequestEnabled &&
+            lhs.defaultDevice == rhs.defaultDevice &&
+            lhs.micDefaultOn == rhs.micDefaultOn &&
+            lhs.noiseCancellation == rhs.noiseCancellation &&
+            lhs.opusDtxEnabled == rhs.opusDtxEnabled &&
+            lhs.redundantCodingEnabled == rhs.redundantCodingEnabled &&
+            lhs.speakerDefaultOn == rhs.speakerDefaultOn
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(accessRequestEnabled)
+        hasher.combine(defaultDevice)
+        hasher.combine(micDefaultOn)
+        hasher.combine(noiseCancellation)
+        hasher.combine(opusDtxEnabled)
+        hasher.combine(redundantCodingEnabled)
+        hasher.combine(speakerDefaultOn)
     }
 }

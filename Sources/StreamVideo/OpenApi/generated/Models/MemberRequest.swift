@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MemberRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class MemberRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var role: String?
@@ -20,5 +20,17 @@ public struct MemberRequest: @unchecked Sendable, Codable, JSONEncodable, Hashab
         case custom
         case role
         case userId = "user_id"
+    }
+    
+    public static func == (lhs: MemberRequest, rhs: MemberRequest) -> Bool {
+        lhs.custom == rhs.custom &&
+            lhs.role == rhs.role &&
+            lhs.userId == rhs.userId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
+        hasher.combine(role)
+        hasher.combine(userId)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct NoiseCancellationSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class NoiseCancellationSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Mode: String, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -31,5 +31,13 @@ public struct NoiseCancellationSettings: @unchecked Sendable, Codable, JSONEncod
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case mode
+    }
+    
+    public static func == (lhs: NoiseCancellationSettings, rhs: NoiseCancellationSettings) -> Bool {
+        lhs.mode == rhs.mode
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(mode)
     }
 }

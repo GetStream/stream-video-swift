@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var continentCode: String
     public var countryIsoCode: String
@@ -52,5 +52,31 @@ public struct EdgeResponse: @unchecked Sendable, Codable, JSONEncodable, Hashabl
         case red
         case subdivisionIsoCode = "subdivision_iso_code"
         case yellow
+    }
+    
+    public static func == (lhs: EdgeResponse, rhs: EdgeResponse) -> Bool {
+        lhs.continentCode == rhs.continentCode &&
+            lhs.countryIsoCode == rhs.countryIsoCode &&
+            lhs.green == rhs.green &&
+            lhs.id == rhs.id &&
+            lhs.latencyTestUrl == rhs.latencyTestUrl &&
+            lhs.latitude == rhs.latitude &&
+            lhs.longitude == rhs.longitude &&
+            lhs.red == rhs.red &&
+            lhs.subdivisionIsoCode == rhs.subdivisionIsoCode &&
+            lhs.yellow == rhs.yellow
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(continentCode)
+        hasher.combine(countryIsoCode)
+        hasher.combine(green)
+        hasher.combine(id)
+        hasher.combine(latencyTestUrl)
+        hasher.combine(latitude)
+        hasher.combine(longitude)
+        hasher.combine(red)
+        hasher.combine(subdivisionIsoCode)
+        hasher.combine(yellow)
     }
 }

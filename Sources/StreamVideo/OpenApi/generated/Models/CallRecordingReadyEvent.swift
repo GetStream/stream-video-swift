@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallRecordingReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var callRecording: CallRecording
@@ -23,5 +23,19 @@ public struct CallRecordingReadyEvent: @unchecked Sendable, Event, Codable, JSON
         case callRecording = "call_recording"
         case createdAt = "created_at"
         case type
+    }
+    
+    public static func == (lhs: CallRecordingReadyEvent, rhs: CallRecordingReadyEvent) -> Bool {
+        lhs.callCid == rhs.callCid &&
+            lhs.callRecording == rhs.callRecording &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(callCid)
+        hasher.combine(callRecording)
+        hasher.combine(createdAt)
+        hasher.combine(type)
     }
 }

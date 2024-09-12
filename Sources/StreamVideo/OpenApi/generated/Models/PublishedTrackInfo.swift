@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PublishedTrackInfo: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class PublishedTrackInfo: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var codecMimeType: String?
     public var durationSeconds: Int?
@@ -20,5 +20,17 @@ public struct PublishedTrackInfo: @unchecked Sendable, Codable, JSONEncodable, H
         case codecMimeType = "codec_mime_type"
         case durationSeconds = "duration_seconds"
         case trackType = "track_type"
+    }
+    
+    public static func == (lhs: PublishedTrackInfo, rhs: PublishedTrackInfo) -> Bool {
+        lhs.codecMimeType == rhs.codecMimeType &&
+            lhs.durationSeconds == rhs.durationSeconds &&
+            lhs.trackType == rhs.trackType
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(codecMimeType)
+        hasher.combine(durationSeconds)
+        hasher.combine(trackType)
     }
 }

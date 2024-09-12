@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String
     public var createdAt: Date
@@ -26,5 +26,21 @@ public struct CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSONEncod
         case fromUserId = "from_user_id"
         case mutedUserIds = "muted_user_ids"
         case type
+    }
+    
+    public static func == (lhs: CallUserMutedEvent, rhs: CallUserMutedEvent) -> Bool {
+        lhs.callCid == rhs.callCid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.fromUserId == rhs.fromUserId &&
+            lhs.mutedUserIds == rhs.mutedUserIds &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(callCid)
+        hasher.combine(createdAt)
+        hasher.combine(fromUserId)
+        hasher.combine(mutedUserIds)
+        hasher.combine(type)
     }
 }

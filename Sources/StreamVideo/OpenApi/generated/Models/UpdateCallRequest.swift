@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var settingsOverride: CallSettingsRequest?
@@ -20,5 +20,17 @@ public struct UpdateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Ha
         case custom
         case settingsOverride = "settings_override"
         case startsAt = "starts_at"
+    }
+    
+    public static func == (lhs: UpdateCallRequest, rhs: UpdateCallRequest) -> Bool {
+        lhs.custom == rhs.custom &&
+            lhs.settingsOverride == rhs.settingsOverride &&
+            lhs.startsAt == rhs.startsAt
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
+        hasher.combine(settingsOverride)
+        hasher.combine(startsAt)
     }
 }

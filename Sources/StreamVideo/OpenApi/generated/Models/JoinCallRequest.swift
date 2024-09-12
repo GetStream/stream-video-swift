@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var create: Bool?
     public var data: CallRequest?
@@ -44,5 +44,27 @@ public struct JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hash
         case notify
         case ring
         case video
+    }
+    
+    public static func == (lhs: JoinCallRequest, rhs: JoinCallRequest) -> Bool {
+        lhs.create == rhs.create &&
+            lhs.data == rhs.data &&
+            lhs.location == rhs.location &&
+            lhs.membersLimit == rhs.membersLimit &&
+            lhs.migratingFrom == rhs.migratingFrom &&
+            lhs.notify == rhs.notify &&
+            lhs.ring == rhs.ring &&
+            lhs.video == rhs.video
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(create)
+        hasher.combine(data)
+        hasher.combine(location)
+        hasher.combine(membersLimit)
+        hasher.combine(migratingFrom)
+        hasher.combine(notify)
+        hasher.combine(ring)
+        hasher.combine(video)
     }
 }

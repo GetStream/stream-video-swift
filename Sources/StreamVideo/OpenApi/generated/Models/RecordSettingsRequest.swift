@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Mode: String, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -37,5 +37,17 @@ public struct RecordSettingsRequest: @unchecked Sendable, Codable, JSONEncodable
         case audioOnly = "audio_only"
         case mode
         case quality
+    }
+    
+    public static func == (lhs: RecordSettingsRequest, rhs: RecordSettingsRequest) -> Bool {
+        lhs.audioOnly == rhs.audioOnly &&
+            lhs.mode == rhs.mode &&
+            lhs.quality == rhs.quality
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audioOnly)
+        hasher.combine(mode)
+        hasher.combine(quality)
     }
 }

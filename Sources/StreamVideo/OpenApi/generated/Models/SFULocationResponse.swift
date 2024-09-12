@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SFULocationResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class SFULocationResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var coordinates: Coordinates
     public var datacenter: String
@@ -23,5 +23,19 @@ public struct SFULocationResponse: @unchecked Sendable, Codable, JSONEncodable, 
         case datacenter
         case id
         case location
+    }
+    
+    public static func == (lhs: SFULocationResponse, rhs: SFULocationResponse) -> Bool {
+        lhs.coordinates == rhs.coordinates &&
+            lhs.datacenter == rhs.datacenter &&
+            lhs.id == rhs.id &&
+            lhs.location == rhs.location
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(coordinates)
+        hasher.combine(datacenter)
+        hasher.combine(id)
+        hasher.combine(location)
     }
 }

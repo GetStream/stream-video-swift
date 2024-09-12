@@ -4,7 +4,8 @@
 
 import Foundation
     
-public struct CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
+public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable,
+    WSCallEvent {
     
     public var anonymousParticipantCount: Int
     public var callCid: String
@@ -36,5 +37,23 @@ public struct CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable, Eve
         case participantsCountByRole = "participants_count_by_role"
         case sessionId = "session_id"
         case type
+    }
+    
+    public static func == (lhs: CallSessionParticipantCountsUpdatedEvent, rhs: CallSessionParticipantCountsUpdatedEvent) -> Bool {
+        lhs.anonymousParticipantCount == rhs.anonymousParticipantCount &&
+            lhs.callCid == rhs.callCid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.participantsCountByRole == rhs.participantsCountByRole &&
+            lhs.sessionId == rhs.sessionId &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(anonymousParticipantCount)
+        hasher.combine(callCid)
+        hasher.combine(createdAt)
+        hasher.combine(participantsCountByRole)
+        hasher.combine(sessionId)
+        hasher.combine(type)
     }
 }

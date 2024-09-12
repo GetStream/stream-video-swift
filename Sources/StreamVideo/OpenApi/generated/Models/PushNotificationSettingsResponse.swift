@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PushNotificationSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class PushNotificationSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var disabled: Bool?
     public var disabledUntil: Date?
@@ -17,5 +17,15 @@ public struct PushNotificationSettingsResponse: @unchecked Sendable, Codable, JS
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case disabled
         case disabledUntil = "disabled_until"
+    }
+    
+    public static func == (lhs: PushNotificationSettingsResponse, rhs: PushNotificationSettingsResponse) -> Bool {
+        lhs.disabled == rhs.disabled &&
+            lhs.disabledUntil == rhs.disabledUntil
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(disabled)
+        hasher.combine(disabledUntil)
     }
 }

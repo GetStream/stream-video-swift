@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SendEventRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class SendEventRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
 
@@ -14,5 +14,13 @@ public struct SendEventRequest: @unchecked Sendable, Codable, JSONEncodable, Has
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
+    }
+    
+    public static func == (lhs: SendEventRequest, rhs: SendEventRequest) -> Bool {
+        lhs.custom == rhs.custom
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
     }
 }

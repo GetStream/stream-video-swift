@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct NullBool: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class NullBool: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var hasValue: Bool?
     public var value: Bool?
@@ -17,5 +17,15 @@ public struct NullBool: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case hasValue = "HasValue"
         case value = "Value"
+    }
+    
+    public static func == (lhs: NullBool, rhs: NullBool) -> Bool {
+        lhs.hasValue == rhs.hasValue &&
+            lhs.value == rhs.value
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(hasValue)
+        hasher.combine(value)
     }
 }

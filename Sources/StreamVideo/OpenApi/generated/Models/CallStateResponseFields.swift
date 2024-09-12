@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse
     public var members: [MemberResponse]
@@ -29,5 +29,19 @@ public struct CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodab
         case members
         case membership
         case ownCapabilities = "own_capabilities"
+    }
+    
+    public static func == (lhs: CallStateResponseFields, rhs: CallStateResponseFields) -> Bool {
+        lhs.call == rhs.call &&
+            lhs.members == rhs.members &&
+            lhs.membership == rhs.membership &&
+            lhs.ownCapabilities == rhs.ownCapabilities
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(call)
+        hasher.combine(members)
+        hasher.combine(membership)
+        hasher.combine(ownCapabilities)
     }
 }

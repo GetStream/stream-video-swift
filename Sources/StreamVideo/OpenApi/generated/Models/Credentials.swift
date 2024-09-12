@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Credentials: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class Credentials: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var iceServers: [ICEServer]
     public var server: SFUResponse
@@ -20,5 +20,17 @@ public struct Credentials: @unchecked Sendable, Codable, JSONEncodable, Hashable
         case iceServers = "ice_servers"
         case server
         case token
+    }
+    
+    public static func == (lhs: Credentials, rhs: Credentials) -> Bool {
+        lhs.iceServers == rhs.iceServers &&
+            lhs.server == rhs.server &&
+            lhs.token == rhs.token
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(iceServers)
+        hasher.combine(server)
+        hasher.combine(token)
     }
 }

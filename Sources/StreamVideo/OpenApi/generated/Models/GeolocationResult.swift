@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GeolocationResult: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GeolocationResult: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accuracyRadius: Int
     public var city: String
@@ -52,5 +52,31 @@ public struct GeolocationResult: @unchecked Sendable, Codable, JSONEncodable, Ha
         case longitude
         case subdivision
         case subdivisionIsoCode = "subdivision_iso_code"
+    }
+    
+    public static func == (lhs: GeolocationResult, rhs: GeolocationResult) -> Bool {
+        lhs.accuracyRadius == rhs.accuracyRadius &&
+            lhs.city == rhs.city &&
+            lhs.continent == rhs.continent &&
+            lhs.continentCode == rhs.continentCode &&
+            lhs.country == rhs.country &&
+            lhs.countryIsoCode == rhs.countryIsoCode &&
+            lhs.latitude == rhs.latitude &&
+            lhs.longitude == rhs.longitude &&
+            lhs.subdivision == rhs.subdivision &&
+            lhs.subdivisionIsoCode == rhs.subdivisionIsoCode
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(accuracyRadius)
+        hasher.combine(city)
+        hasher.combine(continent)
+        hasher.combine(continentCode)
+        hasher.combine(country)
+        hasher.combine(countryIsoCode)
+        hasher.combine(latitude)
+        hasher.combine(longitude)
+        hasher.combine(subdivision)
+        hasher.combine(subdivisionIsoCode)
     }
 }

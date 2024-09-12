@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CreateGuestResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CreateGuestResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accessToken: String
     public var duration: String
@@ -20,5 +20,17 @@ public struct CreateGuestResponse: @unchecked Sendable, Codable, JSONEncodable, 
         case accessToken = "access_token"
         case duration
         case user
+    }
+    
+    public static func == (lhs: CreateGuestResponse, rhs: CreateGuestResponse) -> Bool {
+        lhs.accessToken == rhs.accessToken &&
+            lhs.duration == rhs.duration &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(accessToken)
+        hasher.combine(duration)
+        hasher.combine(user)
     }
 }

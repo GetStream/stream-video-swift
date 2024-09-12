@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ChannelMember: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ChannelMember: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banExpires: Date?
     public var banned: Bool
@@ -72,5 +72,41 @@ public struct ChannelMember: @unchecked Sendable, Codable, JSONEncodable, Hashab
         case updatedAt = "updated_at"
         case user
         case userId = "user_id"
+    }
+    
+    public static func == (lhs: ChannelMember, rhs: ChannelMember) -> Bool {
+        lhs.banExpires == rhs.banExpires &&
+            lhs.banned == rhs.banned &&
+            lhs.channelRole == rhs.channelRole &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.deletedAt == rhs.deletedAt &&
+            lhs.inviteAcceptedAt == rhs.inviteAcceptedAt &&
+            lhs.inviteRejectedAt == rhs.inviteRejectedAt &&
+            lhs.invited == rhs.invited &&
+            lhs.isModerator == rhs.isModerator &&
+            lhs.notificationsMuted == rhs.notificationsMuted &&
+            lhs.shadowBanned == rhs.shadowBanned &&
+            lhs.status == rhs.status &&
+            lhs.updatedAt == rhs.updatedAt &&
+            lhs.user == rhs.user &&
+            lhs.userId == rhs.userId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(banExpires)
+        hasher.combine(banned)
+        hasher.combine(channelRole)
+        hasher.combine(createdAt)
+        hasher.combine(deletedAt)
+        hasher.combine(inviteAcceptedAt)
+        hasher.combine(inviteRejectedAt)
+        hasher.combine(invited)
+        hasher.combine(isModerator)
+        hasher.combine(notificationsMuted)
+        hasher.combine(shadowBanned)
+        hasher.combine(status)
+        hasher.combine(updatedAt)
+        hasher.combine(user)
+        hasher.combine(userId)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var data: CallRequest?
     public var membersLimit: Int?
@@ -26,5 +26,21 @@ public struct GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodabl
         case notify
         case ring
         case video
+    }
+    
+    public static func == (lhs: GetOrCreateCallRequest, rhs: GetOrCreateCallRequest) -> Bool {
+        lhs.data == rhs.data &&
+            lhs.membersLimit == rhs.membersLimit &&
+            lhs.notify == rhs.notify &&
+            lhs.ring == rhs.ring &&
+            lhs.video == rhs.video
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(data)
+        hasher.combine(membersLimit)
+        hasher.combine(notify)
+        hasher.combine(ring)
+        hasher.combine(video)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var layout: LayoutSettings?
     public var name: String
@@ -26,5 +26,21 @@ public struct StartRTMPBroadcastsRequest: @unchecked Sendable, Codable, JSONEnco
         case quality
         case streamKey = "stream_key"
         case streamUrl = "stream_url"
+    }
+    
+    public static func == (lhs: StartRTMPBroadcastsRequest, rhs: StartRTMPBroadcastsRequest) -> Bool {
+        lhs.layout == rhs.layout &&
+            lhs.name == rhs.name &&
+            lhs.quality == rhs.quality &&
+            lhs.streamKey == rhs.streamKey &&
+            lhs.streamUrl == rhs.streamUrl
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(layout)
+        hasher.combine(name)
+        hasher.combine(quality)
+        hasher.combine(streamKey)
+        hasher.combine(streamUrl)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct VideoSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class VideoSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum CameraFacing: String, Codable, CaseIterable {
         case back
@@ -49,5 +49,21 @@ public struct VideoSettings: @unchecked Sendable, Codable, JSONEncodable, Hashab
         case cameraFacing = "camera_facing"
         case enabled
         case targetResolution = "target_resolution"
+    }
+    
+    public static func == (lhs: VideoSettings, rhs: VideoSettings) -> Bool {
+        lhs.accessRequestEnabled == rhs.accessRequestEnabled &&
+            lhs.cameraDefaultOn == rhs.cameraDefaultOn &&
+            lhs.cameraFacing == rhs.cameraFacing &&
+            lhs.enabled == rhs.enabled &&
+            lhs.targetResolution == rhs.targetResolution
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(accessRequestEnabled)
+        hasher.combine(cameraDefaultOn)
+        hasher.combine(cameraFacing)
+        hasher.combine(enabled)
+        hasher.combine(targetResolution)
     }
 }

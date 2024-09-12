@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var filterConditions: [String: RawJSON]?
     public var limit: Int?
@@ -32,5 +32,21 @@ public struct QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEncodable
         case next
         case prev
         case sort
+    }
+    
+    public static func == (lhs: QueryCallStatsRequest, rhs: QueryCallStatsRequest) -> Bool {
+        lhs.filterConditions == rhs.filterConditions &&
+            lhs.limit == rhs.limit &&
+            lhs.next == rhs.next &&
+            lhs.prev == rhs.prev &&
+            lhs.sort == rhs.sort
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(filterConditions)
+        hasher.combine(limit)
+        hasher.combine(next)
+        hasher.combine(prev)
+        hasher.combine(sort)
     }
 }

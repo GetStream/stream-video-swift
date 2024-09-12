@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RequestPermissionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RequestPermissionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var permissions: [String]
 
@@ -14,5 +14,13 @@ public struct RequestPermissionRequest: @unchecked Sendable, Codable, JSONEncoda
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case permissions
+    }
+    
+    public static func == (lhs: RequestPermissionRequest, rhs: RequestPermissionRequest) -> Bool {
+        lhs.permissions == rhs.permissions
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(permissions)
     }
 }

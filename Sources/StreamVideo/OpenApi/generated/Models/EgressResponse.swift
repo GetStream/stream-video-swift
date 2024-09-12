@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct EgressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var broadcasting: Bool
     public var hls: EgressHLSResponse?
@@ -20,5 +20,17 @@ public struct EgressResponse: @unchecked Sendable, Codable, JSONEncodable, Hasha
         case broadcasting
         case hls
         case rtmps
+    }
+    
+    public static func == (lhs: EgressResponse, rhs: EgressResponse) -> Bool {
+        lhs.broadcasting == rhs.broadcasting &&
+            lhs.hls == rhs.hls &&
+            lhs.rtmps == rhs.rtmps
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(broadcasting)
+        hasher.combine(hls)
+        hasher.combine(rtmps)
     }
 }

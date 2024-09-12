@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct WSAuthMessageRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class WSAuthMessageRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var products: [String]?
     public var token: String
@@ -20,5 +20,17 @@ public struct WSAuthMessageRequest: @unchecked Sendable, Codable, JSONEncodable,
         case products
         case token
         case userDetails = "user_details"
+    }
+    
+    public static func == (lhs: WSAuthMessageRequest, rhs: WSAuthMessageRequest) -> Bool {
+        lhs.products == rhs.products &&
+            lhs.token == rhs.token &&
+            lhs.userDetails == rhs.userDetails
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(products)
+        hasher.combine(token)
+        hasher.combine(userDetails)
     }
 }

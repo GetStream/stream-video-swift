@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var aggregated: AggregatedStats?
     public var callDurationSeconds: Int
@@ -72,5 +72,41 @@ public struct GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable,
         case qualityScore = "quality_score"
         case sfuCount = "sfu_count"
         case sfus
+    }
+    
+    public static func == (lhs: GetCallStatsResponse, rhs: GetCallStatsResponse) -> Bool {
+        lhs.aggregated == rhs.aggregated &&
+            lhs.callDurationSeconds == rhs.callDurationSeconds &&
+            lhs.callStatus == rhs.callStatus &&
+            lhs.callTimeline == rhs.callTimeline &&
+            lhs.duration == rhs.duration &&
+            lhs.jitter == rhs.jitter &&
+            lhs.latency == rhs.latency &&
+            lhs.maxFreezesDurationSeconds == rhs.maxFreezesDurationSeconds &&
+            lhs.maxParticipants == rhs.maxParticipants &&
+            lhs.maxTotalQualityLimitationDurationSeconds == rhs.maxTotalQualityLimitationDurationSeconds &&
+            lhs.participantReport == rhs.participantReport &&
+            lhs.publishingParticipants == rhs.publishingParticipants &&
+            lhs.qualityScore == rhs.qualityScore &&
+            lhs.sfuCount == rhs.sfuCount &&
+            lhs.sfus == rhs.sfus
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(aggregated)
+        hasher.combine(callDurationSeconds)
+        hasher.combine(callStatus)
+        hasher.combine(callTimeline)
+        hasher.combine(duration)
+        hasher.combine(jitter)
+        hasher.combine(latency)
+        hasher.combine(maxFreezesDurationSeconds)
+        hasher.combine(maxParticipants)
+        hasher.combine(maxTotalQualityLimitationDurationSeconds)
+        hasher.combine(participantReport)
+        hasher.combine(publishingParticipants)
+        hasher.combine(qualityScore)
+        hasher.combine(sfuCount)
+        hasher.combine(sfus)
     }
 }

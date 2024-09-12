@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ScreensharingSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ScreensharingSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accessRequestEnabled: Bool
     public var enabled: Bool
@@ -20,5 +20,17 @@ public struct ScreensharingSettings: @unchecked Sendable, Codable, JSONEncodable
         case accessRequestEnabled = "access_request_enabled"
         case enabled
         case targetResolution = "target_resolution"
+    }
+    
+    public static func == (lhs: ScreensharingSettings, rhs: ScreensharingSettings) -> Bool {
+        lhs.accessRequestEnabled == rhs.accessRequestEnabled &&
+            lhs.enabled == rhs.enabled &&
+            lhs.targetResolution == rhs.targetResolution
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(accessRequestEnabled)
+        hasher.combine(enabled)
+        hasher.combine(targetResolution)
     }
 }

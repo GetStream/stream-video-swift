@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var cid: String
     public var connectionId: String
@@ -23,5 +23,19 @@ public struct HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodab
         case connectionId = "connection_id"
         case createdAt = "created_at"
         case type
+    }
+    
+    public static func == (lhs: HealthCheckEvent, rhs: HealthCheckEvent) -> Bool {
+        lhs.cid == rhs.cid &&
+            lhs.connectionId == rhs.connectionId &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(cid)
+        hasher.combine(connectionId)
+        hasher.combine(createdAt)
+        hasher.combine(type)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct RingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class RingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var autoCancelTimeoutMs: Int
     public var incomingCallTimeoutMs: Int
@@ -20,5 +20,17 @@ public struct RingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, 
         case autoCancelTimeoutMs = "auto_cancel_timeout_ms"
         case incomingCallTimeoutMs = "incoming_call_timeout_ms"
         case missedCallTimeoutMs = "missed_call_timeout_ms"
+    }
+    
+    public static func == (lhs: RingSettingsRequest, rhs: RingSettingsRequest) -> Bool {
+        lhs.autoCancelTimeoutMs == rhs.autoCancelTimeoutMs &&
+            lhs.incomingCallTimeoutMs == rhs.incomingCallTimeoutMs &&
+            lhs.missedCallTimeoutMs == rhs.missedCallTimeoutMs
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(autoCancelTimeoutMs)
+        hasher.combine(incomingCallTimeoutMs)
+        hasher.combine(missedCallTimeoutMs)
     }
 }

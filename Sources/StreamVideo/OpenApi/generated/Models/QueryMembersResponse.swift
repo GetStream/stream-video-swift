@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct QueryMembersResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class QueryMembersResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String
     public var members: [MemberResponse]
@@ -23,5 +23,19 @@ public struct QueryMembersResponse: @unchecked Sendable, Codable, JSONEncodable,
         case members
         case next
         case prev
+    }
+    
+    public static func == (lhs: QueryMembersResponse, rhs: QueryMembersResponse) -> Bool {
+        lhs.duration == rhs.duration &&
+            lhs.members == rhs.members &&
+            lhs.next == rhs.next &&
+            lhs.prev == rhs.prev
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(duration)
+        hasher.combine(members)
+        hasher.combine(next)
+        hasher.combine(prev)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var recordingStorageName: String?
     public var startHls: Bool?
@@ -36,5 +36,23 @@ public struct GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashab
         case startRtmpBroadcasts = "start_rtmp_broadcasts"
         case startTranscription = "start_transcription"
         case transcriptionStorageName = "transcription_storage_name"
+    }
+    
+    public static func == (lhs: GoLiveRequest, rhs: GoLiveRequest) -> Bool {
+        lhs.recordingStorageName == rhs.recordingStorageName &&
+            lhs.startHls == rhs.startHls &&
+            lhs.startRecording == rhs.startRecording &&
+            lhs.startRtmpBroadcasts == rhs.startRtmpBroadcasts &&
+            lhs.startTranscription == rhs.startTranscription &&
+            lhs.transcriptionStorageName == rhs.transcriptionStorageName
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(recordingStorageName)
+        hasher.combine(startHls)
+        hasher.combine(startRecording)
+        hasher.combine(startRtmpBroadcasts)
+        hasher.combine(startTranscription)
+        hasher.combine(transcriptionStorageName)
     }
 }

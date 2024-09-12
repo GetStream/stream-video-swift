@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct TargetResolution: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class TargetResolution: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var bitrate: Int?
     public var height: Int
@@ -20,5 +20,17 @@ public struct TargetResolution: @unchecked Sendable, Codable, JSONEncodable, Has
         case bitrate
         case height
         case width
+    }
+    
+    public static func == (lhs: TargetResolution, rhs: TargetResolution) -> Bool {
+        lhs.bitrate == rhs.bitrate &&
+            lhs.height == rhs.height &&
+            lhs.width == rhs.width
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(bitrate)
+        hasher.combine(height)
+        hasher.combine(width)
     }
 }

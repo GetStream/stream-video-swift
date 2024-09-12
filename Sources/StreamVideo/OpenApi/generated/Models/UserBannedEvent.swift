@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
+public final class UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var channelId: String
     public var channelType: String
@@ -56,5 +56,33 @@ public struct UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEncodabl
         case team
         case type
         case user
+    }
+    
+    public static func == (lhs: UserBannedEvent, rhs: UserBannedEvent) -> Bool {
+        lhs.channelId == rhs.channelId &&
+            lhs.channelType == rhs.channelType &&
+            lhs.cid == rhs.cid &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.createdBy == rhs.createdBy &&
+            lhs.expiration == rhs.expiration &&
+            lhs.reason == rhs.reason &&
+            lhs.shadow == rhs.shadow &&
+            lhs.team == rhs.team &&
+            lhs.type == rhs.type &&
+            lhs.user == rhs.user
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(channelId)
+        hasher.combine(channelType)
+        hasher.combine(cid)
+        hasher.combine(createdAt)
+        hasher.combine(createdBy)
+        hasher.combine(expiration)
+        hasher.combine(reason)
+        hasher.combine(shadow)
+        hasher.combine(team)
+        hasher.combine(type)
+        hasher.combine(user)
     }
 }

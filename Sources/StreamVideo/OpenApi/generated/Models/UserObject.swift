@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserObject: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banExpires: Date?
     public var banned: Bool
@@ -80,5 +80,45 @@ public struct UserObject: @unchecked Sendable, Codable, JSONEncodable, Hashable 
         case role
         case teams
         case updatedAt = "updated_at"
+    }
+    
+    public static func == (lhs: UserObject, rhs: UserObject) -> Bool {
+        lhs.banExpires == rhs.banExpires &&
+            lhs.banned == rhs.banned &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.custom == rhs.custom &&
+            lhs.deactivatedAt == rhs.deactivatedAt &&
+            lhs.deletedAt == rhs.deletedAt &&
+            lhs.id == rhs.id &&
+            lhs.invisible == rhs.invisible &&
+            lhs.language == rhs.language &&
+            lhs.lastActive == rhs.lastActive &&
+            lhs.online == rhs.online &&
+            lhs.privacySettings == rhs.privacySettings &&
+            lhs.pushNotifications == rhs.pushNotifications &&
+            lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
+            lhs.role == rhs.role &&
+            lhs.teams == rhs.teams &&
+            lhs.updatedAt == rhs.updatedAt
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(banExpires)
+        hasher.combine(banned)
+        hasher.combine(createdAt)
+        hasher.combine(custom)
+        hasher.combine(deactivatedAt)
+        hasher.combine(deletedAt)
+        hasher.combine(id)
+        hasher.combine(invisible)
+        hasher.combine(language)
+        hasher.combine(lastActive)
+        hasher.combine(online)
+        hasher.combine(privacySettings)
+        hasher.combine(pushNotifications)
+        hasher.combine(revokeTokensIssuedBefore)
+        hasher.combine(role)
+        hasher.combine(teams)
+        hasher.combine(updatedAt)
     }
 }

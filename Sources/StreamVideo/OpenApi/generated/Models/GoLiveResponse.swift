@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct GoLiveResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class GoLiveResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse
     public var duration: String
@@ -17,5 +17,15 @@ public struct GoLiveResponse: @unchecked Sendable, Codable, JSONEncodable, Hasha
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case call
         case duration
+    }
+    
+    public static func == (lhs: GoLiveResponse, rhs: GoLiveResponse) -> Bool {
+        lhs.call == rhs.call &&
+            lhs.duration == rhs.duration
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(call)
+        hasher.combine(duration)
     }
 }

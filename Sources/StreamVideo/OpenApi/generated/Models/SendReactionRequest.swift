@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct SendReactionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class SendReactionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?
     public var emojiCode: String?
@@ -20,5 +20,17 @@ public struct SendReactionRequest: @unchecked Sendable, Codable, JSONEncodable, 
         case custom
         case emojiCode = "emoji_code"
         case type
+    }
+    
+    public static func == (lhs: SendReactionRequest, rhs: SendReactionRequest) -> Bool {
+        lhs.custom == rhs.custom &&
+            lhs.emojiCode == rhs.emojiCode &&
+            lhs.type == rhs.type
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(custom)
+        hasher.combine(emojiCode)
+        hasher.combine(type)
     }
 }

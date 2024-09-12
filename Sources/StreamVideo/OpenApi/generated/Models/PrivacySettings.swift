@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct PrivacySettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class PrivacySettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var readReceipts: ReadReceipts?
     public var typingIndicators: TypingIndicators?
@@ -17,5 +17,15 @@ public struct PrivacySettings: @unchecked Sendable, Codable, JSONEncodable, Hash
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case readReceipts = "read_receipts"
         case typingIndicators = "typing_indicators"
+    }
+    
+    public static func == (lhs: PrivacySettings, rhs: PrivacySettings) -> Bool {
+        lhs.readReceipts == rhs.readReceipts &&
+            lhs.typingIndicators == rhs.typingIndicators
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(readReceipts)
+        hasher.combine(typingIndicators)
     }
 }

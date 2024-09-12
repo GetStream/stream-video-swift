@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct ThumbnailsSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class ThumbnailsSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool
 
@@ -14,5 +14,13 @@ public struct ThumbnailsSettings: @unchecked Sendable, Codable, JSONEncodable, H
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
+    }
+    
+    public static func == (lhs: ThumbnailsSettings, rhs: ThumbnailsSettings) -> Bool {
+        lhs.enabled == rhs.enabled
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(enabled)
     }
 }

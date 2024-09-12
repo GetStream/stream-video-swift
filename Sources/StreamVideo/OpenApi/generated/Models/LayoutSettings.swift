@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Name: String, Codable, CaseIterable {
         case custom
@@ -42,5 +42,19 @@ public struct LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, Hasha
         case externalCssUrl = "external_css_url"
         case name
         case options
+    }
+    
+    public static func == (lhs: LayoutSettings, rhs: LayoutSettings) -> Bool {
+        lhs.externalAppUrl == rhs.externalAppUrl &&
+            lhs.externalCssUrl == rhs.externalCssUrl &&
+            lhs.name == rhs.name &&
+            lhs.options == rhs.options
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(externalAppUrl)
+        hasher.combine(externalCssUrl)
+        hasher.combine(name)
+        hasher.combine(options)
     }
 }

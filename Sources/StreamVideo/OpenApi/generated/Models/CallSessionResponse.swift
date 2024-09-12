@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var acceptedBy: [String: Date]
     public var anonymousParticipantCount: Int
@@ -60,5 +60,35 @@ public struct CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, 
         case rejectedBy = "rejected_by"
         case startedAt = "started_at"
         case timerEndsAt = "timer_ends_at"
+    }
+    
+    public static func == (lhs: CallSessionResponse, rhs: CallSessionResponse) -> Bool {
+        lhs.acceptedBy == rhs.acceptedBy &&
+            lhs.anonymousParticipantCount == rhs.anonymousParticipantCount &&
+            lhs.endedAt == rhs.endedAt &&
+            lhs.id == rhs.id &&
+            lhs.liveEndedAt == rhs.liveEndedAt &&
+            lhs.liveStartedAt == rhs.liveStartedAt &&
+            lhs.missedBy == rhs.missedBy &&
+            lhs.participants == rhs.participants &&
+            lhs.participantsCountByRole == rhs.participantsCountByRole &&
+            lhs.rejectedBy == rhs.rejectedBy &&
+            lhs.startedAt == rhs.startedAt &&
+            lhs.timerEndsAt == rhs.timerEndsAt
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(acceptedBy)
+        hasher.combine(anonymousParticipantCount)
+        hasher.combine(endedAt)
+        hasher.combine(id)
+        hasher.combine(liveEndedAt)
+        hasher.combine(liveStartedAt)
+        hasher.combine(missedBy)
+        hasher.combine(participants)
+        hasher.combine(participantsCountByRole)
+        hasher.combine(rejectedBy)
+        hasher.combine(startedAt)
+        hasher.combine(timerEndsAt)
     }
 }

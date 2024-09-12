@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct Subsession: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class Subsession: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endedAt: Int
     public var joinedAt: Int
@@ -23,5 +23,19 @@ public struct Subsession: @unchecked Sendable, Codable, JSONEncodable, Hashable 
         case joinedAt = "joined_at"
         case pubSubHint = "pub_sub_hint"
         case sfuId = "sfu_id"
+    }
+    
+    public static func == (lhs: Subsession, rhs: Subsession) -> Bool {
+        lhs.endedAt == rhs.endedAt &&
+            lhs.joinedAt == rhs.joinedAt &&
+            lhs.pubSubHint == rhs.pubSubHint &&
+            lhs.sfuId == rhs.sfuId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(endedAt)
+        hasher.combine(joinedAt)
+        hasher.combine(pubSubHint)
+        hasher.combine(sfuId)
     }
 }

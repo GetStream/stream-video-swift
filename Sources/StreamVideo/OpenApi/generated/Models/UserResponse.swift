@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct UserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banned: Bool
     public var blockedUserIds: [String]
@@ -76,5 +76,43 @@ public struct UserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashabl
         case role
         case teams
         case updatedAt = "updated_at"
+    }
+    
+    public static func == (lhs: UserResponse, rhs: UserResponse) -> Bool {
+        lhs.banned == rhs.banned &&
+            lhs.blockedUserIds == rhs.blockedUserIds &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.custom == rhs.custom &&
+            lhs.deactivatedAt == rhs.deactivatedAt &&
+            lhs.deletedAt == rhs.deletedAt &&
+            lhs.id == rhs.id &&
+            lhs.image == rhs.image &&
+            lhs.language == rhs.language &&
+            lhs.lastActive == rhs.lastActive &&
+            lhs.name == rhs.name &&
+            lhs.online == rhs.online &&
+            lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
+            lhs.role == rhs.role &&
+            lhs.teams == rhs.teams &&
+            lhs.updatedAt == rhs.updatedAt
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(banned)
+        hasher.combine(blockedUserIds)
+        hasher.combine(createdAt)
+        hasher.combine(custom)
+        hasher.combine(deactivatedAt)
+        hasher.combine(deletedAt)
+        hasher.combine(id)
+        hasher.combine(image)
+        hasher.combine(language)
+        hasher.combine(lastActive)
+        hasher.combine(name)
+        hasher.combine(online)
+        hasher.combine(revokeTokensIssuedBefore)
+        hasher.combine(role)
+        hasher.combine(teams)
+        hasher.combine(updatedAt)
     }
 }

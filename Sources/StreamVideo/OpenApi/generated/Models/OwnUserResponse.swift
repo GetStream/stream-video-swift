@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banned: Bool
     public var blockedUserIds: [String]?
@@ -112,5 +112,61 @@ public struct OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hash
         case unreadChannels = "unread_channels"
         case unreadThreads = "unread_threads"
         case updatedAt = "updated_at"
+    }
+    
+    public static func == (lhs: OwnUserResponse, rhs: OwnUserResponse) -> Bool {
+        lhs.banned == rhs.banned &&
+            lhs.blockedUserIds == rhs.blockedUserIds &&
+            lhs.createdAt == rhs.createdAt &&
+            lhs.custom == rhs.custom &&
+            lhs.deactivatedAt == rhs.deactivatedAt &&
+            lhs.deletedAt == rhs.deletedAt &&
+            lhs.devices == rhs.devices &&
+            lhs.id == rhs.id &&
+            lhs.image == rhs.image &&
+            lhs.invisible == rhs.invisible &&
+            lhs.language == rhs.language &&
+            lhs.lastActive == rhs.lastActive &&
+            lhs.latestHiddenChannels == rhs.latestHiddenChannels &&
+            lhs.mutes == rhs.mutes &&
+            lhs.name == rhs.name &&
+            lhs.online == rhs.online &&
+            lhs.privacySettings == rhs.privacySettings &&
+            lhs.pushNotifications == rhs.pushNotifications &&
+            lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
+            lhs.role == rhs.role &&
+            lhs.teams == rhs.teams &&
+            lhs.totalUnreadCount == rhs.totalUnreadCount &&
+            lhs.unreadChannels == rhs.unreadChannels &&
+            lhs.unreadThreads == rhs.unreadThreads &&
+            lhs.updatedAt == rhs.updatedAt
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(banned)
+        hasher.combine(blockedUserIds)
+        hasher.combine(createdAt)
+        hasher.combine(custom)
+        hasher.combine(deactivatedAt)
+        hasher.combine(deletedAt)
+        hasher.combine(devices)
+        hasher.combine(id)
+        hasher.combine(image)
+        hasher.combine(invisible)
+        hasher.combine(language)
+        hasher.combine(lastActive)
+        hasher.combine(latestHiddenChannels)
+        hasher.combine(mutes)
+        hasher.combine(name)
+        hasher.combine(online)
+        hasher.combine(privacySettings)
+        hasher.combine(pushNotifications)
+        hasher.combine(revokeTokensIssuedBefore)
+        hasher.combine(role)
+        hasher.combine(teams)
+        hasher.combine(totalUnreadCount)
+        hasher.combine(unreadChannels)
+        hasher.combine(unreadThreads)
+        hasher.combine(updatedAt)
     }
 }

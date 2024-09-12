@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool?
     public var hls: HLSSettingsRequest?
@@ -20,5 +20,17 @@ public struct BroadcastSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         case enabled
         case hls
         case rtmp
+    }
+    
+    public static func == (lhs: BroadcastSettingsRequest, rhs: BroadcastSettingsRequest) -> Bool {
+        lhs.enabled == rhs.enabled &&
+            lhs.hls == rhs.hls &&
+            lhs.rtmp == rhs.rtmp
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(enabled)
+        hasher.combine(hls)
+        hasher.combine(rtmp)
     }
 }

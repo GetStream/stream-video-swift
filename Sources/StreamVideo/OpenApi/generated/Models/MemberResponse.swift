@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var custom: [String: RawJSON]
@@ -40,5 +40,25 @@ public struct MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hasha
         case updatedAt = "updated_at"
         case user
         case userId = "user_id"
+    }
+    
+    public static func == (lhs: MemberResponse, rhs: MemberResponse) -> Bool {
+        lhs.createdAt == rhs.createdAt &&
+            lhs.custom == rhs.custom &&
+            lhs.deletedAt == rhs.deletedAt &&
+            lhs.role == rhs.role &&
+            lhs.updatedAt == rhs.updatedAt &&
+            lhs.user == rhs.user &&
+            lhs.userId == rhs.userId
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(createdAt)
+        hasher.combine(custom)
+        hasher.combine(deletedAt)
+        hasher.combine(role)
+        hasher.combine(updatedAt)
+        hasher.combine(user)
+        hasher.combine(userId)
     }
 }

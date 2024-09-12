@@ -4,7 +4,11 @@
 
 import Foundation
     
-public struct StopRecordingRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class StopRecordingRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public init() {}
+    
+    public static func == (lhs: StopRecordingRequest, rhs: StopRecordingRequest) -> Bool {}
+
+    public func hash(into hasher: inout Hasher) {}
 }

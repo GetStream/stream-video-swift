@@ -4,7 +4,7 @@
 
 import Foundation
     
-public struct MediaPubSubHint: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class MediaPubSubHint: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audioPublished: Bool
     public var audioSubscribed: Bool
@@ -23,5 +23,19 @@ public struct MediaPubSubHint: @unchecked Sendable, Codable, JSONEncodable, Hash
         case audioSubscribed = "audio_subscribed"
         case videoPublished = "video_published"
         case videoSubscribed = "video_subscribed"
+    }
+    
+    public static func == (lhs: MediaPubSubHint, rhs: MediaPubSubHint) -> Bool {
+        lhs.audioPublished == rhs.audioPublished &&
+            lhs.audioSubscribed == rhs.audioSubscribed &&
+            lhs.videoPublished == rhs.videoPublished &&
+            lhs.videoSubscribed == rhs.videoSubscribed
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audioPublished)
+        hasher.combine(audioSubscribed)
+        hasher.combine(videoPublished)
+        hasher.combine(videoSubscribed)
     }
 }
