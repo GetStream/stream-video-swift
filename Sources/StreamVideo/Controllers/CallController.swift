@@ -684,8 +684,7 @@ class CallController: @unchecked Sendable {
         let joinCallResponse = try await defaultAPI.joinCall(
             type: type,
             id: callId,
-            joinCallRequest: joinCall,
-            connectionId: nil
+            joinCallRequest: joinCall
         )
         return joinCallResponse
     }

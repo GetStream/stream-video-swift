@@ -391,7 +391,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     internal func queryCalls(
         request: QueryCallsRequest
     ) async throws -> QueryCallsResponse {
-        try await coordinatorClient.queryCalls(connectionId: nil, queryCallsRequest: request)
+        try await coordinatorClient.queryCalls(queryCallsRequest: request)
     }
 
     // MARK: - private

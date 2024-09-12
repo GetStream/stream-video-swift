@@ -182,7 +182,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let response = try await coordinatorClient.getCall(
             type: callType,
             id: callId,
-            connectionId: nil,
             membersLimit: membersLimit,
             ring: ring,
             notify: notify,
@@ -278,7 +277,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let response = try await coordinatorClient.getOrCreateCall(
             type: callType,
             id: callId,
-            connectionId: nil,
             getOrCreateCallRequest: request
         )
         await state.update(from: response)
