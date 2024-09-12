@@ -418,10 +418,8 @@
 		4159F17B2C86FA41002B94D3 /* RTMPSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1492C86FA3F002B94D3 /* RTMPSettingsRequest.swift */; };
 		4159F17C2C86FA41002B94D3 /* UserFlaggedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14A2C86FA3F002B94D3 /* UserFlaggedEvent.swift */; };
 		4159F17D2C86FA41002B94D3 /* ReadReceipts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14B2C86FA3F002B94D3 /* ReadReceipts.swift */; };
-		4159F17E2C86FA41002B94D3 /* AcceptCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14C2C86FA3F002B94D3 /* AcceptCallRequest.swift */; };
 		4159F17F2C86FA41002B94D3 /* UserPresenceChangedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14D2C86FA3F002B94D3 /* UserPresenceChangedEvent.swift */; };
 		4159F1802C86FA41002B94D3 /* PushNotificationSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14E2C86FA3F002B94D3 /* PushNotificationSettingsResponse.swift */; };
-		4159F1812C86FA41002B94D3 /* EndCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14F2C86FA3F002B94D3 /* EndCallRequest.swift */; };
 		4159F1822C86FA41002B94D3 /* UserEventPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1502C86FA3F002B94D3 /* UserEventPayload.swift */; };
 		4159F1842C86FA41002B94D3 /* Count.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1522C86FA3F002B94D3 /* Count.swift */; };
 		4159F1862C86FA41002B94D3 /* UserObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1542C86FA40002B94D3 /* UserObject.swift */; };
@@ -5430,7 +5428,6 @@
 				406583902B877A0500B4F979 /* ImageBackgroundVideoFilter.swift in Sources */,
 				8454A3192AAB374B00A012C6 /* CallStatsReport.swift in Sources */,
 				84E5C51C2A013C440003A27A /* PushNotificationsConfig.swift in Sources */,
-				4159F17E2C86FA41002B94D3 /* AcceptCallRequest.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
 				8449824E2C738A830029734D /* StopAllRTMPBroadcastsResponse.swift in Sources */,
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
@@ -5477,7 +5474,6 @@
 				841BAA462BD15CDE000C73E4 /* CallStatsReportSummaryResponse.swift in Sources */,
 				84DC38D829ADFCFD00946713 /* JoinCallRequest.swift in Sources */,
 				84AF64D2287C78E70012A503 /* User.swift in Sources */,
-				4159F1812C86FA41002B94D3 /* EndCallRequest.swift in Sources */,
 				84274F482884251600CF8794 /* InternetConnection.swift in Sources */,
 				84DC389129ADFCFD00946713 /* VideoSettings.swift in Sources */,
 				842E70D12B91BE1700D2D68B /* CallDeletedEvent.swift in Sources */,
