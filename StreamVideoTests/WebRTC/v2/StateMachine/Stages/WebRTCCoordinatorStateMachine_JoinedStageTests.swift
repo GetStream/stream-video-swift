@@ -141,7 +141,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.previousSFUAdapter = mockCoordinatorStack.sfuStack.adapter
         mockCoordinatorStack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        let migrationStatusObserver = MigrationStatusObserver(
+        let migrationStatusObserver = WebRTCMigrationStatusObserver(
             migratingFrom: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.migrationStatusObserver = migrationStatusObserver

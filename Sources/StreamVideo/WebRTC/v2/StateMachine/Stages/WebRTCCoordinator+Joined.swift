@@ -129,7 +129,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Observes migration status if required.
         private func observeMigrationStatusIfRequired(
-            _ migrationStatusObserver: MigrationStatusObserver?,
+            _ migrationStatusObserver: WebRTCMigrationStatusObserver?,
             previousSFUAdapter: SFUAdapter?
         ) async throws {
             if let migrationStatusObserver = migrationStatusObserver {

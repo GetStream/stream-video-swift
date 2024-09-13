@@ -22,7 +22,7 @@ extension WebRTCCoordinator.StateMachine {
 
             var isRejoiningFromSessionID: String? = nil
             var migratingFromSFU: String = ""
-            var migrationStatusObserver: MigrationStatusObserver?
+            var migrationStatusObserver: WebRTCMigrationStatusObserver?
             var previousSessionPublisher: RTCPeerConnectionCoordinator?
             var previousSessionSubscriber: RTCPeerConnectionCoordinator?
             var previousSFUAdapter: SFUAdapter?
