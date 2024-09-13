@@ -1,0 +1,47 @@
+//
+//  CallParticipant+Convenience.swift
+//  StreamVideo
+//
+//  Created by Ilias Pavlidakis on 13/9/24.
+//
+
+import Foundation
+
+extension CallParticipant {
+
+    var trackSubscriptionDetails: [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
+        var result = [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]()
+        if hasVideo {
+            result.append(
+                .init(
+                    for: userId,
+                    sessionId: sessionId,
+                    size: trackSize,
+                    type: .video
+                )
+            )
+        }
+
+        if hasAudio {
+            result.append(
+                .init(
+                    for: userId,
+                    sessionId: sessionId,
+                    type: .audio
+                )
+            )
+        }
+
+        if isScreensharing {
+            result.append(
+                .init(
+                    for: userId,
+                    sessionId: sessionId,
+                    type: .screenShare
+                )
+            )
+        }
+
+        return result
+    }
+}
