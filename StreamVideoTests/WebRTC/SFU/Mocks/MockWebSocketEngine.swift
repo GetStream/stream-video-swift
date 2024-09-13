@@ -5,8 +5,7 @@
 import Foundation
 @testable import StreamVideo
 
-final class MockWebSocketEngine: WebSocketEngine {
-
+final class MockWebSocketEngine: WebSocketEngine, Mockable {
     typealias FunctionKey = MockFunctionKey
 
     enum MockFunctionKey: Hashable, CaseIterable {
@@ -14,15 +13,41 @@ final class MockWebSocketEngine: WebSocketEngine {
         case disconnect
         case disconnectWithCode
         case sendPing
-        case send
+        case sendMessage
+        case sendJSON
     }
 
-    enum FunctionInput {
-        case send(message: SendableEvent?, json: Codable?)
+    var stubbedProperty: [String: Any] = [:]
+    var stubbedFunction: [MockFunctionKey: Any] = [:]
+    func stub<T>(for keyPath: KeyPath<MockWebSocketEngine, T>, with value: T) {}
+    func stub<T>(for function: MockFunctionKey, with value: T) {}
+
+    enum FunctionInput: Payloadable {
+        case connect
+        case disconnect
         case disconnectWithCode(URLSessionWebSocketTask.CloseCode)
+        case sendPing
+        case sendMessage(message: SendableEvent)
+        case sendJSON(json: Codable)
+
+        var payload: Any {
+            switch self {
+            case .connect:
+                return ()
+            case .disconnect:
+                return ()
+            case .sendPing:
+                return ()
+            case let .sendMessage(message):
+                return message
+            case let .sendJSON(json):
+                return json
+            case let .disconnectWithCode(closeCode):
+                return closeCode
+            }
+        }
     }
 
-    private(set) var timesFunctionWasCalled: [FunctionKey: Int] = [:]
     @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInput]] = MockFunctionKey
         .allCases
         .reduce(into: [FunctionKey: [FunctionInput]]()) { $0[$1] = [] }
@@ -49,43 +74,26 @@ final class MockWebSocketEngine: WebSocketEngine {
     }
 
     func connect() {
-        if let value = timesFunctionWasCalled[.connect] {
-            timesFunctionWasCalled[.connect] = value + 1
-        } else {
-            timesFunctionWasCalled[.connect] = 1
-        }
+        stubbedFunctionInput[.connect]?.append(.connect)
     }
 
     func disconnect() {
-        if let value = timesFunctionWasCalled[.disconnect] {
-            timesFunctionWasCalled[.disconnect] = value + 1
-        } else {
-            timesFunctionWasCalled[.disconnect] = 1
-        }
+        stubbedFunctionInput[.disconnect]?.append(.disconnect)
     }
 
     func disconnect(with code: URLSessionWebSocketTask.CloseCode) {
         stubbedFunctionInput[.disconnectWithCode]?.append(.disconnectWithCode(code))
-        if let value = timesFunctionWasCalled[.disconnectWithCode] {
-            timesFunctionWasCalled[.disconnectWithCode] = value + 1
-        } else {
-            timesFunctionWasCalled[.disconnectWithCode] = 1
-        }
     }
 
     func send(message: any SendableEvent) {
-        stubbedFunctionInput[.send]?.append(.send(message: message, json: nil))
+        stubbedFunctionInput[.sendMessage]?.append(.sendMessage(message: message))
     }
 
     func send(jsonMessage: any Codable) {
-        stubbedFunctionInput[.send]?.append(.send(message: nil, json: jsonMessage))
+        stubbedFunctionInput[.sendJSON]?.append(.sendJSON(json: jsonMessage))
     }
 
     func sendPing() {
-        if let value = timesFunctionWasCalled[.sendPing] {
-            timesFunctionWasCalled[.sendPing] = value + 1
-        } else {
-            timesFunctionWasCalled[.sendPing] = 1
-        }
+        stubbedFunctionInput[.sendPing]?.append(.sendPing)
     }
 }

@@ -7,6 +7,8 @@ import Foundation
 import StreamWebRTC
 
 final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding {
+    var stubbedBuildCoordinatorResult: [PeerConnectionType: MockRTCPeerConnectionCoordinator] = [:]
+
     func buildCoordinator(
         sessionId: String,
         peerType: PeerConnectionType,
@@ -20,7 +22,7 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
         audioSession: AudioSession,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) -> RTCPeerConnectionCoordinator {
-        MockRTCPeerConnectionCoordinator(
+        stubbedBuildCoordinatorResult[peerType] ?? MockRTCPeerConnectionCoordinator(
             sessionId: sessionId,
             peerType: peerType,
             peerConnection: peerConnection,

@@ -39,6 +39,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
     private let signalService: SFUSignalService
     private let refreshSubject = PassthroughSubject<Void, Never>()
+    private let webSocketFactory: WebSocketClientProviding
     private var webSocket: WebSocketClient
     private var disposableBag = DisposableBag()
     private var requestDisposableBag = DisposableBag()
@@ -84,6 +85,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         serviceConfiguration: ServiceConfiguration,
         webSocketConfiguration: WebSocketConfiguration
     ) {
+        let webSocketFactory = WebSocketClientFactory()
         self.init(
             signalService: .init(
                 httpClient: serviceConfiguration.httpClient,
@@ -91,23 +93,26 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 hostname: serviceConfiguration.url.absoluteString,
                 token: serviceConfiguration.token
             ),
-            webSocket: .init(
+            webSocket: webSocketFactory.build(
                 sessionConfiguration: webSocketConfiguration.sessionConfiguration,
                 eventDecoder: webSocketConfiguration.eventDecoder,
                 eventNotificationCenter: webSocketConfiguration.eventNotificationCenter,
                 webSocketClientType: .sfu,
                 connectURL: webSocketConfiguration.url,
                 requiresAuth: false
-            )
+            ),
+            webSocketFactory: webSocketFactory
         )
     }
 
     init(
         signalService: SFUSignalService,
-        webSocket: WebSocketClient
+        webSocket: WebSocketClient,
+        webSocketFactory: WebSocketClientProviding
     ) {
         self.signalService = signalService
         self.webSocket = webSocket
+        self.webSocketFactory = webSocketFactory
 
         webSocket.connectionStateDelegate = self
 
@@ -193,11 +198,12 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocket.connectionStateDelegate = nil
         webSocket.disconnect(code: .init(rawValue: 4002)!) {}
         requestDisposableBag.removeAll()
-        webSocket = .init(
+        webSocket = webSocketFactory.build(
             sessionConfiguration: webSocketConfiguration.sessionConfiguration,
             eventDecoder: webSocketConfiguration.eventDecoder,
             eventNotificationCenter: webSocketConfiguration.eventNotificationCenter,
             webSocketClientType: .sfu,
+            environment: .init(),
             connectURL: webSocketConfiguration.url,
             requiresAuth: false
         )
