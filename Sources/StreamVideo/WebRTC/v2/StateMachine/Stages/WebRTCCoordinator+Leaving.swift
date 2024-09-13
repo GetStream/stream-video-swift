@@ -73,7 +73,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         await sfuAdapter.disconnect()
                     }
 
-                    // TODO: further cleanup
                     try transition?(.cleanUp(context))
                 } catch {
                     transitionErrorOrLog(error)

@@ -318,7 +318,6 @@
 		40AB34CC2C5D440E00B5B6B3 /* MockSignalServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34CB2C5D440E00B5B6B3 /* MockSignalServer.swift */; };
 		40AB34CE2C5D442800B5B6B3 /* MockWebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34CD2C5D442800B5B6B3 /* MockWebSocketClient.swift */; };
 		40AB34D02C5D443F00B5B6B3 /* MockWebSocketEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34CF2C5D443F00B5B6B3 /* MockWebSocketEngine.swift */; };
-		40AB34D22C5D445700B5B6B3 /* MockSFUAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D12C5D445700B5B6B3 /* MockSFUAdapter.swift */; };
 		40AB34D42C5D463700B5B6B3 /* SFUMiddleware_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D32C5D463700B5B6B3 /* SFUMiddleware_Tests.swift */; };
 		40AB34DA2C5D5A7B00B5B6B3 /* WebRTCStatsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34D82C5D5A5C00B5B6B3 /* WebRTCStatsReporter.swift */; };
 		40AB34DC2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34DB2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift */; };
@@ -1586,7 +1585,6 @@
 		40AB34CB2C5D440E00B5B6B3 /* MockSignalServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSignalServer.swift; sourceTree = "<group>"; };
 		40AB34CD2C5D442800B5B6B3 /* MockWebSocketClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebSocketClient.swift; sourceTree = "<group>"; };
 		40AB34CF2C5D443F00B5B6B3 /* MockWebSocketEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebSocketEngine.swift; sourceTree = "<group>"; };
-		40AB34D12C5D445700B5B6B3 /* MockSFUAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSFUAdapter.swift; sourceTree = "<group>"; };
 		40AB34D32C5D463700B5B6B3 /* SFUMiddleware_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUMiddleware_Tests.swift; sourceTree = "<group>"; };
 		40AB34D82C5D5A5C00B5B6B3 /* WebRTCStatsReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsReporter.swift; sourceTree = "<group>"; };
 		40AB34DB2C5D630A00B5B6B3 /* WebRTCStatsReporter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsReporter_Tests.swift; sourceTree = "<group>"; };
@@ -3393,7 +3391,6 @@
 				40AB34CB2C5D440E00B5B6B3 /* MockSignalServer.swift */,
 				40AB34CD2C5D442800B5B6B3 /* MockWebSocketClient.swift */,
 				40AB34CF2C5D443F00B5B6B3 /* MockWebSocketEngine.swift */,
-				40AB34D12C5D445700B5B6B3 /* MockSFUAdapter.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -6416,7 +6413,6 @@
 				40E9B3B52BCD93F500ACF18F /* Credentials+Dummy.swift in Sources */,
 				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
 				40E9B3B72BCD941600ACF18F /* SFUResponse+Dummy.swift in Sources */,
-				40AB34D22C5D445700B5B6B3 /* MockSFUAdapter.swift in Sources */,
 				40382F432C89CF9700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */,
 				406B3C252C903BDE00FC93A1 /* MockVideoCapturer.swift in Sources */,
 				40F017672BBEF1B700E89FD1 /* CallIngressResponse+Dummy.swift in Sources */,
