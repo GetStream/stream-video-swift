@@ -23,16 +23,16 @@ enum WebRTCConfiguration {
         static let migrationCompletion: TimeInterval = 1
         #else
         /// Timeout for authentication in production environment.
-        static let authenticate: TimeInterval = 5
+        static let authenticate: TimeInterval = 10
 
         /// Timeout for connection in production environment.
-        static let connect: TimeInterval = 5
+        static let connect: TimeInterval = 10
 
         /// Timeout for joining in production environment.
         static let join: TimeInterval = 10
 
         /// Timeout for migration completion in production environment.
-        static let migrationCompletion: TimeInterval = 7
+        static let migrationCompletion: TimeInterval = 10
         #endif
     }
 }
