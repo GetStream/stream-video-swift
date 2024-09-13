@@ -7,6 +7,11 @@ import Foundation
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
+    /// Creates and returns a disconnected stage for the WebRTC coordinator
+    /// state machine.
+    /// - Parameter context: The context for the disconnected stage.
+    /// - Returns: A `DisconnectedStage` instance representing the disconnected
+    ///   state of the WebRTC coordinator.
     static func disconnected(
         _ context: Context
     ) -> WebRTCCoordinator.StateMachine.Stage {
@@ -18,24 +23,39 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    final class DisconnectedStage: WebRTCCoordinator.StateMachine.Stage {
-
+    /// Represents the disconnected stage in the WebRTC coordinator state
+    /// machine.
+    final class DisconnectedStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
 
         private var internetObservationCancellable: AnyCancellable?
 
+        /// Initializes a new instance of `DisconnectedStage`.
+        /// - Parameter context: The context for the disconnected stage.
         init(
             _ context: Context
         ) {
             super.init(id: .disconnected, context: context)
         }
 
+        /// Performs cleanup actions before transitioning away from this stage.
         override func willTransitionAway() {
             internetObservationCancellable?.cancel()
             context.disconnectionSource = nil
             context.flowError = nil
         }
 
+        /// Performs the transition from a previous stage to this disconnected
+        /// stage.
+        /// - Parameter previousStage: The stage from which the transition is
+        ///   occurring.
+        /// - Returns: This `DisconnectedStage` instance if the transition is
+        ///   valid, otherwise `nil`.
+        /// - Note: Valid transition from: `.joining`, `.joined`,
+        ///   `.disconnected`, `.fastReconnecting`, `.rejoining`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
@@ -78,6 +98,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the disconnected stage logic.
         private func execute() {
             context.sfuEventObserver = nil
             Task {
@@ -90,31 +111,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Attempts to reconnect based on the current reconnection strategy.
         private func reconnect() {
             do {
                 switch context.reconnectionStrategy {
-                case let .fast(disconnectedSince, deadline) where disconnectedSince.timeIntervalSinceNow <= deadline:
-                    try transition?(
-                        .fastReconnecting(
-                            context
-                        )
-                    )
-                case .fast:
+                case let .fast(disconnectedSince, deadline) where abs(disconnectedSince.timeIntervalSinceNow) <= deadline:
+                    try transition?(.fastReconnecting(context))
+                case .fast, .rejoin:
                     try transition?(.rejoining(context))
-
-                case .rejoin:
-                    try transition?(.rejoining(context))
-
                 case .migrate:
                     try transition?(.migrating(context))
-
                 case .unknown:
                     if let error = context.flowError {
                         try transition?(.error(context, error: error))
                     } else {
                         try transition?(.leaving(context))
                     }
-
                 case .disconnected:
                     try transition?(.leaving(context))
                 }
@@ -127,10 +139,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Observes internet connection status and triggers reconnection when
+        /// available.
         private func observeInternetConnection() {
             internetObservationCancellable?.cancel()
             internetObservationCancellable = internetConnectionObserver
-                .$status
+                .statusPublisher
                 .receive(on: DispatchQueue.main)
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }

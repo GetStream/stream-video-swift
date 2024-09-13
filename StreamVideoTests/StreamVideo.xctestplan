@@ -9,7 +9,15 @@
     }
   ],
   "defaultOptions" : {
-    "codeCoverage" : false,
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:StreamVideo.xcodeproj",
+          "identifier" : "84F737EC287C13AC00A363F4",
+          "name" : "StreamVideo"
+        }
+      ]
+    },
     "defaultTestExecutionTimeAllowance" : 100,
     "environmentVariableEntries" : [
       {

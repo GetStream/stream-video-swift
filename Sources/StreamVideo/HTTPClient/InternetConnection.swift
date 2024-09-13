@@ -211,12 +211,39 @@ extension InternetConnection {
     }
 }
 
+/// A protocol defining the interface for internet connection monitoring.
+protocol InternetConnectionProtocol {
+    /// A publisher that emits the current internet connection status.
+    ///
+    /// This publisher never fails and continuously updates with the latest
+    /// connection status.
+    var statusPublisher: AnyPublisher<InternetConnection.Status, Never> { get }
+}
+
+extension InternetConnection: InternetConnectionProtocol {
+    /// A publisher that emits the current internet connection status.
+    ///
+    /// This implementation uses a published property wrapper and erases the
+    /// type to `AnyPublisher`.
+    var statusPublisher: AnyPublisher<InternetConnection.Status, Never> {
+        $status.eraseToAnyPublisher()
+    }
+}
+
 extension InternetConnection: InjectionKey {
-    static var currentValue = InternetConnection(monitor: InternetConnection.Monitor())
+    /// The current value of the internet connection monitor.
+    ///
+    /// This property provides a default implementation of the
+    /// `InternetConnection` with a default monitor.
+    static var currentValue: InternetConnectionProtocol = InternetConnection(monitor: InternetConnection.Monitor())
 }
 
 extension InjectedValues {
-    var internetConnectionObserver: InternetConnection {
+    /// The current value of the internet connection monitor as a protocol type.
+    ///
+    /// This property allows for dependency injection using the protocol type,
+    /// providing more flexibility in testing and modular design.
+    var internetConnectionObserver: InternetConnectionProtocol {
         get { Self[InternetConnection.self] }
         set { Self[InternetConnection.self] = newValue }
     }

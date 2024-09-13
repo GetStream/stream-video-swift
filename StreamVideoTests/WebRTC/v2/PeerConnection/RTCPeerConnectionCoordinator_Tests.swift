@@ -12,11 +12,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
     private lazy var sessionId: String! = .unique
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
-    private lazy var mockSFUStack: (
-        sfuAdapter: SFUAdapter,
-        mockService: MockSignalServer,
-        mockWebSocketClient: MockWebSocketClient
-    )! = SFUAdapter.mock(webSocketClientType: .sfu)
+    private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var audioSession: AudioSession! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockLocalMediaAdapterA: MockLocalMediaAdapter! = .init()
@@ -57,7 +53,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         videoOptions: .init(),
         callSettings: .init(),
         audioSettings: .init(),
-        sfuAdapter: mockSFUStack.sfuAdapter,
+        sfuAdapter: mockSFUStack.adapter,
         audioSession: audioSession,
         mediaAdapter: mediaAdapter
     )

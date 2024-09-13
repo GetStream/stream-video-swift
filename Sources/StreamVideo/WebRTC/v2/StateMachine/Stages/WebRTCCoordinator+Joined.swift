@@ -7,6 +7,11 @@ import Foundation
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
+    /// Creates and returns a joined stage for the WebRTC coordinator state
+    /// machine.
+    /// - Parameter context: The context for the joined stage.
+    /// - Returns: A `JoinedStage` instance representing the joined state of
+    ///   the WebRTC coordinator.
     static func joined(
         _ context: Context
     ) -> WebRTCCoordinator.StateMachine.Stage {
@@ -18,12 +23,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    final class JoinedStage: WebRTCCoordinator.StateMachine.Stage {
-
+    /// Represents the joined stage in the WebRTC coordinator state machine.
+    final class JoinedStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
 
         private let disposableBag = DisposableBag()
 
+        /// Initializes a new instance of `JoinedStage`.
+        /// - Parameter context: The context for the joined stage.
         init(
             _ context: Context
         ) {
@@ -34,6 +44,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
             disposableBag.removeAll()
         }
 
+        /// Performs the transition from a previous stage to this joined stage.
+        /// - Parameter previousStage: The stage from which the transition is
+        ///   occurring.
+        /// - Returns: This `JoinedStage` instance if the transition is valid,
+        ///   otherwise `nil`.
+        /// - Note: Valid transition from: `.joining`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
@@ -46,10 +62,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Performs cleanup actions when transitioning away from this stage.
         override func didTransitionAway() {
             disposableBag.removeAll()
         }
 
+        /// Executes the joined stage logic.
         private func execute() {
             Task { [weak self] in
                 guard let self else { return }
@@ -58,7 +76,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         context.coordinator != nil
                     else {
                         throw ClientError(
-                            "WebRCTAdapter instance not available."
+                            "WebRCTCoordinator instance not available."
                         )
                     }
 
@@ -86,14 +104,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     await observePeerConnectionState()
                     await configureStatsCollectionAndDelivery()
                 } catch {
-                    context.flowError = error
-                    disconnect()
+                    transitionDisconnectOrError(error)
                 }
             }
         }
 
-        // MARK: -
-
+        /// Cleans up the previous session if required.
         private func cleanUpPreviousSessionIfRequired() async {
             let publisher = context.previousSessionPublisher
             let subscriber = context.previousSessionSubscriber
@@ -111,6 +127,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Observes migration status if required.
         private func observeMigrationStatusIfRequired(
             _ migrationStatusObserver: MigrationStatusObserver?,
             previousSFUAdapter: SFUAdapter?
@@ -135,6 +152,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Observes the connection state.
         private func observeConnection() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -151,7 +169,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 }
                 .sink { [weak self] (source: WebSocketConnectionState.DisconnectionSource) in
                     guard let self else { return }
-                    disposableBag.removeAll()
                     context.disconnectionSource = source
                     if let sfuError = (source.serverError?.underlyingError as? Stream_Video_Sfu_Models_Error) {
                         context.reconnectionStrategy = sfuError.shouldRetry
@@ -166,15 +183,21 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             deadline: context.fastReconnectDeadlineSeconds
                         )
                     }
+
                     log
                         .warning(
-                            "Will disconnect because ws connection state changed to disconnecting/disconnected with source:\(source)."
+                            """
+                            Will disconnect because ws connection state changed 
+                            to disconnecting/disconnected with source:\(source).
+                            """,
+                            subsystems: .webRTC
                         )
-                    disconnect()
+                    transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
         }
 
+        /// Observes the call ended event.
         private func observeCallEndedEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -187,6 +210,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
+        /// Observes the migration event.
         private func observeMigrationEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -195,8 +219,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .sink { [weak self] _ in
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
-                    log.warning("Will disconnect because received an SFU error.", subsystems: .webRTC)
-                    disconnect()
+                    log.warning(
+                        "Will disconnect because received an SFU error.",
+                        subsystems: .webRTC
+                    )
+                    transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
 
@@ -205,12 +232,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .sink { [weak self] _ in
                     guard let self else { return }
                     context.reconnectionStrategy = .migrate
-                    log.warning("Will disconnect because received instruction to migrate to another SFU.", subsystems: .webRTC)
-                    disconnect()
+                    log.warning(
+                        """
+                        Will disconnect because received instruction to migrate 
+                        to another SFU.
+                        """,
+                        subsystems: .webRTC
+                    )
+                    transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
         }
 
+        /// Observes the disconnect event.
         private func observeDisconnectEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -223,6 +257,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
+        /// Observes the preferred reconnection strategy.
         private func observePreferredReconnectionStrategy() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -239,6 +274,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
+        /// Observes subscription updates.
         private func observeForSubscriptionUpdates() async {
             guard
                 let stateAdapter = context.coordinator?.stateAdapter,
@@ -252,9 +288,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .removeDuplicates()
                 .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
                 .map { participants in
-                    Array(participants.values)
+                    let result = Array(participants.values)
                         .filter { $0.id != sessionID }
                         .flatMap(\.trackSubscriptionDetails)
+                    return result
                 }
                 .sinkTask(storeIn: disposableBag) { [weak self] tracks in
                     guard let self else { return }
@@ -271,6 +308,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
+        /// Observes call settings updates.
         private func observeCallSettingsUpdates() async {
             await context
                 .coordinator?
@@ -301,14 +339,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         try await publisher.didUpdateCallSettings(callSettings)
                         log.debug("Publisher callSettings updated.", subsystems: .webRTC)
                     } catch {
-                        context.flowError = error
                         log.warning("Will disconnect because failed to update callSettings on publisher.", subsystems: .webRTC)
-                        disconnect()
+                        transitionDisconnectOrError(error)
                     }
                 }
                 .store(in: disposableBag)
         }
 
+        /// Observes peer connection state.
         private func observePeerConnectionState() async {
             guard
                 let publisher = await context.coordinator?.stateAdapter.publisher,
@@ -339,6 +377,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
+        /// Configures stats collection and delivery.
         private func configureStatsCollectionAndDelivery() async {
             guard
                 let coordinator = context.coordinator
@@ -350,17 +389,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let statsReporter = WebRTCStatsReporter(
                 sessionID: await stateAdapter.sessionID
             )
-            await stateAdapter.set(statsReporter)
 
             statsReporter.interval = await stateAdapter.statsReporter?.interval ?? 0
             statsReporter.publisher = await stateAdapter.publisher
             statsReporter.subscriber = await stateAdapter.subscriber
             statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
+
+            await stateAdapter.set(statsReporter)
         }
 
+        /// Observes internet connection status.
         private func observeInternetConnection() {
             internetConnectionObserver
-                .$status
+                .statusPublisher
                 .receive(on: DispatchQueue.main)
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
@@ -376,14 +417,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         error: .NetworkError("Not available")
                     )
                     log.warning("Will disconnect because internet connection is down.", subsystems: .webRTC)
-                    disconnect()
+                    transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
-        }
-
-        private func disconnect() {
-            disposableBag.removeAll()
-            transitionOrError(.disconnected(context))
         }
     }
 }

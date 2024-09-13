@@ -8,9 +8,7 @@ import XCTest
 
 final class WebRTCStatsReporter_Tests: XCTestCase {
 
-    private var mockSFUAdapter: SFUAdapter!
-    private var mockSFUService: MockSignalServer!
-    private var mockWebSocketClient: MockWebSocketClient!
+    private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var sessionID: String! = .unique
     private lazy var subject: WebRTCStatsReporter! = .init(
         interval: 2,
@@ -19,19 +17,13 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let mockSFUStack = SFUAdapter.mock(webSocketClientType: .sfu)
-        mockSFUAdapter = mockSFUStack.sfuAdapter
-        mockSFUService = mockSFUStack.mockService
-        mockWebSocketClient = mockSFUStack.mockWebSocketClient
-
-        mockWebSocketClient.simulate(state: .connected(healthCheckInfo: .init()))
+        mockSFUStack
+            .setConnectionState(to: .connected(healthCheckInfo: .init()))
     }
 
     override func tearDown() {
         sessionID = nil
-        mockSFUAdapter = nil
-        mockWebSocketClient = nil
-        mockSFUService = nil
+        mockSFUStack = nil
         subject = nil
         super.tearDown()
     }
@@ -41,15 +33,15 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
     func test_sfuAdapterNil_reportWasNotCollectedAndSentCorrectly() async throws {
         await wait(for: subject.interval + 1)
 
-        XCTAssertNil(mockSFUService.sendStatsWasCalledWithRequest)
+        XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
     }
 
     func test_sfuAdapterNotNil_reportWasCollectedAndSentCorrectly() async throws {
-        subject.sfuAdapter = mockSFUAdapter
+        subject.sfuAdapter = mockSFUStack.adapter
 
         await wait(for: subject.interval + 1)
 
-        let request = try XCTUnwrap(mockSFUService.sendStatsWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
         XCTAssertTrue(request.subscriberStats.isEmpty)
         XCTAssertTrue(request.publisherStats.isEmpty)
         XCTAssertEqual(request.sessionID, sessionID)
@@ -57,20 +49,20 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
 
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
-        subject.sfuAdapter = mockSFUAdapter
+        subject.sfuAdapter = mockSFUStack.adapter
         await wait(for: subject.interval - 1)
         
-        let sfuStack = SFUAdapter.mock(webSocketClientType: .sfu)
-        subject.sfuAdapter = sfuStack.sfuAdapter
-        sfuStack.mockWebSocketClient.simulate(state: .connected(healthCheckInfo: .init()))
+        let sfuStack = MockSFUStack()
+        subject.sfuAdapter = sfuStack.adapter
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
 
         await wait(for: 1)
-        XCTAssertNil(mockSFUService.sendStatsWasCalledWithRequest)
-        XCTAssertNil(sfuStack.mockService.sendStatsWasCalledWithRequest)
+        XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
+        XCTAssertNil(sfuStack.service.sendStatsWasCalledWithRequest)
 
         await wait(for: subject.interval)
-        XCTAssertNil(mockSFUService.sendStatsWasCalledWithRequest)
-        XCTAssertNotNil(sfuStack.mockService.sendStatsWasCalledWithRequest)
+        XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
+        XCTAssertNotNil(sfuStack.service.sendStatsWasCalledWithRequest)
     }
 }
 

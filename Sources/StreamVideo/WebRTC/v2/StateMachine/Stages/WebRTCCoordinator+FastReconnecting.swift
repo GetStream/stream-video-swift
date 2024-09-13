@@ -7,6 +7,11 @@ import Foundation
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
+    /// Creates and returns a fast reconnecting stage for the WebRTC coordinator
+    /// state machine.
+    /// - Parameter context: The context for the fast reconnecting stage.
+    /// - Returns: A `FastReconnectingStage` instance representing the fast
+    ///   reconnecting state of the WebRTC coordinator.
     static func fastReconnecting(
         _ context: Context
     ) -> WebRTCCoordinator.StateMachine.Stage {
@@ -18,14 +23,27 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    final class FastReconnectingStage: WebRTCCoordinator.StateMachine.Stage {
-
+    /// Represents the fast reconnecting stage in the WebRTC coordinator state
+    /// machine.
+    final class FastReconnectingStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
+        /// Initializes a new instance of `FastReconnectingStage`.
+        /// - Parameter context: The context for the fast reconnecting stage.
         init(
             _ context: Context
         ) {
             super.init(id: .fastReconnecting, context: context)
         }
 
+        /// Performs the transition from a previous stage to this fast
+        /// reconnecting stage.
+        /// - Parameter previousStage: The stage from which the transition is
+        ///   occurring.
+        /// - Returns: This `FastReconnectingStage` instance if the transition
+        ///   is valid, otherwise `nil`.
+        /// - Note: Valid transition from: `.disconnected`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
@@ -38,6 +56,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the fast reconnecting process.
         private func execute() {
             Task { [weak self] in
                 guard let self else { return }
@@ -57,21 +76,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
 
-                    log.debug("Connecting webSocket", subsystems: .webRTC)
-                    sfuAdapter.connect()
+                    log.debug(
+                        "Waiting for webSocket state to change to authenticating",
+                        subsystems: .webRTC
+                    )
 
-                    log.debug("Waiting for webSocket state to change to authenticating", subsystems: .webRTC)
-                    _ = try await sfuAdapter
-                        .$connectionState
-                        .filter {
-                            switch $0 {
-                            case .authenticating:
-                                return true
-                            default:
-                                return false
-                            }
-                        }
-                        .nextValue(timeout: 5)
+                    try await context.authenticator.waitForAuthentication(on: sfuAdapter)
 
                     try transition?(
                         .fastReconnected(

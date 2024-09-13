@@ -10,7 +10,8 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     private lazy var mockWebSocket: MockWebSocketClient! = .init(webSocketClientType: .sfu)
     private lazy var subject: SFUAdapter! = .init(
         signalService: mockService,
-        webSocket: mockWebSocket
+        webSocket: mockWebSocket,
+        webSocketFactory: MockWebSocketClientFactory()
     )
 
     // MARK: - Lifecycle
@@ -41,7 +42,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         subject.connect()
 
         // Then
-        XCTAssertEqual(mockWebSocket.timesFunctionWasCalled[.connect], 1)
+        XCTAssertEqual(mockWebSocket.timesCalled(.connect), 1)
     }
 
     // MARK: - disconnect
@@ -54,7 +55,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         await subject.disconnect()
 
         // Then
-        XCTAssertEqual(mockWebSocket.timesFunctionWasCalled[.disconnect], 1)
+        XCTAssertEqual(mockWebSocket.timesCalled(.disconnectAsync), 1)
     }
 
     // MARK: - sendHealthCheck
@@ -64,13 +65,14 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         subject.sendHealthCheck()
 
         // Then
-        let input = try XCTUnwrap(mockWebSocket.mockEngine.stubbedFunctionInput[.send]?.first)
-        switch input {
-        case let .send(message, _):
-            XCTAssertNotNil(message as? Stream_Video_Sfu_Event_HealthCheckRequest)
-        default:
-            XCTFail()
-        }
+        let input = try XCTUnwrap(
+            mockWebSocket.mockEngine.recordedInputPayload(
+                Stream_Video_Sfu_Event_HealthCheckRequest.self,
+                for: .sendMessage
+            )
+        )
+
+        XCTAssertNotNil(input.first)
     }
 
     // MARK: - sendMessage
@@ -82,13 +84,14 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         subject.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
 
         // Then
-        let input = try XCTUnwrap(mockWebSocket.mockEngine.stubbedFunctionInput[.send]?.first)
-        switch input {
-        case let .send(message, _):
-            XCTAssertNotNil(message as? Stream_Video_Sfu_Event_HealthCheckRequest)
-        default:
-            XCTFail()
-        }
+        let input = try XCTUnwrap(
+            mockWebSocket.mockEngine.recordedInputPayload(
+                Stream_Video_Sfu_Event_HealthCheckRequest.self,
+                for: .sendMessage
+            )
+        )
+
+        XCTAssertNotNil(input.first)
     }
 
     // MARK: - refresh
@@ -101,7 +104,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        XCTAssertEqual(mockWebSocket.timesFunctionWasCalled[.disconnect], 1)
+        XCTAssertEqual(mockWebSocket.timesCalled(.disconnect), 1)
     }
 
     func test_refresh_oldWebSocketDisconnectsNoLongerReceivesCalls() throws {
@@ -116,7 +119,14 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
         subject.sendHealthCheck()
 
-        XCTAssertNil(mockWebSocket.mockEngine.stubbedFunctionInput[.send]?.first)
+        let input = try XCTUnwrap(
+            mockWebSocket.mockEngine.recordedInputPayload(
+                Stream_Video_Sfu_Event_HealthCheckRequest.self,
+                for: .sendMessage
+            )
+        )
+
+        XCTAssertNil(input.first)
     }
 
     // MARK: - updateTrackMuteState

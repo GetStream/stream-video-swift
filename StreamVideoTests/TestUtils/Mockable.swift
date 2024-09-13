@@ -45,7 +45,7 @@ extension Mockable {
     }
 
     func recordedInputPayload<T>(_ ofType: T.Type, for key: FunctionKey) -> [T]? {
-        stubbedFunctionInput[key]?.map(\.payload) as? [T]
+        stubbedFunctionInput[key]?.compactMap { $0.payload as? T } as? [T]
     }
 
     func timesCalled(_ key: FunctionKey) -> Int { stubbedFunctionInput[key]?.count ?? 0 }
