@@ -7,6 +7,11 @@ import StreamWebRTC
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
+    /// Creates and returns a joining stage for the WebRTC coordinator state
+    /// machine.
+    /// - Parameter context: The context for the joining stage.
+    /// - Returns: A `JoiningStage` instance representing the joining state of
+    ///   the WebRTC coordinator.
     static func joining(
         _ context: Context
     ) -> WebRTCCoordinator.StateMachine.Stage {
@@ -18,14 +23,26 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
 extension WebRTCCoordinator.StateMachine.Stage {
 
-    final class JoiningStage: WebRTCCoordinator.StateMachine.Stage {
-
+    /// Represents the joining stage in the WebRTC coordinator state machine.
+    final class JoiningStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
+        /// Initializes a new instance of `JoiningStage`.
+        /// - Parameter context: The context for the joining stage.
         init(
             _ context: Context
         ) {
             super.init(id: .joining, context: context)
         }
 
+        /// Performs the transition from a previous stage to this joining stage.
+        /// - Parameter previousStage: The stage from which the transition is
+        ///   occurring.
+        /// - Returns: This `JoiningStage` instance if the transition is valid,
+        ///   otherwise `nil`.
+        /// - Note: Valid transition from: `.connected`, `.fastReconnected`,
+        ///   `.migrated`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
@@ -47,6 +64,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the joining process.
+        /// - Parameter isFastReconnecting: A flag indicating if this is a fast
+        ///   reconnection.
         private func execute(
             isFastReconnecting: Bool
         ) {
@@ -107,6 +127,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the migration process.
         private func executeMigration() {
             Task { [weak self] in
                 guard let self else { return }
@@ -123,11 +144,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try await coordinator.stateAdapter.configurePeerConnections()
 
-                    /// Send a joinRequest to the WS connection. The request will include:
-                    /// - The hostname of the SFU we are migrating from
-                    /// - A new Subscriber SDP that is built using the **newly created** publisher. (Check with Marcelo)
-                    /// - The announced tracks of the **newly created**  publisher
-                    /// - The reconnect attempts
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
                             .buildRequest(
@@ -166,6 +182,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Executes the rejoining process.
         private func executeRejoining() {
             Task { [weak self] in
                 guard let self else { return }
@@ -177,7 +194,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         let sfuAdapter = await coordinator.stateAdapter.sfuAdapter
                     else {
                         throw ClientError(
-                            "WebRCTAdapter instance not available."
+                            "WebRCTCoordinator instance not available."
                         )
                     }
 
@@ -216,6 +233,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
+        /// Builds the subscriber session description.
+        /// - Parameters:
+        ///   - coordinator: The WebRTC coordinator.
+        ///   - sfuAdapter: The SFU adapter.
+        ///   - isFastReconnecting: A flag indicating if this is a fast
+        ///     reconnection.
+        ///   - publisher: The RTC peer connection coordinator for publishing.
+        /// - Returns: The subscriber session description as a string.
         private func buildSubscriberSessionDescription(
             coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter,
@@ -244,6 +269,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
             return subscriberSessionDescription
         }
 
+        /// Performs the join process.
+        /// - Parameters:
+        ///   - coordinator: The WebRTC coordinator.
+        ///   - sfuAdapter: The SFU adapter.
         private func join(
             coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter
@@ -259,40 +288,26 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             let joinResponse = try await sfuAdapter
                 .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
-                .nextValue(timeout: 10)
+                .nextValue(timeout: WebRTCConfiguration.Timeout.join)
 
-            /// We start publishing as soon as we get the joinResponse to ensure better UI/UX.
             try await coordinator
                 .stateAdapter
                 .publisher?
                 .didUpdateCallSettings(await coordinator.stateAdapter.callSettings)
 
-            /// Send the first healthCheck to the newly connected SFU.
             sfuAdapter.sendHealthCheck()
 
             context.fastReconnectDeadlineSeconds = TimeInterval(
                 joinResponse.fastReconnectDeadlineSeconds
             )
 
-            _ = try await sfuAdapter
-                .$connectionState
-                .filter {
-                    switch $0 {
-                    case .connected:
-                        return true
-                    default:
-                        return false
-                    }
-                }
-                .nextValue(timeout: 10)
+            try await context.authenticator.waitForConnect(on: sfuAdapter)
 
             let participants = joinResponse
                 .callState
                 .participants
                 .map { $0.toCallParticipant() }
-                .reduce(into: [String: CallParticipant]()) { partialResult, participant in
-                    partialResult[participant.sessionId] = participant
-                }
+                .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
 
             await coordinator
                 .stateAdapter

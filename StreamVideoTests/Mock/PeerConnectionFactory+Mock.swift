@@ -19,4 +19,8 @@ extension PeerConnectionFactory {
     func mockAudioTrack() -> RTCAudioTrack {
         makeAudioTrack(source: makeAudioSource(.defaultConstraints))
     }
+
+    func mockVideoTrack(forScreenShare: Bool) -> RTCVideoTrack {
+        makeVideoTrack(source: makeVideoSource(forScreenShare: forScreenShare))
+    }
 }

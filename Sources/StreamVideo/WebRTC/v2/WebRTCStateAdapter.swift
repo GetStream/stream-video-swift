@@ -30,6 +30,7 @@ actor WebRTCStateAdapter: ObservableObject {
     let callCid: String
     let videoConfig: VideoConfig
     let peerConnectionFactory: PeerConnectionFactory
+    let screenShareSessionProvider: ScreenShareSessionProvider = .init()
 
     @Published private(set) var sessionID: String = ""
     @Published private(set) var token: String = ""
@@ -60,7 +61,6 @@ actor WebRTCStateAdapter: ObservableObject {
     private let audioSession: AudioSession = .init()
     private let disposableBag = DisposableBag()
 
-    private lazy var screenShareSessionProvider: ScreenShareSessionProvider = .init()
     private(set) lazy var participantsUpdateSubject = PassthroughSubject<[String: CallParticipant], Never>()
 
     init(
@@ -68,7 +68,7 @@ actor WebRTCStateAdapter: ObservableObject {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
-        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory()
+        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     ) {
         self.user = user
         self.apiKey = apiKey
@@ -199,12 +199,14 @@ actor WebRTCStateAdapter: ObservableObject {
         subscriber?.close()
         self.publisher = nil
         self.subscriber = nil
-        self.statsReporter = nil
-        await sfuAdapter?.disconnect()
 
+        self.statsReporter = nil
+
+        await sfuAdapter?.disconnect()
         sfuAdapter = nil
 
         token = ""
+        sessionID = ""
         ownCapabilities = []
         participants = [:]
         participantsCount = 0
