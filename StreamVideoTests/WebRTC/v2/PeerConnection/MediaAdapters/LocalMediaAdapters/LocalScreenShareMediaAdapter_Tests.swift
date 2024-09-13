@@ -14,11 +14,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
     private lazy var sessionId: String! = .unique
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
-    private lazy var mockSFUStack: (
-        sfuAdapter: SFUAdapter,
-        mockService: MockSignalServer,
-        mockWebSocketClient: MockWebSocketClient
-    )! = SFUAdapter.mock(webSocketClientType: .sfu)
+    private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var mockCapturerFactory: MockVideoCapturerFactory! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var screenShareSessionProvider: ScreenShareSessionProvider! = .init()
@@ -26,7 +22,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
-        sfuAdapter: mockSFUStack.sfuAdapter,
+        sfuAdapter: mockSFUStack.adapter,
         videoOptions: .init(),
         videoConfig: .dummy(),
         subject: spySubject,
@@ -101,7 +97,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
     func test_beginScreenSharing_withCapability_callSFU() async throws {
         try await assertBeginScreenSharing(.inApp, ownCapabilities: [.screenshare])
 
-        let request = try XCTUnwrap(mockSFUStack.mockService.updateMuteStatesWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .screenShare)
@@ -149,7 +145,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
 
         try await subject.stopScreenSharing()
 
-        let request = try XCTUnwrap(mockSFUStack.mockService.updateMuteStatesWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .screenShare)

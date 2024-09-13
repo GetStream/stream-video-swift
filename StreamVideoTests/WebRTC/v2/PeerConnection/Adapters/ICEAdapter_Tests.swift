@@ -5,22 +5,18 @@
 import Combine
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
 final class ICEAdapterTests: XCTestCase {
 
     private lazy var sessionId: String! = .unique
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
-    private lazy var mockSFUStack: (
-        sfuAdapter: SFUAdapter,
-        mockService: MockSignalServer,
-        mockWebSocketClient: MockWebSocketClient
-    )! = SFUAdapter.mock(webSocketClientType: .sfu)
+    private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var subject: ICEAdapter! = .init(
         sessionID: sessionId,
         peerType: .publisher,
         peerConnection: mockPeerConnection,
-        sfuAdapter: mockSFUStack.sfuAdapter
+        sfuAdapter: mockSFUStack.adapter
     )
 
     private lazy var iceCandidate: RTCIceCandidate! = .init(
@@ -47,24 +43,16 @@ final class ICEAdapterTests: XCTestCase {
 
     func test_trickle_connected_calledWithCandidate_tricklesToSFU() async throws {
         // Given
-        mockSFUStack
-            .mockWebSocketClient
-            .connectionStateDelegate?
-            .webSocketClient(
-                mockSFUStack.mockWebSocketClient,
-                didUpdateConnectionState: .connected(
-                    healthCheckInfo: .init()
-                )
-            )
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
 
         // When
         await subject.trickle(iceCandidate)
-        await fulfillment { [service = mockSFUStack.mockService] in
+        await fulfillment { [service = mockSFUStack.service] in
             service.iCETrickleWasCalledWithRequest != nil
         }
 
         // Then
-        let request = try XCTUnwrap(mockSFUStack.mockService.iCETrickleWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.iCETrickleWasCalledWithRequest)
         XCTAssertEqual(request.peerType, .publisherUnspecified)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertFalse(request.iceCandidate.isEmpty)
@@ -72,20 +60,14 @@ final class ICEAdapterTests: XCTestCase {
 
     func test_trickle_disconnected_calledWithCandidate_tricklesToSFU() async throws {
         // Given
-        mockSFUStack
-            .mockWebSocketClient
-            .connectionStateDelegate?
-            .webSocketClient(
-                mockSFUStack.mockWebSocketClient,
-                didUpdateConnectionState: .disconnected(source: .userInitiated)
-            )
+        mockSFUStack.setConnectionState(to: .disconnected(source: .userInitiated))
 
         // When
         await subject.trickle(iceCandidate)
         await wait(for: 1)
 
         // Then
-        XCTAssertNil(mockSFUStack.mockService.iCETrickleWasCalledWithRequest)
+        XCTAssertNil(mockSFUStack.service.iCETrickleWasCalledWithRequest)
     }
 
     // MARK: - add(_:)
@@ -94,7 +76,7 @@ final class ICEAdapterTests: XCTestCase {
         await subject.add(iceCandidate)
 
         await wait(for: 1)
-        XCTAssertNil(mockSFUStack.mockService.iCETrickleWasCalledWithRequest)
+        XCTAssertNil(mockSFUStack.service.iCETrickleWasCalledWithRequest)
     }
 
     func test_add_peerConnectionWithRemoteDescription_taskWasTriggered() async throws {
