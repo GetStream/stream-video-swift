@@ -14,18 +14,14 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
     private lazy var sessionId: String! = .unique
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
-    private lazy var mockSFUStack: (
-        sfuAdapter: SFUAdapter,
-        mockService: MockSignalServer,
-        mockWebSocketClient: MockWebSocketClient
-    )! = SFUAdapter.mock(webSocketClientType: .sfu)
+    private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var audioSession: AudioSession! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var subject: LocalAudioMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
-        sfuAdapter: mockSFUStack.sfuAdapter,
+        sfuAdapter: mockSFUStack.adapter,
         audioSession: audioSession,
         subject: spySubject
     )
@@ -141,7 +137,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
         try await subject.didUpdateCallSettings(.init(audioOn: false))
 
-        XCTAssertNil(mockSFUStack.mockService.updateSubscriptionsWasCalledWithRequest)
+        XCTAssertNil(mockSFUStack.service.updateSubscriptionsWasCalledWithRequest)
     }
 
     func test_didUpdateCallSettings_isEnabledFalseCallSettingsTrue_SFUWasCalled() async throws {
@@ -152,7 +148,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
         try await subject.didUpdateCallSettings(.init(audioOn: true))
 
-        let request = try XCTUnwrap(mockSFUStack.mockService.updateMuteStatesWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .audio)
@@ -168,7 +164,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
         try await subject.didUpdateCallSettings(.init(audioOn: false))
 
-        let request = try XCTUnwrap(mockSFUStack.mockService.updateMuteStatesWasCalledWithRequest)
+        let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .audio)

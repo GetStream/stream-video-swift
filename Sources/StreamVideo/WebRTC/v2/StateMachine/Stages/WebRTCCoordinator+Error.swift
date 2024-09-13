@@ -26,7 +26,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 extension WebRTCCoordinator.StateMachine.Stage {
 
     /// A class representing the error stage in the `StreamCallStateMachine`.
-    final class ErrorStage: WebRTCCoordinator.StateMachine.Stage {
+    final class ErrorStage:
+        WebRTCCoordinator.StateMachine.Stage,
+        @unchecked Sendable
+    {
         let error: Error
 
         /// Initializes a new error stage with the provided call and error.
