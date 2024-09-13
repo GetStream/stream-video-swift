@@ -15,11 +15,13 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
     private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [
+        .connecting,
         .joining,
         .joined,
         .disconnected,
         .fastReconnecting,
-        .rejoining
+        .rejoining,
+        .migrated
     ]
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .disconnected(.init())
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()

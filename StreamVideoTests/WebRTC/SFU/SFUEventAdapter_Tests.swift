@@ -582,22 +582,17 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         handler: ([String: CallParticipant]) async throws -> Void
     ) async throws {
         await stateAdapter.didUpdateParticipants(initialState)
-
         let eventExpectation = expectation(description: "Event \(type(of: event)) received.")
         let cancellable = sfuAdapter
             .publisher(eventType: type(of: event))
             .sink { _ in eventExpectation.fulfill() }
-        mockWebSocket.eventSubject.send(wrappedEvent)
-        await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
-        _ = cancellable
 
-        let updatedParticipants = await stateAdapter.participants
-        try await handler(updatedParticipants)
         /// We add a group that concurrently updates the participants and awaits for an update as internally
         /// the stateAdapter spins up another task to complete the update.
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
-                await self.stateAdapter.didUpdateParticipants(initialState)
+                self.mockWebSocket.eventSubject.send(wrappedEvent)
+                await self.fulfillment(of: [eventExpectation], timeout: defaultTimeout)
             }
             group.addTask {
                 _ = try? await self.stateAdapter.$participants.nextValue(
@@ -606,5 +601,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             }
             await group.waitForAll()
         }
+        cancellable.cancel()
+        try await handler(await stateAdapter.participants)
     }
 }
