@@ -2,6 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Foundation
+
 /// Protocol defining the authentication process for WebRTC.
 protocol WebRTCAuthenticating {
 
