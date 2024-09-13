@@ -51,12 +51,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         ring: Bool
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
         let response = try await coordinator
-            .callAuthenticator
-            .authenticate(
-                create: create,
-                ring: ring,
-                migratingFrom: currentSFU
-            )
+            .callAuthentication(create, ring, currentSFU)
 
         await coordinator.stateAdapter.set(
             token: response.credentials.token

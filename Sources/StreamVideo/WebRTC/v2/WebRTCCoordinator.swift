@@ -7,11 +7,13 @@ import Foundation
 import StreamWebRTC
 
 final class WebRTCCoordinator: @unchecked Sendable {
+    typealias AuthenticationHandler = (Bool, Bool, String?) async throws -> JoinCallResponse
+
     private static let recordingUserId = "recording-egress"
     private static let participantsThreshold = 10
 
     let stateAdapter: WebRTCStateAdapter
-    let callAuthenticator: CallAuthenticating
+    let callAuthentication: AuthenticationHandler
     private(set) lazy var stateMachine: StateMachine = .init(.init(coordinator: self))
 
     private let disposableBag = DisposableBag()
@@ -23,7 +25,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
-        callAuthenticator: CallAuthenticating,
+        callAuthentication: @escaping AuthenticationHandler,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory()
     ) {
         stateAdapter = .init(
@@ -33,7 +35,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
             videoConfig: videoConfig,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
         )
-        self.callAuthenticator = callAuthenticator
+        self.callAuthentication = callAuthentication
 
         _ = stateMachine
 

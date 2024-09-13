@@ -42,7 +42,7 @@ final class MockWebRTCCoordinatorStack {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
-            callAuthenticator: callAuthenticator,
+            callAuthentication: callAuthenticator.authenticate,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
         )
 

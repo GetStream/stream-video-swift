@@ -1,8 +1,5 @@
 //
-//  Stream_Video_Sfu_Signal_TrackSubscriptionDetails+Convenience.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 13/9/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
