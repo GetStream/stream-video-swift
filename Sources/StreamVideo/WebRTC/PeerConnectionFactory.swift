@@ -67,6 +67,10 @@ final class PeerConnectionFactory: @unchecked Sendable {
         PeerConnectionFactoryStorage.shared.store(self, for: audioProcessingModule)
     }
 
+    deinit {
+        PeerConnectionFactoryStorage.shared.remove(for: audioProcessingModule)
+    }
+
     /// Creates a video source, optionally configured for screen sharing.
     /// - Parameter forScreenShare: Boolean indicating if the source is for screen sharing.
     /// - Returns: An RTCVideoSource instance.
@@ -135,7 +139,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
 }
 
 /// A thread-safe storage class for managing PeerConnectionFactory instances.
-private final class PeerConnectionFactoryStorage {
+final class PeerConnectionFactoryStorage {
     /// Shared singleton instance of PeerConnectionFactoryStorage.
     static let shared = PeerConnectionFactoryStorage()
 

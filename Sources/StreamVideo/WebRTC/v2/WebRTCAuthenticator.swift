@@ -83,20 +83,32 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
 
         let sfuAdapter = SFUAdapter(
             serviceConfiguration: .init(
-                url: .init(string: response.credentials.server.url)!,
+                url: try unwrap(
+                    .init(string: response.credentials.server.url),
+                    errorMessage: "Server URL is invalid."
+                ),
                 apiKey: coordinator.stateAdapter.apiKey,
                 token: await coordinator.stateAdapter.token
             ),
             webSocketConfiguration: .init(
-                url: .init(string: response.credentials.server.wsEndpoint)!,
+                url: try unwrap(
+                    .init(string: response.credentials.server.wsEndpoint),
+                    errorMessage: "WebSocket URL is invalid."
+                ),
                 eventNotificationCenter: .init()
             )
         )
 
-        let statsReporter = await coordinator.stateAdapter.statsReporter
-        statsReporter?.interval = TimeInterval(
-            response.statsOptions.reportingIntervalMs / 1000
-        )
+        let statsReportingInterval = response.statsOptions.reportingIntervalMs / 1000
+        if let statsReporter = await coordinator.stateAdapter.statsReporter {
+            statsReporter.interval = TimeInterval(statsReportingInterval)
+        } else {
+            let statsReporter = WebRTCStatsReporter(
+                sessionID: await coordinator.stateAdapter.sessionID
+            )
+            statsReporter.interval = TimeInterval(statsReportingInterval)
+            await coordinator.stateAdapter.set(statsReporter)
+        }
 
         return (sfuAdapter, response)
     }
@@ -116,7 +128,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     return false
                 }
             }
-            .nextValue(timeout: WebRTCConfiguration.Timeout.authenticate)
+            .nextValue(timeout: WebRTCConfiguration.timeout.authenticate)
     }
 
     /// Awaits for the connectionState to the SFU to change to `.connected`.
@@ -133,6 +145,6 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     return false
                 }
             }
-            .nextValue(timeout: WebRTCConfiguration.Timeout.connect)
+            .nextValue(timeout: WebRTCConfiguration.timeout.connect)
     }
 }

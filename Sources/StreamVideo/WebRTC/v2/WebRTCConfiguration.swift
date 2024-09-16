@@ -7,32 +7,37 @@ import Foundation
 /// Configuration for WebRTC Stack.
 enum WebRTCConfiguration {
 
-    /// Timeout values for various WebRTC operations.
-    enum Timeout {
+    struct Timeout {
+        var authenticate: TimeInterval
+        var connect: TimeInterval
+        var join: TimeInterval
+        var migrationCompletion: TimeInterval
+
+        /// Timeout for authentication in production environment.
+        static let production = Timeout(
+            authenticate: 10,
+            connect: 10,
+            join: 10,
+            migrationCompletion: 10
+        )
+
         #if STREAM_TESTS
         /// Timeout for authentication in test environment.
-        static let authenticate: TimeInterval = 1
+        static let testing = Timeout(
+            authenticate: 1,
+            connect: 1,
+            join: 1,
+            migrationCompletion: 1
+        )
+        #endif
+    }
 
-        /// Timeout for connection in test environment.
-        static let connect: TimeInterval = 1
-
-        /// Timeout for joining in test environment.
-        static let join: TimeInterval = 1
-
-        /// Timeout for migration completion in test environment.
-        static let migrationCompletion: TimeInterval = 1
+    /// Timeout values for various WebRTC operations.
+    static var timeout: Timeout {
+        #if STREAM_TESTS
+        return .testing
         #else
-        /// Timeout for authentication in production environment.
-        static let authenticate: TimeInterval = 10
-
-        /// Timeout for connection in production environment.
-        static let connect: TimeInterval = 10
-
-        /// Timeout for joining in production environment.
-        static let join: TimeInterval = 10
-
-        /// Timeout for migration completion in production environment.
-        static let migrationCompletion: TimeInterval = 10
+        return .production
         #endif
     }
 }

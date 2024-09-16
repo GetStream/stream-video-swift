@@ -385,17 +385,20 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return
             }
             let stateAdapter = coordinator.stateAdapter
+            let sessionId = await stateAdapter.sessionID
 
-            let statsReporter = WebRTCStatsReporter(
-                sessionID: await stateAdapter.sessionID
-            )
+            if await stateAdapter.statsReporter?.sessionID != sessionId {
+                let statsReporter = WebRTCStatsReporter(
+                    sessionID: await stateAdapter.sessionID
+                )
+                await stateAdapter.set(statsReporter)
+            }
 
-            statsReporter.interval = await stateAdapter.statsReporter?.interval ?? 0
-            statsReporter.publisher = await stateAdapter.publisher
-            statsReporter.subscriber = await stateAdapter.subscriber
-            statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
-
-            await stateAdapter.set(statsReporter)
+            let statsReporter = await stateAdapter.statsReporter
+            statsReporter?.interval = await stateAdapter.statsReporter?.interval ?? 0
+            statsReporter?.publisher = await stateAdapter.publisher
+            statsReporter?.subscriber = await stateAdapter.subscriber
+            statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
         }
 
         /// Observes internet connection status.

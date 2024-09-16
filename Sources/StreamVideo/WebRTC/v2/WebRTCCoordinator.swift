@@ -6,27 +6,55 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+/// A coordinator that manages WebRTC connections, state transitions, and media
+/// operations. It interacts with a state machine to handle different WebRTC
+/// stages and uses adapters to handle the media-related functionalities.
 final class WebRTCCoordinator: @unchecked Sendable {
+
+    /// A typealias for a closure that handles authentication for joining a call.
+    /// - Parameters:
+    ///   - create: Whether the call should be created on the backend side.
+    ///   - ring: Whether the call is a ringing call.
+    ///   - migratingFrom: If migrating, where are we migrating from.
+    /// - Returns: A `JoinCallResponse` wrapped in an async throw.
     typealias AuthenticationHandler = (Bool, Bool, String?) async throws -> JoinCallResponse
 
     private static let recordingUserId = "recording-egress"
     private static let participantsThreshold = 10
 
+    /// The state adapter manages the WebRTC state and media configuration.
     let stateAdapter: WebRTCStateAdapter
+
+    /// The handler used for authenticating the user during call joining.
     let callAuthentication: AuthenticationHandler
+
+    /// The state machine that manages the different stages of the WebRTC
+    /// lifecycle.
     private(set) lazy var stateMachine: StateMachine = .init(.init(coordinator: self))
 
     private let disposableBag = DisposableBag()
 
+    /// Cancellable token for listening to participant updates.
     private var didUpdateParticipantsCancellable: AnyCancellable?
 
+    /// Initializes the `WebRTCCoordinator` with user details, video settings,
+    /// and connection handlers.
+    ///
+    /// - Parameters:
+    ///   - user: The current user participating in the call.
+    ///   - apiKey: The API key to authenticate with the WebRTC service.
+    ///   - callCid: The call identifier (cid).
+    ///   - videoConfig: The video configuration for the call.
+    ///   - callAuthentication: A closure for handling call authentication.
+    ///   - rtcPeerConnectionCoordinatorFactory: Factory for creating the peer
+    ///     connection coordinator.
     init(
         user: User,
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
-        callAuthentication: @escaping AuthenticationHandler,
-        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory()
+        rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory(),
+        callAuthentication: @escaping AuthenticationHandler
     ) {
         stateAdapter = .init(
             user: user,
@@ -37,18 +65,21 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
         self.callAuthentication = callAuthentication
 
+        // Initialize the state machine.
         _ = stateMachine
 
-        stateMachine
-            .publisher
-            .sink { [weak self] in self?.didTransition(to: $0.id) }
-            .store(in: disposableBag)
-
+        #if OBSERVE_RECONNECTION_NOTIFICATIONS
         observeForceReconnectionRequests()
+        #endif
     }
 
     // MARK: - Connection
 
+    /// Connects to a call with the specified settings and whether to ring.
+    ///
+    /// - Parameters:
+    ///   - callSettings: Optional call settings.
+    ///   - ring: Boolean flag indicating if a ring tone should be played.
     func connect(
         callSettings: CallSettings?,
         ring: Bool
@@ -59,10 +90,12 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Cleans up the state adapter resources after a call ends.
     func cleanUp() async {
         await stateAdapter.cleanUp()
     }
 
+    /// Leaves the call and transitions the state machine to the `leaving` stage.
     func leave() {
         do {
             try stateMachine.transition(
@@ -75,6 +108,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     // MARK: - Media
 
+    /// Changes the camera position between front and back.
+    ///
+    /// - Parameter position: The desired camera position.
     func changeCameraMode(
         position: CameraPosition
     ) async throws {
@@ -88,6 +124,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Changes the audio state (enabled/disabled) for the call.
+    ///
+    /// - Parameter isEnabled: Whether the audio should be enabled.
     func changeAudioState(isEnabled: Bool) async {
         await stateAdapter.set(
             stateAdapter
@@ -96,6 +135,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Changes the video state (enabled/disabled) for the call.
+    ///
+    /// - Parameter isEnabled: Whether the video should be enabled.
     func changeVideoState(isEnabled: Bool) async {
         await stateAdapter.set(
             stateAdapter
@@ -104,6 +146,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Changes the audio output state (e.g., speaker or headphones).
+    ///
+    /// - Parameter isEnabled: Whether the output should be enabled.
     func changeSoundState(isEnabled: Bool) async {
         await stateAdapter.set(
             stateAdapter
@@ -112,6 +157,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Changes the speaker state (enabled/disabled) for the call.
+    ///
+    /// - Parameter isEnabled: Whether the speaker should be enabled.
     func changeSpeakerState(isEnabled: Bool) async {
         await stateAdapter.set(
             stateAdapter
@@ -120,6 +168,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Updates the visibility of a participant's track.
+    ///
+    /// - Parameters:
+    ///   - participant: The participant whose track's visibility is to be updated.
+    ///   - isVisible: Boolean flag indicating if the track should be visible.
     func changeTrackVisibility(
         for participant: CallParticipant,
         isVisible: Bool
@@ -128,6 +181,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .didUpdateParticipant(participant, isVisible: isVisible)
     }
 
+    /// Updates the track size for a participant.
+    ///
+    /// - Parameters:
+    ///   - trackSize: The new size of the video track.
+    ///   - participant: The participant whose track's size is being updated.
     func updateTrackSize(
         _ trackSize: CGSize,
         for participant: CallParticipant
@@ -138,10 +196,18 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Sets a video filter for the call.
+    ///
+    /// - Parameter videoFilter: The filter to be applied on the video.
     func setVideoFilter(_ videoFilter: VideoFilter?) async {
         await stateAdapter.set(videoFilter)
     }
 
+    // MARK: - Screensharing
+
+    /// Starts screensharing of the specified type.
+    ///
+    /// - Parameter type: The type of screensharing.
     func startScreensharing(
         type: ScreensharingType
     ) async throws {
@@ -151,10 +217,16 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
+    /// Stops screensharing.
     func stopScreensharing() async throws {
         try await stateAdapter.publisher?.stopScreenSharing()
     }
 
+    /// Changes the pin state of a participant.
+    ///
+    /// - Parameters:
+    ///   - isEnabled: Boolean flag indicating if pinning is enabled.
+    ///   - sessionId: The session ID of the participant to pin.
     func changePinState(
         isEnabled: Bool,
         sessionId: String
@@ -176,6 +248,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.didUpdateParticipants(participants)
     }
 
+    /// Starts noise cancellation for a participant's session.
+    ///
+    /// - Parameter sessionID: The session ID to apply noise cancellation to.
     func startNoiseCancellation(
         _ sessionID: String
     ) async throws {
@@ -184,6 +259,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .toggleNoiseCancellation(true, for: sessionID)
     }
 
+    /// Stops noise cancellation for a participant's session.
+    ///
+    /// - Parameter sessionID: The session ID to disable noise cancellation for.
     func stopNoiseCancellation(
         _ sessionID: String
     ) async throws {
@@ -192,10 +270,16 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .toggleNoiseCancellation(false, for: sessionID)
     }
 
+    /// Focuses on a specific point in the video.
+    ///
+    /// - Parameter point: The point at which to focus.
     func focus(at point: CGPoint) async throws {
         try await stateAdapter.publisher?.focus(at: point)
     }
 
+    /// Adds a photo output to the capture session.
+    ///
+    /// - Parameter capturePhotoOutput: The capture output for photo capturing.
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
@@ -204,6 +288,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .addCapturePhotoOutput(capturePhotoOutput)
     }
 
+    /// Removes a photo output from the capture session.
+    ///
+    /// - Parameter capturePhotoOutput: The capture output for photo capturing.
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
@@ -212,6 +299,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .removeCapturePhotoOutput(capturePhotoOutput)
     }
 
+    /// Adds a video output to the capture session.
+    ///
+    /// - Parameter videoOutput: The capture output for video capturing.
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
@@ -220,6 +310,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .addVideoOutput(videoOutput)
     }
 
+    /// Removes a video output from the capture session.
+    ///
+    /// - Parameter videoOutput: The capture output for video capturing.
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
@@ -228,29 +321,27 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .removeVideoOutput(videoOutput)
     }
 
+    /// Zooms the camera by a specified factor.
+    ///
+    /// - Parameter factor: The zoom factor to apply.
     func zoom(by factor: CGFloat) async throws {
         try await stateAdapter
             .publisher?
             .zoom(by: factor)
     }
 
-    // MARK: - SFU Events Handling
-
     // MARK: - Private
 
+    /// Creates the state machine for managing WebRTC stages.
+    ///
+    /// - Returns: The newly created state machine.
     private func makeStateMachine() async -> WebRTCCoordinator.StateMachine {
         .init(.init(coordinator: self))
     }
 
-    private func didTransition(
-        to stageId: StateMachine.Stage.ID
-    ) {
-        switch stageId {
-        default:
-            break
-        }
-    }
-
+    #if OBSERVE_RECONNECTION_NOTIFICATIONS
+    /// Observes notifications for forced reconnection requests and transitions
+    /// the state machine accordingly.
     private func observeForceReconnectionRequests() {
         NotificationCenter
             .default
@@ -303,8 +394,5 @@ final class WebRTCCoordinator: @unchecked Sendable {
             }
             .store(in: disposableBag)
     }
+    #endif
 }
-
-extension Published.Publisher: @unchecked Sendable {}
-extension RTCMediaStreamTrack: @unchecked Sendable {}
-extension AudioSettings: @unchecked Sendable {}

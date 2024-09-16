@@ -21,7 +21,7 @@ final class WebRTCMigrationStatusObserver: @unchecked Sendable {
 
     init(
         migratingFrom sfuAdapter: SFUAdapter,
-        deadline: TimeInterval = WebRTCConfiguration.Timeout.migrationCompletion
+        deadline: TimeInterval = WebRTCConfiguration.timeout.migrationCompletion
     ) {
         connectURL = sfuAdapter.connectURL
         task = Task {
