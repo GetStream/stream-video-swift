@@ -499,29 +499,22 @@ final class WebRTCCoordinator_Tests: XCTestCase {
         line: UInt = #line
     ) async rethrows {
         let transitionExpectation = expectation(description: "WebRTCCoordinator is expected to transition to stage id:\(id).")
-        var cancellable: AnyCancellable?
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
-                cancellable = self
+                let target = try await self
                     .subject
                     .stateMachine
                     .publisher
                     .filter { $0.id == id }
-                    .asyncStreamSink { target in
-                        Task {
-                            do {
-                                await self.assertNoThrowAsync(
-                                    try await handler(target),
-                                    file: file,
-                                    line: line
-                                )
-                                transitionExpectation.fulfill()
-                            } catch {
-                                XCTFail(file: file, line: line)
-                            }
-                        }
-                    }
+                    .nextValue(timeout: defaultTimeout)
+
+                await self.assertNoThrowAsync(
+                    try await handler(target),
+                    file: file,
+                    line: line
+                )
+                transitionExpectation.fulfill()
             }
             group.addTask {
                 await self.wait(for: 0.1)
@@ -532,8 +525,6 @@ final class WebRTCCoordinator_Tests: XCTestCase {
             }
 
             try await group.waitForAll()
-
-            cancellable?.cancel()
         }
     }
 
