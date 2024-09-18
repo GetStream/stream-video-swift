@@ -8,6 +8,8 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -16,12 +18,21 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
     private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.connected, .fastReconnected, .migrated]
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .joining(.init())
+
+    // MARK: - Lifecycle
 
     override func setUp() {
         super.setUp()
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+    }
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
     }
 
     override func tearDown() {

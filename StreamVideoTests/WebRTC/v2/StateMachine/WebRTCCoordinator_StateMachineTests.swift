@@ -24,7 +24,13 @@ final class WebRTCCoordinator_StateMachineTests: XCTestCase {
 
     func testValidTransition() {
         // Given
-        let nextState = WebRTCCoordinator.StateMachine.Stage.connecting(.init(), ring: true)
+        let nextState = WebRTCCoordinator.StateMachine.Stage.connecting(
+            .init(),
+            create: false,
+            options: nil,
+            ring: false,
+            notify: false
+        )
         XCTAssertEqual(subject.currentStage.id, .idle)
 
         // When

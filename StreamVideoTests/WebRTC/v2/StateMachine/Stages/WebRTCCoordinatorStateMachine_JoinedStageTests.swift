@@ -8,6 +8,8 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -16,8 +18,17 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
     private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.joining]
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .joined(.init())
+
+    // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         allOtherStages = nil
@@ -200,6 +211,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
 
+        await wait(for: 0.2)
         let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
         await assertResultAfterTrigger(
             trigger: { [mockCoordinatorStack] in
