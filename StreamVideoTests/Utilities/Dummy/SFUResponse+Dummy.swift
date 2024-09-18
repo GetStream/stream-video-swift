@@ -8,8 +8,8 @@ import StreamVideo
 extension SFUResponse {
     static func dummy(
         edgeName: String = "",
-        url: String = "",
-        wsEndpoint: String = ""
+        url: String = "getstream.io",
+        wsEndpoint: String = "wss://getstream.io"
     ) -> SFUResponse {
         .init(
             edgeName: edgeName,

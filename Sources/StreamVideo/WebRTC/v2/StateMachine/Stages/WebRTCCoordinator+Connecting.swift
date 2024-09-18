@@ -32,7 +32,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         /// Indicates whether to ring the other participants.
-        private let ring: Bool
+        let ring: Bool
 
         /// Initializes a new instance of `ConnectingStage`.
         /// - Parameters:

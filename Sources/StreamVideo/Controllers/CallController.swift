@@ -13,20 +13,19 @@ class CallController: @unchecked Sendable {
         user: user,
         apiKey: apiKey,
         callCid: callCid(from: callId, callType: callType),
-        videoConfig: videoConfig,
-        callAuthenticator: CallAuthenticator {
-            [weak self, callId] create, ring, migratingFrom in
-            if let self {
-                return try await authenticateCall(
-                    create: create,
-                    ring: ring,
-                    migratingFrom: migratingFrom
-                )
-            } else {
-                throw ClientError("Unable to authenticate callId:\(callId).")
-            }
+        videoConfig: videoConfig
+    ) {
+        [weak self, callId] create, ring, migratingFrom in
+        if let self {
+            return try await authenticateCall(
+                create: create,
+                ring: ring,
+                migratingFrom: migratingFrom
+            )
+        } else {
+            throw ClientError("Unable to authenticate callId:\(callId).")
         }
-    )
+    }
 
     weak var call: Call? {
         didSet { subscribeToParticipantsCountUpdatesEvent(call) }
@@ -234,7 +233,7 @@ class CallController: @unchecked Sendable {
             return
         }
 
-        await webRTCCoordinator.stateAdapter.set(.init(ownCapabilities))
+        await webRTCCoordinator.stateAdapter.set(ownCapabilities: .init(ownCapabilities))
     }
 
     /// Initiates a focus operation at a specific point on the camera's view.
