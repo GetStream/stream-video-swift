@@ -7,6 +7,8 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -22,7 +24,16 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         ring: true,
         notify: false
     )
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
+
+    // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         allOtherStages = nil
@@ -63,6 +74,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
     }
 
     func test_transition_fromIdle_doesNotUpdateSession() async throws {
+        _ = mockCoordinatorStack.coordinator
+        await wait(for: 0.5)
         let expectedSessionId = await mockCoordinatorStack
             .coordinator
             .stateAdapter

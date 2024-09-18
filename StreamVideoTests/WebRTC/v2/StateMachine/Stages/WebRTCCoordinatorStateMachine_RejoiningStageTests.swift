@@ -7,6 +7,8 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -15,8 +17,17 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
     private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.disconnected]
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .rejoining(.init())
+
+    // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         allOtherStages = nil
@@ -68,6 +79,7 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
 
     func test_transition_sfuAdapterIsConnected_sendLeaveRequestAndDisconnecteWereCalled() async {
         subject.context.coordinator = mockCoordinatorStack.coordinator
+        await wait(for: 0.25)
         let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
         await mockCoordinatorStack
             .coordinator

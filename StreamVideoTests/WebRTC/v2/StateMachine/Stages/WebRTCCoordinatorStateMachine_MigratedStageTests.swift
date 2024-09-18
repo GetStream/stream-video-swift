@@ -7,6 +7,8 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -16,7 +18,16 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
     private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.migrating]
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .migrated(.init())
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
+
+    // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         allOtherStages = nil
@@ -57,8 +68,8 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
     func test_transition_authenticationFails_transitionsToDisconnected() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
-        let migratingFromSFU = String.unique
-        subject.context.migratingFromSFU = migratingFromSFU
+        let currentSFU = String.unique
+        subject.context.currentSFU = currentSFU
 
         try await assertTransition(
             from: .migrating,
@@ -69,7 +80,9 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
                 coordinator: WebRTCCoordinator,
                 currentSFU: String?,
                 create: Bool,
-                ring: Bool
+                ring: Bool,
+                notify: Bool,
+                options: CreateCallOptions?
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -78,9 +91,11 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
                 )?.first
             )
             XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
-            XCTAssertEqual(input.currentSFU, migratingFromSFU)
+            XCTAssertEqual(input.currentSFU, currentSFU)
             XCTAssertFalse(input.create)
             XCTAssertFalse(input.ring)
+            XCTAssertFalse(input.notify)
+            XCTAssertNil(input.options)
             XCTAssertTrue(target.context.flowError is ClientError)
         }
     }

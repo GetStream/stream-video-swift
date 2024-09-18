@@ -21,7 +21,7 @@ final class MockWebRTCCoordinatorStack {
         user: User = .dummy(),
         apiKey: String = .unique,
         callCid: String = "default:\(String.unique)",
-        videoConfig: VideoConfig = .dummy(),
+        videoConfig: VideoConfig,
         callAuthenticator: MockCallAuthenticator = .init(),
         webRTCAuthenticator: MockWebRTCAuthenticator = .init(),
         sfuStack: MockSFUStack = .init(),

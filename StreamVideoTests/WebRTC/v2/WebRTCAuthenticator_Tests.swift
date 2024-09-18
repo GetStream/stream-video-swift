@@ -7,10 +7,19 @@ import XCTest
 
 final class WebRTCAuthenticator_Tests: XCTestCase {
 
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private static var videoConfig: VideoConfig! = .dummy()
+
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
     private lazy var subject: WebRTCAuthenticator! = .init()
 
     // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         mockCoordinatorStack = nil
@@ -29,7 +38,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
         let expected = JoinCallResponse.dummy()
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
 
-        let (sfuAdapter, response) = try await subject.authenticate(
+        _ = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: currentSFU,
             create: create,
