@@ -135,8 +135,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                             guard let self else { throw ClientError.Unexpected() }
                             let response = try await callController.joinCall(
                                 create: create,
-                                callType: callType,
-                                callId: callId,
                                 callSettings: callSettings,
                                 options: options,
                                 ring: ring,

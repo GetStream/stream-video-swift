@@ -5,7 +5,6 @@
 @testable import StreamVideo
 
 final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable {
-
     // MARK: - Mockable
 
     typealias FunctionKey = MockFunctionKey
@@ -16,7 +15,9 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable {
             coordinator: WebRTCCoordinator,
             currentSFU: String?,
             create: Bool,
-            ring: Bool
+            ring: Bool,
+            notify: Bool,
+            options: CreateCallOptions?
         )
 
         case waitForAuthentication(sfuAdapter: SFUAdapter)
@@ -24,8 +25,8 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable {
 
         var payload: Any {
             switch self {
-            case let .authenticate(coordinator, currentSFU, create, ring):
-                return (coordinator, currentSFU, create, ring)
+            case let .authenticate(coordinator, currentSFU, create, ring, notify, options):
+                return (coordinator, currentSFU, create, ring, notify, options)
             case let .waitForAuthentication(sfuAdapter):
                 return sfuAdapter
             case let .waitForConnect(sfuAdapter):
@@ -65,7 +66,9 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable {
         coordinator: WebRTCCoordinator,
         currentSFU: String?,
         create: Bool,
-        ring: Bool
+        ring: Bool,
+        notify: Bool,
+        options: CreateCallOptions?
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
         stubbedFunctionInput[.authenticate]?
             .append(
@@ -73,7 +76,9 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable {
                     coordinator: coordinator,
                     currentSFU: currentSFU,
                     create: create,
-                    ring: ring
+                    ring: ring,
+                    notify: notify,
+                    options: options
                 )
             )
 

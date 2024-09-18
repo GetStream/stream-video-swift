@@ -13,13 +13,21 @@ extension WebRTCCoordinator.StateMachine.Stage {
     ///   - ring: A Boolean indicating whether to ring the other participants.
     /// - Returns: A `ConnectingStage` instance representing the connecting
     ///   state of the WebRTC coordinator.
+    /// - Important: When transitioning from `.rejoining` values for ``ring``,
+    /// ``notify`` & ``options`` are nullified as are not relevant to the `rejoining` flow.
     static func connecting(
         _ context: Context,
-        ring: Bool
+        create: Bool,
+        options: CreateCallOptions?,
+        ring: Bool,
+        notify: Bool
     ) -> WebRTCCoordinator.StateMachine.Stage {
         ConnectingStage(
             context,
-            ring: ring
+            create: create,
+            options: options,
+            ring: ring,
+            notify: notify
         )
     }
 }
@@ -31,8 +39,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable
     {
+        let create: Bool
+        let options: CreateCallOptions?
         /// Indicates whether to ring the other participants.
         let ring: Bool
+        let notify: Bool
 
         /// Initializes a new instance of `ConnectingStage`.
         /// - Parameters:
@@ -40,9 +51,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///   - ring: A Boolean indicating whether to ring other participants.
         init(
             _ context: Context,
-            ring: Bool
+            create: Bool,
+            options: CreateCallOptions?,
+            ring: Bool,
+            notify: Bool
         ) {
+            self.create = create
+            self.options = options
             self.ring = ring
+            self.notify = notify
             super.init(id: .connecting, context: context)
         }
 
@@ -52,16 +69,35 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///   occurring.
         /// - Returns: This `ConnectingStage` instance if the transition is
         ///   valid, otherwise `nil`.
+        /// - Important: When transitioning from `.rejoining` values for ``ring``,
+        /// ``notify`` & ``options`` are nullified as are not relevant to the `rejoining` flow.
         /// - Note: Valid transition from: `.idle`,  `.rejoining`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
             case .idle:
-                execute(create: true, updateSession: false)
+                execute(
+                    create: create,
+                    ring: ring,
+                    notify: notify,
+                    options: options,
+                    updateSession: false
+                )
                 return self
             case .rejoining:
-                execute(create: false, updateSession: true)
+                if ring || notify || options != nil {
+                    log.assert(ring == false, "Ring cannot be true when rejoining.")
+                    log.assert(notify == false, "Notfiy cannot be true when rejoining.")
+                    log.assert(options == nil, "CreateCallOptions cannot be non-nil when rejoining.")
+                }
+                execute(
+                    create: false,
+                    ring: false,
+                    notify: false,
+                    options: nil,
+                    updateSession: true
+                )
                 return self
             default:
                 return nil
@@ -71,9 +107,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// Executes the call connecting process.
         /// - Parameters:
         ///   - create: A Boolean indicating whether to create a new session.
+        ///   - ring: A Boolean indicating whether to ring other participants.
+        ///   - notify: A Boolean indicating whether to notify other participants.
+        ///   - options: A `CreateCallOptions` instance to provide additional informations when
+        ///   creating a call.
         ///   - updateSession: A Boolean indicating whether to update the
         ///     existing session.
-        private func execute(create: Bool, updateSession: Bool) {
+        private func execute(
+            create: Bool,
+            ring: Bool,
+            notify: Bool,
+            options: CreateCallOptions?,
+            updateSession: Bool
+        ) {
             Task { [weak self] in
                 guard let self else { return }
                 do {
@@ -97,7 +143,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             coordinator: coordinator,
                             currentSFU: nil,
                             create: create,
-                            ring: ring
+                            ring: ring,
+                            notify: notify,
+                            options: options
                         )
 
                     /// We provide the ``SFUAdapter`` to the authenticator which will ensure

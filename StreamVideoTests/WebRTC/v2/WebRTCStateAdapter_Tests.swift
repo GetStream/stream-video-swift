@@ -39,6 +39,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     // MARK: - setSessionID
 
     func test_setSessionID_shouldUpdateSessionID() async throws {
+        _ = subject
+        await wait(for: 0.5)
         let expected = String.unique
 
         await subject.set(sessionID: expected)

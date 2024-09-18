@@ -7,10 +7,19 @@ import XCTest
 
 final class WebRTCAuthenticator_Tests: XCTestCase {
 
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private static var videoConfig: VideoConfig! = .dummy()
+
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
     private lazy var subject: WebRTCAuthenticator! = .init()
 
     // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         mockCoordinatorStack = nil
@@ -20,10 +29,37 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
 
     // MARK: - authenticate
 
+    func test_authenticate_withValidData_callAuthenticationWasCalledWithExpectedInput() async throws {
+        let currentSFU = String.unique
+        let create = true
+        let ring = true
+        let notify = true
+        let options = CreateCallOptions(team: .unique)
+        let expected = JoinCallResponse.dummy()
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
+
+        _ = try await subject.authenticate(
+            coordinator: mockCoordinatorStack.coordinator,
+            currentSFU: currentSFU,
+            create: create,
+            ring: ring,
+            notify: notify,
+            options: options
+        )
+
+        let input = try XCTUnwrap(mockCoordinatorStack.callAuthenticator.authenticateCalledWithInput.first)
+        XCTAssertTrue(input.create)
+        XCTAssertTrue(input.ring)
+        XCTAssertTrue(input.notify)
+        XCTAssertEqual(input.options?.team, options.team)
+    }
+
     func test_authenticate_withValidData_shouldReturnSFUAdapterAndJoinCallResponse() async throws {
         let currentSFU = String.unique
         let create = true
         let ring = true
+        let notify = true
+        let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy()
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
 
@@ -31,7 +67,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: currentSFU,
             create: create,
-            ring: ring
+            ring: ring,
+            notify: notify,
+            options: options
         )
 
         XCTAssertEqual(response, expected)
@@ -42,6 +80,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     func test_authenticate_withNilCurrentSFU_shouldStillReturnSFUAdapterAndJoinCallResponse() async throws {
         let create = true
         let ring = true
+        let notify = true
+        let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy()
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
 
@@ -49,7 +89,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
             create: create,
-            ring: ring
+            ring: ring,
+            notify: notify,
+            options: options
         )
 
         XCTAssertEqual(response, expected)
@@ -60,6 +102,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     func test_authenticate_withCreateTrueAndInitialCallSettings_shouldSetInitialCallSettings() async throws {
         let create = true
         let ring = true
+        let notify = true
+        let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))))
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
         let initialCallSettings = CallSettings(
@@ -76,7 +120,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
             create: create,
-            ring: ring
+            ring: ring,
+            notify: notify,
+            options: options
         )
 
         let callSettings = await mockCoordinatorStack
@@ -89,6 +135,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     func test_authenticate_withCreateTrueWithoutInitialCallSettings_shouldSetCallSettingsFromResponse() async throws {
         let create = true
         let ring = true
+        let notify = true
+        let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: true))))
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
 
@@ -96,7 +144,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
             create: create,
-            ring: ring
+            ring: ring,
+            notify: notify,
+            options: options
         )
 
         let callSettings = await mockCoordinatorStack
@@ -109,6 +159,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     func test_authenticate_withCreateFalse_shouldNotSetInitialCallSettings() async throws {
         let create = false
         let ring = true
+        let notify = true
+        let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))))
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
         await mockCoordinatorStack
@@ -120,7 +172,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
             create: create,
-            ring: ring
+            ring: ring,
+            notify: notify,
+            options: options
         )
 
         let callSettings = await mockCoordinatorStack
@@ -134,6 +188,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     func test_authenticate_updatesVideoOptions() async throws {
         let create = false
         let ring = true
+        let notify = true
+        let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy(
             call: .dummy(
                 settings: .dummy(
@@ -149,7 +205,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
             create: create,
-            ring: ring
+            ring: ring,
+            notify: notify,
+            options: options
         )
 
         let videoOptions = await mockCoordinatorStack
@@ -163,6 +221,8 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     func test_authenticate_updatesIntervalOnStatsReporter() async throws {
         let create = false
         let ring = true
+        let notify = true
+        let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy(
             statsOptions: .init(reportingIntervalMs: 12000)
         )
@@ -172,7 +232,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             coordinator: mockCoordinatorStack.coordinator,
             currentSFU: nil,
             create: create,
-            ring: ring
+            ring: ring,
+            notify: notify,
+            options: options
         )
 
         let statsReporter = await mockCoordinatorStack
