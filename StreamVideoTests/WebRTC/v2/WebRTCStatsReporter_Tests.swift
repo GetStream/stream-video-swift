@@ -64,6 +64,33 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
         XCTAssertNotNil(sfuStack.service.sendStatsWasCalledWithRequest)
     }
+
+    // MARK: - setInterval
+
+    func test_setInterval_withSFUAdapterIntervalMoreThanZero_reportWasCollectedAndSentCorrectly() async throws {
+        subject.sfuAdapter = mockSFUStack.adapter
+        subject.interval = 1
+
+        await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
+
+        let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
+        XCTAssertTrue(request.subscriberStats.isEmpty)
+        XCTAssertTrue(request.publisherStats.isEmpty)
+        XCTAssertEqual(request.sessionID, sessionID)
+    }
+
+    func test_setInterval_withSFUAdapterIntervalMoreThanZeroThenResetsToZero_secondReportWasNotCollectedAndSentCorrectly(
+    ) async throws {
+        subject.sfuAdapter = mockSFUStack.adapter
+        subject.interval = 1
+        await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
+        subject.interval = 0
+        mockSFUStack.service.sendStatsWasCalledWithRequest = nil
+
+        await wait(for: subject.interval + 0.5)
+
+        XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
+    }
 }
 
 extension XCTestCase {
