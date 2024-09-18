@@ -15,16 +15,12 @@ class CallController_Mock: CallController {
 
     override func joinCall(
         create: Bool = true,
-        callType: String,
-        callId: String,
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
-        migratingFrom: String? = nil,
-        sessionID: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
-        mockResponseBuilder.makeJoinCallResponse(cid: "\(callType):\(callId)")
+        mockResponseBuilder.makeJoinCallResponse(cid: super.call?.cId ?? "default:\(String.unique)")
     }
 
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }

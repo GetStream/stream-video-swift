@@ -7,6 +7,8 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -24,11 +26,18 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         .migrated
     ]
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .disconnected(.init())
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
 
     override func setUp() {
         super.setUp()
         mockCoordinatorStack.internetConnection.subject.send(.unknown)
+    }
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
     }
 
     override func tearDown() {

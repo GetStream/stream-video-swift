@@ -8,10 +8,19 @@ import XCTest
 
 final class WebRTCJoinRequestFactory_Tests: XCTestCase {
 
-    private var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private static var videoConfig: VideoConfig! = .dummy()
+
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
     private var subject: WebRTCJoinRequestFactory! = .init()
 
     // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         subject = nil
