@@ -2,19 +2,19 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 @testable import StreamVideo
 @preconcurrency import XCTest
-import AVFoundation
 
 final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var defaultAPI: DefaultAPI! = DefaultAPI(
-            basePath: "example.com",
-            transport: httpClient,
-            middlewares: []
-        )
+        basePath: "example.com",
+        transport: httpClient,
+        middlewares: []
+    )
     private lazy var user: User! = .dummy()
     private lazy var callId: String! = .unique
     private lazy var callType: String! = .default
@@ -65,7 +65,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             operation: {
                 /// We are wrapping in a task as we are not interested in the call result.
                 Task {
-                    try await self
+                    try? await self
                         .subject
                         .joinCall(
                             create: true,
@@ -108,7 +108,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_changeAudioState_callSettingsUpdatedOnWebRTCCoordinatorAsExpected() async throws {
         try await assertWebRTCCoordinatorSettingsUpdated(
             expected: .init(audioOn: true)
-        ){ try await subject.changeAudioState(isEnabled: true) }
+        ) { try await subject.changeAudioState(isEnabled: true) }
     }
 
     // MARK: - changeSoundState
@@ -116,7 +116,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_changeSoundState_callSettingsUpdatedOnWebRTCCoordinatorAsExpected() async throws {
         try await assertWebRTCCoordinatorSettingsUpdated(
             expected: .init(audioOutputOn: true)
-        ){ try await subject.changeSoundState(isEnabled: true) }
+        ) { try await subject.changeSoundState(isEnabled: true) }
     }
 
     // MARK: - changeCameraMode
@@ -124,7 +124,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_changeCameraMode_callSettingsUpdatedOnWebRTCCoordinatorAsExpected() async throws {
         try await assertWebRTCCoordinatorSettingsUpdated(
             expected: .init(cameraPosition: .back)
-        ){ try await subject.changeCameraMode(position: .back) }
+        ) { try await subject.changeCameraMode(position: .back) }
     }
 
     // MARK: - changeSpeakerState
@@ -132,7 +132,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_changeSpeakerState_callSettingsUpdatedOnWebRTCCoordinatorAsExpected() async throws {
         try await assertWebRTCCoordinatorSettingsUpdated(
             expected: .init(speakerOn: true)
-        ){ try await subject.changeSpeakerState(isEnabled: true) }
+        ) { try await subject.changeSpeakerState(isEnabled: true) }
     }
 
     // MARK: - changeTrackVisibility
@@ -166,7 +166,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             100
         )
         await assertEqualAsync(
-            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.participants[user.id]?.trackSize.height,
+            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.participants[user.id]?.trackSize
+                .height,
             200
         )
     }
@@ -304,7 +305,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         try await subject.startNoiseCancellation(user.id)
 
         XCTAssertEqual(
-            mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.service.startNoiseCancellationWasCalledWithRequest?.sessionID,
+            mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.service.startNoiseCancellationWasCalledWithRequest?
+                .sessionID,
             user.id
         )
     }
@@ -541,7 +543,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
         let callSettings = CallSettings(cameraPosition: .back)
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.adapter)
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
+            .set(sfuAdapter: mockWebRTCCoordinatorFactory.mockCoordinatorStack.sfuStack.adapter)
         if let videoFilter {
             await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(videoFilter: videoFilter)
         }
@@ -551,9 +554,12 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(token: .unique)
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(participantsCount: 12)
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(anonymousCount: 22)
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.didUpdateParticipants([user.id: CallParticipant.dummy(id: user.id)])
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
+            .set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
+            .didUpdateParticipants([user.id: CallParticipant.dummy(id: user.id)])
         try await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
+            .set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
     }
 }

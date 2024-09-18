@@ -1,8 +1,5 @@
 //
-//  MockWebRTCCoordinatorFactory.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 18/9/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 @testable import StreamVideo
@@ -12,7 +9,7 @@ final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked
     var mockCoordinatorStack: MockWebRTCCoordinatorStack
 
     init(videoConfig: VideoConfig) {
-        self.mockCoordinatorStack = .init(videoConfig: videoConfig)
+        mockCoordinatorStack = .init(videoConfig: videoConfig)
     }
 
     private var buildCoordinatorWasCalled: (
