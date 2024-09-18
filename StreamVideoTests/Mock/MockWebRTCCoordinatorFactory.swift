@@ -9,7 +9,11 @@
 
 final class MockWebRTCCoordinatorFactory: WebRTCCoordinatorProviding, @unchecked Sendable {
 
-    var mockCoordinatorStack: MockWebRTCCoordinatorStack = .init()
+    var mockCoordinatorStack: MockWebRTCCoordinatorStack
+
+    init(videoConfig: VideoConfig) {
+        self.mockCoordinatorStack = .init(videoConfig: videoConfig)
+    }
 
     private var buildCoordinatorWasCalled: (
         user: User,

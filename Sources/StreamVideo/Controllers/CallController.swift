@@ -391,9 +391,7 @@ class CallController: @unchecked Sendable {
     func cleanUp() {
         guard call != nil else { return }
         call = nil
-        Task {
-            await webRTCCoordinator.cleanUp()
-        }
+        Task { await webRTCCoordinator.cleanUp() }
     }
 
     /// Collects user feedback asynchronously.
