@@ -185,12 +185,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     // MARK: - waitForAuthentication
 
     func test_waitForAuthentication_shouldThrowErrorIfTimeout() async throws {
-        do {
+        _ = await XCTAssertThrowsErrorAsync {
             try await subject
                 .waitForAuthentication(on: mockCoordinatorStack.sfuStack.adapter)
-            XCTFail()
-        } catch {
-            // Success
         }
     }
 
@@ -216,12 +213,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
     // MARK: - waitForConnect
 
     func test_waitForConnect_shouldThrowErrorIfTimeout() async throws {
-        do {
+        _ = await XCTAssertThrowsErrorAsync {
             try await subject
                 .waitForConnect(on: mockCoordinatorStack.sfuStack.adapter)
-            XCTFail()
-        } catch {
-            // Success
         }
     }
 

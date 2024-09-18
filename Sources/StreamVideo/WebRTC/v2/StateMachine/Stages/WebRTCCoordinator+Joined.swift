@@ -391,7 +391,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 let statsReporter = WebRTCStatsReporter(
                     sessionID: await stateAdapter.sessionID
                 )
-                await stateAdapter.set(statsReporter)
+                await stateAdapter.set(statsReporter: statsReporter)
             }
 
             let statsReporter = await stateAdapter.statsReporter

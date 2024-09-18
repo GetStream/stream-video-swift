@@ -289,8 +289,8 @@ final class SFUEventAdapter {
     private func handle(
         _ event: Stream_Video_Sfu_Event_HealthCheckResponse
     ) async {
-        await stateAdapter.set(event.participantCount.total)
-        await stateAdapter.set(anonymous: event.participantCount.anonymous)
+        await stateAdapter.set(participantsCount: event.participantCount.total)
+        await stateAdapter.set(anonymousCount: event.participantCount.anonymous)
     }
 
     /// Handles a TrackPublished event.

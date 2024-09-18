@@ -56,10 +56,10 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         await coordinator.stateAdapter.set(
             token: response.credentials.token
         )
-        await coordinator.stateAdapter.set(Set(response.ownCapabilities))
-        await coordinator.stateAdapter.set(response.call.settings.audio)
+        await coordinator.stateAdapter.set(ownCapabilities: Set(response.ownCapabilities))
+        await coordinator.stateAdapter.set(audioSettings: response.call.settings.audio)
         await coordinator.stateAdapter.set(
-            ConnectOptions(
+            connectOptions: ConnectOptions(
                 iceServers: response.credentials.iceServers
             )
         )
@@ -67,16 +67,16 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         if create {
             if let callSettings = await coordinator.stateAdapter.initialCallSettings {
                 await coordinator.stateAdapter.set(
-                    callSettings
+                    callSettings: callSettings
                 )
             } else {
                 await coordinator.stateAdapter.set(
-                    response.call.settings.toCallSettings
+                    callSettings: response.call.settings.toCallSettings
                 )
             }
         }
         await coordinator.stateAdapter.set(
-            VideoOptions(
+            videoOptions: VideoOptions(
                 targetResolution: response.call.settings.video.targetResolution
             )
         )
@@ -107,7 +107,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 sessionID: await coordinator.stateAdapter.sessionID
             )
             statsReporter.interval = TimeInterval(statsReportingInterval)
-            await coordinator.stateAdapter.set(statsReporter)
+            await coordinator.stateAdapter.set(statsReporter: statsReporter)
         }
 
         return (sfuAdapter, response)

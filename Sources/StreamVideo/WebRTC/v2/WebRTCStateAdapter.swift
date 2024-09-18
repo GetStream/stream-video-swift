@@ -10,7 +10,6 @@ import StreamWebRTC
 /// video call. This class manages the connection setup, track handling, and
 /// participants, including their media settings, capabilities, and track
 /// updates.
-
 actor WebRTCStateAdapter: ObservableObject {
 
     /// Enum representing different types of media tracks.
@@ -106,32 +105,32 @@ actor WebRTCStateAdapter: ObservableObject {
         self.screenShareSessionProvider = screenShareSessionProvider
         let sessionID = UUID().uuidString
 
-        Task { await set(sessionID) }
+        Task { await set(sessionID: sessionID) }
     }
 
     /// Sets the session ID.
-    func set(_ value: String) { self.sessionID = value }
+    func set(sessionID value: String) { self.sessionID = value }
 
     /// Sets the call settings.
-    func set(_ value: CallSettings) { self.callSettings = value }
+    func set(callSettings value: CallSettings) { self.callSettings = value }
 
     /// Sets the initial call settings.
     func set(initialCallSettings value: CallSettings?) { self.initialCallSettings = value }
 
     /// Sets the audio settings.
-    func set(_ value: AudioSettings) { self.audioSettings = value }
+    func set(audioSettings value: AudioSettings) { self.audioSettings = value }
 
     /// Sets the video options.
-    func set(_ value: VideoOptions) { self.videoOptions = value }
+    func set(videoOptions value: VideoOptions) { self.videoOptions = value }
 
     /// Sets the connection options.
-    func set(_ value: ConnectOptions) { self.connectOptions = value }
+    func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
 
     /// Sets the own capabilities of the current user.
-    func set(_ value: Set<OwnCapability>) { self.ownCapabilities = value }
+    func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
-    func set(_ value: WebRTCStatsReporter) {
+    func set(statsReporter value: WebRTCStatsReporter) {
         self.statsReporter = value
     }
 
@@ -143,19 +142,19 @@ actor WebRTCStateAdapter: ObservableObject {
     }
 
     /// Sets the number of participants in the call.
-    func set(_ value: UInt32) { self.participantsCount = value }
+    func set(participantsCount value: UInt32) { self.participantsCount = value }
 
     /// Sets the anonymous participant count.
-    func set(anonymous value: UInt32) { self.anonymousCount = value }
+    func set(anonymousCount value: UInt32) { self.anonymousCount = value }
 
     /// Sets the participant pins.
-    func set(_ value: [PinInfo]) { self.participantPins = value }
+    func set(participantPins value: [PinInfo]) { self.participantPins = value }
 
     /// Sets the token for the session.
     func set(token value: String) { self.token = value }
 
     /// Sets the video filter and applies it to the publisher.
-    func set(_ value: VideoFilter?) {
+    func set(videoFilter value: VideoFilter?) {
         videoFilter = value
         publisher?.setVideoFilter(value)
     }
@@ -164,7 +163,7 @@ actor WebRTCStateAdapter: ObservableObject {
 
     /// Refreshes the session by setting a new session ID.
     func refreshSession() {
-        set(UUID().uuidString)
+        set(sessionID: UUID().uuidString)
     }
 
     /// Configures the peer connections for the session.

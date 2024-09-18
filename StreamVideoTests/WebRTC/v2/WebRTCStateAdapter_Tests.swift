@@ -41,7 +41,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     func test_setSessionID_shouldUpdateSessionID() async throws {
         let expected = String.unique
 
-        await subject.set(expected)
+        await subject.set(sessionID: expected)
 
         await assertEqualAsync(await subject.sessionID, expected)
     }
@@ -51,7 +51,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     func test_setCallSettings_shouldUpdateCallSettings() async throws {
         let expected = CallSettings(cameraPosition: .back)
 
-        await subject.set(expected)
+        await subject.set(callSettings: expected)
 
         await assertEqualAsync(await subject.callSettings, expected)
     }
@@ -78,7 +78,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             speakerDefaultOn: true
         )
 
-        await subject.set(expected)
+        await subject.set(audioSettings: expected)
 
         await assertEqualAsync(await subject.audioSettings, expected)
     }
@@ -92,7 +92,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             preferredFps: 109_999
         )
 
-        await subject.set(expected)
+        await subject.set(videoOptions: expected)
 
         await assertEqualAsync(await subject.videoOptions.preferredDimensions.width, expected.preferredDimensions.width)
         await assertEqualAsync(await subject.videoOptions.preferredDimensions.height, expected.preferredDimensions.height)
@@ -108,7 +108,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             ]
         )
 
-        await subject.set(expected)
+        await subject.set(connectOptions: expected)
 
         await assertEqualAsync(
             await subject.connectOptions.rtcConfiguration.iceServers.map {
@@ -133,7 +133,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     func test_setOwnCapabilities_shouldUpdateOwnCapabilities() async throws {
         let expected = Set<OwnCapability>([OwnCapability.blockUsers, .removeCallMember])
 
-        await subject.set(expected)
+        await subject.set(ownCapabilities: expected)
 
         await assertEqualAsync(await subject.ownCapabilities, expected)
     }
@@ -143,7 +143,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     func test_setStatsReporter_shouldUpdateStatsReporter() async throws {
         let expected = WebRTCStatsReporter(sessionID: .unique)
 
-        await subject.set(expected)
+        await subject.set(statsReporter: expected)
 
         await assertTrueAsync(await subject.statsReporter === expected)
     }
@@ -152,7 +152,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
 
     func test_setSFUAdapter_shouldUpdateSFUAdapterAndStatsReporter() async throws {
         let statsReporter = WebRTCStatsReporter(sessionID: .unique)
-        await subject.set(statsReporter)
+        await subject.set(statsReporter: statsReporter)
         let mockSFUStack = MockSFUStack()
 
         await subject.set(sfuAdapter: mockSFUStack.adapter)
@@ -166,7 +166,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     func test_setParticipantsCount_shouldUpdateParticipantsCount() async throws {
         let expected = UInt32(32)
 
-        await subject.set(expected)
+        await subject.set(participantsCount: expected)
 
         await assertEqualAsync(await subject.participantsCount, expected)
     }
@@ -176,7 +176,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     func test_setAnonymousCount_shouldUpdateAnonymousCount() async throws {
         let expected = UInt32(32)
 
-        await subject.set(anonymous: expected)
+        await subject.set(anonymousCount: expected)
 
         await assertEqualAsync(await subject.anonymousCount, expected)
     }
@@ -186,7 +186,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     func test_setParticipantPins_shouldUpdateParticipantPins() async throws {
         let expected = [PinInfo(isLocal: true, pinnedAt: .init(timeIntervalSince1970: 100))]
 
-        await subject.set(expected)
+        await subject.set(participantPins: expected)
 
         await assertEqualAsync(await subject.participantPins, expected)
     }
@@ -209,7 +209,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         try await subject.configurePeerConnections()
         let expected = VideoFilter(id: .unique, name: .unique, filter: { _ in fatalError() })
 
-        await subject.set(expected)
+        await subject.set(videoFilter: expected)
 
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         XCTAssertEqual(
@@ -243,11 +243,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             name: .unique,
             filter: { _ in fatalError() }
         )
-        await subject.set(videoFilter)
+        await subject.set(videoFilter: videoFilter)
         let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
-        await subject.set(ownCapabilities)
+        await subject.set(ownCapabilities: ownCapabilities)
         let callSettings = CallSettings(cameraPosition: .back)
-        await subject.set(callSettings)
+        await subject.set(callSettings: callSettings)
 
         try await subject.configurePeerConnections()
 
@@ -297,26 +297,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
 
     func test_cleanUp_shouldResetProperties() async throws {
         let sfuStack = MockSFUStack()
-        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
-        let callSettings = CallSettings(cameraPosition: .back)
-        let videoFilter = VideoFilter(
-            id: .unique,
-            name: .unique,
-            filter: { _ in fatalError() }
-        )
-        await subject.set(sfuAdapter: sfuStack.adapter)
-        await subject.set(videoFilter)
-        await subject.set(ownCapabilities)
-        await subject.set(callSettings)
-        await subject.set(.unique)
-        await subject.set(token: .unique)
-        await subject.set(12)
-        await subject.set(anonymous: 22)
-        await subject.set([PinInfo(isLocal: true, pinnedAt: .init())])
-        await subject.didUpdateParticipants([String.unique: CallParticipant.dummy()])
-        try await subject.configurePeerConnections()
-        await subject.set(WebRTCStatsReporter(sessionID: .unique))
+        try await prepare(sfuStack: sfuStack)
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
 
@@ -342,27 +323,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
 
     func test_cleanUpForReconnection_shouldResetPropertiesForReconnection() async throws {
         let sfuStack = MockSFUStack()
-        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
-        let callSettings = CallSettings(cameraPosition: .back)
-        let videoFilter = VideoFilter(
-            id: .unique,
-            name: .unique,
-            filter: { _ in fatalError() }
-        )
-        await subject.set(sfuAdapter: sfuStack.adapter)
-        await subject.set(videoFilter)
-        await subject.set(ownCapabilities)
-        await subject.set(callSettings)
-        await subject.set(token: .unique)
-        await subject.set(12)
-        await subject.set(anonymous: 22)
+        let ownCapabilities = Set([OwnCapability.blockUsers])
         let pins = [PinInfo(isLocal: true, pinnedAt: .init())]
-        await subject.set(pins)
         let participants = [String.unique: CallParticipant.dummy()]
-        await subject.didUpdateParticipants(participants)
-        try await subject.configurePeerConnections()
-        await subject.set(WebRTCStatsReporter(sessionID: .unique))
+        try await prepare(
+            sfuStack: sfuStack,
+            ownCapabilities: ownCapabilities,
+            participants: participants,
+            participantPins: pins
+        )
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let sessionId = await subject.sessionID
@@ -399,7 +368,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             capturer: MockVideoCapturer()
         )
         let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
-        await subject.set(ownCapabilities)
+        await subject.set(ownCapabilities: ownCapabilities)
 
         try await subject.restoreScreenSharing()
 
@@ -426,7 +395,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         try await subject.configurePeerConnections()
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
-        await subject.set(ownCapabilities)
+        await subject.set(ownCapabilities: ownCapabilities)
 
         try await subject.restoreScreenSharing()
 
@@ -548,7 +517,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let newVideoOptions = VideoOptions(targetResolution: .dummy(), preferredFormat: nil, preferredFps: 17)
 
-        await subject.set(newVideoOptions)
+        await subject.set(videoOptions: newVideoOptions)
 
         XCTAssertEqual(mockPublisher.videoOptions.preferredFps, 17)
         XCTAssertEqual(mockSubscriber.videoOptions.preferredFps, 17)
@@ -650,6 +619,33 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
     ) async rethrows {
         let value = try await expression()
         XCTAssertTrue(value, file: file, line: line)
+    }
+
+    private func prepare(
+        sfuStack: MockSFUStack = .init(),
+        ownCapabilities: Set<OwnCapability> = [.changeMaxDuration],
+        participants: [String: CallParticipant] = [.unique: .dummy()],
+        participantPins: [PinInfo] = [.init(isLocal: true, pinnedAt: .init())]
+    ) async throws {
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        let callSettings = CallSettings(cameraPosition: .back)
+        let videoFilter = VideoFilter(
+            id: .unique,
+            name: .unique,
+            filter: { _ in fatalError() }
+        )
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.set(videoFilter: videoFilter)
+        await subject.set(ownCapabilities: ownCapabilities)
+        await subject.set(callSettings: callSettings)
+        await subject.set(sessionID: .unique)
+        await subject.set(token: .unique)
+        await subject.set(participantsCount: 12)
+        await subject.set(anonymousCount: 22)
+        await subject.set(participantPins: participantPins)
+        await subject.didUpdateParticipants(participants)
+        try await subject.configurePeerConnections()
+        await subject.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
     }
 }
 

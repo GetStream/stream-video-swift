@@ -32,7 +32,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     }
 
     private(set) var updateMuteStatesWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest?
-    private(set) var sendStatsWasCalledWithRequest: Stream_Video_Sfu_Signal_SendStatsRequest?
+    var sendStatsWasCalledWithRequest: Stream_Video_Sfu_Signal_SendStatsRequest?
     private(set) var startNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest?
     private(set) var stopNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest?
     private(set) var setPublisherWasCalledWithRequest: Stream_Video_Sfu_Signal_SetPublisherRequest?

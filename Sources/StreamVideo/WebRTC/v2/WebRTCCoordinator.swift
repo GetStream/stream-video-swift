@@ -115,7 +115,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         position: CameraPosition
     ) async throws {
         await stateAdapter.set(
-            stateAdapter
+            callSettings: stateAdapter
                 .callSettings
                 .withUpdatedCameraPosition(position)
         )
@@ -129,7 +129,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// - Parameter isEnabled: Whether the audio should be enabled.
     func changeAudioState(isEnabled: Bool) async {
         await stateAdapter.set(
-            stateAdapter
+            callSettings: stateAdapter
                 .callSettings
                 .withUpdatedAudioState(isEnabled)
         )
@@ -140,7 +140,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// - Parameter isEnabled: Whether the video should be enabled.
     func changeVideoState(isEnabled: Bool) async {
         await stateAdapter.set(
-            stateAdapter
+            callSettings: stateAdapter
                 .callSettings
                 .withUpdatedVideoState(isEnabled)
         )
@@ -151,7 +151,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// - Parameter isEnabled: Whether the output should be enabled.
     func changeSoundState(isEnabled: Bool) async {
         await stateAdapter.set(
-            stateAdapter
+            callSettings: stateAdapter
                 .callSettings
                 .withUpdatedAudioOutputState(isEnabled)
         )
@@ -162,7 +162,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     /// - Parameter isEnabled: Whether the speaker should be enabled.
     func changeSpeakerState(isEnabled: Bool) async {
         await stateAdapter.set(
-            stateAdapter
+            callSettings: stateAdapter
                 .callSettings
                 .withUpdatedSpeakerState(isEnabled)
         )
@@ -200,7 +200,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///
     /// - Parameter videoFilter: The filter to be applied on the video.
     func setVideoFilter(_ videoFilter: VideoFilter?) async {
-        await stateAdapter.set(videoFilter)
+        await stateAdapter.set(videoFilter: videoFilter)
     }
 
     // MARK: - Screensharing

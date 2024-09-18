@@ -157,19 +157,6 @@ final class WebRTCCoordinator_Tests: XCTestCase {
         )
     }
 
-    // MARK: - changeVideoState
-
-    func test_changeVideoState_shouldUpdateVideoState() async throws {
-        /// This can't be test due to the preprocessor macro we are using
-        /// in the CallSettings init.
-//        await subject.changeVideoState(isEnabled: false)
-//
-//        await assertEqualAsync(
-//            await subject.stateAdapter.callSettings.videoOn,
-//            true
-//        )
-    }
-
     // MARK: - changeSoundState
 
     func test_changeSoundState_shouldUpdateAudioOutputState() async throws {
@@ -251,7 +238,7 @@ final class WebRTCCoordinator_Tests: XCTestCase {
     func test_startScreensharing_typeIsInApp_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await subject.stateAdapter.set(Set(ownCapabilities))
+        await subject.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
         let mockPublisher = try await XCTAsyncUnwrap(
             await subject
                 .stateAdapter
@@ -273,7 +260,7 @@ final class WebRTCCoordinator_Tests: XCTestCase {
     func test_startScreensharing_typeIsBroadcast_shouldBeginScreenSharing() async throws {
         try await prepareAsConnected()
         let ownCapabilities = [OwnCapability.createReaction]
-        await subject.stateAdapter.set(Set(ownCapabilities))
+        await subject.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
         let mockPublisher = try await XCTAsyncUnwrap(
             await subject
                 .stateAdapter
@@ -549,17 +536,17 @@ final class WebRTCCoordinator_Tests: XCTestCase {
         let callSettings = CallSettings(cameraPosition: .back)
         await subject.stateAdapter.set(sfuAdapter: mockSFUStack.adapter)
         if let videoFilter {
-            await subject.stateAdapter.set(videoFilter)
+            await subject.stateAdapter.set(videoFilter: videoFilter)
         }
-        await subject.stateAdapter.set(ownCapabilities)
-        await subject.stateAdapter.set(callSettings)
-        await subject.stateAdapter.set(.unique)
+        await subject.stateAdapter.set(ownCapabilities: ownCapabilities)
+        await subject.stateAdapter.set(callSettings: callSettings)
+        await subject.stateAdapter.set(sessionID: .unique)
         await subject.stateAdapter.set(token: .unique)
-        await subject.stateAdapter.set(12)
-        await subject.stateAdapter.set(anonymous: 22)
-        await subject.stateAdapter.set([PinInfo(isLocal: true, pinnedAt: .init())])
+        await subject.stateAdapter.set(participantsCount: 12)
+        await subject.stateAdapter.set(anonymousCount: 22)
+        await subject.stateAdapter.set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
         await subject.stateAdapter.didUpdateParticipants([user.id: CallParticipant.dummy(id: user.id)])
         try await subject.stateAdapter.configurePeerConnections()
-        await subject.stateAdapter.set(WebRTCStatsReporter(sessionID: .unique))
+        await subject.stateAdapter.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
     }
 }
