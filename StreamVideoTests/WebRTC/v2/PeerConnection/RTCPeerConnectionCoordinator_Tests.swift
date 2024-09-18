@@ -10,6 +10,7 @@ import XCTest
 final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
 
     private lazy var sessionId: String! = .unique
+    private lazy var peerType: PeerConnectionType! = .publisher
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockSFUStack: MockSFUStack! = .init()
@@ -48,11 +49,11 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
     )
     private lazy var subject: RTCPeerConnectionCoordinator! = .init(
         sessionId: sessionId,
-        peerType: .publisher,
+        peerType: peerType,
         peerConnection: mockPeerConnection,
         videoOptions: .init(),
         callSettings: .init(),
-        audioSettings: .init(),
+        audioSettings: .dummy(opusDtxEnabled: true, redundantCodingEnabled: true),
         sfuAdapter: mockSFUStack.adapter,
         audioSession: audioSession,
         mediaAdapter: mediaAdapter
@@ -147,5 +148,233 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         subject.close()
 
         XCTAssertEqual(mockPeerConnection?.timesCalled(.close), 1)
+    }
+
+    // MARK: - negotiate
+
+    // MARK: publisher
+
+    func test_negotiate_subjectIsPublisher_callsOfferOnPeerConnection() async throws {
+        _ = subject
+
+        mockPeerConnection
+            .subject
+            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.offer) == 1
+        }
+    }
+
+    func test_negotiate_subjectIsPublisher_callsSetLocalDescriptionWithExpectedOffer() async throws {
+        _ = subject
+        let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+        let expectedOffer = "useinbandfec=1;usedtx=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+
+        mockPeerConnection.stub(
+            for: .offer,
+            with: RTCSessionDescription(type: .offer, sdp: offer)
+        )
+
+        mockPeerConnection
+            .subject
+            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.setLocalDescription) == 1
+        }
+
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self,
+                for: .setLocalDescription
+            )?.first?.sdp,
+            expectedOffer
+        )
+    }
+
+    func test_negotiate_subjectIsPublisher_callsSetPublisherOnSFU() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+        let expectedOffer = "useinbandfec=1;usedtx=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+        mockPeerConnection.stub(
+            for: .offer,
+            with: RTCSessionDescription(type: .offer, sdp: offer)
+        )
+
+        mockPeerConnection
+            .subject
+            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        await fulfillment { [mockSFUStack] in
+            mockSFUStack?.service.setPublisherWasCalledWithRequest != nil
+        }
+
+        XCTAssertEqual(
+            mockSFUStack.service.setPublisherWasCalledWithRequest?.sessionID,
+            sessionId
+        )
+        XCTAssertEqual(
+            mockSFUStack.service.setPublisherWasCalledWithRequest?.tracks,
+            []
+        )
+        XCTAssertEqual(
+            mockSFUStack.service.setPublisherWasCalledWithRequest?.sdp,
+            expectedOffer
+        )
+    }
+
+    func test_negotiate_subjectIsPublisher_callsSetRemoteDescriptionWithExpectedOffer() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        mockPeerConnection.stub(
+            for: .offer,
+            with: RTCSessionDescription(type: .offer, sdp: .unique)
+        )
+        var response = Stream_Video_Sfu_Signal_SetPublisherResponse()
+        let expectedAnswer = String.unique
+        response.sdp = expectedAnswer
+        mockSFUStack.service.stub(for: .setPublisher, with: response)
+
+        mockPeerConnection
+            .subject
+            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.setRemoteDescription) == 1
+        }
+
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self,
+                for: .setRemoteDescription
+            )?.first?.sdp,
+            expectedAnswer
+        )
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self,
+                for: .setRemoteDescription
+            )?.first?.type,
+            .answer
+        )
+    }
+
+    // MARK: subscriber
+
+    func test_negotiate_subjectIsSubscriber_doesNotCallCreateOfferOnPeerConnection() async throws {
+        peerType = .subscriber
+        _ = subject
+
+        mockPeerConnection
+            .subject
+            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+
+        await wait(for: 1)
+
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
+    }
+
+    // MARK: - handleSubscriberOffer
+
+    // MARK: publisher
+
+    func test_handleSubscriberOffer_subjectIsPublisher_doesNotCallSetRemoteDescription() async throws {
+        _ = subject
+
+        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer())))
+
+        await wait(for: 1)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 0)
+    }
+
+    // MARK: subscriber
+
+    func test_handleSubscriberOffer_subjectIsSubscriber_callsSetRemoteDescription() async throws {
+        peerType = .subscriber
+        _ = subject
+
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = .unique
+        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(offer)))
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.setRemoteDescription) == 1
+        }
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self,
+                for: .setRemoteDescription
+            )?.first?.sdp,
+            offer.sdp
+        )
+    }
+
+    func test_handleSubscriberOffer_subjectIsSubscriber_callsCreateAnswer() async throws {
+        peerType = .subscriber
+        _ = subject
+        mockPeerConnection.stub(for: .answer, with: RTCSessionDescription(type: .answer, sdp: .unique))
+
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = .unique
+        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(offer)))
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.answer) == 1
+        }
+    }
+
+    func test_handleSubscriberOffer_subjectIsSubscriber_callsSetLocalDescription() async throws {
+        peerType = .subscriber
+        _ = subject
+        let sdp = String.unique
+        mockPeerConnection.stub(for: .answer, with: RTCSessionDescription(type: .answer, sdp: sdp))
+
+        var offer = Stream_Video_Sfu_Event_SubscriberOffer()
+        offer.sdp = .unique
+        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(offer)))
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.setLocalDescription) == 1
+        }
+
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self,
+                for: .setLocalDescription
+            )?.first?.sdp,
+            sdp
+        )
+    }
+
+    func test_negotiate_subjectIsPublisher_callsSendAnswerOnSFU() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        peerType = .subscriber
+        _ = subject
+        let sdp = String.unique
+        mockPeerConnection.stub(
+            for: .answer,
+            with: RTCSessionDescription(type: .offer, sdp: sdp)
+        )
+
+        mockSFUStack.receiveEvent(.sfuEvent(.subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer())))
+
+        await fulfillment { [mockSFUStack] in
+            mockSFUStack?.service.sendAnswerWasCalledWithRequest != nil
+        }
+
+        XCTAssertEqual(
+            mockSFUStack.service.sendAnswerWasCalledWithRequest?.sessionID,
+            sessionId
+        )
+        XCTAssertEqual(
+            mockSFUStack.service.sendAnswerWasCalledWithRequest?.peerType,
+            .subscriber
+        )
+        XCTAssertEqual(
+            mockSFUStack.service.sendAnswerWasCalledWithRequest?.sdp,
+            sdp
+        )
     }
 }
