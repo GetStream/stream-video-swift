@@ -20,7 +20,7 @@ class CallController_Mock: CallController {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
-        mockResponseBuilder.makeJoinCallResponse(cid: super.call?.cId ?? .unique)
+        mockResponseBuilder.makeJoinCallResponse(cid: super.call?.cId ?? "default:\(String.unique)")
     }
 
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }
