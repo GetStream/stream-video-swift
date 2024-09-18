@@ -79,6 +79,6 @@ final class RTCTemporaryPeerConnection {
                 )
             )
         }
-        return try await peerConnection.createOffer(constraints: .defaultConstraints)
+        return try await peerConnection.offer(for: .defaultConstraints)
     }
 }

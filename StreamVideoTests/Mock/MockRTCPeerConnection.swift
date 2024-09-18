@@ -23,7 +23,6 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
     func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
 
     enum MockFunctionKey: Hashable, CaseIterable {
-        case createOffer
         case setLocalDescription
         case setRemoteDescription
         case offer
@@ -36,7 +35,6 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
     }
 
     enum MockFunctionInputKey: Payloadable {
-        case createOffer(constraints: RTCMediaConstraints)
         case setLocalDescription(sessionDescription: RTCSessionDescription)
         case setRemoteDescription(sessionDescription: RTCSessionDescription)
         case offer(constraints: RTCMediaConstraints)
@@ -49,8 +47,6 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
 
         var payload: Any {
             switch self {
-            case let .createOffer(constraints):
-                return constraints
             case let .setLocalDescription(sessionDescription):
                 return sessionDescription
             case let .setRemoteDescription(sessionDescription):
@@ -81,17 +77,8 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
     var publisher: AnyPublisher<any RTCPeerConnectionEvent, Never> { subject.eraseToAnyPublisher() }
 
     init() {
-        stub(for: .createOffer, with: RTCSessionDescription(type: .offer, sdp: .unique))
         stub(for: .offer, with: RTCSessionDescription(type: .offer, sdp: .unique))
         stub(for: .answer, with: RTCSessionDescription(type: .answer, sdp: .unique))
-    }
-
-    func createOffer(
-        constraints: RTCMediaConstraints
-    ) async throws -> RTCSessionDescription {
-        stubbedFunctionInput[.createOffer]?
-            .append(.createOffer(constraints: constraints))
-        return stubbedFunction[.createOffer] as! RTCSessionDescription
     }
 
     func setLocalDescription(
