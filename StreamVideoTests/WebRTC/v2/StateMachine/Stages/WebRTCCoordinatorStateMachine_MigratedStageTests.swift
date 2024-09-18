@@ -68,8 +68,8 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
     func test_transition_authenticationFails_transitionsToDisconnected() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
-        let migratingFromSFU = String.unique
-        subject.context.migratingFromSFU = migratingFromSFU
+        let currentSFU = String.unique
+        subject.context.currentSFU = currentSFU
 
         try await assertTransition(
             from: .migrating,
@@ -91,7 +91,7 @@ final class WebRTCCoordinatorStateMachine_MigratedStageTests: XCTestCase, @unche
                 )?.first
             )
             XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
-            XCTAssertEqual(input.currentSFU, migratingFromSFU)
+            XCTAssertEqual(input.currentSFU, currentSFU)
             XCTAssertFalse(input.create)
             XCTAssertFalse(input.ring)
             XCTAssertFalse(input.notify)
