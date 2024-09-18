@@ -3,11 +3,156 @@
 //
 
 @testable import StreamVideo
-import SwiftProtobuf
 import XCTest
 
 @MainActor
-final class CallController_Tests: ControllerTestCase {
+final class CallController_Tests: XCTestCase, @unchecked Sendable {
+
+    private static var videoConfig: VideoConfig! = .dummy()
+
+    private lazy var httpClient: HTTPClient_Mock! = HTTPClient_Mock()
+    private lazy var defaultAPI: DefaultAPI! = DefaultAPI(
+            basePath: "example.com",
+            transport: httpClient,
+            middlewares: []
+        )
+    private lazy var user: User! = .dummy()
+    private lazy var callId: String! = .unique
+    private lazy var callType: String! = .default
+    private lazy var apiKey: String! = .unique
+    private lazy var cachedLocation: String? = .unique
+    private lazy var mockWebRTCCoordinatorFactory: MockWebRTCCoordinatorFactory! = .init()
+    private lazy var subject: CallController! = .init(
+        defaultAPI: defaultAPI,
+        user: user,
+        callId: callId,
+        callType: callType,
+        apiKey: apiKey,
+        videoConfig: Self.videoConfig,
+        cachedLocation: cachedLocation,
+        webRTCCoordinatorFactory: mockWebRTCCoordinatorFactory
+    )
+
+    // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
+
+    override func tearDown() {
+        subject = nil
+        mockWebRTCCoordinatorFactory = nil
+        cachedLocation = nil
+        apiKey = nil
+        callType = nil
+        callId = nil
+        user = nil
+        defaultAPI = nil
+        httpClient = nil
+        super.tearDown()
+    }
+
+    // MARK: - joinCall
+
+    func test_joinCall_coordinatorTransitionsToConnecting() async throws {
+        let callSettings = CallSettings(cameraPosition: .back)
+        let options = CreateCallOptions(team: .unique)
+
+        try await assertTransitionToStage(
+            .connecting,
+            operation: {
+                try await self
+                    .subject
+                    .joinCall(
+                        create: true,
+                        callSettings: callSettings,
+                        options: options,
+                        ring: true,
+                        notify: true
+                    )
+            }
+        ) { stage in
+            let expectedStage = try XCTUnwrap(stage as? WebRTCCoordinator.StateMachine.Stage.ConnectingStage)
+            XCTAssertEqual(expectedStage.options?.team, options.team)
+            XCTAssertTrue(expectedStage.ring)
+            XCTAssertTrue(expectedStage.notify)
+            await self.assertEqualAsync(
+                await self
+                    .mockWebRTCCoordinatorFactory
+                    .mockCoordinatorStack
+                    .coordinator
+                    .stateAdapter
+                    .initialCallSettings,
+                callSettings
+            )
+        }
+    }
+
+    // MARK: - Private helpers
+
+    private func assertTransitionToStage(
+        _ id: WebRTCCoordinator.StateMachine.Stage.ID,
+        operation: @escaping () async throws -> Void,
+        handler: @escaping (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async rethrows {
+        let transitionExpectation = expectation(description: "WebRTCCoordinator is expected to transition to stage id:\(id).")
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                let target = try await self
+                    .mockWebRTCCoordinatorFactory
+                    .mockCoordinatorStack
+                    .coordinator
+                    .stateMachine
+                    .publisher
+                    .filter { $0.id == id }
+                    .nextValue(timeout: defaultTimeout)
+
+                await self.assertNoThrowAsync(
+                    try await handler(target),
+                    file: file,
+                    line: line
+                )
+                transitionExpectation.fulfill()
+            }
+            group.addTask {
+                await self.wait(for: 0.1)
+                try await operation()
+            }
+            group.addTask {
+                await self.fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
+            }
+
+            try await group.waitForAll()
+        }
+    }
+
+    private func assertNoThrowAsync(
+        _ expression: @autoclosure () async throws -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        do {
+            try await expression()
+        } catch {
+            let thrower = { throw error }
+            XCTAssertNoThrow(try thrower(), file: file, line: line)
+        }
+    }
+
+    private func assertEqualAsync<T: Equatable>(
+        _ expression: @autoclosure () async throws -> T,
+        _ expected: @autoclosure () async throws -> T,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async rethrows {
+        let value = try await expression()
+        let expectedValue = try await expected()
+        XCTAssertEqual(value, expectedValue, file: file, line: line)
+    }
 
 //    private var webRTCClient: WebRTCClient!
 //
