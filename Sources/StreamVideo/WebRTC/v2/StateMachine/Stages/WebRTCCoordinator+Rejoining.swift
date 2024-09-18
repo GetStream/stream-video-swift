@@ -110,7 +110,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try transition?(
                         .connecting(
                             context,
-                            ring: false
+                            create: false,
+                            options: nil,
+                            ring: false,
+                            notify: false
                         )
                     )
                 } catch {

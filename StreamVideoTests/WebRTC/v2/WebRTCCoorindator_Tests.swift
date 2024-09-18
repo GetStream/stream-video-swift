@@ -50,17 +50,37 @@ final class WebRTCCoordinator_Tests: XCTestCase {
 
     func test_connect_shouldSetInitialCallSettingsAndTransitionStateMachine() async throws {
         let expectedCallSettings = CallSettings(cameraPosition: .back)
+        let expectedOptions = CreateCallOptions(
+            memberIds: [.unique, .unique],
+            members: [.init(userId: .unique)],
+            custom: [.unique: .bool(true)],
+            settings: CallSettingsRequest(audio: .init(defaultDevice: .earpiece)),
+            startsAt: .init(timeIntervalSince1970: 100),
+            team: .unique
+        )
 
         try await assertTransitionToStage(
             .connecting,
             operation: {
                 try await self
                     .subject
-                    .connect(callSettings: expectedCallSettings, ring: true)
+                    .connect(
+                        callSettings: expectedCallSettings,
+                        options: expectedOptions,
+                        ring: true,
+                        notify: true
+                    )
             }
         ) { stage in
             let expectedStage = try XCTUnwrap(stage as? WebRTCCoordinator.StateMachine.Stage.ConnectingStage)
+            XCTAssertEqual(expectedStage.options?.memberIds, expectedOptions.memberIds)
+            XCTAssertEqual(expectedStage.options?.members, expectedOptions.members)
+            XCTAssertEqual(expectedStage.options?.custom, expectedOptions.custom)
+            XCTAssertEqual(expectedStage.options?.settings?.audio?.defaultDevice, .earpiece)
+            XCTAssertEqual(expectedStage.options?.startsAt, expectedOptions.startsAt)
+            XCTAssertEqual(expectedStage.options?.team, expectedOptions.team)
             XCTAssertTrue(expectedStage.ring)
+            XCTAssertTrue(expectedStage.notify)
             await self.assertEqualAsync(
                 await self.subject.stateAdapter.initialCallSettings,
                 expectedCallSettings
@@ -112,7 +132,12 @@ final class WebRTCCoordinator_Tests: XCTestCase {
         mockInternetConnection.subject.send(.unavailable)
 
         try await subject
-            .connect(callSettings: nil, ring: true)
+            .connect(
+                callSettings: nil,
+                options: nil,
+                ring: true,
+                notify: false
+            )
         await wait(for: 1)
 
         await assertTransitionToStage(

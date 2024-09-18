@@ -16,8 +16,16 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - create: Whether the call should be created on the backend side.
     ///   - ring: Whether the call is a ringing call.
     ///   - migratingFrom: If migrating, where are we migrating from.
+    ///   - notify:
+    ///   - options:
     /// - Returns: A `JoinCallResponse` wrapped in an async throw.
-    typealias AuthenticationHandler = (Bool, Bool, String?) async throws -> JoinCallResponse
+    typealias AuthenticationHandler = (
+        Bool,
+        Bool,
+        String?,
+        Bool,
+        CreateCallOptions?
+    ) async throws -> JoinCallResponse
 
     private static let recordingUserId = "recording-egress"
     private static let participantsThreshold = 10
@@ -81,12 +89,21 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - callSettings: Optional call settings.
     ///   - ring: Boolean flag indicating if a ring tone should be played.
     func connect(
+        create: Bool = true,
         callSettings: CallSettings?,
-        ring: Bool
+        options: CreateCallOptions?,
+        ring: Bool,
+        notify: Bool
     ) async throws {
         await stateAdapter.set(initialCallSettings: callSettings)
         try stateMachine.transition(
-            .connecting(stateMachine.currentStage.context, ring: ring)
+            .connecting(
+                stateMachine.currentStage.context,
+                create: create,
+                options: options,
+                ring: ring,
+                notify: notify
+            )
         )
     }
 

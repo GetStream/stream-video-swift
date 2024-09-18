@@ -15,7 +15,13 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
     private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.idle, .rejoining]
-    private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .connecting(.init(), ring: true)
+    private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .connecting(
+        .init(),
+        create: true,
+        options: nil,
+        ring: true,
+        notify: false
+    )
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
 
     override func tearDown() {
@@ -50,7 +56,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .idle,
             expectedTarget: .disconnected,
-            subject: .connecting(.init(), ring: true)
+            subject: subject
         ) { target in
             XCTAssertNotNil(target.context.flowError as? ClientError)
         }
@@ -61,39 +67,81 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             .coordinator
             .stateAdapter
             .sessionID
+        subject.context.coordinator = mockCoordinatorStack.coordinator
 
         try await assertTransition(
             from: .idle,
             expectedTarget: .disconnected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator
-                ),
-                ring: true
-            )
+            subject: subject
         ) { [mockCoordinatorStack] _ in
             let actual = await mockCoordinatorStack?.coordinator.stateAdapter.sessionID
             XCTAssertEqual(actual, expectedSessionId)
         }
     }
 
-    func test_transition_fromIdleRingTrueAuthenticationFails_transitionsToDisconnected() async throws {
+    func test_transition_fromIdleAuthenticationFailsCreateFalse_transitionsToDisconnectedWithExpectedInput() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        let options = CreateCallOptions(team: .unique)
+
         try await assertTransition(
             from: .idle,
             expectedTarget: .disconnected,
             subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
+                subject.context,
+                create: false,
+                options: options,
+                ring: true,
+                notify: true
             )
         ) { [mockCoordinatorStack] target in
             let callType = (
                 coordinator: WebRTCCoordinator,
                 currentSFU: String?,
                 create: Bool,
-                ring: Bool
+                ring: Bool,
+                notify: Bool,
+                options: CreateCallOptions?
+            ).self
+            let input = try XCTUnwrap(
+                mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
+                    callType,
+                    for: .authenticate
+                )?.first
+            )
+            XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
+            XCTAssertNil(input.currentSFU)
+            XCTAssertFalse(input.create)
+            XCTAssertTrue(input.ring)
+            XCTAssertTrue(input.notify)
+            XCTAssertEqual(input.options?.team, options.team)
+            XCTAssertTrue(target.context.flowError is ClientError)
+        }
+    }
+
+    func test_transition_fromIdleAuthenticationFails_transitionsToDisconnectedWithExpectedInput() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        let options = CreateCallOptions(team: .unique)
+
+        try await assertTransition(
+            from: .idle,
+            expectedTarget: .disconnected,
+            subject: .connecting(
+                subject.context,
+                create: true,
+                options: options,
+                ring: true,
+                notify: true
+            )
+        ) { [mockCoordinatorStack] target in
+            let callType = (
+                coordinator: WebRTCCoordinator,
+                currentSFU: String?,
+                create: Bool,
+                ring: Bool,
+                notify: Bool,
+                options: CreateCallOptions?
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -105,43 +153,15 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertNil(input.currentSFU)
             XCTAssertTrue(input.create)
             XCTAssertTrue(input.ring)
-            XCTAssertTrue(target.context.flowError is ClientError)
-        }
-    }
-
-    func test_transition_fromIdleRingFalseAuthenticationFails_transitionsToDisconnected() async throws {
-        try await assertTransition(
-            from: .idle,
-            expectedTarget: .disconnected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: false
-            )
-        ) { [mockCoordinatorStack] target in
-            let callType = (
-                coordinator: WebRTCCoordinator,
-                currentSFU: String?,
-                create: Bool,
-                ring: Bool
-            ).self
-            let input = try XCTUnwrap(
-                mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
-                    callType,
-                    for: .authenticate
-                )?.first
-            )
-            XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
-            XCTAssertNil(input.currentSFU)
-            XCTAssertTrue(input.create)
-            XCTAssertFalse(input.ring)
+            XCTAssertTrue(input.notify)
+            XCTAssertEqual(input.options?.team, options.team)
             XCTAssertTrue(target.context.flowError is ClientError)
         }
     }
 
     func test_transition_fromIdleSFUConnectFails_transitionsToDisconnected() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
             for: .authenticate,
             with: Result<(SFUAdapter, JoinCallResponse), Error>
@@ -151,13 +171,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .idle,
             expectedTarget: .disconnected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
-            )
+            subject: subject
         ) { [mockCoordinatorStack] target in
             let input = try XCTUnwrap(
                 mockCoordinatorStack?
@@ -171,6 +185,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
     }
 
     func test_transition_fromIdleSFUConnectedAndStateAdapterUpdated_transitionsToConnected() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
             for: .authenticate,
             with: Result<(SFUAdapter, JoinCallResponse), Error>
@@ -184,13 +200,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .idle,
             expectedTarget: .connected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
-            )
+            subject: subject
         ) { [mockCoordinatorStack] _ in
             let stateAdapter = try XCTUnwrap(mockCoordinatorStack?.coordinator.stateAdapter)
             let sfuAdapter = await stateAdapter.sfuAdapter
@@ -199,6 +209,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
     }
 
     func test_transition_fromIdleSFUConnectedContextWasUpdated_transitionsToConnected() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
             for: .authenticate,
             with: Result<
@@ -220,13 +232,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .idle,
             expectedTarget: .connected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
-            )
+            subject: subject
         ) { target in
             XCTAssertEqual(target.context.currentSFU, "test-sfu")
         }
@@ -238,13 +244,14 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .rejoining,
             expectedTarget: .disconnected,
-            subject: .connecting(.init(), ring: true)
+            subject: subject
         ) { target in
             XCTAssertNotNil(target.context.flowError as? ClientError)
         }
     }
 
     func test_transition_fromRejoining_updatesSession() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
         let expectedSessionId = await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -253,67 +260,35 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .rejoining,
             expectedTarget: .disconnected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator
-                ),
-                ring: true
-            )
+            subject: subject
         ) { [mockCoordinatorStack] _ in
             let actual = await mockCoordinatorStack?.coordinator.stateAdapter.sessionID
             XCTAssertNotEqual(actual, expectedSessionId)
         }
     }
 
-    func test_transition_fromRejoiningRingTrueAuthenticationFails_transitionsToDisconnected() async throws {
+    func test_transition_fromRejoiningAuthenticationFails_transitionsToDisconnectedWithExpectedInput() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
+        let options = CreateCallOptions(team: .unique)
         try await assertTransition(
             from: .rejoining,
             expectedTarget: .disconnected,
             subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
+                subject.context,
+                create: true,
+                options: options,
+                ring: true,
+                notify: true
             )
         ) { [mockCoordinatorStack] target in
             let callType = (
                 coordinator: WebRTCCoordinator,
                 currentSFU: String?,
                 create: Bool,
-                ring: Bool
-            ).self
-            let input = try XCTUnwrap(
-                mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
-                    callType,
-                    for: .authenticate
-                )?.first
-            )
-            XCTAssertTrue(input.coordinator === mockCoordinatorStack?.coordinator)
-            XCTAssertNil(input.currentSFU)
-            XCTAssertFalse(input.create)
-            XCTAssertTrue(input.ring)
-            XCTAssertTrue(target.context.flowError is ClientError)
-        }
-    }
-
-    func test_transition_fromRejoiningRingFalseAuthenticationFails_transitionsToDisconnected() async throws {
-        try await assertTransition(
-            from: .rejoining,
-            expectedTarget: .disconnected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: false
-            )
-        ) { [mockCoordinatorStack] target in
-            let callType = (
-                coordinator: WebRTCCoordinator,
-                currentSFU: String?,
-                create: Bool,
-                ring: Bool
+                ring: Bool,
+                notify: Bool,
+                options: CreateCallOptions?
             ).self
             let input = try XCTUnwrap(
                 mockCoordinatorStack?.webRTCAuthenticator.recordedInputPayload(
@@ -325,11 +300,15 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertNil(input.currentSFU)
             XCTAssertFalse(input.create)
             XCTAssertFalse(input.ring)
+            XCTAssertFalse(input.notify)
+            XCTAssertNil(input.options)
             XCTAssertTrue(target.context.flowError is ClientError)
         }
     }
 
     func test_transition_fromRejoiningSFUConnectFails_transitionsToDisconnected() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
             for: .authenticate,
             with: Result<(SFUAdapter, JoinCallResponse), Error>
@@ -339,14 +318,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .rejoining,
             expectedTarget: .disconnected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
-            )
-        ) { [error, mockCoordinatorStack] target in
+            subject: subject
+        ) { [mockCoordinatorStack] target in
             let input = try XCTUnwrap(
                 mockCoordinatorStack?
                     .webRTCAuthenticator
@@ -359,6 +332,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
     }
 
     func test_transition_fromRejoiningSFUConnectedAndStateAdapterUpdated_transitionsToConnected() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
             for: .authenticate,
             with: Result<(SFUAdapter, JoinCallResponse), Error>
@@ -372,13 +347,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .rejoining,
             expectedTarget: .connected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
-            )
+            subject: subject
         ) { [mockCoordinatorStack] _ in
             let stateAdapter = try XCTUnwrap(mockCoordinatorStack?.coordinator.stateAdapter)
             let sfuAdapter = await stateAdapter.sfuAdapter
@@ -387,6 +356,8 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
     }
 
     func test_transition_fromRejoiningSFUConnectedContextWasUpdated_transitionsToConnected() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.authenticator = mockCoordinatorStack.webRTCAuthenticator
         mockCoordinatorStack.webRTCAuthenticator.stub(
             for: .authenticate,
             with: Result<
@@ -408,13 +379,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
         try await assertTransition(
             from: .rejoining,
             expectedTarget: .connected,
-            subject: .connecting(
-                .init(
-                    coordinator: mockCoordinatorStack.coordinator,
-                    authenticator: mockCoordinatorStack.webRTCAuthenticator
-                ),
-                ring: true
-            )
+            subject: subject
         ) { target in
             XCTAssertEqual(target.context.currentSFU, "test-sfu")
         }

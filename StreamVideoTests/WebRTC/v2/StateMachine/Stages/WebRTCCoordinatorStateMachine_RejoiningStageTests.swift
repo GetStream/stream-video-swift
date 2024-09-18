@@ -94,6 +94,7 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
 
     func test_transition_isRejoiningFromSessionIDWasSetCorrectly() async {
         subject.context.coordinator = mockCoordinatorStack.coordinator
+        await wait(for: 0.5)
         let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
         await mockCoordinatorStack
             .coordinator
