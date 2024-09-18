@@ -19,7 +19,9 @@ protocol WebRTCAuthenticating {
         coordinator: WebRTCCoordinator,
         currentSFU: String?,
         create: Bool,
-        ring: Bool
+        ring: Bool,
+        notify: Bool,
+        options: CreateCallOptions?
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse)
 
     /// Awaits the SFU to allow authentication
@@ -48,10 +50,18 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         coordinator: WebRTCCoordinator,
         currentSFU: String?,
         create: Bool,
-        ring: Bool
+        ring: Bool,
+        notify: Bool,
+        options: CreateCallOptions?
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
         let response = try await coordinator
-            .callAuthentication(create, ring, currentSFU)
+            .callAuthentication(
+                create,
+                ring,
+                currentSFU,
+                notify,
+                options
+            )
 
         await coordinator.stateAdapter.set(
             token: response.credentials.token

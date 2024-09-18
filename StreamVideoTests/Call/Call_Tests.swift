@@ -422,12 +422,8 @@ private final class MockCallController: CallController, Mockable {
 
     override func joinCall(
         create: Bool = true,
-        callType: String,
-        callId: String,
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
-        migratingFrom: String? = nil,
-        sessionID: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
@@ -439,12 +435,8 @@ private final class MockCallController: CallController, Mockable {
         } else {
             return try await super.joinCall(
                 create: create,
-                callType: callType,
-                callId: callId,
                 callSettings: callSettings,
                 options: options,
-                migratingFrom: migratingFrom,
-                sessionID: sessionID,
                 ring: ring,
                 notify: notify
             )

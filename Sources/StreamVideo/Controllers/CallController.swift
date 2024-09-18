@@ -15,12 +15,14 @@ class CallController: @unchecked Sendable {
         callCid: callCid(from: callId, callType: callType),
         videoConfig: videoConfig
     ) {
-        [weak self, callId] create, ring, migratingFrom in
+        [weak self, callId] create, ring, migratingFrom, notify, options in
         if let self {
             return try await authenticateCall(
                 create: create,
                 ring: ring,
-                migratingFrom: migratingFrom
+                migratingFrom: migratingFrom,
+                notify: notify,
+                options: options
             )
         } else {
             throw ClientError("Unable to authenticate callId:\(callId).")
@@ -112,18 +114,17 @@ class CallController: @unchecked Sendable {
     @discardableResult
     func joinCall(
         create: Bool = true,
-        callType: String,
-        callId: String,
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
-        migratingFrom: String? = nil,
-        sessionID: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
         try await webRTCCoordinator.connect(
+            create: create,
             callSettings: callSettings,
-            ring: ring
+            options: options,
+            ring: ring,
+            notify: notify
         )
         guard
             let response = try await joinCallResponseSubject
@@ -447,42 +448,40 @@ class CallController: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    private func joinCall(
-        create: Bool,
-        callType: String,
-        callId: String,
-        options: CreateCallOptions? = nil,
-        migratingFrom: String?,
-        ring: Bool,
-        notify: Bool
-    ) async throws -> JoinCallResponse {
-        let location = try await getLocation()
-        let response = try await joinCall(
-            callId: callId,
-            type: callType,
-            location: location,
-            options: options,
-            migratingFrom: migratingFrom,
-            create: create,
-            ring: ring,
-            notify: notify
-        )
-        return response
-    }
-
     private func authenticateCall(
         create: Bool,
         ring: Bool,
-        migratingFrom: String?
+        migratingFrom: String?,
+        notify: Bool,
+        options: CreateCallOptions?
     ) async throws -> JoinCallResponse {
-        let response = try await joinCall(
+        let location = try await getLocation()
+        var membersRequest = [MemberRequest]()
+        options?.memberIds?.forEach {
+            membersRequest.append(.init(userId: $0))
+        }
+        options?.members?.forEach {
+            membersRequest.append($0)
+        }
+        let callRequest = CallRequest(
+            custom: options?.custom,
+            members: membersRequest,
+            settingsOverride: options?.settings,
+            startsAt: options?.startsAt,
+            team: options?.team
+        )
+        let joinCall = JoinCallRequest(
             create: create,
-            callType: callType,
-            callId: callId,
-            options: nil,
+            data: callRequest,
+            location: location,
             migratingFrom: migratingFrom,
-            ring: ring,
-            notify: false
+            notify: notify,
+            ring: ring
+        )
+        let response = try await defaultAPI.joinCall(
+            type: callType,
+            id: callId,
+            joinCallRequest: joinCall
         )
 
         // We allow the CallController to manage its state.
@@ -507,46 +506,6 @@ class CallController: @unchecked Sendable {
             return cachedLocation
         }
         return try await LocationFetcher.getLocation()
-    }
-
-    private func joinCall(
-        callId: String,
-        type: String,
-        location: String,
-        options: CreateCallOptions? = nil,
-        migratingFrom: String?,
-        create: Bool,
-        ring: Bool,
-        notify: Bool
-    ) async throws -> JoinCallResponse {
-        var membersRequest = [MemberRequest]()
-        options?.memberIds?.forEach {
-            membersRequest.append(.init(userId: $0))
-        }
-        options?.members?.forEach {
-            membersRequest.append($0)
-        }
-        let callRequest = CallRequest(
-            custom: options?.custom,
-            members: membersRequest,
-            settingsOverride: options?.settings,
-            startsAt: options?.startsAt,
-            team: options?.team
-        )
-        let joinCall = JoinCallRequest(
-            create: create,
-            data: callRequest,
-            location: location,
-            migratingFrom: migratingFrom,
-            notify: notify,
-            ring: ring
-        )
-        let joinCallResponse = try await defaultAPI.joinCall(
-            type: type,
-            id: callId,
-            joinCallRequest: joinCall
-        )
-        return joinCallResponse
     }
 
     private func didFetch(_ response: JoinCallResponse) async {

@@ -75,7 +75,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             coordinator: coordinator,
                             currentSFU: context.currentSFU,
                             create: false,
-                            ring: false
+                            ring: false,
+                            notify: false,
+                            options: nil
                         )
 
                     /// We provide the ``SFUAdapter`` to the authenticator which will ensure

@@ -7,6 +7,8 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -16,7 +18,16 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
     private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.joined, .disconnected]
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .leaving(.init())
-    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init()
+    private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
+        videoConfig: Self.videoConfig
+    )
+
+    // MARK: - Lifecycle
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
 
     override func tearDown() {
         allOtherStages = nil
