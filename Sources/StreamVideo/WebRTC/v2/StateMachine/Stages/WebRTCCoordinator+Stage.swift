@@ -16,13 +16,14 @@ extension WebRTCCoordinator.StateMachine {
             var reconnectAttempts: UInt32 = 0
             var currentSFU: String = ""
             var fastReconnectDeadlineSeconds: TimeInterval = 0
+            var reportingIntervalMs: TimeInterval = 0
             var reconnectionStrategy: ReconnectionStrategy = .unknown
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource? = nil
             var flowError: Error?
 
             var isRejoiningFromSessionID: String? = nil
             var migratingFromSFU: String = ""
-            var migrationStatusObserver: MigrationStatusObserver?
+            var migrationStatusObserver: WebRTCMigrationStatusObserver?
             var previousSessionPublisher: RTCPeerConnectionCoordinator?
             var previousSessionSubscriber: RTCPeerConnectionCoordinator?
             var previousSFUAdapter: SFUAdapter?

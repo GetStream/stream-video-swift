@@ -71,11 +71,11 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(WebRTCStatsReporter(sessionID: .unique))
+            .set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set([OwnCapability.blockUsers])
+            .set(ownCapabilities: [OwnCapability.blockUsers])
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -83,11 +83,11 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(10)
+            .set(participantsCount: 10)
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set([PinInfo(isLocal: true, pinnedAt: .init())])
+            .set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
         mockCoordinatorStack
             .sfuStack
             .setConnectionState(to: .connected(healthCheckInfo: .init()))

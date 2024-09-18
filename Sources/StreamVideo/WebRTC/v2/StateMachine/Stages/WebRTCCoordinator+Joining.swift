@@ -288,7 +288,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             let joinResponse = try await sfuAdapter
                 .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
-                .nextValue(timeout: WebRTCConfiguration.Timeout.join)
+                .nextValue(timeout: WebRTCConfiguration.timeout.join)
 
             try await coordinator
                 .stateAdapter

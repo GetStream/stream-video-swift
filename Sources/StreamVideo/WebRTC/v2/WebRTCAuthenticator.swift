@@ -51,20 +51,15 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         ring: Bool
     ) async throws -> (sfuAdapter: SFUAdapter, response: JoinCallResponse) {
         let response = try await coordinator
-            .callAuthenticator
-            .authenticate(
-                create: create,
-                ring: ring,
-                migratingFrom: currentSFU
-            )
+            .callAuthentication(create, ring, currentSFU)
 
         await coordinator.stateAdapter.set(
             token: response.credentials.token
         )
-        await coordinator.stateAdapter.set(Set(response.ownCapabilities))
-        await coordinator.stateAdapter.set(response.call.settings.audio)
+        await coordinator.stateAdapter.set(ownCapabilities: Set(response.ownCapabilities))
+        await coordinator.stateAdapter.set(audioSettings: response.call.settings.audio)
         await coordinator.stateAdapter.set(
-            ConnectOptions(
+            connectOptions: ConnectOptions(
                 iceServers: response.credentials.iceServers
             )
         )
@@ -72,36 +67,48 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         if create {
             if let callSettings = await coordinator.stateAdapter.initialCallSettings {
                 await coordinator.stateAdapter.set(
-                    callSettings
+                    callSettings: callSettings
                 )
             } else {
                 await coordinator.stateAdapter.set(
-                    response.call.settings.toCallSettings
+                    callSettings: response.call.settings.toCallSettings
                 )
             }
         }
         await coordinator.stateAdapter.set(
-            VideoOptions(
+            videoOptions: VideoOptions(
                 targetResolution: response.call.settings.video.targetResolution
             )
         )
 
         let sfuAdapter = SFUAdapter(
             serviceConfiguration: .init(
-                url: .init(string: response.credentials.server.url)!,
+                url: try unwrap(
+                    .init(string: response.credentials.server.url),
+                    errorMessage: "Server URL is invalid."
+                ),
                 apiKey: coordinator.stateAdapter.apiKey,
                 token: await coordinator.stateAdapter.token
             ),
             webSocketConfiguration: .init(
-                url: .init(string: response.credentials.server.wsEndpoint)!,
+                url: try unwrap(
+                    .init(string: response.credentials.server.wsEndpoint),
+                    errorMessage: "WebSocket URL is invalid."
+                ),
                 eventNotificationCenter: .init()
             )
         )
 
-        let statsReporter = await coordinator.stateAdapter.statsReporter
-        statsReporter?.interval = TimeInterval(
-            response.statsOptions.reportingIntervalMs / 1000
-        )
+        let statsReportingInterval = response.statsOptions.reportingIntervalMs / 1000
+        if let statsReporter = await coordinator.stateAdapter.statsReporter {
+            statsReporter.interval = TimeInterval(statsReportingInterval)
+        } else {
+            let statsReporter = WebRTCStatsReporter(
+                sessionID: await coordinator.stateAdapter.sessionID
+            )
+            statsReporter.interval = TimeInterval(statsReportingInterval)
+            await coordinator.stateAdapter.set(statsReporter: statsReporter)
+        }
 
         return (sfuAdapter, response)
     }
@@ -121,7 +128,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     return false
                 }
             }
-            .nextValue(timeout: WebRTCConfiguration.Timeout.authenticate)
+            .nextValue(timeout: WebRTCConfiguration.timeout.authenticate)
     }
 
     /// Awaits for the connectionState to the SFU to change to `.connected`.
@@ -138,6 +145,6 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     return false
                 }
             }
-            .nextValue(timeout: WebRTCConfiguration.Timeout.connect)
+            .nextValue(timeout: WebRTCConfiguration.timeout.connect)
     }
 }
