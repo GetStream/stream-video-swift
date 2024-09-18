@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🔄 Changed
 - Updated the default sorting for Participants during a call to minimize the movement of already visible tiles [#515](https://github.com/GetStream/stream-video-swift/pull/515)
 
+### 🐞 Fixed
+- An `MissingPermissions` error was thrown when creating a `StreamVideo` with anonymous user type. [#525](https://github.com/GetStream/stream-video-swift/pull/525)
+
 # [1.10.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.10.0)
 _August 29, 2024_
 
