@@ -19,14 +19,6 @@ protocol StreamRTCPeerConnectionProtocol: AnyObject {
     /// A publisher for RTCPeerConnectionEvents.
     var publisher: AnyPublisher<RTCPeerConnectionEvent, Never> { get }
 
-    /// Creates an offer asynchronously with the given media constraints.
-    /// - Parameter constraints: The media constraints to use when creating the offer.
-    /// - Returns: The created RTCSessionDescription.
-    /// - Throws: An error if the offer creation fails.
-    func createOffer(
-        constraints: RTCMediaConstraints
-    ) async throws -> RTCSessionDescription
-
     /// Sets the local description asynchronously.
     /// - Parameter sessionDescription: The RTCSessionDescription to set as the local description.
     /// - Throws: An error if setting the local description fails.
