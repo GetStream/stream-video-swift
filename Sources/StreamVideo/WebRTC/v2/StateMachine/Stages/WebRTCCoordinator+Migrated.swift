@@ -73,7 +73,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .authenticator
                         .authenticate(
                             coordinator: coordinator,
-                            currentSFU: context.currentSFU,
+                            currentSFU: context.migratingFromSFU,
                             create: false,
                             ring: false,
                             notify: false,
