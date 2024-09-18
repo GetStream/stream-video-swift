@@ -8,6 +8,8 @@ import XCTest
 
 final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var mockService: MockSignalServer! = .init()
     private lazy var mockWebSocket: MockWebSocketClient! = .init(webSocketClientType: .sfu)
     private lazy var sfuAdapter: SFUAdapter! = .init(
@@ -19,7 +21,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         user: .dummy(),
         apiKey: .unique,
         callCid: .unique,
-        videoConfig: .dummy(),
+        videoConfig: Self.videoConfig,
         rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory()
     )
     private lazy var subject: SFUEventAdapter! = .init(
@@ -33,6 +35,11 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await super.setUp()
         await stateAdapter.set(sfuAdapter: sfuAdapter)
         _ = subject
+    }
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
     }
 
     override func tearDown() {
