@@ -116,7 +116,6 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.hasVideo == rhs.hasVideo &&
             lhs.hasAudio == rhs.hasAudio &&
             lhs.isScreensharing == rhs.isScreensharing &&
-            lhs.track === rhs.track &&
             lhs.track?.isEnabled == rhs.track?.isEnabled &&
             lhs.track?.trackId == rhs.track?.trackId &&
             lhs.trackSize == rhs.trackSize &&

@@ -98,9 +98,11 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                 label: "Stats"
                             ) { Image(systemName: "chart.xyaxis.line") }
 
+                            #if OBSERVE_RECONNECTION_NOTIFICATIONS
                             if AppEnvironment.configuration != .release {
                                 DemoReconnectionButtonView { viewModel.moreControlsShown = false }
                             }
+                            #endif
                         }
                     }
                 }

@@ -82,7 +82,7 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
 
     func test_transition_SFUAdapterOnStatsReporterIsNil() async throws {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
-            WebRTCStatsReporter(
+            statsReporter: WebRTCStatsReporter(
                 sessionID: .unique
             )
         )

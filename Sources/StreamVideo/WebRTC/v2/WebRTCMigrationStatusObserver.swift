@@ -10,7 +10,7 @@ import Foundation
 ///
 /// If the SFU doesn't send the event before the deadline expires we should consider that the migration failed
 /// and try to rejoin.
-final class MigrationStatusObserver: @unchecked Sendable {
+final class WebRTCMigrationStatusObserver: @unchecked Sendable {
 
     enum State { case idle, running, failed(Error), completed }
 
@@ -21,7 +21,7 @@ final class MigrationStatusObserver: @unchecked Sendable {
 
     init(
         migratingFrom sfuAdapter: SFUAdapter,
-        deadline: TimeInterval = WebRTCConfiguration.Timeout.migrationCompletion
+        deadline: TimeInterval = WebRTCConfiguration.timeout.migrationCompletion
     ) {
         connectURL = sfuAdapter.connectURL
         task = Task {

@@ -141,7 +141,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.previousSFUAdapter = mockCoordinatorStack.sfuStack.adapter
         mockCoordinatorStack.sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        let migrationStatusObserver = MigrationStatusObserver(
+        let migrationStatusObserver = WebRTCMigrationStatusObserver(
             migratingFrom: mockCoordinatorStack.sfuStack.adapter
         )
         subject.context.migrationStatusObserver = migrationStatusObserver
@@ -461,7 +461,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 await mockCoordinatorStack?
                     .coordinator
                     .stateAdapter
-                    .set(CallSettings(audioOn: true, videoOn: true))
+                    .set(callSettings: CallSettings(audioOn: true, videoOn: true))
             }
         ) { _ in }
     }
@@ -482,7 +482,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 await mockCoordinatorStack?
                     .coordinator
                     .stateAdapter
-                    .set(CallSettings(audioOn: true, videoOn: true))
+                    .set(callSettings: CallSettings(audioOn: true, videoOn: true))
             }
         ) { [mockPublisher] expectation in
             XCTAssertEqual(mockPublisher.timesCalled(.didUpdateCallSettings), 1)
@@ -559,7 +559,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
         let initialStatsReporter = WebRTCStatsReporter(interval: 10, sessionID: sessionId)
-        await stateAdapter.set(initialStatsReporter)
+        await stateAdapter.set(statsReporter: initialStatsReporter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
         _ = subject.transition(from: .joining(subject.context))
