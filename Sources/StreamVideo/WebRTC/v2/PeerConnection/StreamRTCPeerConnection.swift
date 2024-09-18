@@ -57,35 +57,6 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
 
     // MARK: - Concurrency API
 
-    /// Creates an offer asynchronously with the given media constraints.
-    ///
-    /// - Parameter constraints: The media constraints to use when creating the offer.
-    /// - Returns: The created RTCSessionDescription.
-    /// - Throws: An error if the offer creation fails.
-    func createOffer(
-        constraints: RTCMediaConstraints = .defaultConstraints
-    ) async throws -> RTCSessionDescription {
-        try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard let self else {
-                continuation.resume(
-                    throwing: ClientError.Unknown("RTCPeerConnection instance is unavailable.")
-                )
-                return
-            }
-            source.offer(for: constraints) { sdp, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else if let sdp = sdp {
-                    continuation.resume(returning: sdp)
-                } else {
-                    continuation.resume(
-                        throwing: ClientError.Unknown("RTCPeerConnection failed to create offer.")
-                    )
-                }
-            }
-        }
-    }
-
     /// Sets the local description asynchronously.
     ///
     /// - Parameter sessionDescription: The RTCSessionDescription to set as the local description.
