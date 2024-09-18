@@ -5,13 +5,16 @@
 import Foundation
 import StreamWebRTC
 
+/// Factory for creating WebRTC join requests.
 struct WebRTCJoinRequestFactory {
+    /// Represents different types of connection for join requests.
     enum ConnectionType {
         case `default`
         case fastReconnect
         case migration(fromHostname: String)
         case rejoin(fromSessionID: String)
 
+        /// Indicates if the connection type is a fast reconnect.
         var isFastReconnect: Bool {
             switch self {
             case .fastReconnect:
@@ -22,6 +25,17 @@ struct WebRTCJoinRequestFactory {
         }
     }
 
+    /// Builds a join request for WebRTC.
+    /// - Parameters:
+    ///   - connectionType: The type of connection for the join request.
+    ///   - coordinator: The WebRTC coordinator.
+    ///   - subscriberSdp: The subscriber's SDP.
+    ///   - reconnectAttempt: The number of reconnect attempts.
+    ///   - publisher: The RTC peer connection coordinator for publishing.
+    ///   - file: The file where the method is called.
+    ///   - function: The function where the method is called.
+    ///   - line: The line number where the method is called.
+    /// - Returns: A join request for the SFU.
     func buildRequest(
         with connectionType: ConnectionType,
         coordinator: WebRTCCoordinator,
@@ -53,6 +67,16 @@ struct WebRTCJoinRequestFactory {
         return result
     }
 
+    /// Builds reconnect details for the join request.
+    /// - Parameters:
+    ///   - connectionType: The type of connection for the join request.
+    ///   - coordinator: The WebRTC coordinator.
+    ///   - reconnectAttempt: The number of reconnect attempts.
+    ///   - publisher: The RTC peer connection coordinator for publishing.
+    ///   - file: The file where the method is called.
+    ///   - function: The function where the method is called.
+    ///   - line: The line number where the method is called.
+    /// - Returns: Reconnect details for the join request.
     func buildReconnectDetails(
         for connectionType: ConnectionType,
         coordinator: WebRTCCoordinator,
@@ -128,6 +152,14 @@ struct WebRTCJoinRequestFactory {
         return result
     }
 
+    /// Builds announced tracks for the join request.
+    /// - Parameters:
+    ///   - publisher: The RTC peer connection coordinator for publishing.
+    ///   - videoOptions: The video options for the tracks.
+    ///   - file: The file where the method is called.
+    ///   - function: The function where the method is called.
+    ///   - line: The line number where the method is called.
+    /// - Returns: An array of announced tracks.
     func buildAnnouncedTracks(
         _ publisher: RTCPeerConnectionCoordinator?,
         videoOptions: VideoOptions,
@@ -157,7 +189,7 @@ struct WebRTCJoinRequestFactory {
             trackInfo.muted = publisher?.localTrack(of: .video)?.isEnabled != true
             result.append(trackInfo)
         }
-        
+
         if let mid = publisher?.mid(for: .screenshare) {
             var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
             trackInfo.trackID = publisher?.localTrack(of: .screenshare)?.trackId ?? ""
@@ -172,6 +204,14 @@ struct WebRTCJoinRequestFactory {
         return result
     }
 
+    /// Builds subscription details for the join request.
+    /// - Parameters:
+    ///   - previousSessionID: The previous session ID, if any.
+    ///   - coordinator: The WebRTC coordinator.
+    ///   - file: The file where the method is called.
+    ///   - function: The function where the method is called.
+    ///   - line: The line number where the method is called.
+    /// - Returns: An array of track subscription details.
     func buildSubscriptionDetails(
         _ previousSessionID: String?,
         coordinator: WebRTCCoordinator,
@@ -183,82 +223,5 @@ struct WebRTCJoinRequestFactory {
         return Array(await coordinator.stateAdapter.participants.values)
             .filter { $0.id != sessionID && $0.id != previousSessionID }
             .flatMap(\.trackSubscriptionDetails)
-    }
-}
-
-extension Stream_Video_Sfu_Models_VideoLayer {
-    
-    init(
-        _ codec: VideoCodec,
-        fps: UInt32 = 30
-    ) {
-        bitrate = UInt32(codec.maxBitrate)
-        rid = codec.quality
-        var dimension = Stream_Video_Sfu_Models_VideoDimension()
-        dimension.height = UInt32(codec.dimensions.height)
-        dimension.width = UInt32(codec.dimensions.width)
-        videoDimension = dimension
-        quality = codec.sfuQuality
-        self.fps = fps
-    }
-}
-
-extension CallParticipant {
-
-    var trackSubscriptionDetails: [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
-        var result = [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]()
-        if hasVideo {
-            result.append(
-                .init(
-                    for: userId,
-                    sessionId: sessionId,
-                    size: trackSize,
-                    type: .video
-                )
-            )
-        }
-
-        if hasAudio {
-            result.append(
-                .init(
-                    for: userId,
-                    sessionId: sessionId,
-                    type: .audio
-                )
-            )
-        }
-
-        if isScreensharing {
-            result.append(
-                .init(
-                    for: userId,
-                    sessionId: sessionId,
-                    type: .screenShare
-                )
-            )
-        }
-
-        return result
-    }
-}
-
-extension Stream_Video_Sfu_Signal_TrackSubscriptionDetails {
-    init(
-        for userId: String,
-        sessionId: String,
-        size: CGSize? = nil,
-        type: Stream_Video_Sfu_Models_TrackType
-    ) {
-        userID = userId
-        dimension = size.map { Stream_Video_Sfu_Models_VideoDimension($0) } ?? Stream_Video_Sfu_Models_VideoDimension()
-        sessionID = sessionId
-        trackType = type
-    }
-}
-
-extension Stream_Video_Sfu_Models_VideoDimension {
-    init(_ size: CGSize) {
-        height = UInt32(size.height)
-        width = UInt32(size.width)
     }
 }

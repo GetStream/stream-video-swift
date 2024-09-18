@@ -42,8 +42,8 @@ final class MockWebRTCCoordinatorStack {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
-            callAuthenticator: callAuthenticator,
-            rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
+            rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+            callAuthentication: callAuthenticator.authenticate
         )
 
         InjectedValues[\.internetConnectionObserver] = internetConnection

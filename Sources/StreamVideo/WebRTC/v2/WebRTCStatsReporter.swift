@@ -107,6 +107,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     private func scheduleCollection(with interval: TimeInterval) {
         guard interval > 0 else {
             log.warning("Collection interval should be greater than 0.")
+            collectionCancellable?.cancel()
             return
         }
 

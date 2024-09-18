@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 
-final class MockCallAuthenticator: CallAuthenticating {
+final class MockCallAuthenticator {
 
     var authenticateResult: Result<JoinCallResponse, Error> = .failure(ClientError.Unknown())
 
