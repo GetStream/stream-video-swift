@@ -6,9 +6,9 @@
 import XCTest
 
 final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unchecked Sendable {
-
+    
     private static var videoConfig: VideoConfig! = .dummy()
-
+    
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
         .Stage
@@ -21,29 +21,29 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
         videoConfig: Self.videoConfig
     )
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .rejoining(.init())
-
+    
     // MARK: - Lifecycle
-
+    
     override class func tearDown() {
         Self.videoConfig = nil
         super.tearDown()
     }
-
+    
     override func tearDown() {
         allOtherStages = nil
         mockCoordinatorStack = nil
         subject = nil
         super.tearDown()
     }
-
+    
     // MARK: - init
-
+    
     func test_init() {
         XCTAssertEqual(subject.id, .rejoining)
     }
-
+    
     // MARK: - transition
-
+    
     func test_transition() {
         for nextStage in allOtherStages {
             if validStages.contains(nextStage.id) {
@@ -53,7 +53,7 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
             }
         }
     }
-
+    
     func test_transition_withoutCoordinator_transitionsToDisconnected() async {
         await assertTransitions(
             from: .disconnected,
@@ -61,26 +61,30 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
             expectedTransitionsChain: [.disconnected]
         )
     }
-
+    
     func test_transition_sfuAdapterIsNotConnected_sendLeaveRequestAndDisconnecteWereNotCalled() async {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
-
+        
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
-
+        
         let webSocket = mockCoordinatorStack.sfuStack.webSocket
         XCTAssertEqual(webSocket.mockEngine.timesCalled(.sendMessage), 0)
         XCTAssertEqual(webSocket.timesCalled(.disconnectAsync), 0)
     }
-
-    func test_transition_sfuAdapterIsConnected_sendLeaveRequestAndDisconnecteWereCalled() async {
+    
+    func test_transition_sfuAdapterIsConnected_sendLeaveRequestAndDisconnecteWereCalled() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
-        await wait(for: 0.25)
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -88,10 +92,10 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
         mockCoordinatorStack
             .sfuStack
             .setConnectionState(to: .connected(healthCheckInfo: .init()))
-
+        
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 1)
-
+        
         let webSocket = mockCoordinatorStack.sfuStack.webSocket
         XCTAssertEqual(
             webSocket
@@ -99,26 +103,31 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
                 .recordedInputPayload(
                     Stream_Video_Sfu_Event_SfuRequest.self,
                     for: .sendMessage
-                )?.first?.leaveCallRequest.sessionID, sessionId
+                )?.first?.leaveCallRequest.sessionID,
+            sessionId
         )
         XCTAssertEqual(webSocket.timesCalled(.disconnectAsync), 1)
     }
-
-    func test_transition_isRejoiningFromSessionIDWasSetCorrectly() async {
+    
+    func test_transition_isRejoiningFromSessionIDWasSetCorrectly() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
-        await wait(for: 0.5)
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
-
+        
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
-
+        
         XCTAssertEqual(subject.context.isRejoiningFromSessionID, sessionId)
     }
-
+    
     func test_transition_previousSessionPeerConnectionsWereSetCorrectly() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         await mockCoordinatorStack
@@ -128,7 +137,7 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
         try await mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
         let publisher = await mockCoordinatorStack.coordinator.stateAdapter.publisher
         let subscriber = await mockCoordinatorStack.coordinator.stateAdapter.subscriber
-
+        
         try await assertTransition(
             from: .disconnected,
             expectedTarget: .connecting,
@@ -138,18 +147,23 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
             XCTAssertTrue(target.context.previousSessionSubscriber === subscriber)
         }
     }
-
-    func test_transition_cleanUpForReconnectionWasCalledOnStateAdapter() async {
+    
+    func test_transition_cleanUpForReconnectionWasCalledOnStateAdapter() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
-
+        
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
-
+        
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter)
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.publisher)
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.subscriber)
@@ -157,9 +171,9 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
         await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.token, "")
         XCTAssertEqual(subject.context.isRejoiningFromSessionID, sessionId)
     }
-
+    
     // MARK: - Private helpers
-
+    
     private func assertTransitions(
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,
@@ -178,13 +192,13 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
                 throw transitionError
             }
         }
-
+        
         _ = subject.transition(from: .init(id: from, context: subject.context))
-
+        
         await fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
         XCTAssertEqual(transitions, expectedTransitionsChain)
     }
-
+    
     private func assertTransition(
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,
@@ -212,10 +226,10 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
             }
         }
         _ = subject.transition(from: .init(id: from, context: subject.context))
-
+        
         await fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
     }
-
+    
     private func assertNilAsync<T>(
         _ expression: @autoclosure () async throws -> T?,
         file: StaticString = #file,
@@ -224,7 +238,7 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
         let value = try await expression()
         XCTAssertNil(value, file: file, line: line)
     }
-
+    
     private func assertEqualAsync<T: Equatable>(
         _ expression: @autoclosure () async throws -> T,
         _ expected: @autoclosure () async throws -> T,
