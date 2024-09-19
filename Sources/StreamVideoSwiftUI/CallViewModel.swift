@@ -173,6 +173,7 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
+    private let customData: [String: RawJSON]?
 
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
@@ -210,10 +211,12 @@ open class CallViewModel: ObservableObject {
 
     public init(
         participantsLayout: ParticipantsLayout = .grid,
-        callSettings: CallSettings? = nil
+        callSettings: CallSettings? = nil,
+        customData: [String: RawJSON]? = nil
     ) {
         self.participantsLayout = participantsLayout
         self.callSettings = callSettings ?? CallSettings()
+        self.customData = customData
         localCallSettingsChange = callSettings != nil
 
         subscribeToCallEvents()
@@ -361,6 +364,7 @@ open class CallViewModel: ObservableObject {
                 do {
                     let callData = try await call.create(
                         members: membersRequest,
+                        custom: customData,
                         ring: ring,
                         maxDuration: maxDuration,
                         maxParticipants: maxParticipants
@@ -589,6 +593,7 @@ open class CallViewModel: ObservableObject {
                 settingsRequest = .init(backstage: backstage, limits: limits)
                 let options = CreateCallOptions(
                     members: members,
+                    custom: customData,
                     settings: settingsRequest,
                     startsAt: startsAt
                 )
