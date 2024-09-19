@@ -75,11 +75,12 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
 
     func test_transition_fromIdle_doesNotUpdateSession() async throws {
         _ = mockCoordinatorStack.coordinator
-        await wait(for: 0.5)
-        let expectedSessionId = await mockCoordinatorStack
+        let expectedSessionId = try await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .sessionID
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
         try await assertTransition(

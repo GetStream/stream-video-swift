@@ -206,13 +206,17 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     // MARK: observeForSubscriptionUpdates
 
-    func test_transition_participantsUpdated_updateSubscriptionsWasCalledOnSFU() async {
+    func test_transition_participantsUpdated_updateSubscriptionsWasCalledOnSFU() async throws {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
 
-        await wait(for: 0.2)
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         await assertResultAfterTrigger(
             trigger: { [mockCoordinatorStack] in
                 await mockCoordinatorStack?.coordinator.stateAdapter.didUpdateParticipants([
