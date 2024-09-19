@@ -9,7 +9,7 @@ import StreamWebRTC
 /// Class that handles a particular call.
 class CallController: @unchecked Sendable {
 
-    private lazy var webRTCCoordinator = WebRTCCoordinator(
+    private lazy var webRTCCoordinator = webRTCCoordinatorFactory.buildCoordinator(
         user: user,
         apiKey: apiKey,
         callCid: callCid(from: callId, callType: callType),
@@ -40,6 +40,7 @@ class CallController: @unchecked Sendable {
     private let defaultAPI: DefaultAPI
     private let videoConfig: VideoConfig
     private let sfuReconnectionTime: CGFloat
+    private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
     private var reconnectionDate: Date?
     private var cachedLocation: String?
     private var currentSFU: String?
@@ -61,7 +62,8 @@ class CallController: @unchecked Sendable {
         callType: String,
         apiKey: String,
         videoConfig: VideoConfig,
-        cachedLocation: String?
+        cachedLocation: String?,
+        webRTCCoordinatorFactory: WebRTCCoordinatorProviding = WebRTCCoordinatorFactory()
     ) {
         self.user = user
         self.callId = callId
@@ -71,6 +73,7 @@ class CallController: @unchecked Sendable {
         sfuReconnectionTime = 30
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
+        self.webRTCCoordinatorFactory = webRTCCoordinatorFactory
 
         _ = webRTCCoordinator
 
@@ -388,9 +391,7 @@ class CallController: @unchecked Sendable {
     func cleanUp() {
         guard call != nil else { return }
         call = nil
-        Task {
-            await webRTCCoordinator.cleanUp()
-        }
+        Task { await webRTCCoordinator.cleanUp() }
     }
 
     /// Collects user feedback asynchronously.

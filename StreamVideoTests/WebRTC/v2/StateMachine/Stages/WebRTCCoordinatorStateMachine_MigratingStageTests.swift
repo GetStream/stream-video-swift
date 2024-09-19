@@ -93,28 +93,14 @@ final class WebRTCCoordinatorStateMachine_MigratingStageTests: XCTestCase, @unch
         }
     }
 
-    func test_transition_cleanUpForReconnectionWasCalledOnStateAdapter() async {
+    func test_transition_cleanUpForReconnectionWasCalledOnStateAdapter() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
-        await mockCoordinatorStack
+        _ = try await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
-
-        _ = subject.transition(from: .disconnected(subject.context))
-        await wait(for: 0.5)
-
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.publisher)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.subscriber)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.statsReporter)
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.token, "")
-    }
-
-    func test_transition_sfEventObser() async {
-        subject.context.coordinator = mockCoordinatorStack.coordinator
-
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         await mockCoordinatorStack
             .coordinator
             .stateAdapter

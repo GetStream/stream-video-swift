@@ -88,9 +88,14 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         XCTAssertEqual(webSocket.timesCalled(.disconnectAsync), 0)
     }
 
-    func test_transition_sfuAdapterIsConnected_sendLeaveRequestAndDisconnecteWereCalled() async {
+    func test_transition_sfuAdapterIsConnected_sendLeaveRequestAndDisconnecteWereCalled() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
