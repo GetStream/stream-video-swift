@@ -98,7 +98,8 @@ final class ICEAdapterTests: XCTestCase {
                     .subject
                     .send(
                         StreamRTCPeerConnection.DidGenerateICECandidateEvent(
-                            candidate: self.iceCandidate)
+                            candidate: self.iceCandidate
+                        )
                     )
             }
         ) { request in
@@ -106,6 +107,72 @@ final class ICEAdapterTests: XCTestCase {
             XCTAssertEqual(request.sessionID, self.sessionId)
             XCTAssertFalse(request.iceCandidate.isEmpty)
         }
+    }
+
+    // MARK: - hasRemoteDescription
+
+    func test_hasRemoteDescriptionEvent_eventReceived_addsTrickledCandidatesOnPeerConnection() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        await wait(for: 0.5)
+        await subject.trickle(iceCandidate)
+        await fulfillment { self.mockSFUStack.service.iCETrickleWasCalledWithRequest != nil }
+
+        mockPeerConnection
+            .subject
+            .send(StreamRTCPeerConnection.HasRemoteDescription())
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addCandidate) == 1 }
+    }
+
+    // MARK: - connectionState
+
+    func test_connectionState_whileDisconnectedTrickles_whenConnectedWillTrickleAnyUntrickledCandidates() async throws {
+        mockSFUStack.setConnectionState(to: .disconnected(source: .noPongReceived))
+        _ = subject
+        await wait(for: 0.5)
+        await subject.trickle(iceCandidate)
+        await wait(for: 1)
+        XCTAssertNil(mockSFUStack.service.iCETrickleWasCalledWithRequest)
+
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+
+        await fulfillment { self.mockSFUStack.service.iCETrickleWasCalledWithRequest != nil }
+    }
+
+    // MARK: - iCETrickle
+
+    func test_iCETrickle_eventReceived_candidateIsAddedOnPeerConnection() async throws {
+        _ = subject
+        await wait(for: 0.5)
+        mockPeerConnection.stub(
+            for: \.remoteDescription,
+            with: RTCSessionDescription(
+                type: .answer,
+                sdp: .unique
+            )
+        )
+
+        var event = Stream_Video_Sfu_Models_ICETrickle()
+        let sdp = String.unique
+        event.iceCandidate = """
+        {
+            "candidate":"\(sdp)"
+        }
+        """
+        event.sessionID = .unique
+        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(event)))
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addCandidate) == 1 }
+        let candidate = try XCTUnwrap(
+            mockPeerConnection.recordedInputPayload(
+                RTCIceCandidate.self,
+                for: .addCandidate
+            )?.first
+        )
+        XCTAssertEqual(candidate.sdp, sdp)
+        XCTAssertEqual(candidate.sdpMLineIndex, 0)
+        XCTAssertNil(candidate.sdpMid)
     }
 
     // MARK: - Private helpers
