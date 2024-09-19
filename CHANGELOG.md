@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- You can now pass your customData when initializing a `CallViewModel` [#530](https://github.com/GetStream/stream-video-swift/pull/530)
+
 ### 🔄 Changed
 - Updated the default sorting for Participants during a call to minimize the movement of already visible tiles [#515](https://github.com/GetStream/stream-video-swift/pull/515)
 
