@@ -76,7 +76,7 @@ final class ICEAdapterTests: XCTestCase {
     func test_add_peerConnectionWithRemoteDescription_taskWasTriggered() async throws {
         _ = subject
         await wait(for: 1) // Wait for object configuration to complete.
-        mockPeerConnection.remoteDescription = .init(type: .offer, sdp: "")
+        mockPeerConnection.stub(for: \.remoteDescription, with: RTCSessionDescription(type: .offer, sdp: ""))
 
         await subject.add(iceCandidate)
 
