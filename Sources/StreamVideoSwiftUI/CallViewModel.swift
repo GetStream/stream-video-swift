@@ -173,7 +173,6 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
-    private let customData: [String: RawJSON]?
 
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
@@ -211,12 +210,10 @@ open class CallViewModel: ObservableObject {
 
     public init(
         participantsLayout: ParticipantsLayout = .grid,
-        callSettings: CallSettings? = nil,
-        customData: [String: RawJSON]? = nil
+        callSettings: CallSettings? = nil
     ) {
         self.participantsLayout = participantsLayout
         self.callSettings = callSettings ?? CallSettings()
-        self.customData = customData
         localCallSettingsChange = callSettings != nil
 
         subscribeToCallEvents()
@@ -337,7 +334,8 @@ open class CallViewModel: ObservableObject {
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
-        backstage: BackstageSettingsRequest? = nil
+        backstage: BackstageSettingsRequest? = nil,
+        customData: [String: RawJSON]? = nil
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
@@ -351,7 +349,8 @@ open class CallViewModel: ObservableObject {
                 maxDuration: maxDuration,
                 maxParticipants: maxParticipants,
                 startsAt: startsAt,
-                backstage: backstage
+                backstage: backstage,
+                customData: customData
             )
         } else {
             let call = streamVideo.call(
@@ -386,9 +385,18 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    public func joinCall(callType: String, callId: String) {
+    public func joinCall(
+        callType: String,
+        callId: String,
+        customData: [String: RawJSON]? = nil
+    ) {
         callingState = .joining
-        enterCall(callType: callType, callId: callId, members: [])
+        enterCall(
+            callType: callType,
+            callId: callId,
+            members: [],
+            customData: customData
+        )
     }
 
     /// Enters into a lobby before joining a call.
@@ -420,12 +428,22 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    public func acceptCall(callType: String, callId: String) {
+    public func acceptCall(
+        callType: String,
+        callId: String,
+        customData: [String: RawJSON]? = nil
+    ) {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
             do {
                 try await call.accept()
-                enterCall(call: call, callType: callType, callId: callId, members: [])
+                enterCall(
+                    call: call,
+                    callType: callType,
+                    callId: callId,
+                    members: [],
+                    customData: customData
+                )
             } catch {
                 self.error = error
                 callingState = .idle
@@ -572,7 +590,8 @@ open class CallViewModel: ObservableObject {
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
-        backstage: BackstageSettingsRequest? = nil
+        backstage: BackstageSettingsRequest? = nil,
+        customData: [String: RawJSON]? = nil
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
