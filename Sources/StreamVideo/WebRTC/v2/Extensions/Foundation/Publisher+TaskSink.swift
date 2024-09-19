@@ -12,7 +12,7 @@ extension Publisher {
         receiveCompletion: @escaping ((Subscribers.Completion<Failure>) -> Void) = { _ in },
         receiveValue: @escaping ((Output) async throws -> Void)
     ) -> AnyCancellable {
-        sink(receiveCompletion: receiveCompletion) { input in
+        sink(receiveCompletion: receiveCompletion) { [weak disposableBag] input in
             let task = Task {
                 do {
                     try Task.checkCancellation()
