@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 - Updated the default sorting for Participants during a call to minimize the movement of already visible tiles [#515](https://github.com/GetStream/stream-video-swift/pull/515)
+- **Breaking** The `StreamDeviceOrientation` values now are `.portrait(isUpsideDown: Bool)` & `.landscape(isLeft: Bool)`. [#534](https://github.com/GetStream/stream-video-swift/pull/534)
 
 ### 🐞 Fixed
 - An `MissingPermissions` error was thrown when creating a `StreamVideo` with anonymous user type. [#525](https://github.com/GetStream/stream-video-swift/pull/525)
