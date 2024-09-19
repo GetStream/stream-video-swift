@@ -42,20 +42,14 @@ final class ICEAdapterTests: XCTestCase {
     // MARK: - trickle(_:)
 
     func test_trickle_connected_calledWithCandidate_tricklesToSFU() async throws {
-        // Given
-        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-
-        // When
-        await subject.trickle(iceCandidate)
-        await fulfillment { [service = mockSFUStack.service] in
-            service.iCETrickleWasCalledWithRequest != nil
+        try await assertSFUTrickleTriggered(
+            connectionState: .connected(healthCheckInfo: .init()),
+            { await self.subject.trickle(self.iceCandidate) }
+        ) { request in
+            XCTAssertEqual(request.peerType, .publisherUnspecified)
+            XCTAssertEqual(request.sessionID, self.sessionId)
+            XCTAssertFalse(request.iceCandidate.isEmpty)
         }
-
-        // Then
-        let request = try XCTUnwrap(mockSFUStack.service.iCETrickleWasCalledWithRequest)
-        XCTAssertEqual(request.peerType, .publisherUnspecified)
-        XCTAssertEqual(request.sessionID, sessionId)
-        XCTAssertFalse(request.iceCandidate.isEmpty)
     }
 
     func test_trickle_disconnected_calledWithCandidate_tricklesToSFU() async throws {
@@ -91,5 +85,54 @@ final class ICEAdapterTests: XCTestCase {
         }
 
         XCTAssertEqual(mockPeerConnection.timesCalled(.addCandidate), 1)
+    }
+
+    // MARK: - didGenerateICECandidateEvent
+
+    func test_didGenerateICECandidateEvent_eventReceivedWhileConnecting_tricklesToSFU() async throws {
+        try await assertSFUTrickleTriggered(
+            connectionState: .connected(healthCheckInfo: .init()),
+            {
+                self
+                    .mockPeerConnection
+                    .subject
+                    .send(
+                        StreamRTCPeerConnection.DidGenerateICECandidateEvent(
+                            candidate: self.iceCandidate)
+                    )
+            }
+        ) { request in
+            XCTAssertEqual(request.peerType, .publisherUnspecified)
+            XCTAssertEqual(request.sessionID, self.sessionId)
+            XCTAssertFalse(request.iceCandidate.isEmpty)
+        }
+    }
+
+    // MARK: - Private helpers
+
+    private func assertSFUTrickleTriggered(
+        connectionState: WebSocketConnectionState,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ operation: @escaping () async throws -> Void,
+        _ validationHandler: @escaping (Stream_Video_Sfu_Models_ICETrickle) -> Void
+    ) async throws {
+        _ = subject
+        await wait(for: 0.5)
+        mockSFUStack.setConnectionState(to: connectionState)
+
+        // When
+        try await operation()
+        await fulfillment(file: file, line: line) { [service = mockSFUStack.service] in
+            service.iCETrickleWasCalledWithRequest != nil
+        }
+
+        // Then
+        let request = try XCTUnwrap(
+            mockSFUStack.service.iCETrickleWasCalledWithRequest,
+            file: file,
+            line: line
+        )
+        validationHandler(request)
     }
 }
