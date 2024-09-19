@@ -422,8 +422,14 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase {
 
     // MARK: - buildSubscriptionDetails
 
-    func test_buildSubscriptionDetails_returnsTrackSubscriptionDetailsForParticipantsOtherThanLocal() async {
-        let sessionId = await mockCoordinatorStack.coordinator.stateAdapter.sessionID
+    func test_buildSubscriptionDetails_returnsTrackSubscriptionDetailsForParticipantsOtherThanLocal() async throws {
+        _ = mockCoordinatorStack.coordinator
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
         await mockCoordinatorStack.coordinator.stateAdapter.didUpdateParticipants([
             sessionId: .dummy(id: sessionId, hasVideo: true, hasAudio: true, isScreenSharing: true),
             "1": .dummy(id: "1", hasVideo: true, trackSize: .init(width: 10, height: 11)),

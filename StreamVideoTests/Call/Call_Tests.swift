@@ -303,6 +303,41 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertTrue(Int(duration) >= 1)
     }
 
+    // MARK: - Update State from Coordinator events
+
+    func test_coordinatorEventReceived_startedRecording_updatesStateCorrectly() async throws {
+        try await assertCoordinatorEventReceived(
+            .typeCallRecordingStartedEvent(
+                CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
+            )
+        ) { call in await fulfillment { call.state.recordingState == .recording } }
+    }
+
+    func test_coordinatorEventReceived_startedRecordingForAnotherCall_doesNotUpdateState() async throws {
+        try await assertCoordinatorEventReceived(
+            .typeCallRecordingStartedEvent(
+                CallRecordingStartedEvent(callCid: .unique, createdAt: Date())
+            )
+        ) { @MainActor call in
+            await wait(for: 1)
+            XCTAssertEqual(call.state.recordingState, .noRecording)
+        }
+    }
+
+    private func assertCoordinatorEventReceived(
+        _ event: VideoEvent,
+        fulfillmentHandler: @MainActor(Call) async throws -> Void
+    ) async throws {
+        let streamVideo = try XCTUnwrap(streamVideo)
+        let call = streamVideo.call(callType: callType, callId: callId)
+
+        streamVideo
+            .eventNotificationCenter
+            .process(.coordinatorEvent(event))
+
+        try await fulfillmentHandler(call)
+    }
+
     // MARK: - join
 
     func test_join_callControllerWasCalledOnlyOnce() async throws {
