@@ -1146,6 +1146,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
+    func transitionDueToError(_ error: Error) {
+        do {
+            try stateMachine.transition(.error(self, error: error))
+        } catch {
+            log.error(error)
+        }
+    }
+
     // MARK: - private
 
     private func updatePermissions(

@@ -538,6 +538,9 @@ class CallController: @unchecked Sendable {
 
             call?.update(reconnectionStatus: .connected)
         case .error:
+            if let call, let errorStage = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
+                call.transitionDueToError(errorStage.error)
+            }
             call?.leave()
         default:
             break
