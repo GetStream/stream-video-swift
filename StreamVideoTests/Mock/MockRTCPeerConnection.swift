@@ -71,7 +71,11 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
 
     // MARK: - Implementation
 
-    var remoteDescription: RTCSessionDescription?
+    var remoteDescription: RTCSessionDescription? {
+        get { self[dynamicMember: \.remoteDescription] }
+        set { _ = newValue }
+    }
+
     var transceivers: [RTCRtpTransceiver] = []
     var subject: PassthroughSubject<any RTCPeerConnectionEvent, Never> = .init()
     var publisher: AnyPublisher<any RTCPeerConnectionEvent, Never> { subject.eraseToAnyPublisher() }

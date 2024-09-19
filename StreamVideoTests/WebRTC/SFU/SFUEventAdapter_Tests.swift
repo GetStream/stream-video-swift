@@ -133,8 +133,6 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) { _ in
             let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
-            let changePublishQualityCall = try XCTUnwrap(mockPublisher.stubbedFunctionInput[.changePublishQuality]?.first)
-
             XCTAssertEqual(
                 mockPublisher.recordedInputPayload(Set<String>.self, for: .changePublishQuality)?.first,
                 .init(["q"])
