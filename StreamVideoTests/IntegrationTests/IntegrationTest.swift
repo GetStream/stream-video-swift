@@ -9,6 +9,8 @@ import XCTest
 
 class IntegrationTest: XCTestCase {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private var apiKey: String! = ""
     private var userId: String! = "thierry"
     private var baseURL: URL! = .init(string: "https://pronto.getstream.io/api/auth/create-token")!
@@ -24,6 +26,11 @@ class IntegrationTest: XCTestCase {
         try await super.setUp()
         client = try await makeClient(for: userId)
         #endif
+    }
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
     }
 
     override func tearDown() {
@@ -50,7 +57,7 @@ class IntegrationTest: XCTestCase {
             apiKey: tokenResponse.apiKey,
             user: User(id: userId),
             token: .init(rawValue: tokenResponse.token),
-            videoConfig: .dummy(),
+            videoConfig: Self.videoConfig,
             pushNotificationsConfig: .init(
                 pushProviderInfo: .init(name: "ios-apn", pushProvider: .apn),
                 voipPushProviderInfo: .init(name: "ios-voip", pushProvider: .apn)
