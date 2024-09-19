@@ -671,7 +671,6 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func test_joinBackstageRegularUser() async throws {
-        throw XCTSkip()
         let startingDate = Date(timeIntervalSinceNow: 30)
         let joiningDate = Date(timeInterval: -20, since: startingDate)
         let firstUserCall = client.call(callType: .livestream, callId: randomCallId)
