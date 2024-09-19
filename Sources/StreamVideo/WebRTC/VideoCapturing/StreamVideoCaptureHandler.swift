@@ -2,24 +2,28 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @preconcurrency import StreamWebRTC
 
 final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
 
-    let source: RTCVideoSource
+    @Injected(\.orientationAdapter) private var orientationAdapter
+
+    let source: RTCVideoCapturerDelegate
     let filters: [VideoFilter]
     let context: CIContext
     let colorSpace: CGColorSpace
     var selectedFilter: VideoFilter?
-    var sceneOrientation: UIInterfaceOrientation = .unknown
+    var sceneOrientation: StreamDeviceOrientation = .portrait(isUpsideDown: false)
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
 
     private lazy var serialActor = SerialActor()
+    private var orientationCancellable: AnyCancellable?
 
     init(
-        source: RTCVideoSource,
+        source: RTCVideoCapturerDelegate,
         filters: [VideoFilter],
         handleRotation: Bool = true
     ) {
@@ -29,13 +33,13 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateRotation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
-        updateRotation()
+
+        orientationCancellable = orientationAdapter
+            .$orientation
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .assign(to: \Self.sceneOrientation, onWeak: self)
+        sceneOrientation = orientationAdapter.orientation
     }
 
     func capturer(
@@ -71,32 +75,29 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         }
     }
 
-    @objc private func updateRotation() {
-        DispatchQueue.main.async {
-            self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
-        }
-    }
-
     private func adjustRotation(
         _ capturer: RTCVideoCapturer,
         for buffer: RTCCVPixelBuffer?,
         frame: RTCVideoFrame
     ) -> RTCVideoFrame {
-        #if os(macOS) || targetEnvironment(simulator) || targetEnvironment(macCatalyst)
+        #if os(macOS) || targetEnvironment(macCatalyst)
         var rotation = RTCVideoRotation._0
         #else
         var rotation = RTCVideoRotation._90
         switch sceneOrientation {
-        case .portrait:
-            rotation = ._90
-        case .portraitUpsideDown:
-            rotation = ._270
-        case .landscapeRight:
-            rotation = currentCameraPosition == .front ? ._180 : ._0
-        case .landscapeLeft:
-            rotation = currentCameraPosition == .front ? ._0 : ._180
-        default:
-            break
+        case let .portrait(isUpsideDown):
+            rotation = isUpsideDown ? ._270 : ._90
+        case let .landscape(isLeft):
+            switch (isLeft, currentCameraPosition == .front) {
+            case (true, true):
+                rotation = ._180
+            case (true, false):
+                rotation = ._0
+            case (false, true):
+                rotation = ._0
+            case (false, false):
+                rotation = ._180
+            }
         }
         #endif
         if rotation != frame.rotation, let _buffer = buffer ?? frame.buffer as? RTCCVPixelBuffer {
@@ -120,14 +121,6 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
                 originalImageOrientation: sceneOrientation.cgOrientation
             )
         ) ?? image
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
     }
 }
 
