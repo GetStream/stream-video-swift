@@ -4,20 +4,46 @@
 
 import Combine
 import Foundation
-import StreamVideo
 #if canImport(UIKit)
 import UIKit
 #endif
 
 /// An enumeration representing device orientations: portrait or landscape.
 public enum StreamDeviceOrientation: Equatable {
-    case portrait, landscape
+    case portrait(isUpsideDown: Bool)
+    case landscape(isLeft: Bool)
 
     /// A computed property that indicates whether the orientation is portrait.
-    public var isPortrait: Bool { self == .portrait }
+    public var isPortrait: Bool {
+        switch self {
+        case .landscape:
+            return false
+        case .portrait:
+            return true
+        }
+    }
 
     /// A computed property that indicates whether the orientation is landscape.
-    public var isLandscape: Bool { self == .landscape }
+    public var isLandscape: Bool {
+        switch self {
+        case .landscape:
+            return true
+        case .portrait:
+            return false
+        }
+    }
+
+    public var cgOrientation: CGImagePropertyOrientation {
+        switch self {
+        /// Handle known portrait orientations
+        case let .portrait(isUpsideDown):
+            return isUpsideDown ?.right : .left
+
+        /// Handle known landscape orientations
+        case let .landscape(isLeft):
+            return isLeft ? .up : .down
+        }
+    }
 }
 
 /// An observable object that adapts to device orientation changes.
@@ -28,14 +54,18 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
     public static let defaultProvider: Provider = {
         #if canImport(UIKit)
         switch UIDevice.current.orientation {
-        case .unknown, .portrait, .portraitUpsideDown:
-            return .portrait
-        case .landscapeLeft, .landscapeRight:
-            return .landscape
+        case .unknown, .portrait:
+            return .portrait(isUpsideDown: false)
+        case .portraitUpsideDown:
+            return .portrait(isUpsideDown: true)
+        case .landscapeLeft:
+            return .landscape(isLeft: true)
+        case .landscapeRight:
+            return .landscape(isLeft: false)
         case .faceUp, .faceDown:
-            return .portrait
+            return .portrait(isUpsideDown: false)
         @unknown default:
-            return .portrait
+            return .portrait(isUpsideDown: false)
         }
         #else
         return .portrait
