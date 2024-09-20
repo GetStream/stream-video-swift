@@ -578,6 +578,31 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_didUpdateParticipants_multipleConcurrentOperations_participantsCountShouldBeCorrect() async throws {
+        let expectedParticipantsCount = 20
+        _ = subject
+        await wait(for: 0.3)
+        await withTaskGroup(of: Void.self) { group in
+            (0..<expectedParticipantsCount)
+                .map { _ in CallParticipant.dummy() }
+                .map {
+                    var event = Stream_Video_Sfu_Event_ParticipantJoined()
+                    event.participant = .init()
+                    event.participant.userID = $0.sessionId
+                    event.participant.sessionID = $0.sessionId
+                    return .participantJoined(event)
+                }
+                .forEach { event in
+                    group.addTask {
+                        self.mockWebSocket.eventSubject.send(.sfuEvent(event))
+                    }
+                }
+        }
+
+        await wait(for: 1)
+        await assertEqualAsync(await stateAdapter.participants.count, expectedParticipantsCount)
+    }
+
     // MARK: - Private helpers
 
     private func assert<T>(
@@ -608,5 +633,16 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
         cancellable.cancel()
         try await handler(await stateAdapter.participants)
+    }
+
+    private func assertEqualAsync<T: Equatable>(
+        _ expression: @autoclosure () async throws -> T,
+        _ expected: @autoclosure () async throws -> T,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async rethrows {
+        let value = try await expression()
+        let expectedValue = try await expected()
+        XCTAssertEqual(value, expectedValue, file: file, line: line)
     }
 }
