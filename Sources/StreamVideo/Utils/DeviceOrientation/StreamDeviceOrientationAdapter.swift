@@ -53,30 +53,33 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
     /// The default provider for device orientation based on platform.
     public static let defaultProvider: Provider = {
         #if canImport(UIKit)
-        switch UIDevice.current.orientation {
-        case .unknown, .portrait:
-            return .portrait(isUpsideDown: false)
-        case .portraitUpsideDown:
-            return .portrait(isUpsideDown: true)
-        case .landscapeLeft:
-            return .landscape(isLeft: true)
-        case .landscapeRight:
-            return .landscape(isLeft: false)
-        case .faceUp, .faceDown:
-            return .portrait(isUpsideDown: false)
-        @unknown default:
+        if let window = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            switch window.interfaceOrientation {
+            case .unknown, .portrait:
+                return .portrait(isUpsideDown: false)
+            case .portraitUpsideDown:
+                return .portrait(isUpsideDown: true)
+            case .landscapeLeft:
+                return .landscape(isLeft: true)
+            case .landscapeRight:
+                return .landscape(isLeft: false)
+            @unknown default:
+                return .portrait(isUpsideDown: false)
+            }
+        } else {
             return .portrait(isUpsideDown: false)
         }
         #else
-        return .portrait
+        return .portrait(isUpsideDown: false)
         #endif
     }
 
     private var provider: Provider
     private var notificationCancellable: AnyCancellable?
+    private var __cancelable: AnyCancellable?
 
     /// The current orientation observed by the adapter.
-    @Published public private(set) var orientation: StreamDeviceOrientation
+    @Published public private(set) var orientation: StreamDeviceOrientation = .portrait(isUpsideDown: false)
 
     /// Initializes an adapter for observing device orientation changes.
     /// - Parameters:
@@ -87,9 +90,9 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
         _ provider: @escaping Provider = StreamDeviceOrientationAdapter.defaultProvider
     ) {
         self.provider = provider
-        orientation = provider()
 
         #if canImport(UIKit)
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         // Subscribe to orientation change notifications on UIKit platforms.
         notificationCancellable = notificationCenter
             .publisher(for: UIDevice.orientationDidChangeNotification)
@@ -99,11 +102,18 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
                 self.orientation = provider() // Update orientation based on the provider.
             }
         #endif
+
+        Task { @MainActor in
+            orientation = provider()
+        }
     }
 
     /// Cleans up resources when the adapter is deallocated.
     deinit {
         notificationCancellable?.cancel() // Cancel notification subscription.
+        #if canImport(UIKit)
+        UIDevice.current.endGeneratingDeviceOrientationNotifications()
+        #endif
     }
 }
 
