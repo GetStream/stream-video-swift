@@ -340,13 +340,7 @@ actor WebRTCStateAdapter: ObservableObject {
 
         guard !participants.isEmpty else { return }
 
-        assignTracksToParticipants(
-            participants,
-            originalParticipants: self.participants,
-            fileName: #file,
-            functionName: #function,
-            line: #line
-        )
+        updateParticipants { $0 }
     }
 
     /// Removes a track for the given participant ID.
@@ -359,13 +353,7 @@ actor WebRTCStateAdapter: ObservableObject {
 
         guard !participants.isEmpty else { return }
 
-        assignTracksToParticipants(
-            participants,
-            originalParticipants: self.participants,
-            fileName: #file,
-            functionName: #function,
-            line: #line
-        )
+        updateParticipants { $0 }
     }
 
     /// Retrieves a track by ID and track type.
