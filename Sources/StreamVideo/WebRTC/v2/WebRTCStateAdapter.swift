@@ -601,7 +601,7 @@ actor WebRTCStateAdapter: ObservableObject {
         let usersWithScreenSharingTracks = updatedParticipants
             .filter { $0.value.screenshareTrack != nil }
 
-        guard updatedParticipants != originalParticipants else { return }
+//        guard updatedParticipants != originalParticipants else { return }
 
         log.debug(
             """
