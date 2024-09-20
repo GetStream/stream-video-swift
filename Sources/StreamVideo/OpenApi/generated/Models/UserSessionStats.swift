@@ -25,6 +25,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     public var maxPliPerSecond: Float?
     public var maxPublishingVideoQuality: VideoQuality?
     public var maxReceivingVideoQuality: VideoQuality?
+    public var minEventTs: Int
     public var os: String?
     public var osVersion: String?
     public var packetLossFraction: Float
@@ -78,6 +79,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         maxPliPerSecond: Float? = nil,
         maxPublishingVideoQuality: VideoQuality? = nil,
         maxReceivingVideoQuality: VideoQuality? = nil,
+        minEventTs: Int,
         os: String? = nil,
         osVersion: String? = nil,
         packetLossFraction: Float,
@@ -130,6 +132,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         self.maxPliPerSecond = maxPliPerSecond
         self.maxPublishingVideoQuality = maxPublishingVideoQuality
         self.maxReceivingVideoQuality = maxReceivingVideoQuality
+        self.minEventTs = minEventTs
         self.os = os
         self.osVersion = osVersion
         self.packetLossFraction = packetLossFraction
@@ -184,6 +187,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         case maxPliPerSecond = "max_pli_per_second"
         case maxPublishingVideoQuality = "max_publishing_video_quality"
         case maxReceivingVideoQuality = "max_receiving_video_quality"
+        case minEventTs = "min_event_ts"
         case os
         case osVersion = "os_version"
         case packetLossFraction = "packet_loss_fraction"
@@ -238,6 +242,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
             lhs.maxPliPerSecond == rhs.maxPliPerSecond &&
             lhs.maxPublishingVideoQuality == rhs.maxPublishingVideoQuality &&
             lhs.maxReceivingVideoQuality == rhs.maxReceivingVideoQuality &&
+            lhs.minEventTs == rhs.minEventTs &&
             lhs.os == rhs.os &&
             lhs.osVersion == rhs.osVersion &&
             lhs.packetLossFraction == rhs.packetLossFraction &&
@@ -292,6 +297,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         hasher.combine(maxPliPerSecond)
         hasher.combine(maxPublishingVideoQuality)
         hasher.combine(maxReceivingVideoQuality)
+        hasher.combine(minEventTs)
         hasher.combine(os)
         hasher.combine(osVersion)
         hasher.combine(packetLossFraction)

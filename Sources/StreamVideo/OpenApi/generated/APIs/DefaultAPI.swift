@@ -581,7 +581,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func startRTMPBroadcast(
+    open func startRTMPBroadcasts(
         type: String,
         id: String,
         startRTMPBroadcastsRequest: StartRTMPBroadcastsRequest
@@ -1118,7 +1118,7 @@ protocol DefaultAPIEndpoints {
     func requestPermission(type: String, id: String, requestPermissionRequest: RequestPermissionRequest) async throws
         -> RequestPermissionResponse
         
-    func startRTMPBroadcast(type: String, id: String, startRTMPBroadcastsRequest: StartRTMPBroadcastsRequest) async throws
+    func startRTMPBroadcasts(type: String, id: String, startRTMPBroadcastsRequest: StartRTMPBroadcastsRequest) async throws
         -> StartRTMPBroadcastsResponse
         
     func stopAllRTMPBroadcasts(type: String, id: String) async throws -> StopAllRTMPBroadcastsResponse

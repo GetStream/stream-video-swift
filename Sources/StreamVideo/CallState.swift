@@ -252,6 +252,8 @@ public class CallState: ObservableObject {
             break
         case .typeUserUnbannedEvent:
             break
+        case .typeUserUpdatedEvent:
+            break
         }
     }
 

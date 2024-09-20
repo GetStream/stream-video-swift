@@ -64,6 +64,7 @@ public enum VideoEvent: Codable, Hashable {
     case typeUserPresenceChangedEvent(UserPresenceChangedEvent)
     case typeUserReactivatedEvent(UserReactivatedEvent)
     case typeUserUnbannedEvent(UserUnbannedEvent)
+    case typeUserUpdatedEvent(UserUpdatedEvent)
 
     public var type: String {
         switch self {
@@ -168,6 +169,8 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeUserReactivatedEvent(value):
             return value.type
         case let .typeUserUnbannedEvent(value):
+            return value.type
+        case let .typeUserUpdatedEvent(value):
             return value.type
         }
     }
@@ -276,6 +279,8 @@ public enum VideoEvent: Codable, Hashable {
             return value
         case let .typeUserUnbannedEvent(value):
             return value
+        case let .typeUserUpdatedEvent(value):
+            return value
         }
     }
 
@@ -383,6 +388,8 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeUserReactivatedEvent(value):
             try container.encode(value)
         case let .typeUserUnbannedEvent(value):
+            try container.encode(value)
+        case let .typeUserUpdatedEvent(value):
             try container.encode(value)
         }
     }
@@ -543,6 +550,9 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "user.unbanned" {
             let value = try container.decode(UserUnbannedEvent.self)
             self = .typeUserUnbannedEvent(value)
+        } else if dto.type == "user.updated" {
+            let value = try container.decode(UserUpdatedEvent.self)
+            self = .typeUserUpdatedEvent(value)
         } else {
             throw DecodingError.typeMismatch(
                 Self.Type.self,

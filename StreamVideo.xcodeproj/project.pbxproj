@@ -397,12 +397,12 @@
 		40FB15212BF78FA100D5E580 /* Publisher+NextValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
 		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
+		4157FF912C9AC9EC0093D839 /* RTMPBroadcastRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4157FF902C9AC9EC0093D839 /* RTMPBroadcastRequest.swift */; };
 		4159F1332C861404002B94D3 /* VideoEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1322C861404002B94D3 /* VideoEvent.swift */; };
 		4159F16A2C86FA41002B94D3 /* PrivacySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1382C86FA3D002B94D3 /* PrivacySettings.swift */; };
 		4159F16B2C86FA41002B94D3 /* UserBannedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1392C86FA3D002B94D3 /* UserBannedEvent.swift */; };
 		4159F16C2C86FA41002B94D3 /* TURNAggregatedStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13A2C86FA3D002B94D3 /* TURNAggregatedStats.swift */; };
 		4159F16D2C86FA41002B94D3 /* UserUpdatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13B2C86FA3E002B94D3 /* UserUpdatedEvent.swift */; };
-		4159F16E2C86FA41002B94D3 /* UserMute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13C2C86FA3E002B94D3 /* UserMute.swift */; };
 		4159F1702C86FA41002B94D3 /* UserMutedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13E2C86FA3E002B94D3 /* UserMutedEvent.swift */; };
 		4159F1712C86FA41002B94D3 /* UserDeactivatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13F2C86FA3E002B94D3 /* UserDeactivatedEvent.swift */; };
 		4159F1722C86FA41002B94D3 /* PublishedTrackInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1402C86FA3E002B94D3 /* PublishedTrackInfo.swift */; };
@@ -426,7 +426,6 @@
 		4159F18E2C86FA41002B94D3 /* NullTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15C2C86FA40002B94D3 /* NullTime.swift */; };
 		4159F18F2C86FA41002B94D3 /* WebhookEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15D2C86FA40002B94D3 /* WebhookEvent.swift */; };
 		4159F1902C86FA41002B94D3 /* PublisherAggregateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15E2C86FA40002B94D3 /* PublisherAggregateStats.swift */; };
-		4159F1922C86FA41002B94D3 /* ChannelMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1602C86FA40002B94D3 /* ChannelMember.swift */; };
 		4159F1932C86FA41002B94D3 /* UserMuteResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1612C86FA41002B94D3 /* UserMuteResponse.swift */; };
 		4159F1952C86FA41002B94D3 /* AggregatedStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1632C86FA41002B94D3 /* AggregatedStats.swift */; };
 		4159F1962C86FA41002B94D3 /* PrivacySettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1642C86FA41002B94D3 /* PrivacySettingsResponse.swift */; };
@@ -899,7 +898,6 @@
 		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
 		84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C267C828F5980F00F0F673 /* ConnectOptions.swift */; };
 		84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C28C912A84D16A00742E33 /* GoLiveRequest.swift */; };
-		84C4004129E3F446007B69C2 /* WSClientEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4003D29E3F446007B69C2 /* WSClientEvent.swift */; };
 		84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4003E29E3F446007B69C2 /* ConnectedEvent.swift */; };
 		84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
 		84CC05892A530C3F00EE9815 /* SpeakerManager_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CC05882A530C3F00EE9815 /* SpeakerManager_Tests.swift */; };
@@ -1515,6 +1513,7 @@
 		40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+NextValue.swift"; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
 		40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+KeyboardIntroduction.swift"; sourceTree = "<group>"; };
+		4157FF902C9AC9EC0093D839 /* RTMPBroadcastRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RTMPBroadcastRequest.swift; sourceTree = "<group>"; };
 		4159F1322C861404002B94D3 /* VideoEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoEvent.swift; sourceTree = "<group>"; };
 		4159F1342C861443002B94D3 /* StopAllRTMPBroadcastsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StopAllRTMPBroadcastsRequest.swift; sourceTree = "<group>"; };
 		4159F1352C861443002B94D3 /* StopHLSBroadcastingRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StopHLSBroadcastingRequest.swift; sourceTree = "<group>"; };
@@ -4169,6 +4168,7 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				4157FF902C9AC9EC0093D839 /* RTMPBroadcastRequest.swift */,
 				4159F19C2C89CC53002B94D3 /* ReadReceiptsResponse.swift */,
 				4159F19D2C89CC53002B94D3 /* TypingIndicatorsResponse.swift */,
 				4159F14C2C86FA3F002B94D3 /* AcceptCallRequest.swift */,
@@ -5407,7 +5407,6 @@
 				848CCCE52AB8ED8F002E83A2 /* StopHLSBroadcastingResponse.swift in Sources */,
 				84DC389729ADFCFD00946713 /* StopLiveResponse.swift in Sources */,
 				40FB02052BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift in Sources */,
-				84C4004129E3F446007B69C2 /* WSClientEvent.swift in Sources */,
 				84AF64D5287C79320012A503 /* RawJSON.swift in Sources */,
 				40C2B5B62C2B605A00EC2C2D /* DisposableBag.swift in Sources */,
 				4159F1802C86FA41002B94D3 /* PushNotificationSettingsResponse.swift in Sources */,
@@ -5535,6 +5534,7 @@
 				406AF2012AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift in Sources */,
 				84A7E18A2883638200526C98 /* URLSessionWebSocketEngine.swift in Sources */,
 				40C4DF492C1C2C210035DBC2 /* Publisher+WeakAssign.swift in Sources */,
+				4157FF912C9AC9EC0093D839 /* RTMPBroadcastRequest.swift in Sources */,
 				844982472C738A830029734D /* DeleteRecordingResponse.swift in Sources */,
 				408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */,
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
@@ -5569,7 +5569,6 @@
 				840F598F2A77FDCB00EF3EB2 /* PinRequest.swift in Sources */,
 				84DC389F29ADFCFD00946713 /* JoinCallResponse.swift in Sources */,
 				84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */,
-				4159F1922C86FA41002B94D3 /* ChannelMember.swift in Sources */,
 				4065839D2B877B6500B4F979 /* UIDevice+NeuralEngine.swift in Sources */,
 				40FB15142BF77D9000D5E580 /* StreamCallStateMachine+Stage.swift in Sources */,
 				84DC38D229ADFCFD00946713 /* UpdatedCallPermissionsEvent.swift in Sources */,
@@ -5659,7 +5658,6 @@
 				84D6494429E9AD08002CA428 /* CallIngressResponse.swift in Sources */,
 				84DC38A229ADFCFD00946713 /* UnblockedUserEvent.swift in Sources */,
 				4065838B2B87695500B4F979 /* VideoFilters.swift in Sources */,
-				4159F16E2C86FA41002B94D3 /* UserMute.swift in Sources */,
 				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
 				84DC389029ADFCFD00946713 /* SendEventResponse.swift in Sources */,
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
