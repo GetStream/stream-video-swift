@@ -9,14 +9,13 @@ public final class PermissionRequestEvent: @unchecked Sendable, Event, Codable, 
     public var callCid: String
     public var createdAt: Date
     public var permissions: [String]
-    public var type: String
+    public var type: String = "call.permission_request"
     public var user: UserResponse
 
-    public init(callCid: String, createdAt: Date, permissions: [String], type: String, user: UserResponse) {
+    public init(callCid: String, createdAt: Date, permissions: [String], user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.permissions = permissions
-        self.type = type
         self.user = user
     }
     

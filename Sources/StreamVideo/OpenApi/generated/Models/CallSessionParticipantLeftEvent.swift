@@ -10,14 +10,13 @@ public final class CallSessionParticipantLeftEvent: @unchecked Sendable, Event, 
     public var createdAt: Date
     public var participant: CallParticipantResponse
     public var sessionId: String
-    public var type: String
+    public var type: String = "call.session_participant_left"
 
-    public init(callCid: String, createdAt: Date, participant: CallParticipantResponse, sessionId: String, type: String) {
+    public init(callCid: String, createdAt: Date, participant: CallParticipantResponse, sessionId: String) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.participant = participant
         self.sessionId = sessionId
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

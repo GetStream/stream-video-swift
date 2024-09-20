@@ -11,22 +11,20 @@ public final class CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event,
     public var capabilitiesByRole: [String: [String]]
     public var createdAt: Date
     public var members: [MemberResponse]
-    public var type: String
+    public var type: String = "call.member_updated_permission"
 
     public init(
         call: CallResponse,
         callCid: String,
         capabilitiesByRole: [String: [String]],
         createdAt: Date,
-        members: [MemberResponse],
-        type: String
+        members: [MemberResponse]
     ) {
         self.call = call
         self.callCid = callCid
         self.capabilitiesByRole = capabilitiesByRole
         self.createdAt = createdAt
         self.members = members
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

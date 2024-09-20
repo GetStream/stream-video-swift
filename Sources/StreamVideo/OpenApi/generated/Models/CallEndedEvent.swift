@@ -9,14 +9,13 @@ public final class CallEndedEvent: @unchecked Sendable, Event, Codable, JSONEnco
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.ended"
     public var user: UserResponse?
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, type: String, user: UserResponse? = nil) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, user: UserResponse? = nil) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
-        self.type = type
         self.user = user
     }
     

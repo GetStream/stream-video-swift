@@ -9,13 +9,12 @@ public final class CallReactionEvent: @unchecked Sendable, Event, Codable, JSONE
     public var callCid: String
     public var createdAt: Date
     public var reaction: ReactionResponse
-    public var type: String
+    public var type: String = "call.reaction_new"
 
-    public init(callCid: String, createdAt: Date, reaction: ReactionResponse, type: String) {
+    public init(callCid: String, createdAt: Date, reaction: ReactionResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.reaction = reaction
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

@@ -9,14 +9,13 @@ public final class UpdatedCallPermissionsEvent: @unchecked Sendable, Event, Coda
     public var callCid: String
     public var createdAt: Date
     public var ownCapabilities: [OwnCapability]
-    public var type: String
+    public var type: String = "call.permissions_updated"
     public var user: UserResponse
 
-    public init(callCid: String, createdAt: Date, ownCapabilities: [OwnCapability], type: String, user: UserResponse) {
+    public init(callCid: String, createdAt: Date, ownCapabilities: [OwnCapability], user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.ownCapabilities = ownCapabilities
-        self.type = type
         self.user = user
     }
     

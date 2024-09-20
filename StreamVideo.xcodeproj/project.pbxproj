@@ -432,8 +432,6 @@
 		4159F1982C86FA41002B94D3 /* UserUnbannedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1662C86FA41002B94D3 /* UserUnbannedEvent.swift */; };
 		4159F1992C86FA41002B94D3 /* CountrywiseAggregateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1672C86FA41002B94D3 /* CountrywiseAggregateStats.swift */; };
 		4159F19A2C86FA41002B94D3 /* UserReactivatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1682C86FA41002B94D3 /* UserReactivatedEvent.swift */; };
-		4159F19E2C89CC53002B94D3 /* ReadReceiptsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F19C2C89CC53002B94D3 /* ReadReceiptsResponse.swift */; };
-		4159F19F2C89CC53002B94D3 /* TypingIndicatorsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F19D2C89CC53002B94D3 /* TypingIndicatorsResponse.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
@@ -5425,7 +5423,6 @@
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
 				40149DD02B7E839500473176 /* AudioSessionProtocol.swift in Sources */,
 				8409465B29AF4EEC007AF5BF /* ListRecordingsResponse.swift in Sources */,
-				4159F19E2C89CC53002B94D3 /* ReadReceiptsResponse.swift in Sources */,
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
@@ -5619,7 +5616,6 @@
 				842B8E2D2A2DFED900863A87 /* StopTranscriptionResponse.swift in Sources */,
 				400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */,
 				40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */,
-				4159F19F2C89CC53002B94D3 /* TypingIndicatorsResponse.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
 				4159F1702C86FA41002B94D3 /* UserMutedEvent.swift in Sources */,

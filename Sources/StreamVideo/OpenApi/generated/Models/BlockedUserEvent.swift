@@ -9,14 +9,13 @@ public final class BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEn
     public var blockedByUser: UserResponse?
     public var callCid: String
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.blocked_user"
     public var user: UserResponse
 
-    public init(blockedByUser: UserResponse? = nil, callCid: String, createdAt: Date, type: String, user: UserResponse) {
+    public init(blockedByUser: UserResponse? = nil, callCid: String, createdAt: Date, user: UserResponse) {
         self.blockedByUser = blockedByUser
         self.callCid = callCid
         self.createdAt = createdAt
-        self.type = type
         self.user = user
     }
     

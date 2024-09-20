@@ -9,13 +9,12 @@ public final class CallLiveStartedEvent: @unchecked Sendable, Event, Codable, JS
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.live_started"
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, type: String) {
+    public init(call: CallResponse, callCid: String, createdAt: Date) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

@@ -8,12 +8,11 @@ public final class CallRecordingFailedEvent: @unchecked Sendable, Event, Codable
     
     public var callCid: String
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.recording_failed"
 
-    public init(callCid: String, createdAt: Date, type: String) {
+    public init(callCid: String, createdAt: Date) {
         self.callCid = callCid
         self.createdAt = createdAt
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

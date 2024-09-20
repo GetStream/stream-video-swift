@@ -7,12 +7,11 @@ import Foundation
 public final class UserReactivatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
-    public var type: String
+    public var type: String = "user.reactivated"
     public var user: UserObject?
 
-    public init(createdAt: Date, type: String, user: UserObject? = nil) {
+    public init(createdAt: Date, user: UserObject? = nil) {
         self.createdAt = createdAt
-        self.type = type
         self.user = user
     }
     

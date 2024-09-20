@@ -9,13 +9,12 @@ public final class CallHLSBroadcastingStartedEvent: @unchecked Sendable, Event, 
     public var callCid: String
     public var createdAt: Date
     public var hlsPlaylistUrl: String
-    public var type: String
+    public var type: String = "call.hls_broadcasting_started"
 
-    public init(callCid: String, createdAt: Date, hlsPlaylistUrl: String, type: String) {
+    public init(callCid: String, createdAt: Date, hlsPlaylistUrl: String) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.hlsPlaylistUrl = hlsPlaylistUrl
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

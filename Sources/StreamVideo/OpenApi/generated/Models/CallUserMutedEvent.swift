@@ -10,14 +10,13 @@ public final class CallUserMutedEvent: @unchecked Sendable, Event, Codable, JSON
     public var createdAt: Date
     public var fromUserId: String
     public var mutedUserIds: [String]
-    public var type: String
+    public var type: String = "call.user_muted"
 
-    public init(callCid: String, createdAt: Date, fromUserId: String, mutedUserIds: [String], type: String) {
+    public init(callCid: String, createdAt: Date, fromUserId: String, mutedUserIds: [String]) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.fromUserId = fromUserId
         self.mutedUserIds = mutedUserIds
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

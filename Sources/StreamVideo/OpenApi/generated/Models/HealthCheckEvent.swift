@@ -11,22 +11,14 @@ public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEn
     public var createdAt: Date
     public var me: OwnUserResponse?
     public var receivedAt: Date?
-    public var type: String
+    public var type: String = "health.check"
 
-    public init(
-        cid: String? = nil,
-        connectionId: String,
-        createdAt: Date,
-        me: OwnUserResponse? = nil,
-        receivedAt: Date? = nil,
-        type: String
-    ) {
+    public init(cid: String? = nil, connectionId: String, createdAt: Date, me: OwnUserResponse? = nil, receivedAt: Date? = nil) {
         self.cid = cid
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.me = me
         self.receivedAt = receivedAt
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

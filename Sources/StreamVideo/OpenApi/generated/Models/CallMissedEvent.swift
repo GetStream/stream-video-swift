@@ -12,7 +12,7 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Codable, JSONEnc
     public var members: [MemberResponse]
     public var notifyUser: Bool
     public var sessionId: String
-    public var type: String
+    public var type: String = "call.missed"
     public var user: UserResponse
 
     public init(
@@ -22,7 +22,6 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         members: [MemberResponse],
         notifyUser: Bool,
         sessionId: String,
-        type: String,
         user: UserResponse
     ) {
         self.call = call
@@ -31,7 +30,6 @@ public final class CallMissedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.members = members
         self.notifyUser = notifyUser
         self.sessionId = sessionId
-        self.type = type
         self.user = user
     }
     

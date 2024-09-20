@@ -9,13 +9,12 @@ public final class ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JS
     public var connectionId: String
     public var createdAt: Date
     public var error: APIError
-    public var type: String
+    public var type: String = "connection.error"
 
-    public init(connectionId: String, createdAt: Date, error: APIError, type: String) {
+    public init(connectionId: String, createdAt: Date, error: APIError) {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.error = error
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

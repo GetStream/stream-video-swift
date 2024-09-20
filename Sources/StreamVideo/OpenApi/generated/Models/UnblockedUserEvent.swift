@@ -8,13 +8,12 @@ public final class UnblockedUserEvent: @unchecked Sendable, Event, Codable, JSON
     
     public var callCid: String
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.unblocked_user"
     public var user: UserResponse
 
-    public init(callCid: String, createdAt: Date, type: String, user: UserResponse) {
+    public init(callCid: String, createdAt: Date, user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
-        self.type = type
         self.user = user
     }
     

@@ -9,13 +9,12 @@ public final class CallRtmpBroadcastFailedEvent: @unchecked Sendable, Event, Cod
     public var callCid: String
     public var createdAt: Date
     public var name: String
-    public var type: String
+    public var type: String = "call.rtmp_broadcast_failed"
 
-    public init(callCid: String, createdAt: Date, name: String, type: String) {
+    public init(callCid: String, createdAt: Date, name: String) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.name = name
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

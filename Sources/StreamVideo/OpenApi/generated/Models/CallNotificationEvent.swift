@@ -11,7 +11,7 @@ public final class CallNotificationEvent: @unchecked Sendable, Event, Codable, J
     public var createdAt: Date
     public var members: [MemberResponse]
     public var sessionId: String
-    public var type: String
+    public var type: String = "call.notification"
     public var user: UserResponse
 
     public init(
@@ -20,7 +20,6 @@ public final class CallNotificationEvent: @unchecked Sendable, Event, Codable, J
         createdAt: Date,
         members: [MemberResponse],
         sessionId: String,
-        type: String,
         user: UserResponse
     ) {
         self.call = call
@@ -28,7 +27,6 @@ public final class CallNotificationEvent: @unchecked Sendable, Event, Codable, J
         self.createdAt = createdAt
         self.members = members
         self.sessionId = sessionId
-        self.type = type
         self.user = user
     }
     

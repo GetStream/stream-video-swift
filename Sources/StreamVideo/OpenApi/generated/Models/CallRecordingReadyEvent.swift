@@ -9,13 +9,12 @@ public final class CallRecordingReadyEvent: @unchecked Sendable, Event, Codable,
     public var callCid: String
     public var callRecording: CallRecording
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.recording_ready"
 
-    public init(callCid: String, callRecording: CallRecording, createdAt: Date, type: String) {
+    public init(callCid: String, callRecording: CallRecording, createdAt: Date) {
         self.callCid = callCid
         self.callRecording = callRecording
         self.createdAt = createdAt
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

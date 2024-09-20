@@ -8,12 +8,11 @@ public final class CallHLSBroadcastingStoppedEvent: @unchecked Sendable, Event, 
     
     public var callCid: String
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.hls_broadcasting_stopped"
 
-    public init(callCid: String, createdAt: Date, type: String) {
+    public init(callCid: String, createdAt: Date) {
         self.callCid = callCid
         self.createdAt = createdAt
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

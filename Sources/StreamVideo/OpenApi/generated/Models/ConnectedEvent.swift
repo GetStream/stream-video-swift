@@ -9,13 +9,12 @@ public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEnco
     public var connectionId: String
     public var createdAt: Date
     public var me: OwnUserResponse
-    public var type: String
+    public var type: String = "connection.ok"
 
-    public init(connectionId: String, createdAt: Date, me: OwnUserResponse, type: String) {
+    public init(connectionId: String, createdAt: Date, me: OwnUserResponse) {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.me = me
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

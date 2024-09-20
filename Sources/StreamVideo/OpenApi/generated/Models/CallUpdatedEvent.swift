@@ -10,14 +10,13 @@ public final class CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
     public var callCid: String
     public var capabilitiesByRole: [String: [String]]
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.updated"
 
-    public init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date, type: String) {
+    public init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date) {
         self.call = call
         self.callCid = callCid
         self.capabilitiesByRole = capabilitiesByRole
         self.createdAt = createdAt
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

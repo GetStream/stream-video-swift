@@ -10,14 +10,13 @@ public final class CallMemberUpdatedEvent: @unchecked Sendable, Event, Codable, 
     public var callCid: String
     public var createdAt: Date
     public var members: [MemberResponse]
-    public var type: String
+    public var type: String = "call.member_updated"
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], type: String) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse]) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.members = members
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

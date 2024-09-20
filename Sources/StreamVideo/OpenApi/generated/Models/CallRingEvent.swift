@@ -11,7 +11,7 @@ public final class CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncod
     public var createdAt: Date
     public var members: [MemberResponse]
     public var sessionId: String
-    public var type: String
+    public var type: String = "call.ring"
     public var user: UserResponse
     public var video: Bool
 
@@ -21,7 +21,6 @@ public final class CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncod
         createdAt: Date,
         members: [MemberResponse],
         sessionId: String,
-        type: String,
         user: UserResponse,
         video: Bool
     ) {
@@ -30,7 +29,6 @@ public final class CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncod
         self.createdAt = createdAt
         self.members = members
         self.sessionId = sessionId
-        self.type = type
         self.user = user
         self.video = video
     }

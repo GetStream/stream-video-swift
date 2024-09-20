@@ -9,14 +9,13 @@ public final class CallAcceptedEvent: @unchecked Sendable, Event, Codable, JSONE
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.accepted"
     public var user: UserResponse
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, type: String, user: UserResponse) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, user: UserResponse) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
-        self.type = type
         self.user = user
     }
     

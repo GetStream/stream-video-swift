@@ -10,15 +10,14 @@ public final class CallRejectedEvent: @unchecked Sendable, Event, Codable, JSONE
     public var callCid: String
     public var createdAt: Date
     public var reason: String?
-    public var type: String
+    public var type: String = "call.rejected"
     public var user: UserResponse
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, reason: String? = nil, type: String, user: UserResponse) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, reason: String? = nil, user: UserResponse) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.reason = reason
-        self.type = type
         self.user = user
     }
     

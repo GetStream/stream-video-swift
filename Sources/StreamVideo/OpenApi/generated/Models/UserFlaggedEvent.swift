@@ -9,14 +9,13 @@ public final class UserFlaggedEvent: @unchecked Sendable, Event, Codable, JSONEn
     public var createdAt: Date
     public var targetUser: String?
     public var targetUsers: [String]?
-    public var type: String
+    public var type: String = "user.flagged"
     public var user: UserObject?
 
-    public init(createdAt: Date, targetUser: String? = nil, targetUsers: [String]? = nil, type: String, user: UserObject? = nil) {
+    public init(createdAt: Date, targetUser: String? = nil, targetUsers: [String]? = nil, user: UserObject? = nil) {
         self.createdAt = createdAt
         self.targetUser = targetUser
         self.targetUsers = targetUsers
-        self.type = type
         self.user = user
     }
     

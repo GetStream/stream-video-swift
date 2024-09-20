@@ -10,14 +10,13 @@ public final class CallSessionStartedEvent: @unchecked Sendable, Event, Codable,
     public var callCid: String
     public var createdAt: Date
     public var sessionId: String
-    public var type: String
+    public var type: String = "call.session_started"
 
-    public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String, type: String) {
+    public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String) {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.sessionId = sessionId
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

@@ -17,7 +17,6 @@ public final class CallStateResponseFields: @unchecked Sendable, Codable, JSONEn
         membership: MemberResponse? = nil,
         ownCapabilities: [OwnCapability]
     ) {
-        
         self.call = call
         self.members = members
         self.membership = membership

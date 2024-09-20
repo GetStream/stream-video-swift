@@ -12,22 +12,20 @@ public final class CallSessionParticipantCountsUpdatedEvent: @unchecked Sendable
     public var createdAt: Date
     public var participantsCountByRole: [String: Int]
     public var sessionId: String
-    public var type: String
+    public var type: String = "call.session_participant_count_updated"
 
     public init(
         anonymousParticipantCount: Int,
         callCid: String,
         createdAt: Date,
         participantsCountByRole: [String: Int],
-        sessionId: String,
-        type: String
+        sessionId: String
     ) {
         self.anonymousParticipantCount = anonymousParticipantCount
         self.callCid = callCid
         self.createdAt = createdAt
         self.participantsCountByRole = participantsCountByRole
         self.sessionId = sessionId
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

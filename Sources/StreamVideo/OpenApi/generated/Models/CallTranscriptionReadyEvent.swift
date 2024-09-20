@@ -9,13 +9,12 @@ public final class CallTranscriptionReadyEvent: @unchecked Sendable, Event, Coda
     public var callCid: String
     public var callTranscription: CallTranscription
     public var createdAt: Date
-    public var type: String
+    public var type: String = "call.transcription_ready"
 
-    public init(callCid: String, callTranscription: CallTranscription, createdAt: Date, type: String) {
+    public init(callCid: String, callTranscription: CallTranscription, createdAt: Date) {
         self.callCid = callCid
         self.callTranscription = callTranscription
         self.createdAt = createdAt
-        self.type = type
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {

@@ -8,13 +8,12 @@ public final class UserUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEn
     
     public var createdAt: Date
     public var receivedAt: Date?
-    public var type: String
+    public var type: String = "user.updated"
     public var user: UserEventPayload
 
-    public init(createdAt: Date, receivedAt: Date? = nil, type: String, user: UserEventPayload) {
+    public init(createdAt: Date, receivedAt: Date? = nil, user: UserEventPayload) {
         self.createdAt = createdAt
         self.receivedAt = receivedAt
-        self.type = type
         self.user = user
     }
     

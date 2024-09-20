@@ -15,7 +15,7 @@ public final class UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEnc
     public var reason: String?
     public var shadow: Bool
     public var team: String?
-    public var type: String
+    public var type: String = "user.banned"
     public var user: UserObject?
 
     public init(
@@ -28,7 +28,6 @@ public final class UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         reason: String? = nil,
         shadow: Bool,
         team: String? = nil,
-        type: String,
         user: UserObject? = nil
     ) {
         self.channelId = channelId
@@ -40,7 +39,6 @@ public final class UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEnc
         self.reason = reason
         self.shadow = shadow
         self.team = team
-        self.type = type
         self.user = user
     }
     

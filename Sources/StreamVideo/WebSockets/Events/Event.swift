@@ -54,8 +54,7 @@ internal enum WrappedEvent: Event {
                     coordinatorHealthCheck: .init(
                         cid: "",
                         connectionId: connectedEvent.connectionId,
-                        createdAt: connectedEvent.createdAt,
-                        type: connectedEvent.type
+                        createdAt: connectedEvent.createdAt
                     )
                 )
             }

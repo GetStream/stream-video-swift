@@ -10,7 +10,7 @@ public final class UserDeletedEvent: @unchecked Sendable, Event, Codable, JSONEn
     public var deleteConversationChannels: Bool
     public var hardDelete: Bool
     public var markMessagesDeleted: Bool
-    public var type: String
+    public var type: String = "user.deleted"
     public var user: UserObject?
 
     public init(
@@ -18,14 +18,12 @@ public final class UserDeletedEvent: @unchecked Sendable, Event, Codable, JSONEn
         deleteConversationChannels: Bool,
         hardDelete: Bool,
         markMessagesDeleted: Bool,
-        type: String,
         user: UserObject? = nil
     ) {
         self.createdAt = createdAt
         self.deleteConversationChannels = deleteConversationChannels
         self.hardDelete = hardDelete
         self.markMessagesDeleted = markMessagesDeleted
-        self.type = type
         self.user = user
     }
     

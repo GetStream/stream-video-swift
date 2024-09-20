@@ -9,14 +9,13 @@ public final class CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEn
     public var callCid: String
     public var createdAt: Date
     public var custom: [String: RawJSON]
-    public var type: String
+    public var type: String = "custom"
     public var user: UserResponse
 
-    public init(callCid: String, createdAt: Date, custom: [String: RawJSON], type: String, user: UserResponse) {
+    public init(callCid: String, createdAt: Date, custom: [String: RawJSON], user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom
-        self.type = type
         self.user = user
     }
     

@@ -8,13 +8,12 @@ public final class UserDeactivatedEvent: @unchecked Sendable, Event, Codable, JS
     
     public var createdAt: Date
     public var createdBy: UserObject
-    public var type: String
+    public var type: String = "user.deactivated"
     public var user: UserObject?
 
-    public init(createdAt: Date, createdBy: UserObject, type: String, user: UserObject? = nil) {
+    public init(createdAt: Date, createdBy: UserObject, user: UserObject? = nil) {
         self.createdAt = createdAt
         self.createdBy = createdBy
-        self.type = type
         self.user = user
     }
     
