@@ -47,7 +47,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: true),
             cameraPosition: .front,
-            expected: ._180
+            expected: ._0
         )
     }
 
@@ -55,7 +55,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: false),
             cameraPosition: .front,
-            expected: ._0
+            expected: ._180
         )
     }
 
@@ -81,7 +81,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: true),
             cameraPosition: .back,
-            expected: ._0
+            expected: ._180
         )
     }
 
@@ -89,7 +89,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: false),
             cameraPosition: .back,
-            expected: ._180
+            expected: ._0
         )
     }
 

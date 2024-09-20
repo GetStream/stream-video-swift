@@ -90,13 +90,13 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         case let .landscape(isLeft):
             switch (isLeft, currentCameraPosition == .front) {
             case (true, true):
-                rotation = ._180
+                rotation = ._0
             case (true, false):
-                rotation = ._0
-            case (false, true):
-                rotation = ._0
-            case (false, false):
                 rotation = ._180
+            case (false, true):
+                rotation = ._180
+            case (false, false):
+                rotation = ._0
             }
         }
         #endif
