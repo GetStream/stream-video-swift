@@ -309,9 +309,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .map { $0.toCallParticipant() }
                 .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
 
-            await coordinator
-                .stateAdapter
-                .didUpdateParticipants(participants)
+            await coordinator.stateAdapter.updateParticipants { _ in
+                participants
+            }
 
             try await coordinator.stateAdapter.restoreScreenSharing()
         }

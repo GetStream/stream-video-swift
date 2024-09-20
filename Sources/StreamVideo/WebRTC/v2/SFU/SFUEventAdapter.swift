@@ -114,19 +114,21 @@ final class SFUEventAdapter {
             return
         }
 
-        var updatedParticipants = await stateAdapter.participants
-        for connectionQualityUpdate in event.connectionQualityUpdates {
-            let sessionID = connectionQualityUpdate.sessionID
-            guard let participant = updatedParticipants[sessionID] else {
-                return
-            }
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
+            for connectionQualityUpdate in event.connectionQualityUpdates {
+                let sessionID = connectionQualityUpdate.sessionID
+                guard let participant = updatedParticipants[sessionID] else {
+                    return updatedParticipants
+                }
 
-            let updatedParticipant = participant.withUpdated(
-                connectionQuality: connectionQualityUpdate.connectionQuality.mapped
-            )
-            updatedParticipants[sessionID] = updatedParticipant
+                let updatedParticipant = participant.withUpdated(
+                    connectionQuality: connectionQualityUpdate.connectionQuality.mapped
+                )
+                updatedParticipants[sessionID] = updatedParticipant
+            }
+            return updatedParticipants
         }
-        await stateAdapter.didUpdateParticipants(updatedParticipants)
     }
 
     /// Handles an AudioLevelChanged event.
@@ -136,21 +138,23 @@ final class SFUEventAdapter {
     private func handle(
         _ event: Stream_Video_Sfu_Event_AudioLevelChanged
     ) async {
-        var participants = await stateAdapter.participants
-        for level in event.audioLevels {
-            guard
-                let participant = participants[level.sessionID],
-                participant.isSpeaking != level.isSpeaking || level.isSpeaking == true
-            else {
-                continue
-            }
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
+            for level in event.audioLevels {
+                guard
+                    let participant = updatedParticipants[level.sessionID],
+                    participant.isSpeaking != level.isSpeaking || level.isSpeaking == true
+                else {
+                    continue
+                }
 
-            participants[level.sessionID] = participant.withUpdated(
-                isSpeaking: level.isSpeaking,
-                audioLevel: level.level
-            )
+                updatedParticipants[level.sessionID] = participant.withUpdated(
+                    isSpeaking: level.isSpeaking,
+                    audioLevel: level.level
+                )
+            }
+            return updatedParticipants
         }
-        await stateAdapter.didUpdateParticipants(participants)
     }
 
     /// Handles a ChangePublishQuality event.
@@ -189,17 +193,18 @@ final class SFUEventAdapter {
         else {
             return
         }
+        await stateAdapter.updateParticipants { [participantsThreshold] participants in
+            var updatedParticipants = participants
+            guard updatedParticipants[event.participant.sessionID] == nil else {
+                return updatedParticipants
+            }
 
-        var participants = await stateAdapter.participants
-        guard participants[event.participant.sessionID] == nil else {
-            return
+            let showTrack = updatedParticipants.count < participantsThreshold
+            let participant = (updatedParticipants[event.participant.sessionID] ?? event.participant.toCallParticipant())
+                .withUpdated(showTrack: showTrack)
+            updatedParticipants[event.participant.sessionID] = participant
+            return updatedParticipants
         }
-
-        let showTrack = participants.count < participantsThreshold
-        let participant = (participants[event.participant.sessionID] ?? event.participant.toCallParticipant())
-            .withUpdated(showTrack: showTrack)
-        participants[event.participant.sessionID] = participant
-        await stateAdapter.didUpdateParticipants(participants)
     }
 
     /// Handles a ParticipantLeft event.
@@ -216,20 +221,23 @@ final class SFUEventAdapter {
             return
         }
         let participant = event.participant.toCallParticipant()
-        var participants = await stateAdapter.participants
-        if participants[participant.sessionId] != nil {
-            participants[participant.sessionId] = nil
-            await stateAdapter.didUpdateParticipants(participants)
-        }
-        await stateAdapter.didRemoveTrack(for: participant.sessionId)
-        if let trackLookupPrefix = participant.trackLookupPrefix {
-            await stateAdapter.didRemoveTrack(for: trackLookupPrefix)
-        }
+        await stateAdapter.updateParticipants { [weak stateAdapter] participants in
+            var updatedParticipants = participants
+            if updatedParticipants[participant.sessionId] != nil {
+                updatedParticipants[participant.sessionId] = nil
+            }
+            await stateAdapter?.didRemoveTrack(for: participant.sessionId)
+            if let trackLookupPrefix = participant.trackLookupPrefix {
+                await stateAdapter?.didRemoveTrack(for: trackLookupPrefix)
+            }
 
-        postNotification(
-            with: CallNotification.participantLeft,
-            userInfo: ["id": participant.id]
-        )
+            postNotification(
+                with: CallNotification.participantLeft,
+                userInfo: ["id": participant.id]
+            )
+
+            return updatedParticipants
+        }
     }
 
     /// Handles a DominantSpeakerChanged event.
@@ -240,12 +248,14 @@ final class SFUEventAdapter {
     private func handle(
         _ event: Stream_Video_Sfu_Event_DominantSpeakerChanged
     ) async {
-        var participants = await stateAdapter.participants
-        for (key, participant) in participants {
-            participants[key] = participant
-                .withUpdated(dominantSpeaker: event.sessionID == key)
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
+            for (key, participant) in participants {
+                updatedParticipants[key] = participant
+                    .withUpdated(dominantSpeaker: event.sessionID == key)
+            }
+            return updatedParticipants
         }
-        await stateAdapter.didUpdateParticipants(participants)
     }
 
     /// Handles a JoinResponse event.
@@ -254,32 +264,33 @@ final class SFUEventAdapter {
     private func handle(
         _ event: Stream_Video_Sfu_Event_JoinResponse
     ) async {
-        let participants = event
-            .callState
-            .participants
-            .filter { $0.userID != recordingUserId }
+        await stateAdapter.updateParticipants { [recordingUserId, participantsThreshold] _ in
+            let participants = event
+                .callState
+                .participants
+                .filter { $0.userID != recordingUserId }
 
-        // For more than threshold participants, the activation of track is on
-        // view appearance.
-        let pins = event
-            .callState
-            .pins
-            .map(\.sessionID)
+            // For more than threshold participants, the activation of track is on
+            // view appearance.
+            let pins = event
+                .callState
+                .pins
+                .map(\.sessionID)
 
-        var callParticipants: [String: CallParticipant] = [:]
-        for (index, participant) in participants.enumerated() {
-            let pin: PinInfo? = pins.contains(participant.sessionID)
-                ? PinInfo(isLocal: false, pinnedAt: .init())
-                : nil
+            var callParticipants: [String: CallParticipant] = [:]
+            for (index, participant) in participants.enumerated() {
+                let pin: PinInfo? = pins.contains(participant.sessionID)
+                    ? PinInfo(isLocal: false, pinnedAt: .init())
+                    : nil
 
-            let callParticipant = participant.toCallParticipant(
-                showTrack: index < participantsThreshold,
-                pin: pin
-            )
-            callParticipants[callParticipant.sessionId] = callParticipant
+                let callParticipant = participant.toCallParticipant(
+                    showTrack: index < participantsThreshold,
+                    pin: pin
+                )
+                callParticipants[callParticipant.sessionId] = callParticipant
+            }
+            return callParticipants
         }
-
-        await stateAdapter.didUpdateParticipants(callParticipants)
     }
 
     /// Handles a HealthCheckResponse event and updates the `participantCount` and the
@@ -300,46 +311,46 @@ final class SFUEventAdapter {
         _ event: Stream_Video_Sfu_Event_TrackPublished
     ) async {
         let sessionID = event.sessionID
-        var participants = await stateAdapter.participants
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
 
-        guard let participant = participants[sessionID] else {
-            return
-        }
+            guard let participant = updatedParticipants[sessionID] else {
+                return updatedParticipants
+            }
 
-        switch event.type {
-        case .audio:
-            participants[sessionID] = participant.withUpdated(audio: true)
-            log.debug(
-                """
-                AudioTrack was published
-                name: \(participant.name)
-                """,
-                subsystems: .webRTC
-            )
-            await stateAdapter.didUpdateParticipants(participants)
-        case .video:
-            participants[sessionID] = participant.withUpdated(video: true)
-            log.debug(
-                """
-                VideoTrack was published
-                name: \(participant.name)
-                """,
-                subsystems: .webRTC
-            )
-            await stateAdapter.didUpdateParticipants(participants)
-        case .screenShare:
-            participants[sessionID] = participant
-                .withUpdated(screensharing: true)
-            log.debug(
-                """
-                ScreenShareTrack was published
-                name: \(participant.name)
-                """,
-                subsystems: .webRTC
-            )
-            await stateAdapter.didUpdateParticipants(participants)
-        default:
-            break
+            switch event.type {
+            case .audio:
+                updatedParticipants[sessionID] = participant.withUpdated(audio: true)
+                log.debug(
+                    """
+                    AudioTrack was published
+                    name: \(participant.name)
+                    """,
+                    subsystems: .webRTC
+                )
+            case .video:
+                updatedParticipants[sessionID] = participant.withUpdated(video: true)
+                log.debug(
+                    """
+                    VideoTrack was published
+                    name: \(participant.name)
+                    """,
+                    subsystems: .webRTC
+                )
+            case .screenShare:
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(screensharing: true)
+                log.debug(
+                    """
+                    ScreenShareTrack was published
+                    name: \(participant.name)
+                    """,
+                    subsystems: .webRTC
+                )
+            default:
+                break
+            }
+            return updatedParticipants
         }
     }
 
@@ -350,53 +361,53 @@ final class SFUEventAdapter {
         _ event: Stream_Video_Sfu_Event_TrackUnpublished
     ) async {
         let sessionID = event.sessionID
-        var participants = await stateAdapter.participants
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
 
-        guard let participant = participants[sessionID] else {
-            return
-        }
+            guard let participant = updatedParticipants[sessionID] else {
+                return updatedParticipants
+            }
 
-        switch event.type {
-        case .audio:
-            participants[sessionID] = participant.withUpdated(audio: false)
-            log.debug(
-                """
-                AudioTrack was unpublished
-                name: \(participant.name)
-                cause: \(event.cause)
-                """,
-                subsystems: .webRTC
-            )
-            await stateAdapter.didUpdateParticipants(participants)
+            switch event.type {
+            case .audio:
+                updatedParticipants[sessionID] = participant.withUpdated(audio: false)
+                log.debug(
+                    """
+                    AudioTrack was unpublished
+                    name: \(participant.name)
+                    cause: \(event.cause)
+                    """,
+                    subsystems: .webRTC
+                )
 
-        case .video:
-            participants[sessionID] = participant.withUpdated(video: false)
-            log.debug(
-                """
-                VideoTrack was unpublished
-                name: \(participant.name)
-                cause: \(event.cause)
-                """,
-                subsystems: .webRTC
-            )
-            await stateAdapter.didUpdateParticipants(participants)
+            case .video:
+                updatedParticipants[sessionID] = participant.withUpdated(video: false)
+                log.debug(
+                    """
+                    VideoTrack was unpublished
+                    name: \(participant.name)
+                    cause: \(event.cause)
+                    """,
+                    subsystems: .webRTC
+                )
 
-        case .screenShare:
-            participants[sessionID] = participant
-                .withUpdated(screensharing: false)
-                .withUpdated(screensharingTrack: nil)
-            log.debug(
-                """
-                ScreenShareTrack was unpublished
-                name: \(participant.name)
-                cause: \(event.cause)
-                """,
-                subsystems: .webRTC
-            )
-            await stateAdapter.didUpdateParticipants(participants)
+            case .screenShare:
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(screensharing: false)
+                    .withUpdated(screensharingTrack: nil)
+                log.debug(
+                    """
+                    ScreenShareTrack was unpublished
+                    name: \(participant.name)
+                    cause: \(event.cause)
+                    """,
+                    subsystems: .webRTC
+                )
 
-        default:
-            break
+            default:
+                break
+            }
+            return updatedParticipants
         }
     }
 
@@ -406,22 +417,24 @@ final class SFUEventAdapter {
     private func handle(
         _ event: Stream_Video_Sfu_Event_PinsChanged
     ) async {
-        var participants = await stateAdapter.participants
-        let sessionIds = event.pins.map(\.sessionID)
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
+            let sessionIds = event.pins.map(\.sessionID)
 
-        for (key, participant) in participants {
-            if
-                sessionIds.contains(key),
-                (participant.pin == nil || participant.pin?.isLocal == true)
-            {
-                participants[key] = participant
-                    .withUpdated(pin: .init(isLocal: false, pinnedAt: .init()))
-            } else {
-                participants[key] = participant.withUpdated(pin: nil)
+            for (key, participant) in updatedParticipants {
+                if
+                    sessionIds.contains(key),
+                    (participant.pin == nil || participant.pin?.isLocal == true)
+                {
+                    updatedParticipants[key] = participant
+                        .withUpdated(pin: .init(isLocal: false, pinnedAt: .init()))
+                } else {
+                    updatedParticipants[key] = participant.withUpdated(pin: nil)
+                }
             }
-        }
 
-        await stateAdapter.didUpdateParticipants(participants)
+            return updatedParticipants
+        }
     }
 
     /// Handles a ParticipantUpdated event.
@@ -430,12 +443,14 @@ final class SFUEventAdapter {
     private func handle(
         _ event: Stream_Video_Sfu_Event_ParticipantUpdated
     ) async {
-        var participants = await stateAdapter.participants
-        let existingEntry = participants[event.participant.sessionID]
-        let participant = (existingEntry ?? event.participant.toCallParticipant())
-            .withUpdated(showTrack: existingEntry?.showTrack ?? true)
-            .withUpdated(pin: existingEntry?.pin)
-        participants[event.participant.sessionID] = participant
-        await stateAdapter.didUpdateParticipants(participants)
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
+            let existingEntry = updatedParticipants[event.participant.sessionID]
+            let participant = (existingEntry ?? event.participant.toCallParticipant())
+                .withUpdated(showTrack: existingEntry?.showTrack ?? true)
+                .withUpdated(pin: existingEntry?.pin)
+            updatedParticipants[event.participant.sessionID] = participant
+            return updatedParticipants
+        }
     }
 }

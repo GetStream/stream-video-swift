@@ -90,7 +90,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .didUpdateParticipants([.unique: .dummy()])
+            .updateParticipants { _ in [.unique: .dummy()] }
         await mockCoordinatorStack
             .coordinator
             .stateAdapter

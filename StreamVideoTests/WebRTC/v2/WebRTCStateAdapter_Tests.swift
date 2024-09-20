@@ -8,28 +8,33 @@ import XCTest
 
 final class WebRTCStateAdapter_Tests: XCTestCase {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
-    private lazy var videoConfig: VideoConfig! = .dummy()
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
     private lazy var screenShareSessionProvider: ScreenShareSessionProvider! = .init()
     private lazy var subject: WebRTCStateAdapter! = .init(
         user: user,
         apiKey: apiKey,
         callCid: callCid,
-        videoConfig: videoConfig,
+        videoConfig: Self.videoConfig,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
         screenShareSessionProvider: screenShareSessionProvider
     )
 
     // MARK: - Lifecycle
 
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
+    }
+
     override func tearDown() {
         subject = nil
         screenShareSessionProvider = nil
         rtcPeerConnectionCoordinatorFactory = nil
-        videoConfig = nil
         callCid = nil
         apiKey = nil
         user = nil
@@ -414,7 +419,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         let track = await subject
             .peerConnectionFactory
             .mockVideoTrack(forScreenShare: false)
-        await subject.didUpdateParticipants([participant.sessionId: participant])
+        await subject.updateParticipants { _ in [participant.sessionId: participant] }
 
         await subject.didAddTrack(
             track,
@@ -433,7 +438,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         let track = await subject
             .peerConnectionFactory
             .mockVideoTrack(forScreenShare: true)
-        await subject.didUpdateParticipants([participant.sessionId: participant])
+        await subject.updateParticipants { _ in [participant.sessionId: participant] }
 
         await subject.didAddTrack(
             track,
@@ -454,7 +459,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         let track = await subject
             .peerConnectionFactory
             .mockVideoTrack(forScreenShare: false)
-        await subject.didUpdateParticipants([participant.sessionId: participant])
+        await subject.updateParticipants { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .video, for: participant.sessionId)
 
         await subject.didRemoveTrack(
@@ -471,7 +476,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         let track = await subject
             .peerConnectionFactory
             .mockVideoTrack(forScreenShare: true)
-        await subject.didUpdateParticipants([participant.sessionId: participant])
+        await subject.updateParticipants { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .screenshare, for: participant.sessionId)
 
         await subject.didRemoveTrack(
@@ -490,7 +495,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         let track = await subject
             .peerConnectionFactory
             .mockVideoTrack(forScreenShare: false)
-        await subject.didUpdateParticipants([participant.sessionId: participant])
+        await subject.updateParticipants { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .video, for: participant.sessionId)
 
         let actual = await subject.track(for: participant.sessionId, of: .video)
@@ -503,7 +508,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         let track = await subject
             .peerConnectionFactory
             .mockVideoTrack(forScreenShare: true)
-        await subject.didUpdateParticipants([participant.sessionId: participant])
+        await subject.updateParticipants { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .screenshare, for: participant.sessionId)
 
         let actual = await subject.track(for: participant.sessionId, of: .screenshare)
@@ -541,12 +546,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             "2": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: false),
             "3": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true)
         ]
-        await subject.didUpdateParticipants(initialParticipants)
+        await subject.updateParticipants { _ in initialParticipants }
 
         await subject.didAddTrack(participantTracks["2"]!, type: .video, for: "2")
         await subject.didAddTrack(participantTracks["3"]!, type: .screenshare, for: "3")
 
-        await subject.didUpdateParticipants(initialParticipants)
+        await subject.updateParticipants { _ in initialParticipants }
 
         await assertEqualAsync(
             await subject.participants["2"]?.track?.trackId,
@@ -558,6 +563,29 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         )
     }
 
+    func test_didUpdateParticipants_multipleConcurrentOperations_participantsCountShouldBeCorrect() async throws {
+        let expectedParticipantsCount = 20
+        _ = subject
+        await wait(for: 0.3)
+        await withTaskGroup(of: Void.self) { group in
+            (0..<expectedParticipantsCount)
+                .map { _ in CallParticipant.dummy() }
+                .forEach { participant in
+                    group.addTask {
+                        await self.subject.updateParticipants {
+                            var updated = $0
+                            updated[participant.sessionId] = participant
+                            return updated
+                        }
+                    }
+                }
+            await group.waitForAll()
+        }
+
+        await wait(for: 1)
+        await assertEqualAsync(await subject.participants.count, expectedParticipantsCount)
+    }
+
     // MARK: - didUpdateParticipantVisibility
 
     func test_didUpdateParticipantVisibility_shouldUpdateVisibility() async throws {
@@ -566,7 +594,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             "2": .dummy(),
             "3": .dummy()
         ]
-        await subject.didUpdateParticipants(initialParticipants)
+        await subject.updateParticipants { _ in initialParticipants }
 
         await subject.didUpdateParticipant(initialParticipants["1"]!, isVisible: false)
 
@@ -581,7 +609,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             "2": .dummy(),
             "3": .dummy()
         ]
-        await subject.didUpdateParticipants(initialParticipants)
+        await subject.updateParticipants { _ in initialParticipants }
 
         await subject.didUpdateParticipant(
             initialParticipants["1"]!,
@@ -648,7 +676,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         await subject.set(participantsCount: 12)
         await subject.set(anonymousCount: 22)
         await subject.set(participantPins: participantPins)
-        await subject.didUpdateParticipants(participants)
+        await subject.updateParticipants { _ in participants }
         try await subject.configurePeerConnections()
         await subject.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
     }

@@ -611,7 +611,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         initialState: [String: CallParticipant],
         handler: ([String: CallParticipant]) async throws -> Void
     ) async throws {
-        await stateAdapter.didUpdateParticipants(initialState)
+        await stateAdapter.updateParticipants { _ in initialState }
         let eventExpectation = expectation(description: "Event \(type(of: event)) received.")
         let cancellable = sfuAdapter
             .publisher(eventType: type(of: event))

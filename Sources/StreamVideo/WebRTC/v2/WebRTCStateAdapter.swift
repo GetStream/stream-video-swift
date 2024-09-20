@@ -71,6 +71,7 @@ actor WebRTCStateAdapter: ObservableObject {
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let audioSession: AudioSession = .init()
     private let disposableBag = DisposableBag()
+    private let participantsTaskQueue = TaskQueue(maxConcurrentTasks: 1)
 
     /// Subject to handle participant updates.
     private(set) lazy var participantsUpdateSubject = PassthroughSubject<[String: CallParticipant], Never>()
@@ -277,6 +278,7 @@ actor WebRTCStateAdapter: ObservableObject {
         audioTracks = [:]
         videoTracks = [:]
         screenShareTracks = [:]
+        participantsTaskQueue.removeAll()
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
@@ -289,6 +291,7 @@ actor WebRTCStateAdapter: ObservableObject {
         audioTracks = [:]
         videoTracks = [:]
         screenShareTracks = [:]
+        participantsTaskQueue.removeAll()
     }
 
     /// Restores screen sharing if an active session exists.
@@ -387,6 +390,17 @@ actor WebRTCStateAdapter: ObservableObject {
         }
     }
 
+    func updateParticipants(
+        _ handler: @Sendable @escaping ([String: CallParticipant]) async -> [String: CallParticipant]
+    ) {
+        participantsTaskQueue.addTask { [weak self] in
+            guard let self else { return }
+            let currentParticipants = await participants
+            let updatedParticipants = await handler(currentParticipants)
+            await didUpdateParticipants(updatedParticipants)
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Handles track events when they are added or removed from peer connections.
@@ -415,7 +429,7 @@ actor WebRTCStateAdapter: ObservableObject {
     ///   - fileName: The source file where this update is triggered (for logging).
     ///   - functionName: The function where this update is triggered (for logging).
     ///   - line: The line number where this update is triggered (for logging).
-    func didUpdateParticipants(
+    private func didUpdateParticipants(
         _ participants: [String: CallParticipant],
         fileName: StaticString = #file,
         functionName: StaticString = #function,

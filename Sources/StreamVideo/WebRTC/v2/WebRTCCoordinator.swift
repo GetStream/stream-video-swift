@@ -248,21 +248,23 @@ final class WebRTCCoordinator: @unchecked Sendable {
         isEnabled: Bool,
         sessionId: String
     ) async throws {
-        var participants = await stateAdapter.participants
+        await stateAdapter.updateParticipants { participants in
+            var updatedParticipants = participants
 
-        guard
-            let participant = participants[sessionId]
-        else {
-            throw ClientError.Unexpected()
+            guard
+                let participant = participants[sessionId]
+            else {
+                return updatedParticipants
+            }
+
+            updatedParticipants[sessionId] = participant.withUpdated(
+                pin: isEnabled
+                    ? PinInfo(isLocal: true, pinnedAt: Date())
+                    : nil
+            )
+
+            return updatedParticipants
         }
-
-        participants[sessionId] = participant.withUpdated(
-            pin: isEnabled
-                ? PinInfo(isLocal: true, pinnedAt: Date())
-                : nil
-        )
-
-        await stateAdapter.didUpdateParticipants(participants)
     }
 
     /// Starts noise cancellation for a participant's session.

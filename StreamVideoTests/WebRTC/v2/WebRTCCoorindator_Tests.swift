@@ -570,7 +570,7 @@ final class WebRTCCoordinator_Tests: XCTestCase {
         await subject.stateAdapter.set(participantsCount: 12)
         await subject.stateAdapter.set(anonymousCount: 22)
         await subject.stateAdapter.set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
-        await subject.stateAdapter.didUpdateParticipants([user.id: CallParticipant.dummy(id: user.id)])
+        await subject.stateAdapter.updateParticipants { _ in [self.user.id: CallParticipant.dummy(id: self.user.id)] }
         try await subject.stateAdapter.configurePeerConnections()
         await subject.stateAdapter.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
     }
