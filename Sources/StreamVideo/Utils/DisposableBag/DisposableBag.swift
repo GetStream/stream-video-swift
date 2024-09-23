@@ -25,19 +25,21 @@ public final class DisposableBag: @unchecked Sendable {
             }
         }
 
-        public func remove(_ key: String) {
+        func remove(_ key: String) {
             queue.sync {
                 storage[key]?.cancel()
                 storage[key] = nil
             }
         }
 
-        public func removeAll() {
+        func removeAll() {
             queue.sync {
                 storage.values.forEach { $0.cancel() }
                 storage = [:]
             }
         }
+
+        var isEmpty: Bool { queue.sync { storage.isEmpty } }
     }
 
     private let storage: Storage = .init()
@@ -58,6 +60,8 @@ public final class DisposableBag: @unchecked Sendable {
     public func removeAll() {
         storage.removeAll()
     }
+
+    public var isEmpty: Bool { storage.isEmpty }
 }
 
 extension AnyCancellable {

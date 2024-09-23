@@ -76,6 +76,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             .stateAdapter
                             .sfuAdapter
 
+                        context.sfuEventObserver?.stopObserving()
                         context.sfuEventObserver = nil
                         context.migratingFromSFU = context.currentSFU
                         context.currentSFU = ""
