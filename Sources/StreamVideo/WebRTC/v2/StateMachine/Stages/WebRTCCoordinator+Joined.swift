@@ -80,12 +80,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
+                    try Task.checkCancellation()
+
                     // We set the reconnectionStrategy to rejoin as default.
                     context.reconnectionStrategy = .rejoin
+
+                    try Task.checkCancellation()
 
                     let migrationStatusObserver = context.migrationStatusObserver
                     let previousSFUAdapter = context.previousSFUAdapter
                     await cleanUpPreviousSessionIfRequired()
+
+                    try Task.checkCancellation()
 
                     try await observeMigrationStatusIfRequired(
                         migrationStatusObserver,
@@ -94,19 +100,46 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     observeInternetConnection()
 
+                    try Task.checkCancellation()
+
                     await observeForSubscriptionUpdates()
+
+                    try Task.checkCancellation()
+
                     await observeConnection()
+
+                    try Task.checkCancellation()
+
                     await observeCallEndedEvent()
+
+                    try Task.checkCancellation()
+
                     await observeMigrationEvent()
+
+                    try Task.checkCancellation()
+
                     await observeDisconnectEvent()
+
+                    try Task.checkCancellation()
+
                     await observePreferredReconnectionStrategy()
+
+                    try Task.checkCancellation()
+
                     await observeCallSettingsUpdates()
+
+                    try Task.checkCancellation()
+
                     await observePeerConnectionState()
+
+                    try Task.checkCancellation()
+
                     await configureStatsCollectionAndDelivery()
                 } catch {
                     transitionDisconnectOrError(error)
                 }
             }
+            .store(in: disposableBag)
         }
 
         /// Cleans up the previous session if required.
@@ -391,14 +424,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 let statsReporter = WebRTCStatsReporter(
                     sessionID: await stateAdapter.sessionID
                 )
+                statsReporter.interval = await stateAdapter.statsReporter?.interval ?? 0
+                statsReporter.publisher = await stateAdapter.publisher
+                statsReporter.subscriber = await stateAdapter.subscriber
+                statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
                 await stateAdapter.set(statsReporter: statsReporter)
+            } else {
+                let statsReporter = await stateAdapter.statsReporter
+                statsReporter?.interval = await stateAdapter.statsReporter?.interval ?? 0
+                statsReporter?.publisher = await stateAdapter.publisher
+                statsReporter?.subscriber = await stateAdapter.subscriber
+                statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
             }
-
-            let statsReporter = await stateAdapter.statsReporter
-            statsReporter?.interval = await stateAdapter.statsReporter?.interval ?? 0
-            statsReporter?.publisher = await stateAdapter.publisher
-            statsReporter?.subscriber = await stateAdapter.subscriber
-            statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
         }
 
         /// Observes internet connection status.

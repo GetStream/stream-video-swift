@@ -94,7 +94,13 @@ extension WebRTCCoordinator.StateMachine {
 
         /// Attempts to transition to a disconnected state or an error state.
         /// - Parameter error: The error that occurred.
-        func transitionDisconnectOrError(_ error: Error) {
+        func transitionDisconnectOrError(
+            _ error: Error,
+            ignoresCancellationError: Bool = true
+        ) {
+            guard (error as? CancellationError) == nil else {
+                return
+            }
             context.flowError = error
             transitionOrError(.disconnected(context))
         }

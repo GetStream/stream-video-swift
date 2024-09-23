@@ -27,6 +27,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable
     {
+        private let disposableBag = DisposableBag()
+
         /// Initializes a new instance of `MigratedStage`.
         /// - Parameter context: The context for the migrated stage.
         init(
@@ -107,15 +109,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         context.migrationStatusObserver = nil
                     }
 
-                    try transition?(
-                        .joining(
-                            context
-                        )
-                    )
+                    transitionOrDisconnect(.joining(context))
                 } catch {
                     transitionDisconnectOrError(error)
                 }
             }
+            .store(in: disposableBag)
         }
     }
 }
