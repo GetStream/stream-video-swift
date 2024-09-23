@@ -28,6 +28,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable
     {
+        private let disposableBag = DisposableBag()
+
         /// Initializes a new instance of `JoiningStage`.
         /// - Parameter context: The context for the joining stage.
         init(
@@ -83,9 +85,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
+                    try Task.checkCancellation()
+
                     if !isFastReconnecting {
                         try await coordinator.stateAdapter.configurePeerConnections()
                     }
+
+                    try Task.checkCancellation()
 
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
@@ -103,21 +109,21 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             )
                     )
 
+                    try Task.checkCancellation()
+
                     try await join(
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter
                     )
+
+                    try Task.checkCancellation()
 
                     if isFastReconnecting {
                         await coordinator.stateAdapter.publisher?.restartICE()
                         await coordinator.stateAdapter.subscriber?.restartICE()
                     }
 
-                    try transition?(
-                        .joined(
-                            context
-                        )
-                    )
+                    transitionOrDisconnect(.joined(context))
                 } catch {
                     context.reconnectionStrategy = context
                         .reconnectionStrategy
@@ -125,6 +131,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
+            .store(in: disposableBag)
         }
 
         /// Executes the migration process.
@@ -142,7 +149,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
+                    try Task.checkCancellation()
+
                     try await coordinator.stateAdapter.configurePeerConnections()
+
+                    try Task.checkCancellation()
 
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
@@ -162,24 +173,20 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     context.reconnectAttempts += 1
 
+                    try Task.checkCancellation()
+
                     try await join(
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter
                     )
 
-                    try transition?(
-                        .joined(
-                            context
-                        )
-                    )
+                    transitionOrDisconnect(.joined(context))
                 } catch {
-                    if let clientError = error as? ClientError {
-                        log.error(clientError)
-                    }
                     context.reconnectionStrategy = .rejoin
                     transitionDisconnectOrError(error)
                 }
             }
+            .store(in: disposableBag)
         }
 
         /// Executes the rejoining process.
@@ -198,7 +205,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     }
 
+                    try Task.checkCancellation()
+
                     try await coordinator.stateAdapter.configurePeerConnections()
+
+                    try Task.checkCancellation()
 
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
@@ -217,20 +228,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     )
                     context.reconnectAttempts += 1
 
+                    try Task.checkCancellation()
+
                     try await join(
                         coordinator: coordinator,
                         sfuAdapter: sfuAdapter
                     )
 
-                    try transition?(
-                        .joined(
-                            context
-                        )
-                    )
+                    transitionOrDisconnect(.joined(context))
                 } catch {
                     transitionDisconnectOrError(error)
                 }
             }
+            .store(in: disposableBag)
         }
 
         /// Builds the subscriber session description.
@@ -286,9 +296,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 )
             }
 
+            try Task.checkCancellation()
+
             let joinResponse = try await sfuAdapter
                 .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
                 .nextValue(timeout: WebRTCConfiguration.timeout.join)
+
+            try Task.checkCancellation()
 
             try await coordinator
                 .stateAdapter
@@ -301,6 +315,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 joinResponse.fastReconnectDeadlineSeconds
             )
 
+            try Task.checkCancellation()
+
             try await context.authenticator.waitForConnect(on: sfuAdapter)
 
             let participants = joinResponse
@@ -308,6 +324,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .participants
                 .map { $0.toCallParticipant() }
                 .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+
+            try Task.checkCancellation()
 
             await coordinator
                 .stateAdapter

@@ -29,6 +29,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable
     {
+        private let disposableBag = DisposableBag()
+
         /// Initializes a new instance of `FastReconnectingStage`.
         /// - Parameter context: The context for the fast reconnecting stage.
         init(
@@ -68,6 +70,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
 
+                    try Task.checkCancellation()
+
                     log.debug("Refreshing webSocket", subsystems: .webRTC)
                     sfuAdapter.refresh(
                         webSocketConfiguration: .init(
@@ -76,6 +80,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
 
+                    try Task.checkCancellation()
+
                     log.debug(
                         "Waiting for webSocket state to change to authenticating",
                         subsystems: .webRTC
@@ -83,16 +89,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try await context.authenticator.waitForAuthentication(on: sfuAdapter)
 
-                    try transition?(
-                        .fastReconnected(
-                            context
-                        )
-                    )
+                    transitionOrDisconnect(.fastReconnected(context))
                 } catch {
                     context.reconnectionStrategy = context.nextReconnectionStrategy()
                     transitionDisconnectOrError(error)
                 }
             }
+            .store(in: disposableBag)
         }
     }
 }

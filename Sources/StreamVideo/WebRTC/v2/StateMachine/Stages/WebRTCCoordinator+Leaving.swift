@@ -27,6 +27,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable
     {
+        private let disposableBag = DisposableBag()
+
         /// Initializes a new instance of `LeavingStage`.
         /// - Parameter context: The context for the leaving stage.
         init(
@@ -64,6 +66,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
 
+                    try Task.checkCancellation()
+
                     if let sfuAdapter = await coordinator.stateAdapter.sfuAdapter {
                         if case .connected = sfuAdapter.connectionState {
                             await sfuAdapter.sendLeaveRequest(
@@ -78,6 +82,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionErrorOrLog(error)
                 }
             }
+            .store(in: disposableBag)
         }
     }
 }

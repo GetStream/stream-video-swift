@@ -8,8 +8,8 @@ import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
-    
+final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Sendable {
+
     private var mockedOrientation: StreamDeviceOrientation! = .portrait(isUpsideDown: false)
     private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init { self.mockedOrientation }
 
@@ -27,8 +27,10 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         cachedLocation: nil
     )
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
+        _ = orientationAdapter
+        try await Task.sleep(nanoseconds: 250_000_000)
         let streamVideo = StreamVideo.mock(httpClient: httpClient, callController: callController)
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
         InjectedValues[\.orientationAdapter] = orientationAdapter
@@ -55,7 +57,12 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 availableFrame: .init(origin: .zero, size: defaultScreenSize),
                 onChangeTrackVisibility: { _, _ in }
             )
-            AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
+            AssertSnapshot(
+                layout,
+                variants: snapshotVariants,
+                suffix: "with_\(count)_participants",
+                record: true
+            )
         }
     }
     
