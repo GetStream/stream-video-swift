@@ -566,7 +566,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     // MARK: configureStatsCollectionAndDelivery
 
-    func test_transition_configuresStatsReporter() async throws {
+    func test_transition_sameSessionId_configuresStatsReporter() async throws {
         let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await stateAdapter.set(sfuAdapter: sfuAdapter)
@@ -574,7 +574,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
-        let initialStatsReporter = WebRTCStatsReporter(interval: 10, sessionID: sessionId)
+        let initialStatsReporter = WebRTCStatsReporter(interval: 12, sessionID: sessionId)
         await stateAdapter.set(statsReporter: initialStatsReporter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
@@ -582,7 +582,32 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
         await wait(for: 1)
         let newStatsReporter = await stateAdapter.statsReporter
-        XCTAssertEqual(newStatsReporter?.interval, 10)
+        XCTAssertEqual(newStatsReporter?.interval, 12)
+        XCTAssertTrue(newStatsReporter?.publisher === publisher)
+        XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
+        XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)
+    }
+
+    func test_transition_differentSessionId_configuresStatsReporter() async throws {
+        let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
+        let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
+        await stateAdapter.set(sfuAdapter: sfuAdapter)
+        let sessionId = await stateAdapter.sessionID
+        try await stateAdapter.configurePeerConnections()
+        let publisher = await stateAdapter.publisher
+        let subscriber = await stateAdapter.subscriber
+        let initialStatsReporter = WebRTCStatsReporter(interval: 11, sessionID: .unique)
+        await stateAdapter.set(statsReporter: initialStatsReporter)
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+
+        _ = subject.transition(from: .joining(subject.context))
+
+        await fulfillment {
+            let newStatsReporter = await stateAdapter.statsReporter
+            return newStatsReporter !== initialStatsReporter && newStatsReporter?.interval == 11
+        }
+        let newStatsReporter = await stateAdapter.statsReporter
+        XCTAssertEqual(newStatsReporter?.interval, 11)
         XCTAssertTrue(newStatsReporter?.publisher === publisher)
         XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
         XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)

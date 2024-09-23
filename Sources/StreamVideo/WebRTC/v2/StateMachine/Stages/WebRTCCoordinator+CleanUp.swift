@@ -27,6 +27,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable
     {
+        private let disposableBag = DisposableBag()
+
         /// Initializes a new instance of `CleanUpStage`.
         /// - Parameter context: The context for the clean-up stage.
         init(
@@ -59,7 +61,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the clean-up process.
         private func execute() {
-            context.sfuEventObserver = nil
             Task { [weak self] in
                 do {
                     guard
@@ -71,6 +72,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
+                    context.sfuEventObserver = nil
+
                     await coordinator.stateAdapter.cleanUp()
                     context = .init(coordinator: context.coordinator)
 
@@ -79,6 +82,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     self?.transitionErrorOrLog(error)
                 }
             }
+            .store(in: disposableBag)
         }
     }
 }
