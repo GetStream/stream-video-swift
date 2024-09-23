@@ -22,6 +22,8 @@ final class SFUEventAdapter {
     /// The threshold of participants above which certain behaviors change.
     private let participantsThreshold = 10
 
+    var isActive: Bool { !disposableBag.isEmpty }
+
     /// Initializes a new instance of SFUEventAdapter.
     ///
     /// - Parameters:
@@ -34,6 +36,11 @@ final class SFUEventAdapter {
         self.sfuAdapter = sfuAdapter
         self.stateAdapter = stateAdapter
         observeEvents()
+    }
+
+    /// Stop event observation. Useful when reconnection, to avoid any unnecessary updates on the UI.
+    func stopObserving() {
+        disposableBag.removeAll()
     }
 
     /// Observes various SFU events and sets up handlers for each.
