@@ -101,6 +101,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
+                    context.sfuEventObserver?.stopObserving()
+
+                    try Task.checkCancellation()
+
                     await coordinator
                         .stateAdapter
                         .cleanUpForReconnection()
