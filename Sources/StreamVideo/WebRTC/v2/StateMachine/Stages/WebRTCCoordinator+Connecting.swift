@@ -45,6 +45,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         let ring: Bool
         let notify: Bool
 
+        private let disposableBag = DisposableBag()
+
         /// Initializes a new instance of `ConnectingStage`.
         /// - Parameters:
         ///   - context: The context for the connecting stage.
@@ -129,11 +131,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw ClientError("WebRTCCoordinator instance not available in stage id:\(id).")
                     }
 
+                    try Task.checkCancellation()
+
                     if updateSession {
                         /// By refreshing the session, we are asking the stateAdapter to update
                         /// the sessionId to a new one.
                         await coordinator.stateAdapter.refreshSession()
                     }
+
+                    try Task.checkCancellation()
 
                     /// The authenticator will fetch a ``JoinCallResponse`` and will use it to
                     /// create an ``SFUAdapter`` instance that we can later use in our flow.
@@ -148,10 +154,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             options: options
                         )
 
+                    try Task.checkCancellation()
+
                     /// We provide the ``SFUAdapter`` to the authenticator which will ensure
                     /// that we will continue only when the WS `connectionState` on the
                     /// ``SFUAdapter`` has changed to `.authenticating`.
                     try await context.authenticator.waitForAuthentication(on: sfuAdapter)
+
+                    try Task.checkCancellation()
 
                     /// With the ``SFUAdapter`` having a `connectionState` to
                     /// `.authenticating`, we store the instance on the ``WebRTCStateAdapter``.
@@ -160,6 +170,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// the name of the SFU we are currently connected, so we can use it later on
                     /// during `migration`.
                     context.currentSFU = response.credentials.server.edgeName
+
+                    try Task.checkCancellation()
 
                     /// We are going to transition to the next stage ``.connected``. If that transition
                     /// fail for any reason, we will transition to ``.disconnected`` to allow for
@@ -171,6 +183,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
+            .store(in: disposableBag)
         }
     }
 }

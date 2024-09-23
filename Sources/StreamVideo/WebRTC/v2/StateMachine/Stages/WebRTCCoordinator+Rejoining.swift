@@ -107,7 +107,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    try transition?(
+                    transitionOrDisconnect(
                         .connecting(
                             context,
                             create: false,
@@ -117,11 +117,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
                 } catch {
-                    if error is CancellationError {
-                        /* No-op */
-                    } else {
-                        transitionDisconnectOrError(error)
-                    }
+                    transitionDisconnectOrError(error)
                 }
             }
             .store(in: disposableBag)
