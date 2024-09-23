@@ -62,6 +62,31 @@ final class WebRTCCoordinatorStateMachine_MigratingStageTests: XCTestCase, @unch
         )
     }
 
+    func test_transition_sfuEventObservationWasStopped() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let sfuEventObserver = SFUEventAdapter(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter,
+            stateAdapter: mockCoordinatorStack.coordinator.stateAdapter
+        )
+        subject.context.sfuEventObserver = sfuEventObserver
+        let currentSFU = String.unique
+        subject.context.currentSFU = currentSFU
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        try await mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
+        let publisher = await mockCoordinatorStack.coordinator.stateAdapter.publisher
+        let subscriber = await mockCoordinatorStack.coordinator.stateAdapter.subscriber
+        let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
+
+        try await assertTransition(
+            from: .disconnected,
+            expectedTarget: .migrated,
+            subject: subject
+        ) { _ in XCTAssertFalse(sfuEventObserver.isActive) }
+    }
+
     func test_transition_contextWasSetCorrectly() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.sfuEventObserver = .init(

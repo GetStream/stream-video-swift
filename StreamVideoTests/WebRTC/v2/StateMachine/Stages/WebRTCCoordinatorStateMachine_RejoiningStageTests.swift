@@ -147,7 +147,29 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
             XCTAssertTrue(target.context.previousSessionSubscriber === subscriber)
         }
     }
-    
+
+    func test_transition_sfuEventObservationWasStopped() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        let sfuEventObserver = SFUEventAdapter(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter,
+            stateAdapter: mockCoordinatorStack.coordinator.stateAdapter
+        )
+        subject.context.sfuEventObserver = sfuEventObserver
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        try await mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
+        let publisher = await mockCoordinatorStack.coordinator.stateAdapter.publisher
+        let subscriber = await mockCoordinatorStack.coordinator.stateAdapter.subscriber
+
+        try await assertTransition(
+            from: .disconnected,
+            expectedTarget: .connecting,
+            subject: subject
+        ) { _ in XCTAssertFalse(sfuEventObserver.isActive) }
+    }
+
     func test_transition_cleanUpForReconnectionWasCalledOnStateAdapter() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         let sessionId = try await mockCoordinatorStack
