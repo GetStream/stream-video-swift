@@ -428,10 +428,8 @@ class CallController: @unchecked Sendable {
     private func handleParticipantsUpdated() {
         webRTCParticipantsObserver = debouncedParticipants?
             .$value
-            .sink { [weak self] participants in
-                Task { @MainActor [weak self] in
-                    self?.call?.state.participantsMap = participants
-                }
+            .sinkTask { @MainActor [weak self] participants in
+                self?.call?.state.participantsMap = participants
             }
     }
 
