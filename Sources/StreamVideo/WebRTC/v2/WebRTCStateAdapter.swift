@@ -71,6 +71,7 @@ actor WebRTCStateAdapter: ObservableObject {
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let audioSession: AudioSession = .init()
     private let disposableBag = DisposableBag()
+    private let peerConnectionsDisposableBag = DisposableBag()
 
     /// Subject to handle participant updates.
     private(set) lazy var participantsUpdateSubject = PassthroughSubject<[String: CallParticipant], Never>()
@@ -188,6 +189,7 @@ actor WebRTCStateAdapter: ObservableObject {
             subsystems: .webRTC
         )
 
+        peerConnectionsDisposableBag.removeAll()
         let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,
@@ -225,18 +227,18 @@ actor WebRTCStateAdapter: ObservableObject {
         publisher
             .trackPublisher
             .log(.debug, subsystems: .peerConnectionPublisher)
-            .sinkTask(storeIn: disposableBag) { [weak self] in
+            .sinkTask(storeIn: peerConnectionsDisposableBag) { [weak self] in
                 await self?.peerConnectionReceivedTrackEvent(.publisher, event: $0)
             }
-            .store(in: disposableBag)
+            .store(in: peerConnectionsDisposableBag)
 
         subscriber
             .trackPublisher
             .log(.debug, subsystems: .peerConnectionSubscriber)
-            .sinkTask { [weak self] in
+            .sinkTask(storeIn: peerConnectionsDisposableBag) { [weak self] in
                 await self?.peerConnectionReceivedTrackEvent(.subscriber, event: $0)
             }
-            .store(in: disposableBag)
+            .store(in: peerConnectionsDisposableBag)
 
         try await publisher.setUp(
             with: callSettings,
@@ -280,8 +282,10 @@ actor WebRTCStateAdapter: ObservableObject {
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
-    func cleanUpForReconnection() {
+    func cleanUpForReconnection() async {
         sfuAdapter = nil
+        await publisher?.prepareForClosing()
+        await subscriber?.prepareForClosing()
         publisher = nil
         subscriber = nil
         statsReporter = nil
@@ -289,6 +293,17 @@ actor WebRTCStateAdapter: ObservableObject {
         audioTracks = [:]
         videoTracks = [:]
         screenShareTracks = [:]
+        peerConnectionsDisposableBag.removeAll()
+
+        var updatedParticipants = [String: CallParticipant]()
+        let participants = self.participants
+        for (key, participant) in participants {
+            var updatedParticipant = participant
+            updatedParticipant.track = nil
+            updatedParticipants[key] = participant
+        }
+
+        didUpdateParticipants(updatedParticipants)
     }
 
     /// Restores screen sharing if an active session exists.
