@@ -210,6 +210,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         peerConnection.close()
     }
 
+    func prepareForClosing() async {
+        await iceAdapter.stopObserving()
+    }
+
     /// Sets up the peer connection with given settings and capabilities.
     ///
     /// - Parameters:

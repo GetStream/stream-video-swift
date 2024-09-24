@@ -94,6 +94,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// the name of the SFU we are currently connected, so we can use it later on
                     /// during `migration`.
                     context.currentSFU = response.credentials.server.edgeName
+                    log.debug(
+                        "Migrating from \(context.migratingFromSFU) → \(context.currentSFU).",
+                        subsystems: .webRTC
+                    )
 
                     /// If there is an SFUAdapter from the previous session available, we create
                     /// an observer that will expect to receive the ``ParticipantMigrationComplete``

@@ -49,62 +49,62 @@ final class SFUEventAdapter {
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ConnectionQualityChanged.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_AudioLevelChanged.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ChangePublishQuality.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantJoined.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantLeft.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_DominantSpeakerChanged.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_HealthCheckResponse.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_TrackPublished.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_TrackUnpublished.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_PinsChanged.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantUpdated.self)
-            .sinkTask { [weak self] in await self?.handle($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handle($0) }
             .store(in: disposableBag)
     }
 
