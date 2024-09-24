@@ -826,6 +826,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response
     }
 
+    /// Queries call members with the specified filters, sort options, and limit.
+    ///
+    /// - Parameters:
+    ///   - filters: An optional dictionary of filters.
+    ///   - sort: An optional array of `SortParamRequest` that determines the sorting order of the results. Defaults to sorting by `created_at` in descending order.
+    ///   - limit: The maximum number of members to return. Defaults to 25.
+    ///
+    /// - Returns: A `QueryMembersResponse` containing the results of the query.
+    /// - Throws: An error if the query fails.
     public func queryMembers(
         filters: [String: RawJSON]? = nil,
         sort: [SortParamRequest] = [SortParamRequest.descending("created_at")],
@@ -834,8 +843,23 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await queryMembers(filters: filters, limit: limit, sort: sort)
     }
 
-    public func queryMembers(next: String) async throws -> QueryMembersResponse {
-        try await queryMembers(filters: nil, limit: nil, next: next, sort: nil)
+    /// Asynchronously queries members with pagination support, using filters, sort options, and limit.
+    ///
+    /// - Parameters:
+    ///   - filters: An optional dictionary of filters.
+    ///   - sort: An optional array of `SortParamRequest` that determines the sorting order of the results.
+    ///   - limit: The maximum number of members to return. Defaults to 25.
+    ///   - next: A `String` representing the pagination token to fetch the next set of results.
+    ///
+    /// - Returns: A `QueryMembersResponse` containing the results of the query.
+    /// - Throws: An error if the query fails.
+    public func queryMembers(
+        filters: [String: RawJSON]? = nil,
+        sort: [SortParamRequest]? = nil,
+        limit: Int = 25,
+        next: String
+    ) async throws -> QueryMembersResponse {
+        try await queryMembers(filters: filters, limit: limit, next: next, sort: sort)
     }
 
     // MARK: - Pinning

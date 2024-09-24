@@ -1,0 +1,52 @@
+---
+id: querying-call-members
+title: Querying Call Members
+description: How to query call members
+---
+
+import FilterConditions from '../../../shared/_filter-operators.mdx';
+import CallMemberFilters from '../../../shared/video/_call-member-filters.mdx';
+import CallMemberSort from '../../../shared/video/_call-member-sort-fields.mdx';
+
+When you create or join a call you get a list of call members, however this can return at most 25 members:
+
+```swift
+// The maximum limit is 25
+// The default limit is 25
+try await call.get(membersLimit: 25)
+```
+
+To get the complete list of call members the Stream API allows you to query, filter and sort members of a call using a paginated list.
+
+## Examples
+
+Below are a few examples of how to use this API:
+
+```swift
+// sorting and pagination
+let sort = SortParamRequest(direction: 1, field: "user_id")
+let result1 = try await call.queryMembers(
+    sort: [sort],
+    limit: 10
+)
+
+// loading the next page            
+if let next = result1.next {
+    let result2 = try await call.queryMembers(sort: [sort], limit: 10, next: next)
+}
+            
+// filtering            
+let result2 = try await call.queryMembers(
+    filters: ["role": .dictionary(["eq": "admin"])]
+)
+```
+
+## Sort options
+
+<CallMemberSort />
+
+## Filter options
+
+<CallMemberFilters />
+
+<FilterConditions />
