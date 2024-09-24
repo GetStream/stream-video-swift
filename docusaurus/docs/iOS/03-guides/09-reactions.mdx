@@ -1,0 +1,32 @@
+---
+title: Reactions
+description: How reactions work
+---
+
+## Sending Reactions
+
+It's easy to add reactions to your call.
+
+```swift
+let response = try await call.sendReaction(type: "fireworks")
+```
+
+You can also add custom data to the reaction and specify a specific emoji
+
+```swift
+let response = try await call.sendReaction(
+    type: "raise-hand",
+    custom: ["mycustomfield": "hello"],
+    emojiCode: ":smile:"
+)
+```
+
+## Listening to Reactions
+
+Here's an example that shows how to listen to reaction events:
+
+```swift
+for await event in call.subscribe(for: CallReactionEvent.self) {
+    // handle reaction event
+}
+```
