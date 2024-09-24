@@ -436,6 +436,13 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase {
             "2": .dummy(id: "2", hasAudio: true),
             "3": .dummy(id: "3", isScreenSharing: true)
         ])
+        await fulfillment {
+            await self
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .participants.count == 4
+        }
 
         let result = await subject.buildSubscriptionDetails(
             .unique,

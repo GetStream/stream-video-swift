@@ -246,6 +246,8 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
                     transitionExpectation
                         .expectationDescription =
                         "Expectation to land on id:\(expectedTarget) but instead landed on id:\(target.id)."
+                } else {
+                    transitionExpectation.fulfill()
                 }
             }
         }

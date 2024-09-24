@@ -18,7 +18,7 @@ enum WebRTCConfiguration {
             authenticate: 10,
             connect: 10,
             join: 10,
-            migrationCompletion: 10
+            migrationCompletion: 30
         )
 
         #if STREAM_TESTS

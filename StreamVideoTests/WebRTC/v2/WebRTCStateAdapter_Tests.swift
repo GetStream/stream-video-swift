@@ -422,10 +422,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             for: participant.sessionId
         )
 
-        await assertEqualAsync(
-            await subject.participants[participant.sessionId]?.track?.trackId,
-            track.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .track?
+                .trackId == track.trackId
+        }
     }
 
     func test_didAddTrack_screenSharingOfExistingParticipant_shouldAddTrack() async throws {
@@ -441,10 +444,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             for: participant.sessionId
         )
 
-        await assertEqualAsync(
-            await subject.participants[participant.sessionId]?.screenshareTrack?.trackId,
-            track.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .screenshareTrack?
+                .trackId == track.trackId
+        }
     }
 
     // MARK: - didRemoveTrack
@@ -461,9 +467,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             for: participant.sessionId
         )
 
-        await assertNilAsync(
-            await subject.participants[participant.sessionId]?.track?.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .track(for: participant.sessionId, of: .video)?
+                .trackId == nil
+        }
     }
 
     func test_didRemoveTrack_screenSharingOfExistingParticipant_shouldRemoveTrack() async throws {
@@ -478,9 +487,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             for: participant.sessionId
         )
 
-        await assertNilAsync(
-            await subject.participants[participant.sessionId]?.screenshareTrack?.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .track(for: participant.sessionId, of: .screenshare)?
+                .trackId == nil
+        }
     }
 
     // MARK: - trackFor
@@ -493,9 +505,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         await subject.didUpdateParticipants([participant.sessionId: participant])
         await subject.didAddTrack(track, type: .video, for: participant.sessionId)
 
-        let actual = await subject.track(for: participant.sessionId, of: .video)
-
-        XCTAssertEqual(track.trackId, actual?.trackId)
+        await fulfillment {
+            await self
+                .subject
+                .track(for: participant.sessionId, of: .video)?
+                .trackId == track.trackId
+        }
     }
 
     func test_trackFor_withScreenShare_shouldReturnCorrectTrack() async throws {
@@ -506,9 +521,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
         await subject.didUpdateParticipants([participant.sessionId: participant])
         await subject.didAddTrack(track, type: .screenshare, for: participant.sessionId)
 
-        let actual = await subject.track(for: participant.sessionId, of: .screenshare)
-
-        XCTAssertEqual(track.trackId, actual?.trackId)
+        await fulfillment {
+            await self
+                .subject
+                .track(for: participant.sessionId, of: .screenshare)?
+                .trackId == track.trackId
+        }
     }
 
     // MARK: - didUpdateVideoOptions
@@ -548,14 +566,40 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
 
         await subject.didUpdateParticipants(initialParticipants)
 
-        await assertEqualAsync(
-            await subject.participants["2"]?.track?.trackId,
-            participantTracks["2"]?.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .participants["2"]?
+                .track?.trackId == participantTracks["2"]?.trackId
+        }
+
         await assertEqualAsync(
             await subject.participants["3"]?.screenshareTrack?.trackId,
             participantTracks["3"]?.trackId
         )
+    }
+
+    func test_didUpdateParticipants_concurrentOperationsHaveExpectedResult() async throws {
+        let initialParticipants: [String: CallParticipant] = [
+            "1": .dummy(),
+            "2": .dummy()
+        ]
+
+        func addParticipantWith(id: String) async {
+            var participants = await subject.participants
+            participants[id] = .dummy(id: id)
+            await subject.didUpdateParticipants(participants)
+        }
+
+        await subject.didUpdateParticipants(initialParticipants)
+        await fulfillment { await self.subject.participants.count == 2 }
+
+        await addParticipantWith(id: "3")
+        await addParticipantWith(id: "4")
+        await addParticipantWith(id: "5")
+        await addParticipantWith(id: "6")
+
+        await fulfillment { await self.subject.participants.count == 6 }
     }
 
     // MARK: - didUpdateParticipantVisibility
@@ -570,7 +614,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
 
         await subject.didUpdateParticipant(initialParticipants["1"]!, isVisible: false)
 
-        await assertEqualAsync(await subject.participants["1"]?.showTrack, false)
+        await fulfillment {
+            await self
+                .subject
+                .participants["1"]?
+                .showTrack == false
+        }
     }
 
     // MARK: - didUpdateParticipantTrackSize
@@ -591,8 +640,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             )
         )
 
-        await assertEqualAsync(await subject.participants["1"]?.trackSize.width, 100)
-        await assertEqualAsync(await subject.participants["1"]?.trackSize.height, 200)
+        await fulfillment {
+            await self
+                .subject
+                .participants["1"]?
+                .trackSize == .init(width: 100, height: 200)
+        }
     }
 
     // MARK: - Private helpers

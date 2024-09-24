@@ -81,15 +81,15 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        Task { [capturer] in try? await capturer?.stopCapture() }
-        localTrack?.isEnabled = false
-        sender?.sender.track = nil
+        Task { @MainActor [sender, localTrack, capturer] in
+            try? await capturer?.stopCapture()
+            localTrack?.isEnabled = false
+            sender?.sender.track = nil
+        }
         if let localTrack {
             log.debug(
                 """
-                Local videoTrack will be deallocated
-                trackId:\(localTrack.trackId)
-                isEnabled:\(localTrack.isEnabled)
+                Local videoTrack will be deallocated trackId:\(localTrack.trackId) isEnabled:\(localTrack.isEnabled).
                 """
             )
         }
@@ -124,7 +124,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 )
             }
         } else if !hasVideo {
-            localTrack?.isEnabled = false
             Task { [weak self] in
                 do {
                     try await self?.capturer?.stopCapture()
@@ -133,40 +132,51 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 }
             }
         }
+
+        localTrack?.isEnabled = settings.videoOn
     }
 
     /// Starts publishing the local video track.
     func publish() {
-        guard
-            let localTrack,
-            localTrack.isEnabled == false || sender == nil
-        else {
-            return
-        }
+        Task { @MainActor [weak self] in
+            guard
+                let self,
+                let localTrack,
+                localTrack.isEnabled == false || sender == nil
+            else {
+                return
+            }
 
-        if sender == nil {
-            sender = peerConnection.addTransceiver(
-                with: localTrack,
-                init: RTCRtpTransceiverInit(
-                    trackType: .video,
-                    direction: .sendOnly,
-                    streamIds: streamIds,
-                    codecs: videoOptions.supportedCodecs
+            if sender == nil {
+                sender = peerConnection.addTransceiver(
+                    with: localTrack,
+                    init: RTCRtpTransceiverInit(
+                        trackType: .video,
+                        direction: .sendOnly,
+                        streamIds: streamIds,
+                        codecs: videoOptions.supportedCodecs
+                    )
                 )
-            )
-        } else {
-            sender?.sender.track = localTrack
+            } else {
+                sender?.sender.track = localTrack
+            }
+            localTrack.isEnabled = true
+            log.debug("Local videoTrack trackId:\(localTrack.trackId) is now published.")
         }
-        localTrack.isEnabled = true
-        log.debug("Local videoTrack trackId:\(localTrack.trackId) is now published.")
     }
 
     /// Stops publishing the local video track.
     func unpublish() {
-        guard let sender, let localTrack else { return }
-        sender.sender.track = nil
-        localTrack.isEnabled = false
-        log.debug("Local videoTrack trackId:\(localTrack.trackId) is now unpublished.")
+        Task { @MainActor [weak self] in
+            guard
+                let self,
+                let sender,
+                let localTrack
+            else { return }
+            sender.sender.track = nil
+            localTrack.isEnabled = false
+            log.debug("Local videoTrack trackId:\(localTrack.trackId) is now unpublished.")
+        }
     }
 
     /// Updates the local video media based on new call settings.
@@ -271,39 +281,45 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func changePublishQuality(
         with activeEncodings: Set<String>
     ) {
-        guard let sender, !activeEncodings.isEmpty else {
-            return
-        }
-
-        var hasChanges = false
-        let params = sender
-            .sender
-            .parameters
-        var updatedEncodings = [RTCRtpEncodingParameters]()
-
-        for encoding in params.encodings {
-            guard let rid = encoding.rid else {
-                continue
+        Task { @MainActor [weak self] in
+            guard
+                let self,
+                let sender,
+                !activeEncodings.isEmpty
+            else {
+                return
             }
-            let shouldEnable = activeEncodings.contains(rid)
 
-            switch (shouldEnable, encoding.isActive) {
-            case (true, true):
-                break
-            case (false, false):
-                break
-            default:
-                hasChanges = true
-                encoding.isActive = shouldEnable
+            var hasChanges = false
+            let params = sender
+                .sender
+                .parameters
+            var updatedEncodings = [RTCRtpEncodingParameters]()
+
+            for encoding in params.encodings {
+                guard let rid = encoding.rid else {
+                    continue
+                }
+                let shouldEnable = activeEncodings.contains(rid)
+
+                switch (shouldEnable, encoding.isActive) {
+                case (true, true):
+                    break
+                case (false, false):
+                    break
+                default:
+                    hasChanges = true
+                    encoding.isActive = shouldEnable
+                }
+                updatedEncodings.append(encoding)
             }
-            updatedEncodings.append(encoding)
-        }
 
-        guard hasChanges else {
-            return
+            guard hasChanges else {
+                return
+            }
+            params.encodings = updatedEncodings
+            sender.sender.parameters = params
         }
-        params.encodings = updatedEncodings
-        sender.sender.parameters = params
     }
 
     // MARK: - Private helpers

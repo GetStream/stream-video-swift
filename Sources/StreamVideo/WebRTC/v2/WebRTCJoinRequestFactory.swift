@@ -201,6 +201,23 @@ struct WebRTCJoinRequestFactory {
             result.append(trackInfo)
         }
 
+        let announcedTracks = result
+            .map {
+                switch $0.trackType {
+                case .screenShare, .video:
+                    return "\($0.trackType)(id:\($0.trackID), mid:\($0.mid), muted:\($0.muted), layers:[\($0.layers.map(\.rid).joined(separator: ","))])"
+                default:
+                    return "\($0.trackType)(id:\($0.trackID), mid:\($0.mid), muted:\($0.muted))"
+                }
+            }
+
+        log.debug(
+            "Announced tracks created: [\(announcedTracks.joined(separator: ", "))].",
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
+
         return result
     }
 
@@ -223,5 +240,24 @@ struct WebRTCJoinRequestFactory {
         return Array(await coordinator.stateAdapter.participants.values)
             .filter { $0.id != sessionID && $0.id != previousSessionID }
             .flatMap(\.trackSubscriptionDetails)
+    }
+}
+
+extension Stream_Video_Sfu_Models_TrackType: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .unspecified:
+            return ".unspecified"
+        case .audio:
+            return ".audio"
+        case .video:
+            return ".video"
+        case .screenShare:
+            return ".screenShare"
+        case .screenShareAudio:
+            return ".screenShareAudio"
+        case let .UNRECOGNIZED(value):
+            return ".UNRECOGNIZED(\(value))"
+        }
     }
 }

@@ -40,17 +40,19 @@ extension XCTestCase {
         line: UInt = #line,
         block: @MainActor @Sendable @escaping () async -> Bool
     ) async {
-        let stepInterval = 0.1
+        let stepInterval: TimeInterval = 1
         var maxIterations = Int(timeout / stepInterval)
         var iterations = 0
         var cancellable: AnyCancellable?
         let waitExpectation = expectation(description: "Wait for completion.")
+        var executionTask: Task<Void, Never>?
         cancellable = Foundation
             .Timer
             .publish(every: stepInterval, on: .main, in: .default)
             .autoconnect()
             .sink { _ in
-                Task {
+                executionTask?.cancel()
+                executionTask = Task {
                     defer { iterations += 1 }
                     guard await block() || iterations > maxIterations else {
                         return
@@ -66,6 +68,7 @@ extension XCTestCase {
             file: file,
             line: line
         )
+        executionTask?.cancel()
         let value = await block()
         XCTAssertTrue(value, message(), file: file, line: line)
     }

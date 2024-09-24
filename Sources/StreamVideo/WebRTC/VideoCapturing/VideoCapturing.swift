@@ -10,7 +10,7 @@ protocol VideoCapturing {
     func stopCapture() async throws
 }
 
-protocol CameraVideoCapturing: VideoCapturing {
+protocol CameraVideoCapturing: VideoCapturing, Sendable {
     func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws
     func setVideoFilter(_ videoFilter: VideoFilter?)
     func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice?

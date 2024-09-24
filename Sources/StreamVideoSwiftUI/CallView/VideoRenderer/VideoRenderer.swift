@@ -133,10 +133,6 @@ extension VideoRenderer {
         onTrackSizeUpdate: @escaping (CGSize, CallParticipant) -> Void
     ) {
         if let track = participant.track {
-            log.info(
-                "Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier)) isMuted:\(!track.isEnabled)",
-                subsystems: .other
-            )
             self.participant = participant
             add(track: track)
             DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in

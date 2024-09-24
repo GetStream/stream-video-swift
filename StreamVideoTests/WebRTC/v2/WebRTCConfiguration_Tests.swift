@@ -13,6 +13,6 @@ final class WebRTCConfigurationTests: XCTestCase {
         XCTAssertEqual(timeout.authenticate, 10)
         XCTAssertEqual(timeout.connect, 10)
         XCTAssertEqual(timeout.join, 10)
-        XCTAssertEqual(timeout.migrationCompletion, 10)
+        XCTAssertEqual(timeout.migrationCompletion, 30)
     }
 }

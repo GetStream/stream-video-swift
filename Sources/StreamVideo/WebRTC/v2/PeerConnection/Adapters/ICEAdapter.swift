@@ -78,6 +78,8 @@ actor ICEAdapter: @unchecked Sendable {
                     throw ClientError("PeerConnection type:\(peerType) was unable to trickle generated candidate\(candidate).")
                 }
 
+                try Task.checkCancellation()
+
                 log.debug(
                     """
                     PeerConnection type:\(peerType) generated candidate while remoteDescription is \(peerConnection
@@ -87,11 +89,16 @@ actor ICEAdapter: @unchecked Sendable {
                     subsystems: .iceAdapter
                 )
 
+                try Task.checkCancellation()
+
                 try await sfuAdapter.iCETrickle(
                     candidate: jsonString,
                     peerType: peerType == .publisher ? .publisherUnspecified : .subscriber,
                     for: sessionID
                 )
+
+                try Task.checkCancellation()
+
                 log.debug(
                     """
                     PeerConnection type:\(peerType) will store trickled candidate for future use.
@@ -177,7 +184,7 @@ actor ICEAdapter: @unchecked Sendable {
             await withTaskGroup(of: Void.self) { [weak self] group in
                 guard let self else { return }
                 for candidate in await trickledCandidates {
-                    group.addTask { [weak self] in
+                    group.addTask { @MainActor [weak self] in
                         guard let self else { return }
                         do {
                             try Task.checkCancellation()
@@ -207,7 +214,7 @@ actor ICEAdapter: @unchecked Sendable {
     private func task(
         for candidate: RTCIceCandidate
     ) -> Task<Void, Never> {
-        Task { [weak peerConnection] in
+        Task { @MainActor [weak peerConnection] in
             guard let peerConnection else { return }
             do {
                 try Task.checkCancellation()

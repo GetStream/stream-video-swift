@@ -319,17 +319,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try await context.authenticator.waitForConnect(on: sfuAdapter)
 
-            let participants = joinResponse
-                .callState
-                .participants
-                .map { $0.toCallParticipant() }
-                .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
-
             try Task.checkCancellation()
-
-            await coordinator
-                .stateAdapter
-                .didUpdateParticipants(participants)
 
             try await coordinator.stateAdapter.restoreScreenSharing()
         }

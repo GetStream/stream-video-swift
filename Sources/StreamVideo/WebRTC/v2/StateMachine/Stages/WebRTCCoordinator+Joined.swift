@@ -62,11 +62,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
-        /// Performs cleanup actions when transitioning away from this stage.
-        override func didTransitionAway() {
-            disposableBag.removeAll()
-        }
-
         /// Executes the joined stage logic.
         private func execute() {
             Task { [weak self] in
@@ -136,6 +131,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     await configureStatsCollectionAndDelivery()
                 } catch {
+                    await cleanUpPreviousSessionIfRequired()
                     transitionDisconnectOrError(error)
                 }
             }
@@ -144,20 +140,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Cleans up the previous session if required.
         private func cleanUpPreviousSessionIfRequired() async {
-            let publisher = context.previousSessionPublisher
-            let subscriber = context.previousSessionSubscriber
-            let previousSFUAdapter = context.previousSFUAdapter
+            await context.previousSessionPublisher?.close()
+            await context.previousSessionSubscriber?.close()
             context.previousSessionPublisher = nil
             context.previousSessionSubscriber = nil
             context.previousSFUAdapter = nil
             context.migratingFromSFU = ""
             context.isRejoiningFromSessionID = nil
             context.migrationStatusObserver = nil
-            publisher?.close()
-            subscriber?.close()
-            if context.migrationStatusObserver != nil {
-                await previousSFUAdapter?.disconnect()
-            }
         }
 
         /// Observes migration status if required.
@@ -182,6 +172,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 }
                 task.store(in: disposableBag)
                 _ = try await task.value
+            } else {
+                await previousSFUAdapter?.disconnect()
             }
         }
 
