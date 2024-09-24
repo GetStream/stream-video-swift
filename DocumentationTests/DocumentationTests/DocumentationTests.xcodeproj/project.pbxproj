@@ -78,6 +78,7 @@
 		40FFDCA22B640741004DA7A2 /* 14-livestream-player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */; };
 		40FFDCA42B640772004DA7A2 /* 15-long-press-to-focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */; };
 		40FFDCA62B6408DE004DA7A2 /* 00-ringing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */; };
+		84BA15AE2CA2EF420018DC51 /* 07-querying-call-members.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -149,6 +150,7 @@
 		40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "14-livestream-player.swift"; sourceTree = "<group>"; };
 		40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "15-long-press-to-focus.swift"; sourceTree = "<group>"; };
 		40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "00-ringing.swift"; sourceTree = "<group>"; };
+		84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-querying-call-members.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,6 +219,7 @@
 				400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */,
 				400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */,
 				400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */,
+				84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */,
 				40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */,
 				40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */,
 				40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */,
@@ -455,6 +458,7 @@
 				40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */,
 				4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */,
 				40FFDC762B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift in Sources */,
+				84BA15AE2CA2EF420018DC51 /* 07-querying-call-members.swift in Sources */,
 				40FFDC672B63F430004DA7A2 /* 04-connection-quality-indicator.swift in Sources */,
 				40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */,
 				40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */,
