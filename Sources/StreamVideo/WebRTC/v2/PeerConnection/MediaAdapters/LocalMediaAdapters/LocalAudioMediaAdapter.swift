@@ -172,8 +172,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     /// Stops publishing the local audio track.
     func unpublish() {
         guard let sender, let localTrack else { return }
-        sender.sender.track = nil
         localTrack.isEnabled = false
+        sender.sender.track = nil
         log.debug("Local audioTrack trackId:\(localTrack.trackId) is now unpublished.")
     }
 

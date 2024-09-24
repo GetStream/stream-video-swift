@@ -45,6 +45,10 @@ actor ICEAdapter: @unchecked Sendable {
         }
     }
 
+    func stopObserving() {
+        disposableBag.removeAll()
+    }
+
     /// Trickles an ICE candidate.
     ///
     /// - Parameter candidate: The ICE candidate to trickle.
