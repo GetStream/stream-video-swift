@@ -34,7 +34,7 @@ struct VideoOptions: Sendable {
                     preferredFormat: preferredFormat,
                     preferredDimensions: preferredDimensions,
                     preferredFps: preferredFps,
-                    preferredBitrate: targetResolution.bitrate!
+                    preferredBitrate: targetResolution.bitrate ?? .maxBitrate
                 )
             } catch {
                 supportedCodecs = VideoCodec.defaultCodecs
@@ -65,7 +65,7 @@ extension VideoCodec {
     static let full = VideoCodec(
         dimensions: .full,
         quality: "f",
-        maxBitrate: 1_000_000
+        maxBitrate: .maxBitrate
     )
     
     static let half = VideoCodec(
@@ -85,6 +85,10 @@ extension VideoCodec {
     static let screenshare = VideoCodec(
         dimensions: .full,
         quality: "q",
-        maxBitrate: 1_000_000
+        maxBitrate: .maxBitrate
     )
+}
+
+extension Int {
+    static let maxBitrate = 1_000_000
 }
