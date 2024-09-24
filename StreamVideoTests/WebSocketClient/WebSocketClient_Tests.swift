@@ -28,8 +28,7 @@ final class WebSocketClient_Tests: XCTestCase {
     private lazy var healthCheckInfo = HealthCheckInfo(
         coordinatorHealthCheck: HealthCheckEvent(
             connectionId: connectionId,
-            createdAt: createdAt,
-            type: "health.check"
+            createdAt: createdAt
         )
     )
     
@@ -327,10 +326,13 @@ final class WebSocketClient_Tests: XCTestCase {
             createdAt: Date(),
             custom: [:],
             user: UserResponse(
+                banned: false,
+                blockedUserIds: [],
                 createdAt: Date(),
                 custom: [:],
                 id: "test",
                 language: "en",
+                online: false,
                 role: "user",
                 teams: [],
                 updatedAt: Date()

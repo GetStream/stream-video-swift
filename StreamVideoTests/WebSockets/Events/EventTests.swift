@@ -13,10 +13,13 @@ final class EventTests: XCTestCase {
         createdAt: Date(),
         custom: [:],
         user: .init(
+            banned: false,
+            blockedUserIds: [],
             createdAt: Date(),
             custom: [:],
             id: "456",
             language: "en",
+            online: true,
             role: "admin",
             teams: [],
             updatedAt: Date()

@@ -158,7 +158,8 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             createdAt: Date(),
             members: [],
             sessionId: callId,
-            user: makeUserResponse()
+            user: makeUserResponse(),
+            video: true
         )
         let incomingCall = WrappedEvent.coordinatorEvent(.typeCallRingEvent(ringEvent))
         streamVideo.eventNotificationCenter.process(incomingCall)
@@ -196,7 +197,8 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             createdAt: Date(),
             members: [],
             sessionId: callId,
-            user: makeUserResponse()
+            user: makeUserResponse(),
+            video: true
         )
         let incomingCall = WrappedEvent.coordinatorEvent(.typeCallRingEvent(ringEvent))
         streamVideo.eventNotificationCenter.process(incomingCall)
@@ -246,10 +248,13 @@ final class StreamVideo_Tests: StreamVideoTestCase {
     
     private func makeUserResponse() -> UserResponse {
         UserResponse(
+            banned: false,
+            blockedUserIds: [],
             createdAt: Date(),
             custom: [:],
             id: "test",
             language: "en",
+            online: false,
             role: "user",
             teams: [],
             updatedAt: Date()

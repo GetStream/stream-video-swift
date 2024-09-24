@@ -10,6 +10,6 @@ extension RingSettings {
         autoCancelTimeoutMs: Int = 0,
         incomingCallTimeoutMs: Int = 0
     ) -> RingSettings {
-        .init(autoCancelTimeoutMs: autoCancelTimeoutMs, incomingCallTimeoutMs: incomingCallTimeoutMs)
+        .init(autoCancelTimeoutMs: autoCancelTimeoutMs, incomingCallTimeoutMs: incomingCallTimeoutMs, missedCallTimeoutMs: 0)
     }
 }

@@ -598,15 +598,15 @@ final class CallCRUDTest: IntegrationTest {
         try await call.streamVideo.setVoipDevice(id: voipDeviceId)
         try await customWait()
         var listDevices = try await call.streamVideo.listDevices()
-        XCTAssertTrue(listDevices.contains(where: { $0.id == deviceId }), "Device should be added")
-        XCTAssertTrue(listDevices.contains(where: { $0.id == voipDeviceId }), "Voip device should be added")
+        XCTAssertTrue(listDevices.contains(where: { $0?.id == deviceId }), "Device should be added")
+        XCTAssertTrue(listDevices.contains(where: { $0?.id == voipDeviceId }), "Voip device should be added")
         
         try await call.streamVideo.deleteDevice(id: deviceId)
         try await call.streamVideo.deleteDevice(id: voipDeviceId)
         try await customWait()
         listDevices = try await call.streamVideo.listDevices()
-        XCTAssertFalse(listDevices.contains(where: { $0.id == deviceId }), "Device should be removed")
-        XCTAssertFalse(listDevices.contains(where: { $0.id == voipDeviceId }), "Voip device should be removed")
+        XCTAssertFalse(listDevices.contains(where: { $0?.id == deviceId }), "Device should be removed")
+        XCTAssertFalse(listDevices.contains(where: { $0?.id == voipDeviceId }), "Voip device should be removed")
     }
     
     func test_setAndDeleteVoipDevices() async throws {
@@ -619,12 +619,12 @@ final class CallCRUDTest: IntegrationTest {
         try await call.streamVideo.setVoipDevice(id: deviceId)
         try await customWait()
         var listDevices = try await call.streamVideo.listDevices()
-        XCTAssertTrue(listDevices.contains(where: { $0.id == deviceId }))
+        XCTAssertTrue(listDevices.contains(where: { $0?.id == deviceId }))
         
         try await call.streamVideo.deleteDevice(id: deviceId)
         try await customWait()
         listDevices = try await call.streamVideo.listDevices()
-        XCTAssertFalse(listDevices.contains(where: { $0.id == deviceId }))
+        XCTAssertFalse(listDevices.contains(where: { $0?.id == deviceId }))
     }
     
     func test_pinAndUnpinUser() async throws {
