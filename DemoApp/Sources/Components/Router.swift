@@ -231,7 +231,11 @@ final class Router: ObservableObject {
         utils.userListProvider = appState
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
 
-        appState.connectUser()
+        if user?.type != .anonymous {
+            appState.connectUser()
+        } else {
+            appState.loading = false
+        }
     }
 
     private func refreshToken(
