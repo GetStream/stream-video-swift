@@ -20,4 +20,10 @@ fileprivate func content() {
     asyncContainer {
         let response = try await call.sendCustomEvent(["type": .string("draw"), "x": .number(10), "y": .number(20)])
     }
+    
+    asyncContainer {
+        for await event in call.subscribe(for: CallReactionEvent.self) {
+            // handle reaction event
+        }
+    }
 }
