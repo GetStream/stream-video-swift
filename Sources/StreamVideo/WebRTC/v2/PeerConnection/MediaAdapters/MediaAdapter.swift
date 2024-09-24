@@ -22,8 +22,11 @@ final class MediaAdapter {
     private let subject: PassthroughSubject<TrackEvent, Never>
 
     /// A publisher for track events.
+    /// - Note: We streamline track updates to a userInteractive queue to ensure, no events loss.
     var trackPublisher: AnyPublisher<TrackEvent, Never> {
-        subject.eraseToAnyPublisher()
+        subject
+            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .eraseToAnyPublisher()
     }
 
     /// Initializes a new instance of the media adapter.
