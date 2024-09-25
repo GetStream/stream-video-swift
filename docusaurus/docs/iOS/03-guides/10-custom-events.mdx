@@ -1,0 +1,101 @@
+---
+title: Custom Events
+description: How custom events work
+---
+
+## Sending Custom Events
+
+In case the reaction system isn't flexible enough we also support custom events.
+
+You can use custom events to send data between participants in the call. This is a realtime layer that you can broadcast your own events to.
+
+For example, if you are building a collaborative drawing app, you can send the coordinates to the other participants with the following code:
+
+```swift
+let response = try await call.sendCustomEvent(["type": .string("draw"), "x": .number(10), "y": .number(20)])
+```
+
+The data that can be passed with a custom event has a limit of 100KB. 
+
+If you want to pass larger files:
+- you can send URLs to those resources and download them from your location when the event is received.
+- you can split the file into chunks of bytes and send them with separate events.
+- if you are sending an image, you can resize it before you pass it in the event.
+
+Here's an example that shows how to resize an image and send it as a base 64 encoded string via custom event:
+
+```swift
+func sendImageData(_ data: Data) async {
+    guard
+        let snapshot = UIImage(data: data),
+        let resizedImage = resize(image: snapshot, to: .init(width: 30, height: 30)),
+        let snapshotData = resizedImage.jpegData(compressionQuality: 0.8)
+    else {
+        return
+    }
+
+    do {
+        try await call.sendCustomEvent([
+            "snapshot": .string(snapshotData.base64EncodedString())
+        ])
+    } catch {
+        log.error("Failed to send image.", error: error)
+    }
+}
+
+private func resize(
+    image: UIImage,
+    to targetSize: CGSize
+) -> UIImage? {
+    guard
+        image.size.width > targetSize.width || image.size.height > targetSize.height
+    else {
+        return image
+    }
+
+    let widthRatio = targetSize.width / image.size.width
+    let heightRatio = targetSize.height / image.size.height
+
+    // Determine the scale factor that preserves aspect ratio
+    let scaleFactor = min(widthRatio, heightRatio)
+
+    let scaledWidth = image.size.width * scaleFactor
+    let scaledHeight = image.size.height * scaleFactor
+    let targetRect = CGRect(
+        x: (targetSize.width - scaledWidth) / 2,
+        y: (targetSize.height - scaledHeight) / 2,
+        width: scaledWidth,
+        height: scaledHeight
+    )
+
+    // Create a new image context
+    UIGraphicsBeginImageContextWithOptions(targetSize, false, 0)
+    image.draw(in: targetRect)
+
+    let newImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+
+    return newImage
+}
+```
+
+## Listening to Custom Events
+
+Custom events are only delivered to clients that are watching the call.
+
+To receive custom events, you need to subscribe to the custom WebSocket event.
+
+```swift
+for await event in call.subscribe(for: CustomVideoEvent.self) {
+    // read custom data
+    let customData = event.custom
+    // perform actions with the custom data.
+}
+```
+
+The custom event has the following properties:
+
+- `callCid`: `String` - the type and call id that identifies the call
+- `createdAt`: `Date` - when was the event created
+- `custom`: `[String: RawJSON]` - any custom data you send via the `sendCustomEvent` method
+- `user`: `UserResponse` - the user who sent the event
