@@ -101,6 +101,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Send
     @MainActor
     func test_grid_participantsSpeaking_snapshot() {
         mockedOrientation = .portrait(isUpsideDown: false)
+        callController.call = call
 
         for count in gridParticipants {
             let participants = ParticipantFactory.get(count, speaking: true)
