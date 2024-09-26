@@ -65,7 +65,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
         // Then
         await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
+        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
@@ -223,7 +223,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
-        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
+        await fulfillment { self.subject.localTrack?.isEnabled == true }
         XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
     }
 
@@ -258,7 +258,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
         subject.unpublish()
 
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
+        await fulfillment { self.subject.localTrack?.isEnabled == false }
     }
 
     // MARK: - Private

@@ -6,7 +6,7 @@ import Combine
 import Foundation
 
 extension Publisher {
-    func sinkTask(
+    public func sinkTask(
         storeIn disposableBag: DisposableBag? = nil,
         identifier: String = UUID().uuidString,
         receiveCompletion: @escaping ((Subscribers.Completion<Failure>) -> Void) = { _ in },
