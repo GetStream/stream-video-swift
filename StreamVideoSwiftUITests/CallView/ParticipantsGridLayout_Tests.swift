@@ -60,8 +60,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Send
             AssertSnapshot(
                 layout,
                 variants: snapshotVariants,
-                suffix: "with_\(count)_participants",
-                record: true
+                suffix: "with_\(count)_participants"
             )
         }
     }
