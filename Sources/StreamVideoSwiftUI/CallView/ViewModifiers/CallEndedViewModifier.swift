@@ -62,6 +62,11 @@ private struct CallEndedViewModifier<Subview: View>: ViewModifier {
             .sheet(isPresented: $viewModel.isPresentingSubview) {
                 subviewProvider(viewModel.lastCall) {
                     viewModel.isPresentingSubview = false
+                    viewModel.lastCall = nil
+                }
+                .onDisappear {
+                    viewModel.isPresentingSubview = false
+                    viewModel.lastCall = nil
                 }
             }
             .onReceive(viewModel.$activeCall.removeDuplicates { $0?.cId == $1?.cId }) { call in

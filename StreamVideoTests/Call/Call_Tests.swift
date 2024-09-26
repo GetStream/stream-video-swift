@@ -303,6 +303,41 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertTrue(Int(duration) >= 1)
     }
 
+    // MARK: - Update State from Coordinator events
+
+    func test_coordinatorEventReceived_startedRecording_updatesStateCorrectly() async throws {
+        try await assertCoordinatorEventReceived(
+            .typeCallRecordingStartedEvent(
+                CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
+            )
+        ) { call in await fulfillment { call.state.recordingState == .recording } }
+    }
+
+    func test_coordinatorEventReceived_startedRecordingForAnotherCall_doesNotUpdateState() async throws {
+        try await assertCoordinatorEventReceived(
+            .typeCallRecordingStartedEvent(
+                CallRecordingStartedEvent(callCid: .unique, createdAt: Date())
+            )
+        ) { @MainActor call in
+            await wait(for: 1)
+            XCTAssertEqual(call.state.recordingState, .noRecording)
+        }
+    }
+
+    private func assertCoordinatorEventReceived(
+        _ event: VideoEvent,
+        fulfillmentHandler: @MainActor(Call) async throws -> Void
+    ) async throws {
+        let streamVideo = try XCTUnwrap(streamVideo)
+        let call = streamVideo.call(callType: callType, callId: callId)
+
+        streamVideo
+            .eventNotificationCenter
+            .process(.coordinatorEvent(event))
+
+        try await fulfillmentHandler(call)
+    }
+
     // MARK: - join
 
     func test_join_callControllerWasCalledOnlyOnce() async throws {
@@ -388,8 +423,9 @@ private struct UpdateStateStep {
 
 private final class MockCallController: CallController, Mockable {
     typealias FunctionKey = MockFunctionKey
+    typealias FunctionInputKey = EmptyPayloadable
 
-    enum MockFunctionKey: Hashable {
+    enum MockFunctionKey: Hashable, CaseIterable {
         case join
     }
 
@@ -397,6 +433,7 @@ private final class MockCallController: CallController, Mockable {
     var timesJoinWasCalled: Int = 0
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
+    var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = [:]
 
     convenience init() {
         self.init(
@@ -420,12 +457,8 @@ private final class MockCallController: CallController, Mockable {
 
     override func joinCall(
         create: Bool = true,
-        callType: String,
-        callId: String,
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
-        migratingFrom: String? = nil,
-        sessionID: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
@@ -437,12 +470,8 @@ private final class MockCallController: CallController, Mockable {
         } else {
             return try await super.joinCall(
                 create: create,
-                callType: callType,
-                callId: callId,
                 callSettings: callSettings,
                 options: options,
-                migratingFrom: migratingFrom,
-                sessionID: sessionID,
                 ring: ring,
                 notify: notify
             )

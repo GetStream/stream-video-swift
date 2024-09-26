@@ -323,8 +323,7 @@ public struct VideoCallParticipantView: View {
     var edgesIgnoringSafeArea: Edge.Set
     var customData: [String: RawJSON]
     var call: Call?
-    
-    @State private var isVisible = false
+
     @State private var isUsingFrontCameraForLocalUser: Bool = false
 
     public init(
@@ -351,8 +350,8 @@ public struct VideoCallParticipantView: View {
                 id: id,
                 size: availableFrame.size,
                 contentMode: contentMode,
-                showVideo: showVideo && isVisible,
-                handleRendering: { [weak call] view in
+                showVideo: showVideo,
+                handleRendering: { [weak call, participant] view in
                     guard call != nil else { return }
                     view.handleViewRendering(for: participant) { [weak call] size, participant in
                         Task { [weak call] in
@@ -361,10 +360,7 @@ public struct VideoCallParticipantView: View {
                     }
                 }
             )
-            .id(participant.id)
         }
-        .onAppear { isVisible = true }
-        .onDisappear { isVisible = false }
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")

@@ -51,9 +51,13 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         doRead()
         task?.resume()
     }
-    
+
     func disconnect() {
-        task?.cancel(with: .normalClosure, reason: nil)
+        disconnect(with: .normalClosure)
+    }
+
+    func disconnect(with code: URLSessionWebSocketTask.CloseCode) {
+        task?.cancel(with: code, reason: nil)
         session?.invalidateAndCancel()
 
         session = nil
@@ -87,7 +91,12 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         let message: URLSessionWebSocketTask.Message = .data(data)
         task?.send(message) { [weak self] error in
             if error == nil {
-                log.debug("Event message sent", subsystems: .webSocket)
+                log.debug(
+                    """
+                    Event message sent
+                    \(String(data: data, encoding: .utf8))
+                    """, subsystems: .webSocket
+                )
                 self?.doRead()
             }
         }

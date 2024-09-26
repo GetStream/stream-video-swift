@@ -12,10 +12,10 @@ final class ReconnectionTests: StreamTestCase {
     
         try super.tearDownWithError()
     }
-    
-    func testReconnectingMessage() {
+
+    func testReconnectingMessageWhenDisconnectedForMoreThanFastReconnectThreshold() throws {
         linkToScenario(withId: 2030)
-        
+
         GIVEN("user starts a new call") {
             userRobot
                 .waitForAutoLogin()
@@ -25,11 +25,16 @@ final class ReconnectionTests: StreamTestCase {
         WHEN("user loses the internet connection") {
             sinatra.setConnection(state: .off)
         }
-        THEN("user observes a reconnecting message") {
-            userRobot.assertReconnectingMessage(isVisible: true)
+        THEN("user waits 10 second to recover connection") {
+            let waitExpectation = expectation(description: "Waiting ....")
+            waitExpectation.isInverted = true
+            wait(for: [waitExpectation], timeout: 30)
         }
         WHEN("user restores the internet connection") {
             sinatra.setConnection(state: .on)
+        }
+        THEN("user observes a reconnecting message") {
+            userRobot.assertReconnectingMessage(isVisible: true)
         }
         THEN("reconnecting message disappears") {
             userRobot.assertReconnectingMessage(isVisible: false)
