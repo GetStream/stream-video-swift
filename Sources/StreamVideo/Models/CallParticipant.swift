@@ -116,7 +116,12 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.hasVideo == rhs.hasVideo &&
             lhs.hasAudio == rhs.hasAudio &&
             lhs.isScreensharing == rhs.isScreensharing &&
+            lhs.track?.isEnabled == rhs.track?.isEnabled &&
+            lhs.track?.trackId == rhs.track?.trackId &&
             lhs.trackSize == rhs.trackSize &&
+            lhs.screenshareTrack === rhs.screenshareTrack &&
+            lhs.screenshareTrack?.isEnabled == rhs.screenshareTrack?.isEnabled &&
+            lhs.screenshareTrack?.trackId == rhs.screenshareTrack?.trackId &&
             lhs.showTrack == rhs.showTrack &&
             lhs.isSpeaking == rhs.isSpeaking &&
             lhs.isDominantSpeaker == rhs.isDominantSpeaker &&
@@ -125,9 +130,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.joinedAt == rhs.joinedAt &&
             lhs.audioLevel == rhs.audioLevel &&
             lhs.audioLevels == rhs.audioLevels &&
-            lhs.pin == rhs.pin &&
-            lhs.track === rhs.track &&
-            lhs.screenshareTrack === rhs.screenshareTrack
+            lhs.pin == rhs.pin
     }
 
     public var isPinned: Bool {
@@ -141,7 +144,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
 
     /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
-        hasVideo && showTrack
+        hasVideo && showTrack && track?.isEnabled == true
     }
 
     public func withUpdated(trackSize: CGSize) -> CallParticipant {

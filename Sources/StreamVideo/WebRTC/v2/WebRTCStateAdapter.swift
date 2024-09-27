@@ -262,9 +262,8 @@ actor WebRTCStateAdapter: ObservableObject {
     /// Cleans up the WebRTC session by closing connections and resetting
     /// states.
     func cleanUp() async {
-        peerConnectionsDisposableBag.removeAll()
-        await publisher?.close()
-        await subscriber?.close()
+        publisher?.close()
+        subscriber?.close()
         self.publisher = nil
         self.subscriber = nil
         self.statsReporter = nil
