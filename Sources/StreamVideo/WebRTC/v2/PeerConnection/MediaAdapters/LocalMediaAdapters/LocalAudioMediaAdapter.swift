@@ -70,10 +70,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        Task { @MainActor [sender, localTrack] in
-            sender?.sender.track = nil
-            localTrack?.isEnabled = false
-        }
+        sender?.sender.track = nil
+        localTrack?.isEnabled = false
         if let localTrack {
             log.debug(
                 """
@@ -122,7 +120,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
                     )
                 )
             }
-            audioTrack.isEnabled = settings.audioOn
+            audioTrack.isEnabled = false
 
             log.debug(
                 """
@@ -149,38 +147,34 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
 
     /// Starts publishing the local audio track.
     func publish() {
-        Task { @MainActor in
-            guard
-                let localTrack,
-                localTrack.isEnabled == false || sender?.sender.track == nil
-            else {
-                return
-            }
-
-            if sender == nil {
-                sender = peerConnection.addTransceiver(
-                    with: localTrack,
-                    init: RTCRtpTransceiverInit(
-                        trackType: .audio,
-                        direction: .sendOnly,
-                        streamIds: streamIds
-                    )
-                )
-            } else {
-                sender?.sender.track = localTrack
-            }
-            localTrack.isEnabled = true
+        guard
+            let localTrack,
+            localTrack.isEnabled == false || sender?.sender.track == nil
+        else {
+            return
         }
+
+        if sender == nil {
+            sender = peerConnection.addTransceiver(
+                with: localTrack,
+                init: RTCRtpTransceiverInit(
+                    trackType: .audio,
+                    direction: .sendOnly,
+                    streamIds: streamIds
+                )
+            )
+        } else {
+            sender?.sender.track = localTrack
+        }
+        localTrack.isEnabled = true
     }
 
     /// Stops publishing the local audio track.
     func unpublish() {
-        Task { @MainActor in
-            guard let sender, let localTrack else { return }
-            localTrack.isEnabled = false
-            sender.sender.track = nil
-            log.debug("Local audioTrack trackId:\(localTrack.trackId) is now unpublished.")
-        }
+        guard let sender, let localTrack else { return }
+        localTrack.isEnabled = false
+        sender.sender.track = nil
+        log.debug("Local audioTrack trackId:\(localTrack.trackId) is now unpublished.")
     }
 
     /// Updates the local audio media based on new call settings.
