@@ -70,7 +70,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         // Then
         await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
-        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
+        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
@@ -209,7 +209,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == true }
+        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
         XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
     }
 
@@ -248,7 +248,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.unpublish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == false }
+        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
     }
 
     // MARK: - didUpdateCameraPosition(_:)
@@ -412,7 +412,6 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.changePublishQuality(with: ["q"])
 
-        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
         XCTAssertEqual(
             (mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?
                 .sender

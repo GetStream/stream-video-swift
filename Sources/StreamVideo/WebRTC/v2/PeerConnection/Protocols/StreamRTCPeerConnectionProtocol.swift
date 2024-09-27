@@ -80,5 +80,5 @@ protocol StreamRTCPeerConnectionProtocol: AnyObject {
     func restartIce()
 
     /// Closes the peer connection.
-    func close() async
+    func close()
 }

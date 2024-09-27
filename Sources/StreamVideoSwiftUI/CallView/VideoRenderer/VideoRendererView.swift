@@ -140,8 +140,7 @@ extension VideoRendererView {
                 .windowPublisher
                 .map { $0 != nil }
                 .removeDuplicates()
-                .receive(on: DispatchQueue.main)
-                .sinkTask(storeIn: disposableBag) { [weak self] in
+                .sink { [weak self] in
                     guard let self else { return }
                     if $0 { handleRendering?(renderer) }
                 }
@@ -151,8 +150,7 @@ extension VideoRendererView {
                 .superviewPublisher
                 .map { $0 != nil }
                 .removeDuplicates()
-                .receive(on: DispatchQueue.main)
-                .sinkTask(storeIn: disposableBag) { [weak self] in
+                .sink { [weak self] in
                     guard let self else { return }
                     if $0 { handleRendering?(renderer) }
                 }
