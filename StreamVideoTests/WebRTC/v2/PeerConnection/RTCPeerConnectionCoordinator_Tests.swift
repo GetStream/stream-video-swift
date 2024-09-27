@@ -145,7 +145,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
     // MARK: - close
 
     func test_close_peerConnectionWasCalled() async throws {
-        await subject.close()
+        subject.close()
 
         XCTAssertEqual(mockPeerConnection?.timesCalled(.close), 1)
     }
