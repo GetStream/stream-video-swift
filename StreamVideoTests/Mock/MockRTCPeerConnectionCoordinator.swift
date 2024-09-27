@@ -203,7 +203,7 @@ final class MockRTCPeerConnectionCoordinator:
         stubbedFunctionInput[.restartICE]?.append(.restartICE)
     }
 
-    override func close() async {
+    override func close() {
         stubbedFunctionInput[.close]?.append(.close)
     }
 

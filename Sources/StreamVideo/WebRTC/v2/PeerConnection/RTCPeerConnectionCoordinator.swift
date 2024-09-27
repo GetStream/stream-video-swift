@@ -207,7 +207,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
-        Task { [peerConnection] in await peerConnection.close() }
+        peerConnection.close()
     }
 
     func prepareForClosing() async {
@@ -366,7 +366,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     }
 
     /// Closes the peer connection.
-    func close() async {
+    func close() {
         log.debug(
             """
             Closing PeerConnection
@@ -378,7 +378,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
-        await peerConnection.close()
+        peerConnection.close()
     }
 
     /// Restarts ICE for the peer connection.
