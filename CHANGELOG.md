@@ -4,11 +4,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
-
-# [1.11.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.11.0)
-_September 26, 2024_
-
 ### ✅ Added
 - You can now pass your customData when initializing a `CallViewModel` [#530](https://github.com/GetStream/stream-video-swift/pull/530)
 
