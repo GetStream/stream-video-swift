@@ -53,6 +53,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///   - apiKey: The API key to authenticate with the WebRTC service.
     ///   - callCid: The call identifier (cid).
     ///   - videoConfig: The video configuration for the call.
+    ///   - webRTCAuthenticator: The authenticator that will be used during all WebRTC flows.
     ///   - callAuthentication: A closure for handling call authentication.
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for creating the peer
     ///     connection coordinator.
@@ -62,6 +63,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         callCid: String,
         videoConfig: VideoConfig,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory(),
+        webRTCAuthenticator: WebRTCAuthenticating = WebRTCAuthenticator(),
         callAuthentication: @escaping AuthenticationHandler
     ) {
         stateAdapter = .init(
@@ -74,7 +76,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         self.callAuthentication = callAuthentication
 
         // Initialize the state machine.
-        _ = stateMachine
+        stateMachine.currentStage.context.authenticator = webRTCAuthenticator
 
         #if OBSERVE_RECONNECTION_NOTIFICATIONS
         observeForceReconnectionRequests()

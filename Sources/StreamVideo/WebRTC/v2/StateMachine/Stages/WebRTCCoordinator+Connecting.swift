@@ -84,7 +84,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     ring: ring,
                     notify: notify,
                     options: options,
-                    updateSession: false
+                    updateSession: false,
+                    onErrorDisconnect: false
                 )
                 return self
             case .rejoining:
@@ -98,7 +99,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     ring: false,
                     notify: false,
                     options: nil,
-                    updateSession: true
+                    updateSession: true,
+                    onErrorDisconnect: true
                 )
                 return self
             default:
@@ -120,7 +122,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             ring: Bool,
             notify: Bool,
             options: CreateCallOptions?,
-            updateSession: Bool
+            updateSession: Bool,
+            onErrorDisconnect: Bool
         ) {
             Task { [weak self] in
                 guard let self else { return }
@@ -178,9 +181,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// reconnection.
                     transitionOrDisconnect(.connected(context))
                 } catch {
-                    /// In case of an error, we transition to ``.disconnected`` with the error
-                    /// stored in the context, in order to allow for reconnection.
-                    transitionDisconnectOrError(error)
+                    if onErrorDisconnect {
+                        /// In case of an error, we transition to ``.disconnected`` with the error
+                        /// stored in the context, in order to allow for reconnection.
+                        transitionDisconnectOrError(error)
+                    } else {
+                        transitionErrorOrLog(error)
+                    }
                 }
             }
             .store(in: disposableBag)

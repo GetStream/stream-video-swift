@@ -63,13 +63,14 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
 
     // MARK: - transition from `.idle`
 
-    func test_transition_fromIdleWithoutCoordinator_transitionsToDisconnected() async throws {
+    func test_transition_fromIdleWithoutCoordinator_transitionsToError() async throws {
         try await assertTransition(
             from: .idle,
-            expectedTarget: .disconnected,
+            expectedTarget: .error,
             subject: subject
         ) { target in
-            XCTAssertNotNil(target.context.flowError as? ClientError)
+            let errorStage = try XCTUnwrap(target as? WebRTCCoordinator.StateMachine.Stage.ErrorStage)
+            XCTAssertNotNil(errorStage.error as? ClientError)
         }
     }
 
@@ -85,7 +86,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
 
         try await assertTransition(
             from: .idle,
-            expectedTarget: .disconnected,
+            expectedTarget: .error,
             subject: subject
         ) { [mockCoordinatorStack] _ in
             let actual = await mockCoordinatorStack?.coordinator.stateAdapter.sessionID
@@ -100,7 +101,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
 
         try await assertTransition(
             from: .idle,
-            expectedTarget: .disconnected,
+            expectedTarget: .error,
             subject: .connecting(
                 subject.context,
                 create: false,
@@ -129,7 +130,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertTrue(input.ring)
             XCTAssertTrue(input.notify)
             XCTAssertEqual(input.options?.team, options.team)
-            XCTAssertTrue(target.context.flowError is ClientError)
+            XCTAssertTrue((target as? WebRTCCoordinator.StateMachine.Stage.ErrorStage)?.error is ClientError)
         }
     }
 
@@ -140,7 +141,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
 
         try await assertTransition(
             from: .idle,
-            expectedTarget: .disconnected,
+            expectedTarget: .error,
             subject: .connecting(
                 subject.context,
                 create: true,
@@ -169,7 +170,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
             XCTAssertTrue(input.ring)
             XCTAssertTrue(input.notify)
             XCTAssertEqual(input.options?.team, options.team)
-            XCTAssertTrue(target.context.flowError is ClientError)
+            XCTAssertTrue((target as? WebRTCCoordinator.StateMachine.Stage.ErrorStage)?.error is ClientError)
         }
     }
 
@@ -184,7 +185,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
 
         try await assertTransition(
             from: .idle,
-            expectedTarget: .disconnected,
+            expectedTarget: .error,
             subject: subject
         ) { [mockCoordinatorStack] target in
             let input = try XCTUnwrap(
@@ -194,7 +195,7 @@ final class WebRTCCoordinatorStateMachine_ConnectingStageTests: XCTestCase, @unc
                     .first
             )
             XCTAssertTrue(input === mockCoordinatorStack?.sfuStack.adapter)
-            XCTAssertTrue(target.context.flowError is ClientError)
+            XCTAssertTrue((target as? WebRTCCoordinator.StateMachine.Stage.ErrorStage)?.error is ClientError)
         }
     }
 

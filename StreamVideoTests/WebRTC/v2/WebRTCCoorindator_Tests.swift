@@ -17,6 +17,7 @@ final class WebRTCCoordinator_Tests: XCTestCase {
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
     private lazy var mockCallAuthenticator: MockCallAuthenticator! = .init()
+    private lazy var mockWebRTCAuthenticator: MockWebRTCAuthenticator! = .init()
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var subject: WebRTCCoordinator! = .init(
@@ -25,6 +26,7 @@ final class WebRTCCoordinator_Tests: XCTestCase {
         callCid: callCid,
         videoConfig: Self.videoConfig,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+        webRTCAuthenticator: mockWebRTCAuthenticator,
         callAuthentication: mockCallAuthenticator.authenticate
     )
 
@@ -124,26 +126,34 @@ final class WebRTCCoordinator_Tests: XCTestCase {
     // MARK: - leave
 
     func test_leave_shouldTransitionStateMachineToLeaving() async throws {
-        /// We are going to try connecting and allow it to fail. We then stub the internet availability, in
-        /// order to transition to ``.disconnected`` and wait. In the meanwhile we are going to trigger
-        /// a manual `leave`.
-        let mockInternetConnection = MockInternetConnection()
-        InjectedValues[\.internetConnectionObserver] = mockInternetConnection
-        mockInternetConnection.subject.send(.unavailable)
-
-        try await subject
-            .connect(
-                callSettings: nil,
-                options: nil,
-                ring: true,
-                notify: false
+        mockWebRTCAuthenticator
+            .stub(
+                for: .authenticate,
+                with: Result<(SFUAdapter, JoinCallResponse), Error>
+                    .success((mockSFUStack.adapter, JoinCallResponse.dummy()))
             )
-        await wait(for: 1)
+        mockWebRTCAuthenticator.stub(
+            for: .waitForAuthentication,
+            with: Result<Void, Error>.success(())
+        )
 
-        await assertTransitionToStage(
-            .leaving,
-            operation: { self.subject.leave() }
-        ) { _ in }
+        try await assertTransitionToStage(
+            .connected,
+            operation: {
+                try await self
+                    .subject
+                    .connect(
+                        callSettings: nil,
+                        options: nil,
+                        ring: true,
+                        notify: true
+                    )
+            }
+        ) { _ in
+            await self.assertTransitionToStage(.leaving) {
+                self.subject.leave()
+            } handler: { _ in }
+        }
     }
 
     // MARK: - changeCameraMode
