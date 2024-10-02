@@ -6,16 +6,33 @@ import Foundation
     
 public final class VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
+    public enum CameraFacing: String, Sendable, Codable, CaseIterable {
+        case back
+        case external
+        case front
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+               let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
+    }
+    
     public var accessRequestEnabled: Bool?
     public var cameraDefaultOn: Bool?
-    public var cameraFacing: String?
+    public var cameraFacing: CameraFacing
     public var enabled: Bool?
     public var targetResolution: TargetResolution?
 
     public init(
         accessRequestEnabled: Bool? = nil,
         cameraDefaultOn: Bool? = nil,
-        cameraFacing: String? = nil,
+        cameraFacing: CameraFacing = nil,
         enabled: Bool? = nil,
         targetResolution: TargetResolution? = nil
     ) {

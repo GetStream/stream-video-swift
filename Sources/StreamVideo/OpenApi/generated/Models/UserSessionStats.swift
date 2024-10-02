@@ -15,6 +15,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     public var distanceToSfuKilometers: Float?
     public var freezeDurationSeconds: Int
     public var geolocation: GeolocationResult?
+    public var group: String
     public var jitter: Stats?
     public var latency: Stats?
     public var maxFirPerSecond: Float?
@@ -31,7 +32,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     public var packetLossFraction: Float
     public var pubSubHints: MediaPubSubHint?
     public var publishedTracks: [PublishedTrackInfo]?
-    public var publisherAudioMos: MOSStats?
     public var publisherJitter: Stats?
     public var publisherLatency: Stats?
     public var publisherNoiseCancellationSeconds: Float?
@@ -48,7 +48,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     public var sdk: String?
     public var sdkVersion: String?
     public var sessionId: String
-    public var subscriberAudioMos: MOSStats?
     public var subscriberJitter: Stats?
     public var subscriberLatency: Stats?
     public var subscriberVideoQualityThrottledDurationSeconds: Float?
@@ -69,6 +68,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         distanceToSfuKilometers: Float? = nil,
         freezeDurationSeconds: Int,
         geolocation: GeolocationResult? = nil,
+        group: String,
         jitter: Stats? = nil,
         latency: Stats? = nil,
         maxFirPerSecond: Float? = nil,
@@ -85,7 +85,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         packetLossFraction: Float,
         pubSubHints: MediaPubSubHint? = nil,
         publishedTracks: [PublishedTrackInfo]? = nil,
-        publisherAudioMos: MOSStats? = nil,
         publisherJitter: Stats? = nil,
         publisherLatency: Stats? = nil,
         publisherNoiseCancellationSeconds: Float? = nil,
@@ -102,7 +101,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         sdk: String? = nil,
         sdkVersion: String? = nil,
         sessionId: String,
-        subscriberAudioMos: MOSStats? = nil,
         subscriberJitter: Stats? = nil,
         subscriberLatency: Stats? = nil,
         subscriberVideoQualityThrottledDurationSeconds: Float? = nil,
@@ -122,6 +120,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         self.distanceToSfuKilometers = distanceToSfuKilometers
         self.freezeDurationSeconds = freezeDurationSeconds
         self.geolocation = geolocation
+        self.group = group
         self.jitter = jitter
         self.latency = latency
         self.maxFirPerSecond = maxFirPerSecond
@@ -138,7 +137,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         self.packetLossFraction = packetLossFraction
         self.pubSubHints = pubSubHints
         self.publishedTracks = publishedTracks
-        self.publisherAudioMos = publisherAudioMos
         self.publisherJitter = publisherJitter
         self.publisherLatency = publisherLatency
         self.publisherNoiseCancellationSeconds = publisherNoiseCancellationSeconds
@@ -155,7 +153,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         self.sdk = sdk
         self.sdkVersion = sdkVersion
         self.sessionId = sessionId
-        self.subscriberAudioMos = subscriberAudioMos
         self.subscriberJitter = subscriberJitter
         self.subscriberLatency = subscriberLatency
         self.subscriberVideoQualityThrottledDurationSeconds = subscriberVideoQualityThrottledDurationSeconds
@@ -177,6 +174,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         case distanceToSfuKilometers = "distance_to_sfu_kilometers"
         case freezeDurationSeconds = "freeze_duration_seconds"
         case geolocation
+        case group
         case jitter
         case latency
         case maxFirPerSecond = "max_fir_per_second"
@@ -193,7 +191,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         case packetLossFraction = "packet_loss_fraction"
         case pubSubHints = "pub_sub_hints"
         case publishedTracks = "published_tracks"
-        case publisherAudioMos = "publisher_audio_mos"
         case publisherJitter = "publisher_jitter"
         case publisherLatency = "publisher_latency"
         case publisherNoiseCancellationSeconds = "publisher_noise_cancellation_seconds"
@@ -210,7 +207,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         case sdk
         case sdkVersion = "sdk_version"
         case sessionId = "session_id"
-        case subscriberAudioMos = "subscriber_audio_mos"
         case subscriberJitter = "subscriber_jitter"
         case subscriberLatency = "subscriber_latency"
         case subscriberVideoQualityThrottledDurationSeconds = "subscriber_video_quality_throttled_duration_seconds"
@@ -232,6 +228,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
             lhs.distanceToSfuKilometers == rhs.distanceToSfuKilometers &&
             lhs.freezeDurationSeconds == rhs.freezeDurationSeconds &&
             lhs.geolocation == rhs.geolocation &&
+            lhs.group == rhs.group &&
             lhs.jitter == rhs.jitter &&
             lhs.latency == rhs.latency &&
             lhs.maxFirPerSecond == rhs.maxFirPerSecond &&
@@ -248,7 +245,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
             lhs.packetLossFraction == rhs.packetLossFraction &&
             lhs.pubSubHints == rhs.pubSubHints &&
             lhs.publishedTracks == rhs.publishedTracks &&
-            lhs.publisherAudioMos == rhs.publisherAudioMos &&
             lhs.publisherJitter == rhs.publisherJitter &&
             lhs.publisherLatency == rhs.publisherLatency &&
             lhs.publisherNoiseCancellationSeconds == rhs.publisherNoiseCancellationSeconds &&
@@ -265,7 +261,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
             lhs.sdk == rhs.sdk &&
             lhs.sdkVersion == rhs.sdkVersion &&
             lhs.sessionId == rhs.sessionId &&
-            lhs.subscriberAudioMos == rhs.subscriberAudioMos &&
             lhs.subscriberJitter == rhs.subscriberJitter &&
             lhs.subscriberLatency == rhs.subscriberLatency &&
             lhs.subscriberVideoQualityThrottledDurationSeconds == rhs.subscriberVideoQualityThrottledDurationSeconds &&
@@ -287,6 +282,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         hasher.combine(distanceToSfuKilometers)
         hasher.combine(freezeDurationSeconds)
         hasher.combine(geolocation)
+        hasher.combine(group)
         hasher.combine(jitter)
         hasher.combine(latency)
         hasher.combine(maxFirPerSecond)
@@ -303,7 +299,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         hasher.combine(packetLossFraction)
         hasher.combine(pubSubHints)
         hasher.combine(publishedTracks)
-        hasher.combine(publisherAudioMos)
         hasher.combine(publisherJitter)
         hasher.combine(publisherLatency)
         hasher.combine(publisherNoiseCancellationSeconds)
@@ -320,7 +315,6 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         hasher.combine(sdk)
         hasher.combine(sdkVersion)
         hasher.combine(sessionId)
-        hasher.combine(subscriberAudioMos)
         hasher.combine(subscriberJitter)
         hasher.combine(subscriberLatency)
         hasher.combine(subscriberVideoQualityThrottledDurationSeconds)

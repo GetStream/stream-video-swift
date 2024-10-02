@@ -6,7 +6,7 @@ import Foundation
     
 public final class AudioSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public enum DefaultDevice: String, Codable, CaseIterable {
+    public enum DefaultDevice: String, Sendable, Codable, CaseIterable {
         case earpiece
         case speaker
         case unknown = "_unknown"

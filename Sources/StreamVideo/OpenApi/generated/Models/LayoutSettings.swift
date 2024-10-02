@@ -6,7 +6,7 @@ import Foundation
     
 public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public enum Name: String, Codable, CaseIterable {
+    public enum Name: String, Sendable, Codable, CaseIterable {
         case custom
         case grid
         case mobile

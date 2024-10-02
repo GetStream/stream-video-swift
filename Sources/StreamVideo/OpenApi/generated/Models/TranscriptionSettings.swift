@@ -6,7 +6,7 @@ import Foundation
     
 public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public enum Mode: String, Codable, CaseIterable {
+    public enum Mode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
         case available
         case disabled

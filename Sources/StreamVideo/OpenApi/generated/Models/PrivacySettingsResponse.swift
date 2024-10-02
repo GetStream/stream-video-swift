@@ -6,10 +6,10 @@ import Foundation
     
 public final class PrivacySettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var readReceipts: ReadReceipts?
-    public var typingIndicators: TypingIndicators?
+    public var readReceipts: ReadReceiptsResponse?
+    public var typingIndicators: TypingIndicatorsResponse?
 
-    public init(readReceipts: ReadReceipts? = nil, typingIndicators: TypingIndicators? = nil) {
+    public init(readReceipts: ReadReceiptsResponse? = nil, typingIndicators: TypingIndicatorsResponse? = nil) {
         self.readReceipts = readReceipts
         self.typingIndicators = typingIndicators
     }
