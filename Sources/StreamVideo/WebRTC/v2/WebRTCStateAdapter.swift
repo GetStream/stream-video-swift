@@ -365,10 +365,23 @@ actor WebRTCStateAdapter: ObservableObject {
     /// Removes a track for the given participant ID.
     ///
     /// - Parameter id: The participant ID whose track should be removed.
-    func didRemoveTrack(for id: String) {
-        audioTracks[id] = nil
-        videoTracks[id] = nil
-        screenShareTracks[id] = nil
+    func didRemoveTrack(for id: String, type: TrackType? = nil) {
+        if let type {
+            switch type {
+            case .audio:
+                audioTracks[id] = nil
+            case .video:
+                videoTracks[id] = nil
+            case .screenshare:
+                screenShareTracks[id] = nil
+            default:
+                break
+            }
+        } else {
+            audioTracks[id] = nil
+            videoTracks[id] = nil
+            screenShareTracks[id] = nil
+        }
 
         guard !participants.isEmpty else { return }
 
@@ -413,8 +426,8 @@ actor WebRTCStateAdapter: ObservableObject {
         switch event {
         case let .added(id, trackType, track):
             didAddTrack(track, type: trackType, for: id)
-        case let .removed(id, _, _):
-            didRemoveTrack(for: id)
+        case let .removed(id, trackType, _):
+            didRemoveTrack(for: id, type: trackType)
         }
     }
 

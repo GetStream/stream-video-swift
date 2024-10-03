@@ -261,6 +261,7 @@
 		408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
 		408CE0F82BD95F170052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
 		408CE0F92BD95F1B0052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
+		408CF9C32CAE886D00F56833 /* WebRTCIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CF9C22CAE886500F56833 /* WebRTCIntegrationTests.swift */; };
 		408D29A22B6D209700885473 /* SnapshotViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29A12B6D209700885473 /* SnapshotViewModifier.swift */; };
 		408D29A42B6D251600885473 /* UIView+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29A32B6D251600885473 /* UIView+Snapshot.swift */; };
 		408D29AD2B6D680D00885473 /* SnapshotTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29AB2B6D638100885473 /* SnapshotTrigger.swift */; };
@@ -1549,6 +1550,7 @@
 		408937902C134305000EEB69 /* View+AlertWithTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+AlertWithTextField.swift"; sourceTree = "<group>"; };
 		408CE0F22BD905920052EC3A /* Models+Sendable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models+Sendable.swift"; sourceTree = "<group>"; };
 		408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoConfig+Dummy.swift"; sourceTree = "<group>"; };
+		408CF9C22CAE886500F56833 /* WebRTCIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCIntegrationTests.swift; sourceTree = "<group>"; };
 		408D29A12B6D209700885473 /* SnapshotViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotViewModifier.swift; sourceTree = "<group>"; };
 		408D29A32B6D251600885473 /* UIView+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Snapshot.swift"; sourceTree = "<group>"; };
 		408D29AB2B6D638100885473 /* SnapshotTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTrigger.swift; sourceTree = "<group>"; };
@@ -3040,6 +3042,7 @@
 		406B3C072C8F602D00FC93A1 /* v2 */ = {
 			isa = PBXGroup;
 			children = (
+				408CF9C12CAE885800F56833 /* IntegrationTests */,
 				40C9E4632C99886200802B28 /* WebRTCCoorindator_Tests.swift */,
 				40C9E4582C98B1A400802B28 /* WebRTCStateAdapter_Tests.swift */,
 				40C9E44B2C948A1F00802B28 /* WebRTCAuthenticator_Tests.swift */,
@@ -3121,6 +3124,14 @@
 				4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */,
 			);
 			path = UUIDProviding;
+			sourceTree = "<group>";
+		};
+		408CF9C12CAE885800F56833 /* IntegrationTests */ = {
+			isa = PBXGroup;
+			children = (
+				408CF9C22CAE886500F56833 /* WebRTCIntegrationTests.swift */,
+			);
+			path = IntegrationTests;
 			sourceTree = "<group>";
 		};
 		408D29A02B6D208700885473 /* Snapshot */ = {
@@ -6536,6 +6547,7 @@
 				40AB34CE2C5D442800B5B6B3 /* MockWebSocketClient.swift in Sources */,
 				8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
 				403FB15E2BFE224D0047A696 /* StreamCallStateMachineStageAcceptedStage_Tests.swift in Sources */,
+				408CF9C32CAE886D00F56833 /* WebRTCIntegrationTests.swift in Sources */,
 				8414081329F28B5700FF2D7C /* RTCConfiguration_Tests.swift in Sources */,
 				40F017712BBEF24E00E89FD1 /* CallSettingsResponse+Dummy.swift in Sources */,
 				403FB1562BFE1FC00047A696 /* StreamCallStateMachineStageErrorStage_Tests.swift in Sources */,
