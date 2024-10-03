@@ -49,9 +49,9 @@ public final class RecordSettingsRequest: @unchecked Sendable, Codable, JSONEnco
     
     public var audioOnly: Bool?
     public var mode: Mode
-    public var quality: Quality
+    public var quality: Quality?
 
-    public init(audioOnly: Bool? = nil, mode: Mode, quality: Quality = nil) {
+    public init(audioOnly: Bool? = nil, mode: Mode, quality: Quality? = nil) {
         self.audioOnly = audioOnly
         self.mode = mode
         self.quality = quality

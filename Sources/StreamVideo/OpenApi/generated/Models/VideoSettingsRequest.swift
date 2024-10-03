@@ -25,14 +25,14 @@ public final class VideoSettingsRequest: @unchecked Sendable, Codable, JSONEncod
     
     public var accessRequestEnabled: Bool?
     public var cameraDefaultOn: Bool?
-    public var cameraFacing: CameraFacing
+    public var cameraFacing: CameraFacing?
     public var enabled: Bool?
     public var targetResolution: TargetResolution?
 
     public init(
         accessRequestEnabled: Bool? = nil,
         cameraDefaultOn: Bool? = nil,
-        cameraFacing: CameraFacing = nil,
+        cameraFacing: CameraFacing? = nil,
         enabled: Bool? = nil,
         targetResolution: TargetResolution? = nil
     ) {

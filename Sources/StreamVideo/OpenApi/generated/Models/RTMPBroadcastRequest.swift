@@ -32,11 +32,11 @@ public final class RTMPBroadcastRequest: @unchecked Sendable, Codable, JSONEncod
     
     public var layout: LayoutSettings?
     public var name: String
-    public var quality: Quality
+    public var quality: Quality?
     public var streamKey: String?
     public var streamUrl: String
 
-    public init(layout: LayoutSettings? = nil, name: String, quality: Quality = nil, streamKey: String? = nil, streamUrl: String) {
+    public init(layout: LayoutSettings? = nil, name: String, quality: Quality? = nil, streamKey: String? = nil, streamUrl: String) {
         self.layout = layout
         self.name = name
         self.quality = quality

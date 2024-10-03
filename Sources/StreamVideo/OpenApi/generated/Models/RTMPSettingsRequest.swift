@@ -31,9 +31,9 @@ public final class RTMPSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
     }
     
     public var enabled: Bool?
-    public var quality: Quality
+    public var quality: Quality?
 
-    public init(enabled: Bool? = nil, quality: Quality = nil) {
+    public init(enabled: Bool? = nil, quality: Quality? = nil) {
         self.enabled = enabled
         self.quality = quality
     }
