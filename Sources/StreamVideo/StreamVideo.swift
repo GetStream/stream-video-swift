@@ -281,7 +281,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     /// Lists the devices registered for the user.
     /// - Returns: an array of `Device`s.
-    public func listDevices() async throws -> [Device?] {
+    public func listDevices() async throws -> [Device] {
         try await coordinatorClient.listDevices().devices
     }
     

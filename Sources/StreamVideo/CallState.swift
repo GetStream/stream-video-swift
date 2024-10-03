@@ -244,14 +244,6 @@ public class CallState: ObservableObject {
             break
         case .typeUserDeletedEvent:
             break
-        case .typeUserMutedEvent:
-            break
-        case .typeUserPresenceChangedEvent:
-            break
-        case .typeUserReactivatedEvent:
-            break
-        case .typeUserUnbannedEvent:
-            break
         case .typeUserUpdatedEvent:
             break
         }

@@ -402,7 +402,6 @@
 		4159F16B2C86FA41002B94D3 /* UserBannedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1392C86FA3D002B94D3 /* UserBannedEvent.swift */; };
 		4159F16C2C86FA41002B94D3 /* TURNAggregatedStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13A2C86FA3D002B94D3 /* TURNAggregatedStats.swift */; };
 		4159F16D2C86FA41002B94D3 /* UserUpdatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13B2C86FA3E002B94D3 /* UserUpdatedEvent.swift */; };
-		4159F1702C86FA41002B94D3 /* UserMutedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13E2C86FA3E002B94D3 /* UserMutedEvent.swift */; };
 		4159F1712C86FA41002B94D3 /* UserDeactivatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F13F2C86FA3E002B94D3 /* UserDeactivatedEvent.swift */; };
 		4159F1722C86FA41002B94D3 /* PublishedTrackInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1402C86FA3E002B94D3 /* PublishedTrackInfo.swift */; };
 		4159F1742C86FA41002B94D3 /* MediaPubSubHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1422C86FA3E002B94D3 /* MediaPubSubHint.swift */; };
@@ -411,9 +410,7 @@
 		4159F1792C86FA41002B94D3 /* TypingIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1472C86FA3F002B94D3 /* TypingIndicators.swift */; };
 		4159F17A2C86FA41002B94D3 /* UserUnmutedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1482C86FA3F002B94D3 /* UserUnmutedEvent.swift */; };
 		4159F17B2C86FA41002B94D3 /* RTMPSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1492C86FA3F002B94D3 /* RTMPSettingsRequest.swift */; };
-		4159F17C2C86FA41002B94D3 /* UserFlaggedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14A2C86FA3F002B94D3 /* UserFlaggedEvent.swift */; };
 		4159F17D2C86FA41002B94D3 /* ReadReceipts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14B2C86FA3F002B94D3 /* ReadReceipts.swift */; };
-		4159F17F2C86FA41002B94D3 /* UserPresenceChangedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14D2C86FA3F002B94D3 /* UserPresenceChangedEvent.swift */; };
 		4159F1802C86FA41002B94D3 /* PushNotificationSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F14E2C86FA3F002B94D3 /* PushNotificationSettingsResponse.swift */; };
 		4159F1822C86FA41002B94D3 /* UserEventPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1502C86FA3F002B94D3 /* UserEventPayload.swift */; };
 		4159F1842C86FA41002B94D3 /* Count.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1522C86FA3F002B94D3 /* Count.swift */; };
@@ -421,16 +418,13 @@
 		4159F1882C86FA41002B94D3 /* UserDeletedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1562C86FA40002B94D3 /* UserDeletedEvent.swift */; };
 		4159F1892C86FA41002B94D3 /* PushNotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1572C86FA40002B94D3 /* PushNotificationSettings.swift */; };
 		4159F18A2C86FA41002B94D3 /* NullBool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1582C86FA40002B94D3 /* NullBool.swift */; };
-		4159F18C2C86FA41002B94D3 /* MOSStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15A2C86FA40002B94D3 /* MOSStats.swift */; };
 		4159F18E2C86FA41002B94D3 /* NullTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15C2C86FA40002B94D3 /* NullTime.swift */; };
 		4159F18F2C86FA41002B94D3 /* WebhookEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15D2C86FA40002B94D3 /* WebhookEvent.swift */; };
 		4159F1902C86FA41002B94D3 /* PublisherAggregateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F15E2C86FA40002B94D3 /* PublisherAggregateStats.swift */; };
 		4159F1932C86FA41002B94D3 /* UserMuteResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1612C86FA41002B94D3 /* UserMuteResponse.swift */; };
 		4159F1952C86FA41002B94D3 /* AggregatedStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1632C86FA41002B94D3 /* AggregatedStats.swift */; };
 		4159F1962C86FA41002B94D3 /* PrivacySettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1642C86FA41002B94D3 /* PrivacySettingsResponse.swift */; };
-		4159F1982C86FA41002B94D3 /* UserUnbannedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1662C86FA41002B94D3 /* UserUnbannedEvent.swift */; };
 		4159F1992C86FA41002B94D3 /* CountrywiseAggregateStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1672C86FA41002B94D3 /* CountrywiseAggregateStats.swift */; };
-		4159F19A2C86FA41002B94D3 /* UserReactivatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159F1682C86FA41002B94D3 /* UserReactivatedEvent.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
@@ -5505,7 +5499,6 @@
 				84DC38A829ADFCFD00946713 /* QueryCallsResponse.swift in Sources */,
 				840F59912A77FDCB00EF3EB2 /* HLSSettingsRequest.swift in Sources */,
 				8449824C2C738A830029734D /* DeleteTranscriptionResponse.swift in Sources */,
-				4159F18C2C86FA41002B94D3 /* MOSStats.swift in Sources */,
 				4159F1782C86FA41002B94D3 /* PushNotificationSettingsInput.swift in Sources */,
 				842B8E1B2A2DFED900863A87 /* CallSessionStartedEvent.swift in Sources */,
 				40FA12F22B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift in Sources */,
@@ -5571,7 +5564,6 @@
 				841BAA472BD15CDE000C73E4 /* CallTranscriptionReadyEvent.swift in Sources */,
 				4012B1922BFCA518006B0031 /* StreamCallStateMachine+AcceptingStage.swift in Sources */,
 				841BAA352BD15CDE000C73E4 /* CallTranscriptionStartedEvent.swift in Sources */,
-				4159F1982C86FA41002B94D3 /* UserUnbannedEvent.swift in Sources */,
 				4159F18A2C86FA41002B94D3 /* NullBool.swift in Sources */,
 				84DC38A729ADFCFD00946713 /* GoLiveResponse.swift in Sources */,
 				84DC38C329ADFCFD00946713 /* GeofenceSettings.swift in Sources */,
@@ -5581,7 +5573,6 @@
 				40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
-				4159F1702C86FA41002B94D3 /* UserMutedEvent.swift in Sources */,
 				841BAA412BD15CDE000C73E4 /* Subsession.swift in Sources */,
 				8454A31D2AAF41E100A012C6 /* Array+SafeSubscript.swift in Sources */,
 				842E70E12B91E90F00D2D68B /* CustomVideoEvent.swift in Sources */,
@@ -5666,7 +5657,6 @@
 				845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */,
 				4159F1952C86FA41002B94D3 /* AggregatedStats.swift in Sources */,
 				4159F1962C86FA41002B94D3 /* PrivacySettingsResponse.swift in Sources */,
-				4159F17C2C86FA41002B94D3 /* UserFlaggedEvent.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
 				8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */,
 				84DC38D929ADFCFD00946713 /* OpenISO8601DateFormatter.swift in Sources */,
@@ -5728,7 +5718,6 @@
 				84DC38A329ADFCFD00946713 /* MuteUsersResponse.swift in Sources */,
 				84DC38BF29ADFCFD00946713 /* ScreensharingSettings.swift in Sources */,
 				4159F1882C86FA41002B94D3 /* UserDeletedEvent.swift in Sources */,
-				4159F17F2C86FA41002B94D3 /* UserPresenceChangedEvent.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
@@ -5736,7 +5725,6 @@
 				848CCCEA2AB8ED8F002E83A2 /* RecordSettingsResponse.swift in Sources */,
 				84DC38BA29ADFCFD00946713 /* CallResponse.swift in Sources */,
 				843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */,
-				4159F19A2C86FA41002B94D3 /* UserReactivatedEvent.swift in Sources */,
 				842E70DF2B91E84800D2D68B /* HealthCheckEvent.swift in Sources */,
 				84DC388F29ADFCFD00946713 /* CodableHelper.swift in Sources */,
 				8409465A29AF4EEC007AF5BF /* ReactionResponse.swift in Sources */,
