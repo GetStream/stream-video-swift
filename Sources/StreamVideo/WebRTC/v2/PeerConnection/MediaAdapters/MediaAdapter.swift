@@ -40,6 +40,7 @@ final class MediaAdapter {
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
     ///   - audioSession: The audio session manager.
+    ///   - videoCaptureSessionProvider: Provides access to the active video capturing session.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
     convenience init(
         sessionID: String,
@@ -50,6 +51,7 @@ final class MediaAdapter {
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
         audioSession: AudioSession,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
         let subject = PassthroughSubject<TrackEvent, Never>()
@@ -100,7 +102,8 @@ final class MediaAdapter {
                     sfuAdapter: sfuAdapter,
                     videoOptions: videoOptions,
                     videoConfig: videoConfig,
-                    subject: subject
+                    subject: subject,
+                    videoCaptureSessionProvider: videoCaptureSessionProvider
                 ),
                 screenShareMediaAdapter: .init(
                     sessionID: sessionID,

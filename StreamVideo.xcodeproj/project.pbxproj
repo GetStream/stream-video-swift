@@ -263,6 +263,7 @@
 		408CE0F92BD95F1B0052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
 		408CF9C32CAE886D00F56833 /* WebRTCIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CF9C22CAE886500F56833 /* WebRTCIntegrationTests.swift */; };
 		408CF9C62CAEC24A00F56833 /* ScreenPropertiesAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CF9C52CAEC24A00F56833 /* ScreenPropertiesAdapter.swift */; };
+		408CF9C82CAEC62600F56833 /* VideoCaptureSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CF9C72CAEC61B00F56833 /* VideoCaptureSession.swift */; };
 		408D29A22B6D209700885473 /* SnapshotViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29A12B6D209700885473 /* SnapshotViewModifier.swift */; };
 		408D29A42B6D251600885473 /* UIView+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29A32B6D251600885473 /* UIView+Snapshot.swift */; };
 		408D29AD2B6D680D00885473 /* SnapshotTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29AB2B6D638100885473 /* SnapshotTrigger.swift */; };
@@ -1553,6 +1554,7 @@
 		408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoConfig+Dummy.swift"; sourceTree = "<group>"; };
 		408CF9C22CAE886500F56833 /* WebRTCIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCIntegrationTests.swift; sourceTree = "<group>"; };
 		408CF9C52CAEC24A00F56833 /* ScreenPropertiesAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenPropertiesAdapter.swift; sourceTree = "<group>"; };
+		408CF9C72CAEC61B00F56833 /* VideoCaptureSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCaptureSession.swift; sourceTree = "<group>"; };
 		408D29A12B6D209700885473 /* SnapshotViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotViewModifier.swift; sourceTree = "<group>"; };
 		408D29A32B6D251600885473 /* UIView+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Snapshot.swift"; sourceTree = "<group>"; };
 		408D29AB2B6D638100885473 /* SnapshotTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTrigger.swift; sourceTree = "<group>"; };
@@ -3554,6 +3556,7 @@
 				40BBC4B62C627E59002AEF92 /* VideoMediaAdapter.swift */,
 				40BBC4BB2C6280B4002AEF92 /* ScreenShareMediaAdapter.swift */,
 				40429D5E2C779B3D00AC7FFF /* ScreenShareSession.swift */,
+				408CF9C72CAEC61B00F56833 /* VideoCaptureSession.swift */,
 			);
 			path = MediaAdapters;
 			sourceTree = "<group>";
@@ -6280,6 +6283,7 @@
 				842B8E2D2A2DFED900863A87 /* StopTranscriptionResponse.swift in Sources */,
 				400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */,
 				40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */,
+				408CF9C82CAEC62600F56833 /* VideoCaptureSession.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
 				841BAA412BD15CDE000C73E4 /* Subsession.swift in Sources */,

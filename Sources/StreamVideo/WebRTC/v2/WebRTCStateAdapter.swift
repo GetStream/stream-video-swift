@@ -42,6 +42,7 @@ actor WebRTCStateAdapter: ObservableObject {
     let callCid: String
     let videoConfig: VideoConfig
     let peerConnectionFactory: PeerConnectionFactory
+    let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
 
     /// Published properties that represent different parts of the WebRTC state.
@@ -94,6 +95,7 @@ actor WebRTCStateAdapter: ObservableObject {
     ///   - videoConfig: Configuration for video settings.
     ///   - rtcPeerConnectionCoordinatorFactory: Factory for peer connection
     ///     creation.
+    ///   - videoCaptureSessionProvider: Provides sessions for video capturing.
     ///   - screenShareSessionProvider: Provides sessions for screen sharing.
     init(
         user: User,
@@ -101,6 +103,7 @@ actor WebRTCStateAdapter: ObservableObject {
         callCid: String,
         videoConfig: VideoConfig,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
         self.user = user
@@ -111,6 +114,7 @@ actor WebRTCStateAdapter: ObservableObject {
             audioProcessingModule: videoConfig.audioProcessingModule
         )
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
+        self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
         let sessionID = UUID().uuidString
 
@@ -215,6 +219,7 @@ actor WebRTCStateAdapter: ObservableObject {
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
             audioSession: audioSession,
+            videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )
 
@@ -232,6 +237,7 @@ actor WebRTCStateAdapter: ObservableObject {
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
             audioSession: audioSession,
+            videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )
 

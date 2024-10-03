@@ -60,7 +60,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider
     ) {
         self.init(
             sessionID: sessionID,
@@ -73,7 +74,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
-                subject: subject
+                subject: subject,
+                videoCaptureSessionProvider: videoCaptureSessionProvider
             ),
             subject: subject
         )

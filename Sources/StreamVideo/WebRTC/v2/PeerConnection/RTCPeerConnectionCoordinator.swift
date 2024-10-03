@@ -80,6 +80,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - audioSettings: Settings for audio processing.
     ///   - sfuAdapter: Adapter for communicating with the SFU.
     ///   - audioSession: The audio session to be used.
+    ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
     ///   - screenShareSessionProvider: Provider for screen sharing sessions.
     convenience init(
         sessionId: String,
@@ -92,6 +93,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
         audioSession: AudioSession,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
         self.init(
@@ -112,6 +114,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
                 audioSession: audioSession,
+                videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
             )
         )
