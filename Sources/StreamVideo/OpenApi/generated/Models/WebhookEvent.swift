@@ -4,7 +4,7 @@
 
 import Foundation
 
-private class ChatEventMapping: Decodable {
+private class WSEventMapping: Decodable {
     let type: String
 }
 
@@ -52,10 +52,6 @@ public enum WebhookEvent: Codable, Hashable {
     case typeUserBannedEvent(UserBannedEvent)
     case typeUserDeactivatedEvent(UserDeactivatedEvent)
     case typeUserDeletedEvent(UserDeletedEvent)
-    case typeUserFlaggedEvent(UserFlaggedEvent)
-    case typeUserMutedEvent(UserMutedEvent)
-    case typeUserReactivatedEvent(UserReactivatedEvent)
-    case typeUserUnbannedEvent(UserUnbannedEvent)
     case typeUserUnmutedEvent(UserUnmutedEvent)
     case typeUserUpdatedEvent(UserUpdatedEvent)
 
@@ -146,14 +142,6 @@ public enum WebhookEvent: Codable, Hashable {
         case let .typeUserDeactivatedEvent(value):
             return value.type
         case let .typeUserDeletedEvent(value):
-            return value.type
-        case let .typeUserFlaggedEvent(value):
-            return value.type
-        case let .typeUserMutedEvent(value):
-            return value.type
-        case let .typeUserReactivatedEvent(value):
-            return value.type
-        case let .typeUserUnbannedEvent(value):
             return value.type
         case let .typeUserUnmutedEvent(value):
             return value.type
@@ -249,14 +237,6 @@ public enum WebhookEvent: Codable, Hashable {
         case let .typeUserDeactivatedEvent(value):
             return value
         case let .typeUserDeletedEvent(value):
-            return value
-        case let .typeUserFlaggedEvent(value):
-            return value
-        case let .typeUserMutedEvent(value):
-            return value
-        case let .typeUserReactivatedEvent(value):
-            return value
-        case let .typeUserUnbannedEvent(value):
             return value
         case let .typeUserUnmutedEvent(value):
             return value
@@ -354,14 +334,6 @@ public enum WebhookEvent: Codable, Hashable {
             try container.encode(value)
         case let .typeUserDeletedEvent(value):
             try container.encode(value)
-        case let .typeUserFlaggedEvent(value):
-            try container.encode(value)
-        case let .typeUserMutedEvent(value):
-            try container.encode(value)
-        case let .typeUserReactivatedEvent(value):
-            try container.encode(value)
-        case let .typeUserUnbannedEvent(value):
-            try container.encode(value)
         case let .typeUserUnmutedEvent(value):
             try container.encode(value)
         case let .typeUserUpdatedEvent(value):
@@ -371,7 +343,7 @@ public enum WebhookEvent: Codable, Hashable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let dto = try container.decode(ChatEventMapping.self)
+        let dto = try container.decode(WSEventMapping.self)
         if dto.type == "call.accepted" {
             let value = try container.decode(CallAcceptedEvent.self)
             self = .typeCallAcceptedEvent(value)
@@ -501,18 +473,6 @@ public enum WebhookEvent: Codable, Hashable {
         } else if dto.type == "user.deleted" {
             let value = try container.decode(UserDeletedEvent.self)
             self = .typeUserDeletedEvent(value)
-        } else if dto.type == "user.flagged" {
-            let value = try container.decode(UserFlaggedEvent.self)
-            self = .typeUserFlaggedEvent(value)
-        } else if dto.type == "user.muted" {
-            let value = try container.decode(UserMutedEvent.self)
-            self = .typeUserMutedEvent(value)
-        } else if dto.type == "user.reactivated" {
-            let value = try container.decode(UserReactivatedEvent.self)
-            self = .typeUserReactivatedEvent(value)
-        } else if dto.type == "user.unbanned" {
-            let value = try container.decode(UserUnbannedEvent.self)
-            self = .typeUserUnbannedEvent(value)
         } else if dto.type == "user.unmuted" {
             let value = try container.decode(UserUnmutedEvent.self)
             self = .typeUserUnmutedEvent(value)

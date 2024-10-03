@@ -8,7 +8,7 @@ internal protocol WSCallEvent {
     var callCid: String { get }
 }
 
-private class ChatEventMapping: Decodable {
+private class WSEventMapping: Decodable {
     let type: String
 }
 
@@ -60,10 +60,6 @@ public enum VideoEvent: Codable, Hashable {
     case typeUserBannedEvent(UserBannedEvent)
     case typeUserDeactivatedEvent(UserDeactivatedEvent)
     case typeUserDeletedEvent(UserDeletedEvent)
-    case typeUserMutedEvent(UserMutedEvent)
-    case typeUserPresenceChangedEvent(UserPresenceChangedEvent)
-    case typeUserReactivatedEvent(UserReactivatedEvent)
-    case typeUserUnbannedEvent(UserUnbannedEvent)
     case typeUserUpdatedEvent(UserUpdatedEvent)
 
     public var type: String {
@@ -161,14 +157,6 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeUserDeactivatedEvent(value):
             return value.type
         case let .typeUserDeletedEvent(value):
-            return value.type
-        case let .typeUserMutedEvent(value):
-            return value.type
-        case let .typeUserPresenceChangedEvent(value):
-            return value.type
-        case let .typeUserReactivatedEvent(value):
-            return value.type
-        case let .typeUserUnbannedEvent(value):
             return value.type
         case let .typeUserUpdatedEvent(value):
             return value.type
@@ -270,14 +258,6 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeUserDeactivatedEvent(value):
             return value
         case let .typeUserDeletedEvent(value):
-            return value
-        case let .typeUserMutedEvent(value):
-            return value
-        case let .typeUserPresenceChangedEvent(value):
-            return value
-        case let .typeUserReactivatedEvent(value):
-            return value
-        case let .typeUserUnbannedEvent(value):
             return value
         case let .typeUserUpdatedEvent(value):
             return value
@@ -381,14 +361,6 @@ public enum VideoEvent: Codable, Hashable {
             try container.encode(value)
         case let .typeUserDeletedEvent(value):
             try container.encode(value)
-        case let .typeUserMutedEvent(value):
-            try container.encode(value)
-        case let .typeUserPresenceChangedEvent(value):
-            try container.encode(value)
-        case let .typeUserReactivatedEvent(value):
-            try container.encode(value)
-        case let .typeUserUnbannedEvent(value):
-            try container.encode(value)
         case let .typeUserUpdatedEvent(value):
             try container.encode(value)
         }
@@ -396,7 +368,7 @@ public enum VideoEvent: Codable, Hashable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let dto = try container.decode(ChatEventMapping.self)
+        let dto = try container.decode(WSEventMapping.self)
         if dto.type == "call.accepted" {
             let value = try container.decode(CallAcceptedEvent.self)
             self = .typeCallAcceptedEvent(value)
@@ -538,18 +510,6 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "user.deleted" {
             let value = try container.decode(UserDeletedEvent.self)
             self = .typeUserDeletedEvent(value)
-        } else if dto.type == "user.muted" {
-            let value = try container.decode(UserMutedEvent.self)
-            self = .typeUserMutedEvent(value)
-        } else if dto.type == "user.presence.changed" {
-            let value = try container.decode(UserPresenceChangedEvent.self)
-            self = .typeUserPresenceChangedEvent(value)
-        } else if dto.type == "user.reactivated" {
-            let value = try container.decode(UserReactivatedEvent.self)
-            self = .typeUserReactivatedEvent(value)
-        } else if dto.type == "user.unbanned" {
-            let value = try container.decode(UserUnbannedEvent.self)
-            self = .typeUserUnbannedEvent(value)
         } else if dto.type == "user.updated" {
             let value = try container.decode(UserUpdatedEvent.self)
             self = .typeUserUpdatedEvent(value)
