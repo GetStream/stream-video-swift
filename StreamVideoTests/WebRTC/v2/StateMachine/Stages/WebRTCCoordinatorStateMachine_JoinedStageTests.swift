@@ -219,11 +219,13 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             .nextValue()
         await assertResultAfterTrigger(
             trigger: { [mockCoordinatorStack] in
-                await mockCoordinatorStack?.coordinator.stateAdapter.didUpdateParticipants([
-                    sessionId: .dummy(id: sessionId, hasAudio: true),
-                    "0": .dummy(hasAudio: true),
-                    "1": .dummy(hasAudio: true)
-                ])
+                await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
+                    [
+                        sessionId: .dummy(id: sessionId, hasAudio: true),
+                        "0": .dummy(hasAudio: true),
+                        "1": .dummy(hasAudio: true)
+                    ]
+                }
             }
         ) { [mockCoordinatorStack] expectation in
             let request = try? XCTUnwrap(mockCoordinatorStack?.sfuStack.service.updateSubscriptionsWasCalledWithRequest)

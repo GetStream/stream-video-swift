@@ -430,12 +430,14 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase {
             .$sessionID
             .filter { !$0.isEmpty }
             .nextValue()
-        await mockCoordinatorStack.coordinator.stateAdapter.didUpdateParticipants([
-            sessionId: .dummy(id: sessionId, hasVideo: true, hasAudio: true, isScreenSharing: true),
-            "1": .dummy(id: "1", hasVideo: true, trackSize: .init(width: 10, height: 11)),
-            "2": .dummy(id: "2", hasAudio: true),
-            "3": .dummy(id: "3", isScreenSharing: true)
-        ])
+        await mockCoordinatorStack.coordinator.stateAdapter.enqueue { _ in
+            [
+                sessionId: .dummy(id: sessionId, hasVideo: true, hasAudio: true, isScreenSharing: true),
+                "1": .dummy(id: "1", hasVideo: true, trackSize: .init(width: 10, height: 11)),
+                "2": .dummy(id: "2", hasAudio: true),
+                "3": .dummy(id: "3", isScreenSharing: true)
+            ]
+        }
 
         let result = await subject.buildSubscriptionDetails(
             .unique,

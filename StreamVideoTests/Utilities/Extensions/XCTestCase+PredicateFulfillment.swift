@@ -66,6 +66,7 @@ extension XCTestCase {
             file: file,
             line: line
         )
+        cancellable?.cancel()
         let value = await block()
         XCTAssertTrue(value, message(), file: file, line: line)
     }

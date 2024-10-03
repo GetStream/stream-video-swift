@@ -12,6 +12,9 @@ import StreamWebRTC
 /// updates.
 actor WebRTCStateAdapter: ObservableObject {
 
+    typealias ParticipantsStorage = [String: CallParticipant]
+    typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
+
     /// Enum representing different types of media tracks.
     enum TrackEntry {
         case audio(id: String, track: RTCAudioTrack)
@@ -30,6 +33,8 @@ actor WebRTCStateAdapter: ObservableObject {
             }
         }
     }
+
+    @Injected(\.screenProperties) private var screenProperties
 
     // Properties for user, API key, call ID, video configuration, and factories.
     let user: User
@@ -56,7 +61,7 @@ actor WebRTCStateAdapter: ObservableObject {
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
     @Published private(set) var statsReporter: WebRTCStatsReporter?
-    @Published private(set) var participants: [String: CallParticipant] = [:]
+    @Published private(set) var participants: ParticipantsStorage = [:]
     @Published private(set) var participantsCount: UInt32 = 0
     @Published private(set) var anonymousCount: UInt32 = 0
     @Published private(set) var participantPins: [PinInfo] = []
@@ -74,7 +79,10 @@ actor WebRTCStateAdapter: ObservableObject {
     private let peerConnectionsDisposableBag = DisposableBag()
 
     /// Subject to handle participant updates.
-    private(set) lazy var participantsUpdateSubject = PassthroughSubject<[String: CallParticipant], Never>()
+    private let participantsUpdateSubject = PassthroughSubject<ParticipantsStorage, Never>()
+    private var participantsUpdatesCancellable: AnyCancellable?
+    private var interimParticipants = ParticipantsStorage()
+    private var previousParticipantOperation: Task<Void, Never>?
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -106,7 +114,10 @@ actor WebRTCStateAdapter: ObservableObject {
         self.screenShareSessionProvider = screenShareSessionProvider
         let sessionID = UUID().uuidString
 
-        Task { await set(sessionID: sessionID) }
+        Task {
+            await set(sessionID: sessionID)
+            await configureParticipantsObservation()
+        }
     }
 
     /// Sets the session ID.
@@ -296,15 +307,11 @@ actor WebRTCStateAdapter: ObservableObject {
         screenShareTracks = [:]
         peerConnectionsDisposableBag.removeAll()
 
-        var updatedParticipants = [String: CallParticipant]()
-        let participants = self.participants
-        for (key, participant) in participants {
-            var updatedParticipant = participant
-            updatedParticipant.track = nil
-            updatedParticipants[key] = participant
+        enqueue { participants in
+            participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
+                partialResult[entry.key] = entry.value.withUpdated(track: nil)
+            }
         }
-
-        didUpdateParticipants(updatedParticipants)
     }
 
     /// Restores screen sharing if an active session exists.
@@ -351,15 +358,7 @@ actor WebRTCStateAdapter: ObservableObject {
             break
         }
 
-        guard !participants.isEmpty else { return }
-
-        assignTracksToParticipants(
-            participants,
-            originalParticipants: self.participants,
-            fileName: #file,
-            functionName: #function,
-            line: #line
-        )
+        enqueue { $0 }
     }
 
     /// Removes a track for the given participant ID.
@@ -383,15 +382,7 @@ actor WebRTCStateAdapter: ObservableObject {
             screenShareTracks[id] = nil
         }
 
-        guard !participants.isEmpty else { return }
-
-        assignTracksToParticipants(
-            participants,
-            originalParticipants: self.participants,
-            fileName: #file,
-            functionName: #function,
-            line: #line
-        )
+        enqueue { $0 }
     }
 
     /// Retrieves a track by ID and track type.
@@ -416,6 +407,17 @@ actor WebRTCStateAdapter: ObservableObject {
         }
     }
 
+    func track(
+        for participant: CallParticipant,
+        of trackType: TrackType
+    ) -> RTCMediaStreamTrack? {
+        if let trackLookupPrefix = participant.trackLookupPrefix {
+            return track(for: trackLookupPrefix, of: trackType) ?? track(for: participant.sessionId, of: trackType)
+        } else {
+            return track(for: participant.sessionId, of: trackType)
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Handles track events when they are added or removed from peer connections.
@@ -437,226 +439,55 @@ actor WebRTCStateAdapter: ObservableObject {
         subscriber?.videoOptions = videoOptions
     }
 
-    /// Updates the list of participants and assigns the media tracks to them.
-    ///
-    /// - Parameters:
-    ///   - participants: The new list of participants.
-    ///   - fileName: The source file where this update is triggered (for logging).
-    ///   - functionName: The function where this update is triggered (for logging).
-    ///   - line: The line number where this update is triggered (for logging).
-    func didUpdateParticipants(
-        _ participants: [String: CallParticipant],
-        fileName: StaticString = #file,
-        functionName: StaticString = #function,
-        line: UInt = #line
-    ) {
-        assignTracksToParticipants(
-            participants,
-            originalParticipants: self.participants,
-            fileName: fileName,
-            functionName: functionName,
-            line: line
-        )
+    // MARK: Participant Operations
+
+    private func configureParticipantsObservation() {
+        let refreshRate = screenProperties.refreshRate
+        participantsUpdatesCancellable = participantsUpdateSubject
+            .removeDuplicates()
+            .throttle(for: .init(floatLiteral: refreshRate), scheduler: DispatchQueue.main, latest: true)
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.set(participants: $0) }
     }
 
-    /// Updates a specific participant's track visibility.
-    ///
-    /// - Parameters:
-    ///   - participant: The participant to update.
-    ///   - isVisible: Whether the track should be visible.
-    func didUpdateParticipant(
-        _ participant: CallParticipant,
-        isVisible: Bool
-    ) {
-        var updatedParticipants = self.participants
-
-        guard
-            let _participant = updatedParticipants[participant.id],
-            _participant.showTrack != isVisible
-        else {
-            return
-        }
-
-        log.debug("Will toggle visibility for name:\(_participant.name) to isVisible:\(isVisible).")
-        updatedParticipants[_participant.id] = _participant
-            .withUpdated(showTrack: isVisible)
-
-        didUpdateParticipants(updatedParticipants)
-    }
-
-    /// Updates a participant's track size.
-    ///
-    /// - Parameters:
-    ///   - participant: The participant whose track size will be updated.
-    ///   - trackSize: The new track size.
-    func didUpdateParticipant(
-        _ participant: CallParticipant,
-        trackSize: CGSize
-    ) async {
-        var updatedParticipants = self.participants
-
-        guard
-            let _participant = participants[participant.id],
-            _participant.trackSize != trackSize
-        else {
-            return
-        }
-
-        updatedParticipants[participant.id] = _participant
-            .withUpdated(trackSize: trackSize)
-
-        didUpdateParticipants(updatedParticipants)
-    }
-
-    /// Assigns media tracks to participants based on track ID and session ID.
-    ///
-    /// - Parameters:
-    ///   - participants: The current list of participants.
-    ///   - originalParticipants: The list of participants before the update.
-    ///   - fileName: The source file where this function is called (for logging).
-    ///   - functionName: The function where this function is called (for logging).
-    ///   - line: The line number where this function is called (for logging).
-    private func assignTracksToParticipants(
-        _ participants: [String: CallParticipant],
-        originalParticipants: [String: CallParticipant],
-        fileName: StaticString,
-        functionName: StaticString,
-        line: UInt
-    ) {
-        log.debug(
-            """
-            Assigning tracks to participants
-            ParticipantsCount: \(participants.count)
-            AudioTracksCount: \(audioTracks.count)
-            VideoTracksCount: \(videoTracks.count)
-            ScreenShareTracksCount: \(screenShareTracks.count)
-            """,
-            subsystems: .webRTC,
-            functionName: functionName,
-            fileName: fileName,
-            lineNumber: line
-        )
-
-        var updatedParticipants: [String: CallParticipant] = [:]
-        for (key, participant) in participants {
-            var updatedParticipant = participant
-            let isLocalUser = updatedParticipant.sessionId == sessionID
-
-            // Assign the correct video track for each participant.
-            let videoTrack: RTCVideoTrack? = {
-                if
-                    let trackLookupPrefix = updatedParticipant.trackLookupPrefix,
-                    let videoTrack = videoTracks[trackLookupPrefix],
-                    videoTrack.readyState != .ended {
-                    return videoTrack
-                } else {
-                    return videoTracks[key]
-                }
-            }()
-
-            if
-                let videoTrack = videoTrack,
-                updatedParticipant.track == nil || updatedParticipant.track?.readyState == .ended {
-                updatedParticipant = updatedParticipant.withUpdated(track: videoTrack)
-            } else if videoTrack == nil {
-                updatedParticipant = updatedParticipant.withUpdated(track: nil)
-            }
-
-            // Assign the correct screen sharing track.
-            let screenSharingTrack: RTCVideoTrack? = {
-                if
-                    let trackLookUpPrefix = updatedParticipant.trackLookupPrefix,
-                    let screenSharingTrack = screenShareTracks[trackLookUpPrefix] {
-                    return screenSharingTrack
-
-                } else if let screenSharingTrack = screenShareTracks[key] {
-                    return screenSharingTrack
-
-                } else if
-                    isLocalUser,
-                    updatedParticipant.isScreensharing,
-                    let screenSharingTrack = screenShareTracks[sessionID] {
-                    return screenSharingTrack
-
-                } else {
-                    return nil
-                }
-            }()
-
-            if
-                let screenSharingTrack,
-                updatedParticipant.screenshareTrack == nil || updatedParticipant.screenshareTrack?.readyState == .ended {
-                updatedParticipant = updatedParticipant
-                    .withUpdated(screensharingTrack: screenSharingTrack)
-            } else if screenSharingTrack == nil {
-                updatedParticipant = updatedParticipant
-                    .withUpdated(screensharingTrack: nil)
-            }
-
-            // Toggle track visibility for remote participants.
-            if !isLocalUser, let track = updatedParticipant.track {
-                if track.isEnabled != updatedParticipant.showTrack {
-                    log.debug(
-                        "Will toggle track for name:\(participant.name) to isEnabled:\(updatedParticipant.showTrack).",
-                        subsystems: .webRTC
-                    )
-                    updatedParticipant.track?.isEnabled = updatedParticipant.showTrack
-                }
-            }
-
-            updatedParticipants[key] = updatedParticipant
-        }
-
-        let usersWithVideoTracks = updatedParticipants
-            .filter { $0.value.track != nil }
-
-        let videoTracksKeys = Set(participants.flatMap { [$0.value.trackLookupPrefix, $0.key].compactMap { $0 } })
-        let unusedVideoTracks = videoTracks.filter { !videoTracksKeys.contains($0.key) }
-
-        let usersWithScreenSharingTracks = updatedParticipants
-            .filter { $0.value.screenshareTrack != nil }
-
-        guard updatedParticipants != originalParticipants else { return }
-
-        log.debug(
-            """
-            Participants count: \(updatedParticipants.count)
-
-            Participant TrackKeys:
-            \(
-                participants.map {
-                    """
-                    Name: \($0.value.name)
-                        Id: \($0.key)
-                        LookUpPrefix: \($0.value.trackLookupPrefix ?? "-")
-                    """
-                }
-                .joined(separator: "\n")
+    private func set(participants: ParticipantsStorage) {
+        self.participants = participants
+        log
+            .debug(
+                "\(participants.count) participants updated. \(participants.filter { $0.value.track != nil }.map(\.value.name).sorted().joined(separator: ",")) have video tracks."
             )
+    }
 
-            Total tracks:
-            AudioTracks: \(audioTracks.count)
-            VideoTracks: \(videoTracks.count)
-            ScreenShareTracks: \(screenShareTracks.count)
+    func enqueue(
+        _ operation: @escaping ParticipantOperation,
+        functionName: StaticString = #function,
+        fileName: StaticString = #file,
+        lineNumber: UInt = #line
+    ) {
+        let newTask = Task { [previousParticipantOperation] in
+            _ = await previousParticipantOperation?.result
 
-            After assigning tracks to participants the following ones have:
-            VideoTracks: \(usersWithVideoTracks.map(\.value.name).joined(separator: ","))
-            ScreenShareTracks: \(usersWithScreenSharingTracks.map(\.value.name).joined(separator: ","))
+            let current = interimParticipants
+            let next = operation(current)
+            let updated = assignTracks(on: next)
+            interimParticipants = updated
+            participantsUpdateSubject.send(updated)
+            log.debug(
+                "Participant operation completed.",
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
+        }
 
-            Muted tracks:
-            AudioTracks: \(audioTracks.filter { !$0.value.isEnabled || $0.value.readyState != .live }.map(\.key))
-            VideoTracks: \(videoTracks.filter { !$0.value.isEnabled || $0.value.readyState != .live }.map(\.key))
-            ScreenShareTracks: \(screenShareTracks.filter { !$0.value.isEnabled || $0.value.readyState != .live }.map(\.key))
+        previousParticipantOperation = newTask
+    }
 
-            Unused tracks:
-            VideoTracks: \(unusedVideoTracks.count) found with keys: \(unusedVideoTracks.map(\.key).joined(separator: ","))
-            """,
-            subsystems: .webRTC,
-            functionName: functionName,
-            fileName: fileName,
-            lineNumber: line
-        )
-
-        self.participants = updatedParticipants
+    func assignTracks(on participants: ParticipantsStorage) -> ParticipantsStorage {
+        participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
+            partialResult[entry.key] = entry
+                .value
+                .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
+                .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
+        }
     }
 }

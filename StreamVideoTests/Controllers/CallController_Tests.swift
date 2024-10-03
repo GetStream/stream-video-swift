@@ -557,7 +557,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
             .set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
-            .didUpdateParticipants([user.id: CallParticipant.dummy(id: user.id)])
+            .enqueue { _ in [self.user.id: CallParticipant.dummy(id: self.user.id)] }
         try await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
             .set(statsReporter: WebRTCStatsReporter(sessionID: .unique))

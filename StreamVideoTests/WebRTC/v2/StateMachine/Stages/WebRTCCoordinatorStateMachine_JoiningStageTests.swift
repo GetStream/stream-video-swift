@@ -423,11 +423,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         await mockCoordinatorStack
             .coordinator
-            .stateAdapter.didUpdateParticipants([
-                "0": .dummy(id: "0", hasVideo: true, hasAudio: false, isScreenSharing: false),
-                "1": .dummy(id: "1", hasVideo: false, hasAudio: true, isScreenSharing: false),
-                "2": .dummy(id: "2", hasVideo: false, hasAudio: false, isScreenSharing: true)
-            ])
+            .stateAdapter.enqueue { _ in
+                [
+                    "0": .dummy(id: "0", hasVideo: true, hasAudio: false, isScreenSharing: false),
+                    "1": .dummy(id: "1", hasVideo: false, hasAudio: true, isScreenSharing: false),
+                    "2": .dummy(id: "2", hasVideo: false, hasAudio: false, isScreenSharing: true)
+                ]
+            }
 
         try await assertTransition(
             from: .connected,
@@ -742,11 +744,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         await mockCoordinatorStack
             .coordinator
-            .stateAdapter.didUpdateParticipants([
-                "0": .dummy(id: "0", hasVideo: true, hasAudio: false, isScreenSharing: false),
-                "1": .dummy(id: "1", hasVideo: false, hasAudio: true, isScreenSharing: false),
-                "2": .dummy(id: "2", hasVideo: false, hasAudio: false, isScreenSharing: true)
-            ])
+            .stateAdapter.enqueue { _ in
+                [
+                    "0": .dummy(id: "0", hasVideo: true, hasAudio: false, isScreenSharing: false),
+                    "1": .dummy(id: "1", hasVideo: false, hasAudio: true, isScreenSharing: false),
+                    "2": .dummy(id: "2", hasVideo: false, hasAudio: false, isScreenSharing: true)
+                ]
+            }
         /// We manually trigger the peerConnection configuration to allow us to test what will happen to
         /// the existing connections.
         try await mockCoordinatorStack
@@ -924,11 +928,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         await mockCoordinatorStack
             .coordinator
-            .stateAdapter.didUpdateParticipants([
-                "0": .dummy(id: "0", hasVideo: true, hasAudio: false, isScreenSharing: false),
-                "1": .dummy(id: "1", hasVideo: false, hasAudio: true, isScreenSharing: false),
-                "2": .dummy(id: "2", hasVideo: false, hasAudio: false, isScreenSharing: true)
-            ])
+            .stateAdapter.enqueue { _ in
+                [
+                    "0": .dummy(id: "0", hasVideo: true, hasAudio: false, isScreenSharing: false),
+                    "1": .dummy(id: "1", hasVideo: false, hasAudio: true, isScreenSharing: false),
+                    "2": .dummy(id: "2", hasVideo: false, hasAudio: false, isScreenSharing: true)
+                ]
+            }
 
         try await assertTransition(
             from: .migrated,

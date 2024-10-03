@@ -312,7 +312,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             await coordinator
                 .stateAdapter
-                .didUpdateParticipants(participants)
+                .enqueue { _ in participants }
 
             try Task.checkCancellation()
 
