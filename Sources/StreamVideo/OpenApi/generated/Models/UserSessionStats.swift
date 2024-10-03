@@ -51,7 +51,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     public var subscriberJitter: Stats?
     public var subscriberLatency: Stats?
     public var subscriberVideoQualityThrottledDurationSeconds: Float?
-    public var subsessions: [Subsession?]?
+    public var subsessions: [Subsession]?
     public var timeline: CallTimeline?
     public var totalPixelsIn: Int
     public var totalPixelsOut: Int
@@ -104,7 +104,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         subscriberJitter: Stats? = nil,
         subscriberLatency: Stats? = nil,
         subscriberVideoQualityThrottledDurationSeconds: Float? = nil,
-        subsessions: [Subsession?]? = nil,
+        subsessions: [Subsession]? = nil,
         timeline: CallTimeline? = nil,
         totalPixelsIn: Int,
         totalPixelsOut: Int,

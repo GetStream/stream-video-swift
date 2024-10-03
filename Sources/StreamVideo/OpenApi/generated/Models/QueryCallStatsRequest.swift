@@ -10,14 +10,14 @@ public final class QueryCallStatsRequest: @unchecked Sendable, Codable, JSONEnco
     public var limit: Int?
     public var next: String?
     public var prev: String?
-    public var sort: [SortParamRequest?]?
+    public var sort: [SortParamRequest]?
 
     public init(
         filterConditions: [String: RawJSON]? = nil,
         limit: Int? = nil,
         next: String? = nil,
         prev: String? = nil,
-        sort: [SortParamRequest?]? = nil
+        sort: [SortParamRequest]? = nil
     ) {
         self.filterConditions = filterConditions
         self.limit = limit

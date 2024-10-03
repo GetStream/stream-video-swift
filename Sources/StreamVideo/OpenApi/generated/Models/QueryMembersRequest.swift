@@ -11,7 +11,7 @@ public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncoda
     public var limit: Int?
     public var next: String?
     public var prev: String?
-    public var sort: [SortParamRequest?]?
+    public var sort: [SortParamRequest]?
     public var type: String
 
     public init(
@@ -20,7 +20,7 @@ public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncoda
         limit: Int? = nil,
         next: String? = nil,
         prev: String? = nil,
-        sort: [SortParamRequest?]? = nil,
+        sort: [SortParamRequest]? = nil,
         type: String
     ) {
         self.filterConditions = filterConditions

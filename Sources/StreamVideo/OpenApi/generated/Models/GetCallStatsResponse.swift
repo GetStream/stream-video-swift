@@ -16,7 +16,7 @@ public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncod
     public var maxFreezesDurationSeconds: Int
     public var maxParticipants: Int
     public var maxTotalQualityLimitationDurationSeconds: Int
-    public var participantReport: [UserStats?]
+    public var participantReport: [UserStats]
     public var publishingParticipants: Int
     public var qualityScore: Int
     public var sfuCount: Int
@@ -33,7 +33,7 @@ public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncod
         maxFreezesDurationSeconds: Int,
         maxParticipants: Int,
         maxTotalQualityLimitationDurationSeconds: Int,
-        participantReport: [UserStats?],
+        participantReport: [UserStats],
         publishingParticipants: Int,
         qualityScore: Int,
         sfuCount: Int,

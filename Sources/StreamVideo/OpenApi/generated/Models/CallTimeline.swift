@@ -6,9 +6,9 @@ import Foundation
     
 public final class CallTimeline: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var events: [CallEvent?]
+    public var events: [CallEvent]
 
-    public init(events: [CallEvent?]) {
+    public init(events: [CallEvent]) {
         self.events = events
     }
     

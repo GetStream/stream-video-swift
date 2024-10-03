@@ -19,7 +19,7 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     public var language: String
     public var lastActive: Date?
     public var latestHiddenChannels: [String]?
-    public var mutes: [UserMuteResponse?]
+    public var mutes: [UserMuteResponse]
     public var name: String?
     public var online: Bool
     public var privacySettings: PrivacySettingsResponse?
@@ -47,7 +47,7 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         language: String,
         lastActive: Date? = nil,
         latestHiddenChannels: [String]? = nil,
-        mutes: [UserMuteResponse?],
+        mutes: [UserMuteResponse],
         name: String? = nil,
         online: Bool,
         privacySettings: PrivacySettingsResponse? = nil,

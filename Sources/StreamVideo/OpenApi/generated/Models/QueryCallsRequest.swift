@@ -10,7 +10,7 @@ public final class QueryCallsRequest: @unchecked Sendable, Codable, JSONEncodabl
     public var limit: Int?
     public var next: String?
     public var prev: String?
-    public var sort: [SortParamRequest?]?
+    public var sort: [SortParamRequest]?
     public var watch: Bool?
 
     public init(
@@ -18,7 +18,7 @@ public final class QueryCallsRequest: @unchecked Sendable, Codable, JSONEncodabl
         limit: Int? = nil,
         next: String? = nil,
         prev: String? = nil,
-        sort: [SortParamRequest?]? = nil,
+        sort: [SortParamRequest]? = nil,
         watch: Bool? = nil
     ) {
         self.filterConditions = filterConditions
