@@ -41,7 +41,7 @@ extension XCTestCase {
         block: @MainActor @Sendable @escaping () async -> Bool
     ) async {
         let stepInterval = 0.1
-        var maxIterations = Int(timeout / stepInterval)
+        let maxIterations = Int(timeout / stepInterval)
         var iterations = 0
         var cancellable: AnyCancellable?
         let waitExpectation = expectation(description: "Wait for completion.")
@@ -66,6 +66,7 @@ extension XCTestCase {
             file: file,
             line: line
         )
+        cancellable?.cancel()
         let value = await block()
         XCTAssertTrue(value, message(), file: file, line: line)
     }

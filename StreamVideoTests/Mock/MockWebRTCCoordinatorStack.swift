@@ -2,7 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 @testable import StreamVideo
+import StreamWebRTC
 
 final class MockWebRTCCoordinatorStack {
 
@@ -16,6 +18,8 @@ final class MockWebRTCCoordinatorStack {
     let sfuStack: MockSFUStack
     let rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory
     let internetConnection: MockInternetConnection
+
+    private var healthCheckCancellable: AnyCancellable?
 
     init(
         user: User = .dummy(),
@@ -43,9 +47,68 @@ final class MockWebRTCCoordinatorStack {
             callCid: callCid,
             videoConfig: videoConfig,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
+            webRTCAuthenticator: webRTCAuthenticator,
             callAuthentication: callAuthenticator.authenticate
         )
 
         InjectedValues[\.internetConnectionObserver] = internetConnection
+    }
+
+    // MARK: Event Simulation
+
+    func joinResponse(_ participants: [CallParticipant]) {
+        var event = Stream_Video_Sfu_Event_JoinResponse()
+        event.callState.participants = participants.map { .init($0) }
+        sfuStack.receiveEvent(.sfuEvent(.joinResponse(event)))
+    }
+
+    func participantJoined(_ participant: CallParticipant) {
+        var event = Stream_Video_Sfu_Event_ParticipantJoined()
+        event.participant = .init(participant)
+        event.callCid = callCid
+        sfuStack.receiveEvent(.sfuEvent(.participantJoined(event)))
+    }
+
+    func participantLeft(_ participant: CallParticipant) {
+        var event = Stream_Video_Sfu_Event_ParticipantLeft()
+        event.participant = .init(participant)
+        event.callCid = callCid
+        sfuStack.receiveEvent(.sfuEvent(.participantLeft(event)))
+    }
+
+    func addTrack(
+        kind: TrackType,
+        for identifier: String
+    ) async {
+        let track: RTCMediaStreamTrack = await .dummy(
+            kind: kind,
+            peerConnectionFactory: coordinator.stateAdapter.peerConnectionFactory
+        )
+        await coordinator.stateAdapter.didAddTrack(
+            track,
+            type: kind,
+            for: identifier
+        )
+    }
+
+    func removeTrack(kind: TrackType, for identifier: String) async {
+        await coordinator.stateAdapter.didRemoveTrack(
+            for: identifier,
+            type: kind
+        )
+    }
+
+    func receiveHealthCheck(
+        every interval: TimeInterval = 1
+    ) {
+        healthCheckCancellable = Foundation
+            .Timer
+            .publish(every: interval, on: .main, in: .default)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                let event = Stream_Video_Sfu_Event_HealthCheckResponse()
+                sfuStack.receiveEvent(.sfuEvent(.healthCheckResponse(event)))
+            }
     }
 }

@@ -37,6 +37,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         var eventDecoder: WebRTCEventDecoder = WebRTCEventDecoder()
     }
 
+    private let processingQueue = DispatchQueue(label: "io.getstream.sfu.event.processingQueue")
     private let signalService: SFUSignalService
     private let refreshSubject = PassthroughSubject<Void, Never>()
     private let webSocketFactory: WebSocketClientProviding

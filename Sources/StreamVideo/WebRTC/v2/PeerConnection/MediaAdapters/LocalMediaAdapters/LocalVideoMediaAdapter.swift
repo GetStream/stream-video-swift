@@ -33,6 +33,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The stream identifiers for this video adapter.
     private let streamIds: [String]
 
+    private let videoCaptureSessionProvider: VideoCaptureSessionProvider
+
     /// The local video track.
     private(set) var localTrack: RTCVideoTrack?
 
@@ -66,7 +68,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
         subject: PassthroughSubject<TrackEvent, Never>,
-        capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory()
+        capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
+        videoCaptureSessionProvider: VideoCaptureSessionProvider
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -76,23 +79,13 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.videoConfig = videoConfig
         self.subject = subject
         self.capturerFactory = capturerFactory
+        self.videoCaptureSessionProvider = videoCaptureSessionProvider
         streamIds = ["\(sessionID):video"]
     }
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        Task { @MainActor [sender, localTrack, capturer] in
-            try? await capturer?.stopCapture()
-            localTrack?.isEnabled = false
-            sender?.sender.track = nil
-        }
-        if let localTrack {
-            log.debug(
-                """
-                Local videoTrack will be deallocated trackId:\(localTrack.trackId) isEnabled:\(localTrack.isEnabled).
-                """
-            )
-        }
+        sender?.sender.track = nil
     }
 
     // MARK: - LocalMediaManaging
@@ -142,26 +135,35 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             guard
                 let self,
                 let localTrack,
-                localTrack.isEnabled == false || sender == nil
+                localTrack.isEnabled == false || sender == nil,
+                let activeSession = videoCaptureSessionProvider.activeSession
             else {
                 return
             }
 
-            if sender == nil {
-                sender = peerConnection.addTransceiver(
-                    with: localTrack,
-                    init: RTCRtpTransceiverInit(
-                        trackType: .video,
-                        direction: .sendOnly,
-                        streamIds: streamIds,
-                        codecs: videoOptions.supportedCodecs
-                    )
+            do {
+                try await activeSession.capturer.startCapture(
+                    device: activeSession.device
                 )
-            } else {
-                sender?.sender.track = localTrack
+
+                if sender == nil {
+                    sender = peerConnection.addTransceiver(
+                        with: localTrack,
+                        init: RTCRtpTransceiverInit(
+                            trackType: .video,
+                            direction: .sendOnly,
+                            streamIds: streamIds,
+                            codecs: videoOptions.supportedCodecs
+                        )
+                    )
+                } else {
+                    sender?.sender.track = localTrack
+                }
+                localTrack.isEnabled = true
+                log.debug("Local videoTrack trackId:\(localTrack.trackId) is now published.")
+            } catch {
+                log.error(error)
             }
-            localTrack.isEnabled = true
-            log.debug("Local videoTrack trackId:\(localTrack.trackId) is now published.")
         }
     }
 
@@ -175,6 +177,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             else { return }
             sender.sender.track = nil
             localTrack.isEnabled = false
+            try? await capturer?.stopCapture()
             log.debug("Local videoTrack trackId:\(localTrack.trackId) is now unpublished.")
         }
     }
@@ -319,6 +322,16 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             }
             params.encodings = updatedEncodings
             sender.sender.parameters = params
+
+            let videoCodecs = VideoCodec
+                .defaultCodecs
+                .filter { activeEncodings.contains($0.quality) }
+
+            if
+                let activeSession = videoCaptureSessionProvider.activeSession,
+                let device = activeSession.device {
+                await activeSession.capturer.updateCaptureQuality(videoCodecs, on: device)
+            }
         }
     }
 
@@ -330,40 +343,62 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private func makeVideoTrack(
         _ position: AVCaptureDevice.Position
     ) async throws {
-        let videoSource = peerConnectionFactory
-            .makeVideoSource(forScreenShare: false)
-        let videoTrack = peerConnectionFactory.makeVideoTrack(source: videoSource)
-        localTrack = videoTrack
-        /// This is important to be false once we setUp as the activation will happen once
-        /// publish is called (in order also to inform the SFU via the didUpdateCallSettings).
-        videoTrack.isEnabled = false
+        if
+            let activeSession = videoCaptureSessionProvider.activeSession,
+            activeSession.position == position {
+            capturer = activeSession.capturer
+            localTrack = activeSession.localTrack
+            localTrack?.isEnabled = false
 
-        log.debug(
-            """
-            VideoTrack generated
-            address:\(Unmanaged.passUnretained(videoTrack).toOpaque())
-            trackId:\(videoTrack.trackId)
-            mid: \(sender?.mid ?? "-")
-            """
-        )
-
-        subject.send(
-            .added(
-                id: sessionID,
-                trackType: .video,
-                track: videoTrack
+            subject.send(
+                .added(
+                    id: sessionID,
+                    trackType: .video,
+                    track: activeSession.localTrack
+                )
             )
-        )
+        } else {
+            let videoSource = peerConnectionFactory
+                .makeVideoSource(forScreenShare: false)
+            let videoTrack = peerConnectionFactory.makeVideoTrack(source: videoSource)
+            localTrack = videoTrack
+            /// This is important to be false once we setUp as the activation will happen once
+            /// publish is called (in order also to inform the SFU via the didUpdateCallSettings).
+            videoTrack.isEnabled = false
 
-        try await capturer?.stopCapture()
-        let cameraCapturer = capturerFactory.buildCameraCapturer(
-            source: videoSource,
-            options: videoOptions,
-            filters: videoConfig.videoFilters
-        )
-        capturer = cameraCapturer
+            log.debug(
+                """
+                VideoTrack generated
+                address:\(Unmanaged.passUnretained(videoTrack).toOpaque())
+                trackId:\(videoTrack.trackId)
+                mid: \(sender?.mid ?? "-")
+                """
+            )
 
-        let device = cameraCapturer.capturingDevice(for: position)
-        try await cameraCapturer.startCapture(device: device)
+            subject.send(
+                .added(
+                    id: sessionID,
+                    trackType: .video,
+                    track: videoTrack
+                )
+            )
+
+            let cameraCapturer = capturerFactory.buildCameraCapturer(
+                source: videoSource,
+                options: videoOptions,
+                filters: videoConfig.videoFilters
+            )
+            capturer = cameraCapturer
+
+            let device = cameraCapturer.capturingDevice(for: position)
+            try await cameraCapturer.startCapture(device: device)
+
+            videoCaptureSessionProvider.activeSession = .init(
+                position: position,
+                device: device,
+                localTrack: videoTrack,
+                capturer: cameraCapturer
+            )
+        }
     }
 }
