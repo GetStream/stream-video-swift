@@ -4,9 +4,9 @@
 
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
-final class WebRTCJoinRequestFactory_Tests: XCTestCase {
+final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
 
     private static var videoConfig: VideoConfig! = .dummy()
 
@@ -437,6 +437,14 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase {
                 "2": .dummy(id: "2", hasAudio: true),
                 "3": .dummy(id: "3", isScreenSharing: true)
             ]
+        }
+
+        await fulfillment {
+            await self
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .participants.count == 4
         }
 
         let result = await subject.buildSubscriptionDetails(

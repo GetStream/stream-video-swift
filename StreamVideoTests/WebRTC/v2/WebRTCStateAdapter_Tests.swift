@@ -311,6 +311,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.close), 1)
         XCTAssertEqual(mockSubscriber.timesCalled(.close), 1)
         XCTAssertEqual(sfuStack.webSocket.timesCalled(.disconnectAsync), 1)
+
+        await fulfillment { await self.subject.publisher == nil }
         await assertNilAsync(await subject.publisher)
         await assertNilAsync(await subject.subscriber)
         await assertNilAsync(await subject.statsReporter)
