@@ -131,6 +131,7 @@ final class MockRTCPeerConnectionCoordinator:
         audioSettings: AudioSettings = .init(),
         sfuAdapter: SFUAdapter,
         audioSession: AudioSession = .init(),
+        videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) throws {
         let peerConnectionFactory = PeerConnectionFactory.build(
@@ -147,6 +148,7 @@ final class MockRTCPeerConnectionCoordinator:
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
             audioSession: audioSession,
+            videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )
     }

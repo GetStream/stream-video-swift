@@ -4,9 +4,9 @@
 
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
-final class WebRTCStateAdapter_Tests: XCTestCase {
+final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
@@ -422,10 +422,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             for: participant.sessionId
         )
 
-        await assertEqualAsync(
-            await subject.participants[participant.sessionId]?.track?.trackId,
-            track.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .track?
+                .trackId == track.trackId
+        }
     }
 
     func test_didAddTrack_screenSharingOfExistingParticipant_shouldAddTrack() async throws {
@@ -441,10 +444,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
             for: participant.sessionId
         )
 
-        await assertEqualAsync(
-            await subject.participants[participant.sessionId]?.screenshareTrack?.trackId,
-            track.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .screenshareTrack?
+                .trackId == track.trackId
+        }
     }
 
     // MARK: - didRemoveTrack
@@ -532,9 +538,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
 
     func test_didUpdateParticipants_shouldAssignTracksToParticipants() async throws {
         let initialParticipants: [String: CallParticipant] = [
-            "1": .dummy(),
-            "2": .dummy(),
-            "3": .dummy()
+            "1": .dummy(id: "1"),
+            "2": .dummy(id: "2"),
+            "3": .dummy(id: "3")
         ]
         let participantTracks: [String: RTCMediaStreamTrack] = [
             "1": await subject.peerConnectionFactory.mockAudioTrack(),
@@ -548,51 +554,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase {
 
         await subject.enqueue { _ in initialParticipants }
 
-        await assertEqualAsync(
-            await subject.participants["2"]?.track?.trackId,
-            participantTracks["2"]?.trackId
-        )
-        await assertEqualAsync(
-            await subject.participants["3"]?.screenshareTrack?.trackId,
-            participantTracks["3"]?.trackId
-        )
-    }
+        await fulfillment {
+            let participant2 = await self.subject.participants["2"]
+            let participant3 = await self.subject.participants["3"]
 
-    // MARK: - didUpdateParticipantVisibility
-
-    func test_didUpdateParticipantVisibility_shouldUpdateVisibility() async throws {
-        let initialParticipants: [String: CallParticipant] = [
-            "1": .dummy(id: "1", showTrack: true),
-            "2": .dummy(),
-            "3": .dummy()
-        ]
-        await subject.enqueue { _ in initialParticipants }
-
-        await subject.didUpdateParticipant(initialParticipants["1"]!, isVisible: false)
-
-        await assertEqualAsync(await subject.participants["1"]?.showTrack, false)
-    }
-
-    // MARK: - didUpdateParticipantTrackSize
-
-    func test_didUpdateParticipantTrackSize_shouldUpdateTrackSize() async throws {
-        let initialParticipants: [String: CallParticipant] = [
-            "1": .dummy(id: "1"),
-            "2": .dummy(),
-            "3": .dummy()
-        ]
-        await subject.enqueue { _ in initialParticipants }
-
-        await subject.didUpdateParticipant(
-            initialParticipants["1"]!,
-            trackSize: .init(
-                width: 100,
-                height: 200
-            )
-        )
-
-        await assertEqualAsync(await subject.participants["1"]?.trackSize.width, 100)
-        await assertEqualAsync(await subject.participants["1"]?.trackSize.height, 200)
+            return participant2?.track?.trackId == participantTracks["2"]?.trackId
+                && participant3?.screenshareTrack?.trackId == participantTracks["3"]?.trackId
+        }
     }
 
     // MARK: - Private helpers

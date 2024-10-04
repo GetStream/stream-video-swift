@@ -115,9 +115,12 @@ class VideoCapturer: CameraVideoCapturing {
 
     func updateCaptureQuality(
         _ codecs: [VideoCodec],
-        on device: AVCaptureDevice
+        on device: AVCaptureDevice?
     ) async {
-        guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer else {
+        guard
+            let videoCapturer = videoCapturer as? RTCCameraVideoCapturer,
+            let device
+        else {
             return
         }
 

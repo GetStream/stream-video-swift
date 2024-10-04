@@ -51,7 +51,7 @@ class CallController: @unchecked Sendable {
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
     private var webRTCParticipantsObserver: AnyCancellable?
-    private var delayedParticipants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
+    private var participants: CollectionDelayedUpdateObserver<[String: CallParticipant]>?
 
     private let disposableBag = DisposableBag()
 
@@ -80,7 +80,7 @@ class CallController: @unchecked Sendable {
         Task {
             await handleParticipantCountUpdated()
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
-            self.delayedParticipants = CollectionDelayedUpdateObserver(
+            self.participants = CollectionDelayedUpdateObserver(
                 publisher: participantsPublisher.eraseToAnyPublisher(),
                 initial: [:],
                 mode: .throttle(scheduler: DispatchQueue.main, latest: true)
@@ -427,7 +427,7 @@ class CallController: @unchecked Sendable {
     // MARK: - private
 
     private func handleParticipantsUpdated() {
-        webRTCParticipantsObserver = delayedParticipants?
+        webRTCParticipantsObserver = participants?
             .$value
             .sinkTask { @MainActor [weak self] participants in
                 self?.call?.state.participantsMap = participants

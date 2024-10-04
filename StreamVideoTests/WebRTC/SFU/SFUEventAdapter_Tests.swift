@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
 final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
@@ -80,8 +80,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.connectionQualityChanged(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0[participantA.sessionId]?.connectionQuality, .good)
-            XCTAssertEqual($0[participantB.sessionId]?.connectionQuality, .excellent)
+            $0[participantA.sessionId]?.connectionQuality == .good && $0[participantB.sessionId]?.connectionQuality == .excellent
         }
     }
 
@@ -106,8 +105,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.audioLevelChanged(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0[participantA.sessionId]?.audioLevel, 0.8)
-            XCTAssertEqual($0[participantB.sessionId]?.audioLevel, 0)
+            $0[participantA.sessionId]?.audioLevel == 0.8 && $0[participantB.sessionId]?.audioLevel == 0
         }
     }
 
@@ -133,10 +131,9 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) { _ in
             let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
-            XCTAssertEqual(
-                mockPublisher.recordedInputPayload(Set<String>.self, for: .changePublishQuality)?.first,
-                .init(["q"])
-            )
+            return mockPublisher
+                .recordedInputPayload(Set<String>.self, for: .changePublishQuality)?
+                .first == .init(["q"])
         }
     }
 
@@ -155,8 +152,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.participantJoined(event)),
             initialState: [.dummy()].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertNotNil($0[participant.sessionId])
-            XCTAssertTrue($0[participant.sessionId]?.showTrack ?? false)
+            $0[participant.sessionId] != nil && $0[participant.sessionId]?.showTrack == true
         }
     }
 
@@ -172,7 +168,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.participantJoined(event)),
             initialState: [.dummy()].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertNil($0[participant.sessionId])
+            $0[participant.sessionId] == nil
         }
     }
 
@@ -200,8 +196,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
                 .dummy()
             ].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertNotNil($0[participant.sessionId])
-            XCTAssertFalse($0[participant.sessionId]?.showTrack ?? true)
+            $0[participant.sessionId] != nil && $0[participant.sessionId]?.showTrack == false
         }
     }
 
@@ -283,22 +278,21 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) { [trackLookupPrefix] participants in
             XCTAssertTrue(participants.isEmpty)
-            let audioTrack = await stateAdapter.track(for: participant.sessionId, of: .audio)
-            XCTAssertNil(audioTrack)
-            let videoTrack = await stateAdapter.track(for: participant.sessionId, of: .video)
-            XCTAssertNil(videoTrack)
-            let screenShareTrack = await stateAdapter.track(for: participant.sessionId, of: .screenshare)
-            XCTAssertNil(screenShareTrack)
+            let audioTrack = await self.stateAdapter.track(for: participant.sessionId, of: .audio)
+            let videoTrack = await self.stateAdapter.track(for: participant.sessionId, of: .video)
+            let screenShareTrack = await self.stateAdapter.track(for: participant.sessionId, of: .screenshare)
+            let prefix_audioTrack = await self.stateAdapter.track(for: trackLookupPrefix, of: .audio)
+            let prefix_videoTrack = await self.stateAdapter.track(for: trackLookupPrefix, of: .video)
+            let prefix_screenShareTrack = await self.stateAdapter.track(for: trackLookupPrefix, of: .screenshare)
 
-            let prefix_audioTrack = await stateAdapter.track(for: trackLookupPrefix, of: .audio)
-            XCTAssertNil(prefix_audioTrack)
-            let prefix_videoTrack = await stateAdapter.track(for: trackLookupPrefix, of: .video)
-            XCTAssertNil(prefix_videoTrack)
-            let prefix_screenShareTrack = await stateAdapter.track(for: trackLookupPrefix, of: .screenshare)
-            XCTAssertNil(prefix_screenShareTrack)
-
-            await fulfillment(of: [participantLeftNotificationExpectation], timeout: defaultTimeout)
+            return screenShareTrack == nil &&
+                videoTrack == nil &&
+                audioTrack == nil &&
+                prefix_audioTrack == nil &&
+                prefix_videoTrack == nil &&
+                prefix_screenShareTrack == nil
         }
+        await fulfillment(of: [participantLeftNotificationExpectation], timeout: defaultTimeout)
     }
 
     func test_handleParticipantLeft_givenEventWithRecordingUser_whenPublished_thenParticipantsAndTracksNotChanging() async throws {
@@ -322,9 +316,9 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.participantLeft(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) { participants in
-            XCTAssertFalse(participants.isEmpty)
-            await fulfillment(of: [participantLeftNotificationExpectation], timeout: 2)
+            participants.isEmpty == false
         }
+        await fulfillment(of: [participantLeftNotificationExpectation], timeout: 2)
     }
 
     // MARK: dominantSpeakerChanged
@@ -341,8 +335,8 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.dominantSpeakerChanged(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertTrue($0[participantA.sessionId]?.isDominantSpeaker ?? false)
-            XCTAssertFalse($0[participantB.sessionId]?.isDominantSpeaker ?? false)
+            $0[participantA.sessionId]?.isDominantSpeaker == true
+                && $0[participantB.sessionId]?.isDominantSpeaker == false
         }
     }
 
@@ -370,8 +364,8 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.joinResponse(event)),
             initialState: [:]
         ) { participants in
-            XCTAssertEqual(participants.count, 11)
-            XCTAssertEqual(participants.filter { !$0.value.showTrack }.count, 1)
+            participants.count == 11
+                && participants.filter { !$0.value.showTrack }.count == 1
         }
     }
 
@@ -388,10 +382,9 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.healthCheckResponse(event)),
             initialState: [:]
         ) { _ in
-            let participantsCount = await stateAdapter.participantsCount
-            let anonymousCount = await stateAdapter.anonymousCount
-            XCTAssertEqual(participantsCount, 23)
-            XCTAssertEqual(anonymousCount, 4)
+            let participantsCount = await self.stateAdapter.participantsCount
+            let anonymousCount = await self.stateAdapter.anonymousCount
+            return participantsCount == 23 && anonymousCount == 4
         }
     }
 
@@ -408,8 +401,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.trackPublished(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0.count, 1)
-            XCTAssertTrue($0[participant.sessionId]?.hasAudio ?? false)
+            $0.count == 1 && $0[participant.sessionId]?.hasAudio == true
         }
     }
 
@@ -424,8 +416,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.trackPublished(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0.count, 1)
-            XCTAssertTrue($0[participant.sessionId]?.hasVideo ?? false)
+            $0.count == 1 && $0[participant.sessionId]?.hasVideo == true
         }
     }
 
@@ -440,8 +431,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.trackPublished(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0.count, 1)
-            XCTAssertTrue($0[participant.sessionId]?.isScreensharing ?? false)
+            $0.count == 1 && $0[participant.sessionId]?.isScreensharing == true
         }
     }
 
@@ -458,8 +448,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.trackUnpublished(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0.count, 1)
-            XCTAssertFalse($0[participant.sessionId]?.hasAudio ?? true)
+            $0.count == 1 && $0[participant.sessionId]?.hasAudio == false
         }
     }
 
@@ -474,8 +463,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.trackUnpublished(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0.count, 1)
-            XCTAssertFalse($0[participant.sessionId]?.hasVideo ?? true)
+            $0.count == 1 && $0[participant.sessionId]?.hasVideo == false
         }
     }
 
@@ -490,8 +478,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.trackUnpublished(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0.count, 1)
-            XCTAssertFalse($0[participant.sessionId]?.isSpeaking ?? true)
+            $0.count == 1 && $0[participant.sessionId]?.isScreensharing == false
         }
     }
 
@@ -511,8 +498,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.pinsUpdated(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertNotNil($0[participantA.sessionId]?.pin)
-            XCTAssertNil($0[participantB.sessionId]?.pin)
+            $0[participantA.sessionId]?.pin != nil && $0[participantB.sessionId]?.pin == nil
         }
     }
 
@@ -530,8 +516,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.pinsUpdated(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertFalse($0[participantA.sessionId]?.pin?.isLocal ?? true)
-            XCTAssertNil($0[participantB.sessionId]?.pin)
+            $0[participantA.sessionId]?.pin?.isLocal == false && $0[participantB.sessionId]?.pin == nil
         }
     }
 
@@ -549,8 +534,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.pinsUpdated(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertNotNil($0[participantA.sessionId]?.pin)
-            XCTAssertNil($0[participantB.sessionId]?.pin)
+            $0[participantA.sessionId]?.pin != nil && $0[participantB.sessionId]?.pin == nil
         }
     }
 
@@ -558,12 +542,13 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_handleParticipantUpdated_givenEvent_whenPublished_thenUpdatesParticipant() async throws {
         let pinnedAt = Date(timeIntervalSince1970: 100)
-        let participant = CallParticipant.dummy(showTrack: false, pin: .init(isLocal: true, pinnedAt: pinnedAt))
+        let participant = CallParticipant.dummy(showTrack: true, pin: .init(isLocal: true, pinnedAt: pinnedAt))
         var event = Stream_Video_Sfu_Event_ParticipantUpdated()
         let expectedParticipant = CallParticipant.dummy(
             id: participant.id,
-            name: participant.name,
-            showTrack: false,
+            name: participant.name + "_newName",
+            showTrack: true,
+            audioLevels: [0],
             pin: .init(isLocal: true, pinnedAt: pinnedAt)
         )
         event.participant = .init(expectedParticipant)
@@ -573,8 +558,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.participantUpdated(event)),
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
-            XCTAssertEqual($0.count, 1)
-            XCTAssertEqual($0[expectedParticipant.sessionId], expectedParticipant)
+            $0.count == 1 && $0[expectedParticipant.sessionId] == expectedParticipant
         }
     }
 
@@ -584,7 +568,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         _ event: T,
         wrappedEvent: WrappedEvent,
         initialState: [String: CallParticipant],
-        handler: ([String: CallParticipant]) async throws -> Void
+        handler: @Sendable @escaping ([String: CallParticipant]) async throws -> Bool
     ) async throws {
         await stateAdapter.enqueue { _ in initialState }
         let eventExpectation = expectation(description: "Event \(type(of: event)) received.")
@@ -607,6 +591,13 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             await group.waitForAll()
         }
         cancellable.cancel()
-        try await handler(await stateAdapter.participants)
+
+        await fulfillment {
+            do {
+                return try await handler(await self.stateAdapter.participants)
+            } catch {
+                return false
+            }
+        }
     }
 }

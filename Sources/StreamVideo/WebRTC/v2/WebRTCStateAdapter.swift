@@ -34,8 +34,6 @@ actor WebRTCStateAdapter: ObservableObject {
         }
     }
 
-    @Injected(\.screenProperties) private var screenProperties
-
     // Properties for user, API key, call ID, video configuration, and factories.
     let user: User
     let apiKey: String
@@ -369,7 +367,9 @@ actor WebRTCStateAdapter: ObservableObject {
 
     /// Removes a track for the given participant ID.
     ///
-    /// - Parameter id: The participant ID whose track should be removed.
+    /// - Parameters:
+    ///   - id: The participant ID whose track should be removed.
+    ///   - type: The type of track (audio, video, screenshare) or `nil` to remove all.
     func didRemoveTrack(for id: String, type: TrackType? = nil) {
         if let type {
             switch type {
@@ -413,6 +413,12 @@ actor WebRTCStateAdapter: ObservableObject {
         }
     }
 
+    /// Retrieves a track by (trackLookUpPrefix or sessionId) and track type.
+    ///
+    /// - Parameters:
+    ///   - participant: The participant for which we want to fetch the track.
+    ///   - trackType: The type of track (audio, video, screenshare).
+    /// - Returns: The associated media stream track, or `nil` if not found.
     func track(
         for participant: CallParticipant,
         of trackType: TrackType
@@ -447,39 +453,62 @@ actor WebRTCStateAdapter: ObservableObject {
 
     // MARK: Participant Operations
 
+    /// Configures the observation of participants' updates.
     private func configureParticipantsObservation() {
-        let refreshRate = screenProperties.refreshRate
+        /// Subscribes to the `participantsUpdateSubject` to handle updates.
         participantsUpdatesCancellable = participantsUpdateSubject
             .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.set(participants: $0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in
+                /// Sets the participants when an update is received.
+                await self?.set(participants: $0)
+            }
     }
 
+    /// Updates the current participants and logs those with video tracks.
+    /// - Parameter participants: The storage containing participant information.
     private func set(participants: ParticipantsStorage) {
+        /// Updates the local participants storage.
         self.participants = participants
+        /// Filters participants who have video tracks.
         let participantsWithVideoTracks = participants
             .filter { $0.value.track != nil }
             .map(\.value.name)
             .sorted()
             .joined(separator: ",")
+        /// Logs the count and names of participants with video tracks.
         log.debug(
             "\(participants.count) participants updated. \(participantsWithVideoTracks) have video tracks."
         )
     }
 
+    /// Enqueues a participant operation to be executed asynchronously but in serial order for the actor.
+    /// - Parameters:
+    ///   - operation: The participant operation to perform.
+    ///   - functionName: The name of the calling function. Defaults to the current function name.
+    ///   - fileName: The name of the file where the function is called. Defaults to the current file name.
+    ///   - lineNumber: The line number where the function is called. Defaults to the current line number.
     func enqueue(
         _ operation: @escaping ParticipantOperation,
         functionName: StaticString = #function,
         fileName: StaticString = #file,
         lineNumber: UInt = #line
     ) {
+        /// Creates a new asynchronous task for the operation.
         let newTask = Task { [previousParticipantOperation] in
+            /// Awaits the result of the previous participant operation.
             _ = await previousParticipantOperation?.result
 
+            /// Retrieves the current interim participants.
             let current = interimParticipants
+            /// Applies the operation to get the next state of participants.
             let next = operation(current)
+            /// Assigns media tracks to the participants.
             let updated = assignTracks(on: next)
+            /// Updates the interim participants with the new state.
             interimParticipants = updated
+            /// Sends the updated participants to observers.
             participantsUpdateSubject.send(updated)
+            /// Logs the completion of the participant operation.
             log.debug(
                 "Participant operation completed.",
                 functionName: functionName,
@@ -488,16 +517,23 @@ actor WebRTCStateAdapter: ObservableObject {
             )
         }
 
+        /// Stores the new task as the previous operation for chaining.
         previousParticipantOperation = newTask
     }
 
+    /// Assigns media tracks to participants based on their media type.
+    /// - Parameter participants: The storage containing participant information.
+    /// - Returns: An updated participants storage with assigned tracks.
     func assignTracks(
         on participants: ParticipantsStorage
     ) -> ParticipantsStorage {
+        /// Reduces the participants to a new storage with updated tracks.
         participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
             partialResult[entry.key] = entry
                 .value
+                /// Updates the participant with a video track if available.
                 .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
+                /// Updates the participant with a screensharing track if available.
                 .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
         }
     }

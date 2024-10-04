@@ -5,7 +5,7 @@
 import Combine
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
 final class LocalVideoMediaAdapter_Tests: XCTestCase {
     private let mockActiveCallProvider: MockActiveCallProvider! = .init()
@@ -24,9 +24,12 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         videoOptions: .init(),
         videoConfig: .dummy(),
         subject: spySubject,
-        capturerFactory: mockCapturerFactory
+        capturerFactory: mockCapturerFactory,
+        videoCaptureSessionProvider: .init()
     )
     private var temporaryPeerConnection: RTCPeerConnection?
+
+    // MARK: - Lifecycle
 
     override func setUp() {
         super.setUp()
