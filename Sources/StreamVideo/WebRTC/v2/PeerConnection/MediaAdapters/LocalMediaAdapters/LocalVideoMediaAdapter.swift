@@ -2,12 +2,15 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+@preconcurrency import AVFoundation
 import Combine
 import Foundation
 import StreamWebRTC
 
 /// A class that manages local video media for a call session.
 final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
+
+    @Injected(\.videoCapturePolicy) private var videoCapturePolicy
 
     /// The unique identifier for the current session.
     private let sessionID: String
@@ -323,15 +326,10 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             params.encodings = updatedEncodings
             sender.sender.parameters = params
 
-            let videoCodecs = VideoCodec
-                .defaultCodecs
-                .filter { activeEncodings.contains($0.quality) }
-
-            if
-                let activeSession = videoCaptureSessionProvider.activeSession,
-                let device = activeSession.device {
-                await activeSession.capturer.updateCaptureQuality(videoCodecs, on: device)
-            }
+            await videoCapturePolicy.updateCaptureQuality(
+                with: activeEncodings,
+                for: videoCaptureSessionProvider.activeSession
+            )
         }
     }
 

@@ -451,16 +451,19 @@ actor WebRTCStateAdapter: ObservableObject {
         let refreshRate = screenProperties.refreshRate
         participantsUpdatesCancellable = participantsUpdateSubject
             .removeDuplicates()
-            .throttle(for: .init(floatLiteral: refreshRate), scheduler: DispatchQueue.main, latest: true)
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.set(participants: $0) }
     }
 
     private func set(participants: ParticipantsStorage) {
         self.participants = participants
-        log
-            .debug(
-                "\(participants.count) participants updated. \(participants.filter { $0.value.track != nil }.map(\.value.name).sorted().joined(separator: ",")) have video tracks."
-            )
+        let participantsWithVideoTracks = participants
+            .filter { $0.value.track != nil }
+            .map(\.value.name)
+            .sorted()
+            .joined(separator: ",")
+        log.debug(
+            "\(participants.count) participants updated. \(participantsWithVideoTracks) have video tracks."
+        )
     }
 
     func enqueue(
@@ -488,7 +491,9 @@ actor WebRTCStateAdapter: ObservableObject {
         previousParticipantOperation = newTask
     }
 
-    func assignTracks(on participants: ParticipantsStorage) -> ParticipantsStorage {
+    func assignTracks(
+        on participants: ParticipantsStorage
+    ) -> ParticipantsStorage {
         participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
             partialResult[entry.key] = entry
                 .value

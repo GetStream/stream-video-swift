@@ -144,7 +144,10 @@ class VideoCapturer: CameraVideoCapturing {
         }
 
         if dimensions.area != videoOptions.preferredDimensions.area {
-            log.debug("Adapting video source output format (\(dimensions.width)x\(dimensions.height))")
+            log.debug(
+                "Adapting video source output format (\(dimensions.width)x\(dimensions.height))",
+                subsystems: .webRTC
+            )
             videoSource.adaptOutputFormat(
                 toWidth: dimensions.width,
                 height: dimensions.height,
