@@ -196,8 +196,18 @@ final class WebRTCCoordinator: @unchecked Sendable {
         for participant: CallParticipant,
         isVisible: Bool
     ) async {
-        await stateAdapter
-            .didUpdateParticipant(participant, isVisible: isVisible)
+        await stateAdapter.enqueue { participants in
+            guard
+                let participant = participants[participant.id],
+                participant.showTrack != isVisible
+            else {
+                return participants
+            }
+            var updatedParticipants = participants
+            updatedParticipants[participant.id] = participant
+                .withUpdated(showTrack: isVisible)
+            return updatedParticipants
+        }
     }
 
     /// Updates the track size for a participant.
@@ -209,10 +219,18 @@ final class WebRTCCoordinator: @unchecked Sendable {
         _ trackSize: CGSize,
         for participant: CallParticipant
     ) async {
-        await stateAdapter.didUpdateParticipant(
-            participant,
-            trackSize: trackSize
-        )
+        await stateAdapter.enqueue { participants in
+            guard
+                let participant = participants[participant.id],
+                participant.trackSize != trackSize
+            else {
+                return participants
+            }
+            var updatedParticipants = participants
+            updatedParticipants[participant.id] = participant
+                .withUpdated(trackSize: trackSize)
+            return updatedParticipants
+        }
     }
 
     /// Sets a video filter for the call.
@@ -250,21 +268,17 @@ final class WebRTCCoordinator: @unchecked Sendable {
         isEnabled: Bool,
         sessionId: String
     ) async throws {
-        var participants = await stateAdapter.participants
-
-        guard
-            let participant = participants[sessionId]
-        else {
-            throw ClientError.Unexpected()
+        await stateAdapter.enqueue { participants in
+            guard
+                let participant = participants[sessionId]
+            else {
+                return participants
+            }
+            var updatedParticipants = participants
+            let pin = isEnabled ? PinInfo(isLocal: true, pinnedAt: Date()) : nil
+            updatedParticipants[participant.id] = participant.withUpdated(pin: pin)
+            return updatedParticipants
         }
-
-        participants[sessionId] = participant.withUpdated(
-            pin: isEnabled
-                ? PinInfo(isLocal: true, pinnedAt: Date())
-                : nil
-        )
-
-        await stateAdapter.didUpdateParticipants(participants)
     }
 
     /// Starts noise cancellation for a participant's session.

@@ -112,7 +112,67 @@ class VideoCapturer: CameraVideoCapturing {
             }
         }
     }
-    
+
+    func updateCaptureQuality(
+        _ codecs: [VideoCodec],
+        on device: AVCaptureDevice?
+    ) async throws {
+        guard
+            let videoCapturer = videoCapturer as? RTCCameraVideoCapturer,
+            let device
+        else {
+            return
+        }
+
+        let preferredDimensions: CMVideoDimensions = {
+            if codecs.first(where: { $0.quality == VideoCodec.full.quality }) != nil {
+                return .full
+            } else if codecs.first(where: { $0.quality == VideoCodec.half.quality }) != nil {
+                return .half
+            } else {
+                return .quarter
+            }
+        }()
+        let outputFormat = VideoCapturingUtils.outputFormat(
+            for: device,
+            preferredFormat: videoOptions.preferredFormat,
+            preferredDimensions: preferredDimensions,
+            preferredFps: videoOptions.preferredFps
+        )
+        guard
+            let selectedFormat = outputFormat.format,
+            let dimensions = outputFormat.dimensions
+        else {
+            return
+        }
+
+        if dimensions.area != videoOptions.preferredDimensions.area {
+            log.debug(
+                "Adapting video source output format (\(dimensions.width)x\(dimensions.height))",
+                subsystems: .webRTC
+            )
+            videoSource.adaptOutputFormat(
+                toWidth: dimensions.width,
+                height: dimensions.height,
+                fps: Int32(outputFormat.fps)
+            )
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            videoCapturer.startCapture(
+                with: device,
+                format: selectedFormat,
+                fps: outputFormat.fps
+            ) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+
     /// Initiates a focus and exposure operation at the specified point on the camera's view.
     ///
     /// This method attempts to focus the camera and set the exposure at a specific point by interacting

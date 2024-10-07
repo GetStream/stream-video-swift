@@ -6,9 +6,9 @@ import Combine
 import Foundation
 
 extension Publisher {
-    func sinkTask(
+    public func sinkTask(
         storeIn disposableBag: DisposableBag? = nil,
-        identifier: String = UUID().uuidString,
+        identifier: String? = nil,
         receiveCompletion: @escaping ((Subscribers.Completion<Failure>) -> Void) = { _ in },
         receiveValue: @escaping ((Output) async throws -> Void)
     ) -> AnyCancellable {
@@ -29,7 +29,7 @@ extension Publisher {
             }
 
             if let disposableBag {
-                task.store(in: disposableBag, key: identifier)
+                task.store(in: disposableBag, key: identifier ?? UUID().uuidString)
             }
         }
     }

@@ -145,10 +145,15 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             isVisible: true
         )
 
-        await assertEqualAsync(
-            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.participants[user.id]?.showTrack,
-            true
-        )
+        await fulfillment {
+            await self
+                .mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .participants[self.user.id]?
+                .showTrack == true
+        }
     }
 
     // MARK: - updateTrackSize
@@ -161,15 +166,15 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             for: .dummy(id: user.id)
         )
 
-        await assertEqualAsync(
-            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.participants[user.id]?.trackSize.width,
-            100
-        )
-        await assertEqualAsync(
-            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.participants[user.id]?.trackSize
-                .height,
-            200
-        )
+        await fulfillment {
+            await self
+                .mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .participants[self.user.id]?
+                .trackSize == .init(width: 100, height: 200)
+        }
     }
 
     // MARK: - setVideoFilter
@@ -267,14 +272,14 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         try await subject.changePinState(isEnabled: true, sessionId: user.id)
 
-        await assertEqualAsync(
-            await mockWebRTCCoordinatorFactory
+        await fulfillment {
+            await self
+                .mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
-                .participants[user.id]?.pin?.isLocal,
-            true
-        )
+                .participants[self.user.id]?.pin?.isLocal == true
+        }
     }
 
     func test_changePinState_isEnabledFalse_shouldUpdateParticipantPin() async throws {
@@ -557,7 +562,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
             .set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
-            .didUpdateParticipants([user.id: CallParticipant.dummy(id: user.id)])
+            .enqueue { _ in [self.user.id: CallParticipant.dummy(id: self.user.id)] }
         try await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
             .set(statsReporter: WebRTCStatsReporter(sessionID: .unique))

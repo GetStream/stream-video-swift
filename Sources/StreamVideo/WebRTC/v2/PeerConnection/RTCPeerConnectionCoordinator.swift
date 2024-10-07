@@ -80,6 +80,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - audioSettings: Settings for audio processing.
     ///   - sfuAdapter: Adapter for communicating with the SFU.
     ///   - audioSession: The audio session to be used.
+    ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
     ///   - screenShareSessionProvider: Provider for screen sharing sessions.
     convenience init(
         sessionId: String,
@@ -92,6 +93,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
         audioSession: AudioSession,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
         self.init(
@@ -112,6 +114,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
                 audioSession: audioSession,
+                videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
             )
         )
@@ -150,6 +153,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
         peerConnection
             .publisher
+            .receive(on: DispatchQueue.main)
             .sink { [identifier, subsystem] in
                 if let failedToGatherEvent = $0 as? StreamRTCPeerConnection.ICECandidateFailedToGatherEvent {
                     log.warning(
@@ -207,7 +211,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
-        peerConnection.close()
+        Task { [peerConnection] in await peerConnection.close() }
     }
 
     func prepareForClosing() async {
@@ -366,7 +370,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     }
 
     /// Closes the peer connection.
-    func close() {
+    func close() async {
         log.debug(
             """
             Closing PeerConnection
@@ -378,7 +382,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
-        peerConnection.close()
+        await peerConnection.close()
     }
 
     /// Restarts ICE for the peer connection.

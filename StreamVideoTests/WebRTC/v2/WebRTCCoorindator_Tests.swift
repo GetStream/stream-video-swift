@@ -5,9 +5,9 @@
 import Combine
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
-final class WebRTCCoordinator_Tests: XCTestCase {
+final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     /// Class variable that will be used by all test cases in the file. This ensure that only one
     /// PeerConnectionFactory will be created during tests, ensuring that WebRTC deallocation will
     /// only happen once all tests cases in the file ran.
@@ -224,10 +224,13 @@ final class WebRTCCoordinator_Tests: XCTestCase {
             isVisible: true
         )
 
-        await assertEqualAsync(
-            await subject.stateAdapter.participants[user.id]?.showTrack,
-            true
-        )
+        await fulfillment {
+            await self
+                .subject
+                .stateAdapter
+                .participants[self.user.id]?
+                .showTrack == true
+        }
     }
 
     // MARK: - updateTrackSize
@@ -240,14 +243,13 @@ final class WebRTCCoordinator_Tests: XCTestCase {
             for: .dummy(id: user.id)
         )
 
-        await assertEqualAsync(
-            await subject.stateAdapter.participants[user.id]?.trackSize.width,
-            100
-        )
-        await assertEqualAsync(
-            await subject.stateAdapter.participants[user.id]?.trackSize.height,
-            200
-        )
+        await fulfillment {
+            await self
+                .subject
+                .stateAdapter
+                .participants[self.user.id]?
+                .trackSize == .init(width: 100, height: 200)
+        }
     }
 
     // MARK: - setVideoFilter
@@ -336,10 +338,13 @@ final class WebRTCCoordinator_Tests: XCTestCase {
 
         try await subject.changePinState(isEnabled: true, sessionId: user.id)
 
-        await assertEqualAsync(
-            await subject.stateAdapter.participants[user.id]?.pin?.isLocal,
-            true
-        )
+        await fulfillment {
+            await self
+                .subject
+                .stateAdapter
+                .participants[self.user.id]?
+                .pin?.isLocal == true
+        }
     }
 
     func test_changePinState_isEnabledFalse_shouldUpdateParticipantPin() async throws {
@@ -580,7 +585,7 @@ final class WebRTCCoordinator_Tests: XCTestCase {
         await subject.stateAdapter.set(participantsCount: 12)
         await subject.stateAdapter.set(anonymousCount: 22)
         await subject.stateAdapter.set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
-        await subject.stateAdapter.didUpdateParticipants([user.id: CallParticipant.dummy(id: user.id)])
+        await subject.stateAdapter.enqueue { _ in [self.user.id: CallParticipant.dummy(id: self.user.id)] }
         try await subject.stateAdapter.configurePeerConnections()
         await subject.stateAdapter.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
     }

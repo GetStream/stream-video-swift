@@ -33,6 +33,7 @@ final class MockCameraVideoCapturer: CameraVideoCapturing, Mockable {
         case removeCapturePhotoOutput
         case startCapture
         case stopCapture
+        case updateCaptureQuality
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -47,6 +48,7 @@ final class MockCameraVideoCapturer: CameraVideoCapturing, Mockable {
         case removeCapturePhotoOutput(capturePhotoOutput: AVCapturePhotoOutput)
         case startCapture(device: AVCaptureDevice?)
         case stopCapture
+        case updateCaptureQuality(codecs: [VideoCodec], device: AVCaptureDevice?)
 
         var payload: Any {
             switch self {
@@ -72,6 +74,8 @@ final class MockCameraVideoCapturer: CameraVideoCapturing, Mockable {
                 return capturePhotoOutput
             case let .removeCapturePhotoOutput(capturePhotoOutput):
                 return capturePhotoOutput
+            case let .updateCaptureQuality(codecs, device):
+                return (codecs, device)
             }
         }
     }
@@ -101,6 +105,14 @@ final class MockCameraVideoCapturer: CameraVideoCapturing, Mockable {
     func stopCapture() async throws {
         stubbedFunctionInput[.stopCapture]?
             .append(.stopCapture)
+    }
+
+    func updateCaptureQuality(
+        _ codecs: [VideoCodec],
+        on device: AVCaptureDevice?
+    ) async {
+        stubbedFunctionInput[.updateCaptureQuality]?
+            .append(.updateCaptureQuality(codecs: codecs, device: device))
     }
 
     func setVideoFilter(_ videoFilter: VideoFilter?) {

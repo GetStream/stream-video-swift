@@ -23,6 +23,7 @@ protocol RTCPeerConnectionCoordinatorProviding {
     ///   - audioSettings: Settings for audio configuration.
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - audioSession: The audio session to be used.
+    ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     /// - Returns: An initialized `RTCPeerConnectionCoordinator` instance.
     func buildCoordinator(
@@ -36,6 +37,7 @@ protocol RTCPeerConnectionCoordinatorProviding {
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
         audioSession: AudioSession,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) -> RTCPeerConnectionCoordinator
 }
@@ -58,6 +60,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - audioSettings: Settings for audio configuration.
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - audioSession: The audio session to be used.
+    ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     /// - Returns: A newly created `RTCPeerConnectionCoordinator` instance.
     func buildCoordinator(
@@ -71,6 +74,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
         audioSession: AudioSession,
+        videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) -> RTCPeerConnectionCoordinator {
         RTCPeerConnectionCoordinator(
@@ -84,6 +88,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
             audioSession: audioSession,
+            videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )
     }
