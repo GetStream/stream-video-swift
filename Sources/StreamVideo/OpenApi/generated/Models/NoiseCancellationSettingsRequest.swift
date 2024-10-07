@@ -4,7 +4,7 @@
 
 import Foundation
     
-public final class NoiseCancellationSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class NoiseCancellationSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Mode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
@@ -33,7 +33,7 @@ public final class NoiseCancellationSettings: @unchecked Sendable, Codable, JSON
         case mode
     }
     
-    public static func == (lhs: NoiseCancellationSettings, rhs: NoiseCancellationSettings) -> Bool {
+    public static func == (lhs: NoiseCancellationSettingsRequest, rhs: NoiseCancellationSettingsRequest) -> Bool {
         lhs.mode == rhs.mode
     }
 

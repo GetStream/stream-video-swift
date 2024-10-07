@@ -25,7 +25,7 @@ public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncod
     public var accessRequestEnabled: Bool?
     public var defaultDevice: DefaultDevice
     public var micDefaultOn: Bool?
-    public var noiseCancellation: NoiseCancellationSettings?
+    public var noiseCancellation: NoiseCancellationSettingsRequest?
     public var opusDtxEnabled: Bool?
     public var redundantCodingEnabled: Bool?
     public var speakerDefaultOn: Bool?
@@ -34,7 +34,7 @@ public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncod
         accessRequestEnabled: Bool? = nil,
         defaultDevice: DefaultDevice,
         micDefaultOn: Bool? = nil,
-        noiseCancellation: NoiseCancellationSettings? = nil,
+        noiseCancellation: NoiseCancellationSettingsRequest? = nil,
         opusDtxEnabled: Bool? = nil,
         redundantCodingEnabled: Bool? = nil,
         speakerDefaultOn: Bool? = nil

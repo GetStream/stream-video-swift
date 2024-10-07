@@ -13,7 +13,6 @@ public final class ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSON
     public var language: String?
     public var name: String?
     public var privacySettings: PrivacySettings?
-    public var pushNotifications: PushNotificationSettingsInput?
 
     public init(
         custom: [String: RawJSON]? = nil,
@@ -22,8 +21,7 @@ public final class ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSON
         invisible: Bool? = nil,
         language: String? = nil,
         name: String? = nil,
-        privacySettings: PrivacySettings? = nil,
-        pushNotifications: PushNotificationSettingsInput? = nil
+        privacySettings: PrivacySettings? = nil
     ) {
         self.custom = custom
         self.id = id
@@ -32,7 +30,6 @@ public final class ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSON
         self.language = language
         self.name = name
         self.privacySettings = privacySettings
-        self.pushNotifications = pushNotifications
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -43,7 +40,6 @@ public final class ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSON
         case language
         case name
         case privacySettings = "privacy_settings"
-        case pushNotifications = "push_notifications"
     }
     
     public static func == (lhs: ConnectUserDetailsRequest, rhs: ConnectUserDetailsRequest) -> Bool {
@@ -53,8 +49,7 @@ public final class ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSON
             lhs.invisible == rhs.invisible &&
             lhs.language == rhs.language &&
             lhs.name == rhs.name &&
-            lhs.privacySettings == rhs.privacySettings &&
-            lhs.pushNotifications == rhs.pushNotifications
+            lhs.privacySettings == rhs.privacySettings
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -65,6 +60,5 @@ public final class ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSON
         hasher.combine(language)
         hasher.combine(name)
         hasher.combine(privacySettings)
-        hasher.combine(pushNotifications)
     }
 }

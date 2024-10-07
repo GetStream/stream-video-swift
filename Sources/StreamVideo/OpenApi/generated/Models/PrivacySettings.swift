@@ -6,26 +6,21 @@ import Foundation
     
 public final class PrivacySettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var readReceipts: ReadReceipts?
     public var typingIndicators: TypingIndicators?
 
-    public init(readReceipts: ReadReceipts? = nil, typingIndicators: TypingIndicators? = nil) {
-        self.readReceipts = readReceipts
+    public init(typingIndicators: TypingIndicators? = nil) {
         self.typingIndicators = typingIndicators
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case readReceipts = "read_receipts"
         case typingIndicators = "typing_indicators"
     }
     
     public static func == (lhs: PrivacySettings, rhs: PrivacySettings) -> Bool {
-        lhs.readReceipts == rhs.readReceipts &&
-            lhs.typingIndicators == rhs.typingIndicators
+        lhs.typingIndicators == rhs.typingIndicators
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(readReceipts)
         hasher.combine(typingIndicators)
     }
 }
