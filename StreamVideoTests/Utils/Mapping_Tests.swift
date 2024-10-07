@@ -19,7 +19,6 @@ final class Mapping_Tests: XCTestCase {
             image: "https://test.com",
             language: "en",
             name: "test",
-            online: false,
             role: "user",
             teams: [],
             updatedAt: date

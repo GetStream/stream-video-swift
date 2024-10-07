@@ -332,7 +332,6 @@ final class WebSocketClient_Tests: XCTestCase {
                 custom: [:],
                 id: "test",
                 language: "en",
-                online: false,
                 role: "user",
                 teams: [],
                 updatedAt: Date()

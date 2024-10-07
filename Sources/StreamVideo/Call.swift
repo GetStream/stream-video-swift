@@ -1283,7 +1283,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Handles updates to noise cancellation settings.
     /// - Parameter value: The updated `NoiseCancellationSettings` value.
-    private func didUpdate(_ value: NoiseCancellationSettings?) {
+    private func didUpdate(_ value: NoiseCancellationSettingsRequest?) {
         guard let noiseCancellationFilter = streamVideo.videoConfig.noiseCancellationFilter else {
             log
                 .warning(

@@ -28,7 +28,6 @@ extension UserResponse {
             image: image,
             language: language,
             name: name,
-            online: false,
             role: role,
             teams: teams,
             updatedAt: updatedAt

@@ -19,7 +19,6 @@ final class EventTests: XCTestCase {
             custom: [:],
             id: "456",
             language: "en",
-            online: true,
             role: "admin",
             teams: [],
             updatedAt: Date()

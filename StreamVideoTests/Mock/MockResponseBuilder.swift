@@ -106,7 +106,6 @@ class MockResponseBuilder {
             custom: [:],
             id: id,
             language: "en",
-            online: false,
             role: "user",
             teams: [],
             updatedAt: Date()
