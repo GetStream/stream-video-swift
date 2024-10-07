@@ -294,12 +294,13 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             .coordinator
             .changePinState(isEnabled: false, sessionId: user.id)
 
-        await assertNilAsync(
-            await mockWebRTCCoordinatorFactory
+        await fulfillment {
+            await self
+                .mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
-                .stateAdapter.participants[user.id]?.pin
-        )
+                .stateAdapter.participants[self.user.id]?.pin == nil
+        }
     }
 
     // MARK: - startNoiseCancellation

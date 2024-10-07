@@ -2,6 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Foundation
+
 /// Defines a video capture policy used by the `LocalVideoAdapter` to adjust video capture quality based on
 /// instructions from the SFU (Selective Forwarding Unit).
 ///
@@ -23,15 +25,35 @@ public class VideoCapturePolicy: @unchecked Sendable {
     ) async throws { /* No operation by default */ }
 }
 
-/// A final class that adapts the video capture quality dynamically.
+/// A final class that adapts the video capture quality dynamically. The policy requires the following criteria
+/// in order to start adapting the capture quality:
+/// - Either the thermal state is `.serious` or higher **or** the current device doesn't have a
+/// neuralEngine (which is required for efficiently resizing frames).
+/// - Requested encodings to activate are different than the currently activated ones.
+/// - There is a running videoCapturingSession
 final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable {
+
+    @Injected(\.thermalStateObserver) private var thermalStateObserver
+
+    private let neuralEngineExistsProvider: () -> Bool
+    private var lastActiveEncodings: Set<String>?
+
+    init(_ neuralEngineExistsProvider: @escaping () -> Bool) {
+        self.neuralEngineExistsProvider = neuralEngineExistsProvider
+        super.init()
+    }
+
     /// Overrides the method to update capture quality using an adaptive policy.
     override func updateCaptureQuality(
         with activeEncodings: Set<String>,
         for activeSession: VideoCaptureSession?
     ) async throws {
         /// Ensure there is an active session to work with.
-        guard let activeSession else { return }
+        guard
+            shouldUpdateCaptureQuality,
+            lastActiveEncodings != activeEncodings,
+            let activeSession
+        else { return }
 
         /// Filter the default video codecs to include only those matching the active encodings.
         let videoCodecs = VideoCodec
@@ -40,6 +62,17 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
 
         try await activeSession.capturer
             .updateCaptureQuality(videoCodecs, on: activeSession.device)
+        lastActiveEncodings = activeEncodings
+        log.debug(
+            "Video capture quality adapted to [\(activeEncodings.sorted().joined(separator: ","))].",
+            subsystems: .webRTC
+        )
+    }
+
+    // MARK: - Private helpers
+
+    private var shouldUpdateCaptureQuality: Bool {
+        thermalStateObserver.state > .fair || !neuralEngineExistsProvider()
     }
 }
 
@@ -57,7 +90,7 @@ extension VideoCapturePolicy {
     /// This `adaptive` policy adjusts the device's video capture quality to match the quality requested
     /// by the SFU (Selective Forwarding Unit). By capturing video at the requested quality, it helps
     /// reduce processing overhead and improve performance, especially on older or less powerful devices.
-    static let adaptive: VideoCapturePolicy = AdaptiveVideoCapturePolicy()
+    static let adaptive: VideoCapturePolicy = AdaptiveVideoCapturePolicy { neuralEngineExists }
 }
 
 extension VideoCapturePolicy: InjectionKey {

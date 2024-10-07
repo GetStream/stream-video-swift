@@ -446,6 +446,9 @@
 		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689172C64DDC70054528A /* Publisher+TaskSink.swift */; };
 		40C6891C2C657F280054528A /* Publisher+AsyncStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C6891B2C657F280054528A /* Publisher+AsyncStream.swift */; };
+		40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */; };
+		40C75BB82CB4045100C167C3 /* MockThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */; };
+		40C75BB92CB40D8700C167C3 /* Mockable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013387B2BF248E9007318BD /* Mockable.swift */; };
 		40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */; };
 		40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8312B61325500FB9DB2 /* ModalButton.swift */; };
 		40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */; };
@@ -1701,6 +1704,7 @@
 		40C689192C64F74F0054528A /* SFUSignalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUSignalService.swift; sourceTree = "<group>"; };
 		40C6891B2C657F280054528A /* Publisher+AsyncStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+AsyncStream.swift"; sourceTree = "<group>"; };
 		40C6891D2C6661990054528A /* SFUEventAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUEventAdapter.swift; sourceTree = "<group>"; };
+		40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockThermalStateObserver.swift; sourceTree = "<group>"; };
 		40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListViewModifier.swift; sourceTree = "<group>"; };
 		40C7B8312B61325500FB9DB2 /* ModalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalButton.swift; sourceTree = "<group>"; };
 		40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView.swift; sourceTree = "<group>"; };
@@ -4620,6 +4624,7 @@
 		8492B87629081CE700006649 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
+				40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */,
 				40FE5EBC2C9C82A6006B0881 /* MockRTCVideoCapturerDelegate.swift */,
 				40483CB92C9B1E6000B4FCA8 /* MockWebRTCCoordinatorFactory.swift */,
 				40AF6A3A2C93469000BA2935 /* MockWebSocketClientFactory.swift */,
@@ -6606,6 +6611,7 @@
 				40C9E4552C988CE100802B28 /* WebRTCJoinRequestFactory_Tests.swift in Sources */,
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
 				40FE5EBF2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */,
+				40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */,
 				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,
 				406B3C142C8F870400FC93A1 /* MockActiveCallProvider.swift in Sources */,
 				841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */,
@@ -6898,6 +6904,7 @@
 				40245F452BE2746300FCF075 /* CallIngressResponse+Dummy.swift in Sources */,
 				40245F462BE2746300FCF075 /* GeofenceSettings+Dummy.swift in Sources */,
 				40245F472BE2746300FCF075 /* CallRejectedEvent+Dummy.swift in Sources */,
+				40C75BB92CB40D8700C167C3 /* Mockable.swift in Sources */,
 				40FE5EC12C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */,
 				40245F482BE2746300FCF075 /* CallParticipantResponse+Dummy.swift in Sources */,
 				40245F492BE2746300FCF075 /* EgressHLSResponse+Dummy.swift in Sources */,
@@ -6913,6 +6920,7 @@
 				40245F672BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift in Sources */,
 				40245F692BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift in Sources */,
 				40245F532BE2746300FCF075 /* TranscriptionSettings+Dummy.swift in Sources */,
+				40C75BB82CB4045100C167C3 /* MockThermalStateObserver.swift in Sources */,
 				40245F542BE2746300FCF075 /* BroadcastSettingsResponse+Dummy.swift in Sources */,
 				40245F552BE2746300FCF075 /* UserResponse+Dummy.swift in Sources */,
 				40245F562BE2746300FCF075 /* ScreensharingSettings+Dummy.swift in Sources */,
