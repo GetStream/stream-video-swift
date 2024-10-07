@@ -14,7 +14,7 @@ extension CallParticipant {
         roles: [String] = [],
         name: String = .unique,
         profileImageURL: URL? = nil,
-        trackLookupPrefix: String? = nil,
+        trackLookupPrefix: String = "",
         hasVideo: Bool = false,
         hasAudio: Bool = false,
         isScreenSharing: Bool = false,

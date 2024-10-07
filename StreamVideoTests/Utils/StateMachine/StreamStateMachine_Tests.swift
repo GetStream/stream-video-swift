@@ -56,11 +56,14 @@ final class StreamStateMachineTests: XCTestCase {
     // MARK: - Mocks
 
     private final class MockStage: StreamStateMachineStage {
+
         var id: String
         var description: String
         var allowedTransitions: [MockStage]
 
+        private(set) var willTransitionAwayWasCalled = false
         var transition: ((MockStage) throws -> Void)?
+        private(set) var didTransitionAwayWasCalled = false
 
         init(id: String, description: String, allowedTransitions: [MockStage] = []) {
             self.id = id
@@ -68,11 +71,19 @@ final class StreamStateMachineTests: XCTestCase {
             self.allowedTransitions = allowedTransitions
         }
 
+        func willTransitionAway() {
+            willTransitionAwayWasCalled = true
+        }
+
         func transition(from currentStage: MockStage) -> Self? {
             if allowedTransitions.contains(where: { $0.id == currentStage.id }) {
                 return self
             }
             return nil
+        }
+
+        func didTransitionAway() {
+            didTransitionAwayWasCalled = true
         }
     }
 }

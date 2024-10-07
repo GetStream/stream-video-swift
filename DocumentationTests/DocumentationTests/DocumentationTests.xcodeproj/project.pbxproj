@@ -32,7 +32,7 @@
 		40F290AB2BDFB37000DCF136 /* 16-noise-cancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */; };
 		40F290AD2BDFB3CA00DCF136 /* 20-noise-cancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F290AC2BDFB3CA00DCF136 /* 20-noise-cancellation.swift */; };
 		40FFDC372B63E400004DA7A2 /* 08-permissions-and-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */; };
-		40FFDC392B63E459004DA7A2 /* 09-reactions-and-custom-events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */; };
+		40FFDC392B63E459004DA7A2 /* 09-reactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC382B63E459004DA7A2 /* 09-reactions.swift */; };
 		40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */; };
 		40FFDC3D2B63E6EC004DA7A2 /* 11-call-lifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3C2B63E6EC004DA7A2 /* 11-call-lifecycle.swift */; };
 		40FFDC3F2B63E734004DA7A2 /* 12-call-state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */; };
@@ -78,6 +78,8 @@
 		40FFDCA22B640741004DA7A2 /* 14-livestream-player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */; };
 		40FFDCA42B640772004DA7A2 /* 15-long-press-to-focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */; };
 		40FFDCA62B6408DE004DA7A2 /* 00-ringing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */; };
+		84BA15B02CA2F04F0018DC51 /* 10-custom-events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BA15AF2CA2F04F0018DC51 /* 10-custom-events.swift */; };
+		84BA15AE2CA2EF420018DC51 /* 07-querying-call-members.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -106,7 +108,7 @@
 		40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "16-noise-cancellation.swift"; sourceTree = "<group>"; };
 		40F290AC2BDFB3CA00DCF136 /* 20-noise-cancellation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "20-noise-cancellation.swift"; sourceTree = "<group>"; };
 		40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-permissions-and-moderation.swift"; sourceTree = "<group>"; };
-		40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-reactions-and-custom-events.swift"; sourceTree = "<group>"; };
+		40FFDC382B63E459004DA7A2 /* 09-reactions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-reactions.swift"; sourceTree = "<group>"; };
 		40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-view-slots.swift"; sourceTree = "<group>"; };
 		40FFDC3C2B63E6EC004DA7A2 /* 11-call-lifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "11-call-lifecycle.swift"; sourceTree = "<group>"; };
 		40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "12-call-state.swift"; sourceTree = "<group>"; };
@@ -149,6 +151,8 @@
 		40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "14-livestream-player.swift"; sourceTree = "<group>"; };
 		40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "15-long-press-to-focus.swift"; sourceTree = "<group>"; };
 		40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "00-ringing.swift"; sourceTree = "<group>"; };
+		84BA15AF2CA2F04F0018DC51 /* 10-custom-events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-custom-events.swift"; sourceTree = "<group>"; };
+		84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-querying-call-members.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,9 +221,11 @@
 				400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */,
 				400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */,
 				400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */,
+				84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */,
 				40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */,
-				40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */,
+				40FFDC382B63E459004DA7A2 /* 09-reactions.swift */,
 				40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */,
+				84BA15AF2CA2F04F0018DC51 /* 10-custom-events.swift */,
 				40FFDC3C2B63E6EC004DA7A2 /* 11-call-lifecycle.swift */,
 				40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */,
 				40FFDC432B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift */,
@@ -455,6 +461,7 @@
 				40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */,
 				4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */,
 				40FFDC762B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift in Sources */,
+				84BA15AE2CA2EF420018DC51 /* 07-querying-call-members.swift in Sources */,
 				40FFDC672B63F430004DA7A2 /* 04-connection-quality-indicator.swift in Sources */,
 				40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */,
 				40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */,
@@ -467,6 +474,7 @@
 				40FFDC4B2B63EC3D004DA7A2 /* 02-outgoing-call.swift in Sources */,
 				40FFDC6D2B63F556004DA7A2 /* 03-video-theme.swift in Sources */,
 				40FFDC492B63EB92004DA7A2 /* 01-call-container.swift in Sources */,
+				84BA15B02CA2F04F0018DC51 /* 10-custom-events.swift in Sources */,
 				40FFDC4D2B63ED16004DA7A2 /* 03-incoming-call.swift in Sources */,
 				409C396F2B67CDF30090044C /* 09-broadcasting.swift in Sources */,
 				40FFDC692B63F474004DA7A2 /* 05-call-background.swift in Sources */,
@@ -476,7 +484,7 @@
 				40FFDC962B64023A004DA7A2 /* 08-permission-requests.swift in Sources */,
 				400D91CF2B63DE0100EBA47D /* 03-call-and-participant-state.swift in Sources */,
 				40FFDC652B63F395004DA7A2 /* 03-avatars.swift in Sources */,
-				40FFDC392B63E459004DA7A2 /* 09-reactions-and-custom-events.swift in Sources */,
+				40FFDC392B63E459004DA7A2 /* 09-reactions.swift in Sources */,
 				40FFDC7C2B63FB76004DA7A2 /* 03-custom-label.swift in Sources */,
 				40FFDC5C2B63F137004DA7A2 /* 02-call-participants.swift in Sources */,
 				40FFDC7A2B63FA96004DA7A2 /* 02-replacing-call-controls.swift in Sources */,

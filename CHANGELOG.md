@@ -4,11 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.12.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.12.0)
+_September 27, 2024_
+
 ### ✅ Added
 - You can now pass your customData when initializing a `CallViewModel` [#530](https://github.com/GetStream/stream-video-swift/pull/530)
 
 ### 🔄 Changed
 - Updated the default sorting for Participants during a call to minimize the movement of already visible tiles [#515](https://github.com/GetStream/stream-video-swift/pull/515)
+- **Breaking** The `StreamDeviceOrientation` values now are `.portrait(isUpsideDown: Bool)` & `.landscape(isLeft: Bool)`. [#534](https://github.com/GetStream/stream-video-swift/pull/534)
 
 ### 🐞 Fixed
 - An `MissingPermissions` error was thrown when creating a `StreamVideo` with anonymous user type. [#525](https://github.com/GetStream/stream-video-swift/pull/525)
@@ -19,6 +25,15 @@ _August 29, 2024_
 ### ✅ Added
 - Participants (regular and anonymous) count, can be accessed - before or after joining a call - from the `Call.state.participantCount` & `Call.state.anonymousParticipantCount` respectively. [#496](https://github.com/GetStream/stream-video-swift/pull/496)
 - You can now provide the `CallSettings` when you start a ringing call [#497](https://github.com/GetStream/stream-video-swift/pull/497)
+
+### 🔄 Changed
+- The following `Call` APIs have been now marked as async to provide better observability.
+    - `func focus(at point: CGPoint)`
+    - `func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput)`
+    - `func removeCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput)`
+    - `func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput)`
+    - `func removeVideoOutput(_ videoOutput: AVCaptureVideoDataOutput)`
+    - `func zoom(by factor: CGFloat)`
 
 # [1.0.9](https://github.com/GetStream/stream-video-swift/releases/tag/1.0.9)
 _July 19, 2024_

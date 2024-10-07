@@ -363,7 +363,7 @@ extension AppEnvironment {
     static var tokenExpiration: TokenExpiration = {
         switch configuration {
         case .debug:
-            return .oneMinute
+            return .never
         case .test:
             return .oneMinute
         case .release:

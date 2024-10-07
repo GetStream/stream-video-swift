@@ -56,6 +56,8 @@ struct VideoCodec: Sendable {
     let maxBitrate: Int
     /// Factor that tells how much the resolution should be scalled down.
     var scaleDownFactor: Int32?
+    
+    var sfuQuality: Stream_Video_Sfu_Models_VideoQuality
 }
 
 extension VideoCodec {
@@ -65,27 +67,31 @@ extension VideoCodec {
     static let full = VideoCodec(
         dimensions: .full,
         quality: "f",
-        maxBitrate: .maxBitrate
+        maxBitrate: .maxBitrate,
+        sfuQuality: .high
     )
     
     static let half = VideoCodec(
         dimensions: .half,
         quality: "h",
         maxBitrate: 500_000,
-        scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.half.area
+        scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.half.area,
+        sfuQuality: .mid
     )
     
     static let quarter = VideoCodec(
         dimensions: .quarter,
         quality: "q",
         maxBitrate: 300_000,
-        scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.quarter.area
+        scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.quarter.area,
+        sfuQuality: .lowUnspecified
     )
     
     static let screenshare = VideoCodec(
         dimensions: .full,
         quality: "q",
-        maxBitrate: .maxBitrate
+        maxBitrate: .maxBitrate,
+        sfuQuality: .high
     )
 }
 

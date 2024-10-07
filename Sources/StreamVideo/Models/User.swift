@@ -5,7 +5,7 @@
 import Foundation
 
 /// Model for the user's info.
-public struct User: Identifiable, Equatable, Sendable, Codable {
+public struct User: Identifiable, Hashable, Sendable, Codable {
     public let id: String
     public let imageURL: URL?
     public let role: String
@@ -86,7 +86,7 @@ public extension UserResponse {
     }
 }
 
-public enum UserAuthType: Sendable, Codable {
+public enum UserAuthType: Sendable, Codable, Hashable {
     case regular
     case anonymous
     case guest

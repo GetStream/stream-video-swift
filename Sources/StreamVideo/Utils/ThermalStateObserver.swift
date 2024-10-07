@@ -108,6 +108,15 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
     }
 }
 
+extension ProcessInfo.ThermalState: Comparable {
+    public static func < (
+        lhs: ProcessInfo.ThermalState,
+        rhs: ProcessInfo.ThermalState
+    ) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}
+
 /// Provides the default value of the `Appearance` class.
 enum ThermalStateObserverKey: InjectionKey {
     static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared

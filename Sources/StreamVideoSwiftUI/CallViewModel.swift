@@ -23,7 +23,9 @@ open class CallViewModel: ObservableObject {
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] in self?.callParticipants = $0 })
+                .sink(receiveValue: { [weak self] participants in
+                    self?.callParticipants = participants
+                })
 
             blockedUserUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
@@ -38,15 +40,13 @@ open class CallViewModel: ObservableObject {
             reconnectionUpdates = call?.state.$reconnectionStatus
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
-                    if reconnectionStatus == .reconnecting {
-                        if self?.callingState != .reconnecting {
-                            self?.callingState = .reconnecting
-                        }
-                    } else if reconnectionStatus == .disconnected {
-                        self?.leaveCall()
-                    } else {
-                        if self?.callingState != .inCall && self?.callingState != .outgoing {
-                            self?.callingState = .inCall
+                    guard let self else { return }
+                    switch reconnectionStatus {
+                    case .reconnecting where callingState != .reconnecting:
+                        callingState = .reconnecting
+                    default:
+                        if callingState != .inCall, callingState != .outgoing {
+                            callingState = .inCall
                         }
                     }
                 })
@@ -106,7 +106,6 @@ open class CallViewModel: ObservableObject {
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
-            log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkCallSettingsForCurrentUser()
         }

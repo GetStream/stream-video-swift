@@ -8,51 +8,70 @@ import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
+@MainActor
 final class VideoRenderer_Tests: XCTestCase {
 
-    private var mockThermalStateObserver: MockThermalStateObserver! = .init()
-    private var subject: VideoRenderer!
-
-    override func setUp() {
-        super.setUp()
-
-        InjectedValues[\.thermalStateObserver] = mockThermalStateObserver
-        subject = .init(frame: .zero)
-    }
+    private lazy var thermalStateSubject: PassthroughSubject<ProcessInfo.ThermalState, Never>! = .init()
+    private lazy var mockThermalStateObserver: MockThermalStateObserver! = .init()
+    private lazy var maximumFramesPerSecond: Int! = UIScreen.main.maximumFramesPerSecond
+    private lazy var subject: VideoRenderer! = .init(frame: .zero)
 
     override func tearDown() {
+        InjectedValues[\.thermalStateObserver] = ThermalStateObserver { .nominal }
+        thermalStateSubject = nil
         mockThermalStateObserver = nil
+        maximumFramesPerSecond = nil
+        subject = nil
         super.tearDown()
     }
 
     // MARK: - preferredFramesPerSecond
 
-    func testFPSForNominalThermalState() {
-        mockThermalStateObserver.state = .nominal
-        XCTAssertEqual(subject.preferredFramesPerSecond, UIScreen.main.maximumFramesPerSecond)
+    func testFPSForNominalThermalState() async {
+        await assertPreferredFramesPerSecond(
+            thermalState: .nominal,
+            expected: Double(maximumFramesPerSecond)
+        )
     }
 
-    func testFPSForFairThermalState() {
-        mockThermalStateObserver.state = .fair
-        XCTAssertEqual(subject.preferredFramesPerSecond, UIScreen.main.maximumFramesPerSecond)
+    func testFPSForFairThermalState() async {
+        await assertPreferredFramesPerSecond(
+            thermalState: .fair,
+            expected: Double(maximumFramesPerSecond)
+        )
     }
 
-    func testFPSForSeriousThermalState() {
-        mockThermalStateObserver.state = .serious
-        XCTAssertEqual(subject.preferredFramesPerSecond, Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.5))
+    func testFPSForSeriousThermalState() async {
+        await assertPreferredFramesPerSecond(
+            thermalState: .serious,
+            expected: Double(maximumFramesPerSecond) * 0.5
+        )
     }
 
-    func testFPSForCriticalThermalState() {
-        mockThermalStateObserver.state = .critical
-        XCTAssertEqual(subject.preferredFramesPerSecond, Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.4))
+    func testFPSForCriticalThermalState() async {
+        await assertPreferredFramesPerSecond(
+            thermalState: .critical,
+            expected: Double(maximumFramesPerSecond) * 0.4
+        )
     }
-}
 
-// MARK: - Private Helpers
+    // MARK: - Private helpers
 
-private final class MockThermalStateObserver: ThermalStateObserving {
-    var state: ProcessInfo.ThermalState = .nominal { didSet { stateSubject.send(state) } }
-    lazy var stateSubject: CurrentValueSubject<ProcessInfo.ThermalState, Never> = .init(state)
-    var statePublisher: AnyPublisher<ProcessInfo.ThermalState, Never> { stateSubject.eraseToAnyPublisher() }
-    var scale: CGFloat = 1
+    private func assertPreferredFramesPerSecond(
+        thermalState: ProcessInfo.ThermalState,
+        expected: Double,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        mockThermalStateObserver.stub(
+            for: \.statePublisher,
+            with: thermalStateSubject.eraseToAnyPublisher()
+        )
+        _ = subject
+        thermalStateSubject.send(thermalState)
+
+        await fulfillment(file: file, line: line) {
+            [subject] in subject?.preferredFramesPerSecond == Int(expected)
+        }
+    }
 }
