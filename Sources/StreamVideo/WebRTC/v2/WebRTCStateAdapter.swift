@@ -78,8 +78,6 @@ actor WebRTCStateAdapter: ObservableObject {
     private let peerConnectionsDisposableBag = DisposableBag()
 
     /// Subject to handle participant updates.
-    private let participantsUpdateSubject = PassthroughSubject<ParticipantsStorage, Never>()
-    private var participantsUpdatesCancellable: AnyCancellable?
     private var previousParticipantOperation: Task<Void, Never>?
 
     /// Initializes the WebRTC state adapter with user details and connection
@@ -117,7 +115,6 @@ actor WebRTCStateAdapter: ObservableObject {
 
         Task {
             await set(sessionID: sessionID)
-            await configureParticipantsObservation()
         }
     }
 
@@ -452,17 +449,6 @@ actor WebRTCStateAdapter: ObservableObject {
 
     // MARK: Participant Operations
 
-    /// Configures the observation of participants' updates.
-    private func configureParticipantsObservation() {
-        /// Subscribes to the `participantsUpdateSubject` to handle updates.
-        participantsUpdatesCancellable = participantsUpdateSubject
-            .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { [weak self] in
-                /// Sets the participants when an update is received.
-                await self?.set(participants: $0)
-            }
-    }
-
     /// Updates the current participants and logs those with video tracks.
     /// - Parameter participants: The storage containing participant information.
     private func set(participants: ParticipantsStorage) {
@@ -504,7 +490,7 @@ actor WebRTCStateAdapter: ObservableObject {
             /// Assigns media tracks to the participants.
             let updated = assignTracks(on: next)
             /// Sends the updated participants to observers while helping publishing streamlined updates.
-            participantsUpdateSubject.send(updated)
+            set(participants: updated)
             /// Logs the completion of the participant operation.
             log.debug(
                 "Participant operation completed.",
