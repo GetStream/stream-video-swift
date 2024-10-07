@@ -116,7 +116,7 @@ class VideoCapturer: CameraVideoCapturing {
     func updateCaptureQuality(
         _ codecs: [VideoCodec],
         on device: AVCaptureDevice?
-    ) async {
+    ) async throws {
         guard
             let videoCapturer = videoCapturer as? RTCCameraVideoCapturer,
             let device
@@ -158,14 +158,14 @@ class VideoCapturer: CameraVideoCapturing {
             )
         }
 
-        await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             videoCapturer.startCapture(
                 with: device,
                 format: selectedFormat,
                 fps: outputFormat.fps
             ) { error in
                 if let error {
-                    log.error(error)
+                    continuation.resume(throwing: error)
                 } else {
                     continuation.resume(returning: ())
                 }

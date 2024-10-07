@@ -326,10 +326,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             params.encodings = updatedEncodings
             sender.sender.parameters = params
 
-            await videoCapturePolicy.updateCaptureQuality(
-                with: activeEncodings,
-                for: videoCaptureSessionProvider.activeSession
-            )
+            do {
+                try await videoCapturePolicy.updateCaptureQuality(
+                    with: activeEncodings,
+                    for: videoCaptureSessionProvider.activeSession
+                )
+            } catch {
+                log.error(error)
+            }
         }
     }
 

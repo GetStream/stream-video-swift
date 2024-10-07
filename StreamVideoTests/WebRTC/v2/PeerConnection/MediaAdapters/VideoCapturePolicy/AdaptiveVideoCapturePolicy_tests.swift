@@ -7,7 +7,7 @@ import AVFoundation
 import StreamWebRTC
 import XCTest
 
-final class AdaptiveVideoCapturePolicy_tests: XCTestCase {
+final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
 
     private lazy var device: AVCaptureDevice! = .init(uniqueID: .unique)
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
@@ -39,27 +39,27 @@ final class AdaptiveVideoCapturePolicy_tests: XCTestCase {
     // MARK: - updateCaptureQuality
 
     func test_updateCaptureQuality_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(expected: [.full, .half, .quarter])
+        try await assertUpdateCaptureQuality(expected: [.full, .half, .quarter])
     }
 
     func test_updateCaptureQuality_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(expected: [.half, .quarter])
+        try await assertUpdateCaptureQuality(expected: [.half, .quarter])
     }
 
     func test_updateCaptureQuality_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(expected: [.full, .quarter])
+        try await assertUpdateCaptureQuality(expected: [.full, .quarter])
     }
 
     func test_updateCaptureQuality_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(expected: [.full])
+        try await assertUpdateCaptureQuality(expected: [.full])
     }
 
     func test_updateCaptureQuality_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(expected: [.half])
+        try await assertUpdateCaptureQuality(expected: [.half])
     }
 
     func test_updateCaptureQuality_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(expected: [.quarter])
+        try await assertUpdateCaptureQuality(expected: [.quarter])
     }
 
     // MARK: - Private helpers
@@ -68,8 +68,8 @@ final class AdaptiveVideoCapturePolicy_tests: XCTestCase {
         expected: [VideoCodec],
         file: StaticString = #file,
         line: UInt = #line
-    ) async {
-        await subject.updateCaptureQuality(
+    ) async throws {
+        try await subject.updateCaptureQuality(
             with: .init(
                 expected.map(\.quality)
             ),

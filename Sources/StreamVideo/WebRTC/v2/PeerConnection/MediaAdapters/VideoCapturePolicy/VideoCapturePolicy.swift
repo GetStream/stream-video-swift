@@ -20,7 +20,7 @@ public class VideoCapturePolicy: @unchecked Sendable {
     func updateCaptureQuality(
         with activeEncodings: Set<String>,
         for activeSession: VideoCaptureSession?
-    ) async { /* No operation by default */ }
+    ) async throws { /* No operation by default */ }
 }
 
 /// A final class that adapts the video capture quality dynamically.
@@ -29,7 +29,7 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
     override func updateCaptureQuality(
         with activeEncodings: Set<String>,
         for activeSession: VideoCaptureSession?
-    ) async {
+    ) async throws {
         /// Ensure there is an active session to work with.
         guard let activeSession else { return }
 
@@ -38,7 +38,7 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
             .defaultCodecs
             .filter { activeEncodings.contains($0.quality) }
 
-        await activeSession.capturer
+        try await activeSession.capturer
             .updateCaptureQuality(videoCodecs, on: activeSession.device)
     }
 }

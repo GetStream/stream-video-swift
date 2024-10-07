@@ -39,27 +39,27 @@ final class VideoCapturePolicy_Tests: XCTestCase {
     // MARK: - updateCaptureQuality
 
     func test_updateCaptureQuality_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(input: [.full, .half, .quarter])
+        try await assertUpdateCaptureQuality(input: [.full, .half, .quarter])
     }
 
     func test_updateCaptureQuality_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(input: [.half, .quarter])
+        try await assertUpdateCaptureQuality(input: [.half, .quarter])
     }
 
     func test_updateCaptureQuality_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(input: [.full, .quarter])
+        try await assertUpdateCaptureQuality(input: [.full, .quarter])
     }
 
     func test_updateCaptureQuality_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(input: [.full])
+        try await assertUpdateCaptureQuality(input: [.full])
     }
 
     func test_updateCaptureQuality_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(input: [.half])
+        try await assertUpdateCaptureQuality(input: [.half])
     }
 
     func test_updateCaptureQuality_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        await assertUpdateCaptureQuality(input: [.quarter])
+        try await assertUpdateCaptureQuality(input: [.quarter])
     }
 
     // MARK: - Private helpers
@@ -68,8 +68,8 @@ final class VideoCapturePolicy_Tests: XCTestCase {
         input: [VideoCodec],
         file: StaticString = #file,
         line: UInt = #line
-    ) async {
-        await subject.updateCaptureQuality(
+    ) async throws {
+        try await subject.updateCaptureQuality(
             with: .init(input.map(\.quality)),
             for: activeCaptureSession
         )

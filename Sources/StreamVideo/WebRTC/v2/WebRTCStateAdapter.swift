@@ -80,7 +80,6 @@ actor WebRTCStateAdapter: ObservableObject {
     /// Subject to handle participant updates.
     private let participantsUpdateSubject = PassthroughSubject<ParticipantsStorage, Never>()
     private var participantsUpdatesCancellable: AnyCancellable?
-    private var interimParticipants = ParticipantsStorage()
     private var previousParticipantOperation: Task<Void, Never>?
 
     /// Initializes the WebRTC state adapter with user details and connection
@@ -498,15 +497,13 @@ actor WebRTCStateAdapter: ObservableObject {
             /// Awaits the result of the previous participant operation.
             _ = await previousParticipantOperation?.result
 
-            /// Retrieves the current interim participants.
-            let current = interimParticipants
+            /// Retrieves the current participants.
+            let current = participants
             /// Applies the operation to get the next state of participants.
             let next = operation(current)
             /// Assigns media tracks to the participants.
             let updated = assignTracks(on: next)
-            /// Updates the interim participants with the new state.
-            interimParticipants = updated
-            /// Sends the updated participants to observers.
+            /// Sends the updated participants to observers while helping publishing streamlined updates.
             participantsUpdateSubject.send(updated)
             /// Logs the completion of the participant operation.
             log.debug(

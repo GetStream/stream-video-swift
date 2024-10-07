@@ -16,7 +16,7 @@ protocol CameraVideoCapturing: VideoCapturing {
     func updateCaptureQuality(
         _ codecs: [VideoCodec],
         on device: AVCaptureDevice?
-    ) async
+    ) async throws
     func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice?
     func zoom(by factor: CGFloat) throws
     func focus(at point: CGPoint) throws
