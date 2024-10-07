@@ -22,12 +22,19 @@ final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
         localTrack: videoTrack,
         capturer: cameraVideoCapturer
     )
-    private lazy var subject: AdaptiveVideoCapturePolicy! = .init()
+    private lazy var thermalStateObserver: MockThermalStateObserver! = .init()
+    private var subject: AdaptiveVideoCapturePolicy!
 
     // MARK: - Lifecycle
 
+    override func setUp() {
+        super.setUp()
+        _ = thermalStateObserver
+    }
+
     override func tearDown() {
         subject = nil
+        thermalStateObserver = nil
         activeCaptureSession = nil
         cameraVideoCapturer = nil
         videoTrack = nil
@@ -38,37 +45,701 @@ final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
 
     // MARK: - updateCaptureQuality
 
-    func test_updateCaptureQuality_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        try await assertUpdateCaptureQuality(expected: [.full, .half, .quarter])
+    // MARK: ThermalState: .nominal | neuralEngineExists: false
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineDoesNotExist_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
     }
 
-    func test_updateCaptureQuality_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        try await assertUpdateCaptureQuality(expected: [.half, .quarter])
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineDoesNotExist_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
     }
 
-    func test_updateCaptureQuality_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        try await assertUpdateCaptureQuality(expected: [.full, .quarter])
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineDoesNotExist_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
     }
 
-    func test_updateCaptureQuality_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        try await assertUpdateCaptureQuality(expected: [.full])
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineDoesNotExist_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
     }
 
-    func test_updateCaptureQuality_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        try await assertUpdateCaptureQuality(expected: [.half])
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineDoesNotExist_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
     }
 
-    func test_updateCaptureQuality_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec() async throws {
-        try await assertUpdateCaptureQuality(expected: [.quarter])
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineDoesNotExist_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineDoesNotExist_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .nominal
+        )
+    }
+
+    // MARK: ThermalState: .nominal | neuralEngineExists: true
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineExists_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineExists_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineExists_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineExists_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineExists_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineExists_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateNominal_neuralEngineExists_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .nominal
+        )
+    }
+
+    // MARK: ThermalState: .fair | neuralEngineExists: false
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineDoesNotExist_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineDoesNotExist_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineDoesNotExist_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineDoesNotExist_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineDoesNotExist_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineDoesNotExist_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineDoesNotExist_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .fair
+        )
+    }
+
+    // MARK: ThermalState: .fair | neuralEngineExists: true
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineExists_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineExists_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineExists_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineExists_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineExists_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineExists_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateFair_neuralEngineExists_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 0,
+            neuralEngineExists: true,
+            thermalState: .fair
+        )
+    }
+
+    // MARK: thermalState: .serious | neuralEngineExists: false
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineDoesNotExist_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineDoesNotExist_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineDoesNotExist_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineDoesNotExist_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineDoesNotExist_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineDoesNotExist_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineDoesNotExist_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .serious
+        )
+    }
+
+    // MARK: thermalState: .serious | neuralEngineExists: true
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineExists_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineExists_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineExists_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineExists_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineExists_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineExists_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateSerious_neuralEngineExists_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .serious
+        )
+    }
+
+    // MARK: thermalState: .critical | neuralEngineExists: false
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineDoesNotExist_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineDoesNotExist_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineDoesNotExist_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineDoesNotExist_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineDoesNotExist_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineDoesNotExist_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineDoesNotExist_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: false,
+            thermalState: .critical
+        )
+    }
+
+    // MARK: thermalState: .critical | neuralEngineExists: true
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineExists_fullHalfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full, .half, .quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineExists_halfAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .half,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineExists_fullAndQuarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [
+                .full,
+                .quarter
+            ],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineExists_fullEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.full],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineExists_halfEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.half],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineExists_quarterEncodingsAreActive_capturerWasCalledWithExpectedVideoCodec(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
+    }
+
+    func test_updateCaptureQuality_thermalStateCritical_neuralEngineExists_quarterEncodingsMatchTheCurrentlyActiveOnes_capturerWasNotCalledASecondTime(
+    ) async throws {
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
+
+        try await assertUpdateCaptureQuality(
+            expected: [.quarter],
+            expectedTimesCalled: 1,
+            neuralEngineExists: true,
+            thermalState: .critical
+        )
     }
 
     // MARK: - Private helpers
 
     private func assertUpdateCaptureQuality(
         expected: [VideoCodec],
+        expectedTimesCalled: Int,
+        neuralEngineExists: Bool,
+        thermalState: ProcessInfo.ThermalState,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
+        if subject == nil {
+            subject = .init { neuralEngineExists }
+        }
+        thermalStateObserver.stub(for: \.state, with: thermalState)
+
         try await subject.updateCaptureQuality(
             with: .init(
                 expected.map(\.quality)
@@ -78,16 +749,20 @@ final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
 
         XCTAssertEqual(
             cameraVideoCapturer.timesCalled(.updateCaptureQuality),
-            1,
+            expectedTimesCalled,
             file: file,
             line: line
         )
-        XCTAssertEqual(
-            cameraVideoCapturer.recordedInputPayload(([VideoCodec], AVCaptureDevice?).self, for: .updateCaptureQuality)?.first?.0
-                .map(\.quality).sorted(),
-            expected.map(\.quality).sorted(),
-            file: file,
-            line: line
-        )
+
+        if expectedTimesCalled > 0 {
+            XCTAssertEqual(
+                cameraVideoCapturer.recordedInputPayload(([VideoCodec], AVCaptureDevice?).self, for: .updateCaptureQuality)?.first?
+                    .0
+                    .map(\.quality).sorted(),
+                expected.map(\.quality).sorted(),
+                file: file,
+                line: line
+            )
+        }
     }
 }
