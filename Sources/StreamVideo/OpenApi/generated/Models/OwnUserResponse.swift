@@ -27,10 +27,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     public var revokeTokensIssuedBefore: Date?
     public var role: String
     public var teams: [String]
-    public var totalUnreadCount: Int
-    public var unreadChannels: Int
-    public var unreadCount: Int
-    public var unreadThreads: Int
     public var updatedAt: Date
 
     public init(
@@ -55,10 +51,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],
-        totalUnreadCount: Int,
-        unreadChannels: Int,
-        unreadCount: Int,
-        unreadThreads: Int,
         updatedAt: Date
     ) {
         self.banned = banned
@@ -82,10 +74,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
         self.teams = teams
-        self.totalUnreadCount = totalUnreadCount
-        self.unreadChannels = unreadChannels
-        self.unreadCount = unreadCount
-        self.unreadThreads = unreadThreads
         self.updatedAt = updatedAt
     }
     
@@ -111,10 +99,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
         case role
         case teams
-        case totalUnreadCount = "total_unread_count"
-        case unreadChannels = "unread_channels"
-        case unreadCount = "unread_count"
-        case unreadThreads = "unread_threads"
         case updatedAt = "updated_at"
     }
     
@@ -140,10 +124,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
             lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
             lhs.teams == rhs.teams &&
-            lhs.totalUnreadCount == rhs.totalUnreadCount &&
-            lhs.unreadChannels == rhs.unreadChannels &&
-            lhs.unreadCount == rhs.unreadCount &&
-            lhs.unreadThreads == rhs.unreadThreads &&
             lhs.updatedAt == rhs.updatedAt
     }
 
@@ -169,10 +149,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
         hasher.combine(teams)
-        hasher.combine(totalUnreadCount)
-        hasher.combine(unreadChannels)
-        hasher.combine(unreadCount)
-        hasher.combine(unreadThreads)
         hasher.combine(updatedAt)
     }
 }

@@ -17,7 +17,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public var language: String
     public var lastActive: Date?
     public var name: String?
-    public var online: Bool
     public var revokeTokensIssuedBefore: Date?
     public var role: String
     public var teams: [String]
@@ -35,7 +34,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         language: String,
         lastActive: Date? = nil,
         name: String? = nil,
-        online: Bool,
         revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],
@@ -52,7 +50,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         self.language = language
         self.lastActive = lastActive
         self.name = name
-        self.online = online
         self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
         self.teams = teams
@@ -71,7 +68,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         case language
         case lastActive = "last_active"
         case name
-        case online
         case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
         case role
         case teams
@@ -90,7 +86,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
             lhs.name == rhs.name &&
-            lhs.online == rhs.online &&
             lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
             lhs.teams == rhs.teams &&
@@ -109,7 +104,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         hasher.combine(language)
         hasher.combine(lastActive)
         hasher.combine(name)
-        hasher.combine(online)
         hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
         hasher.combine(teams)
