@@ -469,9 +469,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             for: participant.sessionId
         )
 
-        await assertNilAsync(
-            await subject.participants[participant.sessionId]?.track?.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .track?
+                .trackId == nil
+        }
     }
 
     func test_didRemoveTrack_screenSharingOfExistingParticipant_shouldRemoveTrack() async throws {
@@ -486,9 +490,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             for: participant.sessionId
         )
 
-        await assertNilAsync(
-            await subject.participants[participant.sessionId]?.screenshareTrack?.trackId
-        )
+        await fulfillment {
+            await self
+                .subject
+                .participants[participant.sessionId]?
+                .screenshareTrack?
+                .trackId == nil
+        }
     }
 
     // MARK: - trackFor

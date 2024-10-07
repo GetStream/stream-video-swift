@@ -9,6 +9,8 @@ import XCTest
 
 final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
 
+    private static var thermalStateObserver: MockThermalStateObserver! = .init()
+
     private lazy var device: AVCaptureDevice! = .init(uniqueID: .unique)
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var videoTrack: RTCVideoTrack! = (
@@ -22,19 +24,18 @@ final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
         localTrack: videoTrack,
         capturer: cameraVideoCapturer
     )
-    private lazy var thermalStateObserver: MockThermalStateObserver! = .init()
     private var subject: AdaptiveVideoCapturePolicy!
 
     // MARK: - Lifecycle
 
-    override func setUp() {
-        super.setUp()
-        _ = thermalStateObserver
+    override class func tearDown() {
+        Self.thermalStateObserver = nil
+        InjectedValues[\.thermalStateObserver] = ThermalStateObserver.shared
+        super.tearDown()
     }
 
     override func tearDown() {
         subject = nil
-        thermalStateObserver = nil
         activeCaptureSession = nil
         cameraVideoCapturer = nil
         videoTrack = nil
@@ -738,7 +739,7 @@ final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
         if subject == nil {
             subject = .init { neuralEngineExists }
         }
-        thermalStateObserver.stub(for: \.state, with: thermalState)
+        Self.thermalStateObserver.stub(for: \.state, with: thermalState)
 
         try await subject.updateCaptureQuality(
             with: .init(

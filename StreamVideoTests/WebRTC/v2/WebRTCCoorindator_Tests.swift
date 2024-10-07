@@ -353,9 +353,13 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
         try await subject.changePinState(isEnabled: false, sessionId: user.id)
 
-        await assertNilAsync(
-            await subject.stateAdapter.participants[user.id]?.pin
-        )
+        await fulfillment {
+            await self
+                .subject
+                .stateAdapter
+                .participants[self.user.id]?
+                .pin == nil
+        }
     }
 
     // MARK: - startNoiseCancellation
