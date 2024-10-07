@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class TURNAggregatedStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var tcp: Count?

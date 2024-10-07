@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class GeolocationResult: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accuracyRadius: Int

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallRecording: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endTime: Date

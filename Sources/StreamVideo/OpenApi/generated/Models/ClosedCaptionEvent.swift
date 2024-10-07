@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class ClosedCaptionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String

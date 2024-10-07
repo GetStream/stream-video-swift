@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallStateResponseFields: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse

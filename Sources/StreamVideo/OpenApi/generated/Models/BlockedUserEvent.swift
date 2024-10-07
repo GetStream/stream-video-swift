@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var blockedByUser: UserResponse?

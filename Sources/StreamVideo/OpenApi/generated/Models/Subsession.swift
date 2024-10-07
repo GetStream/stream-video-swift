@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class Subsession: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endedAt: Int

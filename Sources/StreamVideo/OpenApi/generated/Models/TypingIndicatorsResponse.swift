@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class TypingIndicatorsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool

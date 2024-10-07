@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class LimitsSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var maxDurationSeconds: Int?

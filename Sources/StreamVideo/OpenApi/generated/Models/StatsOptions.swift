@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class StatsOptions: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var reportingIntervalMs: Int

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var backstage: Bool

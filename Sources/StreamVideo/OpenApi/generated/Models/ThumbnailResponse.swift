@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class ThumbnailResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var imageUrl: String

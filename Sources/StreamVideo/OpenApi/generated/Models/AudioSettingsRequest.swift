@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class AudioSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum DefaultDevice: String, Sendable, Codable, CaseIterable {

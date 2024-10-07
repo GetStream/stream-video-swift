@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class GetOrCreateCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var data: CallRequest?

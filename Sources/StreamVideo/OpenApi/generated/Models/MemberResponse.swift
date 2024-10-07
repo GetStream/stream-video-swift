@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class MemberResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date

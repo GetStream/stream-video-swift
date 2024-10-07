@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class StartTranscriptionRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var transcriptionExternalStorage: String?

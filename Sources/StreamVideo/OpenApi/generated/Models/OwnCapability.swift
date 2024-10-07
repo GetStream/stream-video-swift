@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public enum OwnCapability: String, Sendable, Codable, CaseIterable {
     case blockUsers = "block-users"
     case changeMaxDuration = "change-max-duration"

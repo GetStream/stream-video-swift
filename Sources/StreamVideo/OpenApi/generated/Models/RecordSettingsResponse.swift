@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class RecordSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audioOnly: Bool

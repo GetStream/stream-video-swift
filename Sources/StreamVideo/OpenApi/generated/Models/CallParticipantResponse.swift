@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallParticipantResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var joinedAt: Date

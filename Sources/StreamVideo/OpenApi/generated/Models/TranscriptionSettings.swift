@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Mode: String, Sendable, Codable, CaseIterable {

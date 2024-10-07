@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var code: Int

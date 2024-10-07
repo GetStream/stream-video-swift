@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class UserBannedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var channelId: String

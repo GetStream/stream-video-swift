@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallIngressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var rtmp: RTMPIngress

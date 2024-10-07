@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var callCid: String

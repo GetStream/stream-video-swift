@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class SortParamRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var direction: Int?

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class PrivacySettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var readReceipts: ReadReceiptsResponse?

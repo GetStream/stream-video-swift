@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class RejectCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var reason: String?

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class GoLiveRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var recordingStorageName: String?

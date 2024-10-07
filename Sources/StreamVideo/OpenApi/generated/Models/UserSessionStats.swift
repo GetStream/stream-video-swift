@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var browser: String?

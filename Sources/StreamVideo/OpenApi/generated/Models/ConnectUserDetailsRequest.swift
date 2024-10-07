@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class ConnectUserDetailsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var custom: [String: RawJSON]?

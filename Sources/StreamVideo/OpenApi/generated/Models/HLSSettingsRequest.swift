@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class HLSSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var autoOn: Bool?

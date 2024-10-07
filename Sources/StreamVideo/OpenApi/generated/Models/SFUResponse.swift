@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class SFUResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var edgeName: String

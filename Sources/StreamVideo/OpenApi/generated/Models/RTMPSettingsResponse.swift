@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class RTMPSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var enabled: Bool

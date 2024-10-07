@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class UserStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var info: UserInfoResponse

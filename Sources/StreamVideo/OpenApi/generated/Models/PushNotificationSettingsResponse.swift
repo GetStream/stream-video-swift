@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class PushNotificationSettingsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var disabled: Bool?

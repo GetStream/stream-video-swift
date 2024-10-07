@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var additional: [String: RawJSON]?

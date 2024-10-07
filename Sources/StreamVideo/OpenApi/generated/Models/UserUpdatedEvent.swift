@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class UserUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date

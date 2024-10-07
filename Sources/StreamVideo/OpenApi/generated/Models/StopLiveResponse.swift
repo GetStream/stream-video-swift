@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class StopLiveResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var call: CallResponse

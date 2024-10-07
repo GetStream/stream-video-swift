@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class RTMPBroadcastRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum Quality: String, Sendable, Codable, CaseIterable {

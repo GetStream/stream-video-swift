@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class VideoQuality: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var resolution: VideoResolution?

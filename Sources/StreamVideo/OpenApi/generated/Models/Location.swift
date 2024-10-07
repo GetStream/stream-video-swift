@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class Location: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var continentCode: String

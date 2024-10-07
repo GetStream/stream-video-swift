@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var connectionId: String

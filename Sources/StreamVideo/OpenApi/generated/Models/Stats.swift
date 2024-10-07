@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class Stats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var averageSeconds: Float

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallRecordingStoppedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var callCid: String

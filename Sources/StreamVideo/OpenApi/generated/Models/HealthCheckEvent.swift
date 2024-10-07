@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable {
     
     public var cid: String?

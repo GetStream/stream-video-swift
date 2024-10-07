@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class RingSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var autoCancelTimeoutMs: Int

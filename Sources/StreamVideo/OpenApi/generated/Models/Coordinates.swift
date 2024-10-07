@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class Coordinates: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var latitude: Float

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class ScreensharingSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var accessRequestEnabled: Bool?

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banned: Bool

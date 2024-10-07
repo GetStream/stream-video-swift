@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CreateGuestRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var user: UserRequest

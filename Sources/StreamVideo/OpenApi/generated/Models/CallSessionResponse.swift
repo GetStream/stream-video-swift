@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallSessionResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var acceptedBy: [String: Date]

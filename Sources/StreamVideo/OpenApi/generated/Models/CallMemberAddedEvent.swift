@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallMemberAddedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     
     public var call: CallResponse

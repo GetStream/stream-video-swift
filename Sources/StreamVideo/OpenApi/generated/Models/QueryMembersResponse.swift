@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class QueryMembersResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var duration: String

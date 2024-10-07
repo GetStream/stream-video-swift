@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class JoinCallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var create: Bool?

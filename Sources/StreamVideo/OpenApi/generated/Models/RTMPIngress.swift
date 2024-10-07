@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class RTMPIngress: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var address: String

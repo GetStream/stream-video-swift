@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class GeofenceSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var names: [String]

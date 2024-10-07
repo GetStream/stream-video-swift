@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class PublisherAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var byTrackType: [String: Count]?

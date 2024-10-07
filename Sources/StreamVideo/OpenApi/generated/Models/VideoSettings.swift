@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class VideoSettings: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public enum CameraFacing: String, Sendable, Codable, CaseIterable {

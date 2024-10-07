@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class ListDevicesResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var devices: [Device]

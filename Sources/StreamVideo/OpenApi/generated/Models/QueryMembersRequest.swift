@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class QueryMembersRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var filterConditions: [String: RawJSON]?

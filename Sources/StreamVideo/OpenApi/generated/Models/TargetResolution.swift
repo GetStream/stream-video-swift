@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class TargetResolution: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var bitrate: Int?

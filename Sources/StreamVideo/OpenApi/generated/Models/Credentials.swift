@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class Credentials: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var iceServers: [ICEServer]

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class EgressResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var broadcasting: Bool

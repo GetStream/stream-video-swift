@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var banExpires: Date?

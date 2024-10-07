@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class UnpinRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var sessionId: String

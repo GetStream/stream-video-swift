@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class EgressRTMPResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var name: String

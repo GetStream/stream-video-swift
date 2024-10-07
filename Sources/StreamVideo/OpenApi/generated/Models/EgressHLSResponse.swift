@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class EgressHLSResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var playlistUrl: String

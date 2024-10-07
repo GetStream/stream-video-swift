@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class PublishedTrackInfo: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var codecMimeType: String?

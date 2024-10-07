@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var endTime: Date

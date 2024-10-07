@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CountrywiseAggregateStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var participantCount: Count?

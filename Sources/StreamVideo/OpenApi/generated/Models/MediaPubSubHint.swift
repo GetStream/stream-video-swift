@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class MediaPubSubHint: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audioPublished: Bool

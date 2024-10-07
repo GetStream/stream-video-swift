@@ -3,7 +3,7 @@
 //
 
 import Foundation
-    
+
 public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var audio: AudioSettingsRequest?
