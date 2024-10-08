@@ -11,7 +11,6 @@ final class Mapping_Tests: XCTestCase {
         // Given
         let date = Date()
         let userResponse = UserResponse(
-            banned: false,
             blockedUserIds: [],
             createdAt: date,
             custom: ["test": "test"],

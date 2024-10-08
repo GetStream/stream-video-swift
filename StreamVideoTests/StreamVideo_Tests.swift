@@ -248,7 +248,6 @@ final class StreamVideo_Tests: StreamVideoTestCase {
     
     private func makeUserResponse() -> UserResponse {
         UserResponse(
-            banned: false,
             blockedUserIds: [],
             createdAt: Date(),
             custom: [:],

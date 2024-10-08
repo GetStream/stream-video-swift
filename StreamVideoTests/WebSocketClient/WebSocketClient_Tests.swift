@@ -326,7 +326,6 @@ final class WebSocketClient_Tests: XCTestCase {
             createdAt: Date(),
             custom: [:],
             user: UserResponse(
-                banned: false,
                 blockedUserIds: [],
                 createdAt: Date(),
                 custom: [:],

@@ -19,7 +19,6 @@ extension UserResponse {
         updatedAt: Date = Date(timeIntervalSince1970: 0)
     ) -> UserResponse {
         .init(
-            banned: false,
             blockedUserIds: [],
             createdAt: createdAt,
             custom: custom,

@@ -13,7 +13,6 @@ final class EventTests: XCTestCase {
         createdAt: Date(),
         custom: [:],
         user: .init(
-            banned: false,
             blockedUserIds: [],
             createdAt: Date(),
             custom: [:],

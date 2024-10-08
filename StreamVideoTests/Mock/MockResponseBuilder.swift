@@ -100,7 +100,6 @@ class MockResponseBuilder {
     
     func makeUserResponse(id: String = "test") -> UserResponse {
         UserResponse(
-            banned: false,
             blockedUserIds: [],
             createdAt: Date(),
             custom: [:],
