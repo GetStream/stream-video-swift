@@ -6,7 +6,6 @@ import Foundation
 
 public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var banned: Bool
     public var blockedUserIds: [String]?
     public var createdAt: Date
     public var custom: [String: RawJSON]
@@ -15,13 +14,9 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     public var devices: [Device]
     public var id: String
     public var image: String?
-    public var invisible: Bool
     public var language: String
     public var lastActive: Date?
-    public var latestHiddenChannels: [String]?
-    public var mutes: [UserMuteResponse]
     public var name: String?
-    public var online: Bool
     public var pushNotifications: PushNotificationSettingsResponse?
     public var revokeTokensIssuedBefore: Date?
     public var role: String
@@ -29,7 +24,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     public var updatedAt: Date
 
     public init(
-        banned: Bool,
         blockedUserIds: [String]? = nil,
         createdAt: Date,
         custom: [String: RawJSON],
@@ -38,20 +32,15 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         devices: [Device],
         id: String,
         image: String? = nil,
-        invisible: Bool,
         language: String,
         lastActive: Date? = nil,
-        latestHiddenChannels: [String]? = nil,
-        mutes: [UserMuteResponse],
         name: String? = nil,
-        online: Bool,
         pushNotifications: PushNotificationSettingsResponse? = nil,
         revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],
         updatedAt: Date
     ) {
-        self.banned = banned
         self.blockedUserIds = blockedUserIds
         self.createdAt = createdAt
         self.custom = custom
@@ -60,13 +49,9 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         self.devices = devices
         self.id = id
         self.image = image
-        self.invisible = invisible
         self.language = language
         self.lastActive = lastActive
-        self.latestHiddenChannels = latestHiddenChannels
-        self.mutes = mutes
         self.name = name
-        self.online = online
         self.pushNotifications = pushNotifications
         self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
@@ -75,7 +60,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case banned
         case blockedUserIds = "blocked_user_ids"
         case createdAt = "created_at"
         case custom
@@ -84,13 +68,9 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         case devices
         case id
         case image
-        case invisible
         case language
         case lastActive = "last_active"
-        case latestHiddenChannels = "latest_hidden_channels"
-        case mutes
         case name
-        case online
         case pushNotifications = "push_notifications"
         case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
         case role
@@ -99,8 +79,7 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     }
     
     public static func == (lhs: OwnUserResponse, rhs: OwnUserResponse) -> Bool {
-        lhs.banned == rhs.banned &&
-            lhs.blockedUserIds == rhs.blockedUserIds &&
+        lhs.blockedUserIds == rhs.blockedUserIds &&
             lhs.createdAt == rhs.createdAt &&
             lhs.custom == rhs.custom &&
             lhs.deactivatedAt == rhs.deactivatedAt &&
@@ -108,13 +87,9 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
             lhs.devices == rhs.devices &&
             lhs.id == rhs.id &&
             lhs.image == rhs.image &&
-            lhs.invisible == rhs.invisible &&
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
-            lhs.latestHiddenChannels == rhs.latestHiddenChannels &&
-            lhs.mutes == rhs.mutes &&
             lhs.name == rhs.name &&
-            lhs.online == rhs.online &&
             lhs.pushNotifications == rhs.pushNotifications &&
             lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
@@ -123,7 +98,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(banned)
         hasher.combine(blockedUserIds)
         hasher.combine(createdAt)
         hasher.combine(custom)
@@ -132,13 +106,9 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         hasher.combine(devices)
         hasher.combine(id)
         hasher.combine(image)
-        hasher.combine(invisible)
         hasher.combine(language)
         hasher.combine(lastActive)
-        hasher.combine(latestHiddenChannels)
-        hasher.combine(mutes)
         hasher.combine(name)
-        hasher.combine(online)
         hasher.combine(pushNotifications)
         hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
