@@ -44,9 +44,23 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     }
 
     /// The unique identifier for the call.
-    open var callId: String { active.map { storage[$0]?.call.callId ?? "" } ?? "" }
+    open var callId: String {
+        if let active, let callEntry = callEntry(for: active) {
+            return callEntry.call.callId
+        } else {
+            return ""
+        }
+    }
+
     /// The type of call.
-    open var callType: String { active.map { storage[$0]?.call.callType ?? "" } ?? "" }
+    open var callType: String {
+        if let active, let callEntry = callEntry(for: active) {
+            return callEntry.call.callType
+        } else {
+            return ""
+        }
+    }
+
     /// The icon data for the call template.
     open var iconTemplateImageData: Data?
     /// Whether the call can be held on its own or swapped with another call.
@@ -65,8 +79,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// The call provider responsible for handling call-related actions.
     open internal(set) lazy var callProvider = buildProvider()
 
-    private(set) var storage: [UUID: CallEntry] = [:]
+    private var _storage: [UUID: CallEntry] = [:]
+    private let storageAccessQueue: UnfairQueue = .init()
     private var active: UUID?
+    var callCount: Int { storageAccessQueue.sync { _storage.count } }
 
     private var callEventsSubscription: Task<Void, Error>?
     private var callEndedNotificationCancellable: AnyCancellable?
@@ -120,7 +136,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             """
         )
 
-        guard let streamVideo, let callEntry = storage[callUUID] else {
+        guard let streamVideo, let callEntry = callEntry(for: callUUID) else {
             log.warning(
                 """
                 CallKit operation:reportIncomingCall cannot be fulfilled because 
@@ -188,7 +204,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         /// The call was accepted somewhere else (e.g the incoming call on the same device or another
         /// device). No action is required.
         guard
-            let newCallEntry = storage.first(where: { $0.value.call.cId == response.callCid })?.value,
+            let newCallEntry = callEntry(for: response.callCid),
             newCallEntry.callUUID != active // Ensure that the new call isn't the currently active one.
         else {
             return
@@ -200,7 +216,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         )
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
-        storage[newCallEntry.callUUID] = nil
+        set(nil, for: newCallEntry.callUUID)
         callCache.remove(for: newCallEntry.call.cId)
     }
 
@@ -209,7 +225,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Parameter response: The call rejected event.
     open func callRejected(_ response: CallRejectedEvent) {
         guard
-            let newCallEntry = storage.first(where: { $0.value.call.cId == response.callCid })?.value,
+            let newCallEntry = callEntry(for: response.callCid),
             newCallEntry.callUUID != active // Ensure that the new call isn't the currently active one.
         else {
             return
@@ -230,13 +246,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         )
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
-        storage[newCallEntry.callUUID] = nil
+        set(nil, for: newCallEntry.callUUID)
         callCache.remove(for: newCallEntry.call.cId)
     }
 
     /// Handles the event when a call ends.
     open func callEnded(_ cId: String) {
-        guard let callEndedEntry = storage.first(where: { $0.value.call.cId == cId })?.value else {
+        guard let callEndedEntry = callEntry(for: cId) else {
             return
         }
         Task {
@@ -262,7 +278,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         /// We listen for the event so in the case we are the only ones remaining
         /// in the call, we leave.
         Task { @MainActor in
-            if let call = storage.first(where: { $0.value.call.cId == response.callCid })?.value.call,
+            if let call = callEntry(for: response.callCid)?.call,
                call.state.participants.count == 1 {
                 callEnded(response.callCid)
             }
@@ -276,8 +292,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// This callback can be treated as a request to end all calls without the need to respond to any actions
     open func providerDidReset(_ provider: CXProvider) {
         log.debug("CXProvider didReset.")
-        for (_, entry) in storage {
-            entry.call.leave()
+        storageAccessQueue.sync {
+            for (_, entry) in _storage {
+                entry.call.leave()
+            }
         }
     }
 
@@ -287,7 +305,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ) {
         guard
             action.callUUID != active,
-            let callToJoinEntry = storage[action.callUUID]
+            let callToJoinEntry = callEntry(for: action.callUUID)
         else {
             return action.fail()
         }
@@ -313,7 +331,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 action.fulfill()
             } catch {
                 callToJoinEntry.call.leave()
-                storage[action.callUUID] = nil
+                set(nil, for: action.callUUID)
                 log.error(error)
                 action.fail()
             }
@@ -328,7 +346,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimerCancellable = nil
         let currentCallWasEnded = action.callUUID == active
 
-        guard let stackEntry = storage[action.callUUID] else {
+        guard let stackEntry = callEntry(for: action.callUUID) else {
             action.fail()
             return
         }
@@ -363,7 +381,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             if currentCallWasEnded {
                 stackEntry.call.leave()
             }
-            storage[action.callUUID] = nil
+            set(nil, for: action.callUUID)
             action.fulfill()
         }
     }
@@ -503,7 +521,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 callType: idComponents[0],
                 callId: idComponents[1]
             ) {
-            storage[uuid] = .init(call: call, callUUID: uuid)
+            set(.init(call: call, callUUID: uuid), for: uuid)
         }
 
         update.localizedCallerName = localizedCallerName
@@ -523,6 +541,26 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
 
         return (uuid, update)
+    }
+
+    // MARK: - Storage Access
+
+    private func set(_ value: CallEntry?, for key: UUID) {
+        storageAccessQueue.sync {
+            _storage[key] = value
+        }
+    }
+
+    private func callEntry(for cId: String) -> CallEntry? {
+        storageAccessQueue.sync {
+            _storage
+                .first { $0.value.call.cId == cId }?
+                .value
+        }
+    }
+
+    private func callEntry(for uuid: UUID) -> CallEntry? {
+        storageAccessQueue.sync { _storage[uuid] }
     }
 }
 
