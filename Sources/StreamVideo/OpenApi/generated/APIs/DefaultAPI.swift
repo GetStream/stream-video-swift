@@ -1066,58 +1066,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(EmptyResponse.self, from: $0)
         }
     }
-    
-    /**
-     Start closed captions
-     
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: StartClosedCaptionsResponse
-     */
-
-    open func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse {
-        var localVariablePath = "/video/call/{type}/{id}/start_closed_captions"
-        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
-        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
-        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
-        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "POST"
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(StartClosedCaptionsResponse.self, from: $0)
-        }
-    }
-    
-    /**
-     Stop closed captions
-     
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: StopClosedCaptionsResponse
-     */
-
-    open func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse {
-        var localVariablePath = "/video/call/{type}/{id}/stop_closed_captions"
-        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
-        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
-        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
-        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "POST"
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(StopClosedCaptionsResponse.self, from: $0)
-        }
-    }
 }
 
 protocol DefaultAPIEndpoints {
@@ -1222,9 +1170,4 @@ protocol DefaultAPIEndpoints {
     func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
         
     func videoConnect() async throws -> Void
-    
-    func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse
-
-    func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse
-
 }

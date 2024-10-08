@@ -17,7 +17,6 @@ public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hash
     public var language: String?
     public var lastActive: Date?
     public var online: Bool
-    public var privacySettings: PrivacySettings?
     public var pushNotifications: PushNotificationSettings?
     public var revokeTokensIssuedBefore: Date?
     public var role: String
@@ -36,7 +35,6 @@ public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hash
         language: String? = nil,
         lastActive: Date? = nil,
         online: Bool,
-        privacySettings: PrivacySettings? = nil,
         pushNotifications: PushNotificationSettings? = nil,
         revokeTokensIssuedBefore: Date? = nil,
         role: String,
@@ -54,7 +52,6 @@ public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hash
         self.language = language
         self.lastActive = lastActive
         self.online = online
-        self.privacySettings = privacySettings
         self.pushNotifications = pushNotifications
         self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
@@ -74,7 +71,6 @@ public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hash
         case language
         case lastActive = "last_active"
         case online
-        case privacySettings = "privacy_settings"
         case pushNotifications = "push_notifications"
         case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
         case role
@@ -94,7 +90,6 @@ public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hash
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
             lhs.online == rhs.online &&
-            lhs.privacySettings == rhs.privacySettings &&
             lhs.pushNotifications == rhs.pushNotifications &&
             lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
@@ -114,7 +109,6 @@ public final class UserObject: @unchecked Sendable, Codable, JSONEncodable, Hash
         hasher.combine(language)
         hasher.combine(lastActive)
         hasher.combine(online)
-        hasher.combine(privacySettings)
         hasher.combine(pushNotifications)
         hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)

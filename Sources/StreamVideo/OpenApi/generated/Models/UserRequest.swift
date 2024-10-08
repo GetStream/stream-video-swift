@@ -12,7 +12,6 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
     public var invisible: Bool?
     public var language: String?
     public var name: String?
-    public var privacySettings: PrivacySettings?
 
     public init(
         custom: [String: RawJSON]? = nil,
@@ -20,8 +19,7 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         image: String? = nil,
         invisible: Bool? = nil,
         language: String? = nil,
-        name: String? = nil,
-        privacySettings: PrivacySettings? = nil
+        name: String? = nil
     ) {
         self.custom = custom
         self.id = id
@@ -29,7 +27,6 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         self.invisible = invisible
         self.language = language
         self.name = name
-        self.privacySettings = privacySettings
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -39,7 +36,6 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         case invisible
         case language
         case name
-        case privacySettings = "privacy_settings"
     }
     
     public static func == (lhs: UserRequest, rhs: UserRequest) -> Bool {
@@ -48,8 +44,7 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
             lhs.image == rhs.image &&
             lhs.invisible == rhs.invisible &&
             lhs.language == rhs.language &&
-            lhs.name == rhs.name &&
-            lhs.privacySettings == rhs.privacySettings
+            lhs.name == rhs.name
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -59,6 +54,5 @@ public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Has
         hasher.combine(invisible)
         hasher.combine(language)
         hasher.combine(name)
-        hasher.combine(privacySettings)
     }
 }

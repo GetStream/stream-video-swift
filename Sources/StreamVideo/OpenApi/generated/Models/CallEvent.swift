@@ -6,6 +6,7 @@ import Foundation
 
 public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
+    public var _internal: Bool
     public var additional: [String: RawJSON]?
     public var component: String?
     public var description: String
@@ -15,6 +16,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
     public var type: String
 
     public init(
+        _internal: Bool,
         additional: [String: RawJSON]? = nil,
         component: String? = nil,
         description: String,
@@ -23,6 +25,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
         timestamp: Int,
         type: String
     ) {
+        self._internal = _internal
         self.additional = additional
         self.component = component
         self.description = description
@@ -33,6 +36,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
+        case _internal = "internal"
         case additional
         case component
         case description
@@ -43,7 +47,8 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
     }
     
     public static func == (lhs: CallEvent, rhs: CallEvent) -> Bool {
-        lhs.additional == rhs.additional &&
+        lhs._internal == rhs._internal &&
+            lhs.additional == rhs.additional &&
             lhs.component == rhs.component &&
             lhs.description == rhs.description &&
             lhs.endTimestamp == rhs.endTimestamp &&
@@ -53,6 +58,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(_internal)
         hasher.combine(additional)
         hasher.combine(component)
         hasher.combine(description)

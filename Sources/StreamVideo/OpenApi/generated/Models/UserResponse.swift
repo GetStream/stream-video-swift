@@ -6,7 +6,6 @@ import Foundation
 
 public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var banned: Bool
     public var blockedUserIds: [String]
     public var createdAt: Date
     public var custom: [String: RawJSON]
@@ -23,7 +22,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public var updatedAt: Date
 
     public init(
-        banned: Bool,
         blockedUserIds: [String],
         createdAt: Date,
         custom: [String: RawJSON],
@@ -39,7 +37,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
         teams: [String],
         updatedAt: Date
     ) {
-        self.banned = banned
         self.blockedUserIds = blockedUserIds
         self.createdAt = createdAt
         self.custom = custom
@@ -57,7 +54,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case banned
         case blockedUserIds = "blocked_user_ids"
         case createdAt = "created_at"
         case custom
@@ -75,8 +71,7 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     }
     
     public static func == (lhs: UserResponse, rhs: UserResponse) -> Bool {
-        lhs.banned == rhs.banned &&
-            lhs.blockedUserIds == rhs.blockedUserIds &&
+        lhs.blockedUserIds == rhs.blockedUserIds &&
             lhs.createdAt == rhs.createdAt &&
             lhs.custom == rhs.custom &&
             lhs.deactivatedAt == rhs.deactivatedAt &&
@@ -93,7 +88,6 @@ public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(banned)
         hasher.combine(blockedUserIds)
         hasher.combine(createdAt)
         hasher.combine(custom)

@@ -22,7 +22,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     public var mutes: [UserMuteResponse]
     public var name: String?
     public var online: Bool
-    public var privacySettings: PrivacySettingsResponse?
     public var pushNotifications: PushNotificationSettingsResponse?
     public var revokeTokensIssuedBefore: Date?
     public var role: String
@@ -46,7 +45,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         mutes: [UserMuteResponse],
         name: String? = nil,
         online: Bool,
-        privacySettings: PrivacySettingsResponse? = nil,
         pushNotifications: PushNotificationSettingsResponse? = nil,
         revokeTokensIssuedBefore: Date? = nil,
         role: String,
@@ -69,7 +67,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         self.mutes = mutes
         self.name = name
         self.online = online
-        self.privacySettings = privacySettings
         self.pushNotifications = pushNotifications
         self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
@@ -94,7 +91,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         case mutes
         case name
         case online
-        case privacySettings = "privacy_settings"
         case pushNotifications = "push_notifications"
         case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
         case role
@@ -119,7 +115,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
             lhs.mutes == rhs.mutes &&
             lhs.name == rhs.name &&
             lhs.online == rhs.online &&
-            lhs.privacySettings == rhs.privacySettings &&
             lhs.pushNotifications == rhs.pushNotifications &&
             lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
@@ -144,7 +139,6 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         hasher.combine(mutes)
         hasher.combine(name)
         hasher.combine(online)
-        hasher.combine(privacySettings)
         hasher.combine(pushNotifications)
         hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
