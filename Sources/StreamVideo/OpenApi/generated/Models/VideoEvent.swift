@@ -57,9 +57,6 @@ public enum VideoEvent: Codable, Hashable {
     case typeConnectedEvent(ConnectedEvent)
     case typeCustomVideoEvent(CustomVideoEvent)
     case typeHealthCheckEvent(HealthCheckEvent)
-    case typeUserBannedEvent(UserBannedEvent)
-    case typeUserDeactivatedEvent(UserDeactivatedEvent)
-    case typeUserDeletedEvent(UserDeletedEvent)
     case typeUserUpdatedEvent(UserUpdatedEvent)
 
     public var type: String {
@@ -151,12 +148,6 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeCustomVideoEvent(value):
             return value.type
         case let .typeHealthCheckEvent(value):
-            return value.type
-        case let .typeUserBannedEvent(value):
-            return value.type
-        case let .typeUserDeactivatedEvent(value):
-            return value.type
-        case let .typeUserDeletedEvent(value):
             return value.type
         case let .typeUserUpdatedEvent(value):
             return value.type
@@ -253,12 +244,6 @@ public enum VideoEvent: Codable, Hashable {
             return value
         case let .typeHealthCheckEvent(value):
             return value
-        case let .typeUserBannedEvent(value):
-            return value
-        case let .typeUserDeactivatedEvent(value):
-            return value
-        case let .typeUserDeletedEvent(value):
-            return value
         case let .typeUserUpdatedEvent(value):
             return value
         }
@@ -354,12 +339,6 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeCustomVideoEvent(value):
             try container.encode(value)
         case let .typeHealthCheckEvent(value):
-            try container.encode(value)
-        case let .typeUserBannedEvent(value):
-            try container.encode(value)
-        case let .typeUserDeactivatedEvent(value):
-            try container.encode(value)
-        case let .typeUserDeletedEvent(value):
             try container.encode(value)
         case let .typeUserUpdatedEvent(value):
             try container.encode(value)
@@ -501,15 +480,6 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "health.check" {
             let value = try container.decode(HealthCheckEvent.self)
             self = .typeHealthCheckEvent(value)
-        } else if dto.type == "user.banned" {
-            let value = try container.decode(UserBannedEvent.self)
-            self = .typeUserBannedEvent(value)
-        } else if dto.type == "user.deactivated" {
-            let value = try container.decode(UserDeactivatedEvent.self)
-            self = .typeUserDeactivatedEvent(value)
-        } else if dto.type == "user.deleted" {
-            let value = try container.decode(UserDeletedEvent.self)
-            self = .typeUserDeletedEvent(value)
         } else if dto.type == "user.updated" {
             let value = try container.decode(UserUpdatedEvent.self)
             self = .typeUserUpdatedEvent(value)
