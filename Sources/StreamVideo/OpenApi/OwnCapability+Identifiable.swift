@@ -1,3 +1,7 @@
+//
+// Copyright © 2024 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 
 extension OwnCapability: Identifiable {
@@ -5,4 +9,3 @@ extension OwnCapability: Identifiable {
         rawValue
     }
 }
-

@@ -5,13 +5,14 @@
 import Foundation
 
 extension AudioSettings {
-    init() {
-        accessRequestEnabled = false
-        defaultDevice = .unknown
-        micDefaultOn = false
-        noiseCancellation = nil
-        opusDtxEnabled = false
-        redundantCodingEnabled = false
-        speakerDefaultOn = false
+    convenience init() {
+        self.init(
+            accessRequestEnabled: false,
+            defaultDevice: .unknown,
+            micDefaultOn: false,
+            opusDtxEnabled: false,
+            redundantCodingEnabled: false,
+            speakerDefaultOn: false
+        )
     }
 }

@@ -11,6 +11,6 @@ extension EgressRTMPResponse {
         streamKey: String = "",
         url: String = ""
     ) -> EgressRTMPResponse {
-        .init(name: name, streamKey: streamKey, url: url)
+        .init(name: name, startedAt: Date(), streamKey: streamKey)
     }
 }

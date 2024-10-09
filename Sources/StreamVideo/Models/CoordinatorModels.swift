@@ -4,31 +4,6 @@
 
 import Foundation
 
-extension CallSettingsResponse: @unchecked Sendable {}
-extension ModelResponse: @unchecked Sendable {}
-extension AcceptCallResponse: @unchecked Sendable {}
-extension RejectCallResponse: @unchecked Sendable {}
-extension CallResponse: @unchecked Sendable {}
-extension OwnCapability: @unchecked Sendable {}
-extension MemberRequest: @unchecked Sendable {}
-extension MemberResponse: @unchecked Sendable {}
-extension UpdateCallMembersResponse: @unchecked Sendable {}
-extension CallSettingsRequest: @unchecked Sendable {}
-extension JoinCallResponse: @unchecked Sendable {}
-extension GetOrCreateCallResponse: @unchecked Sendable {}
-extension GetCallResponse: @unchecked Sendable {}
-extension UpdateCallResponse: @unchecked Sendable {}
-extension BlockUserResponse: @unchecked Sendable {}
-extension UnblockUserResponse: @unchecked Sendable {}
-extension MuteUsersResponse: @unchecked Sendable {}
-extension MuteUsersRequest: @unchecked Sendable {}
-extension PinRequest: @unchecked Sendable {}
-extension UnpinRequest: @unchecked Sendable {}
-extension PinResponse: @unchecked Sendable {}
-extension UnpinResponse: @unchecked Sendable {}
-extension GoLiveResponse: @unchecked Sendable {}
-extension SendReactionResponse: @unchecked Sendable {}
-
 public struct FetchingLocationError: Error {}
 
 public enum RecordingState {

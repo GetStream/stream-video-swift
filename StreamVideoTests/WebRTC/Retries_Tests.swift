@@ -129,12 +129,12 @@ final class Retries_Tests: XCTestCase {
         // Given
         let httpClient = HTTPClient_Mock()
         let apiError = APIError(
-            statusCode: 400,
             code: 40,
             details: [],
             duration: "1.0",
             message: "Bad request",
-            moreInfo: ""
+            moreInfo: "",
+            statusCode: 400
         )
         httpClient.errors = [apiError, dummyError, dummyError, dummyError]
         httpClient.dataResponses = [dummyData]

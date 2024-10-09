@@ -247,6 +247,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             members: [],
             sessionId: "123",
             user: UserResponse(
+                banned: false,
+                blockedUserIds: [],
                 createdAt: Date(),
                 custom: [:],
                 id: secondUser.userId,
@@ -254,7 +256,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 role: "user",
                 teams: [],
                 updatedAt: Date()
-            )
+            ),
+            video: true
         )
 
         let wrapped = WrappedEvent.coordinatorEvent(.typeCallRingEvent(event))
@@ -302,6 +305,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             members: [],
             sessionId: "123",
             user: UserResponse(
+                banned: false,
+                blockedUserIds: [],
                 createdAt: Date(),
                 custom: [:],
                 id: secondUser.userId,
@@ -309,7 +314,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 role: "user",
                 teams: [],
                 updatedAt: Date()
-            )
+            ),
+            video: true
         )
         let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
         eventNotificationCenter.process(.coordinatorEvent(.typeCallRingEvent(event)))
@@ -932,6 +938,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 extension User {
     func toUserResponse() -> UserResponse {
         UserResponse(
+            banned: false,
+            blockedUserIds: [],
             createdAt: Date(),
             custom: customData,
             id: id,

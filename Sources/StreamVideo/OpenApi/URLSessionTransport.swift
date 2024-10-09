@@ -121,12 +121,13 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         do {
             return try await execute(request: clone.urlRequest())
         } catch {
-            // Log error and rethrow          
+            // Log error and rethrow
             log.error(
                 "URLSessionTransport: \(String(describing: request.url.absoluteString))\n"
                     + "Headers:\n\(String(describing: request.headers))\n"
                     + "Query items:\n\(request.queryParams)",
-                subsystems: .httpRequests, error: error)
+                subsystems: .httpRequests, error: error
+            )
             throw error
         }
     }

@@ -17,7 +17,6 @@ extension CallRejectedEvent {
             call: call,
             callCid: callCid,
             createdAt: createdAt,
-            type: type,
             user: user
         )
     }
