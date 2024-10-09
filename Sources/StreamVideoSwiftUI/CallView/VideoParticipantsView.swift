@@ -345,22 +345,20 @@ public struct VideoCallParticipantView: View {
     }
     
     public var body: some View {
-        withCallSettingsObservartion {
-            VideoRendererView(
-                id: id,
-                size: availableFrame.size,
-                contentMode: contentMode,
-                showVideo: showVideo,
-                handleRendering: { [weak call, participant] view in
-                    guard call != nil else { return }
-                    view.handleViewRendering(for: participant) { [weak call] size, participant in
-                        Task { [weak call] in
-                            await call?.updateTrackSize(size, for: participant)
-                        }
+        VideoRendererView(
+            id: id,
+            size: availableFrame.size,
+            contentMode: contentMode,
+            showVideo: showVideo,
+            handleRendering: { [weak call, participant] view in
+                guard call != nil else { return }
+                view.handleViewRendering(for: participant) { [weak call] size, participant in
+                    Task { [weak call] in
+                        await call?.updateTrackSize(size, for: participant)
                     }
                 }
-            )
-        }
+            }
+        )
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")
@@ -381,7 +379,7 @@ public struct VideoCallParticipantView: View {
 
     @MainActor
     @ViewBuilder
-    private func withCallSettingsObservartion(
+    private func withCallSettingsObservation(
         @ViewBuilder _ content: () -> some View
     ) -> some View {
         if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {

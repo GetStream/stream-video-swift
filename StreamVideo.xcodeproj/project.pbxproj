@@ -165,6 +165,8 @@
 		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
+		404C6ED02CB67D4D0063EDB6 /* LocalParticipantMirroringViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404C6ECF2CB67D4D0063EDB6 /* LocalParticipantMirroringViewModifier.swift */; };
+		404C6ED22CB67E5A0063EDB6 /* FromCameraUsageObservationViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404C6ED12CB67E5A0063EDB6 /* FromCameraUsageObservationViewModifier.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		4063033F2AD847EC0091AE77 /* CallState_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4063033E2AD847EC0091AE77 /* CallState_Tests.swift */; };
@@ -1495,6 +1497,8 @@
 		4049CE812BBBF74C003D07D2 /* LegacyAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAsyncImage.swift; sourceTree = "<group>"; };
 		4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAsyncImage.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
+		404C6ECF2CB67D4D0063EDB6 /* LocalParticipantMirroringViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantMirroringViewModifier.swift; sourceTree = "<group>"; };
+		404C6ED12CB67E5A0063EDB6 /* FromCameraUsageObservationViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FromCameraUsageObservationViewModifier.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		4063033E2AD847EC0091AE77 /* CallState_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState_Tests.swift; sourceTree = "<group>"; };
 		406303412AD848000091AE77 /* CallParticipant_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant_Mock.swift; sourceTree = "<group>"; };
@@ -3697,6 +3701,8 @@
 		40C7B82A2B612D5100FB9DB2 /* ViewModifiers */ = {
 			isa = PBXGroup;
 			children = (
+				404C6ED12CB67E5A0063EDB6 /* FromCameraUsageObservationViewModifier.swift */,
+				404C6ECF2CB67D4D0063EDB6 /* LocalParticipantMirroringViewModifier.swift */,
 				403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */,
 				408D29A02B6D208700885473 /* Snapshot */,
 				409145E92B68FDD2007F3C17 /* ReadableContentGuide */,
@@ -6774,6 +6780,7 @@
 				40A941762B4D9F16006D6965 /* StreamPictureInPictureView.swift in Sources */,
 				848A73C229269E7D0089AA6E /* CornerDraggableView.swift in Sources */,
 				84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */,
+				404C6ED22CB67E5A0063EDB6 /* FromCameraUsageObservationViewModifier.swift in Sources */,
 				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				40245F3C2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift in Sources */,
@@ -6850,6 +6857,7 @@
 				84B57D37297F406400E4E709 /* MicrophoneCheckView.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */,
 				8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */,
+				404C6ED02CB67D4D0063EDB6 /* LocalParticipantMirroringViewModifier.swift in Sources */,
 				4049CE822BBBF74C003D07D2 /* LegacyAsyncImage.swift in Sources */,
 				40F0C3A72BC7FAA400AB75AD /* VideoRendererPool.swift in Sources */,
 				4049CE842BBBF8EF003D07D2 /* StreamAsyncImage.swift in Sources */,

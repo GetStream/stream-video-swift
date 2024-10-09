@@ -30,14 +30,16 @@ public struct MinimizedCallView: View {
     
     func content(for availableFrame: CGRect) -> some View {
         Group {
-            if !viewModel.participants.isEmpty {
+            if let participant = viewModel.participants.first {
                 VideoCallParticipantView(
-                    participant: viewModel.participants[0],
+                    participant: participant,
                     availableFrame: availableFrame,
                     contentMode: .scaleAspectFill,
                     customData: [:],
                     call: viewModel.call
                 )
+                .localParticipantMirroring(participant: participant)
+                .frontCameraUsageObservation(call: viewModel.call, participant: participant)
             } else {
                 EmptyView()
             }

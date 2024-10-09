@@ -225,6 +225,8 @@ extension ViewFactory {
             customData: customData,
             call: call
         )
+        .localParticipantMirroring(participant: participant)
+        .frontCameraUsageObservation(call: call, participant: participant)
     }
 
     public func makeVideoCallParticipantModifier(

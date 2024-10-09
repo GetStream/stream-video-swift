@@ -52,6 +52,8 @@ public struct LivestreamPlayer: View {
                                 customData: [:],
                                 call: viewModel.call
                             )
+                            .localParticipantMirroring(participant: participant)
+                            .frontCameraUsageObservation(call: viewModel.call, participant: participant)
                             .onTapGesture {
                                 viewModel.update(controlsShown: true)
                             }
