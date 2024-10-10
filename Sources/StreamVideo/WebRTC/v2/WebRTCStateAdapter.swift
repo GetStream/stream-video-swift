@@ -64,6 +64,7 @@ actor WebRTCStateAdapter: ObservableObject {
     @Published private(set) var participantsCount: UInt32 = 0
     @Published private(set) var anonymousCount: UInt32 = 0
     @Published private(set) var participantPins: [PinInfo] = []
+    @Published private(set) var incomingVideoPolicy: IncomingVideoPolicy = .none
 
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
@@ -167,6 +168,11 @@ actor WebRTCStateAdapter: ObservableObject {
     func set(videoFilter value: VideoFilter?) {
         videoFilter = value
         publisher?.setVideoFilter(value)
+    }
+
+    /// Sets the manual trackSize that will be used when updating subscriptions with the SFU.
+    func set(incomingVideoPolicy value: IncomingVideoPolicy) {
+        self.incomingVideoPolicy = value
     }
 
     // MARK: - Session Management
@@ -512,12 +518,20 @@ actor WebRTCStateAdapter: ObservableObject {
     ) -> ParticipantsStorage {
         /// Reduces the participants to a new storage with updated tracks.
         participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
-            partialResult[entry.key] = entry
-                .value
-                /// Updates the participant with a video track if available.
-                .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
-                /// Updates the participant with a screensharing track if available.
-                .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
+            if incomingVideoPolicy.isVideoDisabled(for: entry.value.sessionId) {
+                partialResult[entry.key] = entry
+                    .value
+                    .withUpdated(track: nil)
+                    /// Updates the participant with a screensharing track if available.
+                    .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
+            } else {
+                partialResult[entry.key] = entry
+                    .value
+                    /// Updates the participant with a video track if available.
+                    .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
+                    /// Updates the participant with a screensharing track if available.
+                    .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
+            }
         }
     }
 }

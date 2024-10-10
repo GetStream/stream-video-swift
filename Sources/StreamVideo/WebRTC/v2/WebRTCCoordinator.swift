@@ -363,6 +363,12 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .zoom(by: factor)
     }
 
+    func setIncomingVideoPolicy(
+        _ value: IncomingVideoPolicy
+    ) async {
+        await stateAdapter.set(incomingVideoPolicy: value)
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.

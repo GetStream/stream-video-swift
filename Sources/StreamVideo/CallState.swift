@@ -124,7 +124,9 @@ public class CallState: ObservableObject {
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
-    
+
+    @Published public internal(set) var incomingVideoPolicy: IncomingVideoPolicy = .none
+
     var sortComparators = defaultComparators
     
     private var localCallSettingsUpdate = false

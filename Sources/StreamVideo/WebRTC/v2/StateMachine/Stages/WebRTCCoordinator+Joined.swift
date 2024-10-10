@@ -121,6 +121,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
+                    await observeIncomingVideoPolicyUpdates()
+
+                    try Task.checkCancellation()
+
                     await observeCallSettingsUpdates()
 
                     try Task.checkCancellation()
@@ -302,30 +306,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// Observes subscription updates.
         private func observeForSubscriptionUpdates() async {
             guard
-                let stateAdapter = context.coordinator?.stateAdapter,
-                let sfuAdapter = await stateAdapter.sfuAdapter
+                let stateAdapter = context.coordinator?.stateAdapter
             else {
                 return
             }
-            let sessionID = await stateAdapter.sessionID
             await stateAdapter
                 .$participants
                 .removeDuplicates()
                 .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
-                .map { participants in
-                    let result = Array(participants.values)
-                        .filter { $0.id != sessionID }
-                        .flatMap(\.trackSubscriptionDetails)
-                    return result
-                }
-                .sinkTask(storeIn: disposableBag) { [weak self] tracks in
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
                     do {
-                        try Task.checkCancellation()
-                        try await sfuAdapter.updateSubscriptions(
-                            tracks: tracks,
-                            for: sessionID
-                        )
+                        try await updateSubscriptions()
                     } catch {
                         transitionDisconnectOrError(error)
                     }
@@ -402,6 +394,28 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
+        private func observeIncomingVideoPolicyUpdates() async {
+            guard
+                let stateAdapter = context.coordinator?.stateAdapter
+            else {
+                return
+            }
+
+            await stateAdapter
+                .$incomingVideoPolicy
+                .removeDuplicates()
+                .log(.debug) { "Incoming video policy updated \($0) and we update subscriptions now." }
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
+                    guard let self else { return }
+                    do {
+                        try await updateSubscriptions()
+                    } catch {
+                        transitionDisconnectOrError(error)
+                    }
+                }
+                .store(in: disposableBag)
+        }
+
         /// Configures stats collection and delivery.
         private func configureStatsCollectionAndDelivery() async {
             guard
@@ -452,6 +466,43 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
+        }
+
+        // MARK: - Private helpers
+
+        private func updateSubscriptions() async throws {
+            guard
+                let coordinator = context.coordinator,
+                let sfuAdapter = await coordinator.stateAdapter.sfuAdapter
+            else {
+                return
+            }
+
+            let incomingVideoPolicy = await coordinator
+                .stateAdapter
+                .incomingVideoPolicy
+
+            let tracks = await WebRTCJoinRequestFactory()
+                .buildSubscriptionDetails(
+                    nil,
+                    coordinator: coordinator,
+                    incomingVideoPolicy: incomingVideoPolicy
+                )
+
+            try Task.checkCancellation()
+
+            let participants = await coordinator.stateAdapter.participants
+            log.debug(
+                """
+                Updating subscriptions for \(participants.count - 1) participants 
+                with incomingVideoPolicy:\(incomingVideoPolicy).
+                """,
+                subsystems: .webRTC
+            )
+            try await sfuAdapter.updateSubscriptions(
+                tracks: tracks,
+                for: await coordinator.stateAdapter.sessionID
+            )
         }
     }
 }

@@ -424,6 +424,12 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    func setIncomingVideoPolicy(
+        _ value: IncomingVideoPolicy
+    ) async {
+        await webRTCCoordinator.setIncomingVideoPolicy(value)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {
