@@ -345,7 +345,7 @@ public struct VideoCallParticipantView: View {
     }
     
     public var body: some View {
-        withCallSettingsObservartion {
+        withCallSettingsObservation {
             VideoRendererView(
                 id: id,
                 size: availableFrame.size,
@@ -381,7 +381,7 @@ public struct VideoCallParticipantView: View {
 
     @MainActor
     @ViewBuilder
-    private func withCallSettingsObservartion(
+    private func withCallSettingsObservation(
         @ViewBuilder _ content: () -> some View
     ) -> some View {
         if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {

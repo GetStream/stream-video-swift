@@ -206,6 +206,22 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.token, expected)
     }
 
+    // MARK: - setIncomingVideoQualitySettings
+
+    func test_setIncomingVideoQualitySettings_shouldUpdateIncomingVideoQualitySettings() async throws {
+        let expected = IncomingVideoQualitySettings.manual(
+            group: .custom(sessionIds: [.unique, .unique]),
+            targetSize: .init(
+                width: 11,
+                height: 10
+            )
+        )
+
+        await subject.set(incomingVideoQualitySettings: expected)
+
+        await assertEqualAsync(await subject.incomingVideoQualitySettings, expected)
+    }
+
     // MARK: - setVideoFilter
 
     func test_setVideoFilter_shouldUpdateVideoFilter() async throws {
@@ -569,6 +585,34 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             let participant3 = await self.subject.participants["3"]
 
             return participant2?.track?.trackId == participantTracks["2"]?.trackId
+                && participant3?.screenshareTrack?.trackId == participantTracks["3"]?.trackId
+        }
+    }
+
+    func test_didUpdateParticipants_withIncomingVideoQualitySettings_shouldAssignTracksToParticipantsCorrectly() async throws {
+        let initialParticipants: [String: CallParticipant] = [
+            "1": .dummy(id: "1"),
+            "2": .dummy(id: "2"),
+            "3": .dummy(id: "3")
+        ]
+        let participantTracks: [String: RTCMediaStreamTrack] = [
+            "1": await subject.peerConnectionFactory.mockAudioTrack(),
+            "2": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: false),
+            "3": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true)
+        ]
+        await subject.set(incomingVideoQualitySettings: .disabled(group: .custom(sessionIds: ["2"])))
+        await subject.enqueue { _ in initialParticipants }
+
+        await subject.didAddTrack(participantTracks["2"]!, type: .video, for: "2")
+        await subject.didAddTrack(participantTracks["3"]!, type: .screenshare, for: "3")
+
+        await subject.enqueue { _ in initialParticipants }
+
+        await fulfillment {
+            let participant2 = await self.subject.participants["2"]
+            let participant3 = await self.subject.participants["3"]
+
+            return participant2?.track == nil
                 && participant3?.screenshareTrack?.trackId == participantTracks["3"]?.trackId
         }
     }

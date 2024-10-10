@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- You can now provide the incoming video quality setting for some or all participants [#571](https://github.com/GetStream/stream-video-swift/pull/571)
 
 # [1.13.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.13.0)
 _October 08, 2024_

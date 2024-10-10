@@ -141,7 +141,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
 
     /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
-        hasVideo && showTrack
+        hasVideo && showTrack && track != nil
     }
 
     public func withUpdated(trackSize: CGSize) -> CallParticipant {
