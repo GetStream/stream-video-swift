@@ -103,6 +103,7 @@ struct WebRTCJoinRequestFactory {
             result.subscriptions = await buildSubscriptionDetails(
                 nil,
                 coordinator: coordinator,
+                incomingVideoPolicy: await coordinator.stateAdapter.incomingVideoPolicy,
                 file: file,
                 function: function,
                 line: line
@@ -122,6 +123,7 @@ struct WebRTCJoinRequestFactory {
             result.subscriptions = await buildSubscriptionDetails(
                 nil,
                 coordinator: coordinator,
+                incomingVideoPolicy: await coordinator.stateAdapter.incomingVideoPolicy,
                 file: file,
                 function: function,
                 line: line
@@ -140,6 +142,7 @@ struct WebRTCJoinRequestFactory {
             result.subscriptions = await buildSubscriptionDetails(
                 fromSessionID,
                 coordinator: coordinator,
+                incomingVideoPolicy: await coordinator.stateAdapter.incomingVideoPolicy,
                 file: file,
                 function: function,
                 line: line
@@ -215,13 +218,14 @@ struct WebRTCJoinRequestFactory {
     func buildSubscriptionDetails(
         _ previousSessionID: String?,
         coordinator: WebRTCCoordinator,
+        incomingVideoPolicy: IncomingVideoPolicy,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
     ) async -> [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
         let sessionID = await coordinator.stateAdapter.sessionID
         return Array(await coordinator.stateAdapter.participants.values)
-            .filter { $0.id != sessionID && $0.id != previousSessionID }
-            .flatMap(\.trackSubscriptionDetails)
+            .filter { $0.id != sessionID && $0.id != previousSessionID && !incomingVideoPolicy.isVideoDisabled(for: sessionID) }
+            .flatMap { $0.trackSubscriptionDetails(incomingVideoPolicy: incomingVideoPolicy) }
     }
 }

@@ -1133,6 +1133,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         state.sortComparators = sortComparators
     }
 
+    @MainActor
+    public func setIncomingVideoPolicy(
+        _ value: IncomingVideoPolicy
+    ) async {
+        state.incomingVideoPolicy = value
+        await callController.setIncomingVideoPolicy(value)
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
