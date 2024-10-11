@@ -247,7 +247,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             members: [],
             sessionId: "123",
             user: UserResponse(
-                banned: false,
                 blockedUserIds: [],
                 createdAt: Date(),
                 custom: [:],
@@ -305,7 +304,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             members: [],
             sessionId: "123",
             user: UserResponse(
-                banned: false,
                 blockedUserIds: [],
                 createdAt: Date(),
                 custom: [:],
@@ -938,7 +936,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 extension User {
     func toUserResponse() -> UserResponse {
         UserResponse(
-            banned: false,
             blockedUserIds: [],
             createdAt: Date(),
             custom: customData,
