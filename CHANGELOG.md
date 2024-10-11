@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [1.13.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.13.0)
+_October 08, 2024_
+
+### 🐞 Fixed
+
+- Improved performance on lower end devices [#557](https://github.com/GetStream/stream-video-swift/pull/557)
+- CallKitService access issue when ending calls [#566](https://github.com/GetStream/stream-video-swift/pull/566)
+
 # [1.12.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.12.0)
 _September 27, 2024_
 

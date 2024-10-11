@@ -387,7 +387,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         await waitExpectation()
 
-        XCTAssertEqual(subject.storage.count, 1)
+        XCTAssertEqual(subject.callCount, 1)
 
         // Stub with the new call
         let secondCallUUID = UUID()
@@ -408,7 +408,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             callerId: callerId
         ) { _ in }
 
-        XCTAssertEqual(subject.storage.count, 2)
+        XCTAssertEqual(subject.callCount, 2)
 
         subject.provider(
             callProvider,
@@ -417,9 +417,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        await fulfillment { [weak subject] in subject?.storage.count == 1 }
+        await fulfillment { [weak subject] in subject?.callCount == 1 }
 
-        XCTAssertEqual(subject.storage.count, 1)
+        XCTAssertEqual(subject.callCount, 1)
     }
 
     // MARK: - callEnded
