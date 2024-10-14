@@ -450,6 +450,30 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - setIncomingVideoQualitySettings
+
+    func test_zoom_shouldCallSeetIncomingVideoQualitySettingsOnCoordinator() async throws {
+        try await prepareAsConnected()
+        let incomingVideoQualitySettings = IncomingVideoQualitySettings.manual(
+            group: .custom(sessionIds: [.unique, .unique]),
+            targetSize: .init(
+                width: 11,
+                height: 10
+            )
+        )
+
+        await subject.setIncomingVideoQualitySettings(incomingVideoQualitySettings)
+
+        await fulfillment {
+            await self
+                .mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .incomingVideoQualitySettings == incomingVideoQualitySettings
+        }
+    }
+
     // MARK: - Private helpers
 
     private func assertTransitionToStage(

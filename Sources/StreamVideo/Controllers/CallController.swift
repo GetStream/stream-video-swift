@@ -424,6 +424,20 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    // MARK: - Incoming video policy
+
+    /// Sets the incoming video policy. This function updates the state and informs the coordinator
+    /// about the new video policy asynchronously.
+    ///
+    /// - Parameter value: The new `setIncomingVideoQualitySettings` to be applied. It determines
+    ///   whether video streams are allowed, manually controlled, or disabled for
+    ///   specific session groups.
+    func setIncomingVideoQualitySettings(
+        _ value: IncomingVideoQualitySettings
+    ) async {
+        await webRTCCoordinator.setIncomingVideoQualitySettings(value)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {

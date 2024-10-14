@@ -9,7 +9,7 @@ import Foundation
 /// It uses either debounce or throttle mechanisms to manage update frequency.
 final class CollectionDelayedUpdateObserver<Value: Collection> {
     /// Represents different time intervals for delaying updates.
-    private enum Interval {
+    enum Interval {
         /// No delay.
         case none
         /// Low delay (0.25 seconds).
@@ -63,7 +63,7 @@ final class CollectionDelayedUpdateObserver<Value: Collection> {
     }
 
     /// The current interval for delaying updates.
-    private var interval: Interval = .screenRefreshRate {
+    private(set) var interval: Interval = .screenRefreshRate {
         didSet {
             /// Reconfigure the observer if the interval has changed.
             if interval != oldValue { configure(with: interval) }
@@ -140,7 +140,7 @@ final class CollectionDelayedUpdateObserver<Value: Collection> {
             case let .throttle(scheduler, latest):
                 /// Applies a throttle to the publisher, emitting values at most once per interval.
                 return publisher
-                    .debounce(for: .seconds(interval.value), scheduler: scheduler)
+                    .throttle(for: .seconds(interval.value), scheduler: scheduler, latest: latest)
                     .eraseToAnyPublisher()
             }
         }

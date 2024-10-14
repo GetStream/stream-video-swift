@@ -496,6 +496,26 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - setIncomingVideoQualitySettings
+
+    func test_setIncomingVideoQualitySettings_correctlyUpdatesStateAdapter() async throws {
+        try await prepareAsConnected()
+        let incomingVideoQualitySettings = IncomingVideoQualitySettings.manual(
+            group: .custom(sessionIds: [.unique, .unique]),
+            targetSize: .init(
+                width: 11,
+                height: 10
+            )
+        )
+
+        await subject.setIncomingVideoQualitySettings(incomingVideoQualitySettings)
+
+        await assertEqualAsync(
+            await subject.stateAdapter.incomingVideoQualitySettings,
+            incomingVideoQualitySettings
+        )
+    }
+
     // MARK: - Private helpers
 
     private func assertEqualAsync<T: Equatable>(

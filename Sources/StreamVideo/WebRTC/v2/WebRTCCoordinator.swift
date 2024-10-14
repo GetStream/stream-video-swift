@@ -363,6 +363,20 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .zoom(by: factor)
     }
 
+    // MARK: - Incoming video policy
+
+    /// Sets the incoming video quality settings. This function updates the state with the new policy. This
+    /// change is then triggering an update in the policy observation (in JoinedStage).
+    ///
+    /// - Parameter value: The new `IncomingVideoQualitySettings` to be applied. It
+    /// determines whether video streams are allowed, manually controlled, or disabled for
+    /// specific session groups.
+    func setIncomingVideoQualitySettings(
+        _ value: IncomingVideoQualitySettings
+    ) async {
+        await stateAdapter.set(incomingVideoQualitySettings: value)
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.
