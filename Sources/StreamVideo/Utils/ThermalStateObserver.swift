@@ -72,13 +72,13 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
         // Initialize the thermal state with the current process's thermal state
         state = thermalStateProvider()
         self.thermalStateProvider = thermalStateProvider
-
+        
         // Set up a publisher to monitor thermal state changes
         notificationCenterCancellable = NotificationCenter
             .default
             .publisher(for: ProcessInfo.thermalStateDidChangeNotification)
             .receive(on: DispatchQueue.global(qos: .utility))
-            .map { [thermalStateProvider] _ in thermalStateProvider() }
+            .compactMap { ($0.object as? ProcessInfo)?.thermalState }
             .receive(on: DispatchQueue.main)
             .assign(to: \.state, on: self)
     }
