@@ -516,6 +516,19 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - setDisconnectionTimeout
+
+    func test_setDisconnectionTimeout_correctlyUpdatesStageContext() async throws {
+        try await prepareAsConnected()
+
+        subject.setDisconnectionTimeout(11)
+
+        XCTAssertEqual(
+            subject.stateMachine.currentStage.context.disconnectionTimeout,
+            11
+        )
+    }
+
     // MARK: - Private helpers
 
     private func assertEqualAsync<T: Equatable>(
