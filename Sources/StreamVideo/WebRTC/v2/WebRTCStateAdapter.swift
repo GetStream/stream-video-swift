@@ -64,6 +64,7 @@ actor WebRTCStateAdapter: ObservableObject {
     @Published private(set) var participantsCount: UInt32 = 0
     @Published private(set) var anonymousCount: UInt32 = 0
     @Published private(set) var participantPins: [PinInfo] = []
+    @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
 
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
@@ -167,6 +168,11 @@ actor WebRTCStateAdapter: ObservableObject {
     func set(videoFilter value: VideoFilter?) {
         videoFilter = value
         publisher?.setVideoFilter(value)
+    }
+
+    /// Sets the manual trackSize that will be used when updating subscriptions with the SFU.
+    func set(incomingVideoQualitySettings value: IncomingVideoQualitySettings) {
+        self.incomingVideoQualitySettings = value
     }
 
     // MARK: - Session Management
@@ -426,6 +432,46 @@ actor WebRTCStateAdapter: ObservableObject {
         }
     }
 
+    // MARK: - Participant Operations
+
+    /// Enqueues a participant operation to be executed asynchronously but in serial order for the actor.
+    /// - Parameters:
+    ///   - operation: The participant operation to perform.
+    ///   - functionName: The name of the calling function. Defaults to the current function name.
+    ///   - fileName: The name of the file where the function is called. Defaults to the current file name.
+    ///   - lineNumber: The line number where the function is called. Defaults to the current line number.
+    func enqueue(
+        _ operation: @escaping ParticipantOperation,
+        functionName: StaticString = #function,
+        fileName: StaticString = #file,
+        lineNumber: UInt = #line
+    ) {
+        /// Creates a new asynchronous task for the operation.
+        let newTask = Task { [previousParticipantOperation] in
+            /// Awaits the result of the previous participant operation.
+            _ = await previousParticipantOperation?.result
+
+            /// Retrieves the current participants.
+            let current = participants
+            /// Applies the operation to get the next state of participants.
+            let next = operation(current)
+            /// Assigns media tracks to the participants.
+            let updated = assignTracks(on: next)
+            /// Sends the updated participants to observers while helping publishing streamlined updates.
+            set(participants: updated)
+            /// Logs the completion of the participant operation.
+            log.debug(
+                "Participant operation completed.",
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
+        }
+
+        /// Stores the new task as the previous operation for chaining.
+        previousParticipantOperation = newTask
+    }
+
     // MARK: - Private Helpers
 
     /// Handles track events when they are added or removed from peer connections.
@@ -466,44 +512,6 @@ actor WebRTCStateAdapter: ObservableObject {
         )
     }
 
-    /// Enqueues a participant operation to be executed asynchronously but in serial order for the actor.
-    /// - Parameters:
-    ///   - operation: The participant operation to perform.
-    ///   - functionName: The name of the calling function. Defaults to the current function name.
-    ///   - fileName: The name of the file where the function is called. Defaults to the current file name.
-    ///   - lineNumber: The line number where the function is called. Defaults to the current line number.
-    func enqueue(
-        _ operation: @escaping ParticipantOperation,
-        functionName: StaticString = #function,
-        fileName: StaticString = #file,
-        lineNumber: UInt = #line
-    ) {
-        /// Creates a new asynchronous task for the operation.
-        let newTask = Task { [previousParticipantOperation] in
-            /// Awaits the result of the previous participant operation.
-            _ = await previousParticipantOperation?.result
-
-            /// Retrieves the current participants.
-            let current = participants
-            /// Applies the operation to get the next state of participants.
-            let next = operation(current)
-            /// Assigns media tracks to the participants.
-            let updated = assignTracks(on: next)
-            /// Sends the updated participants to observers while helping publishing streamlined updates.
-            set(participants: updated)
-            /// Logs the completion of the participant operation.
-            log.debug(
-                "Participant operation completed.",
-                functionName: functionName,
-                fileName: fileName,
-                lineNumber: lineNumber
-            )
-        }
-
-        /// Stores the new task as the previous operation for chaining.
-        previousParticipantOperation = newTask
-    }
-
     /// Assigns media tracks to participants based on their media type.
     /// - Parameter participants: The storage containing participant information.
     /// - Returns: An updated participants storage with assigned tracks.
@@ -512,12 +520,23 @@ actor WebRTCStateAdapter: ObservableObject {
     ) -> ParticipantsStorage {
         /// Reduces the participants to a new storage with updated tracks.
         participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
-            partialResult[entry.key] = entry
+            var newParticipant = entry
                 .value
                 /// Updates the participant with a video track if available.
                 .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
                 /// Updates the participant with a screensharing track if available.
                 .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
+
+            /// For participants other than the local one, we check if the incomingVideoQualitySettings
+            /// provide additional limits.
+            if
+                newParticipant.sessionId != sessionID,
+                incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId)
+            {
+                newParticipant = newParticipant.withUpdated(track: nil)
+            }
+
+            partialResult[entry.key] = newParticipant
         }
     }
 }

@@ -402,3 +402,23 @@ extension Image {
         self = .init(systemName: "star")
     }
 }
+
+var otherParticipant = CallParticipant(
+    id: "",
+    userId: "",
+    roles: [],
+    name: "",
+    profileImageURL: nil,
+    trackLookupPrefix: nil,
+    hasVideo: true,
+    hasAudio: true,
+    isScreenSharing: true,
+    showTrack: true,
+    isDominantSpeaker: true,
+    sessionId: "",
+    connectionQuality: .excellent,
+    joinedAt: .init(),
+    audioLevel: 0,
+    audioLevels: [],
+    pin: nil
+)

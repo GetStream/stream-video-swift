@@ -4,7 +4,7 @@
 
 import Combine
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
 final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @unchecked Sendable {
 
@@ -613,6 +613,41 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         XCTAssertTrue(newStatsReporter?.publisher === publisher)
         XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
         XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)
+    }
+
+    // MARK: observeIncomingVideoQualitySettings
+
+    func test_transition_incomingVideoQualitySettingsUpdated_updateSubscriptionsWasCalledOnSFU() async throws {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
+        await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
+            [
+                sessionId: .dummy(id: sessionId),
+                "0": .dummy(id: "0", hasVideo: true),
+                "1": .dummy(id: "1", hasVideo: true)
+            ]
+        }
+        let incomingVideoQualitySettings = IncomingVideoQualitySettings
+            .disabled(group: .custom(sessionIds: ["0"]))
+
+        await assertResultAfterTrigger(
+            trigger: { [mockCoordinatorStack] in
+                await mockCoordinatorStack?
+                    .coordinator
+                    .setIncomingVideoQualitySettings(incomingVideoQualitySettings)
+            }
+        ) { [mockCoordinatorStack] expectation in
+            let request = try? XCTUnwrap(mockCoordinatorStack?.sfuStack.service.updateSubscriptionsWasCalledWithRequest)
+            XCTAssertEqual(request?.tracks.count, 1)
+            expectation.fulfill()
+        }
     }
 
     // MARK: - Private helpers

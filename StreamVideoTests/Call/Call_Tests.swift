@@ -303,6 +303,23 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertTrue(Int(duration) >= 1)
     }
 
+    func test_setIncomingVideoQualitySettings_updatesCallState() async throws {
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let incomingVideoQualitySettings = IncomingVideoQualitySettings.manual(
+            group: .custom(sessionIds: [.unique, .unique]),
+            targetSize: .init(
+                width: 11,
+                height: 10
+            )
+        )
+
+        await call?.setIncomingVideoQualitySettings(incomingVideoQualitySettings)
+
+        await fulfillment {
+            call?.state.incomingVideoQualitySettings == incomingVideoQualitySettings
+        }
+    }
+
     // MARK: - Update State from Coordinator events
 
     func test_coordinatorEventReceived_startedRecording_updatesStateCorrectly() async throws {

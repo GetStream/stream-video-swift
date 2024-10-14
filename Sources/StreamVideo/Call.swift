@@ -1133,6 +1133,25 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         state.sortComparators = sortComparators
     }
 
+    // MARK: - IncomingVideoQualitySettings
+
+    /// Sets the incoming video quality settings. This function updates the state and informs the internal
+    /// components about the new video policy asynchronously.
+    ///
+    /// - Parameter value: The new `IncomingVideoQualitySettings` to be applied. It
+    ///   determine whether video streams are allowed, manually controlled, or disabled for
+    ///   specific session groups.
+    @MainActor
+    public func setIncomingVideoQualitySettings(
+        _ value: IncomingVideoQualitySettings
+    ) async {
+        // Update the state with the new incoming video policy.
+        state.incomingVideoQualitySettings = value
+
+        // Informs the call controller to apply the new incoming video policy.
+        await callController.setIncomingVideoQualitySettings(value)
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {

@@ -449,7 +449,8 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
 
         let result = await subject.buildSubscriptionDetails(
             .unique,
-            coordinator: mockCoordinatorStack.coordinator
+            coordinator: mockCoordinatorStack.coordinator,
+            incomingVideoQualitySettings: .none
         ).sorted { $0.sessionID <= $1.sessionID }
 
         XCTAssertEqual(result.count, 3)

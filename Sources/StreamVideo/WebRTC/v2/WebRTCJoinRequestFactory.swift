@@ -103,6 +103,9 @@ struct WebRTCJoinRequestFactory {
             result.subscriptions = await buildSubscriptionDetails(
                 nil,
                 coordinator: coordinator,
+                incomingVideoQualitySettings: await coordinator
+                    .stateAdapter
+                    .incomingVideoQualitySettings,
                 file: file,
                 function: function,
                 line: line
@@ -122,6 +125,9 @@ struct WebRTCJoinRequestFactory {
             result.subscriptions = await buildSubscriptionDetails(
                 nil,
                 coordinator: coordinator,
+                incomingVideoQualitySettings: await coordinator
+                    .stateAdapter
+                    .incomingVideoQualitySettings,
                 file: file,
                 function: function,
                 line: line
@@ -140,6 +146,9 @@ struct WebRTCJoinRequestFactory {
             result.subscriptions = await buildSubscriptionDetails(
                 fromSessionID,
                 coordinator: coordinator,
+                incomingVideoQualitySettings: await coordinator
+                    .stateAdapter
+                    .incomingVideoQualitySettings,
                 file: file,
                 function: function,
                 line: line
@@ -208,6 +217,8 @@ struct WebRTCJoinRequestFactory {
     /// - Parameters:
     ///   - previousSessionID: The previous session ID, if any.
     ///   - coordinator: The WebRTC coordinator.
+    ///   - incomingVideoQualitySettings: The `IncomingVideoQualitySettings` for
+    ///   the current session.
     ///   - file: The file where the method is called.
     ///   - function: The function where the method is called.
     ///   - line: The line number where the method is called.
@@ -215,6 +226,7 @@ struct WebRTCJoinRequestFactory {
     func buildSubscriptionDetails(
         _ previousSessionID: String?,
         coordinator: WebRTCCoordinator,
+        incomingVideoQualitySettings: IncomingVideoQualitySettings,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
@@ -222,6 +234,6 @@ struct WebRTCJoinRequestFactory {
         let sessionID = await coordinator.stateAdapter.sessionID
         return Array(await coordinator.stateAdapter.participants.values)
             .filter { $0.id != sessionID && $0.id != previousSessionID }
-            .flatMap(\.trackSubscriptionDetails)
+            .flatMap { $0.trackSubscriptionDetails(incomingVideoQualitySettings: incomingVideoQualitySettings) }
     }
 }

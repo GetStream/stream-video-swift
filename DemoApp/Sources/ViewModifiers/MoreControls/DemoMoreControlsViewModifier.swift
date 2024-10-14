@@ -98,6 +98,10 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                 label: "Stats"
                             ) { Image(systemName: "chart.xyaxis.line") }
 
+                            DemoManualQualitySelectionButtonView(
+                                call: viewModel.call
+                            ) { viewModel.moreControlsShown = false }
+
                             #if OBSERVE_RECONNECTION_NOTIFICATIONS
                             if AppEnvironment.configuration != .release {
                                 DemoReconnectionButtonView { viewModel.moreControlsShown = false }

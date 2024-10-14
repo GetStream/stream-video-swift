@@ -121,6 +121,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
+                    await observeIncomingVideoQualitySettingsUpdates()
+
+                    try Task.checkCancellation()
+
                     await observeCallSettingsUpdates()
 
                     try Task.checkCancellation()
@@ -138,7 +142,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             .store(in: disposableBag)
         }
 
-        /// Cleans up the previous session if required.
+        /// Cleans up the previous WebRTC session, including closing and removing the
+        /// previous publisher, subscriber, and SFU adapter. It also resets the migration
+        /// and rejoining state in the context.
         private func cleanUpPreviousSessionIfRequired() async {
             await context.previousSessionPublisher?.close()
             await context.previousSessionSubscriber?.close()
@@ -150,7 +156,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
             context.migrationStatusObserver = nil
         }
 
-        /// Observes migration status if required.
+        /// Observes the migration status if a `WebRTCMigrationStatusObserver` is provided.
+        /// If migration is successful, the previous SFU (Selective Forwarding Unit)
+        /// adapter is disconnected. If migration fails, the reconnection strategy is set
+        /// to rejoin, and an error is logged.
+        ///
+        /// - Parameters:
+        ///   - migrationStatusObserver: An optional observer that tracks the migration status.
+        ///   - previousSFUAdapter: The previous SFU adapter that should be disconnected after migration.
+        /// - Throws: An error if the migration status observation fails or if the task is cancelled.
         private func observeMigrationStatusIfRequired(
             _ migrationStatusObserver: WebRTCMigrationStatusObserver?,
             previousSFUAdapter: SFUAdapter?
@@ -177,7 +191,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
-        /// Observes the connection state.
+        /// Observes changes in the WebRTC connection state (disconnecting or
+        /// disconnected) from the SFU (Selective Forwarding Unit) adapter. Based on
+        /// the disconnection source, the method sets an appropriate reconnection
+        /// strategy and handles the disconnection.
         private func observeConnection() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -222,7 +239,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes the call ended event.
+        /// Observes call-ended events from the SFU (Selective Forwarding Unit) adapter.
+        /// When a `Stream_Video_Sfu_Event_CallEnded` event is detected, the method logs
+        /// the reason for the call ending and triggers a transition to the "leaving"
+        /// state.
         private func observeCallEndedEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -235,7 +255,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes the migration event.
+        /// Observes migration events from the SFU (Selective Forwarding Unit) adapter.
+        /// If an error or "go away" event with a migration strategy is published, the
+        /// method triggers the appropriate transition to handle the migration by
+        /// disconnecting and setting the reconnection strategy to `.migrate`.
         private func observeMigrationEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -269,7 +292,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes the disconnect event.
+        /// Observes disconnect events from the SFU (Selective Forwarding Unit) adapter.
+        /// If an error event with a `disconnect` reconnection strategy is published,
+        /// the method triggers the appropriate transition to handle the disconnect.
         private func observeDisconnectEvent() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -282,7 +307,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes the preferred reconnection strategy.
+        /// Observes the preferred reconnection strategy based on error events from the
+        /// SFU (Selective Forwarding Unit) adapter. When an error event with a
+        /// reconnection strategy is published, the method updates the reconnection
+        /// strategy in the context accordingly.
         private func observePreferredReconnectionStrategy() async {
             let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
             sfuAdapter?
@@ -299,41 +327,34 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes subscription updates.
+        /// Observes changes to the list of participants and triggers subscription
+        /// updates when the participant list changes. This ensures that subscriptions
+        /// are kept in sync with the current participants.
         private func observeForSubscriptionUpdates() async {
             guard
-                let stateAdapter = context.coordinator?.stateAdapter,
-                let sfuAdapter = await stateAdapter.sfuAdapter
+                let stateAdapter = context.coordinator?.stateAdapter
             else {
                 return
             }
-            let sessionID = await stateAdapter.sessionID
+
             await stateAdapter
                 .$participants
                 .removeDuplicates()
                 .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
-                .map { participants in
-                    let result = Array(participants.values)
-                        .filter { $0.id != sessionID }
-                        .flatMap(\.trackSubscriptionDetails)
-                    return result
-                }
-                .sinkTask(storeIn: disposableBag) { [weak self] tracks in
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
                     do {
-                        try Task.checkCancellation()
-                        try await sfuAdapter.updateSubscriptions(
-                            tracks: tracks,
-                            for: sessionID
-                        )
+                        try await updateSubscriptions()
                     } catch {
                         transitionDisconnectOrError(error)
                     }
                 }
-                .store(in: disposableBag)
+                .store(in: disposableBag) // Store the Combine subscription in the disposable bag.
         }
 
-        /// Observes call settings updates.
+        /// Observes updates to the `callSettings` and ensures that any changes are
+        /// reflected in the publisher. This ensures that updates to audio, video, and
+        /// audio output settings are applied correctly during a WebRTC session.
         private func observeCallSettingsUpdates() async {
             await context
                 .coordinator?
@@ -351,27 +372,35 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 }
                 .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
                     guard let self else { return }
+
                     do {
                         guard
                             let publisher = await context.coordinator?.stateAdapter.publisher
                         else {
                             log.warning(
-                                "PeerConnection haven't been setUp for publishing.",
+                                "PeerConnection hasn't been set up for publishing.",
                                 subsystems: .webRTC
                             )
                             return
                         }
+
                         try await publisher.didUpdateCallSettings(callSettings)
                         log.debug("Publisher callSettings updated.", subsystems: .webRTC)
                     } catch {
-                        log.warning("Will disconnect because failed to update callSettings on publisher.", subsystems: .webRTC)
+                        log.warning(
+                            "Will disconnect because failed to update callSettings on publisher.",
+                            subsystems: .webRTC
+                        )
                         transitionDisconnectOrError(error)
                     }
                 }
-                .store(in: disposableBag)
+                .store(in: disposableBag) // Store the Combine subscription in the disposable bag.
         }
 
-        /// Observes peer connection state.
+        /// Observes the connection state of both the publisher and subscriber peer
+        /// connections. If a disconnection is detected, the method attempts to restart
+        /// ICE (Interactive Connectivity Establishment) for both the publisher and
+        /// subscriber to restore the connection.
         private func observePeerConnectionState() async {
             guard
                 let publisher = await context.coordinator?.stateAdapter.publisher,
@@ -379,49 +408,96 @@ extension WebRTCCoordinator.StateMachine.Stage {
             else {
                 return
             }
+
             publisher
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) {
                     """
-                    PeerConnection of type:\($0) was disconnected. Will attempt
+                    PeerConnection of type: \($0) was disconnected. Will attempt 
                     restarting ICE.
                     """
                 }
-                .sink { [weak publisher] in publisher?.restartICE() }
+                .sink { [weak publisher] in
+                    // Restart ICE on the publisher when disconnected.
+                    publisher?.restartICE()
+                }
                 .store(in: disposableBag)
 
             subscriber
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) {
                     """
-                    PeerConnection of type:\($0) was disconnected. Will attempt
+                    PeerConnection of type: \($0) was disconnected. Will attempt 
                     restarting ICE.
                     """
                 }
-                .sink { [weak subscriber] in subscriber?.restartICE() }
+                .sink { [weak subscriber] in
+                    subscriber?.restartICE()
+                }
                 .store(in: disposableBag)
         }
 
-        /// Configures stats collection and delivery.
+        /// Observes changes to the `incomingVideoQualitySettings` and triggers updates when
+        /// the settings change. It ensures that the video subscriptions are updated
+        /// accordingly and forces a participant update to refresh the UI.
+        private func observeIncomingVideoQualitySettingsUpdates() async {
+            guard
+                let stateAdapter = context.coordinator?.stateAdapter
+            else {
+                return
+            }
+
+            await stateAdapter
+                .$incomingVideoQualitySettings
+                .removeDuplicates()
+                .log(.debug) { "Incoming video quality settings updated \($0) and we update subscriptions now." }
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
+                    guard let self else { return }
+
+                    do {
+                        try await updateSubscriptions()
+                        /// Force a participant update to ensure the UI reflects the new policy.
+                        await stateAdapter.enqueue { $0 }
+                    } catch {
+                        transitionDisconnectOrError(error)
+                    }
+                }
+                .store(in: disposableBag)
+        }
+
+        /// Configures the collection and delivery of WebRTC statistics by setting up
+        /// or updating the `WebRTCStatsReporter` for the current session. This ensures
+        /// that statistics such as network quality, peer connection status, and SFU
+        /// (Selective Forwarding Unit) adapter performance are tracked and reported
+        /// correctly.
         private func configureStatsCollectionAndDelivery() async {
             guard
                 let coordinator = context.coordinator
             else {
                 return
             }
+
             let stateAdapter = coordinator.stateAdapter
             let sessionId = await stateAdapter.sessionID
 
+            /// Check if the stats reporter is already associated with the current session.
             if await stateAdapter.statsReporter?.sessionID != sessionId {
+                /// Create a new stats reporter if the session ID does not match.
                 let statsReporter = WebRTCStatsReporter(
                     sessionID: await stateAdapter.sessionID
                 )
+
+                /// Set the stats reporting interval and associate the reporter with the publisher,
+                /// subscriber, and SFU adapter.
                 statsReporter.interval = await stateAdapter.statsReporter?.interval ?? 0
                 statsReporter.publisher = await stateAdapter.publisher
                 statsReporter.subscriber = await stateAdapter.subscriber
                 statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
+
+                /// Update the state adapter with the new stats reporter.
                 await stateAdapter.set(statsReporter: statsReporter)
             } else {
+                /// If the session ID matches, update the existing stats reporter.
                 let statsReporter = await stateAdapter.statsReporter
                 statsReporter?.interval = await stateAdapter.statsReporter?.interval ?? 0
                 statsReporter?.publisher = await stateAdapter.publisher
@@ -430,7 +506,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
         }
 
-        /// Observes internet connection status.
+        /// Observes changes in the internet connection status and handles disconnection
+        /// logic when the connection becomes unavailable. If the connection is lost,
+        /// the method triggers a fast reconnection strategy and sets the disconnection
+        /// source to a server-initiated event.
         private func observeInternetConnection() {
             internetConnectionObserver
                 .statusPublisher
@@ -441,17 +520,74 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .removeDuplicates()
                 .sink { [weak self] _ in
                     guard let self else { return }
+
+                    /// Set the reconnection strategy to a fast reconnection attempt.
                     context.reconnectionStrategy = .fast(
+                        /// Record the disconnection time.
                         disconnectedSince: .init(),
+                        /// Set a deadline for reconnection.
                         deadline: context.fastReconnectDeadlineSeconds
                     )
+
+                    /// Set the disconnection source as server-initiated due to a network error.
                     context.disconnectionSource = .serverInitiated(
                         error: .NetworkError("Not available")
                     )
-                    log.warning("Will disconnect because internet connection is down.", subsystems: .webRTC)
+
+                    log.warning(
+                        "Will disconnect because internet connection is down.",
+                        subsystems: .webRTC
+                    )
+
+                    /// Trigger the transition to a disconnected state or handle the disconnection.
                     transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
+        }
+
+        // MARK: - Private helpers
+
+        /// Updates the WebRTC subscriptions based on the current state, including the
+        /// incoming video policy and the list of participants. The method communicates
+        /// with the SFU (Selective Forwarding Unit) adapter to adjust track subscriptions.
+        ///
+        /// - Throws: An error if the subscriptions cannot be updated or if the task
+        ///   is cancelled during execution.
+        private func updateSubscriptions() async throws {
+            guard
+                let coordinator = context.coordinator,
+                let sfuAdapter = await coordinator.stateAdapter.sfuAdapter
+            else {
+                return
+            }
+
+            let incomingVideoQualitySettings = await coordinator
+                .stateAdapter
+                .incomingVideoQualitySettings
+
+            let tracks = await WebRTCJoinRequestFactory()
+                .buildSubscriptionDetails(
+                    nil,
+                    coordinator: coordinator,
+                    incomingVideoQualitySettings: incomingVideoQualitySettings
+                )
+
+            try Task.checkCancellation()
+
+            let participants = await coordinator.stateAdapter.participants
+
+            log.debug(
+                """
+                Updating subscriptions for \(participants.count - 1) participants 
+                with incomingVideoQualitySettings: \(incomingVideoQualitySettings).
+                """,
+                subsystems: .webRTC
+            )
+
+            try await sfuAdapter.updateSubscriptions(
+                tracks: tracks,
+                for: await coordinator.stateAdapter.sessionID
+            )
         }
     }
 }
