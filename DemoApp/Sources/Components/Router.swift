@@ -72,13 +72,41 @@ final class Router: ObservableObject {
         }
 
         if
-            deeplinkInfo.baseURL != AppEnvironment.baseURL,
-            let currentUser = appState.currentUser {
+            let apiKey = deeplinkInfo.apiKey,
+            let token = deeplinkInfo.token,
+            let userId = deeplinkInfo.userId,
+            appState.currentUser?.id != userId {
+            Task {
+                do {
+                    await appState.logout()
+                    AppEnvironment.baseURL = .custom(
+                        baseURL: deeplinkInfo.baseURL,
+                        apiKey: apiKey,
+                        token: token
+                    )
+                    try await handleLoggedInUserCredentials(
+                        .init(
+                            userInfo: .init(id: userId),
+                            token: .init(rawValue: token)
+                        ),
+                        deeplinkInfo: deeplinkInfo
+                    )
+                } catch {
+                    log.error(error)
+                }
+            }
+        } else if deeplinkInfo.baseURL != AppEnvironment.baseURL, let currentUser = appState.currentUser {
             Task {
                 do {
                     await appState.logout()
                     AppEnvironment.baseURL = deeplinkInfo.baseURL
-                    try await handleLoggedInUserCredentials(.init(userInfo: currentUser, token: .empty), deeplinkInfo: deeplinkInfo)
+                    try await handleLoggedInUserCredentials(
+                        .init(
+                            userInfo: currentUser,
+                            token: .empty
+                        ),
+                        deeplinkInfo: deeplinkInfo
+                    )
                 } catch {
                     log.error(error)
                 }

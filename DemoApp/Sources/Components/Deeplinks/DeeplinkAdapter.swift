@@ -10,12 +10,18 @@ struct DeeplinkInfo: Equatable {
     var callId: String
     var callType: String
     var baseURL: AppEnvironment.BaseURL
+    var apiKey: String?
+    var token: String?
+    var userId: String?
 
     static let empty = DeeplinkInfo(
         url: nil,
         callId: "",
         callType: "",
-        baseURL: AppEnvironment.baseURL
+        baseURL: AppEnvironment.baseURL,
+        apiKey: nil,
+        token: nil,
+        userId: nil
     )
 }
 
@@ -25,15 +31,20 @@ struct DeeplinkAdapter {
             return true
         }
 
-        let result = AppEnvironment
+        let supported = AppEnvironment
             .supportedDeeplinks
             .compactMap(\.deeplinkURL.host)
+
+        let result = supported
             .first { url.host == $0 } != nil
 
         return result
     }
 
-    func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User?) {
+    func handle(url: URL) -> (
+        deeplinkInfo: DeeplinkInfo,
+        user: User?
+    ) {
         guard canHandle(url: url) else {
             return (.empty, nil)
         }
@@ -79,7 +90,10 @@ struct DeeplinkAdapter {
                 url: url,
                 callId: callId,
                 callType: callType,
-                baseURL: baseURL
+                baseURL: baseURL,
+                apiKey: url.queryParameters["api_key"],
+                token: url.queryParameters["token"],
+                userId: url.queryParameters["user_id"]
             ),
             nil
         )
