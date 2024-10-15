@@ -10,13 +10,13 @@ import UIKit
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.pushNotificationAdapter) var pushNotificationAdapter
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        UNUserNotificationCenter.current().delegate = self
-        setUpRemoteNotifications()
+        _ = pushNotificationAdapter
         setUpPerformanceTracking()
 
         // Setup a dummy video file to loop when working with from the simulator
@@ -58,53 +58,65 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         AppState.shared.pushToken = deviceToken
     }
 
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        let userInfo = response.notification.request.content.userInfo
-        log.debug("push notification received \(userInfo)")
-        guard let stream = userInfo["stream"] as? [String: Any],
-              let callCid = stream["call_cid"] as? String else {
-            return
-        }
-        let components = callCid.components(separatedBy: ":")
-        if components.count >= 2 {
-            let callType = components[0]
-            let callId = components[1]
-            let call = streamVideo.call(callType: callType, callId: callId)
-            AppState.shared.activeCall = call
-            Task {
-                do {
-                    try Task.checkCancellation()
-                    try await streamVideo.connect()
-
-                    try Task.checkCancellation()
-                    try await call.accept()
-
-                    try Task.checkCancellation()
-                    try await call.join()
-                } catch {
-                    log.error(error)
-                }
-            }
-        }
-    }
+//
+//    func userNotificationCenter(
+//        _ center: UNUserNotificationCenter,
+//        didReceive response: UNNotificationResponse
+//    ) async {
+//        do {
+//            try await pushNotificationAdapter.handleNotification(response)
+//        } catch {
+//            log.error(error)
+//        }
+    ////        let userInfo = response.notification.request.content.userInfo
+    ////        log.debug("push notification received \(userInfo)")
+    ////        guard
+    ////            let stream = userInfo["stream"] as? [String: Any],
+    ////            let callCid = stream["call_cid"] as? String
+    ////        else { return }
+    ////
+    ////        let components = callCid.components(separatedBy: ":")
+    ////        if components.count >= 2 {
+    ////            let callType = components[0]
+    ////            let callId = components[1]
+    ////            let call = streamVideo.call(callType: callType, callId: callId)
+    ////            AppState.shared.activeCall = call
+    ////            do {
+    ////                try Task.checkCancellation()
+    ////                try await streamVideo.connect()
+    ////
+    ////                try Task.checkCancellation()
+    ////                try await call.accept()
+    ////
+    ////                try Task.checkCancellation()
+    ////                try await call.join()
+    ////            } catch {
+    ////                log.error(error)
+    ////            }
+    ////        }
+//    }
+//
+//    func userNotificationCenter(
+//        _ center: UNUserNotificationCenter,
+//        willPresent notification: UNNotification
+//    ) async -> UNNotificationPresentationOptions {
+//        log.debug("Will present received push notification: \(notification).")
+//        return [.banner, .sound]
+//    }
 
     // MARK: - Private Helpers
 
-    private func setUpRemoteNotifications() {
-        UNUserNotificationCenter
-            .current()
-            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                if granted {
-                    DispatchQueue.main.async {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
-                }
-            }
-    }
+//    private func setUpRemoteNotifications() {
+//        UNUserNotificationCenter
+//            .current()
+//            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+//                if granted {
+//                    Task { @MainActor in
+//                        UIApplication.shared.registerForRemoteNotifications()
+//                    }
+//                }
+//            }
+//    }
 
     private func setUpPerformanceTracking() {
         guard AppEnvironment.performanceTrackerVisibility == .visible else { return }

@@ -76,7 +76,30 @@ extension AppEnvironment {
             }
         }
 
-        func joinLink(_ callId: String, callType: String = .default) -> URL {
+        var identifier: String {
+            switch self {
+            case .pronto:
+                return "pronto"
+            case .prontoStaging:
+                return "pronto-staging"
+            case .staging:
+                return "staging"
+            case .legacy:
+                return "legacy"
+            case .demo:
+                return "demo"
+            case let .custom:
+                return "custom"
+            }
+        }
+
+        func joinLink(
+            _ callId: String,
+            callType: String = .default,
+            apiKey: String? = nil,
+            userId: String? = nil,
+            token: String? = nil
+        ) -> URL {
             switch self {
             case .demo:
                 return url
@@ -85,17 +108,26 @@ extension AppEnvironment {
                     .appendingPathComponent("join")
                     .appendingPathComponent(callId)
                     .addQueryParameter("type", value: callType)
+                    .addQueryParameter("api_key", value: apiKey)
+                    .addQueryParameter("user_id", value: userId)
+                    .addQueryParameter("token", value: token)
             case let .custom(baseURL, _, _):
                 return baseURL
                     .url
                     .appendingPathComponent("join")
                     .appendingPathComponent(callId)
                     .addQueryParameter("type", value: callType)
+                    .addQueryParameter("api_key", value: apiKey)
+                    .addQueryParameter("user_id", value: userId)
+                    .addQueryParameter("token", value: token)
             default:
                 return url
                     .appendingPathComponent("join")
                     .appendingPathComponent(callId)
                     .addQueryParameter("type", value: callType)
+                    .addQueryParameter("api_key", value: apiKey)
+                    .addQueryParameter("user_id", value: userId)
+                    .addQueryParameter("token", value: token)
             }
         }
 
@@ -252,6 +284,7 @@ extension AppEnvironment {
 
     enum SupportedDeeplink: Debuggable, CaseIterable {
         case pronto
+        case prontoStaging
         case staging
         case demo
         case legacy
@@ -260,6 +293,8 @@ extension AppEnvironment {
             switch self {
             case .pronto:
                 return BaseURL.pronto.url
+            case .prontoStaging:
+                return BaseURL.prontoStaging.url
             case .staging:
                 return BaseURL.staging.url
             case .demo:
@@ -273,6 +308,8 @@ extension AppEnvironment {
             switch self {
             case .pronto:
                 return "Pronto"
+            case .prontoStaging:
+                return "Pronto Staging"
             case .staging:
                 return "Staging"
             case .demo:
@@ -286,9 +323,9 @@ extension AppEnvironment {
     static var supportedDeeplinks: [SupportedDeeplink] = {
         switch configuration {
         case .debug:
-            return [.pronto, .demo, .staging, .legacy]
+            return [.pronto, .prontoStaging, .demo, .staging, .legacy]
         case .test:
-            return [.pronto, .demo, .staging, .legacy]
+            return [.pronto, .prontoStaging, .demo, .staging, .legacy]
         case .release:
             return [.demo]
         }

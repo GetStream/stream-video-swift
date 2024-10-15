@@ -338,6 +338,11 @@ lane :restart_video_buddy do
   start_video_buddy
 end
 
+desc 'Send push notifications to all running simulators.'
+lane :send_push_notification do |options|
+sh("../Scripts/sendPushNotification.sh", options[:payload])
+end
+
 lane :build_xcframeworks do
   match_me
   output_directory = File.absolute_path("#{Dir.pwd}/../Products")
