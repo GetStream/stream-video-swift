@@ -41,7 +41,6 @@ struct AnonymousAuth: DefaultAPIClientMiddleware {
         modifiedRequest.headers["stream-auth-type"] = "anonymous"
         return try await next(modifiedRequest)
     }
-    
 }
 
 struct DefaultParams: DefaultAPIClientMiddleware {
@@ -58,5 +57,4 @@ struct DefaultParams: DefaultAPIClientMiddleware {
         modifiedRequest.headers["x-client-request-id"] = UUID().uuidString
         return try await next(modifiedRequest)
     }
-    
 }

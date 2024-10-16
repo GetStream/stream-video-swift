@@ -104,8 +104,8 @@ final class CallEventsHandler_Tests: XCTestCase {
             createdAt: Date(),
             members: [],
             sessionId: "123",
-            type: "call.ring",
-            user: mockResponseBuilder.makeUserResponse()
+            user: mockResponseBuilder.makeUserResponse(),
+            video: true
         )
         let event: VideoEvent = .typeCallRingEvent(rawEvent)
         
@@ -126,8 +126,7 @@ final class CallEventsHandler_Tests: XCTestCase {
             call: mockResponseBuilder.makeCallResponse(cid: callCid),
             callCid: callCid,
             createdAt: Date(),
-            sessionId: "123",
-            type: "call.session_started"
+            sessionId: "123"
         )
         let event: VideoEvent = .typeCallSessionStartedEvent(rawEvent)
         

@@ -182,7 +182,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             membersLimit: membersLimit,
             ring: ring,
-            notify: notify
+            notify: notify,
+            video: nil
         )
         await state.update(from: response)
         if ring {
@@ -819,7 +820,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             sort: sort,
             type: callType
         )
-        let response = try await coordinatorClient.queryMembers(queryMembersRequest: request)
+        let response = try await coordinatorClient.queryCallMembers(queryMembersRequest: request)
         await state.mergeMembers(response.members)
         return response
     }
@@ -1108,7 +1109,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     @MainActor
     public func collectUserFeedback(
-        rating: Int? = nil,
+        rating: Int,
         reason: String? = nil,
         custom: [String: RawJSON]? = nil
     ) async throws -> CollectUserFeedbackResponse {
@@ -1331,7 +1332,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Handles updates to noise cancellation settings.
     /// - Parameter value: The updated `NoiseCancellationSettings` value.
-    private func didUpdate(_ value: NoiseCancellationSettings?) {
+    private func didUpdate(_ value: NoiseCancellationSettingsRequest?) {
         guard let noiseCancellationFilter = streamVideo.videoConfig.noiseCancellationFilter else {
             log
                 .warning(
