@@ -73,6 +73,7 @@ public extension User {
 public extension UserResponse {
     static func make(from id: String) -> UserResponse {
         UserResponse(
+            blockedUserIds: [],
             createdAt: Date(),
             custom: [:],
             id: id,

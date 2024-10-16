@@ -406,7 +406,7 @@ class CallController: @unchecked Sendable {
     func collectUserFeedback(
         sessionID: String,
         custom: [String: RawJSON]? = nil,
-        rating: Int? = nil,
+        rating: Int,
         reason: String? = nil
     ) async throws -> CollectUserFeedbackResponse {
         try await defaultAPI.collectUserFeedback(
