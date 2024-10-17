@@ -51,6 +51,7 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
     public typealias Provider = () -> StreamDeviceOrientation
 
     /// The default provider for device orientation based on platform.
+    @MainActor
     public static let defaultProvider: Provider = {
         #if canImport(UIKit)
         if let window = UIApplication.shared.connectedScenes.first as? UIWindowScene {
@@ -85,6 +86,7 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
     /// - Parameters:
     ///   - notificationCenter: The notification center to observe orientation changes.
     ///   - provider: A custom provider for determining device orientation.
+    @MainActor
     public init(
         notificationCenter: NotificationCenter = .default,
         _ provider: @escaping Provider = StreamDeviceOrientationAdapter.defaultProvider
@@ -103,9 +105,7 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
             }
         #endif
 
-        Task { @MainActor in
-            orientation = provider()
-        }
+        orientation = provider()
     }
 
     /// Cleans up resources when the adapter is deallocated.
@@ -119,11 +119,13 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
 
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
 enum StreamDeviceOrientationAdapterKey: InjectionKey {
+    @MainActor
     static var currentValue: StreamDeviceOrientationAdapter = .init()
 }
 
 extension InjectedValues {
     /// Provides access to the `StreamDeviceOrientationAdapter` class to the views and view models.
+    @MainActor
     public var orientationAdapter: StreamDeviceOrientationAdapter {
         get {
             Self[StreamDeviceOrientationAdapterKey.self]
