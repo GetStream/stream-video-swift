@@ -29,11 +29,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     ) {
         self.source = source
         self.filters = filters
-        #if targetEnvironment(simulator)
-        self.handleRotation = false
-        #else
         self.handleRotation = handleRotation
-        #endif
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
