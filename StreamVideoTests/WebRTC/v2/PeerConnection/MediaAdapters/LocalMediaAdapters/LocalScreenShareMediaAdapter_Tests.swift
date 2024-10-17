@@ -11,6 +11,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
 
     private let mockActiveCallProvider: MockActiveCallProvider! = .init()
     private let mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
+    private var disposableBag: DisposableBag! = .init()
     private lazy var sessionId: String! = .unique
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
@@ -41,6 +42,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
         peerConnectionFactory = nil
         screenShareSessionProvider = nil
         temporaryPeerConnection = nil
+        disposableBag = nil
         super.tearDown()
     }
 
@@ -229,21 +231,6 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
 
     // MARK: - Private
 
-    private func assertAsyncOperation<T>(
-        _ operation: @escaping () async throws -> T,
-        validationHandler: @escaping (T, XCTestExpectation, StaticString, UInt) throws -> Void = { _, _, _, _ in },
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> XCTestExpectation {
-        let expectation = self.expectation(description: "Assert async expectation")
-        Task {
-            do {
-                try validationHandler(try await operation(), expectation, file, line)
-            } catch { /* No-op */ }
-        }
-        return expectation
-    }
-
     private func makeTransceiver(
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
@@ -273,32 +260,53 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
         _ type: ScreensharingType,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        let eventExpectation = assertAsyncOperation { [spySubject] in
-            try await spySubject!.nextValue(timeout: defaultTimeout)
-        } validationHandler: { [sessionId] event, expectation, file, line in
-            switch event {
-            case let .added(id, trackType, track):
-                XCTAssertEqual(id, sessionId, file: file, line: line)
-                XCTAssertEqual(trackType, .screenshare, file: file, line: line)
-                XCTAssertTrue(track is RTCVideoTrack, file: file, line: line)
-                expectation.fulfill()
-            case .removed:
-                XCTFail()
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask { [weak subject] in
+                try await Task.sleep(nanoseconds: 250_000_000)
+                let subject = try XCTUnwrap(subject)
+                try await subject.beginScreenSharing(
+                    of: type,
+                    ownCapabilities: ownCapabilities
+                )
             }
+
+            let eventReceivedExpectation = expectation(description: "")
+            eventReceivedExpectation.isInverted = !ownCapabilities.contains(.screenshare)
+            group.addTask { [spySubject, sessionId, disposableBag] in
+                let spySubject = try XCTUnwrap(spySubject)
+                let disposableBag = try XCTUnwrap(disposableBag)
+                spySubject
+                    .compactMap {
+                        switch $0 {
+                        case let .added(id, trackType, track):
+                            return (id, trackType, track)
+                        default:
+                            return nil
+                        }
+                    }
+                    .sink { [sessionId] id, trackType, track in
+                        XCTAssertEqual(id, sessionId)
+                        XCTAssertEqual(trackType, .screenshare)
+                        XCTAssertTrue(track is RTCVideoTrack)
+                        eventReceivedExpectation.fulfill()
+                    }
+                    .store(in: disposableBag)
+            }
+
+            group.addTask { [weak self] in
+                await self?.fulfillment(
+                    of: [eventReceivedExpectation],
+                    timeout: ownCapabilities.contains(.screenshare) ? defaultTimeout : 1
+                )
+            }
+
+            try await group.waitForAll()
         }
-        eventExpectation.isInverted = !ownCapabilities.contains(.screenshare)
 
-        try await subject.beginScreenSharing(
-            of: type,
-            ownCapabilities: ownCapabilities
-        )
-
-        await fulfillment(
-            of: [eventExpectation],
-            timeout: ownCapabilities.contains(.screenshare) ? defaultTimeout : 1
-        )
         if ownCapabilities.contains(.screenshare) {
             XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
         }
+
+        disposableBag.removeAll()
     }
 }

@@ -28,6 +28,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         videoCaptureSessionProvider: .init()
     )
     private var temporaryPeerConnection: RTCPeerConnection?
+    private var disposableBag: DisposableBag! = .init()
 
     // MARK: - Lifecycle
 
@@ -44,95 +45,70 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         mockPeerConnection = nil
         peerConnectionFactory = nil
         temporaryPeerConnection = nil
+        disposableBag = nil
         super.tearDown()
     }
 
     // MARK: - setUp(with:ownCapabilities:)
 
     func test_setUp_hasVideoCapabilityAndVideoOn_noLocalTrack_createsAndAddsTrackAndTransceiver() async throws {
-        // Given
-        let eventExpectation = assertAsyncOperation { [spySubject] in
-            try await spySubject!.nextValue(timeout: defaultTimeout)
-        } validationHandler: { [sessionId] event, expectation, file, line in
-            switch event {
+        try await assertTrackEvent {
+            switch $0 {
             case let .added(id, trackType, track):
-                XCTAssertEqual(id, sessionId, file: file, line: line)
-                XCTAssertEqual(trackType, .video, file: file, line: line)
-                XCTAssertTrue(track is RTCVideoTrack, file: file, line: line)
-                expectation.fulfill()
-            case .removed:
-                XCTFail()
+                return (id, trackType, track)
+            default:
+                return nil
             }
+        } operation: { subject in
+            try await subject.setUp(
+                with: .init(videoOn: true),
+                ownCapabilities: [.sendVideo]
+            )
+        } validation: { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .video)
+            XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        // When
-        try await subject.setUp(
-            with: .init(videoOn: true),
-            ownCapabilities: [.sendVideo]
-        )
-
-        // Then
-        await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
         XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
     func test_setUp_hasVideoCapabilityVideoOff_noLocalTrack_createsTrackWithoutTransceiver() async throws {
-        // Given
-        let eventExpectation = assertAsyncOperation { [spySubject] in
-            try await spySubject!.nextValue(timeout: defaultTimeout)
-        } validationHandler: { [sessionId] event, expectation, file, line in
-            switch event {
+        try await assertTrackEvent {
+            switch $0 {
             case let .added(id, trackType, track):
-                XCTAssertEqual(id, sessionId, file: file, line: line)
-                XCTAssertEqual(trackType, .video, file: file, line: line)
-                XCTAssertTrue(track is RTCVideoTrack, file: file, line: line)
-                expectation.fulfill()
-            case .removed:
-                XCTFail()
+                return (id, trackType, track)
+            default:
+                return nil
             }
+        } operation: { subject in
+            try await subject.setUp(
+                with: .init(videoOn: false),
+                ownCapabilities: [.sendVideo]
+            )
+        } validation: { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .video)
+            XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        // When
-        try await subject.setUp(
-            with: .init(videoOn: false),
-            ownCapabilities: [.sendVideo]
-        )
-
-        // Then
-        await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
         XCTAssertNotNil(subject.localTrack)
         XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
-    func test_setUp_doesNotHavesVideoCapability_noLocalTrack_doesNotCreateTrack() async throws {
-        // Given
+    func test_setUp_doesNotHaveVideoCapability_noLocalTrack_doesNotCreateTrack() async throws {
         let mockCapturer = MockCameraVideoCapturer()
         mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
-        let eventExpectation = assertAsyncOperation { [spySubject] in
-            try await spySubject!.nextValue(timeout: defaultTimeout)
-        } validationHandler: { [sessionId] event, expectation, file, line in
-            switch event {
-            case let .added(id, trackType, track):
-                XCTAssertEqual(id, sessionId, file: file, line: line)
-                XCTAssertEqual(trackType, .audio, file: file, line: line)
-                XCTAssertTrue(track is RTCAudioTrack, file: file, line: line)
-                expectation.fulfill()
-            case .removed:
-                XCTFail()
-            }
-        }
-        eventExpectation.isInverted = true
 
-        // When
-        try await subject.setUp(
-            with: .init(videoOn: true),
-            ownCapabilities: []
-        )
+        try await assertTrackEvent(isInverted: true, operation: { subject in
+            try await subject.setUp(
+                with: .init(videoOn: true),
+                ownCapabilities: []
+            )
+        })
 
-        // Then
-        await fulfillment(of: [eventExpectation], timeout: 1) // We set it to one to avoid delaying tests.
         XCTAssertNil(subject.localTrack)
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
         XCTAssertEqual(mockCapturer.stubbedFunctionInput[.capturingDevice]?.count, 0)
@@ -429,19 +405,39 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
     // MARK: - Private
 
-    private func assertAsyncOperation<T>(
-        _ operation: @escaping () async throws -> T,
-        validationHandler: @escaping (T, XCTestExpectation, StaticString, UInt) throws -> Void = { _, _, _, _ in },
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> XCTestExpectation {
-        let expectation = self.expectation(description: "Assert async expectation")
-        Task {
-            do {
-                try validationHandler(try await operation(), expectation, file, line)
-            } catch { /* No-op */ }
+    private func assertTrackEvent(
+        isInverted: Bool = false,
+        filter: @escaping (TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
+        operation: @Sendable @escaping (LocalVideoMediaAdapter) async throws -> Void,
+        validation: @Sendable @escaping (String, TrackType, RTCMediaStreamTrack) -> Void = { _, _, _ in XCTFail() }
+    ) async throws {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask { [weak subject] in
+                try await Task.sleep(nanoseconds: 250_000_000)
+                let subject = try XCTUnwrap(subject)
+                try await operation(subject)
+            }
+
+            let eventReceivedExpectation = expectation(description: "")
+            eventReceivedExpectation.isInverted = isInverted
+            group.addTask { [spySubject, disposableBag] in
+                let spySubject = try XCTUnwrap(spySubject)
+                let disposableBag = try XCTUnwrap(disposableBag)
+                spySubject
+                    .compactMap { filter($0) }
+                    .sink { id, trackType, track in
+                        validation(id, trackType, track)
+                        eventReceivedExpectation.fulfill()
+                    }
+                    .store(in: disposableBag)
+            }
+
+            group.addTask { [weak self] in
+                await self?.fulfillment(of: [eventReceivedExpectation], timeout: defaultTimeout)
+            }
+
+            try await group.waitForAll()
         }
-        return expectation
     }
 
     private func makeTransceiver(

@@ -348,7 +348,8 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let sfuStack = MockSFUStack()
         let ownCapabilities = Set([OwnCapability.blockUsers])
         let pins = [PinInfo(isLocal: true, pinnedAt: .init())]
-        let participants = [String.unique: CallParticipant.dummy()]
+        let userId = String.unique
+        let participants = [userId: CallParticipant.dummy(id: userId)]
         try await prepare(
             sfuStack: sfuStack,
             ownCapabilities: ownCapabilities,
@@ -358,7 +359,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let sessionId = await subject.sessionID
-
+        await subject.didAddTrack(
+            .dummy(
+                kind: .video,
+                peerConnectionFactory: await subject.peerConnectionFactory
+            ),
+            type: .video,
+            for: userId
+        )
+        await fulfillment { await self.subject.participants[userId]?.track != nil }
         await subject.cleanUpForReconnection()
 
         XCTAssertEqual(mockPublisher.timesCalled(.close), 0)
@@ -371,7 +380,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.token, "")
         await assertEqualAsync(await subject.sessionID, sessionId)
         await assertEqualAsync(await subject.ownCapabilities, ownCapabilities)
-        await assertEqualAsync(await subject.participants, participants)
+        await assertEqualAsync(await subject.participants[userId]?.track, nil)
         await assertEqualAsync(await subject.participantsCount, 12)
         await assertEqualAsync(await subject.anonymousCount, 22)
         await assertEqualAsync(await subject.participantPins, pins)
@@ -661,11 +670,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             name: .unique,
             filter: { _ in fatalError() }
         )
+        await fulfillment { await self.subject.sessionID.isEmpty == false }
         await subject.set(sfuAdapter: sfuStack.adapter)
         await subject.set(videoFilter: videoFilter)
         await subject.set(ownCapabilities: ownCapabilities)
         await subject.set(callSettings: callSettings)
-        await subject.set(sessionID: .unique)
         await subject.set(token: .unique)
         await subject.set(participantsCount: 12)
         await subject.set(anonymousCount: 22)

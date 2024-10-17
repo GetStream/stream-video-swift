@@ -5,9 +5,9 @@
 import Foundation
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
-final class StreamVideoCaptureHandler_Tests: XCTestCase {
+final class StreamVideoCaptureHandler_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var source: MockRTCVideoCapturerDelegate! = .init()
     private lazy var subject: StreamVideoCaptureHandler! = .init(
@@ -27,6 +27,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
 
     // MARK: camera: front
 
+    @MainActor
     func test_didCapture_orientationPortraitCameraFront_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .portrait(isUpsideDown: false),
@@ -35,6 +36,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_didCapture_orientationPortraitUpsideDownCameraFront_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .portrait(isUpsideDown: true),
@@ -43,6 +45,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_didCapture_orientationLandscapeLeftCameraFront_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: true),
@@ -51,6 +54,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_didCapture_orientationLandscapeRightCameraFront_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: false),
@@ -61,6 +65,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
 
     // MARK: camera: back
 
+    @MainActor
     func test_didCapture_orientationPortraitCameraBack_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .portrait(isUpsideDown: false),
@@ -69,6 +74,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_didCapture_orientationPortraitUpsideDownCameraBack_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .portrait(isUpsideDown: true),
@@ -77,6 +83,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_didCapture_orientationLandscapeLeftCameraBack_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: true),
@@ -85,6 +92,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         )
     }
 
+    @MainActor
     func test_didCapture_orientationLandscapeRightCameraBack_frameHasExpectedOrientation() async throws {
         try await assertFrameOrientation(
             deviceOrientation: .landscape(isLeft: false),
@@ -95,6 +103,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
 
     // MARK: - Private Helpers
 
+    @MainActor
     func assertFrameOrientation(
         deviceOrientation: StreamDeviceOrientation,
         cameraPosition: AVCaptureDevice.Position,
@@ -102,10 +111,15 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
-        let orientationAdapter = StreamDeviceOrientationAdapter() { deviceOrientation }
+        var timesOrientationRequest = 0
+        let orientationAdapter = StreamDeviceOrientationAdapter() {
+            timesOrientationRequest += 1
+            return deviceOrientation
+        }
         InjectedValues[\.orientationAdapter] = orientationAdapter
         let capturer: RTCVideoCapturer! = .init()
         _ = subject
+        await fulfillment { timesOrientationRequest == 1 }
         subject.currentCameraPosition = cameraPosition
         let frame = RTCVideoFrame(
             buffer: RTCCVPixelBuffer(pixelBuffer: try .make()),

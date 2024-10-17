@@ -34,12 +34,14 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
 
-        orientationCancellable = orientationAdapter
-            .$orientation
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .assign(to: \Self.sceneOrientation, onWeak: self)
-        sceneOrientation = orientationAdapter.orientation
+        Task { @MainActor in
+            orientationCancellable = orientationAdapter
+                .$orientation
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .assign(to: \Self.sceneOrientation, onWeak: self)
+            sceneOrientation = orientationAdapter.orientation
+        }
     }
 
     func capturer(
@@ -83,7 +85,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         #if os(macOS) || targetEnvironment(macCatalyst)
         var rotation = RTCVideoRotation._0
         #else
-        var rotation = RTCVideoRotation._90
+        var rotation = frame.rotation
         switch sceneOrientation {
         case let .portrait(isUpsideDown):
             rotation = isUpsideDown ? ._270 : ._90

@@ -120,7 +120,9 @@ actor WebRTCStateAdapter: ObservableObject {
     }
 
     /// Sets the session ID.
-    func set(sessionID value: String) { self.sessionID = value }
+    func set(sessionID value: String) {
+        self.sessionID = value
+    }
 
     /// Sets the call settings.
     func set(callSettings value: CallSettings) { self.callSettings = value }
@@ -141,7 +143,7 @@ actor WebRTCStateAdapter: ObservableObject {
     func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
-    func set(statsReporter value: WebRTCStatsReporter) {
+    func set(statsReporter value: WebRTCStatsReporter?) {
         self.statsReporter = value
     }
 
@@ -286,14 +288,14 @@ actor WebRTCStateAdapter: ObservableObject {
         self.subscriber = nil
         self.statsReporter = nil
         await sfuAdapter?.disconnect()
-        sfuAdapter = nil
-        token = ""
-        sessionID = ""
-        ownCapabilities = []
-        participants = [:]
-        participantsCount = 0
-        anonymousCount = 0
-        participantPins = []
+        enqueue { _ in [:] }
+        set(sfuAdapter: nil)
+        set(token: "")
+        set(sessionID: "")
+        set(ownCapabilities: [])
+        set(participantsCount: 0)
+        set(anonymousCount: 0)
+        set(participantPins: [])
         audioTracks = [:]
         videoTracks = [:]
         screenShareTracks = [:]
@@ -301,23 +303,22 @@ actor WebRTCStateAdapter: ObservableObject {
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
     func cleanUpForReconnection() async {
-        sfuAdapter = nil
+        set(
+            participants: participants
+                .reduce(into: ParticipantsStorage()) { $0[$1.key] = $1.value.withUpdated(track: nil) }
+        )
+
+        peerConnectionsDisposableBag.removeAll()
         await publisher?.prepareForClosing()
         await subscriber?.prepareForClosing()
         publisher = nil
         subscriber = nil
-        statsReporter = nil
-        token = ""
+        set(sfuAdapter: nil)
+        set(statsReporter: nil)
+        set(token: "")
         audioTracks = [:]
         videoTracks = [:]
         screenShareTracks = [:]
-        peerConnectionsDisposableBag.removeAll()
-
-        enqueue { participants in
-            participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
-                partialResult[entry.key] = entry.value.withUpdated(track: nil)
-            }
-        }
     }
 
     /// Restores screen sharing if an active session exists.
