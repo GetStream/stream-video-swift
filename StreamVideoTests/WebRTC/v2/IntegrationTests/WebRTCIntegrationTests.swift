@@ -138,14 +138,14 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
     private func flowExecution(
         of operations: [FlowOperation]
     ) async throws {
-            for operation in operations {
-                switch operation {
-                case let .default(item):
-                    if item.delay > 0 {
+        for operation in operations {
+            switch operation {
+            case let .default(item):
+                if item.delay > 0 {
                     await wait(for: item.delay)
-                    }
-                    try await item.operation()
-                case let .concurrent(operations):
+                }
+                try await item.operation()
+            case let .concurrent(operations):
                 try await withThrowingTaskGroup(of: Void.self) { group in
                     operations.forEach { item in
                         group.addTask {

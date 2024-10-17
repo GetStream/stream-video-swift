@@ -11,6 +11,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
     private let mockActiveCallProvider: MockActiveCallProvider! = .init()
     private let mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
+    private var disposableBag: DisposableBag! = .init()
     private lazy var sessionId: String! = .unique
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
@@ -36,93 +37,74 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         mockPeerConnection = nil
         peerConnectionFactory = nil
         temporaryPeerConnection = nil
+        disposableBag = nil
         super.tearDown()
     }
 
     // MARK: - setUp(with:ownCapabilities:)
 
     func test_setUp_hasAudioCapabilityAndAudioOn_noLocalTrack_createsAndAddsTrackAndTransceiver() async throws {
-        // Given
-        let eventExpectation = assertAsyncOperation { [spySubject] in
-            try await spySubject!.nextValue(timeout: defaultTimeout)
-        } validationHandler: { [sessionId] event, expectation, file, line in
-            switch event {
-            case let .added(id, trackType, track):
-                XCTAssertEqual(id, sessionId, file: file, line: line)
-                XCTAssertEqual(trackType, .audio, file: file, line: line)
-                XCTAssertTrue(track is RTCAudioTrack, file: file, line: line)
-                expectation.fulfill()
-            case .removed:
-                XCTFail()
+        try await assertTrackEvent(
+            filter: {
+                switch $0 {
+                case let .added(id, trackType, track):
+                    return (id, trackType, track)
+                default:
+                    return nil
+                }
+            },
+            operation: { subject in
+                try await subject.setUp(
+                    with: .init(audioOn: true),
+                    ownCapabilities: [.sendAudio]
+                )
             }
+        ) { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .audio)
+            XCTAssertTrue(track is RTCAudioTrack)
         }
 
-        // When
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: [.sendAudio]
-        )
-
-        // Then
-        await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
         XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
     func test_setUp_hasAudioCapabilityAudioIsOff_noLocalTrack_createsTrackWithoutTransceiver() async throws {
-        // Given
-        let eventExpectation = assertAsyncOperation { [spySubject] in
-            try await spySubject!.nextValue(timeout: defaultTimeout)
-        } validationHandler: { [sessionId] event, expectation, file, line in
-            switch event {
-            case let .added(id, trackType, track):
-                XCTAssertEqual(id, sessionId, file: file, line: line)
-                XCTAssertEqual(trackType, .audio, file: file, line: line)
-                XCTAssertTrue(track is RTCAudioTrack, file: file, line: line)
-                expectation.fulfill()
-            case .removed:
-                XCTFail()
+        try await assertTrackEvent(
+            filter: {
+                switch $0 {
+                case let .added(id, trackType, track):
+                    return (id, trackType, track)
+                default:
+                    return nil
+                }
+            },
+            operation: { subject in
+                try await subject.setUp(
+                    with: .init(audioOn: false),
+                    ownCapabilities: [.sendAudio]
+                )
             }
+        ) { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .audio)
+            XCTAssertTrue(track is RTCAudioTrack)
         }
 
-        // When
-        try await subject.setUp(
-            with: .init(audioOn: false),
-            ownCapabilities: [.sendAudio]
-        )
-
-        // Then
-        await fulfillment(of: [eventExpectation], timeout: defaultTimeout)
         XCTAssertNotNil(subject.localTrack)
         XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
     func test_setUp_doesNotHavesAudioCapability_noLocalTrack_doesNotCreateTrack() async throws {
-        // Given
-        let eventExpectation = assertAsyncOperation { [spySubject] in
-            try await spySubject!.nextValue(timeout: defaultTimeout)
-        } validationHandler: { [sessionId] event, expectation, file, line in
-            switch event {
-            case let .added(id, trackType, track):
-                XCTAssertEqual(id, sessionId, file: file, line: line)
-                XCTAssertEqual(trackType, .audio, file: file, line: line)
-                XCTAssertTrue(track is RTCAudioTrack, file: file, line: line)
-                expectation.fulfill()
-            case .removed:
-                XCTFail()
-            }
+        try await assertTrackEvent(
+            isInverted: true
+        ) { subject in
+            try await subject.setUp(
+                with: .init(audioOn: true),
+                ownCapabilities: []
+            )
         }
-        eventExpectation.isInverted = true
-
-        // When
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: []
-        )
-
-        // Then
-        await fulfillment(of: [eventExpectation], timeout: 1) // We set it to one to avoid delaying tests.
         XCTAssertNil(subject.localTrack)
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
@@ -263,19 +245,42 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
     // MARK: - Private
 
-    private func assertAsyncOperation<T>(
-        _ operation: @escaping () async throws -> T,
-        validationHandler: @escaping (T, XCTestExpectation, StaticString, UInt) throws -> Void = { _, _, _, _ in },
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> XCTestExpectation {
-        let expectation = self.expectation(description: "Assert async expectation")
-        Task {
-            do {
-                try validationHandler(try await operation(), expectation, file, line)
-            } catch { /* No-op */ }
+    private func assertTrackEvent(
+        isInverted: Bool = false,
+        filter: @escaping (TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
+        operation: @Sendable @escaping (LocalAudioMediaAdapter) async throws -> Void,
+        validation: @Sendable @escaping (String, TrackType, RTCMediaStreamTrack) -> Void = { _, _, _ in XCTFail() }
+    ) async throws {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask { [weak subject] in
+                try await Task.sleep(nanoseconds: 250_000_000)
+                let subject = try XCTUnwrap(subject)
+                try await operation(subject)
+            }
+
+            let eventReceivedExpectation = expectation(description: "")
+            eventReceivedExpectation.isInverted = isInverted
+            group.addTask { [spySubject, disposableBag] in
+                let spySubject = try XCTUnwrap(spySubject)
+                let disposableBag = try XCTUnwrap(disposableBag)
+                spySubject
+                    .compactMap { filter($0) }
+                    .sink { id, trackType, track in
+                        validation(id, trackType, track)
+                        eventReceivedExpectation.fulfill()
+                    }
+                    .store(in: disposableBag)
+            }
+
+            group.addTask { [weak self] in
+                await self?.fulfillment(
+                    of: [eventReceivedExpectation],
+                    timeout: defaultTimeout
+                )
+            }
+
+            try await group.waitForAll()
         }
-        return expectation
     }
 
     private func makeTransceiver(
