@@ -128,6 +128,7 @@ struct DemoFeedbackView: View {
 
     // MARK: - Private helpers
 
+    @MainActor
     func checkIfDisconnectionErrorIsAvailable() {
         if call?.state.disconnectionError is ClientError.NetworkNotAvailable {
             toast = .init(
