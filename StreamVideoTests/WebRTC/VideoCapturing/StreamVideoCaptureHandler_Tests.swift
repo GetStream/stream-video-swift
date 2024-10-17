@@ -95,6 +95,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase {
 
     // MARK: - Private Helpers
 
+    @MainActor
     func assertFrameOrientation(
         deviceOrientation: StreamDeviceOrientation,
         cameraPosition: AVCaptureDevice.Position,
