@@ -4,9 +4,9 @@
 
 import Foundation
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
-final class WebRTCStatsReporter_Tests: XCTestCase {
+final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var sessionID: String! = .unique
@@ -45,6 +45,20 @@ final class WebRTCStatsReporter_Tests: XCTestCase {
         XCTAssertTrue(request.subscriberStats.isEmpty)
         XCTAssertTrue(request.publisherStats.isEmpty)
         XCTAssertEqual(request.sessionID, sessionID)
+    }
+
+    func test_sfuAdapterNotNil_thermalStateWillBeIncluded_reportWasCollectedAndSentCorrectly() async throws {
+        InjectedValues[\.thermalStateObserver] = ThermalStateObserver { .critical }
+
+        subject.sfuAdapter = mockSFUStack.adapter
+
+        await wait(for: subject.interval + 1)
+
+        let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
+        XCTAssertTrue(request.subscriberStats.isEmpty)
+        XCTAssertTrue(request.publisherStats.isEmpty)
+        XCTAssertEqual(request.sessionID, sessionID)
+        XCTAssertEqual(request.deviceState?.thermalState, .critical)
     }
 
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(

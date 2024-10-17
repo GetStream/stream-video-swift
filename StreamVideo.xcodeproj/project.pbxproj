@@ -481,6 +481,11 @@
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
 		40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */; };
 		40DE867D2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DE867C2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift */; };
+		40DFA88D2CC10FF3003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DFA88C2CC10FEF003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift */; };
+		40DFA88E2CC1111E003DCE05 /* CallState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84530C6B2A3C4E0700F2678E /* CallState.swift */; };
+		40DFA88F2CC11137003DCE05 /* UpdateCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387629ADFCFC00946713 /* UpdateCallResponse.swift */; };
+		40DFA8902CC11146003DCE05 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A92883E4AD00526C98 /* APIKey.swift */; };
+		40DFA8912CC11155003DCE05 /* LayoutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841AE1892C738CCC005B6560 /* LayoutSettings.swift */; };
 		40E110472B5A9DF4007DF492 /* CallDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E110462B5A9DF4007DF492 /* CallDurationView.swift */; };
 		40E110492B5A9F03007DF492 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E110482B5A9F03007DF492 /* Formatters.swift */; };
 		40E1104C2B5A9F6D007DF492 /* MediaDurationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E1104B2B5A9F6D007DF492 /* MediaDurationFormatter.swift */; };
@@ -746,7 +751,6 @@
 		8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 8415D3E0290B2AF2006E53CB /* outgoing.m4a */; };
 		8415D3E3290BC882006E53CB /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8415D3E2290BC882006E53CB /* Sounds.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
-		841AE18A2C738CCC005B6560 /* LayoutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841AE1892C738CCC005B6560 /* LayoutSettings.swift */; };
 		841BAA312BD15CDE000C73E4 /* VideoQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA182BD15CDC000C73E4 /* VideoQuality.swift */; };
 		841BAA322BD15CDE000C73E4 /* CallTranscriptionStoppedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA192BD15CDC000C73E4 /* CallTranscriptionStoppedEvent.swift */; };
 		841BAA332BD15CDE000C73E4 /* SFULocationResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA1A2BD15CDC000C73E4 /* SFULocationResponse.swift */; };
@@ -882,7 +886,6 @@
 		844ADA6B2AD4439D00769F6A /* DemoCallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6A2AD4439D00769F6A /* DemoCallsView.swift */; };
 		844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */; };
 		844ECF4F2A33458A0023263C /* Member.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ECF4E2A33458A0023263C /* Member.swift */; };
-		84530C6C2A3C4E0700F2678E /* CallState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84530C6B2A3C4E0700F2678E /* CallState.swift */; };
 		8454A3192AAB374B00A012C6 /* CallStatsReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8454A3182AAB374B00A012C6 /* CallStatsReport.swift */; };
 		8454A31D2AAF41E100A012C6 /* Array+SafeSubscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
@@ -1032,7 +1035,6 @@
 		84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1932883652000526C98 /* EventMiddleware.swift */; };
 		84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */; };
 		84A7E1A82883E46200526C98 /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A72883E46200526C98 /* Timers.swift */; };
-		84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A92883E4AD00526C98 /* APIKey.swift */; };
 		84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AD2883E6B300526C98 /* HTTPUtils.swift */; };
 		84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AF2883E73100526C98 /* EventBatcher.swift */; };
 		84AF64D2287C78E70012A503 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64D1287C78E70012A503 /* User.swift */; };
@@ -1133,7 +1135,6 @@
 		84DC38C429ADFCFD00946713 /* MemberResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387329ADFCFC00946713 /* MemberResponse.swift */; };
 		84DC38C529ADFCFD00946713 /* GetOrCreateCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387429ADFCFC00946713 /* GetOrCreateCallRequest.swift */; };
 		84DC38C629ADFCFD00946713 /* CallRejectedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387529ADFCFC00946713 /* CallRejectedEvent.swift */; };
-		84DC38C729ADFCFD00946713 /* UpdateCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387629ADFCFC00946713 /* UpdateCallResponse.swift */; };
 		84DC38C829ADFCFD00946713 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387729ADFCFC00946713 /* Device.swift */; };
 		84DC38CA29ADFCFD00946713 /* UpdateCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387929ADFCFC00946713 /* UpdateCallRequest.swift */; };
 		84DC38CB29ADFCFD00946713 /* SortParamRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387A29ADFCFC00946713 /* SortParamRequest.swift */; };
@@ -1749,6 +1750,7 @@
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
 		40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingTopView.swift; sourceTree = "<group>"; };
 		40DE867C2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitPushNotificationAdapterTests.swift; sourceTree = "<group>"; };
+		40DFA88C2CC10FEF003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift"; sourceTree = "<group>"; };
 		40E110462B5A9DF4007DF492 /* CallDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDurationView.swift; sourceTree = "<group>"; };
 		40E110482B5A9F03007DF492 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		40E1104B2B5A9F6D007DF492 /* MediaDurationFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaDurationFormatter.swift; sourceTree = "<group>"; };
@@ -3704,6 +3706,7 @@
 		40C2B5B92C2C41CF00EC2C2D /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				40DFA88C2CC10FEF003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift */,
 				40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */,
 			);
 			path = Extensions;
@@ -6153,6 +6156,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40DFA8912CC11155003DCE05 /* LayoutSettings.swift in Sources */,
+				40DFA8902CC11146003DCE05 /* APIKey.swift in Sources */,
+				40DFA88F2CC11137003DCE05 /* UpdateCallResponse.swift in Sources */,
+				40DFA88E2CC1111E003DCE05 /* CallState.swift in Sources */,
 				4029E94E2CB8162900E1D571 /* IncomingVideoQualitySettings.swift in Sources */,
 				846D16242A52C3D50036CE4C /* CameraManager.swift in Sources */,
 				848CCCE52AB8ED8F002E83A2 /* StopHLSBroadcastingResponse.swift in Sources */,
@@ -6176,6 +6183,7 @@
 				8449824E2C738A830029734D /* StopAllRTMPBroadcastsResponse.swift in Sources */,
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
 				40149DD02B7E839500473176 /* AudioSessionProtocol.swift in Sources */,
+				40DFA88D2CC10FF3003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift in Sources */,
 				8409465B29AF4EEC007AF5BF /* ListRecordingsResponse.swift in Sources */,
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				40382F2E2C88B87D00C2D00F /* ReflectiveStringConvertible.swift in Sources */,
@@ -6555,18 +6563,10 @@
 				840F59922A77FDCB00EF3EB2 /* UnpinResponse.swift in Sources */,
 				8487D8AD2A67F4EC00536ED4 /* ScreenshareCapturer.swift in Sources */,
 				84BAD7782A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift in Sources */,
-				84530C6C2A3C4E0700F2678E /* CallState.swift in Sources */,
-				84DC38C729ADFCFD00946713 /* UpdateCallResponse.swift in Sources */,
 				4159F1992C86FA41002B94D3 /* CountrywiseAggregateStats.swift in Sources */,
-				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
-				841AE18A2C738CCC005B6560 /* LayoutSettings.swift in Sources */,
 				40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */,
-				84530C6C2A3C4E0700F2678E /* CallState.swift in Sources */,
-				84DC38C729ADFCFD00946713 /* UpdateCallResponse.swift in Sources */,
 				40BBC4E22C63A5C5002AEF92 /* WebRTCCoordinator+FastReconnecting.swift in Sources */,
 				406B3BE92C8F384A00FC93A1 /* RTCMediaStream+CustomStringConvertible.swift in Sources */,
-				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
-				841AE18A2C738CCC005B6560 /* LayoutSettings.swift in Sources */,
 				40429D612C779B7000AC7FFF /* SFUSignalService.swift in Sources */,
 				435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */,
 				40BBC4B32C6276C4002AEF92 /* LocalNoOpMediaAdapter.swift in Sources */,
