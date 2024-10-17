@@ -379,6 +379,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     func setDisconnectionTimeout(_ timeout: TimeInterval) {
         stateMachine.currentStage.context.disconnectionTimeout = timeout
+        log.debug("Disconnection timeout was set to \(timeout).")
     }
 
     // MARK: - Private
