@@ -29,17 +29,23 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     ) {
         self.source = source
         self.filters = filters
+        #if targetEnvironment(simulator)
+        self.handleRotation = false
+        #else
         self.handleRotation = handleRotation
+        #endif
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
 
-        orientationCancellable = orientationAdapter
-            .$orientation
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .assign(to: \Self.sceneOrientation, onWeak: self)
-        sceneOrientation = orientationAdapter.orientation
+        Task { @MainActor in
+            orientationCancellable = orientationAdapter
+                .$orientation
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .assign(to: \Self.sceneOrientation, onWeak: self)
+            sceneOrientation = orientationAdapter.orientation
+        }
     }
 
     func capturer(
