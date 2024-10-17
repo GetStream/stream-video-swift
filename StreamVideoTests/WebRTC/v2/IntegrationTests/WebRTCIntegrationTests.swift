@@ -74,12 +74,17 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
                 ),
                 
                 // -- Joining
-
-                .buildDefault(delay: 0.5) {
-                    self.mockStack.joinResponse([
-                        .dummy(id: await self.stateAdapter.sessionID)
-                    ])
-                },
+                .concurrent(
+                    [
+                        .init(delay: 0.5) { self.mockStack.joinResponse([.dummy(id: await self.stateAdapter.sessionID)]) },
+                        .init {
+                            self.mockStack.webRTCAuthenticator.stub(
+                                for: .waitForConnect,
+                                with: Result<Void, Error>.success(())
+                            )
+                        }
+                    ]
+                ),
                 .concurrent(
                     [
                         .init {
@@ -133,15 +138,15 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
     private func flowExecution(
         of operations: [FlowOperation]
     ) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { group in
             for operation in operations {
                 switch operation {
                 case let .default(item):
                     if item.delay > 0 {
-                        await self.wait(for: item.delay)
+                    await wait(for: item.delay)
                     }
                     try await item.operation()
                 case let .concurrent(operations):
+                try await withThrowingTaskGroup(of: Void.self) { group in
                     operations.forEach { item in
                         group.addTask {
                             if item.delay > 0 {
