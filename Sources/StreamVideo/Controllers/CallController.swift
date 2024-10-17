@@ -438,6 +438,10 @@ class CallController: @unchecked Sendable {
         await webRTCCoordinator.setIncomingVideoQualitySettings(value)
     }
 
+    func setDisconnectionTimeout(_ timeout: TimeInterval) {
+        webRTCCoordinator.setDisconnectionTimeout(timeout)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {
@@ -551,10 +555,12 @@ class CallController: @unchecked Sendable {
 
             call?.update(reconnectionStatus: .connected)
         case .error:
-            if let call, let errorStage = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
-                call.transitionDueToError(errorStage.error)
+            Task { @MainActor in
+                if let call, let errorStage = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
+                    call.transitionDueToError(errorStage.error)
+                }
+                call?.leave()
             }
-            call?.leave()
         default:
             break
         }

@@ -212,6 +212,15 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         ) { _ in }
     }
 
+    func test_transition_connectionDoesNotRestoreWithDisconnectionTimeout_landsOnError() async {
+        subject.context.disconnectionTimeout = 1
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .error,
+            trigger: {}
+        ) { _ in }
+    }
+
     // MARK: - Private helpers
 
     private func assertTransitionAfterTrigger(

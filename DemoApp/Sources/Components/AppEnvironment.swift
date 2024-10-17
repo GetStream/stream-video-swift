@@ -442,3 +442,36 @@ extension AppEnvironment {
 
     static var autoLeavePolicy: AutoLeavePolicy = .default
 }
+
+extension AppEnvironment {
+
+    enum DisconnectionTimeout: Hashable, Debuggable {
+        case never
+        case twoMinutes
+        case custom(TimeInterval)
+
+        var title: String {
+            switch self {
+            case .never:
+                return "Never"
+            case .twoMinutes:
+                return "2'"
+            case let .custom(value):
+                return "\(value)\""
+            }
+        }
+
+        var duration: TimeInterval {
+            switch self {
+            case .never:
+                return 0
+            case .twoMinutes:
+                return 2 * 60
+            case let .custom(value):
+                return value
+            }
+        }
+    }
+
+    static var disconnectionTimeout: DisconnectionTimeout = .never
+}

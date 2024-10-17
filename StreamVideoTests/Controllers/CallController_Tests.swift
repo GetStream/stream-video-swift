@@ -452,7 +452,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     // MARK: - setIncomingVideoQualitySettings
 
-    func test_zoom_shouldCallSeetIncomingVideoQualitySettingsOnCoordinator() async throws {
+    func test_setIncomingVideoQualitySettings_shouldCallSetIncomingVideoQualitySettingsOnCoordinator() async throws {
         try await prepareAsConnected()
         let incomingVideoQualitySettings = IncomingVideoQualitySettings.manual(
             group: .custom(sessionIds: [.unique, .unique]),
@@ -472,6 +472,25 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .stateAdapter
                 .incomingVideoQualitySettings == incomingVideoQualitySettings
         }
+    }
+
+    // MARK: - setDisconnectionTimeout
+
+    func test_setDisconnectionTimeout_shouldCallSetDisconnectionTimeoutOnCoordinator() async throws {
+        try await prepareAsConnected()
+
+        subject.setDisconnectionTimeout(11)
+
+        XCTAssertEqual(
+            mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateMachine
+                .currentStage
+                .context
+                .disconnectionTimeout,
+            11
+        )
     }
 
     // MARK: - Private helpers

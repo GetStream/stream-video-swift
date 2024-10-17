@@ -130,6 +130,15 @@ public class CallState: ObservableObject {
     /// disabled, each potentially applying to specific session IDs.
     @Published public internal(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
 
+    /// This property holds the error that indicates the user has been disconnected
+    /// due to a network-related issue. When the user’s connection is disrupted for longer than the specified
+    /// timeout, this error will be set with a relevant error type, such as
+    /// `ClientError.NetworkNotAvailable`.
+    ///
+    /// - SeeAlso: ``ClientError.NetworkNotAvailable`` for the type of error set when a
+    ///            disconnection due to network issues occurs.
+    @Published public internal(set) var disconnectionError: Error?
+
     var sortComparators = defaultComparators
     
     private var localCallSettingsUpdate = false

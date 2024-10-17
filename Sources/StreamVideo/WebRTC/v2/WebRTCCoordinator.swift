@@ -377,6 +377,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.set(incomingVideoQualitySettings: value)
     }
 
+    func setDisconnectionTimeout(_ timeout: TimeInterval) {
+        stateMachine.currentStage.context.disconnectionTimeout = timeout
+        log.debug("Disconnection timeout was set to \(timeout).")
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.

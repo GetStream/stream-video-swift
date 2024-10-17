@@ -76,6 +76,10 @@ struct DebugMenu: View {
         didSet { AppEnvironment.callExpiration = callExpiration }
     }
 
+    @State private var disconnectionTimeout: AppEnvironment.DisconnectionTimeout = AppEnvironment.disconnectionTimeout {
+        didSet { AppEnvironment.disconnectionTimeout = disconnectionTimeout }
+    }
+
     @State private var isLogsViewerVisible: Bool = false
 
     @State private var presentsCustomEnvironmentSetup: Bool = false
@@ -85,6 +89,9 @@ struct DebugMenu: View {
 
     @State private var customTokenExpirationValue: Int = 0
     @State private var presentsCustomTokenExpiration: Bool = false
+
+    @State private var customDisconnectionTimeoutValue: TimeInterval = 0
+    @State private var presentsCustomDisconnectionTimeout: Bool = false
 
     @State private var autoLeavePolicy: AppEnvironment.AutoLeavePolicy = AppEnvironment.autoLeavePolicy {
         didSet { AppEnvironment.autoLeavePolicy = autoLeavePolicy }
@@ -150,6 +157,13 @@ struct DebugMenu: View {
             ) { self.autoLeavePolicy = $0 }
 
             makeMenu(
+                for: [.never, .twoMinutes],
+                currentValue: disconnectionTimeout,
+                additionalItems: { customDisconnectionTimeoutView },
+                label: "Disconnection Timeout"
+            ) { self.disconnectionTimeout = $0 }
+
+            makeMenu(
                 for: [.visible, .hidden],
                 currentValue: performanceTrackerVisibility,
                 label: "Performance Tracker"
@@ -212,6 +226,14 @@ struct DebugMenu: View {
             valueBinding: $customTokenExpirationValue,
             transformer: { Int($0) ?? 0 },
             action: { self.tokenExpiration = .custom(customTokenExpirationValue) }
+        )
+        .alertWithTextField(
+            title: "Enter disconnection timeout in seconds",
+            placeholder: "Interval",
+            presentationBinding: $presentsCustomDisconnectionTimeout,
+            valueBinding: $customDisconnectionTimeoutValue,
+            transformer: { TimeInterval($0) ?? 0 },
+            action: { self.disconnectionTimeout = .custom(customDisconnectionTimeoutValue) }
         )
     }
 
@@ -280,6 +302,31 @@ struct DebugMenu: View {
         } else {
             Button {
                 presentsCustomCallExpiration = true
+            } label: {
+                Label {
+                    Text("Custom")
+                } icon: {
+                    EmptyView()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customDisconnectionTimeoutView: some View {
+        if case let .custom(value) = AppEnvironment.disconnectionTimeout {
+            Button {
+                presentsCustomDisconnectionTimeout = true
+            } label: {
+                Label {
+                    Text("Custom (\(value)\")")
+                } icon: {
+                    Image(systemName: "checkmark")
+                }
+            }
+        } else {
+            Button {
+                presentsCustomDisconnectionTimeout = true
             } label: {
                 Label {
                     Text("Custom")

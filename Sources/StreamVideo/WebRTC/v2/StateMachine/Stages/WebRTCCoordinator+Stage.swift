@@ -16,6 +16,7 @@ extension WebRTCCoordinator.StateMachine {
             var reconnectAttempts: UInt32 = 0
             var currentSFU: String = ""
             var fastReconnectDeadlineSeconds: TimeInterval = 0
+            var disconnectionTimeout: TimeInterval = 0
             var reportingIntervalMs: TimeInterval = 0
             var reconnectionStrategy: ReconnectionStrategy = .unknown
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource? = nil

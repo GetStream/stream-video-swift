@@ -72,6 +72,7 @@ struct DemoCallingViewModifier: ViewModifier {
             }
             .onReceive(appState.$activeCall) { call in
                 viewModel.setActiveCall(call)
+                call?.setDisconnectionTimeout(AppEnvironment.disconnectionTimeout.duration)
             }
             .onReceive(appState.$userState) { userState in
                 if userState == .notLoggedIn {

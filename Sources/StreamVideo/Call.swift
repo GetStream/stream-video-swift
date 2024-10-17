@@ -1153,6 +1153,29 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await callController.setIncomingVideoQualitySettings(value)
     }
 
+    /// Sets the disconnection timeout for a user who has temporarily lost connection.
+    ///
+    /// This method defines the duration a user, who has already joined the call, can remain
+    /// in a disconnected state due to temporary internet issues. If the user’s connection
+    /// remains disrupted beyond the specified timeout period, they will be dropped from the call.
+    /// This timeout helps ensure that users with unstable connections do not stay in the call
+    /// indefinitely if they cannot reconnect.
+    ///
+    /// - Parameters:
+    ///   - timeout: The time interval, in seconds, that specifies how long a user can stay
+    ///              disconnected before being removed from the call. For example, if the
+    ///              timeout is set to 60 seconds, the user will be dropped from the call if
+    ///              they do not reconnect within that timeframe. Defaults to 0, where the user will
+    ///              remain in the disconnected state until their connection restores or the user hangs
+    ///              up manually.
+    ///
+    /// - Important: This mechanism is critical in managing users with unstable internet
+    ///              connections, ensuring that temporary network issues are handled gracefully
+    ///              but long-term disconnections result in the user being removed from the call.
+    public func setDisconnectionTimeout(_ timeout: TimeInterval) {
+        callController.setDisconnectionTimeout(timeout)
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
@@ -1190,8 +1213,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
+    @MainActor
     func transitionDueToError(_ error: Error) {
         do {
+            if stateMachine.currentStage.id == .joined {
+                state.disconnectionError = error
+            }
             try stateMachine.transition(.error(self, error: error))
         } catch {
             log.error(error)
