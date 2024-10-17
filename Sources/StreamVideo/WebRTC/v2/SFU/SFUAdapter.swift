@@ -293,7 +293,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     /// - Throws: An error if sending the stats fails.
     func sendStats(
         _ report: CallStatsReport?,
-        for sessionId: String
+        for sessionId: String,
+        thermalState: ProcessInfo.ThermalState? = nil
     ) async throws {
         statusCheck()
         guard let report else { return }
@@ -304,6 +305,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         statsRequest.webrtcVersion = SystemEnvironment.webRTCVersion
         statsRequest.publisherStats = report.publisherRawStats?.jsonString ?? ""
         statsRequest.subscriberStats = report.subscriberRawStats?.jsonString ?? ""
+        statsRequest.deviceState = .init(thermalState)
+
         let task = Task { [statsRequest, signalService] in
             try Task.checkCancellation()
             return try await signalService.sendStats(sendStatsRequest: statsRequest)

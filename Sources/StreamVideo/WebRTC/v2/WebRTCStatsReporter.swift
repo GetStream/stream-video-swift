@@ -15,6 +15,8 @@ import Foundation
 ///
 final class WebRTCStatsReporter: @unchecked Sendable {
 
+    @Injected(\.thermalStateObserver) private var thermalStateObserver
+
     /// The session ID associated with this reporter.
     var sessionID: String
 
@@ -159,7 +161,11 @@ final class WebRTCStatsReporter: @unchecked Sendable {
                 guard let self else { return }
 
                 try Task.checkCancellation()
-                try await sfuAdapter?.sendStats(report, for: sessionID)
+                try await sfuAdapter?.sendStats(
+                    report,
+                    for: sessionID,
+                    thermalState: thermalStateObserver.state
+                )
             } catch {
                 log.error(error)
             }
