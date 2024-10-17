@@ -226,6 +226,7 @@ final class Router: ObservableObject {
         appState.userState = .loggedIn
         appState.streamVideo = streamVideo
         ReactionsAdapter.currentValue.streamVideo = streamVideo
+        _ = DemoStatsAdapter.currentValue
 
         let utils = UtilsKey.currentValue
         utils.userListProvider = appState
