@@ -5,10 +5,6 @@
 import Combine
 import Foundation
 
-extension LogSubsystem {
-    public static let thermalState = Self(rawValue: 1 << 6)
-}
-
 /// A protocol representing an observer of a device's thermal state.
 ///
 /// This protocol is designed to provide both the current thermal state of the device and a publisher
@@ -55,7 +51,7 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
             // Log the thermal state change with the calculated log level
             log.log(
                 logLevel,
-                message: "Thermal state changed \(oldValue) → state",
+                message: "Thermal state changed \(oldValue) → \(state)",
                 subsystems: .thermalState,
                 error: nil
             )
@@ -76,13 +72,13 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
         // Initialize the thermal state with the current process's thermal state
         state = thermalStateProvider()
         self.thermalStateProvider = thermalStateProvider
-
+        
         // Set up a publisher to monitor thermal state changes
         notificationCenterCancellable = NotificationCenter
             .default
             .publisher(for: ProcessInfo.thermalStateDidChangeNotification)
             .receive(on: DispatchQueue.global(qos: .utility))
-            .map { [thermalStateProvider] _ in thermalStateProvider() }
+            .compactMap { ($0.object as? ProcessInfo)?.thermalState }
             .receive(on: DispatchQueue.main)
             .assign(to: \.state, on: self)
     }
