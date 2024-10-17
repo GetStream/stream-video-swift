@@ -62,7 +62,9 @@ let streamVideo = StreamVideo(
 
 Anonymous users don't establish a web socket connection, therefore they won't receive any events. They are just able to watch a livestream or join a call.
 
-The token for an anonymous user should contain the `call_cids` field, which is an array of the call `cid`'s that the user is allowed to join.
+The token for an anonymous user should contain the `call_cids` field, which is an array of the call `cid`'s that the user is allowed to join. 
+
+Call `cid` consists of the call type and the call id, in the following format: `callType:callId`.
 
 Here's an example JWT token payload for an anonymous user:
 
