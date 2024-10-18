@@ -32,6 +32,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
 
         private var internetObservationCancellable: AnyCancellable?
+        private var timeInStageCancellable: AnyCancellable?
 
         /// Initializes a new instance of `DisconnectedStage`.
         /// - Parameter context: The context for the disconnected stage.
@@ -44,6 +45,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// Performs cleanup actions before transitioning away from this stage.
         override func willTransitionAway() {
             internetObservationCancellable?.cancel()
+            timeInStageCancellable?.cancel()
             context.disconnectionSource = nil
             context.flowError = nil
         }
@@ -108,6 +110,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .statsReporter
                 statsReporter?.sfuAdapter = nil
                 observeInternetConnection()
+                observeDurationInStage()
             }
         }
 
@@ -151,6 +154,50 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .filter { $0.isAvailable }
                 .removeDuplicates()
                 .sink { [weak self] _ in self?.reconnect() }
+        }
+
+        /// Observes the duration spent in the disconnected stage.
+        ///
+        /// This method monitors how long the user remains in the disconnected stage of
+        /// the state machine. It checks if the disconnection timeout is set to a value
+        /// greater than zero, and if so, it schedules a timer based on this duration.
+        /// Once the timer expires, indicating the user has been disconnected for too
+        /// long, a transition is triggered to handle the expired timeout. If the value is equal to zero, we
+        /// will remain in the disconnected state until the connection restores or the user hangs up.
+        ///
+        /// - Important: The timer uses the disconnection timeout to define how long a
+        ///              user can remain in a disconnected state. If the user's connection
+        ///              isn't restored before the timeout expires, the state machine will
+        ///              transition accordingly.
+        ///
+        /// - Note: The `context.disconnectionTimeout` holds the value of the timeout
+        ///         duration. If the value is zero or less, no action will be taken,
+        ///         meaning the user can stay disconnected indefinitely without
+        ///         triggering a transition.
+        private func observeDurationInStage() {
+            guard context.disconnectionTimeout > 0 else {
+                return
+            }
+            timeInStageCancellable = Foundation
+                .Timer
+                .publish(every: context.disconnectionTimeout, on: .main, in: .default)
+                .autoconnect()
+                .sink { [weak self] _ in self?.didTimeInStageExpired() }
+        }
+
+        /// Handles the expiration of the time spent in the disconnected stage.
+        ///
+        /// This method is called when the timer, which monitors the user's disconnection
+        /// timeout, expires. It triggers a state transition to either handle the
+        /// disconnection as an error or log the issue. Specifically, it transitions to an
+        /// error state by raising a `ClientError.NetworkNotAvailable` if the user's
+        /// network is still not available.
+        ///
+        /// - Important: This method ensures that users who exceed the allowed time in the
+        ///              disconnected state are transitioned out of the call, preventing
+        ///              them from staying in an unrecoverable state indefinitely.
+        private func didTimeInStageExpired() {
+            transitionErrorOrLog(ClientError.NetworkNotAvailable())
         }
     }
 }

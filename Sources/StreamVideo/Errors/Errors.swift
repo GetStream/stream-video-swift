@@ -88,7 +88,10 @@ extension ClientError {
     
     /// Networking error.
     public class NetworkError: ClientError {}
-    
+
+    /// Represents a network-related error indicating that the network is unavailable.
+    public class NetworkNotAvailable: ClientError {}
+
     /// Permissions error.
     public class MissingPermissions: ClientError {}
     

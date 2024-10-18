@@ -99,7 +99,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             .current()
             .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
                 if granted {
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         UIApplication.shared.registerForRemoteNotifications()
                     }
                 }
