@@ -85,7 +85,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         #if os(macOS) || targetEnvironment(macCatalyst)
         var rotation = RTCVideoRotation._0
         #else
-        var rotation = frame.rotation
+        var rotation = RTCVideoRotation._90
         switch sceneOrientation {
         case let .portrait(isUpsideDown):
             rotation = isUpsideDown ? ._270 : ._90
