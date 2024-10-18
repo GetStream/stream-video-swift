@@ -34,12 +34,14 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
 
-        orientationCancellable = orientationAdapter
-            .$orientation
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .assign(to: \Self.sceneOrientation, onWeak: self)
-        sceneOrientation = orientationAdapter.orientation
+        Task { @MainActor in
+            orientationCancellable = orientationAdapter
+                .$orientation
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .assign(to: \Self.sceneOrientation, onWeak: self)
+            sceneOrientation = orientationAdapter.orientation
+        }
     }
 
     func capturer(

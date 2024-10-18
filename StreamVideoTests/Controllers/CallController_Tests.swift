@@ -610,5 +610,14 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         try await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter
             .set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
+
+        await fulfillment {
+            await self
+                .mockWebRTCCoordinatorFactory
+                .mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .participants.count == 1
+        }
     }
 }

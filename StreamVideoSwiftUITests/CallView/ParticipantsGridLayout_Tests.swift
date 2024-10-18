@@ -6,8 +6,9 @@ import SnapshotTesting
 import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
-import XCTest
+@preconcurrency import XCTest
 
+@MainActor
 final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     private var mockedOrientation: StreamDeviceOrientation! = .portrait(isUpsideDown: false)
