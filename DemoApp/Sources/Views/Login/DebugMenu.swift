@@ -67,6 +67,11 @@ struct DebugMenu: View {
         .pictureInPictureIntegration {
         didSet { AppEnvironment.pictureInPictureIntegration = pictureInPictureIntegration }
     }
+    
+    @State private var thermalStateManagement: AppEnvironment.ThermalStateManagement = AppEnvironment
+        .thermalStateManagement {
+        didSet { AppEnvironment.thermalStateManagement = thermalStateManagement }
+    }
 
     @State private var tokenExpiration: AppEnvironment.TokenExpiration = AppEnvironment.tokenExpiration {
         didSet { AppEnvironment.tokenExpiration = tokenExpiration }
@@ -149,6 +154,12 @@ struct DebugMenu: View {
                 currentValue: pictureInPictureIntegration,
                 label: "Picture in Picture Integration"
             ) { self.pictureInPictureIntegration = $0 }
+
+            makeMenu(
+                for: [.enabled, .disabled],
+                currentValue: thermalStateManagement,
+                label: "Thermal Condition Management"
+            ) { self.thermalStateManagement = $0 }
 
             makeMenu(
                 for: [.default, .lastParticipant],

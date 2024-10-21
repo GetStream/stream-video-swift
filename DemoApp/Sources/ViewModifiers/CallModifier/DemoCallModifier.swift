@@ -31,6 +31,6 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
             viewFactory: viewFactory,
             viewModel: viewModel
         )
-        .modifier(ThermalStateViewModifier())
+        .modifier(ThermalStateViewModifier(viewModel.call))
     }
 }
