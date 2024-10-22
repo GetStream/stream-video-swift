@@ -332,7 +332,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
 
     func test_buildAnnouncedTracks_publisherHasOnlyScreenSharing_returnsCorrectTrackInfo() async throws {
         var videoOptions = VideoOptions()
-        videoOptions.supportedCodecs = [.screenshare]
+        videoOptions.videoLayers = [.screenshare]
         let mid = String.unique
         let mockTrack = await mockCoordinatorStack
             .coordinator
@@ -495,7 +495,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     private func assertAnnouncedTrack(
         _ actual: @autoclosure () -> Stream_Video_Sfu_Models_TrackInfo,
         _ expected: @autoclosure () -> (mid: String, track: RTCMediaStreamTrack),
-        videoCodecs: [VideoCodec],
+        videoCodecs: [VideoLayer],
         file: StaticString = #file,
         line: UInt = #line
     ) {

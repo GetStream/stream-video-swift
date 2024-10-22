@@ -529,6 +529,23 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - updatePublishOptions
+
+    func test_updatePublishOptions_shouldCallUpdatePublishOptionsCoordinator() async throws {
+        try await prepareAsConnected()
+
+        await subject.updatePublishOptions(
+            preferredVideoCodec: .vp9,
+            maxBitrate: 1000
+        )
+
+        let videoOptions = await subject
+            .stateAdapter
+            .videoOptions
+        XCTAssertEqual(videoOptions.preferredVideoCodec, .vp9)
+        XCTAssertEqual(videoOptions.preferredBitrate, 1000)
+    }
+
     // MARK: - Private helpers
 
     private func assertEqualAsync<T: Equatable>(

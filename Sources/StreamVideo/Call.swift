@@ -1176,6 +1176,22 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setDisconnectionTimeout(timeout)
     }
 
+    /// Updates video publishing options with the preferred video codec and max bitrate for video
+    /// streaming by.
+    ///
+    /// - Parameters:
+    ///    - preferredVideoCodec: The preferred video codec (e.g., H264, VP8, VP9, AV1).
+    ///    - maxBitrate: The maximum allowed bitrate for video streaming (defaults to 1000000).
+    public func updatePublishOptions(
+        preferredVideoCodec: VideoCodec,
+        maxBitrate: Int = .maxBitrate
+    ) async {
+        await callController.updatePublishOptions(
+            preferredVideoCodec: preferredVideoCodec,
+            maxBitrate: maxBitrate
+        )
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {

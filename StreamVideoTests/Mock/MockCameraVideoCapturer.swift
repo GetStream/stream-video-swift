@@ -48,7 +48,7 @@ final class MockCameraVideoCapturer: CameraVideoCapturing, Mockable {
         case removeCapturePhotoOutput(capturePhotoOutput: AVCapturePhotoOutput)
         case startCapture(device: AVCaptureDevice?)
         case stopCapture
-        case updateCaptureQuality(codecs: [VideoCodec], device: AVCaptureDevice?)
+        case updateCaptureQuality(codecs: [VideoLayer], device: AVCaptureDevice?)
 
         var payload: Any {
             switch self {
@@ -108,7 +108,7 @@ final class MockCameraVideoCapturer: CameraVideoCapturing, Mockable {
     }
 
     func updateCaptureQuality(
-        _ codecs: [VideoCodec],
+        _ codecs: [VideoLayer],
         on device: AVCaptureDevice?
     ) async {
         stubbedFunctionInput[.updateCaptureQuality]?

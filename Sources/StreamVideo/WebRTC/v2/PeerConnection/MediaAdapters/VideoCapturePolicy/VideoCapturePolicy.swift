@@ -56,9 +56,9 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
         else { return }
 
         /// Filter the default video codecs to include only those matching the active encodings.
-        let videoCodecs = VideoCodec
-            .defaultCodecs
-            .filter { activeEncodings.contains($0.quality) }
+        let videoCodecs = VideoLayer
+            .default
+            .filter { activeEncodings.contains($0.quality.rawValue) }
 
         try await activeSession.capturer
             .updateCaptureQuality(videoCodecs, on: activeSession.device)

@@ -377,9 +377,41 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.set(incomingVideoQualitySettings: value)
     }
 
+    // MARK: - Disconnection timeout
+
+    /// Sets the disconnection timeout for the current call.
+    ///
+    /// Updates the disconnection timeout in the state machine's context.
+    /// The timeout defines how long a user can stay disconnected
+    /// before being dropped from the call.
+    ///
+    /// - Parameter timeout: The time interval to set as the timeout.
     func setDisconnectionTimeout(_ timeout: TimeInterval) {
         stateMachine.currentStage.context.disconnectionTimeout = timeout
         log.debug("Disconnection timeout was set to \(timeout).")
+    }
+
+    // MARK: - Codec preference
+
+    /// Updates video publishing options asynchronously.
+    ///
+    /// Updates the preferred video codec and max bitrate for video streaming by
+    /// modifying the current video options and applying them via the state
+    /// adapter.
+    ///
+    /// - Parameters:
+    ///    - preferredVideoCodec: The preferred video codec (e.g., H264, VP8, VP9, AV1).
+    ///    - maxBitrate: The maximum allowed bitrate for video streaming.
+    func updatePublishOptions(
+        preferredVideoCodec: VideoCodec,
+        maxBitrate: Int
+    ) async {
+        await stateAdapter.set(
+            videoOptions: await stateAdapter
+                .videoOptions
+                .with(preferredBitrate: maxBitrate)
+                .with(preferredVideoCodec: preferredVideoCodec)
+        )
     }
 
     // MARK: - Private

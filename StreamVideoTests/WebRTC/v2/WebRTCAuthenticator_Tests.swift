@@ -194,6 +194,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             call: .dummy(
                 settings: .dummy(
                     video: .dummy(
+                        cameraFacing: .back,
                         targetResolution: .init(bitrate: 100, height: 200, width: 300)
                     )
                 )
@@ -214,6 +215,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             .coordinator
             .stateAdapter
             .videoOptions
+        XCTAssertEqual(videoOptions.preferredCameraPosition, .back)
         XCTAssertEqual(videoOptions.preferredDimensions.height, 200)
         XCTAssertEqual(videoOptions.preferredDimensions.width, 300)
     }

@@ -97,6 +97,10 @@ struct DebugMenu: View {
         didSet { AppEnvironment.autoLeavePolicy = autoLeavePolicy }
     }
 
+    @State private var preferredVideoCodec: AppEnvironment.PreferredVideoCodec = AppEnvironment.preferredVideoCodec {
+        didSet { AppEnvironment.preferredVideoCodec = preferredVideoCodec }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -162,6 +166,12 @@ struct DebugMenu: View {
                 additionalItems: { customDisconnectionTimeoutView },
                 label: "Disconnection Timeout"
             ) { self.disconnectionTimeout = $0 }
+
+            makeMenu(
+                for: [.h264, .vp8, .vp9, .av1],
+                currentValue: preferredVideoCodec,
+                label: "Preferred Video Codec"
+            ) { self.preferredVideoCodec = $0 }
 
             makeMenu(
                 for: [.visible, .hidden],

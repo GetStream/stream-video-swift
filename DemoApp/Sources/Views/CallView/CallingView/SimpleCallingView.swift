@@ -80,11 +80,14 @@ struct SimpleCallingView: View {
 
                 Button {
                     resignFirstResponder()
-                    viewModel.enterLobby(
-                        callType: .default,
-                        callId: text,
-                        members: []
-                    )
+                    Task {
+                        await setPreferredVideoCodec(for: text)
+                        viewModel.enterLobby(
+                            callType: .default,
+                            callId: text,
+                            members: []
+                        )
+                    }
                 } label: {
                     CallButtonView(
                         title: "Join Call",
@@ -111,13 +114,17 @@ struct SimpleCallingView: View {
 
                 Button {
                     resignFirstResponder()
-                    viewModel.startCall(
-                        callType: .default,
-                        callId: .unique,
-                        members: [],
-                        ring: false,
-                        maxDuration: AppEnvironment.callExpiration.duration
-                    )
+                    Task {
+                        let callId = String.unique
+                        await setPreferredVideoCodec(for: callId)
+                        viewModel.startCall(
+                            callType: .default,
+                            callId: callId,
+                            members: [],
+                            ring: false,
+                            maxDuration: AppEnvironment.callExpiration.duration
+                        )
+                    }
                 } label: {
                     CallButtonView(
                         title: "Start New Call",
@@ -160,6 +167,13 @@ struct SimpleCallingView: View {
                     self.showChangeEnvironmentPrompt = true
                 }
         }
+    }
+
+    private func setPreferredVideoCodec(for callId: String) async {
+        let call = streamVideo.call(callType: .default, callId: callId)
+        await call.updatePublishOptions(
+            preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
+        )
     }
 }
 

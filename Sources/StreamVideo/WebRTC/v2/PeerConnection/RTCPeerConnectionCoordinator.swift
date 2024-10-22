@@ -563,9 +563,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: A set of active encoding identifiers.
     func changePublishQuality(
-        with activeEncodings: Set<String>
+        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
     ) {
-        mediaAdapter.changePublishQuality(with: activeEncodings)
+        mediaAdapter.changePublishQuality(with: layerSettings)
     }
 
     // MARK: - ScreenSharing
