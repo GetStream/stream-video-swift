@@ -191,7 +191,7 @@ struct WebRTCJoinRequestFactory {
             var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
             trackInfo.trackID = publisher?.localTrack(of: .video)?.trackId ?? ""
             trackInfo.layers = videoOptions
-                .supportedCodecs
+                .videoLayers
                 .map { Stream_Video_Sfu_Models_VideoLayer($0) }
             trackInfo.mid = mid
             trackInfo.trackType = .video
@@ -202,7 +202,7 @@ struct WebRTCJoinRequestFactory {
         if let mid = publisher?.mid(for: .screenshare) {
             var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
             trackInfo.trackID = publisher?.localTrack(of: .screenshare)?.trackId ?? ""
-            trackInfo.layers = [VideoCodec.screenshare]
+            trackInfo.layers = [VideoLayer.screenshare]
                 .map { Stream_Video_Sfu_Models_VideoLayer($0, fps: 15) }
             trackInfo.mid = mid
             trackInfo.trackType = .screenShare

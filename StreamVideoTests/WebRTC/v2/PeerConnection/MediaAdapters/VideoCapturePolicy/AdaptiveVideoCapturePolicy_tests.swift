@@ -729,7 +729,7 @@ final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
     // MARK: - Private helpers
 
     private func assertUpdateCaptureQuality(
-        expected: [VideoCodec],
+        expected: [VideoLayer],
         expectedTimesCalled: Int,
         neuralEngineExists: Bool,
         thermalState: ProcessInfo.ThermalState,
@@ -757,7 +757,7 @@ final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
 
         if expectedTimesCalled > 0 {
             XCTAssertEqual(
-                cameraVideoCapturer.recordedInputPayload(([VideoCodec], AVCaptureDevice?).self, for: .updateCaptureQuality)?.first?
+                cameraVideoCapturer.recordedInputPayload(([VideoLayer], AVCaptureDevice?).self, for: .updateCaptureQuality)?.first?
                     .0
                     .map(\.quality).sorted(),
                 expected.map(\.quality).sorted(),

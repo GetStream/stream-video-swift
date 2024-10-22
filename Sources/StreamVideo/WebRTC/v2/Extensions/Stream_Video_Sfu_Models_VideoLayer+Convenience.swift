@@ -7,7 +7,7 @@ import Foundation
 extension Stream_Video_Sfu_Models_VideoLayer {
     
     init(
-        _ codec: VideoCodec,
+        _ codec: VideoLayer,
         fps: UInt32 = 30
     ) {
         bitrate = UInt32(codec.maxBitrate)

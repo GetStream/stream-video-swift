@@ -13,6 +13,7 @@ public struct CallStatsReport: Sendable {
     public let publisherStats: AggregatedStatsReport
     /// The raw publisher statistics report for the call.
     public let publisherRawStats: RTCStatisticsReport?
+    public let publisherBaseStats: [BaseStats]
     /// The aggregated subscriber stats for the call.
     public let subscriberStats: AggregatedStatsReport
     /// The raw subscriber statistics report for the call.

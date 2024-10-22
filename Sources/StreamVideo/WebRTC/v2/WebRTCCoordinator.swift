@@ -382,6 +382,18 @@ final class WebRTCCoordinator: @unchecked Sendable {
         log.debug("Disconnection timeout was set to \(timeout).")
     }
 
+    func updatePublishOptions(
+        preferredVideoCodec: VideoCodec,
+        maxBitrate: Int
+    ) async {
+        await stateAdapter.set(
+            videoOptions: await stateAdapter
+                .videoOptions
+                .with(preferredBitrate: maxBitrate)
+                .with(preferredVideoCodec: preferredVideoCodec)
+        )
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.

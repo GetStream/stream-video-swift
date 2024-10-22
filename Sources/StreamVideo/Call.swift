@@ -1176,6 +1176,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setDisconnectionTimeout(timeout)
     }
 
+    public func updatePublishOptions(
+        preferredVideoCodec: VideoCodec,
+        maxBitrate: Int = .maxBitrate
+    ) async {
+        await callController.updatePublishOptions(
+            preferredVideoCodec: preferredVideoCodec,
+            maxBitrate: maxBitrate
+        )
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
