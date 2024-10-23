@@ -54,7 +54,7 @@ struct DetailedCallingView: View {
     }
 
     @State private var text: String
-    @State private var callAction: CallAction = .liveCall
+    @State private var callAction: CallAction = .startCall
     @State private var callFlow: CallFlow = .joinImmediately
     @State private var liveFlow: LiveFlow = .streamer
 
