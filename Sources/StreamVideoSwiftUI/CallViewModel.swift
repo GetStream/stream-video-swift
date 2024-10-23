@@ -397,6 +397,42 @@ open class CallViewModel: ObservableObject {
             customData: customData
         )
     }
+    
+    /// Starts a livestream for the given call type and call ID.
+    /// - Parameters:
+    ///  - callType: the type of the call.
+    ///  - callId: the id of the call.
+    public func goLive(
+        callType: String,
+        callId: String,
+        customData: [String: RawJSON]? = nil
+    ) {
+        let call = streamVideo.call(callType: callType, callId: callId)
+        callingState = .joining
+        enterCall(
+            call: call,
+            callType: callType,
+            callId: callId,
+            members: [],
+            customData: customData,
+            completion: { result in
+                switch result {
+                case .success:
+                    Task {
+                        do {
+                            let response = try await call.goLive()
+                        } catch {
+                            log.error(error)
+                            self.callingState = .idle
+                        }
+                    }
+                case .failure(let error):
+                    log.error(error)
+                    self.callingState = .idle
+                }
+            }
+        )
+    }
 
     /// Enters into a lobby before joining a call.
     /// - Parameters:
@@ -590,7 +626,8 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
-        customData: [String: RawJSON]? = nil
+        customData: [String: RawJSON]? = nil,
+        completion: ((Result<Void, Error>) -> Void)? = nil
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -624,12 +661,14 @@ open class CallViewModel: ObservableObject {
                 )
                 save(call: call)
                 enteringCallTask = nil
+                completion?(.success(()))
             } catch {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 callingState = .idle
                 Task { await audioRecorder.stopRecording() }
                 enteringCallTask = nil
+                completion?(.failure(error))
             }
         }
     }

@@ -11,12 +11,18 @@ struct DetailedCallingView: View {
     enum CallAction: String, Equatable, CaseIterable {
         case startCall = "Start a call"
         case joinCall = "Join a call"
+        case liveCall = "Live"
     }
 
     enum CallFlow: String, Equatable, CaseIterable {
         case joinImmediately = "Join immediately"
         case ringEvents = "Ring events"
         case lobby = "Lobby"
+    }
+    
+    enum LiveFlow: String, Equatable, CaseIterable {
+        case streamer = "Streamer"
+        case audience = "Audience"
     }
 
     @Injected(\.streamVideo) var streamVideo
@@ -48,8 +54,9 @@ struct DetailedCallingView: View {
     }
 
     @State private var text: String
-    @State private var callAction: CallAction = .startCall
+    @State private var callAction: CallAction = .liveCall
     @State private var callFlow: CallFlow = .joinImmediately
+    @State private var liveFlow: LiveFlow = .streamer
 
     @State var selectedParticipants = [User]()
     @State var incomingCallInfo: IncomingCall?
@@ -124,6 +131,16 @@ struct DetailedCallingView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+            } else if callAction == .liveCall {
+                Spacer()
+                Picker("Live flow", selection: $liveFlow) {
+                    ForEach(LiveFlow.allCases, id: \.self) { liveFlow in
+                        Text(liveFlow.rawValue)
+                            .tag(liveFlow)
+                            .accessibility(identifier: liveFlow.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
             } else {
                 Spacer()
             }
@@ -132,6 +149,12 @@ struct DetailedCallingView: View {
                 resignFirstResponder()
                 if callAction == .joinCall {
                     viewModel.joinCall(callType: .default, callId: text)
+                } else if callAction == .liveCall {
+                    if liveFlow == .streamer {
+                        viewModel.goLive(callType: .livestream, callId: text)
+                    } else {
+                        viewModel.joinCall(callType: .livestream, callId: text)
+                    }
                 } else {
                     if callFlow == .lobby {
                         viewModel.enterLobby(
@@ -150,12 +173,18 @@ struct DetailedCallingView: View {
                 }
             } label: {
                 CallButtonView(
-                    title: callAction == .joinCall ? "Join Call" : "Start Call",
+                    title: callAction == .startCall
+                    ? "Start Call" : callAction == .joinCall
+                    ? "Join Call" : liveFlow == .streamer
+                    ? "Go Live" : "Join Live",
                     isDisabled: isActionDisabled
                 )
             }
             .disabled(isActionDisabled)
-            .accessibilityIdentifier(callAction == .joinCall ? "joinCall" : "startCall")
+            .accessibilityIdentifier(callAction == .startCall
+                                     ? "startCall" : callAction == .joinCall
+                                     ? "joinCall" : liveFlow == .streamer
+                                     ? "goLive" : "joinLive")
         }
         .modifier(
             DemoCallingViewModifier(
