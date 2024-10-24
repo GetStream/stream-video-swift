@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - You can now provide the incoming video quality setting for some or all participants [#571](https://github.com/GetStream/stream-video-swift/pull/571)
 - You can now set the time a user can remain in the call - after their connection disrupted - while waiting for their network connection to recover [#573](https://github.com/GetStream/stream-video-swift/pull/573)
 
+### 🐞 Fixed
+- Toggling the speaker during a call wasn't always working. [#585](https://github.com/GetStream/stream-video-swift/pull/585)
+
 # [1.13.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.13.0)
 _October 08, 2024_
 

@@ -23,7 +23,7 @@ actor AudioSession {
         rtcAudioSession.lockForConfiguration()
         defer { rtcAudioSession.unlockForConfiguration() }
         rtcAudioSession.useManualAudio = true
-        rtcAudioSession.isAudioEnabled = true
+        rtcAudioSession.isAudioEnabled = audioOn
 
         do {
             log.debug(
