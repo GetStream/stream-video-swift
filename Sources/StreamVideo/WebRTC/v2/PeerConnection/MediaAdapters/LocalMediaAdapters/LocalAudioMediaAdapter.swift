@@ -193,8 +193,18 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     ) async throws {
         guard let localTrack else { return }
         let isMuted = !settings.audioOn
+        // Check if the localTrack is muted
         let isLocalMuted = localTrack.isEnabled == false
-        guard isMuted != isLocalMuted || sender == nil else {
+        // Check if the speaker is on, for the current AudioSession
+        let isLocalSpeakerOn = await audioSession.isSpeakerOn
+        // Check if the current AudioSession isActive
+        let isLocalAudioSessionActive = await audioSession.isActive
+        guard
+            sender == nil
+            || isMuted != isLocalMuted
+            || settings.speakerOn != isLocalSpeakerOn
+            || settings.audioOutputOn != isLocalAudioSessionActive
+        else {
             return
         }
 
@@ -205,7 +215,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         )
 
         await audioSession.configure(
-            audioOn: settings.audioOn,
+            audioOn: settings.audioOutputOn,
             speakerOn: settings.speakerOn
         )
 
