@@ -75,6 +75,7 @@ fastlane/screenshots
 fastlane/test_output
 fastlane/allurectl
 fastlane/xcresults
+**/metrics/
 recordings
 *.coverage.txt
 vendor/bundle/
@@ -92,6 +93,8 @@ derived_data/
 spm_cache/
 .buildcache
 buildcache
+App Thinning Size Report.txt
+app-thinning.plist
 *.dmg
 
 # Stream Video Buddy

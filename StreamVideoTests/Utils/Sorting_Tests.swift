@@ -702,6 +702,76 @@ final class Sorting_Tests: XCTestCase {
         )
     }
 
+    func test_defaultComparators_someSpeakingWhileDominantSpeakerIsVisible_orderDoesNotChange() {
+        let combined = combineComparators(defaultComparators)
+
+        assertSort(
+            [
+                .dummy(
+                    hasAudio: true,
+                    showTrack: true,
+                    isSpeaking: true,
+                    isDominantSpeaker: false
+                ),
+                .dummy(
+                    hasAudio: true,
+                    showTrack: true,
+                    isSpeaking: true,
+                    isDominantSpeaker: false
+                ),
+                .dummy(
+                    hasAudio: true,
+                    showTrack: true,
+                    isSpeaking: true,
+                    isDominantSpeaker: false
+                ),
+                .dummy(
+                    hasAudio: true,
+                    showTrack: true,
+                    isSpeaking: true,
+                    isDominantSpeaker: true
+                )
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[0], $0[1], $0[2], $0[3]] }
+        )
+    }
+
+    func test_defaultComparators_someSpeakingWhileDominantSpeakerIsInisible_orderChanges() {
+        let combined = combineComparators(defaultComparators)
+
+        assertSort(
+            [
+                .dummy(
+                    hasAudio: true,
+                    showTrack: true,
+                    isSpeaking: true,
+                    isDominantSpeaker: false
+                ),
+                .dummy(
+                    hasAudio: true,
+                    showTrack: true,
+                    isSpeaking: true,
+                    isDominantSpeaker: false
+                ),
+                .dummy(
+                    hasAudio: true,
+                    showTrack: true,
+                    isSpeaking: true,
+                    isDominantSpeaker: false
+                ),
+                .dummy(
+                    hasAudio: true,
+                    showTrack: false,
+                    isSpeaking: true,
+                    isDominantSpeaker: true
+                )
+            ],
+            comparator: combined,
+            expectedTransformer: { [$0[3], $0[0], $0[1], $0[2]] }
+        )
+    }
+
     // MARK: - Private Helpers
 
     private func assertSort(

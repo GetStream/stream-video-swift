@@ -226,12 +226,17 @@ final class Router: ObservableObject {
         appState.userState = .loggedIn
         appState.streamVideo = streamVideo
         ReactionsAdapter.currentValue.streamVideo = streamVideo
+        _ = DemoStatsAdapter.currentValue
 
         let utils = UtilsKey.currentValue
         utils.userListProvider = appState
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
 
-        appState.connectUser()
+        if user?.type != .anonymous {
+            appState.connectUser()
+        } else {
+            appState.loading = false
+        }
     }
 
     private func refreshToken(

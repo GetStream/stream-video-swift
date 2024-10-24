@@ -6,11 +6,12 @@ import SnapshotTesting
 import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
-import XCTest
+@preconcurrency import XCTest
 
-final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
-    
-    private var mockedOrientation: StreamDeviceOrientation! = .portrait
+@MainActor
+final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Sendable {
+
+    private var mockedOrientation: StreamDeviceOrientation! = .portrait(isUpsideDown: false)
     private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init { self.mockedOrientation }
 
     private lazy var callController: CallController_Mock! = CallController_Mock(
@@ -27,8 +28,10 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         cachedLocation: nil
     )
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
+        _ = orientationAdapter
+        try await Task.sleep(nanoseconds: 250_000_000)
         let streamVideo = StreamVideo.mock(httpClient: httpClient, callController: callController)
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
         InjectedValues[\.orientationAdapter] = orientationAdapter
@@ -45,7 +48,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
     @MainActor
     func test_grid_participantWithAudio_snapshot() {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
 
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
@@ -55,13 +58,17 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 availableFrame: .init(origin: .zero, size: defaultScreenSize),
                 onChangeTrackVisibility: { _, _ in }
             )
-            AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
+            AssertSnapshot(
+                layout,
+                variants: snapshotVariants,
+                suffix: "with_\(count)_participants"
+            )
         }
     }
     
     @MainActor
     func test_grid_participantWithoutAudio_snapshot() {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
 
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
@@ -77,7 +84,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
     @MainActor
     func test_grid_participantsConnectionQuality_snapshot() throws {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
 
         for quality in connectionQuality {
             let count = gridParticipants.last!
@@ -94,7 +101,8 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
     @MainActor
     func test_grid_participantsSpeaking_snapshot() {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
+        callController.call = call
 
         for count in gridParticipants {
             let participants = ParticipantFactory.get(count, speaking: true)

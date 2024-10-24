@@ -3,7 +3,7 @@
 //
 
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
 @MainActor
 final class Call_Tests: StreamVideoTestCase {
@@ -303,10 +303,77 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertTrue(Int(duration) >= 1)
     }
 
+    func test_setIncomingVideoQualitySettings_updatesCallState() async throws {
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let incomingVideoQualitySettings = IncomingVideoQualitySettings.manual(
+            group: .custom(sessionIds: [.unique, .unique]),
+            targetSize: .init(
+                width: 11,
+                height: 10
+            )
+        )
+
+        await call?.setIncomingVideoQualitySettings(incomingVideoQualitySettings)
+
+        await fulfillment {
+            call?.state.incomingVideoQualitySettings == incomingVideoQualitySettings
+        }
+    }
+
+    func test_setDisconnectionTimeout_setDisconnectionTimeoutOnCallController() async throws {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init())
+
+        call.setDisconnectionTimeout(11)
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                TimeInterval.self,
+                for: .setDisconnectionTimeout
+            )?.first,
+            11
+        )
+    }
+
+    // MARK: - Update State from Coordinator events
+
+    func test_coordinatorEventReceived_startedRecording_updatesStateCorrectly() async throws {
+        try await assertCoordinatorEventReceived(
+            .typeCallRecordingStartedEvent(
+                CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
+            )
+        ) { call in await fulfillment { call.state.recordingState == .recording } }
+    }
+
+    func test_coordinatorEventReceived_startedRecordingForAnotherCall_doesNotUpdateState() async throws {
+        try await assertCoordinatorEventReceived(
+            .typeCallRecordingStartedEvent(
+                CallRecordingStartedEvent(callCid: .unique, createdAt: Date())
+            )
+        ) { @MainActor call in
+            await wait(for: 1)
+            XCTAssertEqual(call.state.recordingState, .noRecording)
+        }
+    }
+
+    private func assertCoordinatorEventReceived(
+        _ event: VideoEvent,
+        fulfillmentHandler: @MainActor(Call) async throws -> Void
+    ) async throws {
+        let streamVideo = try XCTUnwrap(streamVideo)
+        let call = streamVideo.call(callType: callType, callId: callId)
+
+        streamVideo
+            .eventNotificationCenter
+            .process(.coordinatorEvent(event))
+
+        try await fulfillmentHandler(call)
+    }
+
     // MARK: - join
 
     func test_join_callControllerWasCalledOnlyOnce() async throws {
-        LogConfig.level = .debug
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
         call.stub(for: \.state, with: .init())
@@ -383,69 +450,5 @@ private struct UpdateStateStep {
     ) {
         self.event = event
         validation = { $0[keyPath: keyPath] == expected }
-    }
-}
-
-private final class MockCallController: CallController, Mockable {
-    typealias FunctionKey = MockFunctionKey
-
-    enum MockFunctionKey: Hashable {
-        case join
-    }
-
-    var joinError: Error?
-    var timesJoinWasCalled: Int = 0
-    var stubbedProperty: [String: Any] = [:]
-    var stubbedFunction: [FunctionKey: Any] = [:]
-
-    convenience init() {
-        self.init(
-            defaultAPI: .dummy(),
-            user: .dummy(),
-            callId: .unique,
-            callType: .unique,
-            apiKey: .unique,
-            videoConfig: .dummy(),
-            cachedLocation: nil
-        )
-    }
-
-    func stub<T>(for keyPath: KeyPath<MockCallController, T>, with value: T) {
-        stubbedProperty[propertyKey(for: keyPath)] = value
-    }
-
-    func stub<T>(for function: FunctionKey, with value: T) {
-        stubbedFunction[function] = value
-    }
-
-    override func joinCall(
-        create: Bool = true,
-        callType: String,
-        callId: String,
-        callSettings: CallSettings?,
-        options: CreateCallOptions? = nil,
-        migratingFrom: String? = nil,
-        sessionID: String? = nil,
-        ring: Bool = false,
-        notify: Bool = false
-    ) async throws -> JoinCallResponse {
-        timesJoinWasCalled += 1
-        if let stub = stubbedFunction[.join] as? JoinCallResponse {
-            return stub
-        } else if let joinError {
-            throw joinError
-        } else {
-            return try await super.joinCall(
-                create: create,
-                callType: callType,
-                callId: callId,
-                callSettings: callSettings,
-                options: options,
-                migratingFrom: migratingFrom,
-                sessionID: sessionID,
-                ring: ring,
-                notify: notify
-            )
-        }
     }
 }

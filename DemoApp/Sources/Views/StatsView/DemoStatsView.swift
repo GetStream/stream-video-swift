@@ -27,7 +27,8 @@ struct DemoStatsView: View {
                     title: "Call Latency",
                     description: "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
                 ) {
-                    DemoLatencyChartView(viewModel)
+                    DemoLatencyChartView()
+                        .frame(height: 150)
                 }
                 .withoutListSeparator()
             }
@@ -36,7 +37,7 @@ struct DemoStatsView: View {
                 viewModel: viewModel,
                 iconName: "chart.bar.xaxis",
                 title: "Call Performance",
-                description: "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
+                description: "Review the key data points below to assess call performance"
             ) {
                 VStack(spacing: 16) {
                     row {
@@ -278,7 +279,6 @@ private struct DemoStatView<Value: Comparable>: View {
                 .$statsReport
                 .receive(on: DispatchQueue.global(qos: .utility))
                 .map(valueTransformer)
-                .removeDuplicates()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] value in
                     guard let self else { return }
@@ -382,7 +382,8 @@ private struct DemoLatencyChartView: View {
 
     private final class DemoLatencyChartViewModel: ObservableObject {
 
-        @ObservedObject private var viewModel: CallViewModel
+        @Injected(\.demoStatsAdapter) private var demoStatsAdapter
+
         private var cancellable: AnyCancellable?
         private let visibleItems = 8
 
@@ -396,19 +397,14 @@ private struct DemoLatencyChartView: View {
         @Published var values: [(offset: Int, element: Double)] = []
         @Published var visibleRange: ClosedRange<Int> = 0...0
 
-        init(
-            viewModel: CallViewModel
-        ) {
-            self.viewModel = viewModel
+        init() {
             values = []
-            cancellable = viewModel
-                .call?
-                .state
-                .$statsReport
+            cancellable = demoStatsAdapter
+                .$reports
                 .receive(on: DispatchQueue.global(qos: .utility))
-                .compactMap { $0?.publisherStats.averageRoundTripTimeInMs }
+                .map { $0.map(\.publisherStats.averageRoundTripTimeInMs) }
                 .receive(on: DispatchQueue.main)
-                .sink { [weak self] in self?.internalValues.append($0) }
+                .assign(to: \.internalValues, onWeak: self)
         }
     }
 
@@ -416,10 +412,8 @@ private struct DemoLatencyChartView: View {
 
     @StateObject private var viewModel: DemoLatencyChartViewModel
 
-    init(
-        _ callViewModel: CallViewModel
-    ) {
-        _viewModel = .init(wrappedValue: .init(viewModel: callViewModel))
+    init() {
+        _viewModel = .init(wrappedValue: .init())
     }
 
     var body: some View {
@@ -439,7 +433,6 @@ private struct DemoLatencyChartView: View {
                 .foregroundStyle(colors.accentGreen)
             }
         }
-        .aspectRatio(1, contentMode: .fill)
         .chartXScale(domain: viewModel.visibleRange)
         .chartXAxis(.hidden)
         .padding(.vertical)

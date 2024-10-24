@@ -8,7 +8,15 @@ extension APIError: Error {}
 
 extension Stream_Video_Sfu_Models_Error: Error, CustomStringConvertible {
     var description: String {
-        "SFU error code: \(code.rawValue) message: \(message) shouldRetry: \(shouldRetry)"
+        if code == .unspecified {
+            return "-"
+        } else {
+            return """
+            code: \(code)
+            message: \(message)
+            shouldRetry: \(shouldRetry)
+            """
+        }
     }
 }
 
@@ -80,7 +88,10 @@ extension ClientError {
     
     /// Networking error.
     public class NetworkError: ClientError {}
-    
+
+    /// Represents a network-related error indicating that the network is unavailable.
+    public class NetworkNotAvailable: ClientError {}
+
     /// Permissions error.
     public class MissingPermissions: ClientError {}
     

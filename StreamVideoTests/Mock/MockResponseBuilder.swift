@@ -100,6 +100,7 @@ class MockResponseBuilder {
     
     func makeUserResponse(id: String = "test") -> UserResponse {
         UserResponse(
+            blockedUserIds: [],
             createdAt: Date(),
             custom: [:],
             id: id,
@@ -122,7 +123,11 @@ class MockResponseBuilder {
         let backstageSettings = BackstageSettings(enabled: false)
         let broadcastSettings = BroadcastSettingsResponse(
             enabled: false,
-            hls: HLSSettingsResponse(autoOn: false, enabled: false, qualityTracks: [])
+            hls: HLSSettingsResponse(
+                autoOn: false,
+                enabled: false, qualityTracks: []
+            ),
+            rtmp: .init(enabled: true, quality: "good")
         )
         let geofenceSettings = GeofenceSettings(names: [])
         let recordSettings = RecordSettingsResponse(
@@ -132,7 +137,8 @@ class MockResponseBuilder {
         )
         let ringSettings = RingSettings(
             autoCancelTimeoutMs: 15000,
-            incomingCallTimeoutMs: 15000
+            incomingCallTimeoutMs: 15000,
+            missedCallTimeoutMs: 15000
         )
         let screensharingSettings = ScreensharingSettings(
             accessRequestEnabled: false,
@@ -140,6 +146,7 @@ class MockResponseBuilder {
         )
         let transcriptionSettings = TranscriptionSettings(
             closedCaptionMode: "",
+            languages: [],
             mode: .disabled
         )
         let videoSettings = VideoSettings(
@@ -175,10 +182,12 @@ class MockResponseBuilder {
     ) -> CallSessionResponse {
         CallSessionResponse(
             acceptedBy: acceptedBy,
+            anonymousParticipantCount: 0,
             endedAt: liveEndedAt,
             id: cid,
             liveEndedAt: liveEndedAt,
             liveStartedAt: liveStartedAt,
+            missedBy: [:],
             participants: [],
             participantsCountByRole: [:],
             rejectedBy: rejectedBy,

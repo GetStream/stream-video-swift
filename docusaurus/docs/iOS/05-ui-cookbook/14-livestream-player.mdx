@@ -46,3 +46,23 @@ Apart from the required parameters, you can also specify some optional ones in t
 - `muted`: `Bool` - whether the livestream audio should be on when joining the stream (default is `false`).
 - `showParticipantCount`: `Bool` - whether the participant count should be shown (default is `true`).
 - `onFullScreenStateChange`: `((Bool) -> ())?` - closure that is invoked when the full screen state changes. Useful if you use the livestream component as part of your custom views, since this is the chance to update the visibility of your custom UI elements.
+
+## Accessing the livestream track
+
+You can also build your own version of a livestream player, depending on your requirements. In those cases, you need to have access to the livestream track (or tracks).
+
+If there is only one video track (you only have one person livestreaming), you can get it with the following code:
+
+```swift
+let livestream = call.state.participants.first(where: { $0.track != nil })
+```
+
+If you have multiple hosts that are livestreaming, and you want to show them all, you can fetch the hosts by role:
+
+```swift
+var hosts: [CallParticipant] {
+    call.state.participants.filter { $0.roles.contains("host") }
+}
+```
+
+Then, you can access the video track they are streaming, with the `track` property.

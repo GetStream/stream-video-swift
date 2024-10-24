@@ -57,4 +57,46 @@ final class CallParticipants_Tests: XCTestCase {
         XCTAssert(participant.trackLookupPrefix == "123-track")
         XCTAssert(participant.connectionQuality == .excellent)
     }
+
+    // MARK: - shouldDisplayTrack
+
+    func test_shouldDisplayTrack_hasVideoFalse_returnsFalse() {
+        let subject = CallParticipant.dummy(
+            hasVideo: false,
+            showTrack: false,
+            track: nil
+        )
+
+        XCTAssertFalse(subject.shouldDisplayTrack)
+    }
+
+    func test_shouldDisplayTrack_hasVideoTrueShowTrackFalse_returnsFalse() {
+        let subject = CallParticipant.dummy(
+            hasVideo: true,
+            showTrack: false,
+            track: nil
+        )
+
+        XCTAssertFalse(subject.shouldDisplayTrack)
+    }
+
+    func test_shouldDisplayTrack_hasVideoTrueShowTrackTrueTrackNil_returnsFalse() {
+        let subject = CallParticipant.dummy(
+            hasVideo: true,
+            showTrack: true,
+            track: nil
+        )
+
+        XCTAssertFalse(subject.shouldDisplayTrack)
+    }
+
+    func test_shouldDisplayTrack_hasVideoTrueShowTrackTrueTrackNotNil_returnsTrue() {
+        let subject = CallParticipant.dummy(
+            hasVideo: true,
+            showTrack: true,
+            track: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false)
+        )
+
+        XCTAssertTrue(subject.shouldDisplayTrack)
+    }
 }

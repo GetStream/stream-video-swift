@@ -140,6 +140,12 @@ fileprivate func content() {
     }
 
     container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+
+        callKitAdapter.callSettings = CallSettings(audioOn: true, videoOn: false)
+    }
+
+    container {
         @Injected(\.callKitService) var callKitService
 
         // Setting the `supportsVideo` property to `true` will

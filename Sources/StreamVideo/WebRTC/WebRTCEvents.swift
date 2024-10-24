@@ -8,9 +8,7 @@ extension Stream_Video_Sfu_Event_SubscriberOffer: Event {}
 extension Stream_Video_Sfu_Event_ConnectionQualityChanged: Event {}
 extension Stream_Video_Sfu_Event_AudioLevelChanged: Event {}
 extension Stream_Video_Sfu_Event_AudioLevel: Event {}
-extension Stream_Video_Sfu_Event_AudioMediaRequest: Event {}
 extension Stream_Video_Sfu_Event_AudioSender: Event {}
-extension Stream_Video_Sfu_Event_VideoMediaRequest: Event {}
 extension Stream_Video_Sfu_Event_VideoLayerSetting: Event {}
 extension Stream_Video_Sfu_Event_VideoSender: Event {}
 extension Stream_Video_Sfu_Event_ChangePublishQuality: Event {}

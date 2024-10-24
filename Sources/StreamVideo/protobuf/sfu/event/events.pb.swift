@@ -988,31 +988,10 @@ struct Stream_Video_Sfu_Event_AudioLevelChanged {
   init() {}
 }
 
-struct Stream_Video_Sfu_Event_AudioMediaRequest {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var channelCount: Int32 = 0
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 struct Stream_Video_Sfu_Event_AudioSender {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
-
-  var mediaRequest: Stream_Video_Sfu_Event_AudioMediaRequest {
-    get {return _mediaRequest ?? Stream_Video_Sfu_Event_AudioMediaRequest()}
-    set {_mediaRequest = newValue}
-  }
-  /// Returns true if `mediaRequest` has been explicitly set.
-  var hasMediaRequest: Bool {return self._mediaRequest != nil}
-  /// Clears the value of `mediaRequest`. Subsequent reads from it will return its default value.
-  mutating func clearMediaRequest() {self._mediaRequest = nil}
 
   var codec: Stream_Video_Sfu_Models_Codec {
     get {return _codec ?? Stream_Video_Sfu_Models_Codec()}
@@ -1027,24 +1006,7 @@ struct Stream_Video_Sfu_Event_AudioSender {
 
   init() {}
 
-  fileprivate var _mediaRequest: Stream_Video_Sfu_Event_AudioMediaRequest? = nil
   fileprivate var _codec: Stream_Video_Sfu_Models_Codec? = nil
-}
-
-struct Stream_Video_Sfu_Event_VideoMediaRequest {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var idealHeight: Int32 = 0
-
-  var idealWidth: Int32 = 0
-
-  var idealFrameRate: Int32 = 0
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
 }
 
 /// VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
@@ -1063,8 +1025,6 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
 
   var scaleResolutionDownBy: Float = 0
 
-  var priority: Stream_Video_Sfu_Event_VideoLayerSetting.Priority = .highUnspecified
-
   var codec: Stream_Video_Sfu_Models_Codec {
     get {return _codec ?? Stream_Video_Sfu_Models_Codec()}
     set {_codec = newValue}
@@ -1076,74 +1036,19 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
 
   var maxFramerate: UInt32 = 0
 
+  var scalabilityMode: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  enum Priority: SwiftProtobuf.Enum {
-    typealias RawValue = Int
-    case highUnspecified // = 0
-    case low // = 1
-    case medium // = 2
-    case veryLow // = 3
-    case UNRECOGNIZED(Int)
-
-    init() {
-      self = .highUnspecified
-    }
-
-    init?(rawValue: Int) {
-      switch rawValue {
-      case 0: self = .highUnspecified
-      case 1: self = .low
-      case 2: self = .medium
-      case 3: self = .veryLow
-      default: self = .UNRECOGNIZED(rawValue)
-      }
-    }
-
-    var rawValue: Int {
-      switch self {
-      case .highUnspecified: return 0
-      case .low: return 1
-      case .medium: return 2
-      case .veryLow: return 3
-      case .UNRECOGNIZED(let i): return i
-      }
-    }
-
-  }
 
   init() {}
 
   fileprivate var _codec: Stream_Video_Sfu_Models_Codec? = nil
 }
 
-#if swift(>=4.2)
-
-extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: CaseIterable {
-  // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Event_VideoLayerSetting.Priority] = [
-    .highUnspecified,
-    .low,
-    .medium,
-    .veryLow,
-  ]
-}
-
-#endif  // swift(>=4.2)
-
 struct Stream_Video_Sfu_Event_VideoSender {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
-
-  var mediaRequest: Stream_Video_Sfu_Event_VideoMediaRequest {
-    get {return _mediaRequest ?? Stream_Video_Sfu_Event_VideoMediaRequest()}
-    set {_mediaRequest = newValue}
-  }
-  /// Returns true if `mediaRequest` has been explicitly set.
-  var hasMediaRequest: Bool {return self._mediaRequest != nil}
-  /// Clears the value of `mediaRequest`. Subsequent reads from it will return its default value.
-  mutating func clearMediaRequest() {self._mediaRequest = nil}
 
   var codec: Stream_Video_Sfu_Models_Codec {
     get {return _codec ?? Stream_Video_Sfu_Models_Codec()}
@@ -1160,7 +1065,6 @@ struct Stream_Video_Sfu_Event_VideoSender {
 
   init() {}
 
-  fileprivate var _mediaRequest: Stream_Video_Sfu_Event_VideoMediaRequest? = nil
   fileprivate var _codec: Stream_Video_Sfu_Models_Codec? = nil
 }
 
@@ -1275,11 +1179,8 @@ extension Stream_Video_Sfu_Event_ConnectionQualityInfo: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_DominantSpeakerChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioLevel: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioLevelChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_Event_AudioMediaRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioSender: @unchecked Sendable {}
-extension Stream_Video_Sfu_Event_VideoMediaRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_VideoLayerSetting: @unchecked Sendable {}
-extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_VideoSender: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ChangePublishQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_CallGrantsUpdated: @unchecked Sendable {}
@@ -2901,42 +2802,9 @@ extension Stream_Video_Sfu_Event_AudioLevelChanged: SwiftProtobuf.Message, Swift
   }
 }
 
-extension Stream_Video_Sfu_Event_AudioMediaRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".AudioMediaRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "channel_count"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt32Field(value: &self.channelCount) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.channelCount != 0 {
-      try visitor.visitSingularInt32Field(value: self.channelCount, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Stream_Video_Sfu_Event_AudioMediaRequest, rhs: Stream_Video_Sfu_Event_AudioMediaRequest) -> Bool {
-    if lhs.channelCount != rhs.channelCount {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
 extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".AudioSender"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "media_request"),
     2: .same(proto: "codec"),
   ]
 
@@ -2946,7 +2814,6 @@ extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtob
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._mediaRequest) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
       default: break
       }
@@ -2958,9 +2825,6 @@ extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtob
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._mediaRequest {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
     try { if let v = self._codec {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
@@ -2968,52 +2832,7 @@ extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtob
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_AudioSender, rhs: Stream_Video_Sfu_Event_AudioSender) -> Bool {
-    if lhs._mediaRequest != rhs._mediaRequest {return false}
     if lhs._codec != rhs._codec {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Stream_Video_Sfu_Event_VideoMediaRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".VideoMediaRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "ideal_height"),
-    2: .standard(proto: "ideal_width"),
-    3: .standard(proto: "ideal_frame_rate"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt32Field(value: &self.idealHeight) }()
-      case 2: try { try decoder.decodeSingularInt32Field(value: &self.idealWidth) }()
-      case 3: try { try decoder.decodeSingularInt32Field(value: &self.idealFrameRate) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.idealHeight != 0 {
-      try visitor.visitSingularInt32Field(value: self.idealHeight, fieldNumber: 1)
-    }
-    if self.idealWidth != 0 {
-      try visitor.visitSingularInt32Field(value: self.idealWidth, fieldNumber: 2)
-    }
-    if self.idealFrameRate != 0 {
-      try visitor.visitSingularInt32Field(value: self.idealFrameRate, fieldNumber: 3)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Stream_Video_Sfu_Event_VideoMediaRequest, rhs: Stream_Video_Sfu_Event_VideoMediaRequest) -> Bool {
-    if lhs.idealHeight != rhs.idealHeight {return false}
-    if lhs.idealWidth != rhs.idealWidth {return false}
-    if lhs.idealFrameRate != rhs.idealFrameRate {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -3026,9 +2845,9 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
     2: .same(proto: "active"),
     3: .standard(proto: "max_bitrate"),
     4: .standard(proto: "scale_resolution_down_by"),
-    5: .same(proto: "priority"),
     6: .same(proto: "codec"),
     7: .standard(proto: "max_framerate"),
+    8: .standard(proto: "scalability_mode"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -3041,9 +2860,9 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
       case 2: try { try decoder.decodeSingularBoolField(value: &self.active) }()
       case 3: try { try decoder.decodeSingularInt32Field(value: &self.maxBitrate) }()
       case 4: try { try decoder.decodeSingularFloatField(value: &self.scaleResolutionDownBy) }()
-      case 5: try { try decoder.decodeSingularEnumField(value: &self.priority) }()
       case 6: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
       case 7: try { try decoder.decodeSingularUInt32Field(value: &self.maxFramerate) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.scalabilityMode) }()
       default: break
       }
     }
@@ -3066,14 +2885,14 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
     if self.scaleResolutionDownBy != 0 {
       try visitor.visitSingularFloatField(value: self.scaleResolutionDownBy, fieldNumber: 4)
     }
-    if self.priority != .highUnspecified {
-      try visitor.visitSingularEnumField(value: self.priority, fieldNumber: 5)
-    }
     try { if let v = self._codec {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     } }()
     if self.maxFramerate != 0 {
       try visitor.visitSingularUInt32Field(value: self.maxFramerate, fieldNumber: 7)
+    }
+    if !self.scalabilityMode.isEmpty {
+      try visitor.visitSingularStringField(value: self.scalabilityMode, fieldNumber: 8)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -3083,27 +2902,17 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
     if lhs.active != rhs.active {return false}
     if lhs.maxBitrate != rhs.maxBitrate {return false}
     if lhs.scaleResolutionDownBy != rhs.scaleResolutionDownBy {return false}
-    if lhs.priority != rhs.priority {return false}
     if lhs._codec != rhs._codec {return false}
     if lhs.maxFramerate != rhs.maxFramerate {return false}
+    if lhs.scalabilityMode != rhs.scalabilityMode {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "PRIORITY_HIGH_UNSPECIFIED"),
-    1: .same(proto: "PRIORITY_LOW"),
-    2: .same(proto: "PRIORITY_MEDIUM"),
-    3: .same(proto: "PRIORITY_VERY_LOW"),
-  ]
-}
-
 extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".VideoSender"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "media_request"),
     2: .same(proto: "codec"),
     3: .same(proto: "layers"),
   ]
@@ -3114,7 +2923,6 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._mediaRequest) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.layers) }()
       default: break
@@ -3127,9 +2935,6 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._mediaRequest {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
     try { if let v = self._codec {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
@@ -3140,7 +2945,6 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_VideoSender, rhs: Stream_Video_Sfu_Event_VideoSender) -> Bool {
-    if lhs._mediaRequest != rhs._mediaRequest {return false}
     if lhs._codec != rhs._codec {return false}
     if lhs.layers != rhs.layers {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

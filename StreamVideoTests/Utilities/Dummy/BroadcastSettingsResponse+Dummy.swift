@@ -10,6 +10,6 @@ extension BroadcastSettingsResponse {
         enabled: Bool = false,
         hls: HLSSettingsResponse = .dummy()
     ) -> BroadcastSettingsResponse {
-        .init(enabled: enabled, hls: hls)
+        .init(enabled: enabled, hls: hls, rtmp: .init(enabled: enabled, quality: "good"))
     }
 }

@@ -691,8 +691,9 @@ final class CallCRUDTest: IntegrationTest {
         let error = await XCTAssertThrowsErrorAsync {
             try await secondUserCall.join()
         }
-        XCTAssertEqual((error as! APIError).statusCode, 403)
-        
+        let apiError = try XCTUnwrap(error as? APIError)
+        XCTAssertEqual(apiError.statusCode, 403)
+
         await fulfillment(timeout: 30) { Date() >= joiningDate }
         try await secondUserCall.join()
     }

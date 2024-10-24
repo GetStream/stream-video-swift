@@ -17,8 +17,7 @@ extension CallSessionParticipantLeftEvent {
             callCid: callCid,
             createdAt: createdAt,
             participant: participant,
-            sessionId: sessionId,
-            type: type
+            sessionId: sessionId
         )
     }
 }

@@ -103,9 +103,72 @@ struct Stream_Video_Sfu_Signal_SendStatsRequest {
 
   var sdkVersion: String = String()
 
+  var audioDevices: Stream_Video_Sfu_Models_InputDevices {
+    get {return _audioDevices ?? Stream_Video_Sfu_Models_InputDevices()}
+    set {_audioDevices = newValue}
+  }
+  /// Returns true if `audioDevices` has been explicitly set.
+  var hasAudioDevices: Bool {return self._audioDevices != nil}
+  /// Clears the value of `audioDevices`. Subsequent reads from it will return its default value.
+  mutating func clearAudioDevices() {self._audioDevices = nil}
+
+  var videoDevices: Stream_Video_Sfu_Models_InputDevices {
+    get {return _videoDevices ?? Stream_Video_Sfu_Models_InputDevices()}
+    set {_videoDevices = newValue}
+  }
+  /// Returns true if `videoDevices` has been explicitly set.
+  var hasVideoDevices: Bool {return self._videoDevices != nil}
+  /// Clears the value of `videoDevices`. Subsequent reads from it will return its default value.
+  mutating func clearVideoDevices() {self._videoDevices = nil}
+
+  var deviceState: Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState? = nil
+
+  var android: Stream_Video_Sfu_Models_AndroidState {
+    get {
+      if case .android(let v)? = deviceState {return v}
+      return Stream_Video_Sfu_Models_AndroidState()
+    }
+    set {deviceState = .android(newValue)}
+  }
+
+  var apple: Stream_Video_Sfu_Models_AppleState {
+    get {
+      if case .apple(let v)? = deviceState {return v}
+      return Stream_Video_Sfu_Models_AppleState()
+    }
+    set {deviceState = .apple(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
+  enum OneOf_DeviceState: Equatable {
+    case android(Stream_Video_Sfu_Models_AndroidState)
+    case apple(Stream_Video_Sfu_Models_AppleState)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState, rhs: Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.android, .android): return {
+        guard case .android(let l) = lhs, case .android(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.apple, .apple): return {
+        guard case .apple(let l) = lhs, case .apple(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
+
   init() {}
+
+  fileprivate var _audioDevices: Stream_Video_Sfu_Models_InputDevices? = nil
+  fileprivate var _videoDevices: Stream_Video_Sfu_Models_InputDevices? = nil
 }
 
 struct Stream_Video_Sfu_Signal_SendStatsResponse {
@@ -408,6 +471,7 @@ extension Stream_Video_Sfu_Signal_StartNoiseCancellationResponse: @unchecked Sen
 extension Stream_Video_Sfu_Signal_StopNoiseCancellationRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_StopNoiseCancellationResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_ICERestartRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_ICERestartResponse: @unchecked Sendable {}
@@ -575,6 +639,10 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     4: .standard(proto: "webrtc_version"),
     5: .same(proto: "sdk"),
     6: .standard(proto: "sdk_version"),
+    7: .standard(proto: "audio_devices"),
+    8: .standard(proto: "video_devices"),
+    9: .same(proto: "android"),
+    10: .same(proto: "apple"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -589,12 +657,44 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
       case 4: try { try decoder.decodeSingularStringField(value: &self.webrtcVersion) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self.sdk) }()
       case 6: try { try decoder.decodeSingularStringField(value: &self.sdkVersion) }()
+      case 7: try { try decoder.decodeSingularMessageField(value: &self._audioDevices) }()
+      case 8: try { try decoder.decodeSingularMessageField(value: &self._videoDevices) }()
+      case 9: try {
+        var v: Stream_Video_Sfu_Models_AndroidState?
+        var hadOneofValue = false
+        if let current = self.deviceState {
+          hadOneofValue = true
+          if case .android(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.deviceState = .android(v)
+        }
+      }()
+      case 10: try {
+        var v: Stream_Video_Sfu_Models_AppleState?
+        var hadOneofValue = false
+        if let current = self.deviceState {
+          hadOneofValue = true
+          if case .apple(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.deviceState = .apple(v)
+        }
+      }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.sessionID.isEmpty {
       try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 1)
     }
@@ -613,6 +713,23 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     if !self.sdkVersion.isEmpty {
       try visitor.visitSingularStringField(value: self.sdkVersion, fieldNumber: 6)
     }
+    try { if let v = self._audioDevices {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    } }()
+    try { if let v = self._videoDevices {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+    } }()
+    switch self.deviceState {
+    case .android?: try {
+      guard case .android(let v)? = self.deviceState else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
+    }()
+    case .apple?: try {
+      guard case .apple(let v)? = self.deviceState else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
+    }()
+    case nil: break
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -623,6 +740,9 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     if lhs.webrtcVersion != rhs.webrtcVersion {return false}
     if lhs.sdk != rhs.sdk {return false}
     if lhs.sdkVersion != rhs.sdkVersion {return false}
+    if lhs._audioDevices != rhs._audioDevices {return false}
+    if lhs._videoDevices != rhs._videoDevices {return false}
+    if lhs.deviceState != rhs.deviceState {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

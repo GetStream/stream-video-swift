@@ -567,16 +567,12 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
   /// and establish a new WebSocket connection.
   case fast // = 2
 
-  /// SDK should drop existing pc instances and creates a fresh WebSocket connection,
-  /// ensuring a clean state for the reconnection.
-  case clean // = 3
-
   /// SDK should obtain new credentials from the coordinator, drops existing pc instances, set a new session_id and initializes
   /// a completely new WebSocket connection, ensuring a comprehensive reset.
-  case rejoin // = 4
+  case rejoin // = 3
 
   /// SDK should migrate to a new SFU instance
-  case migrate // = 5
+  case migrate // = 4
   case UNRECOGNIZED(Int)
 
   init() {
@@ -588,9 +584,8 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
     case 0: self = .unspecified
     case 1: self = .disconnect
     case 2: self = .fast
-    case 3: self = .clean
-    case 4: self = .rejoin
-    case 5: self = .migrate
+    case 3: self = .rejoin
+    case 4: self = .migrate
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -600,9 +595,8 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
     case .unspecified: return 0
     case .disconnect: return 1
     case .fast: return 2
-    case .clean: return 3
-    case .rejoin: return 4
-    case .migrate: return 5
+    case .rejoin: return 3
+    case .migrate: return 4
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -617,9 +611,128 @@ extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: CaseIterable {
     .unspecified,
     .disconnect,
     .fast,
-    .clean,
     .rejoin,
     .migrate,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
+/// AndroidThermalState is reported by the Android API. The full list of values is documented here
+/// https://developer.android.com/reference/android/os/PowerManager.html#getCurrentThermalStatus()
+enum Stream_Video_Sfu_Models_AndroidThermalState: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+  case none // = 1
+  case light // = 2
+  case moderate // = 3
+  case severe // = 4
+  case critical // = 5
+  case emergency // = 6
+  case shutdown // = 7
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .none
+    case 2: self = .light
+    case 3: self = .moderate
+    case 4: self = .severe
+    case 5: self = .critical
+    case 6: self = .emergency
+    case 7: self = .shutdown
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .none: return 1
+    case .light: return 2
+    case .moderate: return 3
+    case .severe: return 4
+    case .critical: return 5
+    case .emergency: return 6
+    case .shutdown: return 7
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_AndroidThermalState: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Stream_Video_Sfu_Models_AndroidThermalState] = [
+    .unspecified,
+    .none,
+    .light,
+    .moderate,
+    .severe,
+    .critical,
+    .emergency,
+    .shutdown,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
+/// AppleThermalState is the thermal state as reported by Apple devices when available or applicable to the platform.
+/// The full list of states (enum) is available here: https://developer.apple.com/documentation/foundation/processinfo/thermalstate
+enum Stream_Video_Sfu_Models_AppleThermalState: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+  case nominal // = 1
+  case fair // = 2
+  case serious // = 3
+  case critical // = 4
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .nominal
+    case 2: self = .fair
+    case 3: self = .serious
+    case 4: self = .critical
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .nominal: return 1
+    case .fair: return 2
+    case .serious: return 3
+    case .critical: return 4
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_AppleThermalState: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Stream_Video_Sfu_Models_AppleThermalState] = [
+    .unspecified,
+    .nominal,
+    .fair,
+    .serious,
+    .critical,
   ]
 }
 
@@ -876,6 +989,8 @@ struct Stream_Video_Sfu_Models_TrackInfo {
 
   var red: Bool = false
 
+  var muted: Bool = false
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1081,6 +1196,51 @@ struct Stream_Video_Sfu_Models_CallGrants {
   init() {}
 }
 
+struct Stream_Video_Sfu_Models_InputDevices {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var availableDevices: [String] = []
+
+  var currentDevice: String = String()
+
+  var isPermitted: Bool = false
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Models_AndroidState {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var thermalState: Stream_Video_Sfu_Models_AndroidThermalState = .unspecified
+
+  var isPowerSaverMode: Bool = false
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Models_AppleState {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var thermalState: Stream_Video_Sfu_Models_AppleThermalState = .unspecified
+
+  /// https://developer.apple.com/documentation/foundation/processinfo/1617047-islowpowermodeenabled
+  var isLowPowerModeEnabled: Bool = false
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Models_PeerType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
@@ -1092,6 +1252,8 @@ extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_GoAwayReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallEndedReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AndroidThermalState: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AppleThermalState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantCount: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Pin: @unchecked Sendable {}
@@ -1110,6 +1272,9 @@ extension Stream_Video_Sfu_Models_Browser: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Device: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Call: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallGrants: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_InputDevices: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AndroidState: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AppleState: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -1223,9 +1388,31 @@ extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf._Pro
     0: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED"),
     1: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT"),
     2: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_FAST"),
-    3: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_CLEAN"),
-    4: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_REJOIN"),
-    5: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_MIGRATE"),
+    3: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_REJOIN"),
+    4: .same(proto: "WEBSOCKET_RECONNECT_STRATEGY_MIGRATE"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_AndroidThermalState: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "ANDROID_THERMAL_STATE_UNSPECIFIED"),
+    1: .same(proto: "ANDROID_THERMAL_STATE_NONE"),
+    2: .same(proto: "ANDROID_THERMAL_STATE_LIGHT"),
+    3: .same(proto: "ANDROID_THERMAL_STATE_MODERATE"),
+    4: .same(proto: "ANDROID_THERMAL_STATE_SEVERE"),
+    5: .same(proto: "ANDROID_THERMAL_STATE_CRITICAL"),
+    6: .same(proto: "ANDROID_THERMAL_STATE_EMERGENCY"),
+    7: .same(proto: "ANDROID_THERMAL_STATE_SHUTDOWN"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_AppleThermalState: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "APPLE_THERMAL_STATE_UNSPECIFIED"),
+    1: .same(proto: "APPLE_THERMAL_STATE_NOMINAL"),
+    2: .same(proto: "APPLE_THERMAL_STATE_FAIR"),
+    3: .same(proto: "APPLE_THERMAL_STATE_SERIOUS"),
+    4: .same(proto: "APPLE_THERMAL_STATE_CRITICAL"),
   ]
 }
 
@@ -1719,6 +1906,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     7: .same(proto: "dtx"),
     8: .same(proto: "stereo"),
     9: .same(proto: "red"),
+    10: .same(proto: "muted"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1734,6 +1922,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 7: try { try decoder.decodeSingularBoolField(value: &self.dtx) }()
       case 8: try { try decoder.decodeSingularBoolField(value: &self.stereo) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.red) }()
+      case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
       default: break
       }
     }
@@ -1761,6 +1950,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.red != false {
       try visitor.visitSingularBoolField(value: self.red, fieldNumber: 9)
     }
+    if self.muted != false {
+      try visitor.visitSingularBoolField(value: self.muted, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1772,6 +1964,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.dtx != rhs.dtx {return false}
     if lhs.stereo != rhs.stereo {return false}
     if lhs.red != rhs.red {return false}
+    if lhs.muted != rhs.muted {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2156,6 +2349,126 @@ extension Stream_Video_Sfu_Models_CallGrants: SwiftProtobuf.Message, SwiftProtob
     if lhs.canPublishAudio != rhs.canPublishAudio {return false}
     if lhs.canPublishVideo != rhs.canPublishVideo {return false}
     if lhs.canScreenshare != rhs.canScreenshare {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_InputDevices: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".InputDevices"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "available_devices"),
+    2: .standard(proto: "current_device"),
+    3: .standard(proto: "is_permitted"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedStringField(value: &self.availableDevices) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.currentDevice) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self.isPermitted) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.availableDevices.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.availableDevices, fieldNumber: 1)
+    }
+    if !self.currentDevice.isEmpty {
+      try visitor.visitSingularStringField(value: self.currentDevice, fieldNumber: 2)
+    }
+    if self.isPermitted != false {
+      try visitor.visitSingularBoolField(value: self.isPermitted, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_InputDevices, rhs: Stream_Video_Sfu_Models_InputDevices) -> Bool {
+    if lhs.availableDevices != rhs.availableDevices {return false}
+    if lhs.currentDevice != rhs.currentDevice {return false}
+    if lhs.isPermitted != rhs.isPermitted {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_AndroidState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".AndroidState"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "thermal_state"),
+    2: .standard(proto: "is_power_saver_mode"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.thermalState) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.isPowerSaverMode) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.thermalState != .unspecified {
+      try visitor.visitSingularEnumField(value: self.thermalState, fieldNumber: 1)
+    }
+    if self.isPowerSaverMode != false {
+      try visitor.visitSingularBoolField(value: self.isPowerSaverMode, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_AndroidState, rhs: Stream_Video_Sfu_Models_AndroidState) -> Bool {
+    if lhs.thermalState != rhs.thermalState {return false}
+    if lhs.isPowerSaverMode != rhs.isPowerSaverMode {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_AppleState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".AppleState"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "thermal_state"),
+    2: .standard(proto: "is_low_power_mode_enabled"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.thermalState) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.isLowPowerModeEnabled) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.thermalState != .unspecified {
+      try visitor.visitSingularEnumField(value: self.thermalState, fieldNumber: 1)
+    }
+    if self.isLowPowerModeEnabled != false {
+      try visitor.visitSingularBoolField(value: self.isLowPowerModeEnabled, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_AppleState, rhs: Stream_Video_Sfu_Models_AppleState) -> Bool {
+    if lhs.thermalState != rhs.thermalState {return false}
+    if lhs.isLowPowerModeEnabled != rhs.isLowPowerModeEnabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

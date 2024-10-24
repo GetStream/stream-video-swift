@@ -21,12 +21,14 @@ gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
+swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
 swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
 
 before_all do |lane|
   if is_ci
     setup_ci
+    setup_git_config
     xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload, :pod_lint, :stop_e2e_helpers].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
@@ -42,7 +44,6 @@ desc "Release a new version"
 lane :release do |options|
   previous_version_number = last_git_tag
   artifacts_path = File.absolute_path('../StreamVideoArtifacts.json')
-  swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
   extra_changes = lambda do |release_version|
     # Set the framework version on the artifacts
     artifacts = JSON.parse(File.read(artifacts_path))
@@ -52,6 +53,9 @@ lane :release do |options|
     # Set the framework version in SystemEnvironment+Version.swift
     new_content = File.read(swift_environment_path).gsub!(previous_version_number, release_version)
     File.open(swift_environment_path, 'w') { |f| f.puts(new_content) }
+
+    # Update sdk sizes
+    Dir.chdir('fastlane') { update_img_shields_sdk_sizes }
   end
 
   pod_lint
@@ -66,10 +70,23 @@ lane :release do |options|
   )
 end
 
+lane :merge_release do |options|
+  merge_release_to_main(author: options[:author])
+  sh('gh workflow run release-publish.yml --ref main')
+end
+
+lane :merge_main do
+  merge_main_to_develop
+end
+
 desc "Publish a new release to GitHub and CocoaPods"
 lane :publish_release do |options|
-  xcversion(version: '15.0.1')
+  release_version = File.read(swift_environment_path).match(/String\s+=\s+"([\d.]+)"/)[1]
+  UI.user_error!("Release #{release_version} has already been published.") if git_tag_exists(tag: release_version, remote: true)
+  UI.user_error!('Release version cannot be empty') if release_version.to_s.empty?
+  ensure_git_branch(branch: 'main')
 
+  xcversion(version: '15.0.1')
   clean_products
   build_xcframeworks
   compress_frameworks
@@ -77,16 +94,14 @@ lane :publish_release do |options|
 
   publish_ios_sdk(
     skip_git_status_check: false,
-    version: options[:version],
+    version: release_version,
     sdk_names: sdk_names,
     podspec_names: podspec_names,
     github_repo: github_repo,
     upload_assets: ['Products/StreamVideo.zip', 'Products/StreamVideoSwiftUI.zip', 'Products/StreamVideoUIKit.zip', 'Products/StreamVideo-All.zip']
   )
 
-  update_spm(version: options[:version])
-
-  merge_main_to_develop
+  update_spm(version: release_version)
 end
 
 lane :pod_lint do
@@ -278,10 +293,12 @@ private_lane :test_ui do |options|
     next if png_files.empty?
 
     # Discard all files apart from the snapshots
-    png_files.each { |png| sh("git add #{png}") || true }
-    sh('git restore .')
+    Dir.chdir('..') do
+      png_files.each { |png| sh("git add #{png}") || true }
+      sh('git restore .')
+    end
 
-    create_pr(
+    pr_create(
       title: '[CI] Snapshots',
       base_branch: current_branch,
       head_branch: "#{current_branch}-snapshots"
@@ -479,36 +496,6 @@ private_lane :build_example_app do |options|
   )
 end
 
-lane :merge_release_to_main do
-  ensure_git_status_clean
-  sh('git checkout main')
-  sh('git pull')
-
-  # Grep all remote release branches and ensure there's only one
-  release_branches = sh(command: 'git branch -a', log: false).delete(' ').split("\n").grep(%r(origin/.*release/))
-  UI.user_error!("Expected 1 release branch, found #{release_branches.size}") if release_branches.size != 1
-
-  # Merge release branch to main. For more info, read: https://notion.so/iOS-Branching-Strategy-37c10127dc26493e937769d44b1d6d9a
-  sh("git merge #{release_branches.first} --ff-only")
-  UI.user_error!('Not pushing changes') unless prompt(text: 'Will push changes. All looking good?', boolean: true)
-  sh('git push')
-  UI.important('Please, wait for the `Publish new release` workflow to pass on GitHub Actions: ' \
-               "https://github.com/#{github_repo}/actions/workflows/publish-release.yml")
-end
-
-lane :merge_main_to_develop do
-  if is_ci
-    sh('git reset --hard')
-  else
-    ensure_git_status_clean
-  end
-
-  sh('git checkout main && git pull')
-  sh('git checkout develop && git pull')
-  sh('git merge main')
-  sh('git push')
-end
-
 desc 'Compresses the XCFrameworks into zip files'
 lane :compress_frameworks do
   Dir.chdir('..') do
@@ -581,7 +568,6 @@ private_lane :update_spm do |options|
     File.open('./Package.swift', 'w') { |file| file << file_data }
 
     # Update the repo
-    sh('git config --global user.name "Stream Bot"')
     sh('git add -A')
     sh("git commit -m 'Bump #{version}'")
     sh('git push')
@@ -604,25 +590,6 @@ end
 lane :code_generation do
   Dir.chdir('..') { sh('sh Scripts/generateCode.sh') }
   sync_xcodeproj_references
-end
-
-private_lane :git_status do |options|
-  UI.user_error!('Extension should be provided') unless options[:ext]
-
-  untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
-  UI.important("Git Status: #{untracked_files}")
-
-  deleted_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: 'D')
-  added_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: ['A', '??'])
-  renamed_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: 'R')
-  modified_files = select_files_from(files: untracked_files, with_extension: options[:ext], that_start_with: 'M')
-
-  renamed_files.each do |renamed_file|
-    content = renamed_file.split.drop(1).join.split('->').map(&:strip)
-    deleted_files << content.first
-    added_files << content.last
-  end
-  { a: added_files, d: deleted_files, m: modified_files }
 end
 
 lane :sync_xcodeproj_references do
@@ -662,16 +629,6 @@ lane :sync_xcodeproj_references do
   end
 end
 
-def select_files_from(files:, with_extension:, that_start_with:)
-  files.select do |f|
-    f.start_with?(*that_start_with)
-  end.map do |f|
-    f.split.drop(1).join(' ')
-  end.select do |f|
-    f.gsub(/['"]/, '').end_with?(with_extension)
-  end
-end
-
 desc 'Run fastlane linting'
 lane :rubocop do
   next unless is_check_required(sources: sources_matrix[:ruby], force_check: @force_check)
@@ -691,21 +648,7 @@ lane :run_swift_format do |options|
 end
 
 lane :install_runtime do |options|
-  runtimes = `xcrun simctl runtime list -j`
-  UI.message("👉 Runtime list:\n#{runtimes}")
-  simulators = JSON.parse(runtimes).select do |_, sim|
-    sim['platformIdentifier'].end_with?('iphonesimulator') && sim['version'] == options[:ios] && sim['state'] == 'Ready'
-  end
-
-  if simulators.empty?
-    Dir.chdir('..') do
-      sh("echo 'iOS #{options[:ios]} Simulator' | ipsw download xcode --sim") if Dir['*.dmg'].first.nil?
-      sh("./Scripts/install_ios_runtime.sh #{Dir['*.dmg'].first}")
-      UI.success("iOS #{options[:ios]} Runtime successfuly installed")
-    end
-  else
-    UI.important("iOS #{options[:ios]} Runtime already exists")
-  end
+  install_ios_runtime(version: options[:ios], custom_script: 'Scripts/install_ios_runtime.sh')
 end
 
 desc 'Remove UI Snapshots'
@@ -729,6 +672,7 @@ lane :sources_matrix do
     swiftui_sample_apps: ['Sources', 'DemoApp', xcode_project],
     uikit_sample_apps: ['Sources', 'DemoAppUIKit', xcode_project],
     documentation_tests: ['Sources', 'DocumentationTests', 'docusaurus', xcode_project],
+    size: ['Sources', xcode_project],
     ruby: ['fastlane']
   }
 end
@@ -737,29 +681,57 @@ lane :copyright do
   update_copyright(ignore: [derived_data_path, source_packages_path, 'vendor/'])
   next unless is_ci
 
-  create_pr(
+  pr_create(
     title: '[CI] Update Copyright',
     head_branch: "ci/update-copyright-#{Time.now.to_i}"
   )
 end
 
-private_lane :create_pr do |options|
-  options[:base_branch] ||= 'develop'
-  sh("git checkout -b #{options[:head_branch]}")
-  sh('git add -A')
-  sh("git commit -m '#{options[:title]}'")
-  push_to_git_remote(tags: false)
+lane :show_frameworks_sizes do |options|
+  next unless is_check_required(sources: sources_matrix[:size], force_check: @force_check)
 
-  create_pull_request(
-    api_token: ENV.fetch('GITHUB_TOKEN', nil),
-    repo: github_repo,
-    title: options[:title],
-    head: options[:head_branch],
-    base: options[:base_branch],
-    body: 'This PR was created automatically by CI.'
+  sizes = options[:sizes] || frameworks_sizes
+  show_sdk_size(branch_sizes: sizes, github_repo: github_repo)
+  update_img_shields_sdk_sizes(sizes: sizes, open_pr: options[:open_pr]) if options[:update_readme]
+end
+
+lane :update_img_shields_sdk_sizes do |options|
+  update_sdk_size_in_readme(
+    open_pr: options[:open_pr] || false,
+    readme_path: 'README.md',
+    sizes: options[:sizes] || frameworks_sizes
   )
 end
 
-private_lane :current_branch do
-  ENV['BRANCH_NAME'].to_s.empty? ? git_branch : ENV.fetch('BRANCH_NAME')
+def frameworks_sizes
+  root_dir = 'Build/SDKSize'
+  archive_dir = "#{root_dir}/DemoApp.xcarchive"
+
+  FileUtils.rm_rf("../#{root_dir}/")
+
+  match_me
+
+  gym(
+    scheme: 'DemoAppUIKit',
+    archive_path: archive_dir,
+    export_method: 'ad-hoc',
+    export_options: 'fastlane/sdk_size_export_options.plist'
+  )
+
+  frameworks_path = "../#{archive_dir}/Products/Applications/DemoAppUIKit.app/Frameworks"
+  stream_video_size = File.size("#{frameworks_path}/StreamVideo.framework/StreamVideo")
+  stream_video_size_kb = stream_video_size / 1024.0
+  stream_video_swiftui_size = File.size("#{frameworks_path}/StreamVideoSwiftUI.framework/StreamVideoSwiftUI")
+  stream_video_swiftui_size_kb = stream_video_swiftui_size / 1024.0
+  stream_video_uikit_size = File.size("#{frameworks_path}/StreamVideoUIKit.framework/StreamVideoUIKit")
+  stream_video_uikit_size_kb = (stream_video_uikit_size + stream_video_swiftui_size) / 1024.0
+  stream_web_rtc_size = File.size("#{frameworks_path}/StreamWebRTC.framework/StreamWebRTC")
+  stream_web_rtc_size_kb = stream_web_rtc_size / 1024.0
+
+  {
+    StreamVideo: stream_video_size_kb.round(0),
+    StreamVideoSwiftUI: stream_video_swiftui_size_kb.round(0),
+    StreamVideoUIKit: stream_video_uikit_size_kb.round(0),
+    StreamWebRTC: stream_web_rtc_size_kb.round(0)
+  }
 end

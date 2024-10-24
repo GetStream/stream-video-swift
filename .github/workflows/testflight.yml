@@ -1,10 +1,9 @@
 name: Test Flight Deploy DemoApp
 
 on:
-  # TODO: commented until `develop` branch is in place
-  # pull_request:
-  #   branches:
-  #     - 'main'
+  pull_request:
+    branches:
+      - 'main'
 
   release:
     types: [published]
@@ -32,7 +31,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.number }}
     steps:
-    - name: Install Bot SSH Key
+    - name: Connect Bot
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}

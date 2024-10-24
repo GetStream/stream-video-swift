@@ -23,7 +23,9 @@ open class CallViewModel: ObservableObject {
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] in self?.callParticipants = $0 })
+                .sink(receiveValue: { [weak self] participants in
+                    self?.callParticipants = participants
+                })
 
             blockedUserUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
@@ -38,15 +40,13 @@ open class CallViewModel: ObservableObject {
             reconnectionUpdates = call?.state.$reconnectionStatus
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
-                    if reconnectionStatus == .reconnecting {
-                        if self?.callingState != .reconnecting {
-                            self?.callingState = .reconnecting
-                        }
-                    } else if reconnectionStatus == .disconnected {
-                        self?.leaveCall()
-                    } else {
-                        if self?.callingState != .inCall && self?.callingState != .outgoing {
-                            self?.callingState = .inCall
+                    guard let self else { return }
+                    switch reconnectionStatus {
+                    case .reconnecting where callingState != .reconnecting:
+                        callingState = .reconnecting
+                    default:
+                        if callingState != .inCall, callingState != .outgoing {
+                            callingState = .inCall
                         }
                     }
                 })
@@ -106,7 +106,6 @@ open class CallViewModel: ObservableObject {
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
-            log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkCallSettingsForCurrentUser()
         }
@@ -334,7 +333,8 @@ open class CallViewModel: ObservableObject {
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
-        backstage: BackstageSettingsRequest? = nil
+        backstage: BackstageSettingsRequest? = nil,
+        customData: [String: RawJSON]? = nil
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
@@ -348,15 +348,21 @@ open class CallViewModel: ObservableObject {
                 maxDuration: maxDuration,
                 maxParticipants: maxParticipants,
                 startsAt: startsAt,
-                backstage: backstage
+                backstage: backstage,
+                customData: customData
             )
         } else {
-            let call = streamVideo.call(callType: callType, callId: callId)
+            let call = streamVideo.call(
+                callType: callType,
+                callId: callId,
+                callSettings: callSettings
+            )
             self.call = call
             Task {
                 do {
                     let callData = try await call.create(
                         members: membersRequest,
+                        custom: customData,
                         ring: ring,
                         maxDuration: maxDuration,
                         maxParticipants: maxParticipants
@@ -378,9 +384,18 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    public func joinCall(callType: String, callId: String) {
+    public func joinCall(
+        callType: String,
+        callId: String,
+        customData: [String: RawJSON]? = nil
+    ) {
         callingState = .joining
-        enterCall(callType: callType, callId: callId, members: [])
+        enterCall(
+            callType: callType,
+            callId: callId,
+            members: [],
+            customData: customData
+        )
     }
 
     /// Enters into a lobby before joining a call.
@@ -412,12 +427,22 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    public func acceptCall(callType: String, callId: String) {
+    public func acceptCall(
+        callType: String,
+        callId: String,
+        customData: [String: RawJSON]? = nil
+    ) {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
             do {
                 try await call.accept()
-                enterCall(call: call, callType: callType, callId: callId, members: [])
+                enterCall(
+                    call: call,
+                    callType: callType,
+                    callId: callId,
+                    members: [],
+                    customData: customData
+                )
             } catch {
                 self.error = error
                 callingState = .idle
@@ -564,7 +589,8 @@ open class CallViewModel: ObservableObject {
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
-        backstage: BackstageSettingsRequest? = nil
+        backstage: BackstageSettingsRequest? = nil,
+        customData: [String: RawJSON]? = nil
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -572,7 +598,11 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = Task {
             do {
                 log.debug("Starting call")
-                let call = call ?? streamVideo.call(callType: callType, callId: callId)
+                let call = call ?? streamVideo.call(
+                    callType: callType,
+                    callId: callId,
+                    callSettings: callSettings
+                )
                 var settingsRequest: CallSettingsRequest?
                 var limits: LimitsSettingsRequest?
                 if maxDuration != nil || maxParticipants != nil {
@@ -581,6 +611,7 @@ open class CallViewModel: ObservableObject {
                 settingsRequest = .init(backstage: backstage, limits: limits)
                 let options = CreateCallOptions(
                     members: members,
+                    custom: customData,
                     settings: settingsRequest,
                     startsAt: startsAt
                 )

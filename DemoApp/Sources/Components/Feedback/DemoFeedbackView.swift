@@ -16,6 +16,7 @@ struct DemoFeedbackView: View {
     @State private var comment: String = ""
     @State private var rating: Int = 5
     @State private var isSubmitting = false
+    @State private var toast: Toast?
 
     private weak var call: Call?
     private var dismiss: () -> Void
@@ -121,6 +122,20 @@ struct DemoFeedbackView: View {
             .padding(.horizontal)
         }
         .withModalNavigationBar(title: "", closeAction: dismiss)
+        .toastView(toast: $toast)
+        .onAppear { checkIfDisconnectionErrorIsAvailable() }
+    }
+
+    // MARK: - Private helpers
+
+    @MainActor
+    func checkIfDisconnectionErrorIsAvailable() {
+        if call?.state.disconnectionError is ClientError.NetworkNotAvailable {
+            toast = .init(
+                style: .error,
+                message: "Your call was ended because it seems your internet connection is down."
+            )
+        }
     }
 }
 

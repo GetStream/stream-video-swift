@@ -75,11 +75,7 @@ final class CallsController_Tests: ControllerTestCase {
         streamVideo?.state.connection = .disconnected()
         try await waitForCallEvent()
         streamVideo?.state.connection = .connected
-        try await waitForCallEvent()
-        
-        // Then
-        // Calls should be rewatched
-        XCTAssertEqual(httpClient.requestCounter, 2)
+        try await fulfillment { self.httpClient.requestCounter == 2 }
     }
     
     func test_callsController_noWatchingCalls() async throws {

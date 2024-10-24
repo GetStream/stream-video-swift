@@ -63,15 +63,32 @@ The following fields are available on the call:
 
 ### Participant State
 
-The `CallParticipant` is the most essential component used to render a participant in a call. It contains all of the information to render a participant, such as audio & video renderers, availabilities of audio & video, the screen sharing session, reactions, and etc. Here's how you iterate over the participants:
+The `CallParticipant` is the most essential component used to render a participant in a call. It contains all of the information to render a participant, such as audio & video tracks, availabilities of audio & video, the screen sharing session, reactions, and etc. Here's how you can subscribe to participants updates:
 
 ```swift
 // all participants
 let cancellable = call.state.$participants.sink { participants in
     // ..
 }
+```
 
-// you
+Filtering of the participants is also supported. You can get all the participants with the role "host", with the following code:
+
+```swift
+var hosts: [CallParticipant] {
+    call.state.participants.filter { $0.roles.contains("host") }
+}
+```
+
+When you join a call with many participants, maximum of 250 participants are returned in the join response. The list of participants is updated dynamically when there are join call events.
+
+The participants that are publishing video, audio or screensharing are prioritized over the other participants in the list.
+
+The total number of participants is updated realtime via health check events. This value is available from the call state's `participantCount` property.
+
+You can get the current user with the following code:
+
+```swift
 let localParticipant: CallParticipant? = call.state.localParticipant
 ```
 

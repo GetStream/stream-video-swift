@@ -7,7 +7,7 @@ import Foundation
 /// An `Event` object representing an event in the chat system.
 public protocol Event: Sendable {}
 
-public protocol SendableEvent: Event, ProtoModel {}
+public protocol SendableEvent: Event, ProtoModel, ReflectiveStringConvertible {}
 
 extension Event {
     var name: String {
@@ -52,9 +52,9 @@ internal enum WrappedEvent: Event {
             if case let .typeConnectedEvent(connectedEvent) = event {
                 return HealthCheckInfo(
                     coordinatorHealthCheck: .init(
+                        cid: nil,
                         connectionId: connectedEvent.connectionId,
-                        createdAt: connectedEvent.createdAt,
-                        type: connectedEvent.type
+                        createdAt: connectedEvent.createdAt
                     )
                 )
             }

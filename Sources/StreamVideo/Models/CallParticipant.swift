@@ -6,7 +6,7 @@ import Foundation
 @preconcurrency import StreamWebRTC
 
 /// Represents a participant in the call.
-public struct CallParticipant: Identifiable, Sendable, Equatable {
+public struct CallParticipant: Identifiable, Sendable, Hashable {
     /// The `User` object for the participant.
     public var user: User
     /// The unique call id of the participant.
@@ -44,22 +44,22 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     /// List of the last 10 audio levels.
     public var audioLevels: [Float]
     public var pin: PinInfo?
-    
+
     /// The user's id. This is not necessarily unique, since a user can join from multiple devices.
     public var userId: String {
         user.id
     }
-    
+
     /// The user's name.
     public var name: String {
         user.name
     }
-    
+
     /// The user's profile image url.
     public var profileImageURL: URL? {
         user.imageURL
     }
-    
+
     public init(
         id: String,
         userId: String,
@@ -107,21 +107,43 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         self.audioLevels = audioLevels
         self.pin = pin
     }
-    
+
+    public static func == (lhs: CallParticipant, rhs: CallParticipant) -> Bool {
+        lhs.id == rhs.id &&
+            lhs.user == rhs.user &&
+            lhs.roles == rhs.roles &&
+            lhs.trackLookupPrefix == rhs.trackLookupPrefix &&
+            lhs.hasVideo == rhs.hasVideo &&
+            lhs.hasAudio == rhs.hasAudio &&
+            lhs.isScreensharing == rhs.isScreensharing &&
+            lhs.trackSize == rhs.trackSize &&
+            lhs.showTrack == rhs.showTrack &&
+            lhs.isSpeaking == rhs.isSpeaking &&
+            lhs.isDominantSpeaker == rhs.isDominantSpeaker &&
+            lhs.sessionId == rhs.sessionId &&
+            lhs.connectionQuality == rhs.connectionQuality &&
+            lhs.joinedAt == rhs.joinedAt &&
+            lhs.audioLevel == rhs.audioLevel &&
+            lhs.audioLevels == rhs.audioLevels &&
+            lhs.pin == rhs.pin &&
+            lhs.track === rhs.track &&
+            lhs.screenshareTrack === rhs.screenshareTrack
+    }
+
     public var isPinned: Bool {
         pin != nil
     }
-    
+
     public var isPinnedRemotely: Bool {
         guard let pin else { return false }
         return pin.isLocal == false
     }
-    
+
     /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
-        hasVideo && track != nil && showTrack
+        hasVideo && showTrack && track != nil
     }
-    
+
     public func withUpdated(trackSize: CGSize) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -147,7 +169,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             pin: pin
         )
     }
-    
+
     public func withUpdated(track: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -173,7 +195,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             pin: pin
         )
     }
-    
+
     public func withUpdated(screensharingTrack: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -199,7 +221,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             pin: pin
         )
     }
-    
+
     public func withUpdated(audio: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -251,7 +273,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             pin: pin
         )
     }
-    
+
     public func withUpdated(screensharing: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -338,7 +360,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             pin: pin
         )
     }
-    
+
     public func withUpdated(dominantSpeaker: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -364,7 +386,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             pin: pin
         )
     }
-    
+
     public func withUpdated(connectionQuality: ConnectionQuality) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -390,7 +412,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             pin: pin
         )
     }
-    
+
     public func withUpdated(pin: PinInfo?) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -419,8 +441,10 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
 }
 
 extension Stream_Video_Sfu_Models_Participant {
-    
-    func toCallParticipant(showTrack: Bool = true, pin: PinInfo? = nil) -> CallParticipant {
+    func toCallParticipant(
+        showTrack: Bool = true,
+        pin: PinInfo? = nil
+    ) -> CallParticipant {
         CallParticipant(
             id: sessionID,
             userId: userID,
@@ -445,9 +469,16 @@ extension Stream_Video_Sfu_Models_Participant {
 }
 
 /// Provides info whether the user is pinned.
-public struct PinInfo: Sendable, Equatable {
+public struct PinInfo: Sendable, Hashable {
     /// Determines if it's a local or a remote pin.
     public let isLocal: Bool
     /// The date of pinning.
     public let pinnedAt: Date
+}
+
+extension CGSize: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(width)
+        hasher.combine(height)
+    }
 }

@@ -6,16 +6,17 @@ import Foundation
 @testable import StreamVideo
 
 final class MockStreamVideo: StreamVideo, Mockable {
-
     typealias FunctionKey = MockStreamVideoFunctionKey
+    typealias FunctionInputKey = EmptyPayloadable
 
-    enum MockStreamVideoFunctionKey: Hashable {
+    enum MockStreamVideoFunctionKey: Hashable, CaseIterable {
         case call
         case connect
     }
 
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
+    var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = [:]
 
     override var state: StreamVideo.State {
         get { self[dynamicMember: \.state] }
@@ -60,7 +61,11 @@ final class MockStreamVideo: StreamVideo, Mockable {
         stubbedFunction[function] = value
     }
 
-    override func call(callType: String, callId: String) -> Call {
+    override func call(
+        callType: String,
+        callId: String,
+        callSettings: CallSettings? = nil
+    ) -> Call {
         stubbedFunction[.call] as! Call
     }
 

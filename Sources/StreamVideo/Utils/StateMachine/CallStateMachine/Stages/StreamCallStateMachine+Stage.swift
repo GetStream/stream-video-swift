@@ -39,6 +39,9 @@ extension StreamCallStateMachine {
             self.call = call
         }
 
+        func willTransitionAway() { /* No-op */ }
+        func didTransitionAway() { /* No-op */ }
+
         /// Handles the transition from the previous stage to this stage.
         ///
         /// - Parameter previousStage: The previous stage.

@@ -117,13 +117,28 @@ public class CallState: ObservableObject {
     }
 
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
+    @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings = CallSettings()
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
-    
+
+    /// A public enum representing the settings for incoming video streams in a WebRTC
+    /// session. This enum supports different policies like none, manual, or
+    /// disabled, each potentially applying to specific session IDs.
+    @Published public internal(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
+
+    /// This property holds the error that indicates the user has been disconnected
+    /// due to a network-related issue. When the user’s connection is disrupted for longer than the specified
+    /// timeout, this error will be set with a relevant error type, such as
+    /// `ClientError.NetworkNotAvailable`.
+    ///
+    /// - SeeAlso: ``ClientError.NetworkNotAvailable`` for the type of error set when a
+    ///            disconnection due to network issues occurs.
+    @Published public internal(set) var disconnectionError: Error?
+
     var sortComparators = defaultComparators
     
     private var localCallSettingsUpdate = false
@@ -207,14 +222,14 @@ public class CallState: ObservableObject {
         case .typeHealthCheckEvent:
             // note: health checks are not relevant for call state sync'ing
             break
-        case .typeCallUserMuted:
+        case .typeCallUserMutedEvent:
             break
         case .typeCallDeletedEvent:
             break
         case .typeCallHLSBroadcastingFailedEvent:
             break
         case .typeCallRecordingFailedEvent:
-            break
+            recordingState = .noRecording
         case .typeCallRecordingReadyEvent:
             break
         case .typeClosedCaptionEvent:
@@ -227,6 +242,18 @@ public class CallState: ObservableObject {
             transcribing = true
         case .typeCallTranscriptionStoppedEvent:
             transcribing = false
+        case .typeCallMissedEvent:
+            break
+        case .typeCallRtmpBroadcastStartedEvent:
+            break
+        case .typeCallRtmpBroadcastStoppedEvent:
+            break
+        case .typeCallRtmpBroadcastFailedEvent:
+            break
+        case .typeCallSessionParticipantCountsUpdatedEvent:
+            break
+        case .typeUserUpdatedEvent:
+            break
         }
     }
 
@@ -421,10 +448,17 @@ public class CallState: ObservableObject {
     }
     
     private func didUpdate(_ session: CallSessionResponse?) {
-        if startedAt != session?.liveStartedAt {
-            startedAt = session?.liveStartedAt
+        guard let session else { return }
+        if let startedAt = session.startedAt {
+            self.startedAt = startedAt
+        } else if let liveStartedAt = session.liveStartedAt {
+            startedAt = liveStartedAt
+        } else if startedAt == nil {
+            /// If we don't receive a value from the SFU we start the timer on the current date.
+            startedAt = Date()
         }
-        if session?.liveEndedAt != nil {
+
+        if session.liveEndedAt != nil {
             resetTimer()
         }
     }

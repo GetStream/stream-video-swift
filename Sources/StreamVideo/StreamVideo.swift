@@ -189,7 +189,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 } catch {
                     log.error("Error connecting as guest", error: error)
                 }
-            } else {
+            } else if user.type != .anonymous {
                 do {
                     try Task.checkCancellation()
                     try await self.connectUser(isInitial: true)
@@ -215,10 +215,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the all.
+    ///  - callSettings: the initial CallSettings to use. If `nil` is provided, the default CallSettings
+    ///  will be used.
     /// - Returns: `Call` object.
     public func call(
         callType: String,
-        callId: String
+        callId: String,
+        callSettings: CallSettings? = nil
     ) -> Call {
         callCache.call(for: callCid(from: callId, callType: callType)) {
             let callController = makeCallController(callType: callType, callId: callId)
@@ -226,7 +229,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 callType: callType,
                 callId: callId,
                 coordinatorClient: coordinatorClient,
-                callController: callController
+                callController: callController,
+                callSettings: callSettings
             )
             eventsMiddleware.add(subscriber: call)
             return call
@@ -272,7 +276,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Parameter id: the id of the device that will be deleted.
     @discardableResult
     public func deleteDevice(id: String) async throws -> ModelResponse {
-        try await coordinatorClient.deleteDevice(id: id, userId: user.id)
+        try await coordinatorClient.deleteDevice(id: id)
     }
     
     /// Lists the devices registered for the user.
@@ -553,9 +557,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         name: String,
         isVoip: Bool
     ) async throws -> ModelResponse {
+        guard let provider = CreateDeviceRequest.PushProvider(rawValue: pushProvider.rawValue) else {
+            throw ClientError.Unexpected("Invalid push provider value")
+        }
         let createDeviceRequest = CreateDeviceRequest(
             id: id,
-            pushProvider: .init(rawValue: pushProvider.rawValue),
+            pushProvider: provider,
             pushProviderName: name,
             voipToken: isVoip
         )

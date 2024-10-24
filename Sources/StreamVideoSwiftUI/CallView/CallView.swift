@@ -68,6 +68,12 @@ public struct CallView<Factory: ViewFactory>: View {
         }
     }
 
+    private var shouldShowDraggableView: Bool {
+        (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true)
+            && viewModel.participantsLayout == .grid
+            && viewModel.participants.count <= 3
+    }
+
     @ViewBuilder
     private func cornerDraggableView(_ proxy: GeometryProxy) -> some View {
         if shouldShowDraggableView {
@@ -88,12 +94,6 @@ public struct CallView<Factory: ViewFactory>: View {
         } else {
             EmptyView()
         }
-    }
-
-    private var shouldShowDraggableView: Bool {
-        (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true)
-            && viewModel.participantsLayout == .grid
-            && viewModel.participants.count <= 3
     }
 
     @ViewBuilder

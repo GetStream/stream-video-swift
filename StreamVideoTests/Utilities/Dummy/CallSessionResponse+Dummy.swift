@@ -19,10 +19,12 @@ extension CallSessionResponse {
     ) -> CallSessionResponse {
         .init(
             acceptedBy: acceptedBy,
+            anonymousParticipantCount: 0,
             endedAt: endedAt,
             id: id,
             liveEndedAt: liveEndedAt,
             liveStartedAt: liveStartedAt,
+            missedBy: [:],
             participants: participants,
             participantsCountByRole: participantsCountByRole,
             rejectedBy: rejectedBy,
