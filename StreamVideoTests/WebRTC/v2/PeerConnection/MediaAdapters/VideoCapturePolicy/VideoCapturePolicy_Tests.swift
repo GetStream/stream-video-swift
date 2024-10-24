@@ -65,7 +65,7 @@ final class VideoCapturePolicy_Tests: XCTestCase {
     // MARK: - Private helpers
 
     private func assertUpdateCaptureQuality(
-        input: [VideoCodec],
+        input: [VideoLayer],
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {

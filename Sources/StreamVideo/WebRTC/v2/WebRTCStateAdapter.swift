@@ -207,6 +207,7 @@ actor WebRTCStateAdapter: ObservableObject {
         )
 
         peerConnectionsDisposableBag.removeAll()
+        peerConnectionFactory.setPreferredEncodingCodec(videoOptions.preferredVideoCodec)
         let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,

@@ -14,7 +14,7 @@ protocol CameraVideoCapturing: VideoCapturing {
     func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws
     func setVideoFilter(_ videoFilter: VideoFilter?)
     func updateCaptureQuality(
-        _ codecs: [VideoCodec],
+        _ codecs: [VideoLayer],
         on device: AVCaptureDevice?
     ) async throws
     func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice?

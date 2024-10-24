@@ -85,6 +85,17 @@ struct DemoStatsView: View {
                             viewModel,
                             title: "PUBLISH RESOLUTION",
                             value: "none",
+                            titleTransformer: { report in
+                                let codec = report?
+                                    .publisherBaseStats
+                                    .last?
+                                    .codec
+                                if let codec = codec?.split(separator: "/").last {
+                                    return "PUBLISH RESOLUTION(\(codec))"
+                                } else {
+                                    return "PUBLISH RESOLUTION"
+                                }
+                            },
                             valueTransformer: { resolutionFormatter(from: $0?.publisherStats) }
                         )
                     } _: {
@@ -258,6 +269,7 @@ private struct DemoStatView<Value: Comparable>: View {
 
         @ObservedObject private var viewModel: CallViewModel
         private var cancellable: AnyCancellable?
+        private var titleCancellable: AnyCancellable?
 
         @Published var title: String
         @Published var value: Value
@@ -265,14 +277,24 @@ private struct DemoStatView<Value: Comparable>: View {
 
         init(
             viewModel: CallViewModel,
-            title: String = "",
+            titleTransformer: @escaping (CallStatsReport?) -> String = { _ in "" },
             value: Value,
             valueTransformer: @escaping (CallStatsReport?) -> Value
         ) {
             self.viewModel = viewModel
-            self.title = title
+            title = titleTransformer(nil)
             self.value = value
             previousValue = value
+
+            titleCancellable = viewModel
+                .call?
+                .state
+                .$statsReport
+                .receive(on: DispatchQueue.global(qos: .utility))
+                .map(titleTransformer)
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.title, onWeak: self)
+
             cancellable = viewModel
                 .call?
                 .state
@@ -339,6 +361,7 @@ private struct DemoStatView<Value: Comparable>: View {
         _ callViewModel: CallViewModel,
         title: String,
         value: Value,
+        titleTransformer: ((CallStatsReport?) -> String)? = nil,
         valueTransformer: @escaping (CallStatsReport?) -> Value,
         presentationTransformer: @escaping (Value, Value) -> String = { newValue, _ in "\(newValue)" },
         valueQualityTransformer: @escaping (Value) -> DemoStatQuality = { _ in .unknown }
@@ -346,7 +369,7 @@ private struct DemoStatView<Value: Comparable>: View {
         _viewModel = .init(
             wrappedValue: .init(
                 viewModel: callViewModel,
-                title: title,
+                titleTransformer: { titleTransformer?($0) ?? title },
                 value: value,
                 valueTransformer: valueTransformer
             )

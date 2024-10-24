@@ -287,7 +287,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
         streamIds: [String] = [.unique],
-        codecs: [VideoCodec]? = nil
+        codecs: [VideoLayer]? = nil
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
             temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(

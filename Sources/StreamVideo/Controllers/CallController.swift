@@ -442,6 +442,16 @@ class CallController: @unchecked Sendable {
         webRTCCoordinator.setDisconnectionTimeout(timeout)
     }
 
+    func updatePublishOptions(
+        preferredVideoCodec: VideoCodec,
+        maxBitrate: Int
+    ) async {
+        await webRTCCoordinator.updatePublishOptions(
+            preferredVideoCodec: preferredVideoCodec,
+            maxBitrate: maxBitrate
+        )
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {

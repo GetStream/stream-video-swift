@@ -174,19 +174,17 @@ final class SFUEventAdapter {
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) async {
         guard
-            let enabledRIds = event
+            let layerSettings = event
             .videoSenders
             .first?
             .layers
-            .filter(\.active)
-            .map(\.name)
         else {
             return
         }
 
         await stateAdapter
             .publisher?
-            .changePublishQuality(with: .init(enabledRIds))
+            .changePublishQuality(with: layerSettings)
     }
 
     /// Handles a ParticipantJoined event.

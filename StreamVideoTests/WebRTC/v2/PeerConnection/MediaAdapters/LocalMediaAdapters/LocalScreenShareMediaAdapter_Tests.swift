@@ -194,7 +194,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
     func test_publish_disabledLocalTrack_transceiverHasBeenCreated_enablesAndAddsTrack() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .screenshare, codecs: [VideoCodec.screenshare])
+            with: try makeTransceiver(of: .screenshare, codecs: [VideoLayer.screenshare])
         )
         try await subject.beginScreenSharing(
             of: .inApp,
@@ -207,7 +207,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
         /// When there is only one encoding on the transceiver, WebRTC internally, removes the rid
         XCTAssertEqual(
             transceiver.sender.parameters.encodings.compactMap(\.maxBitrateBps),
-            [NSNumber(value: VideoCodec.screenshare.maxBitrate)]
+            [NSNumber(value: VideoLayer.screenshare.maxBitrate)]
         )
     }
 
@@ -235,7 +235,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase {
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
         streamIds: [String] = [.unique],
-        codecs: [VideoCodec]? = nil
+        codecs: [VideoLayer]? = nil
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
             temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(

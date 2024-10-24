@@ -319,9 +319,9 @@ final class MediaAdapter {
     ///
     /// - Parameter activeEncodings: The set of active encoding identifiers.
     func changePublishQuality(
-        with activeEncodings: Set<String>
+        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
     ) {
-        videoMediaAdapter.changePublishQuality(with: activeEncodings)
+        videoMediaAdapter.changePublishQuality(with: layerSettings)
     }
 
     // MARK: - ScreenSharing

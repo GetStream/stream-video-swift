@@ -45,6 +45,7 @@ struct StreamCallStatisticsReporter {
             datacenter: datacenter,
             publisherStats: publisherReportBuilder.aggregatedReport, /// Aggregated statistics for the publisher.
             publisherRawStats: publisherReport.source, /// Raw statistics for the publisher.
+            publisherBaseStats: publisherReportBuilder.baseReport,
             subscriberStats: subscriberReportBuilder.aggregatedReport, /// Aggregated statistics for the subscriber.
             subscriberRawStats: subscriberReport.source, /// Raw statistics for the subscriber.
             participantsStats: publisherReportBuilder.participantsReport + subscriberReportBuilder.participantsReport,

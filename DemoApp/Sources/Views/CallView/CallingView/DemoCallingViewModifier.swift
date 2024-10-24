@@ -90,9 +90,13 @@ struct DemoCallingViewModifier: ViewModifier {
         Task {
             do {
                 try await streamVideo.connect()
-                await MainActor.run {
+                let call = streamVideo.call(callType: callType, callId: callId)
+                await call.updatePublishOptions(
+                    preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
+                )
+                _ = await Task { @MainActor in
                     viewModel.joinCall(callType: callType, callId: callId)
-                }
+                }.result
             } catch {
                 log.error(error)
             }

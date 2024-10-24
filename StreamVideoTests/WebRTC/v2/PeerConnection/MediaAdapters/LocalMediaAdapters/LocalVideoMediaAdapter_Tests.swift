@@ -195,7 +195,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     func test_publish_disabledLocalTrack_transceiverHasBeenCreated_enablesAndAddsTrack() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video, codecs: VideoCodec.defaultCodecs)
+            with: try makeTransceiver(of: .video, codecs: VideoLayer.default)
         )
         try await subject.setUp(
             with: .init(videoOn: true),
@@ -381,7 +381,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     func test_changePublishQuality_transceiverWasUpdatedCorrectly() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video, codecs: VideoCodec.defaultCodecs)
+            with: try makeTransceiver(of: .video, codecs: VideoLayer.default)
         )
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
@@ -444,7 +444,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
         streamIds: [String] = [.unique],
-        codecs: [VideoCodec]? = nil
+        codecs: [VideoLayer]? = nil
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
             temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(
