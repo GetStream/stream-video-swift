@@ -114,7 +114,7 @@ class VideoCapturer: CameraVideoCapturing {
     }
 
     func updateCaptureQuality(
-        _ codecs: [VideoLayer],
+        _ layers: [VideoLayer],
         on device: AVCaptureDevice?
     ) async throws {
         guard
@@ -125,9 +125,9 @@ class VideoCapturer: CameraVideoCapturing {
         }
 
         let preferredDimensions: CMVideoDimensions = {
-            if codecs.first(where: { $0.quality == VideoLayer.full.quality }) != nil {
+            if layers.first(where: { $0.quality == VideoLayer.full.quality }) != nil {
                 return .full
-            } else if codecs.first(where: { $0.quality == VideoLayer.half.quality }) != nil {
+            } else if layers.first(where: { $0.quality == VideoLayer.half.quality }) != nil {
                 return .half
             } else {
                 return .quarter

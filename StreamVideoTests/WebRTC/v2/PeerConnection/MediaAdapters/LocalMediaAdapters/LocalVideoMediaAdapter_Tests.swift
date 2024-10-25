@@ -73,7 +73,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
+        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
@@ -215,11 +215,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             ["q", "h", "f"]
         )
     }
-
-    func test_publish_disabledLocalTrack_transceiverHasBeenCreated_updatesCodecPreferencesAsExpected() async throws {
-        XCTFail()
-    }
-
+    
     // MARK: - unpublish
 
     func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {

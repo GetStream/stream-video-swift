@@ -83,14 +83,30 @@ final class PeerConnectionFactory: @unchecked Sendable {
     /// - Parameter forScreenShare: Boolean indicating if the source is for screen sharing.
     /// - Returns: An RTCVideoSource instance.
     func makeVideoSource(forScreenShare: Bool) -> RTCVideoSource {
-        factory.videoSource(forScreenCast: forScreenShare)
+        let result = factory.videoSource(forScreenCast: forScreenShare)
+        log.debug(
+            """
+            VideoSource was created \(Unmanaged.passUnretained(result).toOpaque())
+            Encoder preferredCodec: \(defaultEncoder.preferredCodec)
+            """,
+            subsystems: .webRTC
+        )
+        return result
     }
 
     /// Creates a video track from a given video source.
     /// - Parameter source: The RTCVideoSource to use for the track.
     /// - Returns: An RTCVideoTrack instance.
     func makeVideoTrack(source: RTCVideoSource) -> RTCVideoTrack {
-        factory.videoTrack(with: source, trackId: UUID().uuidString)
+        let result = factory.videoTrack(with: source, trackId: UUID().uuidString)
+        log.debug(
+            """
+            VideoTrack was created \(Unmanaged.passUnretained(result).toOpaque())
+            trackId: \(result.trackId)
+            """,
+            subsystems: .webRTC
+        )
+        return result
     }
 
     /// Creates an audio source with optional constraints.

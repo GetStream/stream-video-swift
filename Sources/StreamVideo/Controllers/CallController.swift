@@ -453,7 +453,7 @@ class CallController: @unchecked Sendable {
     // MARK: - Codec preference
 
     /// Updates video publishing options with the preferred video codec and max bitrate for video
-    /// streaming by.
+    /// streaming.
     ///
     /// - Parameters:
     ///    - preferredVideoCodec: The preferred video codec (e.g., H264, VP8, VP9, AV1).

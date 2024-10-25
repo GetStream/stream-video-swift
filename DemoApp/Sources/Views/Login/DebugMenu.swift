@@ -12,13 +12,13 @@ struct DebugMenu: View {
 
     @Injected(\.colors) var colors
 
-    private var appState: AppState = .shared
+    private var appState = AppState.shared
 
-    @State private var loggedInView: AppEnvironment.LoggedInView = AppEnvironment.loggedInView {
+    @State private var loggedInView = AppEnvironment.loggedInView {
         didSet { AppEnvironment.loggedInView = loggedInView }
     }
 
-    @State private var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL {
+    @State private var baseURL = AppEnvironment.baseURL {
         didSet {
             switch baseURL {
             case .pronto:
@@ -40,11 +40,11 @@ struct DebugMenu: View {
         }
     }
 
-    @State private var supportedDeeplinks: [AppEnvironment.SupportedDeeplink] = AppEnvironment.supportedDeeplinks {
+    @State private var supportedDeeplinks = AppEnvironment.supportedDeeplinks {
         didSet { AppEnvironment.supportedDeeplinks = supportedDeeplinks }
     }
 
-    @State private var performanceTrackerVisibility: AppEnvironment.PerformanceTrackerVisibility = AppEnvironment
+    @State private var performanceTrackerVisibility = AppEnvironment
         .performanceTrackerVisibility {
         didSet {
             switch performanceTrackerVisibility {
@@ -68,36 +68,36 @@ struct DebugMenu: View {
         didSet { AppEnvironment.pictureInPictureIntegration = pictureInPictureIntegration }
     }
 
-    @State private var tokenExpiration: AppEnvironment.TokenExpiration = AppEnvironment.tokenExpiration {
+    @State private var tokenExpiration = AppEnvironment.tokenExpiration {
         didSet { AppEnvironment.tokenExpiration = tokenExpiration }
     }
 
-    @State private var callExpiration: AppEnvironment.CallExpiration = AppEnvironment.callExpiration {
+    @State private var callExpiration = AppEnvironment.callExpiration {
         didSet { AppEnvironment.callExpiration = callExpiration }
     }
 
-    @State private var disconnectionTimeout: AppEnvironment.DisconnectionTimeout = AppEnvironment.disconnectionTimeout {
+    @State private var disconnectionTimeout = AppEnvironment.disconnectionTimeout {
         didSet { AppEnvironment.disconnectionTimeout = disconnectionTimeout }
     }
 
-    @State private var isLogsViewerVisible: Bool = false
+    @State private var isLogsViewerVisible = false
 
-    @State private var presentsCustomEnvironmentSetup: Bool = false
+    @State private var presentsCustomEnvironmentSetup = false
 
-    @State private var customCallExpirationValue: Int = 0
-    @State private var presentsCustomCallExpiration: Bool = false
+    @State private var customCallExpirationValue = 0
+    @State private var presentsCustomCallExpiration = false
 
-    @State private var customTokenExpirationValue: Int = 0
-    @State private var presentsCustomTokenExpiration: Bool = false
+    @State private var customTokenExpirationValue = 0
+    @State private var presentsCustomTokenExpiration = false
 
     @State private var customDisconnectionTimeoutValue: TimeInterval = 0
-    @State private var presentsCustomDisconnectionTimeout: Bool = false
+    @State private var presentsCustomDisconnectionTimeout = false
 
-    @State private var autoLeavePolicy: AppEnvironment.AutoLeavePolicy = AppEnvironment.autoLeavePolicy {
+    @State private var autoLeavePolicy = AppEnvironment.autoLeavePolicy {
         didSet { AppEnvironment.autoLeavePolicy = autoLeavePolicy }
     }
 
-    @State private var preferredVideoCodec: AppEnvironment.PreferredVideoCodec = AppEnvironment.preferredVideoCodec {
+    @State private var preferredVideoCodec = AppEnvironment.preferredVideoCodec {
         didSet { AppEnvironment.preferredVideoCodec = preferredVideoCodec }
     }
 

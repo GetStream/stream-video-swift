@@ -298,7 +298,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         for encoding in params.encodings {
             let layerSettings = isUsingSVCCodec
                 // for SVC, we only have one layer (q) and often rid is omitted
-                ? layerSettings[0]
+                ? layerSettings.first
                 // for non-SVC, we need to find the layer by rid (simulcast)
                 : layerSettings.first(where: { $0.name == encoding.rid })
 
@@ -467,26 +467,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     preferredVideoCodec: videoOptions.preferredVideoCodec
                 )
             )
-            sender?.codecPreferences = codecPreferences
         } else {
             sender?.sender.track = localTrack
         }
-    }
-
-    private var codecPreferences: [RTCRtpCodecCapability] {
-        let supportedCodecs = peerConnectionFactory.supportedVideoCodecEncoding
-        var result = [RTCRtpCodecCapability]()
-        for supportedCodec in supportedCodecs {
-            let codecInfo = RTCRtpCodecCapability()
-            codecInfo.name = supportedCodec.name
-            codecInfo.kind = .video
-            codecInfo.parameters = supportedCodec.parameters
-            if supportedCodec.name.lowercased() == videoOptions.preferredVideoCodec.rawValue {
-                result.insert(codecInfo, at: 0)
-            } else {
-                result.append(codecInfo)
-            }
-        }
-        return result
     }
 }
