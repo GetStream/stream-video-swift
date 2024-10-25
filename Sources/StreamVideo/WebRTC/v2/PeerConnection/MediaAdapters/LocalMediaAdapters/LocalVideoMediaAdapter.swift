@@ -108,16 +108,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             try await makeVideoTrack(
                 settings.cameraPosition == .front ? .front : .back
             )
-            if sender == nil, settings.videoOn {
-                sender = peerConnection.addTransceiver(
-                    with: localTrack!,
-                    init: RTCRtpTransceiverInit(
-                        trackType: .video,
-                        direction: .sendOnly,
-                        streamIds: streamIds,
-                        codecs: videoOptions.supportedCodecs
-                    )
-                )
+            if sender == nil, settings.videoOn, let localTrack {
+                setUpTransceiverIfRequired(localTrack)
             }
         } else if !hasVideo {
             Task { [weak self] in
@@ -128,8 +120,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 }
             }
         }
-
-        localTrack?.isEnabled = settings.videoOn
     }
 
     /// Starts publishing the local video track.
@@ -149,19 +139,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     device: activeSession.device
                 )
 
-                if sender == nil {
-                    sender = peerConnection.addTransceiver(
-                        with: localTrack,
-                        init: RTCRtpTransceiverInit(
-                            trackType: .video,
-                            direction: .sendOnly,
-                            streamIds: streamIds,
-                            codecs: videoOptions.supportedCodecs
-                        )
-                    )
-                } else {
-                    sender?.sender.track = localTrack
-                }
+                setUpTransceiverIfRequired(localTrack)
                 localTrack.isEnabled = true
                 log.debug("Local videoTrack trackId:\(localTrack.trackId) is now published.")
             } catch {
@@ -285,50 +263,123 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: The set of active encoding identifiers.
     func changePublishQuality(
-        with activeEncodings: Set<String>
+        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
     ) {
-        Task { @MainActor [weak self] in
-            guard
-                let self,
-                let sender,
-                !activeEncodings.isEmpty
-            else {
-                return
+        guard
+            let sender,
+            !layerSettings.isEmpty
+        else {
+            return
+        }
+
+        var hasChanges = false
+        let params = sender
+            .sender
+            .parameters
+
+        guard
+            !params.encodings.isEmpty
+        else {
+            log.warning("Update publish quality, No suitable video encoding quality found", subsystems: .webRTC)
+            return
+        }
+
+        let isUsingSVCCodec = {
+            if
+                let preferredCodec = params.codecs.first,
+                let videoCodec = VideoCodec(preferredCodec) {
+                return videoCodec.isSVC
+            } else {
+                return false
+            }
+        }()
+        var updatedEncodings = [RTCRtpEncodingParameters]()
+
+        for encoding in params.encodings {
+            let layerSettings = isUsingSVCCodec
+                // for SVC, we only have one layer (q) and often rid is omitted
+                ? layerSettings.first
+                // for non-SVC, we need to find the layer by rid (simulcast)
+                : layerSettings.first(where: { $0.name == encoding.rid })
+
+            // flip 'active' flag only when necessary
+            if layerSettings?.active != encoding.isActive {
+                encoding.isActive = layerSettings?.active ?? false
+                hasChanges = true
             }
 
-            var hasChanges = false
-            let params = sender
-                .sender
-                .parameters
-            var updatedEncodings = [RTCRtpEncodingParameters]()
-
-            for encoding in params.encodings {
-                guard let rid = encoding.rid else {
-                    continue
-                }
-                let shouldEnable = activeEncodings.contains(rid)
-
-                switch (shouldEnable, encoding.isActive) {
-                case (true, true):
-                    break
-                case (false, false):
-                    break
-                default:
-                    hasChanges = true
-                    encoding.isActive = shouldEnable
-                }
+            // skip the rest of the settings if the layer is disabled or not found
+            guard let layerSettings else {
                 updatedEncodings.append(encoding)
+                continue
             }
 
-            guard hasChanges else {
-                return
+            if
+                layerSettings.scaleResolutionDownBy >= 1,
+                layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0)
+            {
+                encoding.scaleResolutionDownBy = .init(value: layerSettings.scaleResolutionDownBy)
+                hasChanges = true
             }
-            params.encodings = updatedEncodings
-            sender.sender.parameters = params
 
+            if
+                layerSettings.maxBitrate > 0,
+                layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0)
+            {
+                encoding.maxBitrateBps = .init(value: layerSettings.maxBitrate)
+                hasChanges = true
+            }
+
+            if
+                layerSettings.maxFramerate > 0,
+                layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0)
+            {
+                encoding.maxFramerate = .init(value: layerSettings.maxFramerate)
+                hasChanges = true
+            }
+
+            if
+                !layerSettings.scalabilityMode.isEmpty,
+                layerSettings.scalabilityMode != encoding.scalabilityMode
+            {
+                encoding.scalabilityMode = layerSettings.scalabilityMode
+                hasChanges = true
+            }
+
+            updatedEncodings.append(encoding)
+        }
+
+        let activeLayers = layerSettings
+            .filter { $0.active }
+            .map {
+                let value = [
+                    "name:\($0.name)",
+                    "scaleResolutionDownBy:\($0.scaleResolutionDownBy)",
+                    "maxBitrate:\($0.maxBitrate)",
+                    "maxFramerate:\($0.maxFramerate)",
+                    "scalabilityMode:\($0.scalabilityMode)"
+                ]
+                return "[\(value.joined(separator: ","))]"
+            }
+
+        guard hasChanges else {
+            log.info(
+                "Update publish quality, no change: \(activeLayers.joined(separator: ","))",
+                subsystems: .webRTC
+            )
+            return
+        }
+        log.info(
+            "Update publish quality, enabled rids: \(activeLayers.joined(separator: ","))",
+            subsystems: .webRTC
+        )
+        params.encodings = updatedEncodings
+        sender.sender.parameters = params
+
+        Task { @MainActor in
             do {
                 try await videoCapturePolicy.updateCaptureQuality(
-                    with: activeEncodings,
+                    with: .init(layerSettings.map(\.name)),
                     for: videoCaptureSessionProvider.activeSession
                 )
             } catch {
@@ -401,6 +452,23 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 localTrack: videoTrack,
                 capturer: cameraCapturer
             )
+        }
+    }
+
+    private func setUpTransceiverIfRequired(_ localTrack: RTCVideoTrack) {
+        if sender == nil {
+            sender = peerConnection.addTransceiver(
+                with: localTrack,
+                init: RTCRtpTransceiverInit(
+                    trackType: .video,
+                    direction: .sendOnly,
+                    streamIds: streamIds,
+                    layers: videoOptions.videoLayers,
+                    preferredVideoCodec: videoOptions.preferredVideoCodec
+                )
+            )
+        } else {
+            sender?.sender.track = localTrack
         }
     }
 }

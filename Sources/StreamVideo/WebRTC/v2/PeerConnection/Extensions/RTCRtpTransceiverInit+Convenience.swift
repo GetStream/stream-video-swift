@@ -22,16 +22,26 @@ extension RTCRtpTransceiverInit {
         trackType: TrackType,
         direction: RTCRtpTransceiverDirection,
         streamIds: [String],
-        codecs: [VideoCodec]? = nil
+        layers: [VideoLayer]? = nil,
+        preferredVideoCodec: VideoCodec? = nil
     ) {
         self.init()
         self.direction = direction
         self.streamIds = streamIds
-        if let codecs {
-            sendEncodings = codecs
-                .map(RTCRtpEncodingParameters.init)
-        }
+        if let layers {
+            var sendEncodings = layers
+                .map { RTCRtpEncodingParameters($0, preferredVideoCodec: preferredVideoCodec) }
 
+            if preferredVideoCodec?.isSVC == true {
+                sendEncodings = sendEncodings
+                    .filter { $0.rid == "f" }
+                sendEncodings.first?.rid = "q"
+                self.sendEncodings = sendEncodings
+            } else {
+                self.sendEncodings = sendEncodings
+            }
+        }
+        
         if trackType == .screenshare {
             sendEncodings.forEach { $0.isActive = true }
         }

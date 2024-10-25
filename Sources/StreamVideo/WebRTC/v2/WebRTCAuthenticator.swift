@@ -85,10 +85,22 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 )
             }
         }
+        let videoOptions = await coordinator.stateAdapter.videoOptions
         await coordinator.stateAdapter.set(
-            videoOptions: VideoOptions(
-                targetResolution: response.call.settings.video.targetResolution
-            )
+            videoOptions: videoOptions
+                .with(preferredTargetResolution: response.call.settings.video.targetResolution)
+                .with(preferredCameraPosition: {
+                    switch response.call.settings.video.cameraFacing {
+                    case .back:
+                        return .back
+                    case .external:
+                        return .front
+                    case .front:
+                        return .front
+                    case .unknown:
+                        return .front
+                    }
+                }())
         )
 
         let sfuAdapter = SFUAdapter(

@@ -92,7 +92,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_setVideoOptions_shouldUpdateVideoOptions() async throws {
         let expected = VideoOptions(
-            targetResolution: .dummy(bitrate: 10000, height: 200, width: 300),
+            preferredTargetResolution: .dummy(bitrate: 10000, height: 200, width: 300),
             preferredFormat: nil,
             preferredFps: 109_999
         )
@@ -561,7 +561,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await subject.configurePeerConnections()
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
-        let newVideoOptions = VideoOptions(targetResolution: .dummy(), preferredFormat: nil, preferredFps: 17)
+        let newVideoOptions = VideoOptions(
+            preferredTargetResolution: .dummy(),
+            preferredFormat: nil,
+            preferredFps: 17
+        )
 
         await subject.set(videoOptions: newVideoOptions)
 

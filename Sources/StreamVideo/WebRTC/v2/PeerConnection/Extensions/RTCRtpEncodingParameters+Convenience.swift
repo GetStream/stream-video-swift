@@ -17,12 +17,19 @@ extension RTCRtpEncodingParameters {
     /// - Note: The `rid` (Restriction Identifier) is set to the codec's quality.
     ///         The `maxBitrateBps` is set to the codec's maximum bitrate.
     ///         If the codec has a `scaleDownFactor`, it's applied to `scaleResolutionDownBy`.
-    convenience init(_ codec: VideoCodec) {
+    convenience init(
+        _ layer: VideoLayer,
+        preferredVideoCodec: VideoCodec?
+    ) {
         self.init()
-        rid = codec.quality
-        maxBitrateBps = (codec.maxBitrate) as NSNumber
-        if let scaleDownFactor = codec.scaleDownFactor {
-            scaleResolutionDownBy = (scaleDownFactor) as NSNumber
+        rid = layer.quality.rawValue
+        maxBitrateBps = (layer.maxBitrate) as NSNumber
+        if preferredVideoCodec?.isSVC == true {
+            scalabilityMode = "L3T2_KEY"
+        } else {
+            if let scaleDownFactor = layer.scaleDownFactor {
+                scaleResolutionDownBy = (scaleDownFactor) as NSNumber
+            }
         }
     }
 }

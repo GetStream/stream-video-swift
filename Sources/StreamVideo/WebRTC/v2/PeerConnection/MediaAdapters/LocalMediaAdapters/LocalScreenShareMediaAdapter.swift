@@ -118,7 +118,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                     trackType: .screenshare,
                     direction: .sendOnly,
                     streamIds: ["\(sessionID)-screenshare-\(screenSharingType)"],
-                    codecs: [VideoCodec.screenshare]
+                    layers: [VideoLayer.screenshare]
                 )
             )
         } else {

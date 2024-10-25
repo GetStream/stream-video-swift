@@ -216,10 +216,10 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: The set of active encoding identifiers.
     func changePublishQuality(
-        with activeEncodings: Set<String>
+        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
     ) {
         (localMediaManager as? LocalVideoMediaAdapter)?
-            .changePublishQuality(with: activeEncodings)
+            .changePublishQuality(with: layerSettings)
     }
 
     // MARK: - Observers

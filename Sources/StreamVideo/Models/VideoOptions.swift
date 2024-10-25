@@ -7,94 +7,104 @@ import Foundation
 
 /// Configuration for the video options for a call.
 struct VideoOptions: Sendable {
-    
     /// The preferred video format.
     var preferredFormat: AVCaptureDevice.Format?
     /// The preferred video dimensions.
     var preferredDimensions: CMVideoDimensions
     /// The preferred frames per second.
     var preferredFps: Int
+    var preferredVideoCodec: VideoCodec
+    var preferredBitrate: Int
+    var preferredTargetResolution: TargetResolution?
+    var preferredCameraPosition: AVCaptureDevice.Position
+
     /// The supported codecs.
-    var supportedCodecs: [VideoCodec]
-    
+    var videoLayers: [VideoLayer]
+
     init(
-        targetResolution: TargetResolution? = nil,
+        preferredTargetResolution: TargetResolution? = nil,
         preferredFormat: AVCaptureDevice.Format? = nil,
-        preferredFps: Int = 30
+        preferredFps: Int = 30,
+        preferredVideoCodec: VideoCodec = .h264,
+        preferredBitrate: Int = .maxBitrate,
+        preferredCameraPosition: AVCaptureDevice.Position = .front
     ) {
+        self.preferredTargetResolution = preferredTargetResolution
         self.preferredFormat = preferredFormat
         self.preferredFps = preferredFps
-        if let targetResolution {
+        self.preferredVideoCodec = preferredVideoCodec
+        self.preferredBitrate = preferredBitrate
+        self.preferredCameraPosition = preferredCameraPosition
+
+        if let preferredTargetResolution {
             preferredDimensions = CMVideoDimensions(
-                width: Int32(targetResolution.width),
-                height: Int32(targetResolution.height)
+                width: Int32(preferredTargetResolution.width),
+                height: Int32(preferredTargetResolution.height)
             )
             do {
-                supportedCodecs = try VideoCapturingUtils.codecs(
+                videoLayers = try VideoCapturingUtils.codecs(
                     preferredFormat: preferredFormat,
                     preferredDimensions: preferredDimensions,
                     preferredFps: preferredFps,
-                    preferredBitrate: targetResolution.bitrate ?? .maxBitrate
+                    preferredBitrate: preferredTargetResolution.bitrate ?? preferredBitrate,
+                    preferredCameraPosition: preferredCameraPosition
                 )
             } catch {
-                supportedCodecs = VideoCodec.defaultCodecs
+                videoLayers = VideoLayer.default
             }
         } else {
             preferredDimensions = .full
-            supportedCodecs = VideoCodec.defaultCodecs
+            videoLayers = VideoLayer.default
         }
+
+        print("")
+    }
+
+    func with(preferredTargetResolution: TargetResolution?) -> VideoOptions {
+        .init(
+            preferredTargetResolution: preferredTargetResolution,
+            preferredFormat: preferredFormat,
+            preferredFps: preferredFps,
+            preferredVideoCodec: preferredVideoCodec,
+            preferredBitrate: preferredBitrate,
+            preferredCameraPosition: preferredCameraPosition
+        )
+    }
+
+    func with(preferredVideoCodec: VideoCodec) -> VideoOptions {
+        .init(
+            preferredTargetResolution: preferredTargetResolution,
+            preferredFormat: preferredFormat,
+            preferredFps: preferredFps,
+            preferredVideoCodec: preferredVideoCodec,
+            preferredBitrate: preferredBitrate,
+            preferredCameraPosition: preferredCameraPosition
+        )
+    }
+
+    func with(preferredBitrate: Int) -> VideoOptions {
+        .init(
+            preferredTargetResolution: preferredTargetResolution,
+            preferredFormat: preferredFormat,
+            preferredFps: preferredFps,
+            preferredVideoCodec: preferredVideoCodec,
+            preferredBitrate: preferredBitrate,
+            preferredCameraPosition: preferredCameraPosition
+        )
+    }
+
+    func with(preferredCameraPosition: AVCaptureDevice.Position) -> VideoOptions {
+        .init(
+            preferredTargetResolution: preferredTargetResolution,
+            preferredFormat: preferredFormat,
+            preferredFps: preferredFps,
+            preferredVideoCodec: preferredVideoCodec,
+            preferredBitrate: preferredBitrate,
+            preferredCameraPosition: preferredCameraPosition
+        )
     }
 }
 
-/// Represents a video codec.
-struct VideoCodec: Sendable {
-    /// The dimensions of the codec.
-    let dimensions: CMVideoDimensions
-    /// The codec quality.
-    let quality: String
-    /// The maximum bitrate.
-    let maxBitrate: Int
-    /// Factor that tells how much the resolution should be scalled down.
-    var scaleDownFactor: Int32?
-    
-    var sfuQuality: Stream_Video_Sfu_Models_VideoQuality
-}
-
-extension VideoCodec {
-    
-    static let defaultCodecs = [quarter, half, full]
-    
-    static let full = VideoCodec(
-        dimensions: .full,
-        quality: "f",
-        maxBitrate: .maxBitrate,
-        sfuQuality: .high
-    )
-    
-    static let half = VideoCodec(
-        dimensions: .half,
-        quality: "h",
-        maxBitrate: 500_000,
-        scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.half.area,
-        sfuQuality: .mid
-    )
-    
-    static let quarter = VideoCodec(
-        dimensions: .quarter,
-        quality: "q",
-        maxBitrate: 300_000,
-        scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.quarter.area,
-        sfuQuality: .lowUnspecified
-    )
-    
-    static let screenshare = VideoCodec(
-        dimensions: .full,
-        quality: "q",
-        maxBitrate: .maxBitrate,
-        sfuQuality: .high
-    )
-}
-
 extension Int {
-    static let maxBitrate = 1_000_000
+    public static let maxBitrate = 1_000_000
 }

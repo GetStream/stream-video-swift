@@ -493,6 +493,25 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - updatePublishOptions
+
+    func test_updatePublishOptions_shouldCallUpdatePublishOptionsCoordinator() async throws {
+        try await prepareAsConnected()
+
+        await subject.updatePublishOptions(
+            preferredVideoCodec: .vp9,
+            maxBitrate: 1000
+        )
+
+        let videoOptions = await mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .videoOptions
+        XCTAssertEqual(videoOptions.preferredVideoCodec, .vp9)
+        XCTAssertEqual(videoOptions.preferredBitrate, 1000)
+    }
+
     // MARK: - Private helpers
 
     private func assertTransitionToStage(

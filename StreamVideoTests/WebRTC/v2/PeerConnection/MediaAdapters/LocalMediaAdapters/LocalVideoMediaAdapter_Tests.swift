@@ -35,6 +35,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     override func setUp() {
         super.setUp()
         InjectedValues[\.simulatorStreamFile] = .init(fileURLWithPath: .unique)
+
+        RTCSetMinDebugLogLevel(.verbose)
+        RTCEnableMetrics()
     }
 
     override func tearDown() {
@@ -70,7 +73,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
+        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
@@ -195,7 +198,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     func test_publish_disabledLocalTrack_transceiverHasBeenCreated_enablesAndAddsTrack() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video, codecs: VideoCodec.defaultCodecs)
+            with: try makeTransceiver(of: .video, layers: VideoLayer.default)
         )
         try await subject.setUp(
             with: .init(videoOn: true),
@@ -204,14 +207,15 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
+        await fulfillment { self.subject.localTrack?.isEnabled == true }
         XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
-        XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 1)
         XCTAssertEqual(
             (mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.parameters.encodings.flatMap(\.rid),
             ["q", "h", "f"]
         )
     }
-
+    
     // MARK: - unpublish
 
     func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
@@ -379,28 +383,45 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     // MARK: - changePublishQuality(_:)
 
     func test_changePublishQuality_transceiverWasUpdatedCorrectly() async throws {
-        mockPeerConnection.stub(
-            for: .addTransceiver,
-            with: try makeTransceiver(of: .video, codecs: VideoCodec.defaultCodecs)
-        )
+        let transceiver = try makeTransceiver(of: .video, layers: VideoLayer.default)
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
         subject.publish()
 
-        subject.changePublishQuality(with: ["q"])
+        let scalabilityMode = "L2T1"
+        var layer = Stream_Video_Sfu_Event_VideoLayerSetting.dummy(
+            name: "q",
+            isActive: true,
+            scalabilityMode: scalabilityMode,
+            maxFramerate: 30,
+            maxBitrate: 120,
+            scaleResolutionDownBy: 2
+        )
 
-        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
-        XCTAssertEqual(
-            (mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?
+        subject.changePublishQuality(
+            with: [
+                layer
+            ]
+        )
+
+        let activeEncoding = try XCTUnwrap(
+            transceiver
                 .sender
                 .parameters
                 .encodings
                 .filter { $0.isActive }
-                .compactMap(\.rid),
-            ["q"]
+                .first
         )
+
+        XCTAssertEqual(activeEncoding.rid, "q")
+        XCTAssertTrue(activeEncoding.isActive)
+        XCTAssertEqual(activeEncoding.maxBitrateBps, 120)
+        XCTAssertEqual(activeEncoding.maxFramerate, 30)
+        XCTAssertEqual(activeEncoding.scaleResolutionDownBy, 2)
+        XCTAssertEqual(activeEncoding.scalabilityMode, scalabilityMode)
     }
 
     // MARK: - Private
@@ -444,7 +465,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
         streamIds: [String] = [.unique],
-        codecs: [VideoCodec]? = nil
+        layers: [VideoLayer]? = nil
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
             temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(
@@ -460,7 +481,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
                 trackType: type,
                 direction: direction,
                 streamIds: streamIds,
-                codecs: codecs
+                layers: layers
             )
         )!
     }

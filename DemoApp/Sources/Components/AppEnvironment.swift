@@ -475,3 +475,41 @@ extension AppEnvironment {
 
     static var disconnectionTimeout: DisconnectionTimeout = .never
 }
+
+extension AppEnvironment {
+
+    enum PreferredVideoCodec: Hashable, Debuggable {
+        case h264
+        case vp8
+        case vp9
+        case av1
+
+        var title: String {
+            switch self {
+            case .h264:
+                return "h264"
+            case .vp8:
+                return "VP8"
+            case .vp9:
+                return "VP9"
+            case .av1:
+                return "AV1"
+            }
+        }
+
+        var videoCodec: VideoCodec {
+            switch self {
+            case .h264:
+                return .h264
+            case .vp8:
+                return .vp8
+            case .vp9:
+                return .vp9
+            case .av1:
+                return .av1
+            }
+        }
+    }
+
+    static var preferredVideoCodec: PreferredVideoCodec = .h264
+}

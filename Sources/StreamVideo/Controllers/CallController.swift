@@ -438,8 +438,34 @@ class CallController: @unchecked Sendable {
         await webRTCCoordinator.setIncomingVideoQualitySettings(value)
     }
 
+    // MARK: - Disconnection timeout
+
+    /// Sets the disconnection timeout for the current call.
+    ///
+    /// The timeout defines how long a user can stay disconnected
+    /// before being dropped from the call.
+    ///
+    /// - Parameter timeout: The time interval to set as the timeout.
     func setDisconnectionTimeout(_ timeout: TimeInterval) {
         webRTCCoordinator.setDisconnectionTimeout(timeout)
+    }
+
+    // MARK: - Codec preference
+
+    /// Updates video publishing options with the preferred video codec and max bitrate for video
+    /// streaming.
+    ///
+    /// - Parameters:
+    ///    - preferredVideoCodec: The preferred video codec (e.g., H264, VP8, VP9, AV1).
+    ///    - maxBitrate: The maximum allowed bitrate for video streaming.
+    func updatePublishOptions(
+        preferredVideoCodec: VideoCodec,
+        maxBitrate: Int
+    ) async {
+        await webRTCCoordinator.updatePublishOptions(
+            preferredVideoCodec: preferredVideoCodec,
+            maxBitrate: maxBitrate
+        )
     }
 
     // MARK: - private

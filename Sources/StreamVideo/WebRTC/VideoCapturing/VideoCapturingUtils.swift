@@ -10,9 +10,10 @@ enum VideoCapturingUtils {
         preferredFormat: AVCaptureDevice.Format?,
         preferredDimensions: CMVideoDimensions,
         preferredFps: Int,
-        preferredBitrate: Int
-    ) throws -> [VideoCodec] {
-        guard let device = VideoCapturingUtils.capturingDevice(for: .front) else {
+        preferredBitrate: Int,
+        preferredCameraPosition: AVCaptureDevice.Position
+    ) throws -> [VideoLayer] {
+        guard let device = VideoCapturingUtils.capturingDevice(for: preferredCameraPosition) else {
             throw ClientError.Unexpected()
         }
         let outputFormat = VideoCapturingUtils.outputFormat(
@@ -31,28 +32,26 @@ enum VideoCapturingUtils {
     static func makeCodecs(
         with targetResolution: CMVideoDimensions,
         preferredBitrate: Int
-    ) -> [VideoCodec] {
-        var codecs = [VideoCodec]()
+    ) -> [VideoLayer] {
+        var codecs = [VideoLayer]()
         var scaleDownFactor: Int32 = 1
-        let qualities = ["f", "h", "q"]
+        let qualities: [VideoLayer.Quality] = [.full, .half, .quarter]
         for quality in qualities {
             let width = targetResolution.width / scaleDownFactor
             let height = targetResolution.height / scaleDownFactor
             let bitrate = preferredBitrate / Int(scaleDownFactor)
             let dimensions = CMVideoDimensions(width: width, height: height)
-            let codec = VideoCodec(
+            let codec = VideoLayer(
                 dimensions: dimensions,
                 quality: quality,
                 maxBitrate: bitrate,
                 sfuQuality: {
                     switch quality {
-                    case "f":
+                    case .full:
                         return .high
-                    case "h":
+                    case .half:
                         return .mid
-                    case "q":
-                        return .lowUnspecified
-                    default:
+                    case .quarter:
                         return .lowUnspecified
                     }
                 }()
@@ -121,7 +120,9 @@ enum VideoCapturingUtils {
         return (format: selectedFormat.format, dimensions: selectedFormat.dimensions, fps: selectedFps)
     }
     
-    static func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice? {
+    static func capturingDevice(
+        for cameraPosition: AVCaptureDevice.Position
+    ) -> AVCaptureDevice? {
         let devices = RTCCameraVideoCapturer.captureDevices()
         
         guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {

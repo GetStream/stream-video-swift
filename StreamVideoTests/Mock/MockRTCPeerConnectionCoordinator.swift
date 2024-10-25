@@ -37,7 +37,7 @@ final class MockRTCPeerConnectionCoordinator:
     }
 
     enum MockFunctionInputKey: Payloadable {
-        case changePublishQuality(activeEncodings: Set<String>)
+        case changePublishQuality(layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting])
         case didUpdateCallSettings(callSettings: CallSettings)
         case didUpdateCameraPosition(position: AVCaptureDevice.Position)
         case mid(type: TrackType)
@@ -57,8 +57,8 @@ final class MockRTCPeerConnectionCoordinator:
 
         var payload: Any {
             switch self {
-            case let .changePublishQuality(activeEncodings):
-                return activeEncodings
+            case let .changePublishQuality(layerSettings):
+                return layerSettings
             case let .didUpdateCallSettings(callSettings):
                 return callSettings
             case let .didUpdateCameraPosition(position):
@@ -153,9 +153,11 @@ final class MockRTCPeerConnectionCoordinator:
         )
     }
 
-    override func changePublishQuality(with activeEncodings: Set<String>) {
+    override func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+    ) {
         stubbedFunctionInput[.changePublishQuality]?
-            .append(.changePublishQuality(activeEncodings: activeEncodings))
+            .append(.changePublishQuality(layerSettings: layerSettings))
     }
 
     override func didUpdateCallSettings(_ settings: CallSettings) async throws {
