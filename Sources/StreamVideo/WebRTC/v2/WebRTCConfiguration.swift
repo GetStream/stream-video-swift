@@ -12,13 +12,15 @@ enum WebRTCConfiguration {
         var connect: TimeInterval
         var join: TimeInterval
         var migrationCompletion: TimeInterval
+        var publisherSetUpBeforeNegotiation: TimeInterval
 
         /// Timeout for authentication in production environment.
         static let production = Timeout(
             authenticate: 10,
             connect: 10,
             join: 10,
-            migrationCompletion: 10
+            migrationCompletion: 10,
+            publisherSetUpBeforeNegotiation: 2
         )
 
         #if STREAM_TESTS
@@ -27,7 +29,8 @@ enum WebRTCConfiguration {
             authenticate: 1,
             connect: 1,
             join: 1,
-            migrationCompletion: 1
+            migrationCompletion: 1,
+            publisherSetUpBeforeNegotiation: 2
         )
         #endif
     }
