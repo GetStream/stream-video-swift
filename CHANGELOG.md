@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - You can now set the time a user can remain in the call - after their connection disrupted - while waiting for their network connection to recover [#573](https://github.com/GetStream/stream-video-swift/pull/573)
 - You can now provide the preferred Video stream codec to use [#583](https://github.com/GetStream/stream-video-swift/pull/583)
 
+### 🐞 Fixed
+- In some cases when joining a call setup wasn't completed correctly which lead in issues during the call (e.g. missing video tracks or mute state not updating). [#586](https://github.com/GetStream/stream-video-swift/pull/586)
+
 # [1.13.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.13.0)
 _October 08, 2024_
 

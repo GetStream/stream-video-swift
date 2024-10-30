@@ -193,19 +193,21 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         )
     }
 
-    func test_negotiate_subjectIsPublisher_callsSetPublisherOnSFU() async throws {
+    func test_negotiate_subjectIsPublisher_setUpCompletes_callsSetPublisherOnSFU() async throws {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         _ = subject
+
         let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
         let expectedOffer = "useinbandfec=1;usedtx=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
         mockPeerConnection.stub(
             for: .offer,
             with: RTCSessionDescription(type: .offer, sdp: offer)
         )
-
-        mockPeerConnection
-            .subject
-            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        try await simulateConcurrentPeerConnectionSetUp {
+            self.mockPeerConnection
+                .subject
+                .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        }
 
         await fulfillment { [mockSFUStack] in
             mockSFUStack?.service.setPublisherWasCalledWithRequest != nil
@@ -225,7 +227,27 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         )
     }
 
-    func test_negotiate_subjectIsPublisher_callsSetRemoteDescriptionWithExpectedOffer() async throws {
+    func test_negotiate_subjectIsPublisher_setUpTimesOut_callsSetPublisherOnSFU() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+
+        let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+        let expectedOffer = "useinbandfec=1;usedtx=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+        mockPeerConnection.stub(
+            for: .offer,
+            with: RTCSessionDescription(type: .offer, sdp: offer)
+        )
+        try await simulateConcurrentPeerConnectionSetUp(shouldFail: true) {
+            self.mockPeerConnection
+                .subject
+                .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        }
+
+        await wait(for: WebRTCConfiguration.timeout.publisherSetUpBeforeNegotiation)
+        XCTAssertNil(mockSFUStack?.service.setPublisherWasCalledWithRequest)
+    }
+
+    func test_negotiate_subjectIsPublisher_setUpCompletes_callsSetRemoteDescriptionWithExpectedOffer() async throws {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         _ = subject
         mockPeerConnection.stub(
@@ -237,9 +259,12 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         response.sdp = expectedAnswer
         mockSFUStack.service.stub(for: .setPublisher, with: response)
 
-        mockPeerConnection
-            .subject
-            .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        try await simulateConcurrentPeerConnectionSetUp {
+            self
+                .mockPeerConnection
+                .subject
+                .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        }
 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.setRemoteDescription) == 1
@@ -259,6 +284,29 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
             )?.first?.type,
             .answer
         )
+    }
+
+    func test_negotiate_subjectIsPublisher_setUpTimesOut_callsSetRemoteDescriptionWithExpectedOffer() async throws {
+        mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        _ = subject
+        mockPeerConnection.stub(
+            for: .offer,
+            with: RTCSessionDescription(type: .offer, sdp: .unique)
+        )
+        var response = Stream_Video_Sfu_Signal_SetPublisherResponse()
+        let expectedAnswer = String.unique
+        response.sdp = expectedAnswer
+        mockSFUStack.service.stub(for: .setPublisher, with: response)
+
+        try await simulateConcurrentPeerConnectionSetUp(shouldFail: true) {
+            self
+                .mockPeerConnection
+                .subject
+                .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+        }
+
+        await wait(for: WebRTCConfiguration.timeout.publisherSetUpBeforeNegotiation)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 0)
     }
 
     // MARK: subscriber
@@ -376,5 +424,34 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
             mockSFUStack.service.sendAnswerWasCalledWithRequest?.sdp,
             sdp
         )
+    }
+
+    // MARK: - Private helpers
+
+    private func simulateConcurrentPeerConnectionSetUp(
+        callSettings: CallSettings = .init(),
+        ownCapabilities: [OwnCapability] = [],
+        setUpDelay: TimeInterval = 0,
+        shouldFail: Bool = false,
+        _ operation: @escaping () async throws -> Void
+    ) async throws {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                guard !shouldFail else { return }
+                if setUpDelay > 0 {
+                    await self.wait(for: setUpDelay)
+                }
+                try await self.subject.setUp(
+                    with: callSettings,
+                    ownCapabilities: ownCapabilities
+                )
+            }
+
+            group.addTask {
+                try await operation()
+            }
+
+            try await group.waitForAll()
+        }
     }
 }

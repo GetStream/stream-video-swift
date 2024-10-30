@@ -45,6 +45,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let sfuAdapter: SFUAdapter
 
     private var callSettings: CallSettings
+
+    /// A publisher that we use to observe setUp status. Once the setUp has been completed we expect
+    /// a `true` value to be sent. After that, any subsequent observations will rely on the `currentValue`
+    /// to know that the setUp completed, without having to wait for it.
     private var setUpSubject: CurrentValueSubject<Bool, Never> = .init(false)
     var videoOptions: VideoOptions
     var audioSettings: AudioSettings
@@ -619,19 +623,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
                 try await setLocalDescription(offer)
 
-                if !setUpSubject.value {
-                    log.debug(
-                        "PeerConnection is ready to negotiate but media setUp hasn't completed. Waiting...",
-                        subsystems: .peerConnectionPublisher
-                    )
-                    _ = try await setUpSubject
-                        .filter { $0 }
-                        .nextValue(timeout: WebRTCConfiguration.timeout.publisherSetUpBeforeNegotiation)
-                    log.debug(
-                        "PeerConnection is now ready to negotiate.",
-                        subsystems: .peerConnectionPublisher
-                    )
-                }
+                try await ensureSetUpHasBeenCompleted()
 
                 let tracksInfo = WebRTCJoinRequestFactory().buildAnnouncedTracks(
                     self,
@@ -667,6 +659,34 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             } catch {
                 log.error(error, subsystems: subsystem)
             }
+        }
+    }
+
+    /// SetUp and negotiation are running concurrently. However, in order to be able to negotiate
+    /// successfully, we need to wait for setUp to complete in order to have access to the local tracks.
+    /// This method ensures that setUp has been completed before moving forward.
+    /// - Note: The default timeout is set to 2 seconds.
+    private func ensureSetUpHasBeenCompleted() async throws {
+        guard !setUpSubject.value else {
+            return
+        }
+
+        do {
+            log.debug(
+                "PeerConnection is ready to negotiate but media setUp hasn't completed. Waiting...",
+                subsystems: .peerConnectionPublisher
+            )
+
+            _ = try await setUpSubject
+                .filter { $0 }
+                .nextValue(timeout: WebRTCConfiguration.timeout.publisherSetUpBeforeNegotiation)
+
+            log.debug(
+                "PeerConnection is now ready to negotiate.",
+                subsystems: .peerConnectionPublisher
+            )
+        } catch {
+            throw ClientError("PeerConnection setUp timed-out during negotiation [Error:\(error).].")
         }
     }
 
