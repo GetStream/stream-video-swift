@@ -44,7 +44,7 @@ actor WebRTCStateAdapter: ObservableObject {
     let screenShareSessionProvider: ScreenShareSessionProvider
 
     /// Published properties that represent different parts of the WebRTC state.
-    @Published private(set) var sessionID: String = ""
+    @Published private(set) var sessionID: String = UUID().uuidString
     @Published private(set) var token: String = ""
     @Published private(set) var callSettings: CallSettings = .init()
     @Published private(set) var audioSettings: AudioSettings = .init()
@@ -112,11 +112,6 @@ actor WebRTCStateAdapter: ObservableObject {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-        let sessionID = UUID().uuidString
-
-        Task {
-            await set(sessionID: sessionID)
-        }
     }
 
     /// Sets the session ID.
