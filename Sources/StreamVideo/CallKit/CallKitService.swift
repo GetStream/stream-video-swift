@@ -531,9 +531,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         if supportsHolding {
             log.warning("CallKit hold isn't supported.")
-//            update.supportsGrouping = true
-//            update.supportsHolding = true
-//            update.supportsUngrouping = true
         } else {
             update.supportsGrouping = false
             update.supportsHolding = false

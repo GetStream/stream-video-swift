@@ -45,6 +45,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let sfuAdapter: SFUAdapter
 
     private var callSettings: CallSettings
+
+    /// A publisher that we use to observe setUp status. Once the setUp has been completed we expect
+    /// a `true` value to be sent. After that, any subsequent observations will rely on the `currentValue`
+    /// to know that the setUp completed, without having to wait for it.
+    private var setUpSubject: CurrentValueSubject<Bool, Never> = .init(false)
     var videoOptions: VideoOptions
     var audioSettings: AudioSettings
 
@@ -218,6 +223,34 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         await iceAdapter.stopObserving()
     }
 
+    /// SetUp and negotiation are running concurrently. However, in order to be able to negotiate
+    /// successfully, we need to wait for setUp to complete in order to have access to the local tracks.
+    /// This method ensures that setUp has been completed before moving forward.
+    /// - Note: The default timeout is set to 2 seconds.
+    func ensureSetUpHasBeenCompleted() async throws {
+        guard !setUpSubject.value else {
+            return
+        }
+
+        do {
+            log.debug(
+                "PeerConnection is ready to negotiate but media setUp hasn't completed. Waiting...",
+                subsystems: .peerConnectionPublisher
+            )
+
+            _ = try await setUpSubject
+                .filter { $0 }
+                .nextValue(timeout: WebRTCConfiguration.timeout.publisherSetUpBeforeNegotiation)
+
+            log.debug(
+                "PeerConnection is now ready to negotiate.",
+                subsystems: .peerConnectionPublisher
+            )
+        } catch {
+            throw ClientError("PeerConnection setUp timed-out during negotiation [Error:\(error).].")
+        }
+    }
+
     /// Sets up the peer connection with given settings and capabilities.
     ///
     /// - Parameters:
@@ -236,12 +269,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             Connection type: \(peerType)
             SFU: \(sfuAdapter.hostname)
             
-            CallSettings:
-                audioOn: \(settings.audioOn)
-                videoOn: \(settings.videoOn)
-                audioOutputOn: \(settings.audioOutputOn)
-                speakerOn: \(settings.speakerOn)
-                cameraPosition: \(settings.cameraPosition)
+            \(settings)
             
             ownCapabilities:
                 hasAudio: \(ownCapabilities.contains(.sendAudio))
@@ -253,6 +281,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             with: settings,
             ownCapabilities: ownCapabilities
         )
+        setUpSubject.send(true)
     }
 
     /// Updates the call settings.
@@ -621,6 +650,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     .withRedundantCoding(audioSettings.redundantCodingEnabled)
 
                 try await setLocalDescription(offer)
+
+                try await ensureSetUpHasBeenCompleted()
 
                 let tracksInfo = WebRTCJoinRequestFactory().buildAnnouncedTracks(
                     self,

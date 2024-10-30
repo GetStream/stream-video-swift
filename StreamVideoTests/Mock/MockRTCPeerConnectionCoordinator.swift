@@ -24,6 +24,7 @@ final class MockRTCPeerConnectionCoordinator:
         case restartICE
         case close
         case setVideoFilter
+        case ensureSetUpHasBeenCompleted
         case setUp
         case beginScreenSharing
         case didUpdateCameraPosition
@@ -45,6 +46,7 @@ final class MockRTCPeerConnectionCoordinator:
         case restartICE
         case close
         case setVideoFilter(videoFilter: VideoFilter?)
+        case ensureSetUpHasBeenCompleted
         case setUp(settings: CallSettings, ownCapabilities: [OwnCapability])
         case beginScreenSharing(type: ScreensharingType, ownCapabilities: [OwnCapability])
         case stopScreenSharing
@@ -73,6 +75,8 @@ final class MockRTCPeerConnectionCoordinator:
                 return ()
             case let .setVideoFilter(videoFilter):
                 return videoFilter
+            case .ensureSetUpHasBeenCompleted:
+                return ()
             case let .setUp(settings, ownCapabilities):
                 return (settings, ownCapabilities)
             case let .beginScreenSharing(type, ownCapabilities):
@@ -217,6 +221,15 @@ final class MockRTCPeerConnectionCoordinator:
                 videoFilter: videoFilter
             )
         )
+    }
+
+    override func ensureSetUpHasBeenCompleted() async throws {
+        stubbedFunctionInput[.ensureSetUpHasBeenCompleted]?
+            .append(.ensureSetUpHasBeenCompleted)
+
+        if let result = stubbedFunction[.ensureSetUpHasBeenCompleted] as? Error {
+            throw result
+        }
     }
 
     override func setUp(

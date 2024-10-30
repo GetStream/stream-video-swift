@@ -4,7 +4,7 @@
 
 import Combine
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
 final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
 
