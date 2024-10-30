@@ -218,6 +218,9 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     func sendJoinRequest(
         _ payload: Stream_Video_Sfu_Event_JoinRequest
     ) {
+        if payload.sessionID.isEmpty {
+            log.warning("JoinRequests should contain a sessionId.", subsystems: .sfu)
+        }
         var event = Stream_Video_Sfu_Event_SfuRequest()
         event.requestPayload = .joinRequest(payload)
         send(message: event)
