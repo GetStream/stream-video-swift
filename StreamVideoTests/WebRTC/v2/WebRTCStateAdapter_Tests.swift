@@ -38,6 +38,10 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - setSessionID
 
+    func test_sessionID_shouldNotBeEmptyOnInit() async throws {
+        await assertEqualAsync(await subject.sessionID.isEmpty, false)
+    }
+
     func test_setSessionID_shouldUpdateSessionID() async throws {
         _ = subject
         _ = try await subject
