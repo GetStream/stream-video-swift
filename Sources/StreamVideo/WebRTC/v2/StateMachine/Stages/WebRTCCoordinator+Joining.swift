@@ -264,8 +264,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 let subscriber = await coordinator.stateAdapter.subscriber {
                 let offer = try await subscriber.createOffer()
                 subscriberSessionDescription = offer.sdp
-
             } else {
+                try await publisher?.ensureSetUpHasBeenCompleted()
                 subscriberSessionDescription = try await RTCTemporaryPeerConnection(
                     sessionID: coordinator.stateAdapter.sessionID,
                     peerConnectionFactory: coordinator.stateAdapter.peerConnectionFactory,
