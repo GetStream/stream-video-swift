@@ -9,19 +9,20 @@ final class RecursiveQueueTests: XCTestCase {
 
     private lazy var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
     private lazy var subject: RecursiveQueue! = .init()
+    private var sharedResource: Int! = 0
 
     // MARK: - Lifecycle
 
     override func tearDown() {
         subject = nil
         taskWaitIntervalRange = nil
+        sharedResource = nil
         super.tearDown()
     }
 
     // MARK: - sync(_:)
 
     func test_sync_exclusiveAccess() async {
-        var sharedResource = 0
         let iterations = 10
         let expectation = XCTestExpectation(description: "Concurrent access")
         expectation.expectedFulfillmentCount = iterations
@@ -31,8 +32,8 @@ final class RecursiveQueueTests: XCTestCase {
                 group.addTask {
                     await self.wait(for: Double.random(in: self.taskWaitIntervalRange))
                     self.subject.sync {
-                        let currentValue = sharedResource
-                        sharedResource = currentValue + 1
+                        let currentValue = self.sharedResource!
+                        self.sharedResource = currentValue + 1
                     }
                     expectation.fulfill()
                 }
@@ -49,7 +50,6 @@ final class RecursiveQueueTests: XCTestCase {
     // MARK: - Recursive Lock Testing
 
     func test_sync_recursiveAccess() async {
-        var sharedResource = 0
         let recursionDepth = 5
         let expectation = XCTestExpectation(description: "Recursive access")
         expectation.expectedFulfillmentCount = recursionDepth
@@ -57,7 +57,7 @@ final class RecursiveQueueTests: XCTestCase {
         func recursiveIncrement(depth: Int) {
             guard depth > 0 else { return }
             subject.sync {
-                sharedResource += 1
+                self.sharedResource += 1
                 expectation.fulfill()
                 recursiveIncrement(depth: depth - 1)
             }

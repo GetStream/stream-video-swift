@@ -9,19 +9,20 @@ final class UnfairQueueTests: XCTestCase {
 
     private lazy var taskWaitIntervalRange: ClosedRange<TimeInterval>! = 0.2...0.5
     private lazy var subject: UnfairQueue! = .init()
+    private var sharedResource: Int! = 0
 
     // MARK: - Lifecycle
 
     override func tearDown() {
         subject = nil
         taskWaitIntervalRange = nil
+        sharedResource = nil
         super.tearDown()
     }
 
     // MARK: - sync(_:)
 
     func test_sync_exclusiveAccess() async {
-        var sharedResource = 0
         let iterations = 10
         let expectation = XCTestExpectation(description: "Concurrent access")
         expectation.expectedFulfillmentCount = iterations
@@ -31,8 +32,8 @@ final class UnfairQueueTests: XCTestCase {
                 group.addTask {
                     await self.wait(for: Double.random(in: self.taskWaitIntervalRange))
                     self.subject.sync {
-                        let currentValue = sharedResource
-                        sharedResource = currentValue + 1
+                        let currentValue = self.sharedResource!
+                        self.sharedResource = currentValue + 1
                     }
                     expectation.fulfill()
                 }
