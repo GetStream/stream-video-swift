@@ -65,7 +65,10 @@ public final class DisposableBag: @unchecked Sendable {
 }
 
 extension AnyCancellable {
-    public func store(in disposableBag: DisposableBag?) { disposableBag?.insert(self) }
+    public func store(
+        in disposableBag: DisposableBag?,
+        key: String = UUID().uuidString
+    ) { disposableBag?.insert(self, with: key) }
 }
 
 extension Task {

@@ -72,7 +72,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
 
-        self.callController.call = self
+        callController.call = self
+        speaker.call = self
         // It's important to instantiate the stateMachine as soon as possible
         // to ensure it's uniqueness.
         _ = stateMachine
