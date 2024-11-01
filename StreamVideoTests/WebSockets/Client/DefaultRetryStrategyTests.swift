@@ -53,6 +53,46 @@ final class DefaultRetryStrategyTests: XCTestCase {
         }
     }
 
+    func test_incrementConsecutiveFailures_concurrentAccess() async {
+        let iterations = 100
+        let expectation = XCTestExpectation(description: "Concurrent increment")
+        expectation.expectedFulfillmentCount = iterations
+
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<iterations {
+                group.addTask {
+                    self.subject.incrementConsecutiveFailures()
+                    expectation.fulfill()
+                }
+            }
+        }
+
+        await fulfillment(of: [expectation], timeout: defaultTimeout)
+        XCTAssertEqual(subject.consecutiveFailuresCount, iterations)
+    }
+
+    func test_incrementAndResetConsecutiveFailures_concurrentAccess() async {
+        let iterations = 100
+        let expectation = XCTestExpectation(description: "Concurrent increment and reset")
+        expectation.expectedFulfillmentCount = iterations * 2
+
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<iterations {
+                group.addTask {
+                    self.subject.incrementConsecutiveFailures()
+                    expectation.fulfill()
+                }
+                group.addTask {
+                    self.subject.resetConsecutiveFailures()
+                    expectation.fulfill()
+                }
+            }
+        }
+
+        await fulfillment(of: [expectation], timeout: defaultTimeout)
+        XCTAssert(subject.consecutiveFailuresCount >= 0)
+    }
+
     // MARK: - resetConsecutiveFailures
 
     func test_resetConsecutiveFailures_setsConsecutiveFailuresToZero() {
@@ -65,6 +105,26 @@ final class DefaultRetryStrategyTests: XCTestCase {
         subject.resetConsecutiveFailures()
 
         // Assert # of consecutive failures is set to zero
+        XCTAssertEqual(subject.consecutiveFailuresCount, 0)
+    }
+
+    func test_resetConsecutiveFailures_concurrentAccess() async {
+        (0..<10).forEach { _ in subject.incrementConsecutiveFailures() }
+
+        let iterations = 10
+        let expectation = XCTestExpectation(description: "Concurrent reset")
+        expectation.expectedFulfillmentCount = iterations
+
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<iterations {
+                group.addTask {
+                    self.subject.resetConsecutiveFailures()
+                    expectation.fulfill()
+                }
+            }
+        }
+
+        await fulfillment(of: [expectation], timeout: defaultTimeout)
         XCTAssertEqual(subject.consecutiveFailuresCount, 0)
     }
 
