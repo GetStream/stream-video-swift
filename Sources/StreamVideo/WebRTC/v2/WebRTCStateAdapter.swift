@@ -10,7 +10,7 @@ import StreamWebRTC
 /// video call. This class manages the connection setup, track handling, and
 /// participants, including their media settings, capabilities, and track
 /// updates.
-actor WebRTCStateAdapter: ObservableObject {
+actor WebRTCStateAdapter: ObservableObject, AudioSessionDelegate {
 
     typealias ParticipantsStorage = [String: CallParticipant]
     typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
@@ -42,6 +42,7 @@ actor WebRTCStateAdapter: ObservableObject {
     let peerConnectionFactory: PeerConnectionFactory
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
+    let audioSession: AudioSession = .init()
 
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
@@ -74,7 +75,6 @@ actor WebRTCStateAdapter: ObservableObject {
     private var videoFilter: VideoFilter?
 
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
-    private let audioSession: AudioSession = .init()
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
 
@@ -112,6 +112,8 @@ actor WebRTCStateAdapter: ObservableObject {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
+
+        audioSession.delegate = self
     }
 
     /// Sets the session ID.
@@ -221,7 +223,6 @@ actor WebRTCStateAdapter: ObservableObject {
             callSettings: callSettings,
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
-            audioSession: audioSession,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )
@@ -239,7 +240,6 @@ actor WebRTCStateAdapter: ObservableObject {
             callSettings: callSettings,
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
-            audioSession: audioSession,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )
@@ -539,6 +539,18 @@ actor WebRTCStateAdapter: ObservableObject {
             }
 
             partialResult[entry.key] = newParticipant
+        }
+    }
+
+    // MARK: - AudioSessionDelegate
+
+    nonisolated func audioSessionDidUpdateCallSettings(
+        _ audioSession: AudioSession,
+        callSettings: CallSettings
+    ) {
+        Task {
+            await self.set(callSettings: callSettings)
+            log.debug("AudioSession updated call settings: \(callSettings)")
         }
     }
 }

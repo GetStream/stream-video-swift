@@ -50,7 +50,6 @@ final class MediaAdapter {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
-        audioSession: AudioSession,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -65,8 +64,7 @@ final class MediaAdapter {
                     peerConnection: peerConnection,
                     peerConnectionFactory: peerConnectionFactory,
                     localMediaManager: LocalNoOpMediaAdapter(subject: subject),
-                    subject: subject,
-                    audioSession: audioSession
+                    subject: subject
                 ),
                 videoMediaAdapter: .init(
                     sessionID: sessionID,
@@ -92,8 +90,7 @@ final class MediaAdapter {
                     peerConnection: peerConnection,
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,
-                    subject: subject,
-                    audioSession: audioSession
+                    subject: subject
                 ),
                 videoMediaAdapter: .init(
                     sessionID: sessionID,
@@ -221,30 +218,6 @@ final class MediaAdapter {
         default:
             return nil
         }
-    }
-
-    // MARK: - Audio
-
-    /// Updates the audio session state.
-    ///
-    /// - Parameter isEnabled: Whether the audio session is enabled.
-    func didUpdateAudioSessionState(_ isEnabled: Bool) async {
-        await audioMediaAdapter.didUpdateAudioSessionState(isEnabled)
-    }
-
-    /// Updates the audio session speaker state.
-    ///
-    /// - Parameters:
-    ///   - isEnabled: Whether the speaker is enabled.
-    ///   - audioSessionEnabled: Whether the audio session is enabled.
-    func didUpdateAudioSessionSpeakerState(
-        _ isEnabled: Bool,
-        with audioSessionEnabled: Bool
-    ) async {
-        await audioMediaAdapter.didUpdateAudioSessionSpeakerState(
-            isEnabled,
-            with: audioSessionEnabled
-        )
     }
 
     // MARK: - Video

@@ -61,24 +61,4 @@ final class AudioMediaAdapter_Tests: XCTestCase {
         )
         XCTAssertEqual(actual, settings)
     }
-
-    // MARK: - didUpdateAudioSessionState(_:)
-
-    func test_didUpdateAudioSessionState_audioSessionWasConfiguredCorrectly() async throws {
-        await subject.didUpdateAudioSessionState(true)
-
-        let isActive = await audioSession.isAudioEnabled
-        XCTAssertTrue(isActive)
-    }
-
-    // MARK: - didUpdateAudioSessionSpeakerState(_:)
-
-    func test_didUpdateAudioSessionSpeakerState_audioSessionWasConfiguredCorrectly() async throws {
-        await subject.didUpdateAudioSessionSpeakerState(true, with: false)
-
-        let isActive = await audioSession.isActive
-        let isSpeakerOn = await audioSession.isSpeakerOn
-        XCTAssertFalse(isActive)
-        XCTAssertTrue(isSpeakerOn)
-    }
 }

@@ -172,10 +172,30 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         )
         subject.localTrack?.isEnabled = true
 
-        try await subject.didUpdateCallSettings(.init(audioOn: false))
+        try await subject.didUpdateCallSettings(.init(audioOutputOn: false))
 
         let isActive = await audioSession.isActive
         XCTAssertFalse(isActive)
+    }
+
+    func test_didUpdateCallSettings_isEnabledTrueCallSettingsTrueSpeakerOnTrue_callSettingsUpdatedAudioSession() async throws {
+        mockPeerConnection.stub(
+            for: .addTransceiver,
+            with: try makeTransceiver(of: .audio)
+        )
+
+        try await subject.setUp(
+            with: .init(audioOn: true),
+            ownCapabilities: [.sendAudio]
+        )
+        subject.localTrack?.isEnabled = true
+
+        try await subject.didUpdateCallSettings(.init(audioOn: true, speakerOn: true))
+
+        let isActive = await audioSession.isActive
+        let isSpeakerOn = await audioSession.isSpeakerOn
+        XCTAssertTrue(isActive)
+        XCTAssertTrue(isSpeakerOn)
     }
 
     func test_didUpdateCallSettings_isEnabledFalseCallSettingsTrue_startsRecording() async throws {
@@ -189,6 +209,32 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         await fulfillment { [mockAudioRecorder] in
             mockAudioRecorder?.stubbedFunctionInput[.startRecording]?.isEmpty == true
         }
+    }
+
+    func test_didUpdateCallSettings_disablingAudioSessionWhileSpeakerIsOnAndUnmuted_callSettingsUpdatedAudioSession() async throws {
+        mockPeerConnection.stub(
+            for: .addTransceiver,
+            with: try makeTransceiver(of: .audio)
+        )
+        try await subject.setUp(
+            with: .init(audioOn: true),
+            ownCapabilities: [.sendAudio]
+        )
+        subject.localTrack?.isEnabled = true
+        try await subject.didUpdateCallSettings(.init(audioOn: true, speakerOn: true))
+        await assertEqualAsync(await audioSession.isActive, true)
+        await assertEqualAsync(await audioSession.isSpeakerOn, true)
+
+        try await subject.didUpdateCallSettings(
+            .init(
+                audioOn: true,
+                speakerOn: true,
+                audioOutputOn: false
+            )
+        )
+
+        await assertEqualAsync(await audioSession.isActive, false)
+        await assertEqualAsync(await audioSession.isSpeakerOn, true)
     }
 
     // MARK: - publish
@@ -281,6 +327,17 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
             try await group.waitForAll()
         }
+    }
+
+    private func assertEqualAsync<T: Equatable>(
+        _ expression: @autoclosure () async throws -> T,
+        _ expected: @autoclosure () async throws -> T,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async rethrows {
+        let value = try await expression()
+        let expectedValue = try await expected()
+        XCTAssertEqual(value, expectedValue, file: file, line: line)
     }
 
     private func makeTransceiver(

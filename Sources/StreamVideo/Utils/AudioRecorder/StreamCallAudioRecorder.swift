@@ -196,9 +196,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     }
 
     private func setUpAudioCaptureIfRequired() async throws -> AVAudioRecorder {
-        try audioSession.setCategory(.playAndRecord)
-        try audioSession.setActive(true, options: [])
-
         guard
             await audioSession.requestRecordPermission()
         else {

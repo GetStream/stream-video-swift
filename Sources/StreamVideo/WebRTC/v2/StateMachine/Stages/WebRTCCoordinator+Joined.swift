@@ -362,14 +362,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .$callSettings
                 .compactMap { $0 }
                 .removeDuplicates()
-                .log(.debug, subsystems: .webRTC) {
-                    """
-                    CallSettings updated
-                        audioOn: \($0.audioOn)
-                        videoOn: \($0.videoOn)
-                        audioOutputOn: \($0.audioOutputOn)
-                    """
-                }
+                .log(.debug, subsystems: .webRTC) { "Updated \($0)" }
                 .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
                     guard let self else { return }
 
@@ -384,11 +377,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             return
                         }
 
+                        try context
+                            .coordinator?
+                            .stateAdapter
+                            .audioSession
+                            .didUpdateCallSettings(callSettings)
+
                         try await publisher.didUpdateCallSettings(callSettings)
-                        log.debug("Publisher callSettings updated.", subsystems: .webRTC)
+                        log.debug("Publisher and AudioSession callSettings updated.", subsystems: .webRTC)
                     } catch {
                         log.warning(
-                            "Will disconnect because failed to update callSettings on publisher.",
+                            "Will disconnect because failed to update callSettings on Publisher or AudioSession.[Error:\(error)]",
                             subsystems: .webRTC
                         )
                         transitionDisconnectOrError(error)
