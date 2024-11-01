@@ -2,6 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import CallKit
 import Combine
 import Foundation
@@ -301,6 +302,20 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     open func provider(
         _ provider: CXProvider,
+        didActivate audioSession: AVAudioSession
+    ) {
+        log.debug("AudioSession is now active with router:\(audioSession.currentRoute).")
+    }
+
+    public func provider(
+        _ provider: CXProvider,
+        didDeactivate audioSession: AVAudioSession
+    ) {
+        log.debug("AudioSession is now inactive with router:\(audioSession.currentRoute).")
+    }
+
+    open func provider(
+        _ provider: CXProvider,
         perform action: CXAnswerCallAction
     ) {
         guard
@@ -334,6 +349,26 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 set(nil, for: action.callUUID)
                 log.error(error)
                 action.fail()
+            }
+
+            let callSettings = callToJoinEntry.call.state.callSettings
+            do {
+                if callSettings.audioOn == false {
+                    try await requestTransaction(
+                        CXSetMutedCallAction(
+                            call: callToJoinEntry.callUUID,
+                            muted: true
+                        )
+                    )
+                }
+            } catch {
+                log.error(
+                    """
+                    While joining call id:\(callToJoinEntry.call.cId) we failed to mute the microphone.
+                    \(callSettings)
+                    """,
+                    error: error
+                )
             }
         }
     }
@@ -382,6 +417,31 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 stackEntry.call.leave()
             }
             set(nil, for: action.callUUID)
+            action.fulfill()
+        }
+    }
+
+    open func provider(
+        _ provider: CXProvider,
+        perform action: CXSetMutedCallAction
+    ) {
+        guard let stackEntry = callEntry(for: action.callUUID) else {
+            action.fail()
+            return
+        }
+        Task {
+            do {
+                if action.isMuted {
+                    try await stackEntry.call.microphone.disable()
+                } else {
+                    try await stackEntry.call.microphone.enable()
+                }
+            } catch {
+                log.error(
+                    "Unable to perform muteCallAction isMuted:\(action.isMuted).",
+                    error: error
+                )
+            }
             action.fulfill()
         }
     }
@@ -576,3 +636,4 @@ extension InjectedValues {
 
 extension CXAnswerCallAction: @unchecked Sendable {}
 extension CXSetHeldCallAction: @unchecked Sendable {}
+extension CXSetMutedCallAction: @unchecked Sendable {}

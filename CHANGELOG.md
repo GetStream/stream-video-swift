@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - You can now provide the incoming video quality setting for some or all participants [#571](https://github.com/GetStream/stream-video-swift/pull/571)
 - You can now set the time a user can remain in the call - after their connection disrupted - while waiting for their network connection to recover [#573](https://github.com/GetStream/stream-video-swift/pull/573)
 - You can now provide the preferred Video stream codec to use [#583](https://github.com/GetStream/stream-video-swift/pull/583)
+- Sync microphone mute state between the SDK and CallKit [#590](https://github.com/GetStream/stream-video-swift/pull/590)
 
 ### 🐞 Fixed
 - In some cases when joining a call setup wasn't completed correctly which lead in issues during the call (e.g. missing video tracks or mute state not updating). [#586](https://github.com/GetStream/stream-video-swift/pull/586)

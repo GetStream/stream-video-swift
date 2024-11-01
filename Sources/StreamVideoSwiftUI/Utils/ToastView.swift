@@ -59,8 +59,8 @@ public struct ToastView: View {
 public struct ToastModifier: ViewModifier {
     
     @Binding var toast: Toast?
-    @State private var workItem: DispatchWorkItem?
-    
+    @State private var workItem: Task<Void, Never>?
+
     public init(toast: Binding<Toast?>) {
         _toast = toast
     }
@@ -107,13 +107,11 @@ public struct ToastModifier: ViewModifier {
         
         if toast.duration > 0 {
             workItem?.cancel()
-            
-            let task = DispatchWorkItem {
+
+            workItem = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(toast.duration * Double(1_000_000_000)))
                 dismissToast()
             }
-            
-            workItem = task
-            DispatchQueue.main.asyncAfter(deadline: .now() + toast.duration, execute: task)
         }
     }
     
