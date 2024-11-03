@@ -5,7 +5,7 @@
 import CallKit
 import Foundation
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
 final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
@@ -314,6 +314,75 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    @MainActor
+    func test_accept_micShouldBeMuted_callWasMutedAsExpected() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        let callStateWithMicOff = CallState()
+        callStateWithMicOff.callSettings = .init(audioOn: false)
+        call.stub(for: \.state, with: callStateWithMicOff)
+        try await assertRequestTransaction(CXSetMutedCallAction.self) {
+            // Accept call
+            subject.provider(
+                callProvider,
+                perform: CXAnswerCallAction(
+                    call: firstCallUUID
+                )
+            )
+        }
+    }
+
+    // MARK: - mute
+
+    @MainActor
+    func test_mute_callWasMutedAsExpected() async throws {
+        let customCallSettings = CallSettings(audioOn: true, videoOn: true)
+        subject.callSettings = customCallSettings
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+        await waitExpectation(timeout: 1)
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(call: firstCallUUID)
+        )
+        await waitExpectation(timeout: 1)
+        XCTAssertEqual(call.stubbedFunctionInput[.join]?.count, 1)
+        let input = try XCTUnwrap(call.stubbedFunctionInput[.join]?.first)
+        switch input {
+        case let .join(_, _, _, _, callSettings):
+            XCTAssertEqual(callSettings, customCallSettings)
+        }
+        XCTAssertEqual(call.microphone.status, .enabled)
+
+        // Once we have joined the call
+        subject.provider(
+            callProvider,
+            perform: CXSetMutedCallAction(call: firstCallUUID, muted: true)
+        )
+
+        await fulfillment { call.microphone.status == .disabled }
+    }
+
     // MARK: - callAccepted
 
     @MainActor
@@ -553,11 +622,11 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         actionBlock()
 
         await fulfillment(timeout: defaultTimeout, file: file, line: line) {
-            self.callController.requestWasCalledWith?.0.actions.first != nil
+            (self.callController.requestWasCalledWith?.0.actions.last as? T) != nil
         }
 
         let action = try XCTUnwrap(
-            callController.requestWasCalledWith?.0.actions.first,
+            callController.requestWasCalledWith?.0.actions.last,
             file: file,
             line: line
         )
