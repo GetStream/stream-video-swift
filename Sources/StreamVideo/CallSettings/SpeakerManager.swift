@@ -7,12 +7,19 @@ import Foundation
 
 /// Handles the speaker state during a call.
 public final class SpeakerManager: ObservableObject, CallSettingsManager, @unchecked Sendable {
-        
-    internal let callController: CallController
+
     @Published public internal(set) var status: CallSettingsStatus
     @Published public internal(set) var audioOutputStatus: CallSettingsStatus
+
+    weak var call: Call? {
+        didSet { Task { await didUpdateCall(call) } }
+    }
+
+    internal let callController: CallController
     internal let state = CallSettingsState()
-    
+
+    private let disposableBag = DisposableBag()
+
     init(
         callController: CallController,
         initialSpeakerStatus: CallSettingsStatus,
@@ -74,5 +81,29 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
                 self.audioOutputStatus = status
             }
         )
+    }
+
+    @MainActor
+    private func didUpdateCall(_ call: Call?) {
+        let observationKey = "call-settings-cancellable"
+        disposableBag.remove(observationKey)
+
+        guard let call else {
+            return
+        }
+
+        let typeOfSelf = type(of: self)
+        call
+            .state
+            .$callSettings
+            .removeDuplicates()
+            .map { (speakerOn: $0.speakerOn, audioOutputOn: $0.audioOutputOn) }
+            .log(.debug) { "\(typeOfSelf) callSettings updated speakerOn:\($0.speakerOn) audioOutputOn:\($0.audioOutputOn)." }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.status = $0.speakerOn ? .enabled : .disabled
+                self?.audioOutputStatus = $0.audioOutputOn ? .enabled : .disabled
+            }
+            .store(in: disposableBag, key: observationKey)
     }
 }
