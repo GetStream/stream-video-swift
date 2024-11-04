@@ -24,36 +24,40 @@ import Foundation
 
 @propertyWrapper
 final class Atomic<T> {
-    var wrappedValue: T {
-        get {
-            var currentValue: T!
-            mutate { currentValue = $0 }
-            return currentValue
-        }
+    enum Mode {
+        case unfair
+        case recursive
 
-        set {
-            mutate { $0 = newValue }
+        var queue: LockQueuing {
+            switch self {
+            case .unfair:
+                return UnfairQueue()
+            case .recursive:
+                return RecursiveQueue()
+            }
         }
     }
-    
-    private let lock = NSRecursiveLock()
-    private var _wrappedValue: T
+
+    private let queue: LockQueuing
+    private var _value: T
+
+    var wrappedValue: T {
+        get { queue.sync { _value } }
+        set { queue.sync { _value = newValue } }
+    }
+
+    init(wrappedValue: T, mode: Mode = .unfair) {
+        _value = wrappedValue
+        queue = mode.queue
+    }
+
+    /// Update the value safely.
+    /// - Parameter changes: a block with changes. It should return a new value.
+    func mutate(_ changes: (_ value: T) -> T) {
+        queue.sync { _value = changes(_value) }
+    }
     
     /// Update the value safely.
     /// - Parameter changes: a block with changes. It should return a new value.
-    func mutate(_ changes: (_ value: inout T) -> Void) {
-        lock.lock()
-        changes(&_wrappedValue)
-        lock.unlock()
-    }
-    
-    /// Update the value safely.
-    /// - Parameter changes: a block with changes. It should return a new value.
-    func callAsFunction(_ changes: (_ value: inout T) -> Void) {
-        mutate(changes)
-    }
-    
-    init(wrappedValue: T) {
-        _wrappedValue = wrappedValue
-    }
+    func callAsFunction(_ changes: (_ value: T) -> T) { mutate(changes) }
 }

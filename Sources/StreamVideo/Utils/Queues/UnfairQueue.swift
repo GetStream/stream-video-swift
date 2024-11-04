@@ -23,7 +23,7 @@ import Foundation
 /// additional overhead of dispatching tasks and managing thread execution in a DispatchQueue could result
 /// in unnecessary latency, making `os_unfair_lock` the superior choice for scenarios where rapid, lightweight
 /// synchronization is paramount.
-public final class UnfairQueue: @unchecked Sendable {
+public final class UnfairQueue: LockQueuing, @unchecked Sendable {
 
     /// The unfair lock variable, managed as an unsafe mutable pointer to `os_unfair_lock`.
     private let lock: os_unfair_lock_t
