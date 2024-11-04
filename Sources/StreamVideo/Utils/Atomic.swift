@@ -28,7 +28,7 @@ final class Atomic<T> {
         case unfair
         case recursive
 
-        var queue: LockQueing {
+        var queue: LockQueuing {
             switch self {
             case .unfair:
                 return UnfairQueue()
@@ -38,7 +38,7 @@ final class Atomic<T> {
         }
     }
 
-    private let queue: LockQueing
+    private let queue: LockQueuing
     private var _value: T
 
     var wrappedValue: T {

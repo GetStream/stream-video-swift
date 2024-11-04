@@ -19,7 +19,7 @@ import Foundation
 /// While `NSRecursiveLock` has more overhead than `os_unfair_lock`, it is ideal for more complex code flows
 /// where reentrancy or recursive method calls require safe locking. This makes it a better fit than
 /// `os_unfair_lock` when you need the flexibility to enter the lock multiple times on the same thread.
-public final class RecursiveQueue: LockQueing, @unchecked Sendable {
+public final class RecursiveQueue: LockQueuing, @unchecked Sendable {
 
     /// The recursive lock instance.
     private let lock = NSRecursiveLock()

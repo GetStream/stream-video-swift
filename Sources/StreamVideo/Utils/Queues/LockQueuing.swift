@@ -6,9 +6,9 @@ import Foundation
 
 /// A protocol defining a lock-based synchronization interface.
 ///
-/// Types conforming to `LockQueing` provide thread-safe access to resources
+/// Types conforming to `LockQueuing` provide thread-safe access to resources
 /// by executing blocks of code within a lock, ensuring mutual exclusion.
-protocol LockQueing {
+protocol LockQueuing {
 
     /// Executes a block within a lock, ensuring exclusive access.
     ///
