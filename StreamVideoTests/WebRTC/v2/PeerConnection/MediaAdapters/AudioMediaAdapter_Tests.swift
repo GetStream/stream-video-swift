@@ -14,14 +14,13 @@ final class AudioMediaAdapter_Tests: XCTestCase {
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockMediaAdapter: MockLocalMediaAdapter! = .init()
-    private lazy var audioSession: AudioSession! = .init()
+    private lazy var audioSession: StreamAudioSessionAdapter! = .init()
     private lazy var subject: AudioMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
         localMediaManager: mockMediaAdapter,
-        subject: spySubject,
-        audioSession: audioSession
+        subject: spySubject
     )
 
     override func tearDown() {

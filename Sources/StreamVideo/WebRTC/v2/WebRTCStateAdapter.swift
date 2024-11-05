@@ -10,7 +10,7 @@ import StreamWebRTC
 /// video call. This class manages the connection setup, track handling, and
 /// participants, including their media settings, capabilities, and track
 /// updates.
-actor WebRTCStateAdapter: ObservableObject, AudioSessionDelegate {
+actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     typealias ParticipantsStorage = [String: CallParticipant]
     typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
@@ -42,7 +42,7 @@ actor WebRTCStateAdapter: ObservableObject, AudioSessionDelegate {
     let peerConnectionFactory: PeerConnectionFactory
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
-    let audioSession: AudioSession = .init()
+    let audioSession: StreamAudioSessionAdapter = .init()
 
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
@@ -544,13 +544,16 @@ actor WebRTCStateAdapter: ObservableObject, AudioSessionDelegate {
 
     // MARK: - AudioSessionDelegate
 
-    nonisolated func audioSessionDidUpdateCallSettings(
-        _ audioSession: AudioSession,
+    nonisolated func audioSessionAdapterDidUpdateCallSettings(
+        _ adapter: StreamAudioSessionAdapter,
         callSettings: CallSettings
     ) {
         Task {
             await self.set(callSettings: callSettings)
-            log.debug("AudioSession updated call settings: \(callSettings)")
+            log.debug(
+                "AudioSession updated call settings: \(callSettings)",
+                subsystems: .audioSession
+            )
         }
     }
 }

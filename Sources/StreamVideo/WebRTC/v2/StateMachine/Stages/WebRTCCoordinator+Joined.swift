@@ -377,7 +377,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             return
                         }
 
-                        try context
+                        context
                             .coordinator?
                             .stateAdapter
                             .audioSession

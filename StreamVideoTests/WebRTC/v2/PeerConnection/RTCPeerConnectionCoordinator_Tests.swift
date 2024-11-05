@@ -5,7 +5,7 @@
 import Combine
 @testable import StreamVideo
 import StreamWebRTC
-import XCTest
+@preconcurrency import XCTest
 
 final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
 
@@ -14,7 +14,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockSFUStack: MockSFUStack! = .init()
-    private lazy var audioSession: AudioSession! = .init()
+    private lazy var audioSession: StreamAudioSessionAdapter! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockLocalMediaAdapterA: MockLocalMediaAdapter! = .init()
     private lazy var mockLocalMediaAdapterB: MockLocalMediaAdapter! = .init()
@@ -24,8 +24,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
         localMediaManager: mockLocalMediaAdapterA,
-        subject: spySubject,
-        audioSession: audioSession
+        subject: spySubject
     )
     private lazy var videoMediaAdapter: VideoMediaAdapter! = .init(
         sessionID: sessionId,
@@ -55,7 +54,6 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         callSettings: .init(),
         audioSettings: .dummy(opusDtxEnabled: true, redundantCodingEnabled: true),
         sfuAdapter: mockSFUStack.adapter,
-        audioSession: audioSession,
         mediaAdapter: mediaAdapter
     )
 

@@ -16,14 +16,14 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
-    private lazy var audioSession: AudioSession! = .init()
+    private lazy var audioSession: MockAudioSession! = .init()
+    private lazy var audioSessionAdapter: StreamAudioSessionAdapter! = .init(audioSession)
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var subject: LocalAudioMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
         sfuAdapter: mockSFUStack.adapter,
-        audioSession: audioSession,
         subject: spySubject
     )
 
@@ -33,6 +33,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         subject = nil
         spySubject = nil
         audioSession = nil
+        audioSessionAdapter = nil
         mockSFUStack = nil
         mockPeerConnection = nil
         peerConnectionFactory = nil
@@ -151,90 +152,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .audio)
         XCTAssertTrue(request.muteStates[0].muted)
-    }
-
-    func test_didUpdateCallSettings_isEnabledFalseCallSettingsTrue_callSettingsUpdatedAudioSession() async throws {
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: [.sendAudio]
-        )
-
-        try await subject.didUpdateCallSettings(.init(audioOn: true))
-
-        let isActive = await audioSession.isAudioEnabled
-        XCTAssertTrue(isActive)
-    }
-
-    func test_didUpdateCallSettings_isEnabledTrueCallSettingsFalse_callSettingsUpdatedAudioSession() async throws {
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: [.sendAudio]
-        )
-        subject.localTrack?.isEnabled = true
-
-        try await subject.didUpdateCallSettings(.init(audioOutputOn: false))
-
-        let isActive = await audioSession.isActive
-        XCTAssertFalse(isActive)
-    }
-
-    func test_didUpdateCallSettings_isEnabledTrueCallSettingsTrueSpeakerOnTrue_callSettingsUpdatedAudioSession() async throws {
-        mockPeerConnection.stub(
-            for: .addTransceiver,
-            with: try makeTransceiver(of: .audio)
-        )
-
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: [.sendAudio]
-        )
-        subject.localTrack?.isEnabled = true
-
-        try await subject.didUpdateCallSettings(.init(audioOn: true, speakerOn: true))
-
-        let isActive = await audioSession.isActive
-        let isSpeakerOn = await audioSession.isSpeakerOn
-        XCTAssertTrue(isActive)
-        XCTAssertTrue(isSpeakerOn)
-    }
-
-    func test_didUpdateCallSettings_isEnabledFalseCallSettingsTrue_startsRecording() async throws {
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: [.sendAudio]
-        )
-
-        try await subject.didUpdateCallSettings(.init(audioOn: true))
-
-        await fulfillment { [mockAudioRecorder] in
-            mockAudioRecorder?.stubbedFunctionInput[.startRecording]?.isEmpty == true
-        }
-    }
-
-    func test_didUpdateCallSettings_disablingAudioSessionWhileSpeakerIsOnAndUnmuted_callSettingsUpdatedAudioSession() async throws {
-        mockPeerConnection.stub(
-            for: .addTransceiver,
-            with: try makeTransceiver(of: .audio)
-        )
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: [.sendAudio]
-        )
-        subject.localTrack?.isEnabled = true
-        try await subject.didUpdateCallSettings(.init(audioOn: true, speakerOn: true))
-        await assertEqualAsync(await audioSession.isActive, true)
-        await assertEqualAsync(await audioSession.isSpeakerOn, true)
-
-        try await subject.didUpdateCallSettings(
-            .init(
-                audioOn: true,
-                speakerOn: true,
-                audioOutputOn: false
-            )
-        )
-
-        await assertEqualAsync(await audioSession.isActive, false)
-        await assertEqualAsync(await audioSession.isSpeakerOn, true)
     }
 
     // MARK: - publish

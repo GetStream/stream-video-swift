@@ -15,12 +15,10 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     private struct StartRecordingRequest: Hashable { var hasActiveCall, ignoreActiveCall, isRecording: Bool }
 
     @Injected(\.activeCallProvider) private var activeCallProvider
+    @Injected(\.activeCallAudioSession) private var activeCallAudioSession
 
     /// The builder used to create the AVAudioRecorder instance.
     let audioRecorderBuilder: AVAudioRecorderBuilder
-
-    /// The audio session used for recording and playback.
-    let audioSession: AudioSessionProtocol
 
     /// A private task responsible for setting up the recorder in the background.
     private var setUpTask: Task<Void, Error>?
@@ -36,12 +34,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// A public publisher that exposes the average power of the audio signal.
     open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
 
-    private let queue = UnfairQueue()
-    private var _isRecording: Bool = false
-    private var isRecording: Bool {
-        get { queue.sync { _isRecording } }
-        set { queue.sync { _isRecording = newValue } }
-    }
+    @Atomic private var isRecording: Bool = false
 
     /// Indicates whether an active call is present, influencing recording behaviour.
     private var hasActiveCall: Bool = false {
@@ -49,16 +42,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             guard hasActiveCall != oldValue else { return }
             log.debug("🎙️updated with hasActiveCall:\(hasActiveCall).")
             if !hasActiveCall {
-                Task {
-                    await stopRecording()
-                    do {
-                        /// It's safe to deactivate the session as a call isn't in progress.
-                        try audioSession.setActive(false, options: [])
-                        log.debug("🎙️AudioSession deactivated.")
-                    } catch {
-                        log.error("🎙️Failed to deactivate AudioSession.", error: error)
-                    }
-                }
+                Task { await stopRecording() }
             }
         }
     }
@@ -70,7 +54,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// - Parameter filename: The name of the file to record to.
     public init(filename: String) {
         audioRecorderBuilder = .init(inCacheDirectoryWithFilename: filename)
-        audioSession = AVAudioSession.sharedInstance()
 
         setUp()
     }
@@ -78,13 +61,10 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// Initializes the recorder with a custom builder and audio session.
     ///
     /// - Parameter audioRecorderBuilder: The builder used to create the recorder.
-    /// - Parameter audioSession: The audio session used for recording and playback.
     init(
-        audioRecorderBuilder: AVAudioRecorderBuilder,
-        audioSession: AudioSessionProtocol
+        audioRecorderBuilder: AVAudioRecorderBuilder
     ) {
         self.audioRecorderBuilder = audioRecorderBuilder
-        self.audioSession = audioSession
 
         setUp()
     }
@@ -197,7 +177,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     private func setUpAudioCaptureIfRequired() async throws -> AVAudioRecorder {
         guard
-            await audioSession.requestRecordPermission()
+            await activeCallAudioSession?.requestRecordPermission() == true
         else {
             throw ClientError("🎙️Permission denied.")
         }
