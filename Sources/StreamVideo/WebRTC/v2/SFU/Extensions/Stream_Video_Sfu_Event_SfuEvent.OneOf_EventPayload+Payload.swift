@@ -59,6 +59,8 @@ extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
             return payload as? T
         case let .participantMigrationComplete(payload):
             return payload as? T
+        case let .codecNegotiationComplete(payload):
+            return payload as? T
         }
     }
 }

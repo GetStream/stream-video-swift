@@ -7,18 +7,14 @@ import Foundation
 
 extension Stream_Video_Sfu_Models_Codec {
     static func dummy(
-        payloadType: UInt32 = 0,
-        name: String = "",
-        clockRate: UInt32 = 0,
-        encodingParameters: String = "",
-        feedbacks: [String] = []
+        mimeType: String = String(),
+        scalabilityMode: String = String(),
+        fmtp: String = String()
     ) -> Stream_Video_Sfu_Models_Codec {
         var result = Stream_Video_Sfu_Models_Codec()
-        result.payloadType = payloadType
-        result.name = name
-        result.clockRate = clockRate
-        result.encodingParameters = encodingParameters
-        result.feedbacks = feedbacks
+        result.mimeType = mimeType
+        result.scalabilityMode = scalabilityMode
+        result.fmtp = fmtp
         return result
     }
 }

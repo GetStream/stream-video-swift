@@ -936,17 +936,11 @@ struct Stream_Video_Sfu_Models_Codec {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var payloadType: UInt32 = 0
+  var mimeType: String = String()
 
-  var name: String = String()
+  var scalabilityMode: String = String()
 
-  var fmtpLine: String = String()
-
-  var clockRate: UInt32 = 0
-
-  var encodingParameters: String = String()
-
-  var feedbacks: [String] = []
+  var fmtp: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -990,6 +984,8 @@ struct Stream_Video_Sfu_Models_TrackInfo {
   var red: Bool = false
 
   var muted: Bool = false
+
+  var preferredCodecs: [Stream_Video_Sfu_Models_Codec] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1793,12 +1789,9 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
 extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Codec"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "payload_type"),
-    2: .same(proto: "name"),
-    3: .standard(proto: "fmtp_line"),
-    4: .standard(proto: "clock_rate"),
-    5: .standard(proto: "encoding_parameters"),
-    6: .same(proto: "feedbacks"),
+    10: .standard(proto: "mime_type"),
+    11: .standard(proto: "scalability_mode"),
+    12: .same(proto: "fmtp"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1807,46 +1800,31 @@ extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._M
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.payloadType) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.name) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.fmtpLine) }()
-      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.clockRate) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self.encodingParameters) }()
-      case 6: try { try decoder.decodeRepeatedStringField(value: &self.feedbacks) }()
+      case 10: try { try decoder.decodeSingularStringField(value: &self.mimeType) }()
+      case 11: try { try decoder.decodeSingularStringField(value: &self.scalabilityMode) }()
+      case 12: try { try decoder.decodeSingularStringField(value: &self.fmtp) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.payloadType != 0 {
-      try visitor.visitSingularUInt32Field(value: self.payloadType, fieldNumber: 1)
+    if !self.mimeType.isEmpty {
+      try visitor.visitSingularStringField(value: self.mimeType, fieldNumber: 10)
     }
-    if !self.name.isEmpty {
-      try visitor.visitSingularStringField(value: self.name, fieldNumber: 2)
+    if !self.scalabilityMode.isEmpty {
+      try visitor.visitSingularStringField(value: self.scalabilityMode, fieldNumber: 11)
     }
-    if !self.fmtpLine.isEmpty {
-      try visitor.visitSingularStringField(value: self.fmtpLine, fieldNumber: 3)
-    }
-    if self.clockRate != 0 {
-      try visitor.visitSingularUInt32Field(value: self.clockRate, fieldNumber: 4)
-    }
-    if !self.encodingParameters.isEmpty {
-      try visitor.visitSingularStringField(value: self.encodingParameters, fieldNumber: 5)
-    }
-    if !self.feedbacks.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.feedbacks, fieldNumber: 6)
+    if !self.fmtp.isEmpty {
+      try visitor.visitSingularStringField(value: self.fmtp, fieldNumber: 12)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Models_Codec, rhs: Stream_Video_Sfu_Models_Codec) -> Bool {
-    if lhs.payloadType != rhs.payloadType {return false}
-    if lhs.name != rhs.name {return false}
-    if lhs.fmtpLine != rhs.fmtpLine {return false}
-    if lhs.clockRate != rhs.clockRate {return false}
-    if lhs.encodingParameters != rhs.encodingParameters {return false}
-    if lhs.feedbacks != rhs.feedbacks {return false}
+    if lhs.mimeType != rhs.mimeType {return false}
+    if lhs.scalabilityMode != rhs.scalabilityMode {return false}
+    if lhs.fmtp != rhs.fmtp {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1907,6 +1885,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     8: .same(proto: "stereo"),
     9: .same(proto: "red"),
     10: .same(proto: "muted"),
+    11: .standard(proto: "preferred_codecs"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1923,6 +1902,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 8: try { try decoder.decodeSingularBoolField(value: &self.stereo) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.red) }()
       case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
+      case 11: try { try decoder.decodeRepeatedMessageField(value: &self.preferredCodecs) }()
       default: break
       }
     }
@@ -1953,6 +1933,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.muted != false {
       try visitor.visitSingularBoolField(value: self.muted, fieldNumber: 10)
     }
+    if !self.preferredCodecs.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.preferredCodecs, fieldNumber: 11)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1965,6 +1948,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.stereo != rhs.stereo {return false}
     if lhs.red != rhs.red {return false}
     if lhs.muted != rhs.muted {return false}
+    if lhs.preferredCodecs != rhs.preferredCodecs {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
