@@ -15,7 +15,7 @@ struct SimpleCallingView: View {
     @Injected(\.appearance) var appearance
 
     @State var text = ""
-    @State private var callType: String
+    @State private var callType: String = ""
     @State private var changeEnvironmentPromptForURL: URL?
     @State private var showChangeEnvironmentPrompt: Bool = false
 
@@ -23,9 +23,9 @@ struct SimpleCallingView: View {
     @ObservedObject var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, callId: String) {
-        self.viewModel = viewModel
-        text = callId
-        callType = {
+        _viewModel = .init(wrappedValue: viewModel)
+        _text = .init(wrappedValue: callId)
+        _callType = .init(wrappedValue: {
             guard
                 !AppState.shared.deeplinkInfo.callId.isEmpty,
                 !AppState.shared.deeplinkInfo.callType.isEmpty
@@ -34,7 +34,7 @@ struct SimpleCallingView: View {
             }
 
             return AppState.shared.deeplinkInfo.callType
-        }()
+        }())
     }
 
     var body: some View {

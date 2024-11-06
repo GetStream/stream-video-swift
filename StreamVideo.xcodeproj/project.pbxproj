@@ -198,6 +198,9 @@
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
+		4050B4352CEE509200691C24 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
+		4050B4412CEE5BDE00691C24 /* StreamSwiftTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 4050B4402CEE5BDE00691C24 /* StreamSwiftTestHelpers */; };
+		4050B4432CEE5BDE00691C24 /* StreamWebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 4050B4422CEE5BDE00691C24 /* StreamWebRTC */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		406128812CF32FEF007F5CDC /* SDPLineVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */; };
 		406128832CF33000007F5CDC /* SDPParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128822CF33000007F5CDC /* SDPParser.swift */; };
@@ -1335,6 +1338,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4050B4362CEE509200691C24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F737EC287C13AC00A363F4;
+			remoteInfo = StreamVideo;
+		};
+		4050B4442CEE5BEB00691C24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F73806287C141000A363F4;
+			remoteInfo = StreamVideoSwiftUI;
+		};
+		4050B4462CEE5BEB00691C24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F73827287C146D00A363F4;
+			remoteInfo = StreamVideoUIKit;
+		};
 		40C4DF542C1C60A80035DBC2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
@@ -1644,6 +1668,8 @@
 		4049CE812BBBF74C003D07D2 /* LegacyAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAsyncImage.swift; sourceTree = "<group>"; };
 		4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAsyncImage.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
+		4050B4312CEE509200691C24 /* StreamVideoUnifiedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StreamVideoUnifiedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4050B43F2CEE5ABD00691C24 /* StreamVideoUnifiedTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideoUnifiedTests.xctestplan; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineVisitor.swift; sourceTree = "<group>"; };
 		406128822CF33000007F5CDC /* SDPParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPParser.swift; sourceTree = "<group>"; };
@@ -2632,6 +2658,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4050B42E2CEE509200691C24 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4050B4412CEE5BDE00691C24 /* StreamSwiftTestHelpers in Frameworks */,
+				4050B4432CEE5BDE00691C24 /* StreamWebRTC in Frameworks */,
+				4050B4352CEE509200691C24 /* StreamVideo.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		82392D4E2993C9E100941435 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3275,6 +3311,14 @@
 				406128872CF33029007F5CDC /* RTPMapVisitor.swift */,
 			);
 			path = Visitors;
+			sourceTree = "<group>";
+		};
+		4050B43D2CEE50A600691C24 /* StreamVideoUnifiedTests */ = {
+			isa = PBXGroup;
+			children = (
+				4050B43F2CEE5ABD00691C24 /* StreamVideoUnifiedTests.xctestplan */,
+			);
+			path = StreamVideoUnifiedTests;
 			sourceTree = "<group>";
 		};
 		4063033D2AD847E60091AE77 /* CallState */ = {
@@ -4907,6 +4951,7 @@
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
+				4050B43D2CEE50A600691C24 /* StreamVideoUnifiedTests */,
 				8427FF652A03D1D100AFD2C3 /* CallIntent */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				8493224D2908378A0013C029 /* DemoAppUIKit */,
@@ -4937,6 +4982,7 @@
 				82392D512993C9E100941435 /* SwiftUIDemoAppUITests.xctest */,
 				8427FF622A03D1D100AFD2C3 /* CallIntent.appex */,
 				848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */,
+				4050B4312CEE509200691C24 /* StreamVideoUnifiedTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -5965,6 +6011,30 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		4050B4302CEE509200691C24 /* StreamVideoUnifiedTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4050B43B2CEE509200691C24 /* Build configuration list for PBXNativeTarget "StreamVideoUnifiedTests" */;
+			buildPhases = (
+				4050B42D2CEE509200691C24 /* Sources */,
+				4050B42E2CEE509200691C24 /* Frameworks */,
+				4050B42F2CEE509200691C24 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4050B4452CEE5BEB00691C24 /* PBXTargetDependency */,
+				4050B4472CEE5BEB00691C24 /* PBXTargetDependency */,
+				4050B4372CEE509200691C24 /* PBXTargetDependency */,
+			);
+			name = StreamVideoUnifiedTests;
+			packageProductDependencies = (
+				4050B4402CEE5BDE00691C24 /* StreamSwiftTestHelpers */,
+				4050B4422CEE5BDE00691C24 /* StreamWebRTC */,
+			);
+			productName = StreamVideoUnifiedTests;
+			productReference = 4050B4312CEE509200691C24 /* StreamVideoUnifiedTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		82392D502993C9E100941435 /* SwiftUIDemoAppUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 82392D5B2993C9E100941435 /* Build configuration list for PBXNativeTarget "SwiftUIDemoAppUITests" */;
@@ -6223,9 +6293,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1430;
+				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1530;
 				TargetAttributes = {
+					4050B4302CEE509200691C24 = {
+						CreatedOnToolsVersion = 16.1;
+					};
 					82392D502993C9E100941435 = {
 						CreatedOnToolsVersion = 14.2;
 						TestTargetID = 842D8BC22865B31B00801910;
@@ -6300,11 +6373,19 @@
 				82392D502993C9E100941435 /* SwiftUIDemoAppUITests */,
 				8427FF612A03D1D100AFD2C3 /* CallIntent */,
 				848C46A12A6ABF7E00E5AC09 /* ScreenSharing */,
+				4050B4302CEE509200691C24 /* StreamVideoUnifiedTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4050B42F2CEE509200691C24 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		82392D4F2993C9E100941435 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -6447,6 +6528,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4050B42D2CEE509200691C24 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		82392D4D2993C9E100941435 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -7763,6 +7851,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4050B4372CEE509200691C24 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
+			targetProxy = 4050B4362CEE509200691C24 /* PBXContainerItemProxy */;
+		};
+		4050B4452CEE5BEB00691C24 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F73806287C141000A363F4 /* StreamVideoSwiftUI */;
+			targetProxy = 4050B4442CEE5BEB00691C24 /* PBXContainerItemProxy */;
+		};
+		4050B4472CEE5BEB00691C24 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F73827287C146D00A363F4 /* StreamVideoUIKit */;
+			targetProxy = 4050B4462CEE5BEB00691C24 /* PBXContainerItemProxy */;
+		};
 		40C4DF552C1C60A80035DBC2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
@@ -7863,6 +7966,67 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		4050B4382CEE509200691C24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getsteram.StreamVideoUnifiedTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4050B4392CEE509200691C24 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getsteram.StreamVideoUnifiedTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Test;
+		};
+		4050B43A2CEE509200691C24 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getsteram.StreamVideoUnifiedTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		820EB3112A7A8A56009FDCA5 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -7974,7 +8138,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -7996,7 +8159,6 @@
 		820EB3142A7A8A56009FDCA5 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -8035,7 +8197,6 @@
 		820EB3152A7A8A56009FDCA5 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -8054,7 +8215,6 @@
 		820EB3162A7A8A56009FDCA5 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
@@ -8093,7 +8253,6 @@
 		820EB3172A7A8A56009FDCA5 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -8113,7 +8272,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}-Debug.entitlements";
@@ -8531,7 +8689,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}-Debug.entitlements";
@@ -8580,7 +8737,6 @@
 		842D8BD32865B31D00801910 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}.entitlements";
@@ -8882,7 +9038,6 @@
 		84F73800287C13AD00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -8901,7 +9056,6 @@
 		84F73801287C13AD00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -8919,7 +9073,6 @@
 		84F7381D287C141000A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -8959,7 +9112,6 @@
 		84F7381E287C141000A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -8997,7 +9149,6 @@
 		84F73821287C141000A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -9016,7 +9167,6 @@
 		84F73822287C141000A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -9035,7 +9185,6 @@
 		84F73838287C146D00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
@@ -9075,7 +9224,6 @@
 		84F73839287C146D00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
@@ -9113,7 +9261,6 @@
 		84F7383B287C146D00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -9132,7 +9279,6 @@
 		84F7383C287C146D00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -9150,6 +9296,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4050B43B2CEE509200691C24 /* Build configuration list for PBXNativeTarget "StreamVideoUnifiedTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4050B4382CEE509200691C24 /* Debug */,
+				4050B4392CEE509200691C24 /* Test */,
+				4050B43A2CEE509200691C24 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		82392D5B2993C9E100941435 /* Build configuration list for PBXNativeTarget "SwiftUIDemoAppUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -9277,8 +9433,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-chat-swiftui";
 			requirement = {
-				kind = exactVersion;
-				version = 4.56.0;
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
 			};
 		};
 		401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */ = {
@@ -9367,6 +9523,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */;
 			productName = "GDPerformanceView-Swift";
+		};
+		4050B4402CEE5BDE00691C24 /* StreamSwiftTestHelpers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */;
+			productName = StreamSwiftTestHelpers;
+		};
+		4050B4422CEE5BDE00691C24 /* StreamWebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82EB8F552B0277730038B5A2 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */;
+			productName = StreamWebRTC;
 		};
 		406303442AD942ED0091AE77 /* GoogleSignInSwift */ = {
 			isa = XCSwiftPackageProductDependency;

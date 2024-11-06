@@ -58,9 +58,9 @@ struct DemoCustomEnvironmentView: View {
     @Injected(\.appearance) var appearance
     @Environment(\.presentationMode) var presentationMode
 
-    @State var baseURL: AppEnvironment.BaseURL
-    @State var apiKey: String
-    @State var token: String
+    @State var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL
+    @State var apiKey: String = ""
+    @State var token: String = ""
     @State var usesDefaultPushNotificationConfig = false
     @State var pushNotificationName: String = AppState.shared.pushNotificationConfiguration.pushProviderInfo.name
     @State var voIPPushNotificationName: String = AppState.shared.pushNotificationConfiguration.voipPushProviderInfo.name

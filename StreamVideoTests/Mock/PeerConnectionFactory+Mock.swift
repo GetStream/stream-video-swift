@@ -5,8 +5,6 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-private var _pc: RTCPeerConnection?
-
 extension PeerConnectionFactory {
     static func mock(
         _ audioProcessingModule: AudioProcessingModule = MockAudioProcessingModule.shared

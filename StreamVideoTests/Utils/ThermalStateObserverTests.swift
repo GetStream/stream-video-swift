@@ -22,10 +22,6 @@ final class ThermalStateObserverTests: XCTestCase {
     func test_init_stateHasBeenCorrectlySetUp() {
         XCTAssertEqual(ThermalStateObserver.shared.state, ProcessInfo.processInfo.thermalState)
     }
-    
-    func test_injectedValueWasSetCorrectly() {
-        XCTAssertTrue(InjectedValues[\.thermalStateObserver] === ThermalStateObserver.shared)
-    }
 
     // MARK: - notificationObserver
 

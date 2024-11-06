@@ -96,6 +96,7 @@ struct DemoManualQualitySelectionButtonView: View {
                 return "Disable video"
             }
         }()
+
         Button {
             execute(manualQuality)
         } label: {

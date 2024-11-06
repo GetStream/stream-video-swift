@@ -13,9 +13,7 @@
   },
   "testTargets" : [
     {
-      "skippedTests" : [
-        "StreamAppStateAdapter_Tests\/test_init_stateIsSetToForeground()"
-      ],
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:StreamVideo.xcodeproj",
         "identifier" : "84F7380D287C141000A363F4",

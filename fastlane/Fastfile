@@ -19,7 +19,7 @@ source_packages_path = 'spm_cache'
 gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
-@force_check = false
+@force_check = true
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
 swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
@@ -217,6 +217,46 @@ lane :build_test_app_and_frameworks do
   )
 end
 
+desc 'Runs Unified tests'
+lane :test_unified do |options|
+  next unless is_check_required(sources: sources_matrix[:unit], force_check: @force_check)
+
+  update_testplan_on_ci(path: "StreamVideoUnifiedTests/StreamVideoUnifiedTests.xctestplan")
+
+  # Ensure `skip_testing` defaults to false
+  skip_testing = options.fetch(:skip_testing, false)
+
+  scan_options = {
+    project: xcode_project,
+    scheme: 'StreamVideoUnifiedTests',
+    testplan: 'StreamVideoUnifiedTests',
+    clean: is_localhost,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    devices: options[:device],
+    number_of_retries: 3,
+    skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing],
+    xcargs: is_ci ? "#STREAM_VIDEO_SECRET=#{app_secret}" : '',
+    parallel_testing: true,
+    concurrent_workers: 4,
+    prelaunch_simulator: true
+  }
+
+  # Add `testplan` only if `skip_testing` is not true
+  scan_options[:only_testing] = [] unless skip_testing
+
+  begin
+    scan(scan_options)
+  rescue StandardError => e
+    UI.user_error!(e) unless options[:cron]
+
+    failed_tests = retreive_failed_tests
+    UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
+    scan(scan_options.merge(only_testing: failed_tests))
+  end
+end
+
 desc 'Runs LLC tests'
 lane :test do |options|
   next unless is_check_required(sources: sources_matrix[:unit], force_check: @force_check)
@@ -234,7 +274,10 @@ lane :test do |options|
     number_of_retries: 3,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
-    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
+    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : '',
+    parallel_testing: true,
+    concurrent_workers: 4,
+    prelaunch_simulator: true
   }
 
   begin
@@ -291,7 +334,10 @@ private_lane :test_ui do |options|
     result_bundle: true,
     devices: options[:device],
     build_for_testing: options[:build_for_testing],
-    fail_build: !record_mode
+    fail_build: !record_mode,
+    parallel_testing: true,
+    concurrent_workers: 4,
+    prelaunch_simulator: true
   )
 
   if record_mode && is_ci
@@ -342,6 +388,27 @@ desc 'Restarts Stream Video Buddy'
 lane :restart_video_buddy do
   stop_video_buddy
   start_video_buddy
+end
+
+lane :build_xcframeworks_concurrent do |options|
+  match_me
+  output_directory = File.absolute_path("#{Dir.pwd}/../Products")
+  team_id = File.read('Matchfile').match(/team_id\("(.*)"\)/)[1]
+  codesign = ["codesign --timestamp -v --sign 'Apple Distribution: Stream.io Inc (#{team_id})'"]
+  create_xcframework(
+    project: xcode_project,
+    scheme: options[:scheme],
+    destinations: ['iOS'],
+    include_BCSymbolMaps: true,
+    include_debug_symbols: true,
+    xcframework_output_directory: output_directory,
+    remove_xcarchives: true,
+    enable_bitcode: false
+  )
+  sh('../Scripts/removeUnneededSymbols.sh', options[:scheme], output_directory)
+  codesign << lane_context[SharedValues::XCFRAMEWORK_OUTPUT_PATH]
+  remove_stream_video_module_shadow(output_directory: output_directory)
+  sh(codesign.join(' ')) # We need to sign all frameworks at once
 end
 
 lane :build_xcframeworks do
@@ -400,14 +467,12 @@ lane :test_e2e do |options|
     devices: options[:device],
     prelaunch_simulator: is_ci,
     number_of_retries: 3,
+    parallel_testing: true,
+    concurrent_workers: 2,
     xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
   }
 
-  if is_localhost
-    scan(scan_options)
-  else
-    parallelize_tests_on_ci(scan: scan_options, batch: options[:batch], cron: options[:cron])
-  end
+  scan(scan_options)
 end
 
 private_lane :parallelize_tests_on_ci do |options|
@@ -495,7 +560,8 @@ private_lane :build_example_app do |options|
     scheme: options[:scheme],
     clean: is_localhost,
     configuration: 'Debug',
-    derived_data_path: options[:derived_data_path],
+    derived_data_path: derived_data_path,
+    # derived_data_path: options[:derived_data_path],
     cloned_source_packages_path: source_packages_path,
     build_for_testing: true
   )
