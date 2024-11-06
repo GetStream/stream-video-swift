@@ -26,6 +26,14 @@ runs:
         key: ${{ env.IMAGE }}-brew-${{ hashFiles('**/Brewfile.lock.json') }}
         restore-keys: ${{ env.IMAGE }}-brew-
     - uses: ./.github/actions/ruby-cache
-    - uses: ./.github/actions/xcode-cache
+    - uses: irgaly/xcode-cache@v1
+      with:
+        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.shat }}
+        restore-keys: 
+          - xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+          - xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
+        deriveddata-directory: derived_data
+        sourcepackages-directory: spm_cache
+    - uses: ./.github/actions/python-cache
     - run: ./Scripts/bootstrap.sh
       shell: bash

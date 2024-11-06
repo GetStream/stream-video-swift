@@ -20,7 +20,7 @@ buildcache_xcargs = 'CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++'
 gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
-@force_check = false
+@force_check = true
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
 swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
@@ -237,7 +237,10 @@ lane :test do |options|
     number_of_retries: 3,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
-    xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
+    xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs,
+    parallel_testing: true,
+    concurrent_workers: 4,
+    prelaunch_simulator: true
   }
 
   begin
@@ -295,7 +298,10 @@ private_lane :test_ui do |options|
     devices: options[:device],
     xcargs: buildcache_xcargs,
     build_for_testing: options[:build_for_testing],
-    fail_build: !record_mode
+    fail_build: !record_mode,
+    parallel_testing: true,
+    concurrent_workers: 4,
+    prelaunch_simulator: true
   )
 
   if record_mode && is_ci
