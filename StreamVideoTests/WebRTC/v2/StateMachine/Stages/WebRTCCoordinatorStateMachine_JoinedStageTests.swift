@@ -494,16 +494,19 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             .configurePeerConnections()
         let publisher = await mockCoordinatorStack?.coordinator.stateAdapter.publisher
         let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
+        let updateCallSettings = CallSettings(audioOn: true, videoOn: true)
+        let audioSession = await mockCoordinatorStack.coordinator.stateAdapter.audioSession
 
         await assertResultAfterTrigger(
             trigger: { [mockCoordinatorStack] in
                 await mockCoordinatorStack?
                     .coordinator
                     .stateAdapter
-                    .set(callSettings: CallSettings(audioOn: true, videoOn: true))
+                    .set(callSettings: updateCallSettings)
             }
-        ) { [mockPublisher] expectation in
+        ) { [mockPublisher, audioSession] expectation in
             XCTAssertEqual(mockPublisher.timesCalled(.didUpdateCallSettings), 1)
+            XCTAssertEqual(audioSession.activeCallSettings, updateCallSettings)
             expectation.fulfill()
         }
     }

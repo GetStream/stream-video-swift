@@ -134,7 +134,6 @@ final class MockRTCPeerConnectionCoordinator:
         callSettings: CallSettings = .init(),
         audioSettings: AudioSettings = .init(),
         sfuAdapter: SFUAdapter,
-        audioSession: AudioSession = .init(),
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) throws {
@@ -151,7 +150,6 @@ final class MockRTCPeerConnectionCoordinator:
             callSettings: callSettings,
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
-            audioSession: audioSession,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )

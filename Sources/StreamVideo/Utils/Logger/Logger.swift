@@ -28,7 +28,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .sfu,
         .iceAdapter,
         .mediaAdapter,
-        .thermalState
+        .thermalState,
+        .audioSession
     ]
 
     /// All subsystems within the SDK.
@@ -44,7 +45,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .sfu,
         .iceAdapter,
         .mediaAdapter,
-        .thermalState
+        .thermalState,
+        .audioSession
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -64,11 +66,16 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     /// The subsystem responsible for PeerConnections.
     public static let peerConnectionPublisher = Self(rawValue: 1 << 6)
     public static let peerConnectionSubscriber = Self(rawValue: 1 << 7)
-    /// The subsystem responsible for PeerConnections.
+    /// The subsystem responsible for SFU interaction.
     public static let sfu = Self(rawValue: 1 << 8)
+    /// The subsystem responsible for ICE interactions.
     public static let iceAdapter = Self(rawValue: 1 << 9)
+    /// The subsystem responsible for Media publishing/subscribing.
     public static let mediaAdapter = Self(rawValue: 1 << 10)
+    /// The subsystem responsible for ThermalState observation.
     public static let thermalState = Self(rawValue: 1 << 11)
+    /// The subsystem responsible for interacting with the AudioSession.
+    public static let audioSession = Self(rawValue: 1 << 12)
 
     public var description: String {
         switch rawValue {
@@ -89,13 +96,15 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         case LogSubsystem.peerConnectionSubscriber.rawValue:
             return "peerConnection-subscriber"
         case LogSubsystem.sfu.rawValue:
-            return "SFU"
+            return "sfu"
         case LogSubsystem.iceAdapter.rawValue:
-            return "ICEAdapter"
+            return "iceAdapter"
         case LogSubsystem.mediaAdapter.rawValue:
-            return "MediaAdapter"
+            return "mediaAdapter"
         case LogSubsystem.thermalState.rawValue:
-            return "Thermal State"
+            return "thermalState"
+        case LogSubsystem.audioSession.rawValue:
+            return "audioSession"
         default:
             return "unknown(rawValue:\(rawValue)"
         }

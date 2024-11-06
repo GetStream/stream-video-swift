@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Sync microphone mute state between the SDK and CallKit [#590](https://github.com/GetStream/stream-video-swift/pull/590)
 
 ### 🐞 Fixed
+- Toggling the speaker during a call wasn't always working. [#585](https://github.com/GetStream/stream-video-swift/pull/585)
 - In some cases when joining a call setup wasn't completed correctly which lead in issues during the call (e.g. missing video tracks or mute state not updating). [#586](https://github.com/GetStream/stream-video-swift/pull/586)
 
 # [1.13.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.13.0)
