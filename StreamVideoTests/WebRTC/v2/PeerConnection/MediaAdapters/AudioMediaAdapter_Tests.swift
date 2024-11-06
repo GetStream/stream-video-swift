@@ -14,14 +14,13 @@ final class AudioMediaAdapter_Tests: XCTestCase {
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockMediaAdapter: MockLocalMediaAdapter! = .init()
-    private lazy var audioSession: AudioSession! = .init()
+    private lazy var audioSession: StreamAudioSessionAdapter! = .init()
     private lazy var subject: AudioMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
         localMediaManager: mockMediaAdapter,
-        subject: spySubject,
-        audioSession: audioSession
+        subject: spySubject
     )
 
     override func tearDown() {
@@ -60,25 +59,5 @@ final class AudioMediaAdapter_Tests: XCTestCase {
             mockMediaAdapter.recordedInputPayload(CallSettings.self, for: .didUpdateCallSettings)?.first
         )
         XCTAssertEqual(actual, settings)
-    }
-
-    // MARK: - didUpdateAudioSessionState(_:)
-
-    func test_didUpdateAudioSessionState_audioSessionWasConfiguredCorrectly() async throws {
-        await subject.didUpdateAudioSessionState(true)
-
-        let isActive = await audioSession.isAudioEnabled
-        XCTAssertTrue(isActive)
-    }
-
-    // MARK: - didUpdateAudioSessionSpeakerState(_:)
-
-    func test_didUpdateAudioSessionSpeakerState_audioSessionWasConfiguredCorrectly() async throws {
-        await subject.didUpdateAudioSessionSpeakerState(true, with: false)
-
-        let isActive = await audioSession.isActive
-        let isSpeakerOn = await audioSession.isSpeakerOn
-        XCTAssertFalse(isActive)
-        XCTAssertTrue(isSpeakerOn)
     }
 }

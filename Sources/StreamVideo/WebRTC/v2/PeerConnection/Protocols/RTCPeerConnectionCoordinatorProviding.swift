@@ -22,7 +22,6 @@ protocol RTCPeerConnectionCoordinatorProviding {
     ///   - callSettings: Settings related to the overall call.
     ///   - audioSettings: Settings for audio configuration.
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
-    ///   - audioSession: The audio session to be used.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     /// - Returns: An initialized `RTCPeerConnectionCoordinator` instance.
@@ -36,7 +35,6 @@ protocol RTCPeerConnectionCoordinatorProviding {
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
-        audioSession: AudioSession,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) -> RTCPeerConnectionCoordinator
@@ -59,7 +57,6 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - callSettings: Settings related to the overall call.
     ///   - audioSettings: Settings for audio configuration.
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
-    ///   - audioSession: The audio session to be used.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     /// - Returns: A newly created `RTCPeerConnectionCoordinator` instance.
@@ -73,7 +70,6 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
-        audioSession: AudioSession,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) -> RTCPeerConnectionCoordinator {
@@ -87,7 +83,6 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
             callSettings: callSettings,
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
-            audioSession: audioSession,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )

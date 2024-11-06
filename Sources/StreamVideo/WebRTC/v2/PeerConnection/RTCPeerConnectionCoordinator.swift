@@ -36,7 +36,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let subsystem: LogSubsystem
     private let disposableBag: DisposableBag = .init()
     private let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection.serial.offer.queue")
-    private let audioSession: AudioSession
 
     // MARK: Adapters
 
@@ -97,7 +96,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
-        audioSession: AudioSession,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -109,7 +107,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             callSettings: callSettings,
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
-            audioSession: audioSession,
             mediaAdapter: .init(
                 sessionID: sessionId,
                 peerConnectionType: peerType,
@@ -118,7 +115,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
-                audioSession: audioSession,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
             )
@@ -133,7 +129,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
-        audioSession: AudioSession,
         mediaAdapter: MediaAdapter
     ) {
         self.sessionId = sessionId
@@ -146,7 +141,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         subsystem = peerType == .publisher
             ? .peerConnectionPublisher
             : .peerConnectionSubscriber
-        self.audioSession = audioSession
         self.mediaAdapter = mediaAdapter
 
         iceAdapter = .init(
@@ -291,7 +285,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        let isActive = await audioSession.isActive
         log.debug(
             """
             PeerConnection will setUp:
@@ -305,8 +298,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoOn: \(settings.videoOn)
                 audioOutputOn: \(settings.audioOutputOn)
                 speakerOn: \(settings.speakerOn)
-            
-            AudioSession enabled: \(isActive)
             """,
             subsystems: subsystem
         )
@@ -443,52 +434,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Throws: An error if retrieving statistics fails.
     func statsReport() async throws -> RTCStatisticsReport? {
         try await peerConnection.statistics()
-    }
-
-    // MARK: - Audio
-
-    /// Updates the audio session state.
-    ///
-    /// - Parameter isEnabled: Whether the audio session should be enabled or disabled.
-    func didUpdateAudioSessionState(_ isEnabled: Bool) async {
-        log.debug(
-            """
-            PeerConnection will update audioSession state
-            Identifier: \(identifier)
-            type:\(peerType)
-            sessionID: \(sessionId)
-            sfu: \(sfuAdapter.hostname)
-            audioSession state: \(isEnabled)
-            """,
-            subsystems: subsystem
-        )
-        await mediaAdapter.didUpdateAudioSessionState(isEnabled)
-    }
-
-    /// Updates the audio session speaker state.
-    ///
-    /// - Parameters:
-    ///   - isEnabled: Whether the speaker should be enabled or disabled.
-    ///   - audioSessionEnabled: Whether the audio session is currently enabled.
-    func didUpdateAudioSessionSpeakerState(
-        _ isEnabled: Bool,
-        with audioSessionEnabled: Bool
-    ) async {
-        log.debug(
-            """
-            PeerConnection will update audioSession speakerState
-            Identifier: \(identifier)
-            type:\(peerType)
-            sessionID: \(sessionId)
-            sfu: \(sfuAdapter.hostname)
-            audioSession speakerState: \(isEnabled)
-            """,
-            subsystems: subsystem
-        )
-        await mediaAdapter.didUpdateAudioSessionSpeakerState(
-            isEnabled,
-            with: audioSessionEnabled
-        )
     }
 
     // MARK: - Video

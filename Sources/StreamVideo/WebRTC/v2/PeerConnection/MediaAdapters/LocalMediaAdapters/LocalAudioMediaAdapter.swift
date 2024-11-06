@@ -24,9 +24,6 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     /// The adapter for communicating with the Selective Forwarding Unit (SFU).
     private var sfuAdapter: SFUAdapter
 
-    /// The audio session manager.
-    private let audioSession: AudioSession
-
     /// The stream identifiers for this audio adapter.
     private let streamIds: [String]
 
@@ -35,6 +32,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
 
     /// The RTP transceiver for sending audio.
     private var sender: RTCRtpTransceiver?
+
+    private var lastUpdatedCallSettings: CallSettings.Audio?
 
     /// The mid (Media Stream Identification) of the sender.
     var mid: String? { sender?.mid }
@@ -56,14 +55,12 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
-        audioSession: AudioSession,
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
         self.peerConnectionFactory = peerConnectionFactory
         self.sfuAdapter = sfuAdapter
-        self.audioSession = audioSession
         self.subject = subject
         streamIds = ["\(sessionID):audio"]
     }
@@ -192,40 +189,46 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         _ settings: CallSettings
     ) async throws {
         guard let localTrack else { return }
-        let isMuted = !settings.audioOn
-        let isLocalMuted = localTrack.isEnabled == false
-        guard isMuted != isLocalMuted || sender == nil else {
+
+        guard lastUpdatedCallSettings != settings.audio else {
             return
         }
 
-        try await sfuAdapter.updateTrackMuteState(
-            .audio,
-            isMuted: isMuted,
-            for: sessionID
-        )
-
-        await audioSession.configure(
-            audioOn: settings.audioOn,
-            speakerOn: settings.speakerOn
-        )
+        let isMuted = !settings.audioOn
+        let isLocalMuted = localTrack.isEnabled == false
+        
+        if isMuted != isLocalMuted {
+            try await sfuAdapter.updateTrackMuteState(
+                .audio,
+                isMuted: isMuted,
+                for: sessionID
+            )
+        }
 
         if isMuted, localTrack.isEnabled == true {
             unpublish()
         } else if !isMuted {
             publish()
             await audioRecorder.startRecording()
-            let isActive = await audioSession.isActive
-            let isAudioEnabled = await audioSession.isAudioEnabled
-            log.debug(
-                """
-                Local audioTrack is now published.
-                isEnabled: \(localTrack.isEnabled == true)
-                senderHasCorrectTrack: \(sender?.sender.track == localTrack)
-                trackId:\(localTrack.trackId)
-                audioSession.isActive: \(isActive)
-                audioSession.isAudioEnabled: \(isAudioEnabled)
-                """
-            )
         }
+
+        lastUpdatedCallSettings = settings.audio
+    }
+}
+
+extension CallSettings {
+
+    struct Audio: Equatable {
+        var micOn: Bool
+        var speakerOn: Bool
+        var audioSessionOn: Bool
+    }
+
+    var audio: Audio {
+        .init(
+            micOn: audioOn,
+            speakerOn: speakerOn,
+            audioSessionOn: audioOutputOn
+        )
     }
 }

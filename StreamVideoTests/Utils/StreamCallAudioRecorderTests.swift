@@ -5,7 +5,7 @@
 import AVFoundation
 import Combine
 @testable import StreamVideo
-import XCTest
+@preconcurrency import XCTest
 
 final class StreamAudioRecorderTests: XCTestCase {
 
@@ -13,14 +13,12 @@ final class StreamAudioRecorderTests: XCTestCase {
     private lazy var mockAudioSession: MockAudioSession! = .init()
     private lazy var mockActiveCallProvider: MockStreamActiveCallProvider! = .init()
     private var mockAudioRecorder: MockAudioRecorder!
-    private lazy var subject: StreamCallAudioRecorder! = .init(
-        audioRecorderBuilder: builder,
-        audioSession: mockAudioSession
-    )
+    private lazy var subject: StreamCallAudioRecorder! = .init(audioRecorderBuilder: builder)
 
     override func setUp() async throws {
         try await super.setUp()
         StreamActiveCallProviderKey.currentValue = mockActiveCallProvider
+        StreamActiveCallAudioSessionKey.currentValue = mockAudioSession
         mockAudioRecorder = try .init(
             url: URL(string: "test.wav")!,
             settings: AVAudioRecorderBuilder.defaultRecordingSettings
@@ -44,12 +42,10 @@ final class StreamAudioRecorderTests: XCTestCase {
 
         let actualFileURL = await recorder.audioRecorderBuilder.fileURL.lastPathComponent
         XCTAssertTrue(actualFileURL == filename)
-        XCTAssertTrue(recorder.audioSession === AVAudioSession.sharedInstance())
     }
 
     func testInitWithBuilderAndSession_givenCustomBuilderAndSession_whenInitialized_thenUsesProvidedObjects() {
         XCTAssertTrue(subject.audioRecorderBuilder === builder)
-        XCTAssertTrue(subject.audioSession === mockAudioSession)
     }
 
     // MARK: - deinit
@@ -59,10 +55,7 @@ final class StreamAudioRecorderTests: XCTestCase {
 
         let filename = tempDirectory.appendingPathComponent("test_recording.m4a")
         let mockBuilder = AVAudioRecorderBuilder(cachedResult: try .init(url: filename, settings: [:]))
-        var recorder: StreamCallAudioRecorder! = StreamCallAudioRecorder(
-            audioRecorderBuilder: mockBuilder,
-            audioSession: MockAudioSession()
-        )
+        var recorder: StreamCallAudioRecorder! = StreamCallAudioRecorder(audioRecorderBuilder: mockBuilder)
 
         await recorder.startRecording() // Simulate recording
         recorder = nil
@@ -73,7 +66,7 @@ final class StreamAudioRecorderTests: XCTestCase {
     // MARK: - startRecording
 
     func testStartRecording_givenPermissionNotGranted_whenStarted_thenRecordsAndMetersAreNotUpdated() async throws {
-        mockAudioSession.recordPermission = false
+        mockAudioSession.stub(for: .requestRecordPermission, with: false)
         await setUpHasActiveCall(true)
 
         await subject.startRecording()
@@ -82,7 +75,7 @@ final class StreamAudioRecorderTests: XCTestCase {
     }
 
     func testStartRecording_givenPermissionGranted_whenStarted_thenRecordsAndMetersUpdates() async throws {
-        mockAudioSession.recordPermission = true
+        mockAudioSession.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
 
         await subject.startRecording()
@@ -91,7 +84,7 @@ final class StreamAudioRecorderTests: XCTestCase {
     }
 
     func testStartRecording_givenPermissionGrantedButNoActiveCall_whenStarted_thenRecordsAndMetersWontStart() async throws {
-        mockAudioSession.recordPermission = true
+        mockAudioSession.stub(for: .requestRecordPermission, with: true)
 
         await subject.startRecording()
 
@@ -100,7 +93,7 @@ final class StreamAudioRecorderTests: XCTestCase {
 
     func testStartRecording_givenPermissionGrantedButNoActiveCall_whenIgnoreActiveCallAndStarted_thenRecordsAndMetersUpdates(
     ) async throws {
-        mockAudioSession.recordPermission = true
+        mockAudioSession.stub(for: .requestRecordPermission, with: true)
 
         await subject.startRecording(ignoreActiveCall: true)
 
@@ -110,7 +103,7 @@ final class StreamAudioRecorderTests: XCTestCase {
     // MARK: - stopRecording
 
     func testStopRecording_givenRecording_whenStopped_thenStopsRecording() async throws {
-        mockAudioSession.recordPermission = true
+        mockAudioSession.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
 
         await subject.startRecording()
@@ -122,7 +115,7 @@ final class StreamAudioRecorderTests: XCTestCase {
     // MARK: - activeCall ended
 
     func test_activeCallEnded_givenAnActiveCallAndRecordingTrue_whenActiveCallEnds_thenStopsRecording() async throws {
-        mockAudioSession.recordPermission = true
+        mockAudioSession.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
         await subject.startRecording()
         
@@ -135,7 +128,7 @@ final class StreamAudioRecorderTests: XCTestCase {
 
     func test_activeCallEnded_givenAnActiveCallAndRecordingTrue_whenActiveCallEndsAndAnotherOneStarts_thenStartsRecording(
     ) async throws {
-        mockAudioSession.recordPermission = true
+        mockAudioSession.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
         await subject.startRecording()
         await setUpHasActiveCall(false)
@@ -206,25 +199,6 @@ private class MockAudioRecorder: AVAudioRecorder {
 
     override func updateMeters() {
         // Simulate meter update
-    }
-}
-
-private class MockAudioSession: AudioSessionProtocol {
-
-    var category: AVAudioSession.Category = .playback
-    var active = false
-    var recordPermission = false
-
-    func setCategory(_ category: AVAudioSession.Category) throws {
-        self.category = category
-    }
-
-    func setActive(_ active: Bool, options: AVAudioSession.SetActiveOptions = []) throws {
-        self.active = active
-    }
-
-    func requestRecordPermission() async -> Bool {
-        recordPermission
     }
 }
 

@@ -19,7 +19,6 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         sfuAdapter: SFUAdapter,
-        audioSession: AudioSession,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) -> RTCPeerConnectionCoordinator {
@@ -33,7 +32,6 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
             callSettings: callSettings,
             audioSettings: audioSettings,
             sfuAdapter: sfuAdapter,
-            audioSession: audioSession,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
         )

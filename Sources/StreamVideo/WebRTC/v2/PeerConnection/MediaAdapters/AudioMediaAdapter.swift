@@ -18,9 +18,6 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// The factory for creating WebRTC peer connection components.
     private let peerConnectionFactory: PeerConnectionFactory
 
-    /// The audio session manager.
-    private let audioSession: AudioSession
-
     /// The manager for local audio media.
     private let localMediaManager: LocalMediaAdapting
 
@@ -58,8 +55,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
-        subject: PassthroughSubject<TrackEvent, Never>,
-        audioSession: AudioSession
+        subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.init(
             sessionID: sessionID,
@@ -70,11 +66,9 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
                 peerConnection: peerConnection,
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
-                audioSession: audioSession,
                 subject: subject
             ),
-            subject: subject,
-            audioSession: audioSession
+            subject: subject
         )
     }
 
@@ -86,21 +80,18 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - peerConnectionFactory: The factory for creating WebRTC peer connection components.
     ///   - localMediaManager: The manager for local audio media.
     ///   - subject: A subject for publishing track events.
-    ///   - audioSession: The audio session manager.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         localMediaManager: LocalMediaAdapting,
-        subject: PassthroughSubject<TrackEvent, Never>,
-        audioSession: AudioSession
+        subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
         self.peerConnectionFactory = peerConnectionFactory
         self.localMediaManager = localMediaManager
         self.subject = subject
-        self.audioSession = audioSession
 
         // Set up observers for added and removed streams
         peerConnection
@@ -138,30 +129,6 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter settings: The updated call settings.
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         try await localMediaManager.didUpdateCallSettings(settings)
-    }
-
-    // MARK: - AudioSession
-
-    /// Updates the audio session state.
-    ///
-    /// - Parameter isEnabled: Whether the audio session is enabled.
-    func didUpdateAudioSessionState(_ isEnabled: Bool) async {
-        await audioSession.setAudioSessionEnabled(isEnabled)
-    }
-
-    /// Updates the audio session speaker state.
-    ///
-    /// - Parameters:
-    ///   - isEnabled: Whether the speaker is enabled.
-    ///   - audioSessionEnabled: Whether the audio session is enabled.
-    func didUpdateAudioSessionSpeakerState(
-        _ isEnabled: Bool,
-        with audioSessionEnabled: Bool
-    ) async {
-        await audioSession.configure(
-            audioOn: audioSessionEnabled,
-            speakerOn: isEnabled
-        )
     }
 
     // MARK: - Observers

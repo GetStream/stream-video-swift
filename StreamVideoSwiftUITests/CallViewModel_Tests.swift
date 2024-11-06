@@ -84,7 +84,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         )
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -112,7 +113,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter.process(first)
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.outgoing actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.outgoing actual: \(callingState)") {
             callViewModel.callingState == .outgoing
         }
 
@@ -131,7 +133,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter.process(second)
 
         // Then
-        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+        let callingStateB = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callingStateB)") {
             callViewModel.callingState == .idle
         }
     }
@@ -152,7 +155,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter.process(.coordinatorEvent(.typeCallEndedEvent(event)))
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -173,7 +177,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter.process(.coordinatorEvent(.typeBlockedUserEvent(event)))
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -191,7 +196,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         call?.state.update(from: callData)
         try? await Task.sleep(nanoseconds: 250_000_000)
         callViewModel.setActiveCall(call)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -224,7 +230,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.hangUp()
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -282,7 +289,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.acceptCall(callType: callType, callId: callId)
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
     }
@@ -337,7 +345,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.rejectCall(callType: callType, callId: callId)
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -352,7 +361,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // Then
         XCTAssert(callViewModel.callingState == .joining)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
     }
@@ -393,7 +403,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         )
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
     }
@@ -432,7 +443,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.hangUp()
         
         // Then
-        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -447,7 +459,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -465,7 +478,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -483,7 +497,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -503,7 +518,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -575,7 +591,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -606,7 +623,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -883,7 +901,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         await fulfillment { callViewModel.isSubscribedToCallEvents }
 
         callViewModel.startCall(callType: .default, callId: callId, members: [])
-        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callViewModel.callingState)") {
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
         let call = try XCTUnwrap(callViewModel.call, file: file, line: line)

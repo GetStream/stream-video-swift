@@ -49,4 +49,8 @@ extension Mockable {
     }
 
     func timesCalled(_ key: FunctionKey) -> Int { stubbedFunctionInput[key]?.count ?? 0 }
+
+    mutating func resetRecords(for key: FunctionKey) {
+        stubbedFunctionInput[key] = []
+    }
 }

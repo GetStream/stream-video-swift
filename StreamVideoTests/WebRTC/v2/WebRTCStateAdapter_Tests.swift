@@ -36,6 +36,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - audioSession
+
+    func test_audioSession_delegateWasSetAsExpected() async throws {
+        await assertTrueAsync(await subject.audioSession.delegate === subject)
+    }
+
     // MARK: - setSessionID
 
     func test_sessionID_shouldNotBeEmptyOnInit() async throws {
@@ -631,6 +637,27 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
             return participant2?.track == nil
                 && participant3?.screenshareTrack?.trackId == participantTracks["3"]?.trackId
+        }
+    }
+
+    // MARK: - audioSessionDidUpdateCallSettings
+
+    func test_audioSessionDidUpdateCallSettings_updatesCallSettingsAsExpected() async {
+        let updatedCallSettings = CallSettings(
+            audioOn: false,
+            videoOn: false,
+            speakerOn: true,
+            audioOutputOn: false,
+            cameraPosition: .back
+        )
+
+        subject.audioSessionAdapterDidUpdateCallSettings(
+            await subject.audioSession,
+            callSettings: updatedCallSettings
+        )
+
+        await fulfillment { [subject] in
+            await subject?.callSettings == updatedCallSettings
         }
     }
 
