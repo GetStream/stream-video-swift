@@ -233,7 +233,6 @@
 		406B3BDB2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BDA2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift */; };
 		406B3BDD2C8F351E00FC93A1 /* RTCIceCandidate+Sendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BDC2C8F351E00FC93A1 /* RTCIceCandidate+Sendable.swift */; };
 		406B3BE12C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BE02C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift */; };
-		406B3BE32C8F358600FC93A1 /* Stream_Video_Sfu_Models_Codec+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BE22C8F358500FC93A1 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */; };
 		406B3BE92C8F384A00FC93A1 /* RTCMediaStream+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BE82C8F384A00FC93A1 /* RTCMediaStream+CustomStringConvertible.swift */; };
 		406B3BEB2C8F386100FC93A1 /* RTCRtpReceiver+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BEA2C8F386100FC93A1 /* RTCRtpReceiver+CustomStringConvertible.swift */; };
 		406B3BED2C8F387B00FC93A1 /* RTCIceCandidate+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3BEC2C8F387B00FC93A1 /* RTCIceCandidate+CustomStringConvertible.swift */; };
@@ -1573,7 +1572,6 @@
 		406B3BDA2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpEncodingParameters+Convenience.swift"; sourceTree = "<group>"; };
 		406B3BDC2C8F351E00FC93A1 /* RTCIceCandidate+Sendable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCIceCandidate+Sendable.swift"; sourceTree = "<group>"; };
 		406B3BE02C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCIceCandidate+Convenience.swift"; sourceTree = "<group>"; };
-		406B3BE22C8F358500FC93A1 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_Codec+Convenience.swift"; sourceTree = "<group>"; };
 		406B3BE82C8F384A00FC93A1 /* RTCMediaStream+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCMediaStream+CustomStringConvertible.swift"; sourceTree = "<group>"; };
 		406B3BEA2C8F386100FC93A1 /* RTCRtpReceiver+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpReceiver+CustomStringConvertible.swift"; sourceTree = "<group>"; };
 		406B3BEC2C8F387B00FC93A1 /* RTCIceCandidate+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCIceCandidate+CustomStringConvertible.swift"; sourceTree = "<group>"; };
@@ -3691,7 +3689,6 @@
 				40BBC4972C623D02002AEF92 /* RTCSignalingState+CustomStringConvertible.swift */,
 				406B3BDC2C8F351E00FC93A1 /* RTCIceCandidate+Sendable.swift */,
 				406B3BE02C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift */,
-				406B3BE22C8F358500FC93A1 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */,
 				406B3BE82C8F384A00FC93A1 /* RTCMediaStream+CustomStringConvertible.swift */,
 				406B3BEA2C8F386100FC93A1 /* RTCRtpReceiver+CustomStringConvertible.swift */,
 				406B3BEC2C8F387B00FC93A1 /* RTCIceCandidate+CustomStringConvertible.swift */,

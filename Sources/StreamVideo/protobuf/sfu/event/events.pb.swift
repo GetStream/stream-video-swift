@@ -239,6 +239,16 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     set {eventPayload = .participantMigrationComplete(newValue)}
   }
 
+  /// CodecNegotiationComplete is sent to signal the completion of a codec negotiation.
+  /// SDKs can safely stop previous transceivers
+  var codecNegotiationComplete: Stream_Video_Sfu_Event_CodecNegotiationComplete {
+    get {
+      if case .codecNegotiationComplete(let v)? = eventPayload {return v}
+      return Stream_Video_Sfu_Event_CodecNegotiationComplete()
+    }
+    set {eventPayload = .codecNegotiationComplete(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_EventPayload: Equatable {
@@ -306,6 +316,9 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     case participantUpdated(Stream_Video_Sfu_Event_ParticipantUpdated)
     /// ParticipantMigrationComplete is sent when the participant migration is complete
     case participantMigrationComplete(Stream_Video_Sfu_Event_ParticipantMigrationComplete)
+    /// CodecNegotiationComplete is sent to signal the completion of a codec negotiation.
+    /// SDKs can safely stop previous transceivers
+    case codecNegotiationComplete(Stream_Video_Sfu_Event_CodecNegotiationComplete)
 
   #if !swift(>=4.1)
     static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, rhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) -> Bool {
@@ -397,11 +410,25 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         guard case .participantMigrationComplete(let l) = lhs, case .participantMigrationComplete(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.codecNegotiationComplete, .codecNegotiationComplete): return {
+        guard case .codecNegotiationComplete(let l) = lhs, case .codecNegotiationComplete(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
       default: return false
       }
     }
   #endif
   }
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Event_CodecNegotiationComplete {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 }
@@ -1153,6 +1180,7 @@ struct Stream_Video_Sfu_Event_CallEnded {
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Event_SfuEvent: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_CodecNegotiationComplete: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ParticipantMigrationComplete: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_PinsChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_Error: @unchecked Sendable {}
@@ -1216,6 +1244,7 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     23: .standard(proto: "call_ended"),
     24: .standard(proto: "participant_updated"),
     25: .standard(proto: "participant_migration_complete"),
+    26: .standard(proto: "codec_negotiation_complete"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1497,6 +1526,19 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
           self.eventPayload = .participantMigrationComplete(v)
         }
       }()
+      case 26: try {
+        var v: Stream_Video_Sfu_Event_CodecNegotiationComplete?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .codecNegotiationComplete(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .codecNegotiationComplete(v)
+        }
+      }()
       default: break
       }
     }
@@ -1592,6 +1634,10 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
       guard case .participantMigrationComplete(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 25)
     }()
+    case .codecNegotiationComplete?: try {
+      guard case .codecNegotiationComplete(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 26)
+    }()
     case nil: break
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -1599,6 +1645,25 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
 
   static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent, rhs: Stream_Video_Sfu_Event_SfuEvent) -> Bool {
     if lhs.eventPayload != rhs.eventPayload {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Event_CodecNegotiationComplete: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".CodecNegotiationComplete"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Event_CodecNegotiationComplete, rhs: Stream_Video_Sfu_Event_CodecNegotiationComplete) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
