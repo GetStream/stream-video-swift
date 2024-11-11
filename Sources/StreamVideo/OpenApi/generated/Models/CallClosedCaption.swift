@@ -10,12 +10,14 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
     public var speakerId: String
     public var startTime: Date
     public var text: String
+    public var user: UserResponse?
 
-    public init(endTime: Date, speakerId: String, startTime: Date, text: String) {
+    public init(endTime: Date, speakerId: String, startTime: Date, text: String, user: UserResponse? = nil) {
         self.endTime = endTime
         self.speakerId = speakerId
         self.startTime = startTime
         self.text = text
+        self.user = user
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -23,13 +25,15 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         case speakerId = "speaker_id"
         case startTime = "start_time"
         case text
+        case user
     }
     
     public static func == (lhs: CallClosedCaption, rhs: CallClosedCaption) -> Bool {
         lhs.endTime == rhs.endTime &&
             lhs.speakerId == rhs.speakerId &&
             lhs.startTime == rhs.startTime &&
-            lhs.text == rhs.text
+            lhs.text == rhs.text &&
+            lhs.user == rhs.user
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -37,5 +41,6 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
         hasher.combine(speakerId)
         hasher.combine(startTime)
         hasher.combine(text)
+        hasher.combine(user)
     }
 }

@@ -49,6 +49,7 @@ class MockResponseBuilder {
         let callResponse = CallResponse(
             backstage: false,
             blockedUserIds: [],
+            captioning: false,
             cid: cid,
             createdAt: Date(),
             createdBy: userResponse,
@@ -145,7 +146,7 @@ class MockResponseBuilder {
             enabled: true
         )
         let transcriptionSettings = TranscriptionSettings(
-            closedCaptionMode: "",
+            closedCaptionMode: .available,
             languages: [],
             mode: .disabled
         )

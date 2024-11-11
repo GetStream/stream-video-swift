@@ -6,6 +6,23 @@ import Foundation
 
 public final class TranscriptionSettingsRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
+    public enum ClosedCaptionMode: String, Sendable, Codable, CaseIterable {
+        case autoOn = "auto-on"
+        case available
+        case disabled
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+               let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
+    }
+    
     public enum Mode: String, Sendable, Codable, CaseIterable {
         case autoOn = "auto-on"
         case available
@@ -23,11 +40,11 @@ public final class TranscriptionSettingsRequest: @unchecked Sendable, Codable, J
         }
     }
     
-    public var closedCaptionMode: String?
+    public var closedCaptionMode: ClosedCaptionMode?
     public var languages: [String]?
     public var mode: Mode
 
-    public init(closedCaptionMode: String? = nil, languages: [String]? = nil, mode: Mode) {
+    public init(closedCaptionMode: ClosedCaptionMode? = nil, languages: [String]? = nil, mode: Mode) {
         self.closedCaptionMode = closedCaptionMode
         self.languages = languages
         self.mode = mode

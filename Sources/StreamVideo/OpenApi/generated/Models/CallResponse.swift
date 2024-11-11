@@ -8,6 +8,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     
     public var backstage: Bool
     public var blockedUserIds: [String]
+    public var captioning: Bool?
     public var cid: String
     public var createdAt: Date
     public var createdBy: UserResponse
@@ -31,6 +32,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public init(
         backstage: Bool,
         blockedUserIds: [String],
+        captioning: Bool? = nil,
         cid: String,
         createdAt: Date,
         createdBy: UserResponse,
@@ -53,6 +55,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     ) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
+        self.captioning = captioning
         self.cid = cid
         self.createdAt = createdAt
         self.createdBy = createdBy
@@ -77,6 +80,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case backstage
         case blockedUserIds = "blocked_user_ids"
+        case captioning
         case cid
         case createdAt = "created_at"
         case createdBy = "created_by"
@@ -101,6 +105,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public static func == (lhs: CallResponse, rhs: CallResponse) -> Bool {
         lhs.backstage == rhs.backstage &&
             lhs.blockedUserIds == rhs.blockedUserIds &&
+            lhs.captioning == rhs.captioning &&
             lhs.cid == rhs.cid &&
             lhs.createdAt == rhs.createdAt &&
             lhs.createdBy == rhs.createdBy &&
@@ -125,6 +130,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public func hash(into hasher: inout Hasher) {
         hasher.combine(backstage)
         hasher.combine(blockedUserIds)
+        hasher.combine(captioning)
         hasher.combine(cid)
         hasher.combine(createdAt)
         hasher.combine(createdBy)

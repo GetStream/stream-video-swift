@@ -16,6 +16,9 @@ public enum VideoEvent: Codable, Hashable {
     case typeCallAcceptedEvent(CallAcceptedEvent)
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeClosedCaptionEvent(ClosedCaptionEvent)
+    case typeCallClosedCaptionsFailedEvent(CallClosedCaptionsFailedEvent)
+    case typeCallClosedCaptionsStartedEvent(CallClosedCaptionsStartedEvent)
+    case typeCallClosedCaptionsStoppedEvent(CallClosedCaptionsStoppedEvent)
     case typeCallCreatedEvent(CallCreatedEvent)
     case typeCallDeletedEvent(CallDeletedEvent)
     case typeCallEndedEvent(CallEndedEvent)
@@ -66,6 +69,12 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeBlockedUserEvent(value):
             return value.type
         case let .typeClosedCaptionEvent(value):
+            return value.type
+        case let .typeCallClosedCaptionsFailedEvent(value):
+            return value.type
+        case let .typeCallClosedCaptionsStartedEvent(value):
+            return value.type
+        case let .typeCallClosedCaptionsStoppedEvent(value):
             return value.type
         case let .typeCallCreatedEvent(value):
             return value.type
@@ -162,6 +171,12 @@ public enum VideoEvent: Codable, Hashable {
             return value
         case let .typeClosedCaptionEvent(value):
             return value
+        case let .typeCallClosedCaptionsFailedEvent(value):
+            return value
+        case let .typeCallClosedCaptionsStartedEvent(value):
+            return value
+        case let .typeCallClosedCaptionsStoppedEvent(value):
+            return value
         case let .typeCallCreatedEvent(value):
             return value
         case let .typeCallDeletedEvent(value):
@@ -257,6 +272,12 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeBlockedUserEvent(value):
             try container.encode(value)
         case let .typeClosedCaptionEvent(value):
+            try container.encode(value)
+        case let .typeCallClosedCaptionsFailedEvent(value):
+            try container.encode(value)
+        case let .typeCallClosedCaptionsStartedEvent(value):
+            try container.encode(value)
+        case let .typeCallClosedCaptionsStoppedEvent(value):
             try container.encode(value)
         case let .typeCallCreatedEvent(value):
             try container.encode(value)
@@ -357,6 +378,15 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "call.closed_caption" {
             let value = try container.decode(ClosedCaptionEvent.self)
             self = .typeClosedCaptionEvent(value)
+        } else if dto.type == "call.closed_captions_failed" {
+            let value = try container.decode(CallClosedCaptionsFailedEvent.self)
+            self = .typeCallClosedCaptionsFailedEvent(value)
+        } else if dto.type == "call.closed_captions_started" {
+            let value = try container.decode(CallClosedCaptionsStartedEvent.self)
+            self = .typeCallClosedCaptionsStartedEvent(value)
+        } else if dto.type == "call.closed_captions_stopped" {
+            let value = try container.decode(CallClosedCaptionsStoppedEvent.self)
+            self = .typeCallClosedCaptionsStoppedEvent(value)
         } else if dto.type == "call.created" {
             let value = try container.decode(CallCreatedEvent.self)
             self = .typeCallCreatedEvent(value)

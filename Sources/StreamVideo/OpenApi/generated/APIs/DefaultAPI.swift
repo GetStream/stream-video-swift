@@ -665,6 +665,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
+    open func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse {
+        var path = "/video/call/{type}/{id}/start_closed_captions"
+        
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST"
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(StartClosedCaptionsResponse.self, from: $0)
+        }
+    }
+
     open func startRecording(
         type: String,
         id: String,
@@ -756,6 +775,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopHLSBroadcastingResponse.self, from: $0)
+        }
+    }
+
+    open func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse {
+        var path = "/video/call/{type}/{id}/stop_closed_captions"
+        
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST"
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(StopClosedCaptionsResponse.self, from: $0)
         }
     }
 
@@ -1127,6 +1165,8 @@ protocol DefaultAPIEndpoints {
         
     func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
         
+    func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse
+        
     func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws
         -> StartRecordingResponse
         
@@ -1136,6 +1176,8 @@ protocol DefaultAPIEndpoints {
     func getCallStats(type: String, id: String, session: String) async throws -> GetCallStatsResponse
         
     func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
+        
+    func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse
         
     func stopLive(type: String, id: String) async throws -> StopLiveResponse
         

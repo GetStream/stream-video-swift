@@ -7,7 +7,7 @@ import StreamVideo
 
 extension TranscriptionSettings {
     static func dummy(
-        closedCaptionMode: String = "",
+        closedCaptionMode: ClosedCaptionMode = .available,
         mode: Mode = .available
     ) -> TranscriptionSettings {
         .init(
