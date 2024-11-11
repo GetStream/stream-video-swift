@@ -31,6 +31,7 @@ extension CallResponse {
         .init(
             backstage: backstage,
             blockedUserIds: blockedUserIds,
+            captioning: false,
             cid: cid,
             createdAt: createdAt,
             createdBy: createdBy,
