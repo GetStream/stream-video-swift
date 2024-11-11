@@ -12,7 +12,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
     public var description: String
     public var endTimestamp: Int
     public var issueTags: [String]?
-    public var kind: String
+    public var kind: String?
     public var severity: Int
     public var timestamp: Int
     public var type: String
@@ -24,7 +24,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
         description: String,
         endTimestamp: Int,
         issueTags: [String]? = nil,
-        kind: String,
+        kind: String?,
         severity: Int,
         timestamp: Int,
         type: String
