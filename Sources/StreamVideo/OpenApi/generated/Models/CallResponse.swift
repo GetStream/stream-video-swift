@@ -32,7 +32,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public init(
         backstage: Bool,
         blockedUserIds: [String],
-        captioning: Bool?,
+        captioning: Bool? = nil,
         cid: String,
         createdAt: Date,
         createdBy: UserResponse,

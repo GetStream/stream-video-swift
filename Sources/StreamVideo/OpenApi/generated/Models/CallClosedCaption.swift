@@ -12,7 +12,7 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
     public var text: String
     public var user: UserResponse?
 
-    public init(endTime: Date, speakerId: String, startTime: Date, text: String, user: UserResponse?) {
+    public init(endTime: Date, speakerId: String, startTime: Date, text: String, user: UserResponse? = nil) {
         self.endTime = endTime
         self.speakerId = speakerId
         self.startTime = startTime

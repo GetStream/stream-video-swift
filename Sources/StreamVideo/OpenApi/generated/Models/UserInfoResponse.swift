@@ -12,7 +12,7 @@ public final class UserInfoResponse: @unchecked Sendable, Codable, JSONEncodable
     public var name: String
     public var roles: [String]
 
-    public init(custom: [String: RawJSON], id: String?, image: String, name: String, roles: [String]) {
+    public init(custom: [String: RawJSON], id: String? = nil, image: String, name: String, roles: [String]) {
         self.custom = custom
         self.id = id
         self.image = image

@@ -24,7 +24,7 @@ public final class CallEvent: @unchecked Sendable, Codable, JSONEncodable, Hasha
         description: String,
         endTimestamp: Int,
         issueTags: [String]? = nil,
-        kind: String?,
+        kind: String? = nil,
         severity: Int,
         timestamp: Int,
         type: String
