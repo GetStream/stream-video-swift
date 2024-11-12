@@ -40,7 +40,8 @@ final class StreamRTCAudioSession_Tests: XCTestCase {
     // MARK: - currentRoute
 
     func test_currentRoute_returnsCorrectRoute() {
-        XCTAssertEqual(subject.currentRoute, rtcAudioSession.currentRoute)
+        XCTAssertEqual(subject.currentRoute.inputs.map(\.portType), rtcAudioSession.currentRoute.inputs.map(\.portType))
+        XCTAssertEqual(subject.currentRoute.outputs.map(\.portType), rtcAudioSession.currentRoute.outputs.map(\.portType))
     }
 
     // MARK: - category
