@@ -34,13 +34,13 @@ public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
 /// - `ifInvisible(publishingAudio)`: Sorts participants based on their audio status, but only if they are not visible.
 /// - `roles()`: Sorts participants based on their assigned roles.
 public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
-    ifInvisible(dominantSpeaker),
-    ifInvisible(isSpeaking),
-    ifInvisible(publishingVideo),
-    ifInvisible(publishingAudio),
-    roles(),
-    joinedAt,
-    userId
+    combineComparators([
+        dominantSpeaker,
+        isSpeaking,
+        publishingVideo,
+        publishingAudio
+    ]),
+    roles()
 ]
 
 // MARK: - Sort Sequence
@@ -49,7 +49,7 @@ public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
 public enum StreamSortOrder { case ascending, descending }
 
 extension Sequence where Element == CallParticipant {
-
+    
     /// Sorts the sequence's elements using a specified comparator and order.
     ///
     /// - Parameters:
@@ -69,7 +69,7 @@ extension Sequence where Element == CallParticipant {
             }
         }
     }
-
+    
     /// Sorts the sequence's elements using multiple comparators and a specified order.
     /// The comparators are applied in the order they are provided.
     ///
@@ -100,7 +100,7 @@ func comparison<Value, T: Comparable>(
 ) -> ComparisonResult {
     let lhsValue = lhs[keyPath: keyPath]
     let rhsValue = rhs[keyPath: keyPath]
-
+    
     if lhsValue < rhsValue {
         return .orderedAscending
     } else if lhsValue > rhsValue {
@@ -126,7 +126,7 @@ func comparison<Value>(
 ) -> ComparisonResult {
     let lhsValue = lhs[keyPath: keyPath]
     let rhsValue = rhs[keyPath: keyPath]
-
+    
     switch (lhsValue, rhsValue) {
     case (true, false):
         return .orderedAscending

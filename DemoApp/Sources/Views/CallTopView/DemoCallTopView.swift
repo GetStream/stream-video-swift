@@ -42,6 +42,7 @@ struct DemoCallTopView: View {
 
             HStack {
                 Spacer()
+                livestreamControlsView
                 HangUpIconView(viewModel: viewModel)
             }
             .frame(maxWidth: .infinity)
@@ -63,6 +64,52 @@ struct DemoCallTopView: View {
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
+    }
+
+    @ViewBuilder
+    private var livestreamControlsView: some View {
+        if let call = viewModel.call, call.callType == .livestream, call.currentUserHasCapability(.startBroadcastCall) {
+            Menu {
+                Button {
+                    Task {
+                        do {
+                            if call.state.backstage {
+                                try await call.goLive()
+                            } else {
+                                try await call.stopLive()
+                            }
+                        } catch {
+                            log.error(error)
+                        }
+                    }
+                } label: {
+                    if call.state.backstage {
+                        Label {
+                            Text("Start Live")
+                        } icon: {
+                            Image(systemName: "play.fill")
+                                .foregroundColor(colors.accentGreen)
+                        }
+                    } else {
+                        Label {
+                            Text("Stop Live")
+                        } icon: {
+                            Image(systemName: "stop.fill")
+                                .foregroundColor(colors.accentRed)
+                        }
+                    }
+                }
+
+            } label: {
+                CallIconView(
+                    icon: Image(systemName: "gear"),
+                    size: 44,
+                    iconStyle: .transparent
+                )
+            }
+        } else {
+            EmptyView()
+        }
     }
 }
 

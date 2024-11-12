@@ -9,17 +9,19 @@ import SwiftUI
 public struct LivestreamPlayer: View {
     
     @Injected(\.colors) var colors
-    
+
+    var handleParticipationWithLifecycle: Bool
     var onFullScreenStateChange: ((Bool) -> Void)?
     
     @StateObject var state: CallState
     @StateObject var viewModel: LivestreamPlayerViewModel
-    
+
     public init(
         type: String,
         id: String,
         muted: Bool = false,
         showParticipantCount: Bool = true,
+        handleParticipationWithLifecycle: Bool = true,
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         let viewModel = LivestreamPlayerViewModel(
@@ -30,6 +32,7 @@ public struct LivestreamPlayer: View {
         )
         _viewModel = StateObject(wrappedValue: viewModel)
         _state = StateObject(wrappedValue: viewModel.call.state)
+        self.handleParticipationWithLifecycle = handleParticipationWithLifecycle
         self.onFullScreenStateChange = onFullScreenStateChange
     }
     
@@ -87,6 +90,9 @@ public struct LivestreamPlayer: View {
                                 LivestreamButton(imageName: "viewfinder") {
                                     viewModel.update(fullScreen: !viewModel.fullScreen)
                                 }
+                                LivestreamButton(imageName: "phone.down.fill") {
+                                    viewModel.leaveLivestream()
+                                }
                             }
                             .padding()
                             .background(colors.livestreamBackground.edgesIgnoringSafeArea(.all))
@@ -110,9 +116,11 @@ public struct LivestreamPlayer: View {
             }
         })
         .onAppear {
+            guard handleParticipationWithLifecycle else { return }
             viewModel.joinLivestream()
         }
         .onDisappear {
+            guard handleParticipationWithLifecycle else { return }
             viewModel.leaveLivestream()
         }
     }

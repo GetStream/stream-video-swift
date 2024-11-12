@@ -33,8 +33,11 @@ struct DemoApp: App {
             ZStack {
                 if userState == .loggedIn {
                     NavigationView {
-                        DemoCallContainerView(callId: router.appState.deeplinkInfo.callId)
-                            .navigationBarHidden(true)
+                        DemoCallContainerView(
+                            callId: router.appState.deeplinkInfo.callId,
+                            callType: router.appState.deeplinkInfo.callType
+                        )
+                        .navigationBarHidden(true)
                     }
                     .navigationViewStyle(.stack)
                 } else {
