@@ -23,7 +23,7 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
         self.requestedAt = requestedAt
         self.onReject = onReject
     }
-
+    
     public func reject() {
         onReject(self)
     }
@@ -33,7 +33,7 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
 public class CallState: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
-
+    
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
     @Published public internal(set) var sessionId: String = ""
@@ -41,7 +41,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var participantsMap = [String: CallParticipant]() {
         didSet { didUpdate(Array(participantsMap.values)) }
     }
-
+    
     @Published public internal(set) var localParticipant: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
     @Published public internal(set) var remoteParticipants: [CallParticipant] = []
@@ -61,7 +61,7 @@ public class CallState: ObservableObject {
             }
         }
     }
-
+    
     @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var settings: CallSettingsResponse?
@@ -77,7 +77,7 @@ public class CallState: ObservableObject {
                 Updating ownCapabilities:
                 From:
                 \(oldValue.map(\.rawValue))
-
+                
                 To:
                 \(ownCapabilities.map(\.rawValue))
                 """,
@@ -85,14 +85,14 @@ public class CallState: ObservableObject {
             )
         }
     }
-
+    
     @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
     @Published public internal(set) var createdAt: Date = .distantPast {
         didSet { if !isInitialized { isInitialized = true }}
     }
-
+    
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var startedAt: Date? {
@@ -100,7 +100,7 @@ public class CallState: ObservableObject {
             setupDurationTimer()
         }
     }
-
+    
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
     @Published public internal(set) var custom: [String: RawJSON] = [:]
@@ -115,7 +115,7 @@ public class CallState: ObservableObject {
             didUpdate(session)
         }
     }
-
+    
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
     @Published public internal(set) var participantCount: UInt32 = 0
@@ -124,12 +124,12 @@ public class CallState: ObservableObject {
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
-
+    
     /// A public enum representing the settings for incoming video streams in a WebRTC
     /// session. This enum supports different policies like none, manual, or
     /// disabled, each potentially applying to specific session IDs.
     @Published public internal(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
-
+    
     /// This property holds the error that indicates the user has been disconnected
     /// due to a network-related issue. When the user’s connection is disrupted for longer than the specified
     /// timeout, this error will be set with a relevant error type, such as
@@ -138,12 +138,18 @@ public class CallState: ObservableObject {
     /// - SeeAlso: ``ClientError.NetworkNotAvailable`` for the type of error set when a
     ///            disconnection due to network issues occurs.
     @Published public internal(set) var disconnectionError: Error?
-
-    var sortComparators = defaultComparators
+    
+    var sortComparators = defaultComparators {
+        didSet {
+            Task { @MainActor in
+                didUpdate(participants)
+            }
+        }
+    }
     
     private var localCallSettingsUpdate = false
     private var durationTimer: Foundation.Timer?
-        
+    
     internal func updateState(from event: VideoEvent) {
         switch event {
         case let .typeBlockedUserEvent(event):
@@ -262,7 +268,7 @@ public class CallState: ObservableObject {
             break
         }
     }
-
+    
     internal func addPermissionRequest(user: User, permissions: [String], requestedAt: Date) {
         let requests = permissions.map {
             PermissionRequest(
@@ -274,23 +280,23 @@ public class CallState: ObservableObject {
         }
         permissionRequests.append(contentsOf: requests)
     }
-
+    
     internal func removePermissionRequest(request: PermissionRequest) {
         permissionRequests = permissionRequests.filter {
             $0.id != request.id
         }
     }
-
+    
     internal func blockUser(id: String) {
         if !blockedUserIds.contains(id) {
             blockedUserIds.insert(id)
         }
     }
-
+    
     internal func unblockUser(id: String) {
         blockedUserIds.remove(id)
     }
-
+    
     internal func mergeMembers(_ response: [MemberResponse]) {
         var current = members
         var changed = false
@@ -312,47 +318,47 @@ public class CallState: ObservableObject {
             members = current
         }
     }
-
+    
     internal func update(from response: GetOrCreateCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
-
+    
     internal func update(from response: JoinCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
-
+    
     internal func update(from response: GetCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
-
+    
     internal func update(from response: CallStateResponseFields) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
-
+    
     internal func update(from response: UpdateCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
-
+    
     internal func update(from event: CallCreatedEvent) {
         update(from: event.call)
         mergeMembers(event.members)
     }
-
+    
     internal func update(from event: CallRingEvent) {
         update(from: event.call)
         mergeMembers(event.members)
     }
-
+    
     internal func update(from response: CallResponse) {
         custom = response.custom
         createdAt = response.createdAt
@@ -368,13 +374,13 @@ public class CallState: ObservableObject {
         session = response.session
         settings = response.settings
         egress = response.egress
-
+        
         let rtmp = RTMP(
             address: response.ingress.rtmp.address,
             streamKey: streamVideo.token.rawValue
         )
         ingress = Ingress(rtmp: rtmp)
-
+        
         if !localCallSettingsUpdate {
             callSettings = response.settings.toCallSettings
         }
@@ -397,26 +403,26 @@ public class CallState: ObservableObject {
         }
         ownCapabilities = event.ownCapabilities
     }
-
+    
     private func didUpdate(_ newParticipants: [CallParticipant]) {
         // Combine existing and newly added participants.
         let currentParticipantIds = Set(participants.map(\.id))
         let newlyAddedParticipants = Set(newParticipants.map(\.id))
             .subtracting(currentParticipantIds)
             .compactMap { participantsMap[$0] }
-
+        
         // Sort the updated participants.
         let updatedCurrentParticipants: [CallParticipant] = (
             participants
                 .compactMap { participantsMap[$0.id] } + newlyAddedParticipants
         )
         .sorted(by: sortComparators)
-
+        
         // Variables to hold segregated participants.
         var remoteParticipants: [CallParticipant] = []
         var activeSpeakers: [CallParticipant] = []
         var screenSharingSession: ScreenSharingSession?
-
+        
         // Segregate participants based on conditions.
         for participant in updatedCurrentParticipants {
             // Check if participant is local or remote.
@@ -425,30 +431,30 @@ public class CallState: ObservableObject {
             } else {
                 remoteParticipants.append(participant)
             }
-
+            
             // Check if participant is speaking.
             if participant.isSpeaking {
                 activeSpeakers.append(participant)
             }
-
+            
             // Check if participant is a dominant speaker.
             if participant.isDominantSpeaker {
                 dominantSpeaker = participant
             }
-
+            
             // Check if participant is sharing their screen.
             if let screenshareTrack = participant.screenshareTrack, participant.isScreensharing {
                 screenSharingSession = .init(track: screenshareTrack, participant: participant)
             }
         }
-
+        
         // Update the respective class properties.
         participants = updatedCurrentParticipants
         self.screenSharingSession = screenSharingSession
         self.remoteParticipants = remoteParticipants
         self.activeSpeakers = activeSpeakers
     }
-
+    
     private func didUpdate(_ egress: EgressResponse?) {
         broadcasting = egress?.broadcasting ?? false
     }
@@ -463,7 +469,7 @@ public class CallState: ObservableObject {
             /// If we don't receive a value from the SFU we start the timer on the current date.
             startedAt = Date()
         }
-
+        
         if session.liveEndedAt != nil {
             resetTimer()
         }

@@ -101,6 +101,16 @@ struct DebugMenu: View {
         didSet { AppEnvironment.preferredVideoCodec = preferredVideoCodec }
     }
 
+    @State private var customPreferredCallType: String = ""
+    @State private var presentsCustomPreferredCallType = false
+    @State private var preferredCallType = AppEnvironment.preferredCallType {
+        didSet { AppEnvironment.preferredCallType = preferredCallType?.isEmpty == true ? nil : preferredCallType }
+    }
+
+    @State private var availableCallTypes: [String] = AppEnvironment.availableCallTypes {
+        didSet { AppEnvironment.availableCallTypes = availableCallTypes }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -166,6 +176,28 @@ struct DebugMenu: View {
                 additionalItems: { customDisconnectionTimeoutView },
                 label: "Disconnection Timeout"
             ) { self.disconnectionTimeout = $0 }
+
+            makeMenu(
+                for: availableCallTypes,
+                currentValue: preferredCallType ?? "",
+                additionalItems: {
+                    Divider()
+                    customPreferredCallTypeView
+                    if preferredCallType != nil {
+                        Divider()
+                        Button {
+                            self.preferredCallType = nil
+                        } label: {
+                            Label {
+                                Text("Clear")
+                            } icon: {
+                                Image(systemName: "xmark")
+                            }
+                        }
+                    }
+                },
+                label: "Preferred CallType"
+            ) { self.preferredCallType = $0 }
 
             makeMenu(
                 for: [.h264, .vp8, .vp9, .av1],
@@ -244,6 +276,17 @@ struct DebugMenu: View {
             valueBinding: $customDisconnectionTimeoutValue,
             transformer: { TimeInterval($0) ?? 0 },
             action: { self.disconnectionTimeout = .custom(customDisconnectionTimeoutValue) }
+        )
+        .alertWithTextField(
+            title: "Enter call type",
+            placeholder: "Call Type",
+            presentationBinding: $presentsCustomPreferredCallType,
+            valueBinding: $customPreferredCallType,
+            transformer: { $0 },
+            action: {
+                self.availableCallTypes.append(customPreferredCallType)
+                self.preferredCallType = customPreferredCallType
+            }
         )
     }
 
@@ -343,6 +386,19 @@ struct DebugMenu: View {
                 } icon: {
                     EmptyView()
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customPreferredCallTypeView: some View {
+        Button {
+            presentsCustomPreferredCallType = true
+        } label: {
+            Label {
+                Text("Add")
+            } icon: {
+                Image(systemName: "plus")
             }
         }
     }

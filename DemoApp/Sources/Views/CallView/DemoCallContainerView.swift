@@ -10,19 +10,21 @@ import SwiftUI
 internal struct DemoCallContainerView: View {
 
     private var callId: String
+    private var callType: String
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
     @StateObject var viewModel: CallViewModel
     @StateObject var chatViewModel: DemoChatViewModel
     @ObservedObject var appState = AppState.shared
 
-    internal init(callId: String) {
+    internal init(callId: String, callType: String = .default) {
         let callViewModel = CallViewModel()
         callViewModel.participantAutoLeavePolicy = AppEnvironment.autoLeavePolicy.policy
         callViewModel.isPictureInPictureEnabled = AppEnvironment.pictureInPictureIntegration == .enabled
         _viewModel = StateObject(wrappedValue: callViewModel)
         _chatViewModel = StateObject(wrappedValue: .init(callViewModel))
         self.callId = callId
+        self.callType = callType
     }
 
     internal var body: some View {
@@ -52,7 +54,7 @@ internal struct DemoCallContainerView: View {
             let contact = callIntent.contacts?.first
 
             guard let name = contact?.personHandle?.value else { return }
-            viewModel.startCall(callType: .default, callId: .unique, members: [.init(user: .init(id: name))], ring: true)
+            viewModel.startCall(callType: callType, callId: .unique, members: [.init(user: .init(id: name))], ring: true)
         }
     }
 }
