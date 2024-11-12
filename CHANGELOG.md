@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- When joining one call after another, the last frame of the previous call was flashing for a split second in the new call [#596](https://github.com/GetStream/stream-video-swift/pull/596)
 
 # [1.14.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.14.0)
 _November 06, 2024_
