@@ -74,8 +74,8 @@ final class ReusePoolTests: XCTestCase {
         XCTAssertNotNil(object2)
         XCTAssertNotEqual(object1, object2)
 
-        subject.release(object2, replaceAvailableElementWithNew: true)
-        subject.release(object1, replaceAvailableElementWithNew: true)
+        subject.release(object2)
+        subject.release(object1)
 
         // After releasing, these objects should be available for reuse
         let object3 = subject.acquire()
@@ -83,8 +83,8 @@ final class ReusePoolTests: XCTestCase {
 
         XCTAssertNotNil(object3)
         XCTAssertNotNil(object4)
-        XCTAssertFalse(object1 === object3) // Reused object
-        XCTAssertFalse(object2 === object4) // Reused object
+        XCTAssertTrue(object1 === object3) // Reused object
+        XCTAssertTrue(object2 === object4) // Reused object
 
         // Now, the pool should be at initial capacity
         let object5 = subject.acquire()
