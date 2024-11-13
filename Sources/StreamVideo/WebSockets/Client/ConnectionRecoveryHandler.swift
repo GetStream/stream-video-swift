@@ -28,10 +28,11 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
     private var reconnectionStrategy: RetryStrategy
     private var reconnectionTimer: TimerControl?
     private let keepConnectionAliveInBackground: Bool
-    
+    private var reconnectionPolicies: [AutomaticReconnectionPolicy]
+
     // MARK: - Init
-    
-    init(
+
+    convenience init(
         webSocketClient: WebSocketClient,
         eventNotificationCenter: EventNotificationCenter,
         backgroundTaskScheduler: BackgroundTaskScheduler?,
@@ -40,6 +41,35 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
         reconnectionTimerType: Timer.Type,
         keepConnectionAliveInBackground: Bool
     ) {
+        self.init(
+            webSocketClient: webSocketClient,
+            eventNotificationCenter: eventNotificationCenter,
+            backgroundTaskScheduler: backgroundTaskScheduler,
+            internetConnection: internetConnection,
+            reconnectionStrategy: reconnectionStrategy,
+            reconnectionTimerType: reconnectionTimerType,
+            keepConnectionAliveInBackground: keepConnectionAliveInBackground,
+            reconnectionPolicies: [
+                WebSocketAutomaticReconnectionPolicy(webSocketClient),
+                InternetAvailabilityReconnectionPolicy(internetConnection),
+                CompositeReconnectionPolicy(.or, policies: [
+                    BackgroundStateReconnectionPolicy(backgroundTaskScheduler),
+                    CallKitReconnectionPolicy()
+                ])
+            ]
+        )
+    }
+
+    init(
+        webSocketClient: WebSocketClient,
+        eventNotificationCenter: EventNotificationCenter,
+        backgroundTaskScheduler: BackgroundTaskScheduler?,
+        internetConnection: InternetConnection,
+        reconnectionStrategy: RetryStrategy,
+        reconnectionTimerType: Timer.Type,
+        keepConnectionAliveInBackground: Bool,
+        reconnectionPolicies: [AutomaticReconnectionPolicy]
+    ) {
         self.webSocketClient = webSocketClient
         self.eventNotificationCenter = eventNotificationCenter
         self.backgroundTaskScheduler = backgroundTaskScheduler
@@ -47,6 +77,7 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
         self.reconnectionStrategy = reconnectionStrategy
         self.reconnectionTimerType = reconnectionTimerType
         self.keepConnectionAliveInBackground = keepConnectionAliveInBackground
+        self.reconnectionPolicies = reconnectionPolicies
 
         subscribeOnNotifications()
     }
@@ -192,24 +223,7 @@ private extension DefaultConnectionRecoveryHandler {
     }
     
     var canReconnectAutomatically: Bool {
-        guard webSocketClient.connectionState.isAutomaticReconnectionEnabled else {
-            log.debug("Reconnection is not required (\(webSocketClient.connectionState))", subsystems: .webSocket)
-            return false
-        }
-        
-        guard internetConnection.status.isAvailable else {
-            log.debug("Reconnection is not possible (internet ❌)", subsystems: .webSocket)
-            return false
-        }
-        
-        guard backgroundTaskScheduler?.isAppActive ?? true else {
-            log.debug("Reconnection is not possible (app 💤)", subsystems: .webSocket)
-            return false
-        }
-        
-        log.debug("Will reconnect automatically", subsystems: .webSocket)
-        
-        return true
+        reconnectionPolicies.first { $0.canBeReconnected() == false } == nil
     }
 }
 
@@ -245,5 +259,78 @@ private extension DefaultConnectionRecoveryHandler {
         
         reconnectionTimer?.cancel()
         reconnectionTimer = nil
+    }
+}
+
+// MARK: - Automatic Reconnection Policies
+
+protocol AutomaticReconnectionPolicy {
+    func canBeReconnected() -> Bool
+}
+
+struct WebSocketAutomaticReconnectionPolicy: AutomaticReconnectionPolicy {
+    private var webSocketClient: WebSocketClient
+
+    init(_ webSocketClient: WebSocketClient) {
+        self.webSocketClient = webSocketClient
+    }
+
+    func canBeReconnected() -> Bool {
+        webSocketClient.connectionState.isAutomaticReconnectionEnabled
+    }
+}
+
+struct InternetAvailabilityReconnectionPolicy: AutomaticReconnectionPolicy {
+    private var internetConnection: InternetConnection
+
+    init(_ internetConnection: InternetConnection) {
+        self.internetConnection = internetConnection
+    }
+
+    func canBeReconnected() -> Bool {
+        internetConnection.status.isAvailable
+    }
+}
+
+struct BackgroundStateReconnectionPolicy: AutomaticReconnectionPolicy {
+    private var backgroundTaskScheduler: BackgroundTaskScheduler?
+
+    init(_ backgroundTaskScheduler: BackgroundTaskScheduler?) {
+        self.backgroundTaskScheduler = backgroundTaskScheduler
+    }
+
+    func canBeReconnected() -> Bool {
+        backgroundTaskScheduler?.isAppActive ?? true
+    }
+}
+
+struct CallKitReconnectionPolicy: AutomaticReconnectionPolicy {
+    @Injected(\.callKitService) private var callKitService
+
+    init() {}
+
+    func canBeReconnected() -> Bool {
+        callKitService.callCount > 0
+    }
+}
+
+struct CompositeReconnectionPolicy: AutomaticReconnectionPolicy {
+    enum Operator { case and, or }
+
+    private var `operator`: Operator
+    private var policies: [AutomaticReconnectionPolicy]
+
+    init(_ operator: Operator, policies: [AutomaticReconnectionPolicy]) {
+        self.operator = `operator`
+        self.policies = policies
+    }
+
+    func canBeReconnected() -> Bool {
+        switch `operator` {
+        case .and:
+            return policies.first { $0.canBeReconnected() == false } == nil
+        case .or:
+            return policies.first { $0.canBeReconnected() } != nil
+        }
     }
 }
