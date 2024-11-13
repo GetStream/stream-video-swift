@@ -29,6 +29,7 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
         contentView(content)
     }
 
+    @MainActor
     @ViewBuilder
     private func contentView(_ rootView: Content) -> some View {
         if
@@ -41,6 +42,7 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
                     type: call.callType,
                     id: call.callId,
                     handleParticipationWithLifecycle: false,
+                    showsLeaveCallButton: true,
                     onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
                 )
             }

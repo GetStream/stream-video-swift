@@ -11,6 +11,7 @@ public struct LivestreamPlayer: View {
     @Injected(\.colors) var colors
 
     var handleParticipationWithLifecycle: Bool
+    var showsLeaveCallButton: Bool
     var onFullScreenStateChange: ((Bool) -> Void)?
     
     @StateObject var state: CallState
@@ -22,6 +23,7 @@ public struct LivestreamPlayer: View {
         muted: Bool = false,
         showParticipantCount: Bool = true,
         handleParticipationWithLifecycle: Bool = true,
+        showsLeaveCallButton: Bool = false,
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         let viewModel = LivestreamPlayerViewModel(
@@ -33,6 +35,7 @@ public struct LivestreamPlayer: View {
         _viewModel = StateObject(wrappedValue: viewModel)
         _state = StateObject(wrappedValue: viewModel.call.state)
         self.handleParticipationWithLifecycle = handleParticipationWithLifecycle
+        self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
     }
     
@@ -90,8 +93,10 @@ public struct LivestreamPlayer: View {
                                 LivestreamButton(imageName: "viewfinder") {
                                     viewModel.update(fullScreen: !viewModel.fullScreen)
                                 }
-                                LivestreamButton(imageName: "phone.down.fill") {
-                                    viewModel.leaveLivestream()
+                                if showsLeaveCallButton {
+                                    LivestreamButton(imageName: "phone.down.fill") {
+                                        viewModel.leaveLivestream()
+                                    }
                                 }
                             }
                             .padding()
