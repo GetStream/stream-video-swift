@@ -28,10 +28,15 @@ runs:
     - uses: ./.github/actions/ruby-cache
     - uses: irgaly/xcode-cache@v1
       with:
-        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
-        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+        restore-keys: ${{ restore-keys }}
         deriveddata-directory: derived_data
         sourcepackages-directory: spm_cache
     - uses: ./.github/actions/python-cache
     - run: ./Scripts/bootstrap.sh
       shell: bash
+  inputs:
+  key:
+  restore-keys:
+    description: 'The restore keys to use'
+    required: true

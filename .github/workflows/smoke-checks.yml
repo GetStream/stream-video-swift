@@ -32,6 +32,17 @@ env:
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
+  bootstrap:
+    name: Prepare Environment
+    runs-on: macos-14
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/bootstrap
+      with:
+        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+      env:
+        INSTALL_YEETD: true
+
   test-llc-debug:
     name: Test LLC (Debug)
     runs-on: macos-14
@@ -41,6 +52,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
+      with:
+        restore-keys:
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+      env:
+        INSTALL_YEETD: true
+        SKIP_MINT_BOOTSTRAP: true
+        SKIP_BREW_BOOTSTRAP: true
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 40
@@ -91,6 +110,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
+      with:
+          restore-keys:
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+            xcode-cache-deriveddata-${{ github.workflow }}-test-llc-debug-${{ github.sha }}
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
@@ -124,6 +148,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
+      with:
+          restore-keys:
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+            xcode-cache-deriveddata-${{ github.workflow }}-test-swiftui-debug-${{ github.sha }}
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
