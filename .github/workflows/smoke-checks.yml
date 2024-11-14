@@ -44,11 +44,12 @@ jobs:
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
-        SKIP_BREW_BOOTSTRAP: true
     - uses: irgaly/xcode-cache@v1
       with:
         key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
-        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+        restore-keys: 
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
         deriveddata-directory: derived_data
         sourcepackages-directory: spm_cache
     - name: Run LLC Tests (Debug)
