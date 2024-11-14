@@ -32,17 +32,6 @@ env:
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
-  bootstrap:
-    name: Prepare Environment
-    runs-on: macos-14
-    steps:
-    - uses: actions/checkout@v4.1.1
-    - uses: ./.github/actions/bootstrap
-      with:
-        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
-      env:
-        INSTALL_YEETD: true
-
   test-llc-debug:
     name: Test LLC (Debug)
     runs-on: macos-14
