@@ -52,14 +52,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
-      with:
-        restore-keys:
-          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
-          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
         SKIP_BREW_BOOTSTRAP: true
+    - uses: irgaly/xcode-cache@v1
+      with:
+        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+        deriveddata-directory: derived_data
+        sourcepackages-directory: spm_cache
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 40
@@ -110,15 +112,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
-      with:
-          restore-keys:
-            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
-            xcode-cache-deriveddata-${{ github.workflow }}-test-llc-debug-${{ github.sha }}
-            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
         SKIP_BREW_BOOTSTRAP: true
+    - uses: irgaly/xcode-cache@v1
+      with:
+        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+        restore-keys: 
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
+          xcode-cache-deriveddata-${{ github.workflow }}-test-llc-debug-${{ github.sha }}
+        deriveddata-directory: derived_data
+        sourcepackages-directory: spm_cache
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
       timeout-minutes: 40
@@ -148,11 +153,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
-      with:
-          restore-keys:
-            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.job }}-${{ github.sha }}
-            xcode-cache-deriveddata-${{ github.workflow }}-test-swiftui-debug-${{ github.sha }}
-            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
