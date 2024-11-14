@@ -129,9 +129,7 @@ struct DemoStatsView: View {
                             title: "PUBLISH BITRATE",
                             value: 0,
                             valueTransformer: { $0?.publisherStats.totalBytesSent ?? 0 },
-                            presentationTransformer: { newValue, previousValue in
-                                bytesFormatter(from: max(newValue - previousValue, 0))
-                            }
+                            presentationTransformer: { bitrateFormatter(newValue: $0, oldValue: $1) }
                         )
                     } _: {
                         DemoStatView(
@@ -139,9 +137,7 @@ struct DemoStatsView: View {
                             title: "RECEIVING BITRATE",
                             value: 0,
                             valueTransformer: { $0?.subscriberStats.totalBytesReceived ?? 0 },
-                            presentationTransformer: { newValue, previousValue in
-                                bytesFormatter(from: max(newValue - previousValue, 0))
-                            }
+                            presentationTransformer: { bitrateFormatter(newValue: $0, oldValue: $1) }
                         )
                     }
                 }
@@ -209,6 +205,22 @@ struct DemoStatsView: View {
         } else {
             return "none"
         }
+    }
+
+    private func bitrateFormatter(
+        newValue: Int,
+        oldValue: Int
+    ) -> String {
+        guard
+            let statsCollectionInterval = viewModel.call?.state.statsCollectionInterval,
+            statsCollectionInterval > 0
+        else {
+            return bytesFormatter(from: 0)
+        }
+
+        let diff = newValue - oldValue
+        let bits = diff * 8
+        return bytesFormatter(from: max(bits / statsCollectionInterval, 0))
     }
 }
 
