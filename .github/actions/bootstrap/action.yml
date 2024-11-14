@@ -35,7 +35,7 @@ runs:
     - uses: ./.github/actions/python-cache
     - run: ./Scripts/bootstrap.sh
       shell: bash
-  inputs:
-    restore-keys:
-      description: 'The restore keys to use'
-      required: true
+inputs:
+  restore-keys:
+    description: 'The restore keys to use'
+    required: true
