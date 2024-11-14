@@ -29,6 +29,7 @@ runs:
     - uses: ./.github/actions/python-cache
     - uses: irgaly/xcode-cache@v1
       with:
-        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+        deriveddata-directory: derived_data
+        sourcepackages-directory: spm_cache
     - run: ./Scripts/bootstrap.sh
       shell: bash
