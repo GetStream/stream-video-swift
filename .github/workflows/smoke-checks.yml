@@ -119,7 +119,7 @@ jobs:
 
   cache-update:
     name: Update cache
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     needs: [test-swiftui-debug, test-llc-debug]
     steps:
       - uses: irgaly/xcode-cache@v1
