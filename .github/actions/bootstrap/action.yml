@@ -27,9 +27,8 @@ runs:
         restore-keys: ${{ env.IMAGE }}-brew-
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/python-cache
+    - uses: irgaly/xcode-cache@v1
+      with:
+        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
     - run: ./Scripts/bootstrap.sh
       shell: bash
-inputs:
-  restore-keys:
-    description: 'The restore keys to use'
-    required: true
