@@ -125,6 +125,8 @@ public class CallState: ObservableObject {
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
 
+    @Published public internal(set) var statsCollectionInterval: Int = 0
+
     /// A public enum representing the settings for incoming video streams in a WebRTC
     /// session. This enum supports different policies like none, manual, or
     /// disabled, each potentially applying to specific session IDs.
@@ -323,6 +325,7 @@ public class CallState: ObservableObject {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
+        statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
     }
 
     internal func update(from response: GetCallResponse) {
