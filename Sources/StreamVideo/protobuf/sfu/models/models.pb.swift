@@ -931,14 +931,61 @@ struct Stream_Video_Sfu_Models_VideoLayer {
   fileprivate var _videoDimension: Stream_Video_Sfu_Models_VideoDimension? = nil
 }
 
+struct Stream_Video_Sfu_Models_PublishOptions {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var codecs: [Stream_Video_Sfu_Models_PublishOption] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Models_PublishOption {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
+
+  var codec: Stream_Video_Sfu_Models_Codec {
+    get {return _codec ?? Stream_Video_Sfu_Models_Codec()}
+    set {_codec = newValue}
+  }
+  /// Returns true if `codec` has been explicitly set.
+  var hasCodec: Bool {return self._codec != nil}
+  /// Clears the value of `codec`. Subsequent reads from it will return its default value.
+  mutating func clearCodec() {self._codec = nil}
+
+  var bitrate: Int32 = 0
+
+  var fps: Int32 = 0
+
+  var maxSpatialLayers: Int32 = 0
+
+  var maxTemporalLayers: Int32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _codec: Stream_Video_Sfu_Models_Codec? = nil
+}
+
 struct Stream_Video_Sfu_Models_Codec {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var mimeType: String = String()
+  var payloadType: UInt32 = 0
 
-  var scalabilityMode: String = String()
+  var name: String = String()
+
+  var clockRate: UInt32 = 0
+
+  var encodingParameters: String = String()
 
   var fmtp: String = String()
 
@@ -984,8 +1031,6 @@ struct Stream_Video_Sfu_Models_TrackInfo {
   var red: Bool = false
 
   var muted: Bool = false
-
-  var preferredCodecs: [Stream_Video_Sfu_Models_Codec] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1257,6 +1302,8 @@ extension Stream_Video_Sfu_Models_Participant: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_StreamQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoDimension: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoLayer: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_PublishOptions: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_PublishOption: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Codec: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ICETrickle: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackInfo: @unchecked Sendable {}
@@ -1786,11 +1833,111 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
   }
 }
 
+extension Stream_Video_Sfu_Models_PublishOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PublishOptions"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "codecs"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.codecs) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.codecs.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.codecs, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_PublishOptions, rhs: Stream_Video_Sfu_Models_PublishOptions) -> Bool {
+    if lhs.codecs != rhs.codecs {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PublishOption"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "track_type"),
+    2: .same(proto: "codec"),
+    3: .same(proto: "bitrate"),
+    4: .same(proto: "fps"),
+    5: .standard(proto: "max_spatial_layers"),
+    6: .standard(proto: "max_temporal_layers"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
+      case 3: try { try decoder.decodeSingularInt32Field(value: &self.bitrate) }()
+      case 4: try { try decoder.decodeSingularInt32Field(value: &self.fps) }()
+      case 5: try { try decoder.decodeSingularInt32Field(value: &self.maxSpatialLayers) }()
+      case 6: try { try decoder.decodeSingularInt32Field(value: &self.maxTemporalLayers) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.trackType != .unspecified {
+      try visitor.visitSingularEnumField(value: self.trackType, fieldNumber: 1)
+    }
+    try { if let v = self._codec {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if self.bitrate != 0 {
+      try visitor.visitSingularInt32Field(value: self.bitrate, fieldNumber: 3)
+    }
+    if self.fps != 0 {
+      try visitor.visitSingularInt32Field(value: self.fps, fieldNumber: 4)
+    }
+    if self.maxSpatialLayers != 0 {
+      try visitor.visitSingularInt32Field(value: self.maxSpatialLayers, fieldNumber: 5)
+    }
+    if self.maxTemporalLayers != 0 {
+      try visitor.visitSingularInt32Field(value: self.maxTemporalLayers, fieldNumber: 6)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_PublishOption, rhs: Stream_Video_Sfu_Models_PublishOption) -> Bool {
+    if lhs.trackType != rhs.trackType {return false}
+    if lhs._codec != rhs._codec {return false}
+    if lhs.bitrate != rhs.bitrate {return false}
+    if lhs.fps != rhs.fps {return false}
+    if lhs.maxSpatialLayers != rhs.maxSpatialLayers {return false}
+    if lhs.maxTemporalLayers != rhs.maxTemporalLayers {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Codec"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    10: .standard(proto: "mime_type"),
-    11: .standard(proto: "scalability_mode"),
+    11: .standard(proto: "payload_type"),
+    10: .same(proto: "name"),
+    14: .standard(proto: "clock_rate"),
+    13: .standard(proto: "encoding_parameters"),
     12: .same(proto: "fmtp"),
   ]
 
@@ -1800,30 +1947,40 @@ extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._M
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 10: try { try decoder.decodeSingularStringField(value: &self.mimeType) }()
-      case 11: try { try decoder.decodeSingularStringField(value: &self.scalabilityMode) }()
+      case 10: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 11: try { try decoder.decodeSingularUInt32Field(value: &self.payloadType) }()
       case 12: try { try decoder.decodeSingularStringField(value: &self.fmtp) }()
+      case 13: try { try decoder.decodeSingularStringField(value: &self.encodingParameters) }()
+      case 14: try { try decoder.decodeSingularUInt32Field(value: &self.clockRate) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.mimeType.isEmpty {
-      try visitor.visitSingularStringField(value: self.mimeType, fieldNumber: 10)
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 10)
     }
-    if !self.scalabilityMode.isEmpty {
-      try visitor.visitSingularStringField(value: self.scalabilityMode, fieldNumber: 11)
+    if self.payloadType != 0 {
+      try visitor.visitSingularUInt32Field(value: self.payloadType, fieldNumber: 11)
     }
     if !self.fmtp.isEmpty {
       try visitor.visitSingularStringField(value: self.fmtp, fieldNumber: 12)
+    }
+    if !self.encodingParameters.isEmpty {
+      try visitor.visitSingularStringField(value: self.encodingParameters, fieldNumber: 13)
+    }
+    if self.clockRate != 0 {
+      try visitor.visitSingularUInt32Field(value: self.clockRate, fieldNumber: 14)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Models_Codec, rhs: Stream_Video_Sfu_Models_Codec) -> Bool {
-    if lhs.mimeType != rhs.mimeType {return false}
-    if lhs.scalabilityMode != rhs.scalabilityMode {return false}
+    if lhs.payloadType != rhs.payloadType {return false}
+    if lhs.name != rhs.name {return false}
+    if lhs.clockRate != rhs.clockRate {return false}
+    if lhs.encodingParameters != rhs.encodingParameters {return false}
     if lhs.fmtp != rhs.fmtp {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1885,7 +2042,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     8: .same(proto: "stereo"),
     9: .same(proto: "red"),
     10: .same(proto: "muted"),
-    11: .standard(proto: "preferred_codecs"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1902,7 +2058,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 8: try { try decoder.decodeSingularBoolField(value: &self.stereo) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.red) }()
       case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
-      case 11: try { try decoder.decodeRepeatedMessageField(value: &self.preferredCodecs) }()
       default: break
       }
     }
@@ -1933,9 +2088,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.muted != false {
       try visitor.visitSingularBoolField(value: self.muted, fieldNumber: 10)
     }
-    if !self.preferredCodecs.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.preferredCodecs, fieldNumber: 11)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1948,7 +2100,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.stereo != rhs.stereo {return false}
     if lhs.red != rhs.red {return false}
     if lhs.muted != rhs.muted {return false}
-    if lhs.preferredCodecs != rhs.preferredCodecs {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

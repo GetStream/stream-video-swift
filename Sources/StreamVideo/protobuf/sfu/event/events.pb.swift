@@ -249,6 +249,15 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     set {eventPayload = .codecNegotiationComplete(newValue)}
   }
 
+  /// ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
+  var changePublishOptions: Stream_Video_Sfu_Event_ChangePublishOptions {
+    get {
+      if case .changePublishOptions(let v)? = eventPayload {return v}
+      return Stream_Video_Sfu_Event_ChangePublishOptions()
+    }
+    set {eventPayload = .changePublishOptions(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_EventPayload: Equatable {
@@ -319,6 +328,8 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     /// CodecNegotiationComplete is sent to signal the completion of a codec negotiation.
     /// SDKs can safely stop previous transceivers
     case codecNegotiationComplete(Stream_Video_Sfu_Event_CodecNegotiationComplete)
+    /// ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
+    case changePublishOptions(Stream_Video_Sfu_Event_ChangePublishOptions)
 
   #if !swift(>=4.1)
     static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, rhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) -> Bool {
@@ -414,6 +425,10 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         guard case .codecNegotiationComplete(let l) = lhs, case .codecNegotiationComplete(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.changePublishOptions, .changePublishOptions): return {
+        guard case .changePublishOptions(let l) = lhs, case .changePublishOptions(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
       default: return false
       }
     }
@@ -421,6 +436,27 @@ struct Stream_Video_Sfu_Event_SfuEvent {
   }
 
   init() {}
+}
+
+struct Stream_Video_Sfu_Event_ChangePublishOptions {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var publishOption: Stream_Video_Sfu_Models_PublishOption {
+    get {return _publishOption ?? Stream_Video_Sfu_Models_PublishOption()}
+    set {_publishOption = newValue}
+  }
+  /// Returns true if `publishOption` has been explicitly set.
+  var hasPublishOption: Bool {return self._publishOption != nil}
+  /// Clears the value of `publishOption`. Subsequent reads from it will return its default value.
+  mutating func clearPublishOption() {self._publishOption = nil}
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _publishOption: Stream_Video_Sfu_Models_PublishOption? = nil
 }
 
 struct Stream_Video_Sfu_Event_CodecNegotiationComplete {
@@ -726,6 +762,11 @@ struct Stream_Video_Sfu_Event_JoinRequest {
     set {_uniqueStorage()._subscriberSdp = newValue}
   }
 
+  var publisherSdp: String {
+    get {return _storage._publisherSdp}
+    set {_uniqueStorage()._publisherSdp = newValue}
+  }
+
   var clientDetails: Stream_Video_Sfu_Models_ClientDetails {
     get {return _storage._clientDetails ?? Stream_Video_Sfu_Models_ClientDetails()}
     set {_uniqueStorage()._clientDetails = newValue}
@@ -832,11 +873,21 @@ struct Stream_Video_Sfu_Event_JoinResponse {
 
   var fastReconnectDeadlineSeconds: Int32 = 0
 
+  var publishOptions: Stream_Video_Sfu_Models_PublishOptions {
+    get {return _publishOptions ?? Stream_Video_Sfu_Models_PublishOptions()}
+    set {_publishOptions = newValue}
+  }
+  /// Returns true if `publishOptions` has been explicitly set.
+  var hasPublishOptions: Bool {return self._publishOptions != nil}
+  /// Clears the value of `publishOptions`. Subsequent reads from it will return its default value.
+  mutating func clearPublishOptions() {self._publishOptions = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
   fileprivate var _callState: Stream_Video_Sfu_Models_CallState? = nil
+  fileprivate var _publishOptions: Stream_Video_Sfu_Models_PublishOptions? = nil
 }
 
 /// ParticipantJoined is fired when a user joins a call
@@ -1180,6 +1231,7 @@ struct Stream_Video_Sfu_Event_CallEnded {
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Event_SfuEvent: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ChangePublishOptions: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_CodecNegotiationComplete: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ParticipantMigrationComplete: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_PinsChanged: @unchecked Sendable {}
@@ -1245,6 +1297,7 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     24: .standard(proto: "participant_updated"),
     25: .standard(proto: "participant_migration_complete"),
     26: .standard(proto: "codec_negotiation_complete"),
+    27: .standard(proto: "change_publish_options"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1539,6 +1592,19 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
           self.eventPayload = .codecNegotiationComplete(v)
         }
       }()
+      case 27: try {
+        var v: Stream_Video_Sfu_Event_ChangePublishOptions?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .changePublishOptions(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .changePublishOptions(v)
+        }
+      }()
       default: break
       }
     }
@@ -1638,6 +1704,10 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
       guard case .codecNegotiationComplete(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 26)
     }()
+    case .changePublishOptions?: try {
+      guard case .changePublishOptions(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 27)
+    }()
     case nil: break
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -1645,6 +1715,42 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
 
   static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent, rhs: Stream_Video_Sfu_Event_SfuEvent) -> Bool {
     if lhs.eventPayload != rhs.eventPayload {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Event_ChangePublishOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ChangePublishOptions"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "publish_option"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._publishOption) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._publishOption {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Event_ChangePublishOptions, rhs: Stream_Video_Sfu_Event_ChangePublishOptions) -> Bool {
+    if lhs._publishOption != rhs._publishOption {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2211,6 +2317,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     1: .same(proto: "token"),
     2: .standard(proto: "session_id"),
     3: .standard(proto: "subscriber_sdp"),
+    8: .standard(proto: "publisher_sdp"),
     4: .standard(proto: "client_details"),
     5: .same(proto: "migration"),
     6: .standard(proto: "fast_reconnect"),
@@ -2221,6 +2328,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     var _token: String = String()
     var _sessionID: String = String()
     var _subscriberSdp: String = String()
+    var _publisherSdp: String = String()
     var _clientDetails: Stream_Video_Sfu_Models_ClientDetails? = nil
     var _migration: Stream_Video_Sfu_Event_Migration? = nil
     var _fastReconnect: Bool = false
@@ -2234,6 +2342,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       _token = source._token
       _sessionID = source._sessionID
       _subscriberSdp = source._subscriberSdp
+      _publisherSdp = source._publisherSdp
       _clientDetails = source._clientDetails
       _migration = source._migration
       _fastReconnect = source._fastReconnect
@@ -2263,6 +2372,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         case 5: try { try decoder.decodeSingularMessageField(value: &_storage._migration) }()
         case 6: try { try decoder.decodeSingularBoolField(value: &_storage._fastReconnect) }()
         case 7: try { try decoder.decodeSingularMessageField(value: &_storage._reconnectDetails) }()
+        case 8: try { try decoder.decodeSingularStringField(value: &_storage._publisherSdp) }()
         default: break
         }
       }
@@ -2296,6 +2406,9 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       try { if let v = _storage._reconnectDetails {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
       } }()
+      if !_storage._publisherSdp.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._publisherSdp, fieldNumber: 8)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2308,6 +2421,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         if _storage._token != rhs_storage._token {return false}
         if _storage._sessionID != rhs_storage._sessionID {return false}
         if _storage._subscriberSdp != rhs_storage._subscriberSdp {return false}
+        if _storage._publisherSdp != rhs_storage._publisherSdp {return false}
         if _storage._clientDetails != rhs_storage._clientDetails {return false}
         if _storage._migration != rhs_storage._migration {return false}
         if _storage._fastReconnect != rhs_storage._fastReconnect {return false}
@@ -2433,6 +2547,7 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
     1: .standard(proto: "call_state"),
     2: .same(proto: "reconnected"),
     3: .standard(proto: "fast_reconnect_deadline_seconds"),
+    4: .standard(proto: "publish_options"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2444,6 +2559,7 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
       case 1: try { try decoder.decodeSingularMessageField(value: &self._callState) }()
       case 2: try { try decoder.decodeSingularBoolField(value: &self.reconnected) }()
       case 3: try { try decoder.decodeSingularInt32Field(value: &self.fastReconnectDeadlineSeconds) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._publishOptions) }()
       default: break
       }
     }
@@ -2463,6 +2579,9 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
     if self.fastReconnectDeadlineSeconds != 0 {
       try visitor.visitSingularInt32Field(value: self.fastReconnectDeadlineSeconds, fieldNumber: 3)
     }
+    try { if let v = self._publishOptions {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2470,6 +2589,7 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
     if lhs._callState != rhs._callState {return false}
     if lhs.reconnected != rhs.reconnected {return false}
     if lhs.fastReconnectDeadlineSeconds != rhs.fastReconnectDeadlineSeconds {return false}
+    if lhs._publishOptions != rhs._publishOptions {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
