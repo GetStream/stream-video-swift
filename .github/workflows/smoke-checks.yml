@@ -117,6 +117,20 @@ jobs:
           ~/Library/Logs/scan
           fastlane/test_output/snapshots
 
+  cache-update:
+    name: Update cache
+    runs-on: ubuntu-latest
+    needs: [test-swiftui-debug, test-llc-debug]
+    steps:
+      - uses: irgaly/xcode-cache@v1
+        with:
+          key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
+          restore-keys: 
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
+          deriveddata-directory: derived_data
+          sourcepackages-directory: spm_cache
+
   # test-uikit-debug:
   #   name: Test UIKit (Debug)
   #   runs-on: macos-14
