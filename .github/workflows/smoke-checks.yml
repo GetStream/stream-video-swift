@@ -81,71 +81,71 @@ jobs:
           fastlane/test_output/logs/*/Diagnostics/**/*.txt
           fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
 
-  # test-swiftui-debug:
-  #   name: Test SwiftUI (Debug)
-  #   runs-on: macos-14
-  #   needs: test-llc-debug
-  #   if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #   - uses: ./.github/actions/bootstrap
-  #     env:
-  #       INSTALL_YEETD: true
-  #       SKIP_MINT_BOOTSTRAP: true
-  #       SKIP_BREW_BOOTSTRAP: true
-  #   - name: Run UI Tests (Debug)
-  #     run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
-  #     timeout-minutes: 40
-  #     env:
-  #       XCODE_VERSION: "15.2" # the most stable pair of Xcode
-  #       IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
-  #   - name: Parse xcresult
-  #     if: failure()
-  #     run: |
-  #       brew install chargepoint/xcparse/xcparse
-  #       xcparse screenshots fastlane/test_output/StreamVideoSwiftUI.xcresult fastlane/test_output/snapshots --test
-  #   - uses: actions/upload-artifact@v4
-  #     if: failure()
-  #     with:
-  #       name: SwiftUI Test Data
-  #       path: |
-  #         ~/Library/Logs/scan
-  #         fastlane/test_output/snapshots
+  test-swiftui-debug:
+    name: Test SwiftUI (Debug)
+    runs-on: macos-14
+    needs: test-llc-debug
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/bootstrap
+      env:
+        INSTALL_YEETD: true
+        SKIP_MINT_BOOTSTRAP: true
+        SKIP_BREW_BOOTSTRAP: true
+    - name: Run UI Tests (Debug)
+      run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
+      timeout-minutes: 40
+      env:
+        XCODE_VERSION: "15.2" # the most stable pair of Xcode
+        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
+    - name: Parse xcresult
+      if: failure()
+      run: |
+        brew install chargepoint/xcparse/xcparse
+        xcparse screenshots fastlane/test_output/StreamVideoSwiftUI.xcresult fastlane/test_output/snapshots --test
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: SwiftUI Test Data
+        path: |
+          ~/Library/Logs/scan
+          fastlane/test_output/snapshots
 
-  # test-uikit-debug:
-  #   name: Test UIKit (Debug)
-  #   runs-on: macos-14
-  #   needs: test-swiftui-debug
-  #   if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #   - uses: ./.github/actions/bootstrap
-  #     env:
-  #       INSTALL_YEETD: true
-  #       SKIP_MINT_BOOTSTRAP: true
-  #       SKIP_BREW_BOOTSTRAP: true
-  #   - name: Run UI Tests (Debug)
-  #     run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
-  #     timeout-minutes: 40
-  #     env:
-  #       XCODE_VERSION: "15.2" # the most stable pair of Xcode
-  #       IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
-  #   - name: Parse xcresult
-  #     if: failure()
-  #     run: |
-  #       brew install chargepoint/xcparse/xcparse
-  #       xcparse screenshots fastlane/test_output/StreamVideoUIKit.xcresult fastlane/test_output/snapshots --test
-  #   - uses: actions/upload-artifact@v4
-  #     if: failure()
-  #     with:
-  #       name: UIKit Test Data
-  #       path: |
-  #         ~/Library/Logs/scan
-  #         fastlane/test_output/snapshots
+  test-uikit-debug:
+    name: Test UIKit (Debug)
+    runs-on: macos-14
+    needs: test-swiftui-debug
+    if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/bootstrap
+      env:
+        INSTALL_YEETD: true
+        SKIP_MINT_BOOTSTRAP: true
+        SKIP_BREW_BOOTSTRAP: true
+    - name: Run UI Tests (Debug)
+      run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
+      timeout-minutes: 40
+      env:
+        XCODE_VERSION: "15.2" # the most stable pair of Xcode
+        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
+    - name: Parse xcresult
+      if: failure()
+      run: |
+        brew install chargepoint/xcparse/xcparse
+        xcparse screenshots fastlane/test_output/StreamVideoUIKit.xcresult fastlane/test_output/snapshots --test
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: UIKit Test Data
+        path: |
+          ~/Library/Logs/scan
+          fastlane/test_output/snapshots
 
   # automated-code-review:
   #   name: Automated Code Review

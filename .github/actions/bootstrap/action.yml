@@ -28,10 +28,8 @@ runs:
     - uses: ./.github/actions/ruby-cache
     - uses: irgaly/xcode-cache@v1
       with:
-        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.shat }}
-        restore-keys: 
-          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
-          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
+        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
         deriveddata-directory: derived_data
         sourcepackages-directory: spm_cache
     - uses: ./.github/actions/python-cache
