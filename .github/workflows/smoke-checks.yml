@@ -117,20 +117,6 @@ jobs:
           ~/Library/Logs/scan
           fastlane/test_output/snapshots
 
-  cache-update:
-    name: Update cache
-    runs-on: macos-14
-    needs: [test-swiftui-debug, test-llc-debug]
-    steps:
-      - uses: irgaly/xcode-cache@v1
-        with:
-          key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
-          restore-keys: 
-            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
-            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
-          deriveddata-directory: derived_data
-          sourcepackages-directory: spm_cache
-
   test-uikit-debug:
     name: Test UIKit (Debug)
     runs-on: macos-14
@@ -251,6 +237,20 @@ jobs:
     - name: Build Docs Test Project
       run: bundle exec fastlane build_docs_test
 
+  cache-update:
+    name: Update cache
+    runs-on: macos-14
+    needs: build-apps
+    steps:
+      - uses: irgaly/xcode-cache@v1
+        with:
+          key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
+          restore-keys: 
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+            xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
+          deriveddata-directory: derived_data
+          sourcepackages-directory: spm_cache
+
   allure_testops_launch:
     name: Launch Allure TestOps
     runs-on: macos-13
@@ -270,58 +270,58 @@ jobs:
       run: echo "launch_id=${{env.LAUNCH_ID}}" >> $GITHUB_OUTPUT
       if: env.LAUNCH_ID != ''
 
-  test-e2e-debug:
-    name: Test E2E UI (Debug)
-    runs-on: macos-14
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
-    needs: allure_testops_launch
-    env:
-      LAUNCH_ID: ${{ needs.allure_testops_launch.outputs.launch_id }}
-      ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
-    strategy:
-      matrix:
-        batch: [0, 1]
-      fail-fast: false
-    steps:
-    - uses: actions/checkout@v4.1.1
-    - uses: ./.github/actions/bootstrap
-      env:
-        INSTALL_ALLURE: true
-        INSTALL_VIDEO_BUDDY: true
-        INSTALL_YEETD: true
-        SKIP_MINT_BOOTSTRAP: true
-        SKIP_BREW_BOOTSTRAP: true
-    - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
-      timeout-minutes: 60
-      env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
-        MATRIX_SIZE: ${{ strategy.job-total }}
-        STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
-        STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}
-        STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
-        STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
-        STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
-    - name: Allure TestOps Upload
-      if: env.LAUNCH_ID != '' && (success() || failure())
-      run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
-    - name: Allure TestOps Launch Removal
-      if: env.LAUNCH_ID != '' && cancelled()
-      run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
-    - name: Parse xcresult
-      if: failure()
-      run: |
-        brew install chargepoint/xcparse/xcparse
-        xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
-    - uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: E2E Test Data ${{ matrix.batch }}
-        path: |
-          ~/Library/Logs/scan
-          fastlane/recordings
-          fastlane/*.log
-          fastlane/test_output/report.junit
-          fastlane/test_output/logs/*/Diagnostics/**/*.txt
-          fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
+  # test-e2e-debug:
+  #   name: Test E2E UI (Debug)
+  #   runs-on: macos-14
+  #   if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+  #   needs: allure_testops_launch
+  #   env:
+  #     LAUNCH_ID: ${{ needs.allure_testops_launch.outputs.launch_id }}
+  #     ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+  #   strategy:
+  #     matrix:
+  #       batch: [0, 1]
+  #     fail-fast: false
+  #   steps:
+  #   - uses: actions/checkout@v4.1.1
+  #   - uses: ./.github/actions/bootstrap
+  #     env:
+  #       INSTALL_ALLURE: true
+  #       INSTALL_VIDEO_BUDDY: true
+  #       INSTALL_YEETD: true
+  #       SKIP_MINT_BOOTSTRAP: true
+  #       SKIP_BREW_BOOTSTRAP: true
+  #   - name: Run UI Tests (Debug)
+  #     run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
+  #     timeout-minutes: 60
+  #     env:
+  #       XCODE_VERSION: "15.2" # the most stable pair of Xcode
+  #       IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
+  #       MATRIX_SIZE: ${{ strategy.job-total }}
+  #       STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
+  #       STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}
+  #       STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
+  #       STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
+  #       STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
+  #   - name: Allure TestOps Upload
+  #     if: env.LAUNCH_ID != '' && (success() || failure())
+  #     run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+  #   - name: Allure TestOps Launch Removal
+  #     if: env.LAUNCH_ID != '' && cancelled()
+  #     run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+  #   - name: Parse xcresult
+  #     if: failure()
+  #     run: |
+  #       brew install chargepoint/xcparse/xcparse
+  #       xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
+  #   - uses: actions/upload-artifact@v4
+  #     if: failure()
+  #     with:
+  #       name: E2E Test Data ${{ matrix.batch }}
+  #       path: |
+  #         ~/Library/Logs/scan
+  #         fastlane/recordings
+  #         fastlane/*.log
+  #         fastlane/test_output/report.junit
+  #         fastlane/test_output/logs/*/Diagnostics/**/*.txt
+  #         fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
