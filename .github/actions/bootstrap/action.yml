@@ -36,7 +36,6 @@ runs:
     - run: ./Scripts/bootstrap.sh
       shell: bash
   inputs:
-  key:
-  restore-keys:
-    description: 'The restore keys to use'
-    required: true
+    restore-keys:
+      description: 'The restore keys to use'
+      required: true
