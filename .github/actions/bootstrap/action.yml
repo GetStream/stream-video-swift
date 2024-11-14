@@ -30,8 +30,8 @@ runs:
       with:
         key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.shat }}
         restore-keys: 
-          - xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
-          - xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}
         deriveddata-directory: derived_data
         sourcepackages-directory: spm_cache
     - uses: ./.github/actions/python-cache
