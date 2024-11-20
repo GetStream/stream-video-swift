@@ -86,6 +86,72 @@ struct Stream_Video_Sfu_Signal_StopNoiseCancellationResponse {
   fileprivate var _error: Stream_Video_Sfu_Models_Error? = nil
 }
 
+struct Stream_Video_Sfu_Signal_Reconnection {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var timeSeconds: Float = 0
+
+  var strategy: Stream_Video_Sfu_Models_WebsocketReconnectStrategy = .unspecified
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Signal_Telemetry {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var data: Stream_Video_Sfu_Signal_Telemetry.OneOf_Data? = nil
+
+  var connectionTimeSeconds: Float {
+    get {
+      if case .connectionTimeSeconds(let v)? = data {return v}
+      return 0
+    }
+    set {data = .connectionTimeSeconds(newValue)}
+  }
+
+  var reconnection: Stream_Video_Sfu_Signal_Reconnection {
+    get {
+      if case .reconnection(let v)? = data {return v}
+      return Stream_Video_Sfu_Signal_Reconnection()
+    }
+    set {data = .reconnection(newValue)}
+  }
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  enum OneOf_Data: Equatable {
+    case connectionTimeSeconds(Float)
+    case reconnection(Stream_Video_Sfu_Signal_Reconnection)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Stream_Video_Sfu_Signal_Telemetry.OneOf_Data, rhs: Stream_Video_Sfu_Signal_Telemetry.OneOf_Data) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.connectionTimeSeconds, .connectionTimeSeconds): return {
+        guard case .connectionTimeSeconds(let l) = lhs, case .connectionTimeSeconds(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.reconnection, .reconnection): return {
+        guard case .reconnection(let l) = lhs, case .reconnection(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
+
+  init() {}
+}
+
 struct Stream_Video_Sfu_Signal_SendStatsRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -139,6 +205,15 @@ struct Stream_Video_Sfu_Signal_SendStatsRequest {
     set {deviceState = .apple(newValue)}
   }
 
+  var telemetry: Stream_Video_Sfu_Signal_Telemetry {
+    get {return _telemetry ?? Stream_Video_Sfu_Signal_Telemetry()}
+    set {_telemetry = newValue}
+  }
+  /// Returns true if `telemetry` has been explicitly set.
+  var hasTelemetry: Bool {return self._telemetry != nil}
+  /// Clears the value of `telemetry`. Subsequent reads from it will return its default value.
+  mutating func clearTelemetry() {self._telemetry = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_DeviceState: Equatable {
@@ -169,6 +244,7 @@ struct Stream_Video_Sfu_Signal_SendStatsRequest {
 
   fileprivate var _audioDevices: Stream_Video_Sfu_Models_InputDevices? = nil
   fileprivate var _videoDevices: Stream_Video_Sfu_Models_InputDevices? = nil
+  fileprivate var _telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil
 }
 
 struct Stream_Video_Sfu_Signal_SendStatsResponse {
@@ -470,6 +546,9 @@ extension Stream_Video_Sfu_Signal_StartNoiseCancellationRequest: @unchecked Send
 extension Stream_Video_Sfu_Signal_StartNoiseCancellationResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_StopNoiseCancellationRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_StopNoiseCancellationResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_Reconnection: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_Telemetry: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_Telemetry.OneOf_Data: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendStatsResponse: @unchecked Sendable {}
@@ -630,6 +709,109 @@ extension Stream_Video_Sfu_Signal_StopNoiseCancellationResponse: SwiftProtobuf.M
   }
 }
 
+extension Stream_Video_Sfu_Signal_Reconnection: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Reconnection"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "time_seconds"),
+    2: .same(proto: "strategy"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularFloatField(value: &self.timeSeconds) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.strategy) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.timeSeconds != 0 {
+      try visitor.visitSingularFloatField(value: self.timeSeconds, fieldNumber: 1)
+    }
+    if self.strategy != .unspecified {
+      try visitor.visitSingularEnumField(value: self.strategy, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Signal_Reconnection, rhs: Stream_Video_Sfu_Signal_Reconnection) -> Bool {
+    if lhs.timeSeconds != rhs.timeSeconds {return false}
+    if lhs.strategy != rhs.strategy {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Signal_Telemetry: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Telemetry"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "connection_time_seconds"),
+    2: .same(proto: "reconnection"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Float?
+        try decoder.decodeSingularFloatField(value: &v)
+        if let v = v {
+          if self.data != nil {try decoder.handleConflictingOneOf()}
+          self.data = .connectionTimeSeconds(v)
+        }
+      }()
+      case 2: try {
+        var v: Stream_Video_Sfu_Signal_Reconnection?
+        var hadOneofValue = false
+        if let current = self.data {
+          hadOneofValue = true
+          if case .reconnection(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.data = .reconnection(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.data {
+    case .connectionTimeSeconds?: try {
+      guard case .connectionTimeSeconds(let v)? = self.data else { preconditionFailure() }
+      try visitor.visitSingularFloatField(value: v, fieldNumber: 1)
+    }()
+    case .reconnection?: try {
+      guard case .reconnection(let v)? = self.data else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Signal_Telemetry, rhs: Stream_Video_Sfu_Signal_Telemetry) -> Bool {
+    if lhs.data != rhs.data {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SendStatsRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -643,6 +825,7 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     8: .standard(proto: "video_devices"),
     9: .same(proto: "android"),
     10: .same(proto: "apple"),
+    11: .same(proto: "telemetry"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -685,6 +868,7 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
           self.deviceState = .apple(v)
         }
       }()
+      case 11: try { try decoder.decodeSingularMessageField(value: &self._telemetry) }()
       default: break
       }
     }
@@ -730,6 +914,9 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     }()
     case nil: break
     }
+    try { if let v = self._telemetry {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -743,6 +930,7 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     if lhs._audioDevices != rhs._audioDevices {return false}
     if lhs._videoDevices != rhs._videoDevices {return false}
     if lhs.deviceState != rhs.deviceState {return false}
+    if lhs._telemetry != rhs._telemetry {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
