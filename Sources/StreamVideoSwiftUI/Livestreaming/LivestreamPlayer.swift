@@ -5,24 +5,58 @@
 import StreamVideo
 import SwiftUI
 
+/// A SwiftUI view that renders a livestream video player for managing and
+/// displaying a livestream.
+///
+/// `LivestreamPlayer` provides features such as participant video rendering,
+/// audio output toggling, fullscreen mode, and participant count display.
+/// The view reacts dynamically to the state of the associated call and allows
+/// customisation of its behaviour through policies and callback actions.
 @available(iOS 14.0, *)
 public struct LivestreamPlayer: View {
-    
+
+    /// Determines the join behavior for the livestream.
+    public enum JoinPolicy {
+        /// No automatic action; users must manually join the livestream.
+        case none
+        /// Automatically joins the livestream on appearance and leave on disappearance.
+        case auto
+    }
+
+    /// Accesses the color palette from the app's dependency injection.
     @Injected(\.colors) var colors
 
-    var handleParticipationWithLifecycle: Bool
+    /// The policy that defines how users join the livestream.
+    var joinPolicy: JoinPolicy
+
+    /// Indicates whether a button to leave the livestream is shown.
     var showsLeaveCallButton: Bool
+
+    /// A callback triggered when the fullscreen state changes.
     var onFullScreenStateChange: ((Bool) -> Void)?
-    
+
+    /// The state object representing the call's current state.
     @StateObject var state: CallState
+
+    /// The view model managing the livestream's behavior and state.
     @StateObject var viewModel: LivestreamPlayerViewModel
 
+    /// Initializes a `LivestreamPlayer` with the specified parameters.
+    ///
+    /// - Parameters:
+    ///   - type: The type of the livestream (e.g., meeting or webinar).
+    ///   - id: The unique identifier for the livestream.
+    ///   - muted: Indicates whether the livestream starts muted. Defaults to `false`.
+    ///   - showParticipantCount: Whether to show the count of participants. Defaults to `true`.
+    ///   - joinPolicy: The policy dictating how users join the livestream. Defaults to `.auto`.
+    ///   - showsLeaveCallButton: Whether to show a button to leave the call. Defaults to `false`.
+    ///   - onFullScreenStateChange: A callback for fullscreen state changes.
     public init(
         type: String,
         id: String,
         muted: Bool = false,
         showParticipantCount: Bool = true,
-        handleParticipationWithLifecycle: Bool = true,
+        joinPolicy: JoinPolicy = .auto,
         showsLeaveCallButton: Bool = false,
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
@@ -34,11 +68,11 @@ public struct LivestreamPlayer: View {
         )
         _viewModel = StateObject(wrappedValue: viewModel)
         _state = StateObject(wrappedValue: viewModel.call.state)
-        self.handleParticipationWithLifecycle = handleParticipationWithLifecycle
+        self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
     }
-    
+
     public var body: some View {
         ZStack {
             if viewModel.errorShown {
@@ -65,7 +99,8 @@ public struct LivestreamPlayer: View {
                                 viewModel.controlsShown ? LivestreamPlayPauseButton(
                                     viewModel: viewModel
                                 ) {
-                                    participant.track?.isEnabled = !viewModel.streamPaused
+                                    participant.track?.isEnabled =
+                                        !viewModel.streamPaused
                                     if !viewModel.streamPaused {
                                         viewModel.update(controlsShown: false)
                                     }
@@ -81,26 +116,40 @@ public struct LivestreamPlayer: View {
                                 LiveIndicator()
                                 if viewModel.showParticipantCount {
                                     LivestreamParticipantsView(
-                                        participantsCount: Int(viewModel.call.state.participantCount)
+                                        participantsCount:
+                                        Int(
+                                            viewModel.call.state
+                                                .participantCount
+                                        )
                                     )
                                 }
                                 Spacer()
                                 LivestreamButton(
-                                    imageName: !viewModel.muted ? "speaker.wave.2.fill" : "speaker.slash.fill"
+                                    imageName: !viewModel.muted
+                                        ? "speaker.wave.2.fill"
+                                        : "speaker.slash.fill"
                                 ) {
                                     viewModel.toggleAudioOutput()
                                 }
                                 LivestreamButton(imageName: "viewfinder") {
-                                    viewModel.update(fullScreen: !viewModel.fullScreen)
+                                    viewModel.update(
+                                        fullScreen:
+                                        !viewModel.fullScreen
+                                    )
                                 }
                                 if showsLeaveCallButton {
-                                    LivestreamButton(imageName: "phone.down.fill") {
+                                    LivestreamButton(
+                                        imageName: "phone.down.fill"
+                                    ) {
                                         viewModel.leaveLivestream()
                                     }
                                 }
                             }
                             .padding()
-                            .background(colors.livestreamBackground.edgesIgnoringSafeArea(.all))
+                            .background(
+                                colors.livestreamBackground
+                                    .edgesIgnoringSafeArea(.all)
+                            )
                             .foregroundColor(colors.livestreamCallControlsColor)
                             .overlay(
                                 LivestreamDurationView(
@@ -121,12 +170,20 @@ public struct LivestreamPlayer: View {
             }
         })
         .onAppear {
-            guard handleParticipationWithLifecycle else { return }
-            viewModel.joinLivestream()
+            switch joinPolicy {
+            case .none:
+                break
+            case .auto:
+                viewModel.joinLivestream()
+            }
         }
         .onDisappear {
-            guard handleParticipationWithLifecycle else { return }
-            viewModel.leaveLivestream()
+            switch joinPolicy {
+            case .none:
+                break
+            case .auto:
+                viewModel.leaveLivestream()
+            }
         }
     }
 }

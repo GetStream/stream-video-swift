@@ -28,18 +28,20 @@ public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
 ]
 
 /// The set of comparators used for sorting `CallParticipant` objects during livestreams.
-/// - `ifInvisible(dominantSpeaker)`: Sorts participants based on whether they are the dominant speaker or not, but only if they are not visible.
-/// - `ifInvisible(isSpeaking)`: Sorts participants based on whether they are speaking, but only if they are not visible.
-/// - `ifInvisible(publishingVideo)`: Sorts participants based on their video status, but only if they are not visible.
-/// - `ifInvisible(publishingAudio)`: Sorts participants based on their audio status, but only if they are not visible.
-/// - `roles()`: Sorts participants based on their assigned roles.
+/// - `dominantSpeaker`: Sorts participants based on whether they are the dominant speaker or not, but only if they are not visible.
+/// - `isSpeaking`: Sorts participants based on whether they are speaking, but only if they are not visible.
+/// - `publishingVideo`: Sorts participants based on their video status, but only if they are not visible.
+/// - `publishingAudio`: Sorts participants based on their audio status, but only if they are not visible.
+/// - `roles`: Sorts participants based on their assigned roles.
 public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
-    combineComparators([
-        dominantSpeaker,
-        isSpeaking,
-        publishingVideo,
-        publishingAudio
-    ]),
+    ifInvisible(
+        combineComparators([
+            dominantSpeaker,
+            isSpeaking,
+            publishingVideo,
+            publishingAudio
+        ])
+    ),
     roles()
 ]
 
