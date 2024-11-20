@@ -809,6 +809,11 @@ struct Stream_Video_Sfu_Event_JoinRequest {
   /// Clears the value of `reconnectDetails`. Subsequent reads from it will return its default value.
   mutating func clearReconnectDetails() {_uniqueStorage()._reconnectDetails = nil}
 
+  var preferredPublishOptions: [Stream_Video_Sfu_Models_PublishOption] {
+    get {return _storage._preferredPublishOptions}
+    set {_uniqueStorage()._preferredPublishOptions = newValue}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -873,21 +878,13 @@ struct Stream_Video_Sfu_Event_JoinResponse {
 
   var fastReconnectDeadlineSeconds: Int32 = 0
 
-  var publishOptions: Stream_Video_Sfu_Models_PublishOptions {
-    get {return _publishOptions ?? Stream_Video_Sfu_Models_PublishOptions()}
-    set {_publishOptions = newValue}
-  }
-  /// Returns true if `publishOptions` has been explicitly set.
-  var hasPublishOptions: Bool {return self._publishOptions != nil}
-  /// Clears the value of `publishOptions`. Subsequent reads from it will return its default value.
-  mutating func clearPublishOptions() {self._publishOptions = nil}
+  var publishOptions: [Stream_Video_Sfu_Models_PublishOption] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
   fileprivate var _callState: Stream_Video_Sfu_Models_CallState? = nil
-  fileprivate var _publishOptions: Stream_Video_Sfu_Models_PublishOptions? = nil
 }
 
 /// ParticipantJoined is fired when a user joins a call
@@ -2322,6 +2319,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     5: .same(proto: "migration"),
     6: .standard(proto: "fast_reconnect"),
     7: .standard(proto: "reconnect_details"),
+    9: .standard(proto: "preferred_publish_options"),
   ]
 
   fileprivate class _StorageClass {
@@ -2333,6 +2331,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     var _migration: Stream_Video_Sfu_Event_Migration? = nil
     var _fastReconnect: Bool = false
     var _reconnectDetails: Stream_Video_Sfu_Event_ReconnectDetails? = nil
+    var _preferredPublishOptions: [Stream_Video_Sfu_Models_PublishOption] = []
 
     static let defaultInstance = _StorageClass()
 
@@ -2347,6 +2346,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       _migration = source._migration
       _fastReconnect = source._fastReconnect
       _reconnectDetails = source._reconnectDetails
+      _preferredPublishOptions = source._preferredPublishOptions
     }
   }
 
@@ -2373,6 +2373,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         case 6: try { try decoder.decodeSingularBoolField(value: &_storage._fastReconnect) }()
         case 7: try { try decoder.decodeSingularMessageField(value: &_storage._reconnectDetails) }()
         case 8: try { try decoder.decodeSingularStringField(value: &_storage._publisherSdp) }()
+        case 9: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredPublishOptions) }()
         default: break
         }
       }
@@ -2409,6 +2410,9 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       if !_storage._publisherSdp.isEmpty {
         try visitor.visitSingularStringField(value: _storage._publisherSdp, fieldNumber: 8)
       }
+      if !_storage._preferredPublishOptions.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._preferredPublishOptions, fieldNumber: 9)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2426,6 +2430,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         if _storage._migration != rhs_storage._migration {return false}
         if _storage._fastReconnect != rhs_storage._fastReconnect {return false}
         if _storage._reconnectDetails != rhs_storage._reconnectDetails {return false}
+        if _storage._preferredPublishOptions != rhs_storage._preferredPublishOptions {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -2559,7 +2564,7 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
       case 1: try { try decoder.decodeSingularMessageField(value: &self._callState) }()
       case 2: try { try decoder.decodeSingularBoolField(value: &self.reconnected) }()
       case 3: try { try decoder.decodeSingularInt32Field(value: &self.fastReconnectDeadlineSeconds) }()
-      case 4: try { try decoder.decodeSingularMessageField(value: &self._publishOptions) }()
+      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.publishOptions) }()
       default: break
       }
     }
@@ -2579,9 +2584,9 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
     if self.fastReconnectDeadlineSeconds != 0 {
       try visitor.visitSingularInt32Field(value: self.fastReconnectDeadlineSeconds, fieldNumber: 3)
     }
-    try { if let v = self._publishOptions {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    } }()
+    if !self.publishOptions.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.publishOptions, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2589,7 +2594,7 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
     if lhs._callState != rhs._callState {return false}
     if lhs.reconnected != rhs.reconnected {return false}
     if lhs.fastReconnectDeadlineSeconds != rhs.fastReconnectDeadlineSeconds {return false}
-    if lhs._publishOptions != rhs._publishOptions {return false}
+    if lhs.publishOptions != rhs.publishOptions {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

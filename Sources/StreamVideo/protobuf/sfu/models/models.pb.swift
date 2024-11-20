@@ -931,18 +931,6 @@ struct Stream_Video_Sfu_Models_VideoLayer {
   fileprivate var _videoDimension: Stream_Video_Sfu_Models_VideoDimension? = nil
 }
 
-struct Stream_Video_Sfu_Models_PublishOptions {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var codecs: [Stream_Video_Sfu_Models_PublishOption] = []
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 struct Stream_Video_Sfu_Models_PublishOption {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -1302,7 +1290,6 @@ extension Stream_Video_Sfu_Models_Participant: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_StreamQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoDimension: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoLayer: @unchecked Sendable {}
-extension Stream_Video_Sfu_Models_PublishOptions: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_PublishOption: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Codec: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ICETrickle: @unchecked Sendable {}
@@ -1833,38 +1820,6 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
   }
 }
 
-extension Stream_Video_Sfu_Models_PublishOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".PublishOptions"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "codecs"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.codecs) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.codecs.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.codecs, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Stream_Video_Sfu_Models_PublishOptions, rhs: Stream_Video_Sfu_Models_PublishOptions) -> Bool {
-    if lhs.codecs != rhs.codecs {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
 extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".PublishOption"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1934,10 +1889,10 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
 extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Codec"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    11: .standard(proto: "payload_type"),
+    16: .standard(proto: "payload_type"),
     10: .same(proto: "name"),
     14: .standard(proto: "clock_rate"),
-    13: .standard(proto: "encoding_parameters"),
+    15: .standard(proto: "encoding_parameters"),
     12: .same(proto: "fmtp"),
   ]
 
@@ -1948,10 +1903,10 @@ extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._M
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 10: try { try decoder.decodeSingularStringField(value: &self.name) }()
-      case 11: try { try decoder.decodeSingularUInt32Field(value: &self.payloadType) }()
       case 12: try { try decoder.decodeSingularStringField(value: &self.fmtp) }()
-      case 13: try { try decoder.decodeSingularStringField(value: &self.encodingParameters) }()
       case 14: try { try decoder.decodeSingularUInt32Field(value: &self.clockRate) }()
+      case 15: try { try decoder.decodeSingularStringField(value: &self.encodingParameters) }()
+      case 16: try { try decoder.decodeSingularUInt32Field(value: &self.payloadType) }()
       default: break
       }
     }
@@ -1961,17 +1916,17 @@ extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._M
     if !self.name.isEmpty {
       try visitor.visitSingularStringField(value: self.name, fieldNumber: 10)
     }
-    if self.payloadType != 0 {
-      try visitor.visitSingularUInt32Field(value: self.payloadType, fieldNumber: 11)
-    }
     if !self.fmtp.isEmpty {
       try visitor.visitSingularStringField(value: self.fmtp, fieldNumber: 12)
     }
-    if !self.encodingParameters.isEmpty {
-      try visitor.visitSingularStringField(value: self.encodingParameters, fieldNumber: 13)
-    }
     if self.clockRate != 0 {
       try visitor.visitSingularUInt32Field(value: self.clockRate, fieldNumber: 14)
+    }
+    if !self.encodingParameters.isEmpty {
+      try visitor.visitSingularStringField(value: self.encodingParameters, fieldNumber: 15)
+    }
+    if self.payloadType != 0 {
+      try visitor.visitSingularUInt32Field(value: self.payloadType, fieldNumber: 16)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
