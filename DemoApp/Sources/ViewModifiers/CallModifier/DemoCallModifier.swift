@@ -41,7 +41,7 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
                 LivestreamPlayer(
                     type: call.callType,
                     id: call.callId,
-                    handleParticipationWithLifecycle: false,
+                    joinPolicy: .none,
                     showsLeaveCallButton: true,
                     onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
                 )
