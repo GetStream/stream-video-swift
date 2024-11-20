@@ -166,7 +166,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             }
         }
 
-        hasActiveCallCancellable = activeCallProvider
+        hasActiveCallCancellable = activeCallProvider?
             .hasActiveCallPublisher
             .receive(on: DispatchQueue.global(qos: .utility))
             .removeDuplicates()

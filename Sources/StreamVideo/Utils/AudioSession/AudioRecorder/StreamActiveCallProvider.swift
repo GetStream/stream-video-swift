@@ -25,9 +25,9 @@ struct StreamActiveCallProviderKey: InjectionKey {
 }
 
 extension InjectedValues {
-    var activeCallProvider: StreamActiveCallProviding {
+    var activeCallProvider: StreamActiveCallProviding? {
         get {
-            Self[StreamActiveCallProviderKey.self]!
+            Self[StreamActiveCallProviderKey.self]
         }
         set {
             Self[StreamActiveCallProviderKey.self] = newValue
