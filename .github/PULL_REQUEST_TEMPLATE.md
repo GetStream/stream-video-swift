@@ -34,7 +34,7 @@ _Explain how this change can be tested manually, if applicable._
 - [ ] Changelog is updated with client-facing changes
 - [ ] New code is covered by unit tests
 - [ ] Comparison screenshots added for visual changes
-- [ ] Affected documentation updated (Docusaurus, tutorial, CMS)
+- [ ] Affected documentation updated (tutorial, CMS)
 
 ### 🎁 Meme
 

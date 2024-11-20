@@ -6,7 +6,6 @@ Boolean
 CocoaPods
 cooldown
 Cooldown
-Docusaurus
 encodable
 Giphy
 Objective-C

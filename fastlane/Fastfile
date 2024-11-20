@@ -681,7 +681,7 @@ lane :sources_matrix do
     uikit: ['Sources', 'StreamVideoUIKitTests', xcode_project],
     swiftui_sample_apps: ['Sources', 'DemoApp', xcode_project],
     uikit_sample_apps: ['Sources', 'DemoAppUIKit', xcode_project],
-    documentation_tests: ['Sources', 'DocumentationTests', 'docusaurus', xcode_project],
+    documentation_tests: ['Sources', 'DocumentationTests', xcode_project],
     size: ['Sources', xcode_project],
     ruby: ['fastlane']
   }
