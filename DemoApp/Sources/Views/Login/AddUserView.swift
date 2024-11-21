@@ -58,9 +58,9 @@ struct DemoCustomEnvironmentView: View {
     @Injected(\.appearance) var appearance
     @Environment(\.presentationMode) var presentationMode
 
-    @State var baseURL: AppEnvironment.BaseURL
-    @State var apiKey: String
-    @State var token: String
+    @State var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL
+    @State var apiKey: String = ""
+    @State var token: String = ""
     @State var usesDefaultPushNotificationConfig = false
     @State var pushNotificationName: String = AppState.shared.pushNotificationConfiguration.pushProviderInfo.name
     @State var voIPPushNotificationName: String = AppState.shared.pushNotificationConfiguration.voipPushProviderInfo.name
@@ -72,10 +72,10 @@ struct DemoCustomEnvironmentView: View {
         token: String,
         completionHandler: @escaping (AppEnvironment.BaseURL, String, String) -> Void
     ) {
-        self.baseURL = baseURL
-        self.apiKey = apiKey
-        self.token = token
-        usesDefaultPushNotificationConfig = AppState.shared.pushNotificationConfiguration == .default
+        _baseURL = .init(wrappedValue: baseURL)
+        _apiKey = .init(wrappedValue: apiKey)
+        _token = .init(wrappedValue: token)
+        _usesDefaultPushNotificationConfig = .init(wrappedValue: AppState.shared.pushNotificationConfiguration == .default)
         self.completionHandler = completionHandler
     }
 

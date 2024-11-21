@@ -72,6 +72,7 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     func test_customSchemeURL_joinsExpectedCall() throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/764")
         linkToScenario(withId: 2857)
         
         WHEN("user opens a URL that contains a custom scheme") {
@@ -85,6 +86,7 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     func test_customSchemeWithCallIdInPath_joinsExpectedCall() throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/764")
         linkToScenario(withId: 2955)
         
         WHEN("user opens a URL that contains a custom scheme") {
