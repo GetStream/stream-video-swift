@@ -9,10 +9,13 @@ import SwiftUI
 
 struct SimpleCallingView: View {
 
+    private enum CallAction { case lobby, join, start(callId: String) }
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
 
     @State var text = ""
+    @State private var callType: String
     @State private var changeEnvironmentPromptForURL: URL?
     @State private var showChangeEnvironmentPrompt: Bool = false
 
@@ -22,6 +25,16 @@ struct SimpleCallingView: View {
     init(viewModel: CallViewModel, callId: String) {
         self.viewModel = viewModel
         text = callId
+        callType = {
+            guard
+                !AppState.shared.deeplinkInfo.callId.isEmpty,
+                !AppState.shared.deeplinkInfo.callType.isEmpty
+            else {
+                return AppEnvironment.preferredCallType ?? .default
+            }
+
+            return AppState.shared.deeplinkInfo.callType
+        }()
     }
 
     var body: some View {
@@ -46,7 +59,7 @@ struct SimpleCallingView: View {
                 .padding()
 
             HStack {
-                Text("Call ID number")
+                Text("\(callTypeTitle) ID number")
                     .font(.caption)
                     .foregroundColor(.init(appearance.colors.textLowEmphasis))
                 Spacer()
@@ -54,7 +67,7 @@ struct SimpleCallingView: View {
 
             HStack {
                 HStack {
-                    TextField("Call ID", text: $text)
+                    TextField("\(callTypeTitle) ID", text: $text)
                         .foregroundColor(appearance.colors.text)
                         .padding(.all, 12)
                         .disabled(isAnonymous)
@@ -81,53 +94,38 @@ struct SimpleCallingView: View {
                 Button {
                     resignFirstResponder()
                     Task {
-                        await setPreferredVideoCodec(for: text)
-                        viewModel.enterLobby(
-                            callType: .default,
-                            callId: text,
-                            members: []
+                        await performCallAction(
+                            callType != .livestream ? .lobby : .join
                         )
                     }
                 } label: {
                     CallButtonView(
-                        title: "Join Call",
+                        title: "Join \(callTypeTitle)",
                         maxWidth: 120,
                         isDisabled: appState.loading || text.isEmpty
                     )
                     .disabled(appState.loading || text.isEmpty)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
                 }
                 .disabled(appState.loading || text.isEmpty)
             }
 
             if canStartCall {
                 HStack {
-                    Text("Don't have a Call ID?")
+                    Text("Don't have a \(callTypeTitle) ID?")
                         .font(.caption)
-                        .foregroundColor(
-                            .init(
-                                appearance.colors.textLowEmphasis
-                            )
-                        )
+                        .foregroundColor(.init(appearance.colors.textLowEmphasis))
                     Spacer()
                 }
                 .padding(.top)
 
                 Button {
                     resignFirstResponder()
-                    Task {
-                        let callId = String.unique
-                        await setPreferredVideoCodec(for: callId)
-                        viewModel.startCall(
-                            callType: .default,
-                            callId: callId,
-                            members: [],
-                            ring: false,
-                            maxDuration: AppEnvironment.callExpiration.duration
-                        )
-                    }
+                    Task { await performCallAction(.start(callId: .unique)) }
                 } label: {
                     CallButtonView(
-                        title: "Start New Call",
+                        title: "Start New \(callTypeTitle)",
                         isDisabled: appState.loading
                     )
                     .disabled(appState.loading)
@@ -144,6 +142,7 @@ struct SimpleCallingView: View {
                 viewModel: viewModel
             )
         )
+        .onChange(of: text) { parseURLIfRequired($0) }
     }
 
     private var isAnonymous: Bool { appState.currentUser == .anonymous }
@@ -158,6 +157,12 @@ struct SimpleCallingView: View {
         }
 
         if deeplinkInfo.baseURL == AppEnvironment.baseURL {
+            if !Set(AppEnvironment.availableCallTypes).contains(deeplinkInfo.callType) {
+                AppEnvironment.availableCallTypes.append(deeplinkInfo.callType)
+            }
+            AppEnvironment.preferredCallType = deeplinkInfo.callType
+
+            callType = deeplinkInfo.callType
             text = deeplinkInfo.callId
         } else if let url = deeplinkInfo.url {
             changeEnvironmentPromptForURL = url
@@ -170,10 +175,63 @@ struct SimpleCallingView: View {
     }
 
     private func setPreferredVideoCodec(for callId: String) async {
-        let call = streamVideo.call(callType: .default, callId: callId)
+        let call = streamVideo.call(callType: callType, callId: callId)
         await call.updatePublishOptions(
             preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
         )
+    }
+
+    private func parseURLIfRequired(_ text: String) {
+        let adapter = DeeplinkAdapter()
+        guard
+            let url = URL(string: text),
+            adapter.canHandle(url: url)
+        else {
+            return
+        }
+
+        let deeplinkInfo = adapter.handle(url: url).deeplinkInfo
+        guard !deeplinkInfo.callId.isEmpty else { return }
+
+        handleDeeplink(deeplinkInfo)
+    }
+
+    private var callTypeTitle: String {
+        switch callType {
+        case .livestream:
+            return "Livestream"
+        case .audioRoom:
+            return "AudioRoom"
+        default:
+            return "Call"
+        }
+    }
+
+    private func performCallAction(_ action: CallAction) async {
+        viewModel.update(
+            participantsSortComparators: callType == .livestream ? livestreamComparators : defaultComparators
+        )
+        switch action {
+        case .lobby:
+            await setPreferredVideoCodec(for: text)
+            viewModel.enterLobby(
+                callType: callType,
+                callId: text,
+                members: []
+            )
+        case .join:
+            await setPreferredVideoCodec(for: text)
+            viewModel.joinCall(callType: callType, callId: text)
+        case let .start(callId):
+            await setPreferredVideoCodec(for: callId)
+            viewModel.startCall(
+                callType: callType,
+                callId: callId,
+                members: [],
+                ring: false,
+                maxDuration: AppEnvironment.callExpiration.duration
+            )
+        }
     }
 }
 

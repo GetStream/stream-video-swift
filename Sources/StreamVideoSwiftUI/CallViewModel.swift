@@ -616,6 +616,9 @@ open class CallViewModel: ObservableObject {
                     startsAt: startsAt
                 )
                 let settings = localCallSettingsChange ? callSettings : nil
+
+                call.updateParticipantsSorting(with: participantsSortComparators)
+                
                 try await call.join(
                     create: true,
                     options: options,

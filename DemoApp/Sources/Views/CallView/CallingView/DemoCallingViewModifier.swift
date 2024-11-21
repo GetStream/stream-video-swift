@@ -20,6 +20,12 @@ struct DemoCallingViewModifier: ViewModifier {
 
     private var isAnonymous: Bool { appState.currentUser == .anonymous }
 
+    private var callType: String {
+        !AppState.shared.deeplinkInfo.callType.isEmpty
+            ? AppState.shared.deeplinkInfo.callType
+            : AppEnvironment.preferredCallType ?? .default
+    }
+
     init(
         text: Binding<String>,
         viewModel: CallViewModel
@@ -41,13 +47,14 @@ struct DemoCallingViewModifier: ViewModifier {
 
                 // We may get in this situation when launching the app from a
                 // deeplink.
+
                 if deeplinkInfo.callId.isEmpty {
-                    joinCallIfNeeded(with: self.text.wrappedValue)
+                    joinCallIfNeeded(with: self.text.wrappedValue, callType: callType)
                 } else {
                     self.text.wrappedValue = deeplinkInfo.callId
                     joinCallIfNeeded(
                         with: self.text.wrappedValue,
-                        callType: deeplinkInfo.callType
+                        callType: callType
                     )
                 }
             }
@@ -68,7 +75,7 @@ struct DemoCallingViewModifier: ViewModifier {
                 guard !isAnonymous else { return }
                 callKitAdapter.registerForIncomingCalls()
                 callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
-                joinCallIfNeeded(with: text.wrappedValue)
+                joinCallIfNeeded(with: text.wrappedValue, callType: callType)
             }
             .onReceive(appState.$activeCall) { call in
                 viewModel.setActiveCall(call)
@@ -82,7 +89,7 @@ struct DemoCallingViewModifier: ViewModifier {
             .toastView(toast: $viewModel.toast)
     }
 
-    private func joinCallIfNeeded(with callId: String, callType: String = .default) {
+    private func joinCallIfNeeded(with callId: String, callType: String) {
         guard !callId.isEmpty, viewModel.callingState == .idle else {
             return
         }
@@ -95,11 +102,15 @@ struct DemoCallingViewModifier: ViewModifier {
                     preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
                 )
                 _ = await Task { @MainActor in
+                    viewModel.update(
+                        participantsSortComparators: callType == .livestream ? livestreamComparators : defaultComparators
+                    )
                     viewModel.joinCall(callType: callType, callId: callId)
                 }.result
             } catch {
                 log.error(error)
             }
+            AppState.shared.deeplinkInfo = .empty
         }
     }
 }

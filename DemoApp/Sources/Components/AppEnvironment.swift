@@ -513,3 +513,20 @@ extension AppEnvironment {
 
     static var preferredVideoCodec: PreferredVideoCodec = .h264
 }
+
+extension AppEnvironment {
+
+    static var availableCallTypes: [String] = [
+        .development,
+        .default,
+        .audioRoom,
+        .livestream
+    ]
+    static var preferredCallType: String?
+}
+
+extension String: Debuggable {
+    var title: String {
+        self
+    }
+}
