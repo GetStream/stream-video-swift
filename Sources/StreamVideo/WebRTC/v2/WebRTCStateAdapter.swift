@@ -131,13 +131,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func set(audioSettings value: AudioSettings) { self.audioSettings = value }
 
     /// Sets the video options.
-    func set(videoOptions value: VideoOptions) {
-        self.videoOptions = value
-        
-        // Note that the preferredEncodingCodec won't affect any transceivers
-        // that have already been created.
-        peerConnectionFactory.setPreferredEncodingCodec(value.preferredVideoCodec)
-    }
+    func set(videoOptions value: VideoOptions) { self.videoOptions = value }
 
     /// Sets the connection options.
     func set(connectOptions value: ConnectOptions) { self.connectOptions = value }

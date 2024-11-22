@@ -363,6 +363,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             type:\(peerType)
             sessionID: \(sessionId)
             sfu: \(sfuAdapter.hostname)
+            SDP: \(sessionDescription.sdp.singleLine)
             """,
             subsystems: subsystem
         )
@@ -383,6 +384,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             type:\(peerType)
             sessionID: \(sessionId)
             sfu: \(sfuAdapter.hostname)
+            SDP: \(sessionDescription.sdp.singleLine)
             """,
             subsystems: subsystem
         )

@@ -39,6 +39,7 @@ struct WebRTCJoinRequestFactory {
     func buildRequest(
         with connectionType: ConnectionType,
         coordinator: WebRTCCoordinator,
+        publisherSdp: String,
         subscriberSdp: String,
         reconnectAttempt: UInt32,
         publisher: RTCPeerConnectionCoordinator?,
@@ -49,6 +50,7 @@ struct WebRTCJoinRequestFactory {
         var result = Stream_Video_Sfu_Event_JoinRequest()
         result.clientDetails = SystemEnvironment.clientDetails
         result.sessionID = await coordinator.stateAdapter.sessionID
+        result.publisherSdp = publisherSdp
         result.subscriberSdp = subscriberSdp
         result.fastReconnect = connectionType.isFastReconnect
         result.token = await coordinator.stateAdapter.token

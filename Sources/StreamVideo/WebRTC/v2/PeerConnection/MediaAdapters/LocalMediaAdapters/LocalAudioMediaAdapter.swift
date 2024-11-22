@@ -31,12 +31,12 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     private(set) var localTrack: RTCAudioTrack?
 
     /// The RTP transceiver for sending audio.
-    private var sender: RTCRtpTransceiver?
+    private var transceiver: RTCRtpTransceiver?
 
     private var lastUpdatedCallSettings: CallSettings.Audio?
 
-    /// The mid (Media Stream Identification) of the sender.
-    var mid: String? { sender?.mid }
+    /// The mid (Media Stream Identification) of the transceiver.
+    var mid: String? { transceiver?.mid }
 
     /// A publisher that emits track events.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -67,8 +67,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        Task { @MainActor [sender, localTrack] in
-            sender?.sender.track = nil
+        Task { @MainActor [transceiver, localTrack] in
+            transceiver?.sender.track = nil
             localTrack?.isEnabled = false
         }
         if let localTrack {
@@ -109,8 +109,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
             let audioTrack = peerConnectionFactory
                 .makeAudioTrack(source: audioSource)
 
-            if sender == nil, settings.audioOn {
-                sender = peerConnection.addTransceiver(
+            if transceiver == nil, settings.audioOn {
+                transceiver = peerConnection.addTransceiver(
                     with: audioTrack,
                     init: RTCRtpTransceiverInit(
                         trackType: .audio,
@@ -128,7 +128,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
                 AudioTrack generated
                 address:\(Unmanaged.passUnretained(audioTrack).toOpaque())
                 trackId:\(audioTrack.trackId)
-                mid: \(sender?.mid ?? "-")
+                mid: \(transceiver?.mid ?? "-")
                 """
             )
 
@@ -151,13 +151,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         Task { @MainActor in
             guard
                 let localTrack,
-                localTrack.isEnabled == false || sender?.sender.track == nil
+                localTrack.isEnabled == false || transceiver?.sender.track == nil
             else {
                 return
             }
 
-            if sender == nil {
-                sender = peerConnection.addTransceiver(
+            if transceiver == nil {
+                transceiver = peerConnection.addTransceiver(
                     with: localTrack,
                     init: RTCRtpTransceiverInit(
                         trackType: .audio,
@@ -166,7 +166,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
                     )
                 )
             } else {
-                sender?.sender.track = localTrack
+                transceiver?.sender.track = localTrack
             }
             localTrack.isEnabled = true
         }
@@ -175,9 +175,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     /// Stops publishing the local audio track.
     func unpublish() {
         Task { @MainActor in
-            guard let sender, let localTrack else { return }
+            guard let transceiver, let localTrack else { return }
             localTrack.isEnabled = false
-            sender.sender.track = nil
+            transceiver.sender.track = nil
             log.debug("Local audioTrack trackId:\(localTrack.trackId) is now unpublished.")
         }
     }

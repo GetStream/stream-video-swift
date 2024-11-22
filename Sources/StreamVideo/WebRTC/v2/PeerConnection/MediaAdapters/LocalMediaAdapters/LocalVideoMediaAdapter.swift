@@ -45,10 +45,10 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private var capturer: CameraVideoCapturing?
 
     /// The RTP transceiver for sending video.
-    private var sender: RTCRtpTransceiver?
+    private var transceiver: RTCRtpTransceiver?
 
-    /// The mid (Media Stream Identification) of the sender.
-    var mid: String? { sender?.mid }
+    /// The mid (Media Stream Identification) of the transceiver.
+    var mid: String? { transceiver?.mid }
 
     /// A publisher that emits track events.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -88,7 +88,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        sender?.sender.track = nil
+        transceiver?.sender.track = nil
     }
 
     // MARK: - LocalMediaManaging
@@ -108,7 +108,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             try await makeVideoTrack(
                 settings.cameraPosition == .front ? .front : .back
             )
-            if sender == nil, settings.videoOn, let localTrack {
+            if transceiver == nil, settings.videoOn, let localTrack {
                 setUpTransceiverIfRequired(localTrack)
             }
         } else if !hasVideo {
@@ -128,7 +128,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             guard
                 let self,
                 let localTrack,
-                localTrack.isEnabled == false || sender == nil,
+                localTrack.isEnabled == false || transceiver == nil,
                 let activeSession = videoCaptureSessionProvider.activeSession
             else {
                 return
@@ -153,10 +153,10 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         Task { @MainActor [weak self] in
             guard
                 let self,
-                let sender,
+                let transceiver,
                 let localTrack
             else { return }
-            sender.sender.track = nil
+            transceiver.sender.track = nil
             localTrack.isEnabled = false
             try? await capturer?.stopCapture()
             log.debug("Local videoTrack trackId:\(localTrack.trackId) is now unpublished.")
@@ -172,7 +172,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         guard let localTrack else { return }
         let isMuted = !settings.videoOn
         let isLocalMuted = localTrack.isEnabled == false
-        guard isMuted != isLocalMuted || sender == nil else {
+        guard isMuted != isLocalMuted || transceiver == nil else {
             return
         }
 
@@ -266,14 +266,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
     ) {
         guard
-            let sender,
+            let transceiver,
             !layerSettings.isEmpty
         else {
             return
         }
 
         var hasChanges = false
-        let params = sender
+        let params = transceiver
             .sender
             .parameters
 
@@ -374,7 +374,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             subsystems: .webRTC
         )
         params.encodings = updatedEncodings
-        sender.sender.parameters = params
+        transceiver.sender.parameters = params
 
         Task { @MainActor in
             do {
@@ -424,7 +424,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 VideoTrack generated
                 address:\(Unmanaged.passUnretained(videoTrack).toOpaque())
                 trackId:\(videoTrack.trackId)
-                mid: \(sender?.mid ?? "-")
+                mid: \(transceiver?.mid ?? "-")
                 """
             )
 
@@ -456,8 +456,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     }
 
     private func setUpTransceiverIfRequired(_ localTrack: RTCVideoTrack) {
-        if sender == nil {
-            sender = peerConnection.addTransceiver(
+        if transceiver == nil {
+            transceiver = peerConnection.addTransceiver(
                 with: localTrack,
                 init: RTCRtpTransceiverInit(
                     trackType: .video,
@@ -468,7 +468,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 )
             )
         } else {
-            sender?.sender.track = localTrack
+            transceiver?.sender.track = localTrack
         }
     }
 }

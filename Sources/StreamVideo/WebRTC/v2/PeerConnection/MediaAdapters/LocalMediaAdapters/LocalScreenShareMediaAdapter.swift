@@ -36,10 +36,10 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// The video capturer used to capture screen content.
     private var capturer: VideoCapturing?
     /// The RTP transceiver used to send the screen sharing track.
-    private var sender: RTCRtpTransceiver?
+    private var transceiver: RTCRtpTransceiver?
 
-    /// The media stream identifier (mid) of the sender.
-    var mid: String? { sender?.mid }
+    /// The media stream identifier (mid) of the transceiver.
+    var mid: String? { transceiver?.mid }
 
     /// A subject for publishing track-related events.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -83,7 +83,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     /// Cleans up resources when the instance is being deallocated.
     deinit {
-        sender?.sender.track = nil
+        transceiver?.sender.track = nil
     }
 
     // MARK: - LocalMediaManaging
@@ -106,13 +106,13 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             let localTrack,
             let screenSharingType,
             let capturer,
-            localTrack.isEnabled == false || sender == nil
+            localTrack.isEnabled == false || transceiver == nil
         else {
             return
         }
 
-        if sender == nil {
-            sender = peerConnection.addTransceiver(
+        if transceiver == nil {
+            transceiver = peerConnection.addTransceiver(
                 with: localTrack,
                 init: RTCRtpTransceiverInit(
                     trackType: .screenshare,
@@ -122,7 +122,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 )
             )
         } else {
-            sender?.sender.track = localTrack
+            transceiver?.sender.track = localTrack
         }
         Task {
             do {
@@ -137,7 +137,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     /// Unpublishes the local screen sharing track from the peer connection.
     func unpublish() {
-        guard let sender, let localTrack else { return }
+        guard let transceiver, let localTrack else { return }
         Task {
             do {
                 try await capturer?.stopCapture()
@@ -145,7 +145,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 log.error(error, subsystems: .webRTC)
             }
         }
-        sender.sender.track = nil
+        transceiver.sender.track = nil
         localTrack.isEnabled = false
         log.debug(
             """
@@ -183,9 +183,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
         if type != screenSharingType {
             localTrack = nil
-            sender?.sender.track = nil
-            sender?.stopInternal()
-            sender = nil
+            transceiver?.sender.track = nil
+            transceiver?.stopInternal()
+            transceiver = nil
         }
 
         if localTrack == nil {
@@ -242,7 +242,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             ScreenShareTrack generated
             address:\(Unmanaged.passUnretained(videoTrack).toOpaque())
             trackId:\(videoTrack.trackId)
-            mid: \(sender?.mid ?? "-")
+            mid: \(transceiver?.mid ?? "-")
             screenSharingType: \(screenSharingType)
             """
         )

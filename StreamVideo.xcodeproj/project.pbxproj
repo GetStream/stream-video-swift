@@ -1443,6 +1443,7 @@
 		40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAlwaysAvailabilityPolicy.swift; sourceTree = "<group>"; };
 		40034C2D2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitRegionBasedAvailabilityPolicy.swift; sourceTree = "<group>"; };
 		40034C302CFE168D00A318B1 /* StreamLocaleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamLocaleProvider.swift; sourceTree = "<group>"; };
+		40070F342CF0DDDF00035FA9 /* RTCRtpCodecCapability+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpCodecCapability+Convenience.swift"; sourceTree = "<group>"; };
 		40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureWindowSizePolicy.swift; sourceTree = "<group>"; };
 		40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureVideoRendererTests.swift; sourceTree = "<group>"; };
 		40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy.swift; sourceTree = "<group>"; };
@@ -3905,6 +3906,7 @@
 			isa = PBXGroup;
 			children = (
 				40C9E45C2C9987E300802B28 /* RTCMediaStreamTrack+Sendable.swift */,
+				40070F342CF0DDDF00035FA9 /* RTCRtpCodecCapability+Convenience.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -4961,41 +4963,41 @@
 			isa = PBXGroup;
 			children = (
 				40034C2F2CFE168900A318B1 /* LocaleProvider */,
-				4067F3062CDA32F0002E28BD /* AudioSession */,
-				408CF9C42CAEC24500F56833 /* ScreenPropertiesAdapter */,
-				40C9E44F2C9880D300802B28 /* Unwrap */,
-				40382F2C2C88B87500C2D00F /* ReflectiveStringConvertible */,
-				40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */,
-				40C2B5BC2C2C447700EC2C2D /* RejectionReasonProvider */,
-				40C2B5B42C2B604800EC2C2D /* DisposableBag */,
-				40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */,
-				408937892C062B0B000EEB69 /* UUIDProviding */,
-				403FF3DF2BA1D20E0092CE8A /* Queues */,
-				40FB150D2BF77CA200D5E580 /* StateMachine */,
-				40FB15082BF74C0A00D5E580 /* CallCache */,
-				8456E6C7287EC343004E180E /* Logger */,
-				84C2997C28784BB30034B735 /* Utils.swift */,
-				84AF64D4287C79320012A503 /* RawJSON.swift */,
-				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
+				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				84A7E183288362DF00526C98 /* Atomic.swift */,
-				84A7E1A72883E46200526C98 /* Timers.swift */,
+				40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */,
+				840042CA2A701C2000917B30 /* BroadcastUtils.swift */,
 				841947972886D9CD0007B36E /* BundleExtensions.swift */,
+				40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */,
+				8490DD22298D5330007E53D2 /* Data+Gzip.swift */,
 				84B9A56C29112F39004DE31A /* EndpointConfig.swift */,
+				840042C42A6FED2900917B30 /* IntExtensions.swift */,
+				84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */,
+				40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */,
+				84AF64D4287C79320012A503 /* RawJSON.swift */,
+				40013DDB2B87AA2300915453 /* SerialActor.swift */,
+				846E4B0029D2D372003733AB /* Sorting.swift */,
+				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
+				846A06CD29E056C40084C264 /* StringExtensions.swift */,
 				8268615F290A7556005BFFED /* SystemEnvironment.swift */,
 				841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */,
-				8490DD22298D5330007E53D2 /* Data+Gzip.swift */,
-				846E4B0029D2D372003733AB /* Sorting.swift */,
-				846A06CD29E056C40084C264 /* StringExtensions.swift */,
-				84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */,
-				840042C42A6FED2900917B30 /* IntExtensions.swift */,
-				840042CA2A701C2000917B30 /* BroadcastUtils.swift */,
-				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
-				40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */,
-				40013DDB2B87AA2300915453 /* SerialActor.swift */,
+				84A7E1A72883E46200526C98 /* Timers.swift */,
 				40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */,
-				40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */,
+				84C2997C28784BB30034B735 /* Utils.swift */,
+				4067F3062CDA32F0002E28BD /* AudioSession */,
+				40FB15082BF74C0A00D5E580 /* CallCache */,
 				402F04AC2B714E9B00CA1986 /* DeviceOrientation */,
+				40C2B5B42C2B604800EC2C2D /* DisposableBag */,
+				8456E6C7287EC343004E180E /* Logger */,
+				40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */,
+				403FF3DF2BA1D20E0092CE8A /* Queues */,
+				40382F2C2C88B87500C2D00F /* ReflectiveStringConvertible */,
+				40C2B5BC2C2C447700EC2C2D /* RejectionReasonProvider */,
+				408CF9C42CAEC24500F56833 /* ScreenPropertiesAdapter */,
+				40FB150D2BF77CA200D5E580 /* StateMachine */,
+				40C9E44F2C9880D300802B28 /* Unwrap */,
+				408937892C062B0B000EEB69 /* UUIDProviding */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -5398,24 +5400,24 @@
 		84F737EE287C13AC00A363F4 /* StreamVideo */ = {
 			isa = PBXGroup;
 			children = (
+				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
+				82B82F2229114001001B5FD7 /* Info.plist */,
 				847BE09B29DADE0100B55D21 /* Call.swift */,
+				84530C6B2A3C4E0700F2678E /* CallState.swift */,
+				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
+				8492B874290808AE00006649 /* StreamVideoEnvironment.swift */,
+				8478EB12288A054B00525538 /* VideoConfig.swift */,
 				40FB01FF2BAC8A4000A1C206 /* CallKit */,
 				846D16202A52B8A10036CE4C /* CallSettings */,
-				84530C6B2A3C4E0700F2678E /* CallState.swift */,
 				84EA5D3D28C09A95004D3531 /* Controllers */,
 				84C299712876E77E0034B735 /* DependencyInjection */,
 				8456E6D8287EC436004E180E /* Errors */,
 				8206D8512A5FF30E0099F5EC /* Generated */,
 				84A7E1772881921000526C98 /* HTTPClient */,
-				82B82F2229114001001B5FD7 /* Info.plist */,
 				8456E6D9287EC46D004E180E /* Models */,
 				84B57D3A2981645900E4E709 /* OpenApi */,
 				84ED240B286C9500002A3186 /* protobuf */,
-				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
-				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
-				8492B874290808AE00006649 /* StreamVideoEnvironment.swift */,
 				84AF64D3287C79220012A503 /* Utils */,
-				8478EB12288A054B00525538 /* VideoConfig.swift */,
 				84FC2C1C28ACF29300181490 /* WebRTC */,
 				84A7E17A2883624500526C98 /* WebSockets */,
 			);

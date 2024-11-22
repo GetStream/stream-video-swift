@@ -14,6 +14,8 @@ public protocol ReflectiveStringConvertible: CustomStringConvertible {
 
     /// A set of property names to be excluded from the string representation.
     var excludedProperties: Set<String> { get }
+
+    var propertyTransformers: [String: (Any) -> String] { get }
 }
 
 public extension ReflectiveStringConvertible {
@@ -28,6 +30,12 @@ public extension ReflectiveStringConvertible {
     var excludedProperties: Set<String> {
         [
             "unknownFields"
+        ]
+    }
+
+    var propertyTransformers: [String: (Any) -> String] {
+        [
+            "sdp": { "\($0)".singleLine }
         ]
     }
 
@@ -46,7 +54,8 @@ public extension ReflectiveStringConvertible {
             .children
             .compactMap {
                 if let label = $0.label {
-                    return (label: label, value: $0.value)
+                    let value = propertyTransformers[label]?($0.value) ?? $0.value
+                    return (label: label, value: value)
                 } else {
                     return nil
                 }

@@ -105,11 +105,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             .buildRequest(
                                 with: isFastReconnecting ? .fastReconnect : .default,
                                 coordinator: coordinator,
-                                subscriberSdp: try await buildSubscriberSessionDescription(
+                                publisherSdp: try await buildSessionDescription(
+                                    peerConnectionType: .publisher,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: isFastReconnecting,
-                                    publisher: await coordinator.stateAdapter.publisher
+                                    isFastReconnecting: isFastReconnecting
+                                ),
+                                subscriberSdp: try await buildSessionDescription(
+                                    peerConnectionType: .subscriber,
+                                    coordinator: coordinator,
+                                    sfuAdapter: sfuAdapter,
+                                    isFastReconnecting: isFastReconnecting
                                 ),
                                 reconnectAttempt: context.reconnectAttempts,
                                 publisher: await coordinator.stateAdapter.publisher
@@ -120,7 +126,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try await join(
                         coordinator: coordinator,
-                        sfuAdapter: sfuAdapter
+                        sfuAdapter: sfuAdapter,
+                        isFastReconnecting: isFastReconnecting
                     )
 
                     try Task.checkCancellation()
@@ -167,11 +174,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             .buildRequest(
                                 with: .migration(fromHostname: context.migratingFromSFU),
                                 coordinator: coordinator,
-                                subscriberSdp: try await buildSubscriberSessionDescription(
+                                publisherSdp: try await buildSessionDescription(
+                                    peerConnectionType: .publisher,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: false,
-                                    publisher: await coordinator.stateAdapter.publisher
+                                    isFastReconnecting: false
+                                ),
+                                subscriberSdp: try await buildSessionDescription(
+                                    peerConnectionType: .subscriber,
+                                    coordinator: coordinator,
+                                    sfuAdapter: sfuAdapter,
+                                    isFastReconnecting: false
                                 ),
                                 reconnectAttempt: context.reconnectAttempts,
                                 publisher: await coordinator.stateAdapter.publisher
@@ -184,7 +197,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try await join(
                         coordinator: coordinator,
-                        sfuAdapter: sfuAdapter
+                        sfuAdapter: sfuAdapter,
+                        isFastReconnecting: false
                     )
 
                     transitionOrDisconnect(.joined(context))
@@ -223,11 +237,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             .buildRequest(
                                 with: .rejoin(fromSessionID: isRejoiningFromSessionID),
                                 coordinator: coordinator,
-                                subscriberSdp: try await buildSubscriberSessionDescription(
+                                publisherSdp: try await buildSessionDescription(
+                                    peerConnectionType: .publisher,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: false,
-                                    publisher: coordinator.stateAdapter.publisher
+                                    isFastReconnecting: false
+                                ),
+                                subscriberSdp: try await buildSessionDescription(
+                                    peerConnectionType: .subscriber,
+                                    coordinator: coordinator,
+                                    sfuAdapter: sfuAdapter,
+                                    isFastReconnecting: false
                                 ),
                                 reconnectAttempt: context.reconnectAttempts,
                                 publisher: coordinator.stateAdapter.publisher
@@ -239,7 +259,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try await join(
                         coordinator: coordinator,
-                        sfuAdapter: sfuAdapter
+                        sfuAdapter: sfuAdapter,
+                        isFastReconnecting: false
                     )
 
                     transitionOrDisconnect(.joined(context))
@@ -258,32 +279,38 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///     reconnection.
         ///   - publisher: The RTC peer connection coordinator for publishing.
         /// - Returns: The subscriber session description as a string.
-        private func buildSubscriberSessionDescription(
+        private func buildSessionDescription(
+            peerConnectionType: PeerConnectionType,
             coordinator: WebRTCCoordinator,
             sfuAdapter: SFUAdapter,
-            isFastReconnecting: Bool,
-            publisher: RTCPeerConnectionCoordinator?
+            isFastReconnecting: Bool
         ) async throws -> String {
-            let subscriberSessionDescription: String
+            let sessionDescription: String
 
-            if
-                isFastReconnecting,
-                let subscriber = await coordinator.stateAdapter.subscriber {
-                let offer = try await subscriber.createOffer()
-                subscriberSessionDescription = offer.sdp
-            } else {
-                try await publisher?.ensureSetUpHasBeenCompleted()
-                subscriberSessionDescription = try await RTCTemporaryPeerConnection(
-                    sessionID: coordinator.stateAdapter.sessionID,
-                    peerConnectionFactory: coordinator.stateAdapter.peerConnectionFactory,
-                    configuration: coordinator.stateAdapter.connectOptions.rtcConfiguration,
-                    sfuAdapter: sfuAdapter,
-                    videoOptions: coordinator.stateAdapter.videoOptions,
-                    localAudioTrack: publisher?.localTrack(of: .audio) as? RTCAudioTrack,
-                    localVideoTrack: publisher?.localTrack(of: .video) as? RTCVideoTrack
+            switch peerConnectionType {
+            case .subscriber:
+                if
+                    isFastReconnecting,
+                    let subscriber = await coordinator.stateAdapter.subscriber {
+                    let offer = try await subscriber.createOffer()
+                    sessionDescription = offer.sdp
+                } else {
+                    sessionDescription = try await RTCTemporaryPeerConnection(
+                        peerConnectionType: .subscriber,
+                        coordinator: coordinator,
+                        sfuAdapter: sfuAdapter
+                    ).createOffer().sdp
+                }
+
+            case .publisher:
+                sessionDescription = try await RTCTemporaryPeerConnection(
+                    peerConnectionType: .publisher,
+                    coordinator: coordinator,
+                    sfuAdapter: sfuAdapter
                 ).createOffer().sdp
             }
-            return subscriberSessionDescription
+
+            return sessionDescription
         }
 
         /// Performs the join process.
@@ -292,7 +319,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///   - sfuAdapter: The SFU adapter.
         private func join(
             coordinator: WebRTCCoordinator,
-            sfuAdapter: SFUAdapter
+            sfuAdapter: SFUAdapter,
+            isFastReconnecting: Bool
         ) async throws {
             if let eventObserver = context.sfuEventObserver {
                 eventObserver.sfuAdapter = sfuAdapter
@@ -308,6 +336,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let joinResponse = try await sfuAdapter
                 .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
                 .nextValue(timeout: WebRTCConfiguration.timeout.join)
+
+            try Task.checkCancellation()
+
+            if !isFastReconnecting {
+                try await coordinator.stateAdapter.configurePeerConnections()
+            }
 
             try Task.checkCancellation()
 
