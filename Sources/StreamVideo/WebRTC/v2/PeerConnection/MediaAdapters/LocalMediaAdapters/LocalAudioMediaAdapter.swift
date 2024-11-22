@@ -24,19 +24,18 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     /// The adapter for communicating with the Selective Forwarding Unit (SFU).
     private var sfuAdapter: SFUAdapter
 
+    private var publishOptions: [PublishOptions.AudioPublishOptions]
+
     /// The stream identifiers for this audio adapter.
     private let streamIds: [String]
 
-    /// The local audio track.
-    private(set) var localTrack: RTCAudioTrack?
+    private let transceiverStorage = MediaTransceiverStorage<PublishOptions.AudioPublishOptions>(for: .audio)
+
+    private let primaryTrack: RTCAudioTrack
 
     /// The RTP transceiver for sending audio.
-    private var sender: RTCRtpTransceiver?
 
     private var lastUpdatedCallSettings: CallSettings.Audio?
-
-    /// The mid (Media Stream Identification) of the sender.
-    var mid: String? { sender?.mid }
 
     /// A publisher that emits track events.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -55,32 +54,36 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
+        publishOptions: [PublishOptions.AudioPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
         self.peerConnectionFactory = peerConnectionFactory
         self.sfuAdapter = sfuAdapter
+        self.publishOptions = publishOptions
         self.subject = subject
+        let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let track = peerConnectionFactory.makeAudioTrack(source: source)
+        primaryTrack = track
         streamIds = ["\(sessionID):audio"]
+
+        track.isEnabled = false
     }
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        Task { @MainActor [sender, localTrack] in
-            sender?.sender.track = nil
-            localTrack?.isEnabled = false
+        Task { @MainActor [transceiverStorage] in
+            transceiverStorage.removeAll()
         }
-        if let localTrack {
-            log.debug(
-                """
-                Local audioTrack will be deallocated
-                trackId:\(localTrack.trackId)
-                isEnabled:\(localTrack.isEnabled)
-                """,
-                subsystems: .webRTC
-            )
-        }
+        log.debug(
+            """
+            Local audioTracks will be deallocated
+                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
     }
 
     // MARK: - LocalMediaManaging
@@ -94,91 +97,70 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        let hasAudio = ownCapabilities.contains(.sendAudio)
-
-        if
-            hasAudio,
-            localTrack == nil || localTrack?.isEnabled == false
-        {
-            let audioConstrains = RTCMediaConstraints(
-                mandatoryConstraints: nil,
-                optionalConstraints: nil
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .audio,
+                track: primaryTrack
             )
-            let audioSource = peerConnectionFactory
-                .makeAudioSource(audioConstrains)
-            let audioTrack = peerConnectionFactory
-                .makeAudioTrack(source: audioSource)
-
-            if sender == nil, settings.audioOn {
-                sender = peerConnection.addTransceiver(
-                    with: audioTrack,
-                    init: RTCRtpTransceiverInit(
-                        trackType: .audio,
-                        direction: .sendOnly,
-                        streamIds: streamIds
-                    )
-                )
-            }
-            /// This is important to be false once we setUp as the activation will happen once
-            /// publish is called (in order also to inform the SFU via the didUpdateCallSettings).
-            audioTrack.isEnabled = false
-
-            log.debug(
-                """
-                AudioTrack generated
-                address:\(Unmanaged.passUnretained(audioTrack).toOpaque())
-                trackId:\(audioTrack.trackId)
-                mid: \(sender?.mid ?? "-")
-                """
-            )
-
-            subject.send(
-                .added(
-                    id: sessionID,
-                    trackType: .audio,
-                    track: audioTrack
-                )
-            )
-
-            localTrack = audioTrack
-        } else if !hasAudio {
-            localTrack?.isEnabled = false
-        }
+        )
     }
 
     /// Starts publishing the local audio track.
     func publish() {
         Task { @MainActor in
             guard
-                let localTrack,
-                localTrack.isEnabled == false || sender?.sender.track == nil
+                !primaryTrack.isEnabled
             else {
                 return
             }
 
-            if sender == nil {
-                sender = peerConnection.addTransceiver(
-                    with: localTrack,
-                    init: RTCRtpTransceiverInit(
-                        trackType: .audio,
-                        direction: .sendOnly,
-                        streamIds: streamIds
+            primaryTrack.isEnabled = true
+
+            publishOptions
+                .forEach {
+                    addOrUpdateTransceiver(
+                        for: $0,
+                        with: primaryTrack.clone(from: peerConnectionFactory)
                     )
-                )
-            } else {
-                sender?.sender.track = localTrack
-            }
-            localTrack.isEnabled = true
+                }
+
+            await audioRecorder.startRecording()
+
+            log.debug(
+                """
+                Local audioTracks are now published
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
         }
     }
 
     /// Stops publishing the local audio track.
     func unpublish() {
-        Task { @MainActor in
-            guard let sender, let localTrack else { return }
-            localTrack.isEnabled = false
-            sender.sender.track = nil
-            log.debug("Local audioTrack trackId:\(localTrack.trackId) is now unpublished.")
+        Task { @MainActor [weak self] in
+            guard
+                let self,
+                primaryTrack.isEnabled
+            else {
+                return
+            }
+
+            primaryTrack.isEnabled = false
+
+            transceiverStorage
+                .forEach { $0.value.sender.track?.isEnabled = false }
+
+            log.debug(
+                """
+                Local audioTracks are now unpublished:
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
         }
     }
 
@@ -188,15 +170,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        guard let localTrack else { return }
-
         guard lastUpdatedCallSettings != settings.audio else {
             return
         }
 
         let isMuted = !settings.audioOn
-        let isLocalMuted = localTrack.isEnabled == false
-        
+        let isLocalMuted = primaryTrack.isEnabled == false
+
         if isMuted != isLocalMuted {
             try await sfuAdapter.updateTrackMuteState(
                 .audio,
@@ -205,14 +185,103 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
             )
         }
 
-        if isMuted, localTrack.isEnabled == true {
+        if isMuted, primaryTrack.isEnabled == true {
             unpublish()
         } else if !isMuted {
             publish()
-            await audioRecorder.startRecording()
         }
 
         lastUpdatedCallSettings = settings.audio
+    }
+
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        guard primaryTrack.isEnabled else { return }
+
+        self.publishOptions = publishOptions.audio
+
+        for publishOption in self.publishOptions {
+            addOrUpdateTransceiver(
+                for: publishOption,
+                with: primaryTrack.clone(from: peerConnectionFactory)
+            )
+        }
+
+        let activePublishOptions = Set(self.publishOptions)
+
+        transceiverStorage
+            .filter { !activePublishOptions.contains($0.key) }
+            .forEach { $0.value.sender.track = nil }
+
+        log.debug(
+            """
+            Local audioTracks updated with:
+                PublishOptions:
+                    \(self.publishOptions)
+                
+                TransceiverStorage:
+                    \(transceiverStorage)
+            """,
+            subsystems: .webRTC
+        )
+    }
+
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
+    ) { /* No-op */ }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        transceiverStorage
+            .filter { $0.value.sender.track != nil }
+            .map { _, transceiver in
+                var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
+                trackInfo.trackType = .audio
+                trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
+                trackInfo.mid = transceiver.mid
+                trackInfo.muted = transceiver.sender.track?.isEnabled ?? true
+                return trackInfo
+            }
+    }
+
+    // MARK: - Private Helpers
+
+    private func addOrUpdateTransceiver(
+        for options: PublishOptions.AudioPublishOptions,
+        with track: RTCAudioTrack
+    ) {
+        if let transceiver = transceiverStorage.get(for: options) {
+            transceiver.sender.track = track
+        } else {
+            let transceiver = peerConnection.addTransceiver(
+                trackType: .audio,
+                with: track,
+                init: .init(
+                    direction: .sendOnly,
+                    streamIds: streamIds,
+                    audioOptions: options
+                )
+            )
+            transceiverStorage.set(transceiver, for: options)
+        }
+    }
+}
+
+extension RTCAudioTrack {
+
+    func clone(from factory: PeerConnectionFactory) -> RTCAudioTrack {
+        let result = factory.makeAudioTrack(source: source)
+        result.isEnabled = isEnabled
+        return result
+    }
+}
+
+extension RTCVideoTrack {
+
+    func clone(from factory: PeerConnectionFactory) -> RTCVideoTrack {
+        let result = factory.makeVideoTrack(source: source)
+        result.isEnabled = isEnabled
+        return result
     }
 }
 

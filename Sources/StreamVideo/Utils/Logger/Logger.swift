@@ -29,7 +29,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .iceAdapter,
         .mediaAdapter,
         .thermalState,
-        .audioSession
+        .audioSession,
+        .videoCapturer
     ]
 
     /// All subsystems within the SDK.
@@ -46,7 +47,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .iceAdapter,
         .mediaAdapter,
         .thermalState,
-        .audioSession
+        .audioSession,
+        .videoCapturer
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -76,6 +78,7 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     public static let thermalState = Self(rawValue: 1 << 11)
     /// The subsystem responsible for interacting with the AudioSession.
     public static let audioSession = Self(rawValue: 1 << 12)
+    public static let videoCapturer = Self(rawValue: 1 << 13)
 
     public var description: String {
         switch rawValue {
@@ -105,6 +108,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "thermalState"
         case LogSubsystem.audioSession.rawValue:
             return "audioSession"
+        case LogSubsystem.videoCapturer.rawValue:
+            return "videoCapturer"
         default:
             return "unknown(rawValue:\(rawValue)"
         }

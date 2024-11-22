@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import CoreMedia
 import Foundation
 
 /// Defines a video capture policy used by the `LocalVideoAdapter` to adjust video capture quality based on
@@ -52,7 +53,8 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
         guard
             shouldUpdateCaptureQuality,
             lastActiveEncodings != activeEncodings,
-            let activeSession
+            let activeSession,
+            let device = activeSession.device
         else { return }
 
         /// Filter the default video codecs to include only those matching the active encodings.
@@ -60,8 +62,18 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
             .default
             .filter { activeEncodings.contains($0.quality.rawValue) }
 
+        let preferredDimensions: CGSize = {
+            if videoCodecs.first(where: { $0.quality == VideoLayer.full.quality }) != nil {
+                return .full
+            } else if videoCodecs.first(where: { $0.quality == VideoLayer.half.quality }) != nil {
+                return .half
+            } else {
+                return .quarter
+            }
+        }()
+
         try await activeSession.capturer
-            .updateCaptureQuality(videoCodecs, on: activeSession.device)
+            .updateCaptureQuality(preferredDimensions, on: device)
         lastActiveEncodings = activeEncodings
         log.debug(
             "Video capture quality adapted to [\(activeEncodings.sorted().joined(separator: ","))].",

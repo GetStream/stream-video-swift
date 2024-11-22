@@ -406,12 +406,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
         preferredVideoCodec: VideoCodec,
         maxBitrate: Int
     ) async {
-        await stateAdapter.set(
-            videoOptions: await stateAdapter
-                .videoOptions
-                .with(preferredBitrate: maxBitrate)
-                .with(preferredVideoCodec: preferredVideoCodec)
-        )
+        await stateAdapter.set(publishOptions: PublishOptions(
+            video: [
+                .init(codec: preferredVideoCodec, bitrate: maxBitrate)
+            ]
+        ))
     }
 
     // MARK: - Private

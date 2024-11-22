@@ -14,7 +14,7 @@ struct VideoCaptureSession {
     var localTrack: RTCVideoTrack
 
     /// The video capturer for the screen share.
-    var capturer: CameraVideoCapturing & Sendable
+    var capturer: StreamVideoCapturer
 }
 
 /// A class that provides and manages the active screen sharing session.

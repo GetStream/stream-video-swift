@@ -18,7 +18,11 @@ enum BroadcastUtils {
         )
     }
     
-    static func aspectFit(width: Int32, height: Int32, size: Int32) -> (width: Int32, height: Int32) {
+    static func aspectFit(
+        width: Int32,
+        height: Int32,
+        size: Int32
+    ) -> (width: Int32, height: Int32) {
         let isWider = width >= height
         let ratio = isWider ? Double(height) / Double(width) : Double(width) / Double(height)
         return (
