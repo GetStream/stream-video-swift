@@ -14,6 +14,9 @@ public protocol ReflectiveStringConvertible: CustomStringConvertible {
 
     /// A set of property names to be excluded from the string representation.
     var excludedProperties: Set<String> { get }
+
+    /// A set of property names to be transformed during the string representation.
+    var propertyTransformers: [String: (Any) -> String] { get }
 }
 
 public extension ReflectiveStringConvertible {
@@ -28,6 +31,30 @@ public extension ReflectiveStringConvertible {
     var excludedProperties: Set<String> {
         [
             "unknownFields"
+        ]
+    }
+
+    /// A dictionary of custom transformation functions for specific properties in the string representation.
+    ///
+    /// Each key in the dictionary corresponds to the name of a property that requires a custom transformation.
+    /// The associated value is a closure that takes the property value (`Any`) and returns a transformed `String`.
+    ///
+    /// The transformed string will be included in the final description of the object.
+    ///
+    /// By default, this includes a transformation for the `sdp` property, which replaces carriage return (`\r\n`)
+    /// characters with newline (`\n`) characters.
+    ///
+    /// - Example:
+    ///   Suppose you have a property `sdp` that contains a multiline string with carriage return characters (`\r\n`).
+    ///   You can use this transformer to normalize the line endings before including it in the description:
+    ///   ```
+    ///   "sdp": { "\($0)".replacingOccurrences(of: "\r\n", with: "\n") }
+    ///   ```
+    ///
+    /// - Returns: A dictionary mapping property names to their respective transformation closures.
+    var propertyTransformers: [String: (Any) -> String] {
+        [
+            "sdp": { "\($0)".replacingOccurrences(of: "\r\n", with: "\n") }
         ]
     }
 
@@ -46,7 +73,8 @@ public extension ReflectiveStringConvertible {
             .children
             .compactMap {
                 if let label = $0.label {
-                    return (label: label, value: $0.value)
+                    let value = propertyTransformers[label]?($0.value) ?? $0.value
+                    return (label: label, value: value)
                 } else {
                     return nil
                 }

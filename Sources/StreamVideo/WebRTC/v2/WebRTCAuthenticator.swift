@@ -88,7 +88,6 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         let videoOptions = await coordinator.stateAdapter.videoOptions
         await coordinator.stateAdapter.set(
             videoOptions: videoOptions
-                .with(preferredTargetResolution: response.call.settings.video.targetResolution)
                 .with(preferredCameraPosition: {
                     switch response.call.settings.video.cameraFacing {
                     case .back:

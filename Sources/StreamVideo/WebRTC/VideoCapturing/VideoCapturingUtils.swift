@@ -83,7 +83,7 @@ enum VideoCapturingUtils {
             selectedFormat = foundFormat
         } else {
             selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= preferredDimensions.area
-                    && $0.format.fpsRange().contains(preferredFps)
+                    && $0.format.frameRateRange.contains(preferredFps)
             })
             
             if selectedFormat == nil {
@@ -110,7 +110,7 @@ enum VideoCapturingUtils {
             )
 
         var selectedFps = preferredFps
-        let fpsRange = selectedFormat.format.fpsRange()
+        let fpsRange = selectedFormat.format.frameRateRange
 
         if !fpsRange.contains(selectedFps) {
             log.warning("requested fps: \(preferredFps) not available: \(fpsRange) and will be clamped")

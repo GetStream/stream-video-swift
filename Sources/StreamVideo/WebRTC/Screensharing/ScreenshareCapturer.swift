@@ -14,21 +14,20 @@ class ScreenshareCapturer: VideoCapturing {
     
     init(
         videoSource: RTCVideoSource,
-        videoOptions: VideoOptions,
-        videoFilters: [VideoFilter]
+        videoOptions: VideoOptions
     ) {
         self.videoOptions = videoOptions
         self.videoSource = videoSource
         #if targetEnvironment(simulator)
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
         #else
-        let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters, handleRotation: false)
+        let handler = StreamVideoCaptureHandler(source: videoSource, handleRotation: false)
         videoCaptureHandler = handler
         videoCapturer = RTCVideoCapturer(delegate: handler)
         #endif
     }
     
-    func startCapture(device: AVCaptureDevice?) async throws {
+    func startCapture(with configuration: VideoCapturingConfiguration) async throws {
         let devices = RTCCameraVideoCapturer.captureDevices()
         
         guard let device = devices.first else {
@@ -61,43 +60,43 @@ class ScreenshareCapturer: VideoCapturing {
     }
     
     func handle(sampleBuffer: CMSampleBuffer, type: RPSampleBufferType, for device: AVCaptureDevice) {
-        let outputFormat = VideoCapturingUtils.outputFormat(
-            for: device,
-            preferredFormat: videoOptions.preferredFormat,
-            preferredDimensions: videoOptions.preferredDimensions,
-            preferredFps: videoOptions.preferredFps
-        )
+//        let outputFormat = VideoCapturingUtils.outputFormat(
+//            for: device,
+//            preferredFormat: videoOptions.preferredFormat,
+//            preferredDimensions: videoOptions.preferredDimensions,
+//            preferredFps: videoOptions.preferredFps
+//        )
+//
+//        if type == .video {
+//            guard CMSampleBufferGetNumSamples(sampleBuffer) == 1,
+//                  CMSampleBufferIsValid(sampleBuffer),
+//                  CMSampleBufferDataIsReady(sampleBuffer) else {
+//                return
+//            }
+//
+//            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+//                return
+//            }
+//
+//            let timeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+//            let timeStampNs = Int64(CMTimeGetSeconds(timeStamp) * Double(NSEC_PER_SEC))
+//
+//            let rtcBuffer = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
+//            let rtcFrame = RTCVideoFrame(
+//                buffer: rtcBuffer,
+//                rotation: ._0,
+//                timeStampNs: timeStampNs
+//            )
 
-        if type == .video {
-            guard CMSampleBufferGetNumSamples(sampleBuffer) == 1,
-                  CMSampleBufferIsValid(sampleBuffer),
-                  CMSampleBufferDataIsReady(sampleBuffer) else {
-                return
-            }
-
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-                return
-            }
-
-            let timeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            let timeStampNs = Int64(CMTimeGetSeconds(timeStamp) * Double(NSEC_PER_SEC))
-            
-            let rtcBuffer = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
-            let rtcFrame = RTCVideoFrame(
-                buffer: rtcBuffer,
-                rotation: ._0,
-                timeStampNs: timeStampNs
-            )
-
-            videoCaptureHandler?.capturer(videoCapturer, didCapture: rtcFrame)
-            if let dimensions = outputFormat.dimensions {
-                videoSource.adaptOutputFormat(
-                    toWidth: dimensions.width,
-                    height: dimensions.height,
-                    fps: Int32(outputFormat.fps)
-                )
-            }
-        }
+//            videoCaptureHandler?.capturer(videoCapturer, didCapture: rtcFrame)
+//            if let dimensions = outputFormat.dimensions {
+//                videoSource.adaptOutputFormat(
+//                    toWidth: dimensions.width,
+//                    height: dimensions.height,
+//                    fps: Int32(outputFormat.fps)
+//                )
+//            }
+//        }
     }
     
     private func stopScreensharing() async throws {

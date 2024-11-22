@@ -9,6 +9,8 @@ import StreamWebRTC
 /// Represents a WebRTC peer connection with additional Stream-specific functionality.
 final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked Sendable {
 
+    @Atomic private var transceiversMap: [TrackType: [RTCRtpTransceiver]] = [:]
+
     /// The remote session description of the peer connection.
     var remoteDescription: RTCSessionDescription? { source.remoteDescription }
 
@@ -158,10 +160,17 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     ///   - transceiverInit: The initialization parameters for the transceiver.
     /// - Returns: The created RTCRtpTransceiver, or nil if creation fails.
     func addTransceiver(
+        trackType: TrackType,
         with track: RTCMediaStreamTrack,
         init transceiverInit: RTCRtpTransceiverInit
     ) -> RTCRtpTransceiver? {
-        source.addTransceiver(with: track, init: transceiverInit)
+        let result = source.addTransceiver(with: track, init: transceiverInit)
+        storeTransceiver(result, trackType: trackType)
+        return result
+    }
+
+    func transceivers(for trackType: TrackType) -> [RTCRtpTransceiver] {
+        transceiversMap[trackType] ?? []
     }
 
     /// Adds an ICE candidate to the peer connection.
@@ -201,5 +210,19 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
             source.transceivers.forEach { $0.stopInternal() }
             source.close()
         }
+    }
+
+    // MARK: - Private
+
+    private func storeTransceiver(
+        _ transceiver: RTCRtpTransceiver?,
+        trackType: TrackType
+    ) {
+        guard let transceiver else { return }
+        if transceiversMap[trackType] == nil {
+            transceiversMap[trackType] = []
+        }
+
+        transceiversMap[trackType]?.append(transceiver)
     }
 }

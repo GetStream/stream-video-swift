@@ -5,32 +5,31 @@
 import Foundation
 import StreamWebRTC
 
-class VideoCapturer: CameraVideoCapturing {
-    
-    private var videoCapturer: RTCVideoCapturer?
-    private var videoOptions: VideoOptions
+final class VideoCapturer: CameraVideoCapturing {
+
     private let videoSource: RTCVideoSource
+
+    private var videoCapturer: RTCVideoCapturer?
     private var videoCaptureHandler: StreamVideoCaptureHandler?
-    
+
     private var simulatorStreamFile: URL? = InjectedValues[\.simulatorStreamFile]
-    
-    init(
-        videoSource: RTCVideoSource,
-        videoOptions: VideoOptions,
-        videoFilters: [VideoFilter]
-    ) {
-        self.videoOptions = videoOptions
+
+    @Atomic private var configuration: VideoCapturingConfiguration?
+    @Atomic private var isActive: Bool = false
+
+    init(videoSource: RTCVideoSource) {
         self.videoSource = videoSource
         #if targetEnvironment(simulator)
         if let url = simulatorStreamFile {
-            let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
+            let handler = StreamVideoCaptureHandler(source: videoSource)
             videoCaptureHandler = handler
             videoCapturer = SimulatorScreenCapturer(delegate: handler, videoURL: url)
+            isActive = true
         } else {
             videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
         }
         #else
-        let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
+        let handler = StreamVideoCaptureHandler(source: videoSource)
         videoCaptureHandler = handler
         videoCapturer = RTCCameraVideoCapturer(delegate: handler, captureSession: AVCaptureSession())
         checkForBackgroundCameraAccess()
@@ -41,64 +40,138 @@ class VideoCapturer: CameraVideoCapturing {
         VideoCapturingUtils.capturingDevice(for: cameraPosition)
     }
     
-    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws {
-        guard let device = VideoCapturingUtils.capturingDevice(for: cameraPosition) else {
-            throw ClientError.Unexpected()
+    func setCameraPosition(_ position: AVCaptureDevice.Position) async throws {
+        guard
+            let configuration
+        else {
+            return log.debug("No active video capturing session found.", subsystems: .webRTC)
         }
-        try await startCapture(device: device)
+        try await startCapture(
+            with: .init(
+                position: position,
+                dimensions: configuration.dimensions,
+                frameRate: configuration.frameRate
+            )
+        )
     }
     
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         videoCaptureHandler?.selectedFilter = videoFilter
     }
-    
-    func startCapture(device: AVCaptureDevice?) async throws {
-        try await withCheckedThrowingContinuation { continuation in
-            guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer else {
-                continuation.resume()
+
+    func startCapture(with configuration: VideoCapturingConfiguration) async throws {
+        try await withCheckedThrowingContinuation { [weak self, videoCapturer] continuation in
+            guard
+                let self,
+                let videoCapturer = videoCapturer as? RTCCameraVideoCapturer
+            else {
+                log.debug(
+                    "Start video capturing isn't possible with videoCapturer of type:\(type(of: videoCapturer)).",
+                    subsystems: .webRTC
+                )
+                return continuation.resume()
+            }
+
+            guard configuration != self.configuration else {
                 return
             }
 
-            guard let device else {
-                continuation.resume(throwing: ClientError.Unexpected())
-                return
-            }
-            let outputFormat = VideoCapturingUtils.outputFormat(
-                for: device,
-                preferredFormat: videoOptions.preferredFormat,
-                preferredDimensions: videoOptions.preferredDimensions,
-                preferredFps: videoOptions.preferredFps
-            )
-            guard let selectedFormat = outputFormat.format, let dimensions = outputFormat.dimensions else {
-                continuation.resume(throwing: ClientError.Unexpected())
-                return
-            }
-            
-            if dimensions.area != videoOptions.preferredDimensions.area {
-                log.debug("Adapting video source output format")
-                videoSource.adaptOutputFormat(
-                    toWidth: dimensions.width,
-                    height: dimensions.height,
-                    fps: Int32(outputFormat.fps)
+            guard
+                let device = capturingDevice(for: configuration.position)
+            else {
+                return continuation.resume(
+                    throwing: ClientError(
+                        "Start video capturing for position:\(configuration.position) failed as no devices were found."
+                    )
                 )
             }
-            
+
+            guard
+                let outputFormat = self.outputFormat(for: device, configuration: configuration)
+            else {
+                return continuation.resume(
+                    throwing: ClientError(
+                        "Start video capturing for position:\(configuration.position) failed as no output format was found."
+                    )
+                )
+            }
+
+            let outputFormatDimensions = CMVideoFormatDescriptionGetDimensions(
+                outputFormat.formatDescription
+            )
+
+            let preferredDimensions = CMVideoDimensions(
+                width: Int32(configuration.dimensions.width),
+                height: Int32(configuration.dimensions.height)
+            )
+            if outputFormatDimensions.area != preferredDimensions.area {
+                videoSource.adaptOutputFormat(
+                    toWidth: outputFormatDimensions.width,
+                    height: outputFormatDimensions.height,
+                    fps: Int32(configuration.frameRate.clamped(to: outputFormat.frameRateRange))
+                )
+                log.debug(
+                    "Start video capturing requested dimensions:[w:\(configuration.dimensions.width), h:\(configuration.dimensions.height)] but found dimensions:[w:\(outputFormatDimensions.width), h:\(outputFormatDimensions.height)]. Adapting video source now!",
+                    subsystems: .webRTC
+                )
+            }
+
             videoCapturer.startCapture(
                 with: device,
-                format: selectedFormat,
-                fps: outputFormat.fps
+                format: outputFormat,
+                fps: configuration.frameRate.clamped(to: outputFormat.frameRateRange)
             ) { [weak self] error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
                     self?.videoCaptureHandler?.currentCameraPosition = device.position
-                    continuation.resume(returning: ())
+                    self?.isActive = true
+                    continuation.resume()
                 }
             }
-        } as Void
+
+            self.configuration = configuration
+            log.debug(
+                """
+                Start video capturing completed:
+                Configuration:
+                    Position: \(configuration.position)
+                    Dimensions: [w:\(configuration.dimensions.width), h:\(configuration.dimensions.height)]
+                    FrameRate: \(configuration.frameRate)
+                
+                OutputFormat:
+                    Device: \(device)
+                    Dimensions: [w:\(outputFormatDimensions.width), h:\(outputFormatDimensions.height)]
+                    FrameRate: \(configuration.frameRate.clamped(to: outputFormat.frameRateRange))
+                """,
+                subsystems: .webRTC
+            )
+        }
+    }
+
+    private func outputFormat(
+        for device: AVCaptureDevice,
+        configuration: VideoCapturingConfiguration
+    ) -> AVCaptureDevice.Format? {
+        VideoCapturingUtils.outputFormat(
+            for: device,
+            preferredFormat: nil,
+            preferredDimensions: .init(
+                width: Int32(configuration.dimensions.width),
+                height: Int32(configuration.dimensions.height)
+            ),
+            preferredFps: configuration.frameRate
+        ).format
     }
     
     func stopCapture() async throws {
+        guard
+            isActive
+        else {
+            log.debug("Stop video capturing isn't possible while isActive:\(isActive).", subsystems: .webRTC)
+            return
+        }
+
         try await withCheckedThrowingContinuation { continuation in
             if let capturer = videoCapturer as? RTCCameraVideoCapturer {
                 capturer.stopCapture {
@@ -111,66 +184,71 @@ class VideoCapturer: CameraVideoCapturing {
                 continuation.resume(returning: ())
             }
         }
+
+        configuration = nil
+        isActive = false
+
+        log.debug("Stop video capturing completed", subsystems: .webRTC)
     }
 
     func updateCaptureQuality(
         _ layers: [VideoLayer],
         on device: AVCaptureDevice?
     ) async throws {
-        guard
-            let videoCapturer = videoCapturer as? RTCCameraVideoCapturer,
-            let device
-        else {
-            return
-        }
-
-        let preferredDimensions: CMVideoDimensions = {
-            if layers.first(where: { $0.quality == VideoLayer.full.quality }) != nil {
-                return .full
-            } else if layers.first(where: { $0.quality == VideoLayer.half.quality }) != nil {
-                return .half
-            } else {
-                return .quarter
-            }
-        }()
-        let outputFormat = VideoCapturingUtils.outputFormat(
-            for: device,
-            preferredFormat: videoOptions.preferredFormat,
-            preferredDimensions: preferredDimensions,
-            preferredFps: videoOptions.preferredFps
-        )
-        guard
-            let selectedFormat = outputFormat.format,
-            let dimensions = outputFormat.dimensions
-        else {
-            return
-        }
-
-        if dimensions.area != videoOptions.preferredDimensions.area {
-            log.debug(
-                "Adapting video source output format (\(dimensions.width)x\(dimensions.height))",
-                subsystems: .webRTC
-            )
-            videoSource.adaptOutputFormat(
-                toWidth: dimensions.width,
-                height: dimensions.height,
-                fps: Int32(outputFormat.fps)
-            )
-        }
-
-        return try await withCheckedThrowingContinuation { continuation in
-            videoCapturer.startCapture(
-                with: device,
-                format: selectedFormat,
-                fps: outputFormat.fps
-            ) { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
-                }
-            }
-        }
+//        guard
+//            let videoCapturer = videoCapturer as? RTCCameraVideoCapturer,
+//            let device
+//        else {
+//            return
+//        }
+//
+//        let preferredDimensions: CMVideoDimensions = {
+//            if layers.first(where: { $0.quality == VideoLayer.full.quality }) != nil {
+//                return .full
+//            } else if layers.first(where: { $0.quality == VideoLayer.half.quality }) != nil {
+//                return .half
+//            } else {
+//                return .quarter
+//            }
+//        }()
+//        let outputFormat = VideoCapturingUtils.outputFormat(
+//            for: device,
+//            preferredFormat: videoOptions.preferredFormat,
+//            preferredDimensions: preferredDimensions,
+//            preferredFps: videoOptions.preferredFps
+//        )
+//        guard
+//            let selectedFormat = outputFormat.format,
+//            let dimensions = outputFormat.dimensions
+//        else {
+//            return
+//        }
+//
+//        if dimensions.area != videoOptions.preferredDimensions.area {
+//            log.debug(
+//                "Adapting video source output format (\(dimensions.width)x\(dimensions.height))",
+//                subsystems: .webRTC
+//            )
+//            videoSource.adaptOutputFormat(
+//                toWidth: dimensions.width,
+//                height: dimensions.height,
+//                fps: Int32(outputFormat.fps)
+//            )
+//        }
+//
+//        return try await withCheckedThrowingContinuation { continuation in
+//            videoCapturer.startCapture(
+//                with: device,
+//                format: selectedFormat,
+//                fps: outputFormat.fps
+//            ) { error in
+//                if let error {
+//                    continuation.resume(throwing: error)
+//                } else {
+//                    continuation.resume(returning: ())
+//                }
+//            }
+//        }
     }
 
     /// Initiates a focus and exposure operation at the specified point on the camera's view.
@@ -402,51 +480,5 @@ class VideoCapturer: CameraVideoCapturing {
             }
             captureSession.commitConfiguration()
         }
-    }
-}
-
-extension CMVideoDimensions {
-    
-    public static var full = CMVideoDimensions(width: 1280, height: 720)
-    public static var half = CMVideoDimensions(width: 640, height: 480)
-    public static var quarter = CMVideoDimensions(width: 480, height: 360)
-    
-    var area: Int32 {
-        width * height
-    }
-}
-
-extension AVCaptureDevice.Format {
-    
-    // computes a ClosedRange of supported FPSs for this format
-    func fpsRange() -> ClosedRange<Int> {
-        videoSupportedFrameRateRanges
-            .map { $0.toRange() }
-            .reduce(into: 0...0) { result, current in
-                result = merge(range: result, with: current)
-            }
-    }
-}
-
-extension AVFrameRateRange {
-    
-    // convert to a ClosedRange
-    func toRange() -> ClosedRange<Int> {
-        Int(minFrameRate)...Int(maxFrameRate)
-    }
-}
-
-internal func merge<T>(
-    range range1: ClosedRange<T>,
-    with range2: ClosedRange<T>
-) -> ClosedRange<T> where T: Comparable {
-    min(range1.lowerBound, range2.lowerBound)...max(range1.upperBound, range2.upperBound)
-}
-
-extension Comparable {
-    
-    // clamp a value within the range
-    func clamped(to limits: ClosedRange<Self>) -> Self {
-        min(max(self, limits.lowerBound), limits.upperBound)
     }
 }
