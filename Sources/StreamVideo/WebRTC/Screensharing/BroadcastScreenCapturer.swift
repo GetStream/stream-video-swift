@@ -18,21 +18,20 @@ class BroadcastScreenCapturer: VideoCapturing {
     
     init(
         videoSource: RTCVideoSource,
-        videoOptions: VideoOptions,
-        videoFilters: [VideoFilter]
+        videoOptions: VideoOptions
     ) {
         self.videoOptions = videoOptions
         self.videoSource = videoSource
         #if targetEnvironment(simulator)
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
         #else
-        let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters, handleRotation: false)
+        let handler = StreamVideoCaptureHandler(source: videoSource, handleRotation: false)
         videoCaptureHandler = handler
         videoCapturer = RTCVideoCapturer(delegate: handler)
         #endif
     }
     
-    func startCapture(device: AVCaptureDevice?) async throws {
+    func startCapture(with configuration: VideoCapturingConfiguration) async throws {
         guard self.bufferReader == nil else {
             return
         }
@@ -69,15 +68,15 @@ class BroadcastScreenCapturer: VideoCapturing {
                 height: Int32(CVPixelBufferGetHeight(pixelBuffer))
             )
             
-            bufferDimensions = BroadcastUtils.adjust(
-                width: bufferDimensions.width,
-                height: bufferDimensions.height,
-                size: max(
-                    self.videoOptions.preferredDimensions.width,
-                    self.videoOptions.preferredDimensions.height
-                )
-            )
-            
+//            bufferDimensions = BroadcastUtils.adjust(
+//                width: bufferDimensions.width,
+//                height: bufferDimensions.height,
+//                size: max(
+//                    self.videoOptions.preferredDimensions.width,
+//                    self.videoOptions.preferredDimensions.height
+//                )
+//            )
+//
             self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
             if !self.adaptedOutputFormat {
                 self.adaptedOutputFormat = true

@@ -9,9 +9,34 @@ import StreamWebRTC
 final class RTCTemporaryPeerConnection {
 
     private let peerConnection: StreamRTCPeerConnectionProtocol
-    private let localAudioTrack: RTCAudioTrack?
-    private let localVideoTrack: RTCVideoTrack?
+    private let direction: RTCRtpTransceiverDirection
+    private let localAudioTrack: RTCAudioTrack
+    private let localVideoTrack: RTCVideoTrack
     private let videoOptions: VideoOptions
+
+    convenience init(
+        peerConnectionType: PeerConnectionType,
+        coordinator: WebRTCCoordinator,
+        sfuAdapter: SFUAdapter
+    ) async throws {
+        let peerConnectionFactory = coordinator.stateAdapter.peerConnectionFactory
+        let audioSource = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let audioTrack = peerConnectionFactory.makeAudioTrack(source: audioSource)
+
+        let videoSource = peerConnectionFactory.makeVideoSource(forScreenShare: false)
+        let videoTrack = peerConnectionFactory.makeVideoTrack(source: videoSource)
+
+        try await self.init(
+            direction: peerConnectionType == .subscriber ? .recvOnly : .sendOnly,
+            sessionID: coordinator.stateAdapter.sessionID,
+            peerConnectionFactory: coordinator.stateAdapter.peerConnectionFactory,
+            configuration: coordinator.stateAdapter.connectOptions.rtcConfiguration,
+            sfuAdapter: sfuAdapter,
+            videoOptions: coordinator.stateAdapter.videoOptions,
+            localAudioTrack: audioTrack,
+            localVideoTrack: videoTrack
+        )
+    }
 
     /// Initializes a new RTCTemporaryPeerConnection.
     ///
@@ -21,23 +46,25 @@ final class RTCTemporaryPeerConnection {
     ///   - configuration: The configuration for the peer connection.
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The options for video configuration.
-    ///   - localAudioTrack: The local audio track to add to the connection, if any.
-    ///   - localVideoTrack: The local video track to add to the connection, if any.
+    ///   - localAudioTrack: The local audio track to add to the connection.
+    ///   - localVideoTrack: The local video track to add to the connection.
     ///
     /// - Throws: An error if the peer connection creation fails.
-    init(
+    private init(
+        direction: RTCRtpTransceiverDirection,
         sessionID: String,
         peerConnectionFactory: PeerConnectionFactory,
         configuration: RTCConfiguration,
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
-        localAudioTrack: RTCAudioTrack?,
-        localVideoTrack: RTCVideoTrack?
+        localAudioTrack: RTCAudioTrack,
+        localVideoTrack: RTCVideoTrack
     ) throws {
         peerConnection = try StreamRTCPeerConnection(
             peerConnectionFactory,
             configuration: configuration
         )
+        self.direction = direction
         self.localAudioTrack = localAudioTrack
         self.localVideoTrack = localVideoTrack
         self.videoOptions = videoOptions
@@ -57,29 +84,18 @@ final class RTCTemporaryPeerConnection {
     /// - Returns: An `RTCSessionDescription` representing the created offer.
     /// - Throws: An error if the offer creation fails.
     func createOffer() async throws -> RTCSessionDescription {
-        if let localAudioTrack {
-            _ = peerConnection.addTransceiver(
-                with: localAudioTrack,
-                init: RTCRtpTransceiverInit(
-                    trackType: .audio,
-                    direction: .recvOnly,
-                    streamIds: ["temp-audio"]
-                )
-            )
-        }
+        _ = peerConnection.addTransceiver(
+            trackType: .audio,
+            with: localAudioTrack,
+            init: .temporary(trackType: .audio)
+        )
 
-        if let localVideoTrack {
-            _ = peerConnection.addTransceiver(
-                with: localVideoTrack,
-                init: RTCRtpTransceiverInit(
-                    trackType: .video,
-                    direction: .recvOnly,
-                    streamIds: ["temp-video"],
-                    layers: videoOptions.videoLayers,
-                    preferredVideoCodec: videoOptions.preferredVideoCodec
-                )
-            )
-        }
+        _ = peerConnection.addTransceiver(
+            trackType: .video,
+            with: localVideoTrack,
+            init: .temporary(trackType: .video)
+        )
+        
         return try await peerConnection.offer(for: .defaultConstraints)
     }
 }

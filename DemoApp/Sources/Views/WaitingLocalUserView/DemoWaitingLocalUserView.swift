@@ -151,6 +151,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                     .navigationViewStyle(.stack)
                 }
             }
+            .presentsMoreControls(viewModel: viewModel)
             .alignedToReadableContentGuide()
             .padding(.bottom)
         } else {

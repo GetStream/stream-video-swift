@@ -21,6 +21,7 @@ protocol RTCPeerConnectionCoordinatorProviding {
     ///   - videoConfig: Configuration settings for video.
     ///   - callSettings: Settings related to the overall call.
     ///   - audioSettings: Settings for audio configuration.
+    ///   - publishOptions: TODO
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
@@ -34,6 +35,7 @@ protocol RTCPeerConnectionCoordinatorProviding {
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         audioSettings: AudioSettings,
+        publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
@@ -56,6 +58,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - videoConfig: Configuration settings for video.
     ///   - callSettings: Settings related to the overall call.
     ///   - audioSettings: Settings for audio configuration.
+    ///   - publishOptions: TODO
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
@@ -69,6 +72,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         audioSettings: AudioSettings,
+        publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
@@ -82,6 +86,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
             videoConfig: videoConfig,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider

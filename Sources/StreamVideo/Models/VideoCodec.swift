@@ -9,8 +9,12 @@ import StreamWebRTC
 ///
 /// Each codec is associated with a specific encoding and transmission
 /// standard for video data, such as H.264 or VP8.
-public enum VideoCodec: String, Sendable {
-    case h264, vp8, vp9, av1
+public enum VideoCodec: String, Sendable, Hashable, CustomStringConvertible {
+    case none, h264, vp8, vp9, av1
+
+    public var description: String {
+        rawValue
+    }
 
     /// Determines if the codec supports Scalable Video Coding (SVC).
     ///
@@ -23,6 +27,8 @@ public enum VideoCodec: String, Sendable {
             return true
         case .h264, .vp8:
             return false
+        default:
+            return false
         }
     }
 
@@ -33,7 +39,7 @@ public enum VideoCodec: String, Sendable {
     /// initializer returns `nil`.
     ///
     /// - Parameter source: The codec parameters used to determine the codec.
-    init?(_ source: RTCRtpCodecParameters) {
+    init(_ source: RTCRtpCodecParameters) {
         switch source.name.lowercased() {
         case VideoCodec.h264.rawValue:
             self = .h264
@@ -44,7 +50,22 @@ public enum VideoCodec: String, Sendable {
         case VideoCodec.av1.rawValue:
             self = .av1
         default:
-            return nil
+            self = .none
+        }
+    }
+
+    init(_ source: Stream_Video_Sfu_Models_Codec) {
+        switch source.name.lowercased() {
+        case VideoCodec.h264.rawValue:
+            self = .h264
+        case VideoCodec.vp8.rawValue:
+            self = .vp8
+        case VideoCodec.vp9.rawValue:
+            self = .vp9
+        case VideoCodec.av1.rawValue:
+            self = .av1
+        default:
+            self = .none
         }
     }
 }
