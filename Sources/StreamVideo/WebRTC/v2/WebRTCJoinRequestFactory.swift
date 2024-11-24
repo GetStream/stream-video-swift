@@ -55,7 +55,8 @@ struct WebRTCJoinRequestFactory {
         result.fastReconnect = connectionType.isFastReconnect
         result.token = await coordinator.stateAdapter.token
         result.preferredPublishOptions = await buildPreferredPublishOptions(
-            coordinator: coordinator
+            coordinator: coordinator,
+            publisherSdp: publisherSdp
         )
         if let reconnectDetails = await buildReconnectDetails(
             for: connectionType,
@@ -243,7 +244,8 @@ struct WebRTCJoinRequestFactory {
     }
 
     func buildPreferredPublishOptions(
-        coordinator: WebRTCCoordinator
+        coordinator: WebRTCCoordinator,
+        publisherSdp: String
     ) async -> [Stream_Video_Sfu_Models_PublishOption] {
         var result = [Stream_Video_Sfu_Models_PublishOption]()
         let videoOptions = await coordinator
@@ -257,7 +259,7 @@ struct WebRTCJoinRequestFactory {
         }
 
         guard
-            let codec = coordinator
+            var codec = coordinator
             .stateAdapter
             .peerConnectionFactory
             .codecCapabilities(for: videoOptions.preferredVideoCodec)
@@ -265,6 +267,13 @@ struct WebRTCJoinRequestFactory {
         else {
             return result
         }
+
+        let sdpParser = SDPParser()
+        let rtmapVisitor = RTPMapVisitor()
+        sdpParser.registerVisitor(rtmapVisitor)
+        await sdpParser.parse(sdp: publisherSdp)
+        let payloadType = rtmapVisitor.payloadType(for: videoOptions.preferredVideoCodec) ?? 0
+        codec.payloadType = UInt32(payloadType)
 
         result.append(
             .init(
