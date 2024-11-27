@@ -60,7 +60,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
     /// - Parameter mode: The audio mode to set.
     /// - Throws: An error if setting the mode fails.
     func setMode(_ mode: String) throws {
-        try source.setMode(mode)
+        try source.setMode(AVAudioSession.Mode(rawValue: mode))
     }
 
     /// Configures the audio category and category options for the session.
@@ -73,7 +73,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
         _ category: String,
         with categoryOptions: AVAudioSession.CategoryOptions
     ) throws {
-        try source.setCategory(category, with: categoryOptions)
+        try source.setCategory(AVAudioSession.Category(rawValue: category), with: categoryOptions)
     }
 
     /// Activates or deactivates the audio session.

@@ -250,7 +250,7 @@ final class UnsecureRepository: VoIPTokenHandler {
     func save(voIPPushToken: String?) {
 
     }
-    
+
     func currentVoIPPushToken() -> String? {
         nil
     }
@@ -279,7 +279,7 @@ protocol VoIPTokenHandler {
 }
 
 final class CallKitService {
-    
+
     func reportIncomingCall(
         callCid: String,
         displayName: String,
