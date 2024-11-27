@@ -86,11 +86,17 @@ fileprivate func content() {
 
         voIPTokenObservationCancellable = callKitPushNotificationAdapter.$deviceToken.sink { [streamVideo] updatedDeviceToken in
             Task {
-                if let lastVoIPToken {
-                    try await streamVideo.deleteDevice(id: updatedDeviceToken)
+                do {
+                    if let lastVoIPToken, !lastVoIPToken.isEmpty {
+                        try await streamVideo.deleteDevice(id: lastVoIPToken)
+                    }
+                    if !updatedDeviceToken.isEmpty {
+                        try await streamVideo.setVoipDevice(id: updatedDeviceToken)
+                    }
+                    lastVoIPToken = updatedDeviceToken
+                } catch {
+                    print(error)
                 }
-                try await streamVideo.setVoipDevice(id: updatedDeviceToken)
-                lastVoIPToken = updatedDeviceToken
             }
         }
     }
