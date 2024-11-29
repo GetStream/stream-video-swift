@@ -121,8 +121,8 @@ extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: Event {
         case .callEnded: return "callEnded"
         case .participantUpdated: return "participantUpdated"
         case .participantMigrationComplete: return "participantMigrationComplete"
-        case .codecNegotiationComplete: return "codecNegotiationComplete"
         case .changePublishOptions: return "changePublishOptions"
+        case .changePublishOptionsComplete: return "changePublishOptionsComplete"
         }
     }
 }

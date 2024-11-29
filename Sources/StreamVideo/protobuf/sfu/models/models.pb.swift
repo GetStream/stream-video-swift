@@ -931,13 +931,16 @@ struct Stream_Video_Sfu_Models_VideoLayer {
   fileprivate var _videoDimension: Stream_Video_Sfu_Models_VideoDimension? = nil
 }
 
+/// PublishOption represents the configuration options for publishing a track.
 struct Stream_Video_Sfu_Models_PublishOption {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The type of the track being published (e.g., video, screenshare).
   var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
 
+  /// The codec to be used for encoding the track (e.g., VP8, VP9, H264).
   var codec: Stream_Video_Sfu_Models_Codec {
     get {return _codec ?? Stream_Video_Sfu_Models_Codec()}
     set {_codec = newValue}
@@ -947,19 +950,46 @@ struct Stream_Video_Sfu_Models_PublishOption {
   /// Clears the value of `codec`. Subsequent reads from it will return its default value.
   mutating func clearCodec() {self._codec = nil}
 
+  /// The target bitrate for the published track, in bits per second.
   var bitrate: Int32 = 0
 
+  /// The target frames per second (FPS) for video encoding.
   var fps: Int32 = 0
 
+  /// The maximum number of spatial layers to send.
+  /// - For SVC (e.g., VP9), spatial layers downscale by a factor of 2:
+  ///   - 1 layer: full resolution
+  ///   - 2 layers: full resolution + half resolution
+  ///   - 3 layers: full resolution + half resolution + quarter resolution
+  /// - For non-SVC codecs (e.g., VP8/H264), this determines the number of
+  ///   encoded resolutions (e.g., quarter, half, full) sent for simulcast.
   var maxSpatialLayers: Int32 = 0
 
+  /// The maximum number of temporal layers for scalable video coding (SVC).
+  /// Temporal layers allow varying frame rates for different bandwidths.
   var maxTemporalLayers: Int32 = 0
+
+  /// The dimensions of the video (e.g., width and height in pixels).
+  /// Spatial layers are based on this base resolution. For example, if the base
+  /// resolution is 1280x720:
+  /// - Full resolution (1 layer) = 1280x720
+  /// - Half resolution (2 layers) = 640x360
+  /// - Quarter resolution (3 layers) = 320x180
+  var videoDimension: Stream_Video_Sfu_Models_VideoDimension {
+    get {return _videoDimension ?? Stream_Video_Sfu_Models_VideoDimension()}
+    set {_videoDimension = newValue}
+  }
+  /// Returns true if `videoDimension` has been explicitly set.
+  var hasVideoDimension: Bool {return self._videoDimension != nil}
+  /// Clears the value of `videoDimension`. Subsequent reads from it will return its default value.
+  mutating func clearVideoDimension() {self._videoDimension = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
   fileprivate var _codec: Stream_Video_Sfu_Models_Codec? = nil
+  fileprivate var _videoDimension: Stream_Video_Sfu_Models_VideoDimension? = nil
 }
 
 struct Stream_Video_Sfu_Models_Codec {
@@ -1829,6 +1859,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     4: .same(proto: "fps"),
     5: .standard(proto: "max_spatial_layers"),
     6: .standard(proto: "max_temporal_layers"),
+    7: .standard(proto: "video_dimension"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1843,6 +1874,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
       case 4: try { try decoder.decodeSingularInt32Field(value: &self.fps) }()
       case 5: try { try decoder.decodeSingularInt32Field(value: &self.maxSpatialLayers) }()
       case 6: try { try decoder.decodeSingularInt32Field(value: &self.maxTemporalLayers) }()
+      case 7: try { try decoder.decodeSingularMessageField(value: &self._videoDimension) }()
       default: break
       }
     }
@@ -1871,6 +1903,9 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if self.maxTemporalLayers != 0 {
       try visitor.visitSingularInt32Field(value: self.maxTemporalLayers, fieldNumber: 6)
     }
+    try { if let v = self._videoDimension {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1881,6 +1916,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if lhs.fps != rhs.fps {return false}
     if lhs.maxSpatialLayers != rhs.maxSpatialLayers {return false}
     if lhs.maxTemporalLayers != rhs.maxTemporalLayers {return false}
+    if lhs._videoDimension != rhs._videoDimension {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
