@@ -44,25 +44,50 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
         XCTAssertTrue(subject.registry.desiredPushTypes?.isEmpty ?? false)
     }
 
+    func test_unregister_deviceTokenWasConfiguredCorrectly() {
+        let expectedDecodedToken = "test-device-token"
+        subject.register()
+        subject.pushRegistry(
+            subject.registry,
+            didUpdate: .dummy(expectedDecodedToken),
+            for: .voIP
+        )
+
+        XCTAssertEqual(subject.deviceToken.decodedHex, expectedDecodedToken)
+        subject.unregister()
+
+        XCTAssertTrue(subject.deviceToken.isEmpty)
+    }
+
     // MARK: - pushRegistry(_:didUpdate:for:)
 
     func test_pushRegistryDidUpdatePushCredentials_deviceTokenWasConfiguredCorrectly() {
-        simulateDeviceTokenFetch("mockDeviceToken")
+        let expected = "mock-device-token"
+        subject.pushRegistry(
+            subject.registry,
+            didUpdate: .dummy(expected),
+            for: .voIP
+        )
 
-        XCTAssertEqual(subject.deviceToken, "6d6f636b446576696365546f6b656e")
+        XCTAssertEqual(subject.deviceToken.decodedHex, expected)
     }
 
     // MARK: - pushRegistry(_:didInvalidatePushTokenFor:)
 
     func test_pushRegistryDidInvalidatePushCredentials_deviceTokenWasConfiguredCorrectly() {
-        simulateDeviceTokenFetch("mockDeviceToken")
+        let expected = "mock-device-token"
+        subject.pushRegistry(
+            subject.registry,
+            didUpdate: .dummy(expected),
+            for: .voIP
+        )
 
         subject.pushRegistry(
             subject.registry,
             didInvalidatePushTokenFor: .voIP
         )
 
-        XCTAssertEqual(subject.deviceToken, "")
+        XCTAssertTrue(subject.deviceToken.isEmpty)
     }
 
     // MARK: - pushRegistry(_:didReceiveIncomingPushWith:for:completion:)
@@ -96,20 +121,6 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     }
 
     // MARK: - Private helpers
-
-    private func simulateDeviceTokenFetch(_ token: String) {
-        let registry = subject.registry
-        let deviceToken = token.data(using: .utf8)!
-        let stubPushCredentials = MockPKPushCredentials()
-        stubPushCredentials.stubType = .voIP
-        stubPushCredentials.stubToken = deviceToken
-
-        subject.pushRegistry(
-            registry,
-            didUpdate: stubPushCredentials,
-            for: .voIP
-        )
-    }
 
     @MainActor
     private func assertDidReceivePushNotification(
@@ -173,15 +184,6 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
 
 // MARK: - Mocks
 
-private final class MockPKPushCredentials: PKPushCredentials {
-
-    var stubType: PKPushType = .voIP
-    var stubToken: Data!
-
-    override var type: PKPushType { stubType }
-    override var token: Data { stubToken }
-}
-
 private final class MockPKPushPayload: PKPushPayload {
 
     var stubType: PKPushType = .voIP
@@ -189,4 +191,42 @@ private final class MockPKPushPayload: PKPushPayload {
 
     override var type: PKPushType { stubType }
     override var dictionaryPayload: [AnyHashable: Any] { stubDictionaryPayload }
+}
+
+private extension PKPushCredentials {
+    private final class MockPKPushCredentials: PKPushCredentials {
+        private let inputToken: Data
+        override var token: Data { inputToken }
+        init(_ input: String) {
+            inputToken = Data(input.utf8)
+            super.init()
+        }
+    }
+
+    static func dummy(_ token: String) -> PKPushCredentials {
+        MockPKPushCredentials(token)
+    }
+}
+
+private extension String {
+    var decodedHex: String {
+        var data = Data()
+        var currentIndex = startIndex
+
+        // Ensure the string has an even number of characters
+        guard count % 2 == 0 else { return "self" }
+
+        while currentIndex < endIndex {
+            let nextIndex = index(currentIndex, offsetBy: 2)
+            let byteString = self[currentIndex..<nextIndex]
+            if let byte = UInt8(byteString, radix: 16) {
+                data.append(byte)
+            } else {
+                return self
+            }
+            currentIndex = nextIndex
+        }
+
+        return String(data: data, encoding: .utf8) ?? self
+    }
 }

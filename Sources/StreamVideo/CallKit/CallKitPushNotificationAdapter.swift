@@ -62,6 +62,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         #else
         registry.delegate = nil
         registry.desiredPushTypes = []
+        deviceToken = ""
         #endif
     }
 
