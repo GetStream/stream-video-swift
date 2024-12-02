@@ -297,18 +297,18 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     func sendStats(
         _ report: CallStatsReport?,
         for sessionId: String,
-        thermalState: ProcessInfo.ThermalState? = nil
+        thermalState: ProcessInfo.ThermalState? = nil,
+        telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil
     ) async throws {
-        statusCheck()
-        guard let report else { return }
         var statsRequest = Stream_Video_Sfu_Signal_SendStatsRequest()
         statsRequest.sessionID = sessionId
         statsRequest.sdk = "stream-ios"
         statsRequest.sdkVersion = SystemEnvironment.version
         statsRequest.webrtcVersion = SystemEnvironment.webRTCVersion
-        statsRequest.publisherStats = report.publisherRawStats?.jsonString ?? ""
-        statsRequest.subscriberStats = report.subscriberRawStats?.jsonString ?? ""
+        statsRequest.publisherStats = report?.publisherRawStats?.jsonString ?? ""
+        statsRequest.subscriberStats = report?.subscriberRawStats?.jsonString ?? ""
         statsRequest.deviceState = .init(thermalState)
+        statsRequest.telemetry = telemetry ?? .init()
 
         let task = Task { [statsRequest, signalService] in
             try Task.checkCancellation()

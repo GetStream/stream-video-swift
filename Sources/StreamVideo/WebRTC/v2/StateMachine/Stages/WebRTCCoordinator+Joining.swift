@@ -28,7 +28,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
         WebRTCCoordinator.StateMachine.Stage,
         @unchecked Sendable
     {
+        private enum FlowType { case regular, fast, rejoin, migrate }
         private let disposableBag = DisposableBag()
+        private let startTime = Date()
+        private var flowType = FlowType.regular
 
         /// Initializes a new instance of `JoiningStage`.
         /// - Parameter context: The context for the joining stage.
@@ -50,15 +53,19 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .connected where context.isRejoiningFromSessionID != nil:
+                flowType = .rejoin
                 executeRejoining()
                 return self
             case .connected:
+                flowType = .regular
                 execute(isFastReconnecting: false)
                 return self
             case .fastReconnected:
+                flowType = .fast
                 execute(isFastReconnecting: true)
                 return self
             case .migrated:
+                flowType = .migrate
                 executeMigration()
                 return self
             default:
@@ -334,6 +341,66 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             try await coordinator.stateAdapter.restoreScreenSharing()
+
+            try Task.checkCancellation()
+
+            await reportTelemetry()
+        }
+
+        /// Reports telemetry data to the SFU (Selective Forwarding Unit) to monitor and analyze the
+        /// connection lifecycle.
+        ///
+        /// This method collects relevant metrics based on the flow type of the connection, such as
+        /// connection time or reconnection details, and sends them to the SFU for logging and diagnostics.
+        /// The telemetry data provides insights into the connection's performance and the strategies used
+        /// during rejoining, fast reconnecting, or migration.
+        ///
+        /// - Important: The method relies on the `sessionID` and `sfuAdapter` being
+        /// available in the context. If either is missing, no telemetry is sent.
+        ///
+        /// The reported data includes:
+        /// - Connection time in seconds for a regular flow.
+        /// - Reconnection strategies (e.g., fast reconnect, rejoin, or migration) and their duration.
+        private func reportTelemetry() async {
+            guard
+                let sessionId = await context.coordinator?.stateAdapter.sessionID,
+                let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
+            else {
+                return
+            }
+
+            var telemetry = Stream_Video_Sfu_Signal_Telemetry()
+            let duration = Float(Date().timeIntervalSince(startTime))
+            var reconnection = Stream_Video_Sfu_Signal_Reconnection()
+            reconnection.timeSeconds = duration
+
+            telemetry.data = {
+                switch flowType {
+                case .regular:
+                    return .connectionTimeSeconds(duration)
+                case .fast:
+                    var reconnection = Stream_Video_Sfu_Signal_Reconnection()
+                    reconnection.strategy = .fast
+                    return .reconnection(reconnection)
+                case .rejoin:
+                    reconnection.strategy = .rejoin
+                    return .reconnection(reconnection)
+                case .migrate:
+                    reconnection.strategy = .migrate
+                    return .reconnection(reconnection)
+                }
+            }()
+
+            do {
+                try await sfuAdapter.sendStats(
+                    nil,
+                    for: sessionId,
+                    telemetry: telemetry
+                )
+                log.debug("Join call completed in \(duration) seconds.")
+            } catch {
+                log.error(error)
+            }
         }
     }
 }
