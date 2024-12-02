@@ -16,6 +16,30 @@ fileprivate func content() {
     container {
         @Injected(\.callKitAdapter) var callKitAdapter
 
+        callKitAdapter.availabilityPolicy = .always
+    }
+
+    container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+
+        callKitAdapter.availabilityPolicy = .regionBased
+    }
+
+    container {
+        struct MyCustomAvailabilityPolicy: CallKitAvailabilityPolicyProtocol {
+            var isAvailable: Bool {
+                // Example: Enable CallKit only for premium users
+                return UserManager.currentUser?.isPremium == true
+            }
+        }
+
+        @Injected(\.callKitAdapter) var callKitAdapter
+        callKitAdapter.availabilityPolicy = .custom(MyCustomAvailabilityPolicy())
+    }
+
+    container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+
         let streamVideo = StreamVideo(
             apiKey: apiKey,
             user: user,

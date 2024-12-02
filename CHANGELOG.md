@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- CallKit availability policies allows you to control wether `Callkit` should be enabled/disabled based on different rules [#611](https://github.com/GetStream/stream-video-swift/pull/611)
+
 ### 🐞 Fixed
 - By observing the `CallKitPushNotificationAdapter.deviceToken` you will be notified with an empty `deviceToken` value, once the object unregister push notifications. [#608](https://github.com/GetStream/stream-video-swift/pull/608)
 - When a call you receive a ringing while the app isn't running (and the screen is locked), websocket connection wasn't recovered. [#600](https://github.com/GetStream/stream-video-swift/pull/600)
