@@ -422,3 +422,10 @@ var otherParticipant = CallParticipant(
     audioLevels: [],
     pin: nil
 )
+
+final class UserManager {
+    struct AppUser {
+        var isPremium: Bool
+    }
+    static var currentUser: AppUser?
+}
