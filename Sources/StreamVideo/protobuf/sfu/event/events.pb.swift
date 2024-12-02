@@ -239,15 +239,6 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     set {eventPayload = .participantMigrationComplete(newValue)}
   }
 
-  /// ChangePublishOptionsComplete is sent to signal the completion of a ChangePublishOptions request.
-  var changePublishOptionsComplete: Stream_Video_Sfu_Event_ChangePublishOptionsComplete {
-    get {
-      if case .changePublishOptionsComplete(let v)? = eventPayload {return v}
-      return Stream_Video_Sfu_Event_ChangePublishOptionsComplete()
-    }
-    set {eventPayload = .changePublishOptionsComplete(newValue)}
-  }
-
   /// ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
   var changePublishOptions: Stream_Video_Sfu_Event_ChangePublishOptions {
     get {
@@ -324,8 +315,6 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     case participantUpdated(Stream_Video_Sfu_Event_ParticipantUpdated)
     /// ParticipantMigrationComplete is sent when the participant migration is complete
     case participantMigrationComplete(Stream_Video_Sfu_Event_ParticipantMigrationComplete)
-    /// ChangePublishOptionsComplete is sent to signal the completion of a ChangePublishOptions request.
-    case changePublishOptionsComplete(Stream_Video_Sfu_Event_ChangePublishOptionsComplete)
     /// ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
     case changePublishOptions(Stream_Video_Sfu_Event_ChangePublishOptions)
 
@@ -419,10 +408,6 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         guard case .participantMigrationComplete(let l) = lhs, case .participantMigrationComplete(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.changePublishOptionsComplete, .changePublishOptionsComplete): return {
-        guard case .changePublishOptionsComplete(let l) = lhs, case .changePublishOptionsComplete(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
       case (.changePublishOptions, .changePublishOptions): return {
         guard case .changePublishOptions(let l) = lhs, case .changePublishOptions(let r) = rhs else { preconditionFailure() }
         return l == r
@@ -441,20 +426,13 @@ struct Stream_Video_Sfu_Event_ChangePublishOptions {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var publishOption: Stream_Video_Sfu_Models_PublishOption {
-    get {return _publishOption ?? Stream_Video_Sfu_Models_PublishOption()}
-    set {_publishOption = newValue}
-  }
-  /// Returns true if `publishOption` has been explicitly set.
-  var hasPublishOption: Bool {return self._publishOption != nil}
-  /// Clears the value of `publishOption`. Subsequent reads from it will return its default value.
-  mutating func clearPublishOption() {self._publishOption = nil}
+  var publishOption: [Stream_Video_Sfu_Models_PublishOption] = []
+
+  var reason: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
-
-  fileprivate var _publishOption: Stream_Video_Sfu_Models_PublishOption? = nil
 }
 
 struct Stream_Video_Sfu_Event_ChangePublishOptionsComplete {
@@ -1291,7 +1269,6 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     23: .standard(proto: "call_ended"),
     24: .standard(proto: "participant_updated"),
     25: .standard(proto: "participant_migration_complete"),
-    26: .standard(proto: "change_publish_options_complete"),
     27: .standard(proto: "change_publish_options"),
   ]
 
@@ -1574,19 +1551,6 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
           self.eventPayload = .participantMigrationComplete(v)
         }
       }()
-      case 26: try {
-        var v: Stream_Video_Sfu_Event_ChangePublishOptionsComplete?
-        var hadOneofValue = false
-        if let current = self.eventPayload {
-          hadOneofValue = true
-          if case .changePublishOptionsComplete(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.eventPayload = .changePublishOptionsComplete(v)
-        }
-      }()
       case 27: try {
         var v: Stream_Video_Sfu_Event_ChangePublishOptions?
         var hadOneofValue = false
@@ -1695,10 +1659,6 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
       guard case .participantMigrationComplete(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 25)
     }()
-    case .changePublishOptionsComplete?: try {
-      guard case .changePublishOptionsComplete(let v)? = self.eventPayload else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 26)
-    }()
     case .changePublishOptions?: try {
       guard case .changePublishOptions(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 27)
@@ -1719,6 +1679,7 @@ extension Stream_Video_Sfu_Event_ChangePublishOptions: SwiftProtobuf.Message, Sw
   static let protoMessageName: String = _protobuf_package + ".ChangePublishOptions"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "publish_option"),
+    2: .same(proto: "reason"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1727,25 +1688,26 @@ extension Stream_Video_Sfu_Event_ChangePublishOptions: SwiftProtobuf.Message, Sw
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._publishOption) }()
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.publishOption) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.reason) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._publishOption {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
+    if !self.publishOption.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.publishOption, fieldNumber: 1)
+    }
+    if !self.reason.isEmpty {
+      try visitor.visitSingularStringField(value: self.reason, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_ChangePublishOptions, rhs: Stream_Video_Sfu_Event_ChangePublishOptions) -> Bool {
-    if lhs._publishOption != rhs._publishOption {return false}
+    if lhs.publishOption != rhs.publishOption {return false}
+    if lhs.reason != rhs.reason {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -984,6 +984,20 @@ struct Stream_Video_Sfu_Models_PublishOption {
   /// Clears the value of `videoDimension`. Subsequent reads from it will return its default value.
   mutating func clearVideoDimension() {self._videoDimension = nil}
 
+  /// The unique identifier for the publish request.
+  /// - This `id` is assigned exclusively by the SFU. Any `id` set by the client
+  ///   in the `PublishOption` will be ignored and overwritten by the SFU.
+  /// - The primary purpose of this `id` is to uniquely identify each publish
+  ///   request, even in scenarios where multiple publish requests for the same
+  ///   `track_type` and `codec` are active simultaneously.
+  ///   For example:
+  ///     - A user may publish two tracks of the same type (e.g., video) and codec
+  ///       (e.g., VP9) concurrently.
+  /// - This uniqueness ensures that individual requests can be managed
+  ///   independently. For instance, an `id` is critical when stopping a specific
+  ///   publish request without affecting others.
+  var id: Int32 = 0
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1860,6 +1874,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     5: .standard(proto: "max_spatial_layers"),
     6: .standard(proto: "max_temporal_layers"),
     7: .standard(proto: "video_dimension"),
+    8: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1875,6 +1890,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
       case 5: try { try decoder.decodeSingularInt32Field(value: &self.maxSpatialLayers) }()
       case 6: try { try decoder.decodeSingularInt32Field(value: &self.maxTemporalLayers) }()
       case 7: try { try decoder.decodeSingularMessageField(value: &self._videoDimension) }()
+      case 8: try { try decoder.decodeSingularInt32Field(value: &self.id) }()
       default: break
       }
     }
@@ -1906,6 +1922,9 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     try { if let v = self._videoDimension {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
     } }()
+    if self.id != 0 {
+      try visitor.visitSingularInt32Field(value: self.id, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1917,6 +1936,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if lhs.maxSpatialLayers != rhs.maxSpatialLayers {return false}
     if lhs.maxTemporalLayers != rhs.maxTemporalLayers {return false}
     if lhs._videoDimension != rhs._videoDimension {return false}
+    if lhs.id != rhs.id {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
