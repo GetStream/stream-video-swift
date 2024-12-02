@@ -52,6 +52,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - PublishOptions: -
     ///   - subject: A subject for publishing track events.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
     convenience init(
@@ -61,6 +62,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -75,6 +77,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 subject: subject,
                 screenShareSessionProvider: screenShareSessionProvider
             ),

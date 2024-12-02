@@ -39,6 +39,7 @@ final class MediaAdapter {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: TODO
     ///   - audioSession: The audio session manager.
     ///   - videoCaptureSessionProvider: Provides access to the active video capturing session.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
@@ -50,6 +51,7 @@ final class MediaAdapter {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -99,6 +101,7 @@ final class MediaAdapter {
                     sfuAdapter: sfuAdapter,
                     videoOptions: videoOptions,
                     videoConfig: videoConfig,
+                    publishOptions: publishOptions,
                     subject: subject,
                     videoCaptureSessionProvider: videoCaptureSessionProvider
                 ),
@@ -109,6 +112,7 @@ final class MediaAdapter {
                     sfuAdapter: sfuAdapter,
                     videoOptions: videoOptions,
                     videoConfig: videoConfig,
+                    publishOptions: publishOptions,
                     subject: subject,
                     screenShareSessionProvider: screenShareSessionProvider
                 )

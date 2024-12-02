@@ -339,6 +339,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try Task.checkCancellation()
 
+            await coordinator
+                .stateAdapter
+                .set(publishOptions: .init(publishOptions: joinResponse.publishOptions))
+
+            try Task.checkCancellation()
+
             if !isFastReconnecting {
                 try await coordinator.stateAdapter.configurePeerConnections()
             }

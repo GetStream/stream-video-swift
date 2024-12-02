@@ -154,6 +154,17 @@ final class PeerConnectionFactory: @unchecked Sendable {
 
         return peerConnection
     }
+
+    // MARK: - Capabilities
+
+    func codecCapabilities(
+        for videoCodec: VideoCodec
+    ) -> RTCRtpCodecCapability? {
+        factory
+            .rtpSenderCapabilities(for: .video)
+            .codecs
+            .baseline(for: videoCodec)
+    }
 }
 
 /// A thread-safe storage class for managing PeerConnectionFactory instances.

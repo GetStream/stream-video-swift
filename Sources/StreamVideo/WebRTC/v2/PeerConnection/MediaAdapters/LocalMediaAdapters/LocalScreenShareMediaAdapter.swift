@@ -24,6 +24,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     private let videoOptions: VideoOptions
     /// Configuration settings for video.
     private let videoConfig: VideoConfig
+    private var publishOptions: PublishOptions
     /// The factory for creating the capturer.
     private let capturerFactory: VideoCapturerProviding
     /// Provider for screen sharing session information.
@@ -62,6 +63,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory()
@@ -72,6 +74,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.sfuAdapter = sfuAdapter
         self.videoOptions = videoOptions
         self.videoConfig = videoConfig
+        self.publishOptions = publishOptions
         self.subject = subject
         self.screenShareSessionProvider = screenShareSessionProvider
         self.capturerFactory = capturerFactory

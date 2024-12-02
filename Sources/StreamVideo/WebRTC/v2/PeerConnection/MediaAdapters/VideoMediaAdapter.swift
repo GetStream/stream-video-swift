@@ -52,6 +52,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: TODO
     ///   - subject: A subject for publishing track events.
     convenience init(
         sessionID: String,
@@ -60,6 +61,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider
     ) {
@@ -74,6 +76,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 subject: subject,
                 videoCaptureSessionProvider: videoCaptureSessionProvider
             ),

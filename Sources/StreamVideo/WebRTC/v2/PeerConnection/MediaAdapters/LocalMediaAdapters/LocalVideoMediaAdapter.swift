@@ -30,6 +30,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The video configuration for the call.
     private let videoConfig: VideoConfig
 
+    private var publishOptions: PublishOptions
+
     /// The factory for creating the capturer.
     private let capturerFactory: VideoCapturerProviding
 
@@ -62,6 +64,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: TODO
     ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
@@ -70,6 +73,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
         videoCaptureSessionProvider: VideoCaptureSessionProvider
@@ -80,6 +84,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.sfuAdapter = sfuAdapter
         self.videoOptions = videoOptions
         self.videoConfig = videoConfig
+        self.publishOptions = publishOptions
         self.subject = subject
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider

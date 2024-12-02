@@ -54,6 +54,9 @@ struct WebRTCJoinRequestFactory {
         result.subscriberSdp = subscriberSdp
         result.fastReconnect = connectionType.isFastReconnect
         result.token = await coordinator.stateAdapter.token
+        result.preferredPublishOptions = await buildPreferredPublishOptions(
+            coordinator: coordinator
+        )
         if let reconnectDetails = await buildReconnectDetails(
             for: connectionType,
             coordinator: coordinator,
@@ -237,5 +240,40 @@ struct WebRTCJoinRequestFactory {
         return Array(await coordinator.stateAdapter.participants.values)
             .filter { $0.id != sessionID && $0.id != previousSessionID }
             .flatMap { $0.trackSubscriptionDetails(incomingVideoQualitySettings: incomingVideoQualitySettings) }
+    }
+
+    func buildPreferredPublishOptions(
+        coordinator: WebRTCCoordinator
+    ) async -> [Stream_Video_Sfu_Models_PublishOption] {
+        var result = [Stream_Video_Sfu_Models_PublishOption]()
+        let videoOptions = await coordinator
+            .stateAdapter
+            .videoOptions
+
+        guard
+            videoOptions.preferredVideoCodec != .h264
+        else {
+            return result
+        }
+
+        guard
+            let codec = coordinator
+            .stateAdapter
+            .peerConnectionFactory
+            .codecCapabilities(for: videoOptions.preferredVideoCodec)
+            .map(Stream_Video_Sfu_Models_Codec.init)
+        else {
+            return result
+        }
+
+        result.append(
+            .init(
+                trackType: .video,
+                codec: codec,
+                bitrate: videoOptions.preferredBitrate
+            )
+        )
+
+        return result
     }
 }
