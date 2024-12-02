@@ -26,6 +26,11 @@ open class CallKitAdapter {
         didSet { callKitService.callSettings = callSettings }
     }
 
+    /// The policy defining the availability of CallKit services.
+    ///
+    /// - Default: `.regionBased`
+    public var availabilityPolicy: CallKitAvailabilityPolicy = .regionBased
+
     /// The currently active StreamVideo client.
     /// - Important: We need to update it whenever a user logins.
     public var streamVideo: StreamVideo? {
@@ -46,6 +51,14 @@ open class CallKitAdapter {
     }
 
     private func didUpdate(_ streamVideo: StreamVideo?) {
+        guard availabilityPolicy.policy.isAvailable else {
+            log
+                .warning(
+                    "CallKitAdapter cannot be activated because the current availability policy (\(availabilityPolicy.policy)) doesn't allow it."
+                )
+            return
+        }
+
         callKitService.streamVideo = streamVideo
 
         guard streamVideo != nil else {

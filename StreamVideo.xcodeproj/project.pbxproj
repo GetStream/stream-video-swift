@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40013DDB2B87AA2300915453 /* SerialActor.swift */; };
+		40034C262CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */; };
+		40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */; };
+		40034C2A2CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C292CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */; };
+		40034C2C2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */; };
+		40034C2E2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C2D2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */; };
+		40034C312CFE168D00A318B1 /* StreamLocaleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C302CFE168D00A318B1 /* StreamLocaleProvider.swift */; };
 		40073B6F2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */; };
 		40073B752C456E06006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */; };
 		40073B762C456E0E006A2867 /* StreamPictureInPictureWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */; };
@@ -1431,6 +1437,12 @@
 
 /* Begin PBXFileReference section */
 		40013DDB2B87AA2300915453 /* SerialActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor.swift; sourceTree = "<group>"; };
+		40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAvailabilityPolicyProtocol.swift; sourceTree = "<group>"; };
+		40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAvailabilityPolicy.swift; sourceTree = "<group>"; };
+		40034C292CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitRegionBasedAvailabilityPolicy.swift; sourceTree = "<group>"; };
+		40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAlwaysAvailabilityPolicy.swift; sourceTree = "<group>"; };
+		40034C2D2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitRegionBasedAvailabilityPolicy.swift; sourceTree = "<group>"; };
+		40034C302CFE168D00A318B1 /* StreamLocaleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamLocaleProvider.swift; sourceTree = "<group>"; };
 		40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureWindowSizePolicy.swift; sourceTree = "<group>"; };
 		40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureVideoRendererTests.swift; sourceTree = "<group>"; };
 		40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy.swift; sourceTree = "<group>"; };
@@ -2601,6 +2613,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		40034C212CFE116200A318B1 /* AvailabilityPolicy */ = {
+			isa = PBXGroup;
+			children = (
+				40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */,
+				40034C292CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */,
+				40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */,
+				40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */,
+			);
+			path = AvailabilityPolicy;
+			sourceTree = "<group>";
+		};
+		40034C242CFE154F00A318B1 /* AvailabilityPolicy */ = {
+			isa = PBXGroup;
+			children = (
+				40034C2D2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */,
+			);
+			path = AvailabilityPolicy;
+			sourceTree = "<group>";
+		};
+		40034C2F2CFE168900A318B1 /* LocaleProvider */ = {
+			isa = PBXGroup;
+			children = (
+				40034C302CFE168D00A318B1 /* StreamLocaleProvider.swift */,
+			);
+			path = LocaleProvider;
+			sourceTree = "<group>";
+		};
 		40073B702C456DE0006A2867 /* WindowSizePolicy */ = {
 			isa = PBXGroup;
 			children = (
@@ -3898,6 +3937,7 @@
 		40DE867A2BBEAA6900E88D8A /* CallKit */ = {
 			isa = PBXGroup;
 			children = (
+				40034C242CFE154F00A318B1 /* AvailabilityPolicy */,
 				40DE867C2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift */,
 				40F017412BBEC81C00E89FD1 /* CallKitServiceTests.swift */,
 				40F0173A2BBEB1A900E89FD1 /* CallKitAdapterTests.swift */,
@@ -4147,6 +4187,7 @@
 		40FB01FF2BAC8A4000A1C206 /* CallKit */ = {
 			isa = PBXGroup;
 			children = (
+				40034C212CFE116200A318B1 /* AvailabilityPolicy */,
 				40FB02022BAC93A800A1C206 /* CallKitAdapter.swift */,
 				40FB02042BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift */,
 				40FB02002BAC8A4A00A1C206 /* CallKitService.swift */,
@@ -4919,6 +4960,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40034C2F2CFE168900A318B1 /* LocaleProvider */,
 				4067F3062CDA32F0002E28BD /* AudioSession */,
 				408CF9C42CAEC24500F56833 /* ScreenPropertiesAdapter */,
 				40C9E44F2C9880D300802B28 /* Unwrap */,
@@ -6285,12 +6327,14 @@
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				40382F2E2C88B87D00C2D00F /* ReflectiveStringConvertible.swift in Sources */,
 				40BBC48F2C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift in Sources */,
+				40034C2C2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
 				406B3BD92C8F337000FC93A1 /* MediaAdapting.swift in Sources */,
 				4065839B2B877ADA00B4F979 /* CIImage+Sendable.swift in Sources */,
 				84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */,
 				84A737CE28F4716E001A6769 /* signal.pb.swift in Sources */,
+				40034C2A2CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */,
 				84D6494029E94C14002CA428 /* CallsQuery.swift in Sources */,
 				8490032329D308A000AD9BB4 /* BackstageSettingsRequest.swift in Sources */,
 				40C6891C2C657F280054528A /* Publisher+AsyncStream.swift in Sources */,
@@ -6328,6 +6372,7 @@
 				84BAD77E2A6BFFB200733156 /* BroadcastSampleHandler.swift in Sources */,
 				40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */,
 				40C9E4482C94743800802B28 /* Stream_Video_Sfu_Signal_TrackSubscriptionDetails+Convenience.swift in Sources */,
+				40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */,
 				840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				40C9E44A2C94744E00802B28 /* Stream_Video_Sfu_Models_VideoDimension+Convenience.swift in Sources */,
@@ -6354,6 +6399,7 @@
 				40FB15192BF77EE700D5E580 /* StreamCallStateMachine+IdleStage.swift in Sources */,
 				40382F2B2C88B84800C2D00F /* Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload+Payload.swift in Sources */,
 				84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */,
+				40034C312CFE168D00A318B1 /* StreamLocaleProvider.swift in Sources */,
 				84D91E9C2C7CB0AA00B163A0 /* CallSessionParticipantCountsUpdatedEvent.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,
@@ -6677,6 +6723,7 @@
 				40429D612C779B7000AC7FFF /* SFUSignalService.swift in Sources */,
 				435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */,
 				40BBC4B32C6276C4002AEF92 /* LocalNoOpMediaAdapter.swift in Sources */,
+				40034C262CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift in Sources */,
 				40FB150F2BF77CEC00D5E580 /* StreamStateMachine.swift in Sources */,
 				40CB9FA42B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift in Sources */,
 				4159F1762C86FA41002B94D3 /* RTMPSettingsResponse.swift in Sources */,
@@ -6764,6 +6811,7 @@
 				40C9E4572C98B06E00802B28 /* WebRTCConfiguration_Tests.swift in Sources */,
 				40C9E4592C98B1A900802B28 /* WebRTCStateAdapter_Tests.swift in Sources */,
 				40F017612BBEF15E00E89FD1 /* CallParticipantResponse+Dummy.swift in Sources */,
+				40034C2E2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */,
 				406B3C552C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift in Sources */,
 				40C9E4642C99886900802B28 /* WebRTCCoorindator_Tests.swift in Sources */,
 				40F017772BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */,
