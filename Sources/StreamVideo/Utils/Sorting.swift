@@ -17,13 +17,12 @@ public typealias StreamSortComparator<Value> = (Value, Value) -> ComparisonResul
 public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
     pinned,
     screensharing,
-    ifInvisible(combineComparators([
+    combineComparators([
         dominantSpeaker,
-        isSpeaking,
         isSpeaking,
         publishingVideo,
         publishingAudio
-    ])),
+    ]),
     ifInvisible(userId)
 ]
 

@@ -702,7 +702,8 @@ final class Sorting_Tests: XCTestCase {
         )
     }
 
-    func test_defaultComparators_someSpeakingWhileDominantSpeakerIsVisible_orderDoesNotChange() {
+    func test_defaultComparators_someSpeakingWhileDominantSpeakerIsVisible_orderSetsToShowDominanFirstAndTheOthersSortedBasedOnOtherCriteria(
+    ) {
         let combined = combineComparators(defaultComparators)
 
         assertSort(
@@ -733,7 +734,7 @@ final class Sorting_Tests: XCTestCase {
                 )
             ],
             comparator: combined,
-            expectedTransformer: { [$0[0], $0[1], $0[2], $0[3]] }
+            expectedTransformer: { [$0[3], $0[0], $0[1], $0[2]] }
         )
     }
 
