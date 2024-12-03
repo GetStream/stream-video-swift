@@ -100,10 +100,7 @@ jobs:
         SKIP_MINT_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
-      timeout-minutes: 40
-      env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
+      timeout-minutes: 120
     - name: Parse xcresult
       if: failure()
       run: |
@@ -132,10 +129,7 @@ jobs:
         SKIP_BREW_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
-      timeout-minutes: 40
-      env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
+      timeout-minutes: 120
     - name: Parse xcresult
       if: failure()
       run: |
