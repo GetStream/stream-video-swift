@@ -350,6 +350,41 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         cancellable.cancel()
     }
 
+    func test_transition_fromConnectedSFUConnected_reportsTelemetry() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .joined,
+            subject: subject
+        ) { _ in }
+
+        cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTAssertTrue(true)
+        case .reconnection:
+            XCTFail()
+        case .none:
+            XCTFail()
+        }
+    }
+
     // MARK: - transition from connected with isRejoiningFromSessionID != nil
 
     func test_transition_fromConnectedWithRejoinWithoutCoordinator_transitionsToDisconnected() async throws {
@@ -693,6 +728,41 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         cancellable.cancel()
     }
 
+    func test_transition_fromConnectedWithRejoinSFUConnected_reportsTelemetry() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.isRejoiningFromSessionID = .unique
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .joined,
+            subject: subject
+        ) { _ in }
+
+        cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTFail()
+        case let .reconnection(reconnection):
+            XCTAssertEqual(reconnection.strategy, .rejoin)
+        case .none:
+            XCTFail()
+        }
+    }
+
     // MARK: - transition from fastReconnected
 
     func test_transition_fromFastReconnected_doeNotConfigurePeerConnections() async throws {
@@ -855,6 +925,41 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertEqual(mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForConnect), 1)
         }
         cancellable.cancel()
+    }
+
+    func test_transition_fromFastReconnectedWithSFUConnected_reportsTelemetry() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .fastReconnected,
+            expectedTarget: .joined,
+            subject: subject
+        ) { _ in }
+
+        cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTFail()
+        case let .reconnection(reconnection):
+            XCTAssertEqual(reconnection.strategy, .fast)
+        case .none:
+            XCTFail()
+        }
     }
 
     // MARK: - transition from migrated
@@ -1197,6 +1302,42 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertEqual(mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForConnect), 1)
         }
         cancellable.cancel()
+    }
+
+    func test_transition_fromMigratedWithSFUConnected_reportsTelemetry() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        subject.context.migratingFromSFU = "test-sfu"
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .migrated,
+            expectedTarget: .joined,
+            subject: subject
+        ) { _ in }
+
+        cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTFail()
+        case let .reconnection(reconnection):
+            XCTAssertEqual(reconnection.strategy, .migrate)
+        case .none:
+            XCTFail()
+        }
     }
 
     // MARK: - Private helpers
