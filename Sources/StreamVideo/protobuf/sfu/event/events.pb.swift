@@ -426,7 +426,7 @@ struct Stream_Video_Sfu_Event_ChangePublishOptions {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var publishOption: [Stream_Video_Sfu_Models_PublishOption] = []
+  var publishOptions: [Stream_Video_Sfu_Models_PublishOption] = []
 
   var reason: String = String()
 
@@ -1053,6 +1053,10 @@ struct Stream_Video_Sfu_Event_AudioSender {
   /// Clears the value of `codec`. Subsequent reads from it will return its default value.
   mutating func clearCodec() {self._codec = nil}
 
+  var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
+
+  var publishOptionID: Int32 = 0
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1111,6 +1115,10 @@ struct Stream_Video_Sfu_Event_VideoSender {
   mutating func clearCodec() {self._codec = nil}
 
   var layers: [Stream_Video_Sfu_Event_VideoLayerSetting] = []
+
+  var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
+
+  var publishOptionID: Int32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1678,7 +1686,7 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_Sfu_Event_ChangePublishOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ChangePublishOptions"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "publish_option"),
+    1: .standard(proto: "publish_options"),
     2: .same(proto: "reason"),
   ]
 
@@ -1688,7 +1696,7 @@ extension Stream_Video_Sfu_Event_ChangePublishOptions: SwiftProtobuf.Message, Sw
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.publishOption) }()
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.publishOptions) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.reason) }()
       default: break
       }
@@ -1696,8 +1704,8 @@ extension Stream_Video_Sfu_Event_ChangePublishOptions: SwiftProtobuf.Message, Sw
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.publishOption.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.publishOption, fieldNumber: 1)
+    if !self.publishOptions.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.publishOptions, fieldNumber: 1)
     }
     if !self.reason.isEmpty {
       try visitor.visitSingularStringField(value: self.reason, fieldNumber: 2)
@@ -1706,7 +1714,7 @@ extension Stream_Video_Sfu_Event_ChangePublishOptions: SwiftProtobuf.Message, Sw
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_ChangePublishOptions, rhs: Stream_Video_Sfu_Event_ChangePublishOptions) -> Bool {
-    if lhs.publishOption != rhs.publishOption {return false}
+    if lhs.publishOptions != rhs.publishOptions {return false}
     if lhs.reason != rhs.reason {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -2956,6 +2964,8 @@ extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtob
   static let protoMessageName: String = _protobuf_package + ".AudioSender"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     2: .same(proto: "codec"),
+    3: .standard(proto: "track_type"),
+    4: .standard(proto: "publish_option_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2965,6 +2975,8 @@ extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtob
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 2: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
+      case 4: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
       default: break
       }
     }
@@ -2978,11 +2990,19 @@ extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtob
     try { if let v = self._codec {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
+    if self.trackType != .unspecified {
+      try visitor.visitSingularEnumField(value: self.trackType, fieldNumber: 3)
+    }
+    if self.publishOptionID != 0 {
+      try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_AudioSender, rhs: Stream_Video_Sfu_Event_AudioSender) -> Bool {
     if lhs._codec != rhs._codec {return false}
+    if lhs.trackType != rhs.trackType {return false}
+    if lhs.publishOptionID != rhs.publishOptionID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -3065,6 +3085,8 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     2: .same(proto: "codec"),
     3: .same(proto: "layers"),
+    4: .standard(proto: "track_type"),
+    5: .standard(proto: "publish_option_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -3075,6 +3097,8 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
       switch fieldNumber {
       case 2: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.layers) }()
+      case 4: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
+      case 5: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
       default: break
       }
     }
@@ -3091,12 +3115,20 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
     if !self.layers.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.layers, fieldNumber: 3)
     }
+    if self.trackType != .unspecified {
+      try visitor.visitSingularEnumField(value: self.trackType, fieldNumber: 4)
+    }
+    if self.publishOptionID != 0 {
+      try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 5)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_VideoSender, rhs: Stream_Video_Sfu_Event_VideoSender) -> Bool {
     if lhs._codec != rhs._codec {return false}
     if lhs.layers != rhs.layers {return false}
+    if lhs.trackType != rhs.trackType {return false}
+    if lhs.publishOptionID != rhs.publishOptionID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
