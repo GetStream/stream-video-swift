@@ -308,9 +308,9 @@ private_lane :test_ui do |options|
     end
 
     pr_create(
-      title: '[CI] Snapshots',
+      title: "[CI][#{options[:scheme]}] Snapshots",
       base_branch: current_branch,
-      head_branch: "#{current_branch}-#{options[:scheme]}-snapshots"
+      head_branch: "#{current_branch}-#{options[:scheme]}-Snapshots"
     )
   end
 end
