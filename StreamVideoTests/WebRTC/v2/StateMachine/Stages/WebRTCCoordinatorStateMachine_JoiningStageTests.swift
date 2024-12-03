@@ -367,21 +367,22 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             from: .connected,
             expectedTarget: .joined,
             subject: subject
-        ) { [mockCoordinatorStack] _ in
-            let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
-            let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
-
-            switch telemetry.data {
-            case .connectionTimeSeconds:
-                XCTAssertTrue(true)
-            case .reconnection:
-                XCTFail()
-            case .none:
-                XCTFail()
-            }
-        }
+        ) { _ in }
 
         cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTAssertTrue(true)
+        case .reconnection:
+            XCTFail()
+        case .none:
+            XCTFail()
+        }
     }
 
     // MARK: - transition from connected with isRejoiningFromSessionID != nil
@@ -744,21 +745,22 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             from: .connected,
             expectedTarget: .joined,
             subject: subject
-        ) { [mockCoordinatorStack] _ in
-            let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
-            let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
-
-            switch telemetry.data {
-            case .connectionTimeSeconds:
-                XCTFail()
-            case let .reconnection(reconnection):
-                XCTAssertEqual(reconnection.strategy, .rejoin)
-            case .none:
-                XCTFail()
-            }
-        }
+        ) { _ in }
 
         cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTFail()
+        case let .reconnection(reconnection):
+            XCTAssertEqual(reconnection.strategy, .rejoin)
+        case .none:
+            XCTFail()
+        }
     }
 
     // MARK: - transition from fastReconnected
@@ -942,21 +944,22 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             from: .fastReconnected,
             expectedTarget: .joined,
             subject: subject
-        ) { [mockCoordinatorStack] _ in
-            let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
-            let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
-
-            switch telemetry.data {
-            case .connectionTimeSeconds:
-                XCTFail()
-            case let .reconnection(reconnection):
-                XCTAssertEqual(reconnection.strategy, .fast)
-            case .none:
-                XCTFail()
-            }
-        }
+        ) { _ in }
 
         cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTFail()
+        case let .reconnection(reconnection):
+            XCTAssertEqual(reconnection.strategy, .fast)
+        case .none:
+            XCTFail()
+        }
     }
 
     // MARK: - transition from migrated
@@ -1319,21 +1322,22 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             from: .migrated,
             expectedTarget: .joined,
             subject: subject
-        ) { [mockCoordinatorStack] _ in
-            let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
-            let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
-
-            switch telemetry.data {
-            case .connectionTimeSeconds:
-                XCTFail()
-            case let .reconnection(reconnection):
-                XCTAssertEqual(reconnection.strategy, .migrate)
-            case .none:
-                XCTFail()
-            }
-        }
+        ) { _ in }
 
         cancellable.cancel()
+
+        let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
+        await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
+        let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+
+        switch telemetry.data {
+        case .connectionTimeSeconds:
+            XCTFail()
+        case let .reconnection(reconnection):
+            XCTAssertEqual(reconnection.strategy, .migrate)
+        case .none:
+            XCTFail()
+        }
     }
 
     // MARK: - Private helpers
