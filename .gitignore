@@ -95,6 +95,7 @@ buildcache
 App Thinning Size Report.txt
 app-thinning.plist
 *.dmg
+yeetd-normal.pkg
 
 # Stream Video Buddy
 video-buddy-server.log
