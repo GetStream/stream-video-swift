@@ -49,9 +49,6 @@ jobs:
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 40
-      env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
     - name: Run Sonar analysis
       run: bundle exec fastlane sonar_upload
       env:
