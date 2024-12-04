@@ -1,0 +1,43 @@
+# .github/actions/build-xcframework/action.yml
+name: 'Build XCFramework'
+description: 'Build an XCFramework using the specified scheme'
+
+inputs:
+  parent:
+    description: 'The parent job to use for building the XCFramework'
+    required: true
+  scheme:
+    description: 'The scheme to use for building the XCFramework'
+    required: true
+  match_password:
+    description: 'The password for match'
+    required: true
+  appstore_api_key:
+    description: 'The API key for App Store'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v3.1.0
+
+    - name: Cache Ruby Gems
+      uses: ./.github/actions/ruby-cache
+
+    - name: Cache Xcode Derived Data
+      uses: irgaly/xcode-cache@v1
+      with:
+        key: xcode-15-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}-${{ inputs.scheme }}
+        restore-keys: |
+          xcode-15-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}"-${{ inputs.parent }}
+          xcode-15-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}-${{ inputs.scheme }}
+        deriveddata-directory: derived_data
+        sourcepackages-directory: spm_cache
+
+    - name: Build XCFramework
+      run: bundle exec fastlane build_xcframeworks_concurrent scheme:"${{ inputs.scheme }}"
+      env:
+        MATCH_PASSWORD: ${{ inputs.match_password }}
+        APPSTORE_API_KEY: ${{ inputs.appstore_api_key }}

@@ -13,6 +13,7 @@
   },
   "testTargets" : [
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:StreamVideo.xcodeproj",
         "identifier" : "84F7380D287C141000A363F4",

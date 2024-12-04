@@ -1,12 +1,21 @@
 name: 'Bootstrap'
 description: 'Run bootstrap.sh'
+
+input:
+  parent:
+    description: 'Optional input for job dependencies'
+    required: false
+
 runs:
   using: "composite"
   steps:
+
     - run: echo "IMAGE=${ImageOS}-${ImageVersion}" >> $GITHUB_ENV
       shell: bash
+    
     - run: echo "$HOME/.mint/bin" >> $GITHUB_PATH
       shell: bash
+    
     - name: Cache Mint
       uses: actions/cache@v4
       id: mint-cache
@@ -14,6 +23,7 @@ runs:
         path: ~/.mint
         key: ${{ env.IMAGE }}-mint-${{ hashFiles('**/Mintfile') }}
         restore-keys: ${{ env.IMAGE }}-mint-
+    
     - name: Cache brew
       uses: actions/cache@v4
       id: brew-cache
@@ -26,6 +36,14 @@ runs:
         key: ${{ env.IMAGE }}-brew-${{ hashFiles('**/Brewfile.lock.json') }}
         restore-keys: ${{ env.IMAGE }}-brew-
     - uses: ./.github/actions/ruby-cache
-    - uses: ./.github/actions/xcode-cache
+    - uses: ./.github/actions/python-cache
+    
+    - name: Xcode Cache
+      uses: ./.github/actions/dynamic-xcode-cache
+      with:
+        deriveddata-directory: derived_data
+        sourcepackages-directory: spm_cache
+        parent: ${{ inputs.parent }}
+    
     - run: ./Scripts/bootstrap.sh
       shell: bash

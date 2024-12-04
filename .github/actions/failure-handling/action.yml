@@ -1,0 +1,68 @@
+# .github/actions/failure-handling/action.yml
+name: 'Failure Handling'
+description: 'Handle failure steps including uploading artifacts, sending Slack notifications, and parsing xcresult logs'
+inputs:
+  xcresult-basenames:
+    description: 'JSON array of base names to xcresult files'
+    required: true
+  slack-webhook-url:
+    description: 'The Slack webhook URL to send notifications to'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install jq
+      run: |
+        if ! command -v jq &> /dev/null; then
+          brew install jq
+        fi
+      shell: bash
+
+    - name: Upload SDK Test Data
+      uses: actions/upload-artifact@v4
+      with:
+        name: SDK Test Data ${{ github.job }}
+        path: ~/Library/Logs/scan
+
+    - name: Send Slack notification
+      uses: 8398a7/action-slack@v3
+      if: ${{ github.event_name == 'push' && failure() }}
+      with:
+        status: ${{ job.status }}
+        text: "You shall not pass!"
+        job_name: ${{ github.job }}
+        fields: message,commit,author,action,workflow,job,took
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+
+# Do we need those?
+    - name: Install xcparse
+      run: |
+        brew install chargepoint/xcparse/xcparse
+      shell: bash
+
+    - name: Parse xcresult
+      run: |
+        echo '${{ inputs.xcresult-basenames }}' | jq -r '.[]' | while read basename; do
+          xcparse logs fastlane/test_output/${basename}.xcresult fastlane/test_output/logs/${basename}
+        done
+      shell: bash
+
+    - name: Prepare Test Data Content
+      if: failure()
+      run: |
+        PATHS=""
+        echo '${{ inputs.xcresult-basenames }}' | jq -r '.[]' | while read basename; do
+          PATHS="$PATHS fastlane/test_output/logs/${basename}/Diagnostics/**/*.txt fastlane/test_output/logs/${basename}/Diagnostics/simctl_diagnostics/DiagnosticReports/*"
+        done
+        echo "PATHS=$PATHS" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Upload Test Data
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: Test Data ${{ github.job }}
+        path: ${{ env.PATHS }}

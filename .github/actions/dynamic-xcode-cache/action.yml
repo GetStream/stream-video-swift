@@ -1,0 +1,37 @@
+# .github/actions/dynamic-xcode-cache/action.yml
+name: 'Dynamic Xcode Cache'
+description: 'Set cache key based on job dependencies and cache Xcode derived data'
+
+inputs:
+  deriveddata-directory:
+    description: 'Directory for derived data'
+    required: true
+  sourcepackages-directory:
+    description: 'Directory for source packages'
+    required: true
+  parent:
+    description: 'Optional input for job dependencies'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Cache Key
+      id: set-cache-key
+      run: |
+        if [ -n "${{ inputs.parent }}" ]; then
+          echo "RESTORE_CACHE_KEY=xcode-${{ env.XCODE_VERSION }}-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}-${{ inputs.parent }}" >> $GITHUB_ENV
+        else
+          echo "RESTORE_CACHE_KEY=xcode-${{ env.XCODE_VERSION }}-cache-deriveddata-${{ github.workflow }}-${{ github.event.number }}" >> $GITHUB_ENV
+        fi
+      shell: bash
+
+    - name: Cache Xcode Derived Data
+      uses: irgaly/xcode-cache@v1
+      with:
+        key: xcode-${{ env.XCODE_VERSION }}-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}-${{ github.job }}
+        restore-keys: |
+          ${{ env.RESTORE_CACHE_KEY }}
+        deriveddata-directory: derived_data # enable reading it from the input
+        sourcepackages-directory: spm_cache # enable reading it from the input
+

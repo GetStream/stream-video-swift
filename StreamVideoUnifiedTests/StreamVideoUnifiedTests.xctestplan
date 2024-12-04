@@ -1,0 +1,49 @@
+{
+  "configurations" : [
+    {
+      "id" : "D9252195-ABF5-4767-AA49-8D5CE0006C9A",
+      "name" : "Test Scheme Action",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "STREAM_VIDEO_SECRET",
+            "value" : "$(STREAM_VIDEO_SECRET)"
+          }
+        ]
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:StreamVideo.xcodeproj",
+      "identifier" : "84F737F3287C13AD00A363F4",
+      "name" : "StreamVideoTests"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:StreamVideo.xcodeproj",
+        "identifier" : "84F737F3287C13AD00A363F4",
+        "name" : "StreamVideoTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:StreamVideo.xcodeproj",
+        "identifier" : "84F7380D287C141000A363F4",
+        "name" : "StreamVideoSwiftUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:StreamVideo.xcodeproj",
+        "identifier" : "84F7382E287C146D00A363F4",
+        "name" : "StreamVideoUIKitTests"
+      }
+    }
+  ],
+  "version" : 1
+}
