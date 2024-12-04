@@ -30,7 +30,6 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
     ///   - config: Optional configuration for audio processing.
     ///   - renderPreProcessingDelegate: Optional delegate for render pre-processing.
     public init(
-        config: RTCAudioProcessingConfig? = nil,
         capturePostProcessingDelegate: AudioFilterCapturePostProcessingModule = StreamAudioFilterCapturePostProcessingModule(),
         renderPreProcessingDelegate: RTCAudioCustomProcessingDelegate? = nil
     ) {
@@ -42,15 +41,15 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
 //        #endif
         _capturePostProcessingDelegate = capturePostProcessingDelegate
         super.init(
-            config: config,
-            capturePostProcessingDelegate: capturePostProcessingDelegate,
-            renderPreProcessingDelegate: renderPreProcessingDelegate
+//            config: config,
+//            capturePostProcessingDelegate: capturePostProcessingDelegate,
+//            renderPreProcessingDelegate: renderPreProcessingDelegate
         )
     }
     
-    override public func apply(_ config: RTCAudioProcessingConfig) {
-        super.apply(config)
-    }
+//    override public func apply(_ config: RTCAudioProcessingConfig) {
+//        super.apply(config)
+//    }
 
     /// Retrieves the identifier of the currently active audio filter.
     public var activeAudioFilter: AudioFilter? {
