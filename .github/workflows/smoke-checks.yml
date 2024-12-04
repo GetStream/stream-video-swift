@@ -283,8 +283,6 @@ jobs:
       run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
       timeout-minutes: 60
       env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
         MATRIX_SIZE: ${{ strategy.job-total }}
         STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
         STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}
