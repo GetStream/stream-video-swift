@@ -32,7 +32,7 @@ class VideoCapturer: CameraVideoCapturing {
         #else
         let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
         videoCaptureHandler = handler
-        videoCapturer = RTCCameraVideoCapturer(delegate: handler)
+        videoCapturer = RTCCameraVideoCapturer(delegate: handler, captureSession: AVCaptureSession())
         checkForBackgroundCameraAccess()
         #endif
     }

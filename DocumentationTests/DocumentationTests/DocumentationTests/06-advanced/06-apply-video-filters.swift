@@ -250,7 +250,7 @@ fileprivate func content() {
                 }
             }
         }
-        
+
         container {
             // Get a call object
             let call = streamVideo.call(callType: "default", callId: UUID().uuidString)

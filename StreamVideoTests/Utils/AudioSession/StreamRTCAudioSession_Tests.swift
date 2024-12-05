@@ -48,7 +48,7 @@ final class StreamRTCAudioSession_Tests: XCTestCase {
 
     func test_category_returnsCorrectCategory() throws {
         rtcAudioSession.lockForConfiguration()
-        try rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord.rawValue)
+        try rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord)
         rtcAudioSession.unlockForConfiguration()
 
         // Then
