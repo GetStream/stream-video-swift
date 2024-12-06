@@ -33,7 +33,7 @@ final class RTPMapVisitor: SDPLineVisitor {
     /// Retrieves the payload type for a given codec name.
     /// - Parameter codec: The codec name to search for.
     /// - Returns: The payload type, or `nil` if not found.
-    func payloadType(for codec: VideoCodec) -> Int? {
-        codecMap[codec.rawValue.lowercased()]
+    func payloadType(for codec: String) -> Int? {
+        codecMap[codec.lowercased()]
     }
 }

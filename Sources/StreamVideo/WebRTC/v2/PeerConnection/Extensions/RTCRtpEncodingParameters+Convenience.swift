@@ -32,4 +32,21 @@ extension RTCRtpEncodingParameters {
             }
         }
     }
+
+    convenience init(
+        _ layer: VideoLayer,
+        videoPublishOptions: PublishOptions.VideoPublishOptions
+    ) {
+        self.init()
+        rid = layer.quality.rawValue
+        maxFramerate = (videoPublishOptions.frameRate) as NSNumber
+        maxBitrateBps = (layer.maxBitrate) as NSNumber
+        if videoPublishOptions.codec.isSVC {
+            scalabilityMode = videoPublishOptions.capturingLayers.scalabilityMode
+        } else {
+            if let scaleDownFactor = layer.scaleDownFactor {
+                scaleResolutionDownBy = (scaleDownFactor) as NSNumber
+            }
+        }
+    }
 }

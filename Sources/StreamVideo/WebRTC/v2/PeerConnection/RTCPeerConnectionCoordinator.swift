@@ -51,7 +51,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private var setUpSubject: CurrentValueSubject<Bool, Never> = .init(false)
     var videoOptions: VideoOptions
     var audioSettings: AudioSettings
-    var publishOptions: PublishOptions
+    var publishOptions: PublishOptions {
+        didSet { didUpdatePublishOptions(publishOptions) }
+    }
 
     // MARK: State
 
@@ -64,12 +66,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    func localTrack(of type: TrackType) -> RTCMediaStreamTrack? {
-        mediaAdapter.localTrack(of: type)
-    }
-
-    func mid(for type: TrackType) -> String? {
-        mediaAdapter.mid(for: type)
+    func trackInfo(for type: TrackType) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        mediaAdapter.trackInfo(for: type)
     }
 
     /// Initializes the RTCPeerConnectionCoordinator with necessary dependencies.
@@ -312,6 +310,18 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         try await mediaAdapter.didUpdateCallSettings(settings)
     }
 
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) {
+        Task {
+            do {
+                try await mediaAdapter.didUpdatePublishOptions(publishOptions)
+            } catch {
+                log.error(error)
+            }
+        }
+    }
+
     // MARK: - Actions
 
     /// Creates an offer for the peer connection.
@@ -546,9 +556,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: A set of active encoding identifiers.
     func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
-        mediaAdapter.changePublishQuality(with: layerSettings)
+        Task {
+            await mediaAdapter.changePublishQuality(with: event)
+        }
     }
 
     // MARK: - ScreenSharing
@@ -600,17 +612,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
                 let offer = try await self
                     .createOffer(constraints: constraints)
-                    .withOpusDTX(audioSettings.opusDtxEnabled)
-                    .withRedundantCoding(audioSettings.redundantCodingEnabled)
 
                 try await setLocalDescription(offer)
 
                 try await ensureSetUpHasBeenCompleted()
 
-                let tracksInfo = WebRTCJoinRequestFactory().buildAnnouncedTracks(
-                    self,
-                    videoOptions: videoOptions
-                )
+                let tracksInfo = WebRTCJoinRequestFactory()
+                    .buildAnnouncedTracks(self)
 
                 log.debug(
                     """
@@ -620,8 +628,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     sessionID: \(sessionId)
                     sfu: \(sfuAdapter.hostname)
                     tracksInfo:
-                        hasAudio: \(tracksInfo.contains { $0.trackType == .audio })
-                        hasVideo: \(tracksInfo.contains { $0.trackType == .video })
+                        audio: 
+                            \(tracksInfo.filter { $0.trackType == .audio })
+                        video: 
+                            \(tracksInfo.filter { $0.trackType == .video })
                         hasScreenSharing: \(tracksInfo.contains { $0.trackType == .screenShare })
                     """,
                     subsystems: subsystem

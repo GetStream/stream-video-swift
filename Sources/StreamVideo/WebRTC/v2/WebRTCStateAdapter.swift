@@ -56,7 +56,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     }
 
     /// Published property to track video options and update them.
-    @Published private(set) var publishOptions: PublishOptions = .init() {
+    @Published private(set) var publishOptions: PublishOptions = .default {
         didSet { didUpdate(publishOptions: publishOptions) }
     }
 

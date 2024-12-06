@@ -99,8 +99,7 @@ final class RTCTemporaryPeerConnection {
                 trackType: .video,
                 direction: direction,
                 streamIds: ["temp-video"],
-                layers: videoOptions.videoLayers,
-                preferredVideoCodec: videoOptions.preferredVideoCodec
+                layers: VideoLayerFactory().defaultVideoLayers()
             )
         )
         

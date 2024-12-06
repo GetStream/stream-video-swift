@@ -6,114 +6,198 @@ import Foundation
 
 struct PublishOptions: Sendable, Hashable {
 
-    struct TrackEntry: Sendable, Hashable {
-        var videoCodec: VideoCodec
+    struct AudioPublishOptions: Sendable, Hashable, CustomStringConvertible {
+        var id: Int
+        var codec: AudioCodec
         var bitrate: Int
-        var frameRate: Int
-        var maxSpatialLayers: Int
-        var maxTemporalLayers: Int
-        var dimensions: CGSize
+
+        var description: String {
+            "AudioPublishOptions(id: \(id), codec: \(codec), bitrate: \(bitrate))"
+        }
+
+        init(_ publishOption: Stream_Video_Sfu_Models_PublishOption) {
+            id = Int(publishOption.id)
+            codec = .init(publishOption.codec)
+            bitrate = Int(publishOption.bitrate)
+        }
 
         init(
-            videoCodec: VideoCodec,
-            bitrate: Int,
-            frameRate: Int,
-            maxSpatialLayers: Int,
-            maxTemporalLayers: Int,
-            dimensions: CGSize
+            id: Int,
+            codec: AudioCodec,
+            bitrate: Int = 0
         ) {
-            self.videoCodec = videoCodec
+            self.id = id
+            self.codec = codec
+            self.bitrate = bitrate
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+            hasher.combine(codec)
+        }
+    }
+
+    struct VideoPublishOptions: Sendable, Hashable {
+        struct CapturingLayers: Sendable, Hashable, CustomStringConvertible {
+            var spatialLayers: Int
+            var temporalLayers: Int
+
+            var scalabilityMode: String {
+                var components = [
+                    "L",
+                    "\(spatialLayers)",
+                    "T",
+                    "\(temporalLayers)"
+                ]
+
+                if spatialLayers > 1 {
+                    components.append("_KEY")
+                }
+                return components.joined()
+            }
+
+            var description: String {
+                "CapturingLayers(spatial: \(spatialLayers), temporal: \(temporalLayers), scalabilityMode: \(scalabilityMode))"
+            }
+        }
+
+        var id: Int
+        var codec: VideoCodec
+        var capturingLayers: CapturingLayers
+        var bitrate: Int
+        var frameRate: Int
+        var dimensions: CGSize
+
+        init(_ publishOption: Stream_Video_Sfu_Models_PublishOption) {
+            id = Int(publishOption.id)
+            codec = .init(publishOption.codec)
+            capturingLayers = .init(
+                spatialLayers: Int(publishOption.maxSpatialLayers),
+                temporalLayers: Int(publishOption.maxTemporalLayers)
+            )
+            bitrate = Int(publishOption.bitrate)
+            frameRate = Int(publishOption.fps)
+            dimensions = .init(
+                width: Int(publishOption.videoDimension.width),
+                height: Int(publishOption.videoDimension.height)
+            )
+        }
+
+        init(
+            id: Int = -1,
+            codec: VideoCodec,
+            capturingLayers: PublishOptions.VideoPublishOptions.CapturingLayers = .init(spatialLayers: 3, temporalLayers: 1),
+            bitrate: Int = .maxBitrate,
+            frameRate: Int = 30,
+            dimensions: CGSize = .full
+        ) {
+            self.id = id
+            self.codec = codec
+            self.capturingLayers = capturingLayers
             self.bitrate = bitrate
             self.frameRate = frameRate
-            self.maxSpatialLayers = maxSpatialLayers
-            self.maxTemporalLayers = maxTemporalLayers
             self.dimensions = dimensions
         }
 
-        init(_ source: Stream_Video_Sfu_Models_PublishOption) {
-            videoCodec = .init(source.codec) ?? .h264
-            bitrate = Int(source.bitrate)
-            frameRate = Int(source.fps)
-            maxSpatialLayers = Int(source.maxSpatialLayers)
-            maxTemporalLayers = Int(source.maxTemporalLayers)
-            dimensions = .init(
-                width: Int(source.videoDimension.width),
-                height: Int(source.videoDimension.width)
-            )
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+            hasher.combine(codec)
         }
-
-        static let defaultVideoTrackEntry = TrackEntry(
-            videoCodec: .h264,
-            bitrate: VideoLayer.full.maxBitrate,
-            frameRate: 30,
-            maxSpatialLayers: 1,
-            maxTemporalLayers: 3,
-            dimensions: .init(
-                width: Int(VideoLayer.full.dimensions.width),
-                height: Int(VideoLayer.full.dimensions.height)
-            )
-        )
-
-        static let defaultScreenShareTrackEntry = TrackEntry(
-            videoCodec: .h264,
-            bitrate: VideoLayer.screenshare.maxBitrate,
-            frameRate: 15,
-            maxSpatialLayers: 1,
-            maxTemporalLayers: 3,
-            dimensions: .init(
-                width: Int(VideoLayer.screenshare.dimensions.width),
-                height: Int(VideoLayer.screenshare.dimensions.height)
-            )
-        )
     }
 
-    var videoTrack: TrackEntry
+    let source: [Stream_Video_Sfu_Models_PublishOption]
+    let audio: [AudioPublishOptions]
+    let video: [VideoPublishOptions]
+    let screenShare: [VideoPublishOptions]
 
-    var screenShareTrack: TrackEntry
-
-    init(
-        videoTrack: TrackEntry = .defaultVideoTrackEntry,
-        screenShareTrack: TrackEntry = .defaultScreenShareTrackEntry
-    ) {
-        self.videoTrack = videoTrack
-        self.screenShareTrack = screenShareTrack
-    }
-
-    init(publishOptions: [Stream_Video_Sfu_Models_PublishOption]) {
-        var videoTrack: TrackEntry?
-        var screenShareTrack: TrackEntry?
+    init(_ publishOptions: [Stream_Video_Sfu_Models_PublishOption]) {
+        var audio = [AudioPublishOptions]()
+        var video = [VideoPublishOptions]()
+        var screenShare = [VideoPublishOptions]()
 
         for publishOption in publishOptions {
             switch publishOption.trackType {
+            case .audio:
+                audio.append(.init(publishOption))
             case .video:
-                videoTrack = .init(publishOption)
+                video.append(.init(publishOption))
             case .screenShare:
-                screenShareTrack = .init(publishOption)
+                screenShare.append(.init(publishOption))
             default:
                 break
             }
         }
 
-        self.init(
-            videoTrack: videoTrack ?? .defaultVideoTrackEntry,
-            screenShareTrack: screenShareTrack ?? .defaultScreenShareTrackEntry
-        )
+        source = publishOptions
+        self.audio = audio
+        self.video = video
+        self.screenShare = screenShare
     }
 
-    func update(
-        with publishOption: Stream_Video_Sfu_Models_PublishOption
-    ) -> Self {
-        var result = self
+    init(
+        audio: [AudioPublishOptions] = [],
+        video: [VideoPublishOptions] = [],
+        screenShare: [VideoPublishOptions] = []
+    ) {
+        var source: [Stream_Video_Sfu_Models_PublishOption] = []
+        source.append(
+            contentsOf: audio.map(Stream_Video_Sfu_Models_PublishOption.init)
+        )
+        source.append(
+            contentsOf: video
+                .map { Stream_Video_Sfu_Models_PublishOption($0, trackType: .video) }
+        )
+        source.append(
+            contentsOf: screenShare
+                .map { Stream_Video_Sfu_Models_PublishOption($0, trackType: .screenShare) }
+        )
 
-        switch publishOption.trackType {
-        case .video:
-            result.videoTrack = .init(publishOption)
-        case .screenShare:
-            result.screenShareTrack = .init(publishOption)
-        default:
-            break
-        }
+        self.source = source
+        self.audio = audio
+        self.video = video
+        self.screenShare = screenShare
+    }
 
-        return result
+    // MARK: - VideoLayers
+
+    func videoLayers(
+        for trackType: TrackType,
+        codec: VideoCodec
+    ) -> [VideoLayer] {
+        []
+    }
+
+    // MARK: - Empty
+
+    static let `default` = PublishOptions(
+        video: [.init(codec: .h264)],
+        screenShare: [.init(codec: .h264, frameRate: 20)]
+    )
+}
+
+extension CGSize {
+    static let full = CGSize(width: 1280, height: 720)
+}
+
+extension Stream_Video_Sfu_Models_PublishOption {
+
+    init(_ source: PublishOptions.AudioPublishOptions) {
+        trackType = .audio
+        codec = .init()
+        codec.name = source.codec.rawValue
+        bitrate = Int32(source.bitrate)
+    }
+
+    init(_ source: PublishOptions.VideoPublishOptions, trackType: Stream_Video_Sfu_Models_TrackType) {
+        self.trackType = trackType
+        codec = .init()
+        codec.name = source.codec.rawValue
+        bitrate = Int32(source.bitrate)
+        fps = Int32(source.frameRate)
+        videoDimension = .init()
+        videoDimension.width = UInt32(source.dimensions.width)
+        videoDimension.height = UInt32(source.dimensions.height)
+        maxSpatialLayers = Int32(source.capturingLayers.spatialLayers)
+        maxTemporalLayers = Int32(source.capturingLayers.temporalLayers)
     }
 }

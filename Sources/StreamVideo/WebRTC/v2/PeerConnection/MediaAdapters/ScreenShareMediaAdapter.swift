@@ -38,11 +38,6 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         (localMediaManager as? LocalScreenShareMediaAdapter)?.localTrack
     }
 
-    /// The mid (Media Stream Identification) of the local screen share track, if available.
-    var mid: String? {
-        (localMediaManager as? LocalScreenShareMediaAdapter)?.mid
-    }
-
     /// Convenience initializer for creating a ScreenShareMediaAdapter with a LocalScreenShareMediaAdapter.
     ///
     /// - Parameters:
@@ -144,6 +139,23 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         _ settings: CallSettings
     ) async throws {
         try await localMediaManager.didUpdateCallSettings(settings)
+    }
+
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
+    ) {
+        (localMediaManager as? LocalScreenShareMediaAdapter)?
+            .changePublishQuality(with: layerSettings)
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo()
     }
 
     // MARK: - ScreenSharing

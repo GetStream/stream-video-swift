@@ -101,7 +101,6 @@ struct WebRTCJoinRequestFactory {
         case .fastReconnect:
             result.announcedTracks = buildAnnouncedTracks(
                 publisher,
-                videoOptions: await coordinator.stateAdapter.videoOptions,
                 file: file,
                 function: function,
                 line: line
@@ -122,7 +121,6 @@ struct WebRTCJoinRequestFactory {
         case let .migration(fromHostname):
             result.announcedTracks = buildAnnouncedTracks(
                 publisher,
-                videoOptions: await coordinator.stateAdapter.videoOptions,
                 file: file,
                 function: function,
                 line: line
@@ -144,7 +142,6 @@ struct WebRTCJoinRequestFactory {
         case let .rejoin(fromSessionID):
             result.announcedTracks = buildAnnouncedTracks(
                 publisher,
-                videoOptions: await coordinator.stateAdapter.videoOptions,
                 file: file,
                 function: function,
                 line: line
@@ -170,51 +167,25 @@ struct WebRTCJoinRequestFactory {
     /// Builds announced tracks for the join request.
     /// - Parameters:
     ///   - publisher: The RTC peer connection coordinator for publishing.
-    ///   - videoOptions: The video options for the tracks.
     ///   - file: The file where the method is called.
     ///   - function: The function where the method is called.
     ///   - line: The line number where the method is called.
     /// - Returns: An array of announced tracks.
     func buildAnnouncedTracks(
         _ publisher: RTCPeerConnectionCoordinator?,
-        videoOptions: VideoOptions,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
         var result = [Stream_Video_Sfu_Models_TrackInfo]()
 
-        if let mid = publisher?.mid(for: .audio) {
-            var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
-            trackInfo.trackID = publisher?.localTrack(of: .audio)?.trackId ?? ""
-            trackInfo.mid = mid
-            trackInfo.trackType = .audio
-            trackInfo.muted = publisher?.localTrack(of: .audio)?.isEnabled != true
-            result.append(trackInfo)
+        guard let publisher else {
+            return result
         }
 
-        if let mid = publisher?.mid(for: .video) {
-            var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
-            trackInfo.trackID = publisher?.localTrack(of: .video)?.trackId ?? ""
-            trackInfo.layers = videoOptions
-                .videoLayers
-                .map { Stream_Video_Sfu_Models_VideoLayer($0) }
-            trackInfo.mid = mid
-            trackInfo.trackType = .video
-            trackInfo.muted = publisher?.localTrack(of: .video)?.isEnabled != true
-            result.append(trackInfo)
-        }
-
-        if let mid = publisher?.mid(for: .screenshare) {
-            var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
-            trackInfo.trackID = publisher?.localTrack(of: .screenshare)?.trackId ?? ""
-            trackInfo.layers = [VideoLayer.screenshare]
-                .map { Stream_Video_Sfu_Models_VideoLayer($0, fps: 15) }
-            trackInfo.mid = mid
-            trackInfo.trackType = .screenShare
-            trackInfo.muted = publisher?.localTrack(of: .screenshare)?.isEnabled != true
-            result.append(trackInfo)
-        }
+        result.append(contentsOf: publisher.trackInfo(for: .audio))
+        result.append(contentsOf: publisher.trackInfo(for: .video))
+        result.append(contentsOf: publisher.trackInfo(for: .screenshare))
 
         return result
     }
@@ -247,42 +218,19 @@ struct WebRTCJoinRequestFactory {
         coordinator: WebRTCCoordinator,
         publisherSdp: String
     ) async -> [Stream_Video_Sfu_Models_PublishOption] {
-        var result = [Stream_Video_Sfu_Models_PublishOption]()
-        let videoOptions = await coordinator
-            .stateAdapter
-            .videoOptions
-
-        guard
-            videoOptions.preferredVideoCodec != .h264
-        else {
-            return result
-        }
-
-        guard
-            var codec = coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .codecCapabilities(for: videoOptions.preferredVideoCodec)
-            .map(Stream_Video_Sfu_Models_Codec.init)
-        else {
-            return result
-        }
-
         let sdpParser = SDPParser()
         let rtmapVisitor = RTPMapVisitor()
         sdpParser.registerVisitor(rtmapVisitor)
         await sdpParser.parse(sdp: publisherSdp)
-        let payloadType = rtmapVisitor.payloadType(for: videoOptions.preferredVideoCodec) ?? 0
-        codec.payloadType = UInt32(payloadType)
 
-        result.append(
-            .init(
-                trackType: .video,
-                codec: codec,
-                bitrate: videoOptions.preferredBitrate
-            )
-        )
-
-        return result
+        return await coordinator
+            .stateAdapter
+            .publishOptions
+            .source
+            .map {
+                var publishOption = $0
+                publishOption.codec.payloadType = UInt32(rtmapVisitor.payloadType(for: $0.codec.name) ?? 0)
+                return publishOption
+            }
     }
 }

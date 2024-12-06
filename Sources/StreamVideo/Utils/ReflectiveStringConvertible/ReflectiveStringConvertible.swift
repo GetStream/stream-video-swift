@@ -35,7 +35,7 @@ public extension ReflectiveStringConvertible {
 
     var propertyTransformers: [String: (Any) -> String] {
         [
-            "sdp": { "\($0)".singleLine }
+            "sdp": { "\($0)".replacingOccurrences(of: "\r\n", with: "\n") }
         ]
     }
 

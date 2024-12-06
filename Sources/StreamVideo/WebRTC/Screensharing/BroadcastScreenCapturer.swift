@@ -32,7 +32,7 @@ class BroadcastScreenCapturer: VideoCapturing {
         #endif
     }
     
-    func startCapture(device: AVCaptureDevice?) async throws {
+    func startCapture(with configuration: VideoCapturingConfiguration) async throws {
         guard self.bufferReader == nil else {
             return
         }
@@ -69,15 +69,15 @@ class BroadcastScreenCapturer: VideoCapturing {
                 height: Int32(CVPixelBufferGetHeight(pixelBuffer))
             )
             
-            bufferDimensions = BroadcastUtils.adjust(
-                width: bufferDimensions.width,
-                height: bufferDimensions.height,
-                size: max(
-                    self.videoOptions.preferredDimensions.width,
-                    self.videoOptions.preferredDimensions.height
-                )
-            )
-            
+//            bufferDimensions = BroadcastUtils.adjust(
+//                width: bufferDimensions.width,
+//                height: bufferDimensions.height,
+//                size: max(
+//                    self.videoOptions.preferredDimensions.width,
+//                    self.videoOptions.preferredDimensions.height
+//                )
+//            )
+//
             self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
             if !self.adaptedOutputFormat {
                 self.adaptedOutputFormat = true

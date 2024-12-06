@@ -5,8 +5,14 @@
 import Foundation
 import StreamWebRTC
 
+struct VideoCapturingConfiguration: Equatable {
+    var position: AVCaptureDevice.Position
+    var dimensions: CGSize
+    var frameRate: Int
+}
+
 protocol VideoCapturing {
-    func startCapture(device: AVCaptureDevice?) async throws
+    func startCapture(with configuration: VideoCapturingConfiguration) async throws
     func stopCapture() async throws
 }
 

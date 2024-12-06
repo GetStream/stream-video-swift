@@ -94,12 +94,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    if !isFastReconnecting {
-                        try await coordinator.stateAdapter.configurePeerConnections()
-                    }
-
-                    try Task.checkCancellation()
-
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
                             .buildRequest(
@@ -165,10 +159,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    try await coordinator.stateAdapter.configurePeerConnections()
-
-                    try Task.checkCancellation()
-
                     await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
                             .buildRequest(
@@ -225,10 +215,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             "WebRCTCoordinator instance not available."
                         )
                     }
-
-                    try Task.checkCancellation()
-
-                    try await coordinator.stateAdapter.configurePeerConnections()
 
                     try Task.checkCancellation()
 
@@ -341,7 +327,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             await coordinator
                 .stateAdapter
-                .set(publishOptions: .init(publishOptions: joinResponse.publishOptions))
+                .set(publishOptions: .init(joinResponse.publishOptions))
 
             try Task.checkCancellation()
 

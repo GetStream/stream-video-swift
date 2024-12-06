@@ -46,4 +46,66 @@ extension RTCRtpTransceiverInit {
             sendEncodings.forEach { $0.isActive = true }
         }
     }
+
+    convenience init(
+        direction: RTCRtpTransceiverDirection,
+        streamIds: [String],
+        audioOptions: PublishOptions.AudioPublishOptions
+    ) {
+        self.init()
+        self.direction = direction
+        self.streamIds = streamIds
+    }
+
+    convenience init(
+        trackType: TrackType,
+        direction: RTCRtpTransceiverDirection,
+        streamIds: [String],
+        videoOptions: PublishOptions.VideoPublishOptions
+    ) {
+        self.init()
+        self.direction = direction
+        self.streamIds = streamIds
+
+        let publishOption = Stream_Video_Sfu_Models_PublishOption(
+            videoOptions,
+            trackType: trackType == .video ? .video : .screenShare
+        )
+        let videoLayers = VideoLayerFactory()
+            .videoLayers(for: publishOption)
+
+        var sendEncodings = videoLayers
+            .map { RTCRtpEncodingParameters($0, videoPublishOptions: videoOptions) }
+
+        if videoOptions.codec.isSVC {
+            sendEncodings = sendEncodings
+                .filter { $0.rid == VideoLayer.full.quality.rawValue }
+            sendEncodings.first?.rid = VideoLayer.quarter.quality.rawValue
+        }
+
+        if trackType == .screenshare {
+            sendEncodings.forEach { $0.isActive = true }
+        }
+
+        self.sendEncodings = sendEncodings
+
+        log.debug(
+            """
+            RTCRtpTransceiverInit from VideoPublishOptions:
+                VideoCodec: \(videoOptions.codec)
+                Bitrate: \(videoOptions.bitrate)
+                FrameRate: \(videoOptions.frameRate)
+                Dimensions: \(videoOptions.dimensions)
+                CapturingLayers
+                    Spatial: \(videoOptions.capturingLayers.spatialLayers)
+                    Temporal: \(videoOptions.capturingLayers.temporalLayers)
+                    ScalabilityMode: \(videoOptions.capturingLayers.scalabilityMode)
+            
+            Created with:
+                VideoLayers: \(videoLayers.map(\.quality.rawValue).joined(separator: ","))
+                SendEncodings: \(sendEncodings.compactMap(\.rid).joined(separator: ","))
+                
+            """
+        )
+    }
 }

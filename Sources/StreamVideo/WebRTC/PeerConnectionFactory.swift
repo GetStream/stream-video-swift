@@ -158,10 +158,19 @@ final class PeerConnectionFactory: @unchecked Sendable {
     // MARK: - Capabilities
 
     func codecCapabilities(
+        for audioCodec: AudioCodec
+    ) -> RTCRtpCodecCapability? {
+        factory
+            .rtpSenderCapabilities(forKind: kRTCMediaStreamTrackKindAudio)
+            .codecs
+            .baseline(for: audioCodec)
+    }
+
+    func codecCapabilities(
         for videoCodec: VideoCodec
     ) -> RTCRtpCodecCapability? {
         factory
-            .rtpSenderCapabilities(for: .video)
+            .rtpSenderCapabilities(forKind: kRTCMediaStreamTrackKindVideo)
             .codecs
             .baseline(for: videoCodec)
     }

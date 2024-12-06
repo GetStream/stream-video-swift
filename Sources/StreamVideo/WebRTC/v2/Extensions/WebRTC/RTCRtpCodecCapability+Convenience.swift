@@ -20,6 +20,12 @@ extension Sequence where Element == RTCRtpCodecCapability {
             .sorted(by: videoCodec.baselineComparator)
             .first
     }
+
+    func baseline(for audioCodec: AudioCodec) -> RTCRtpCodecCapability? {
+        filter { $0.name.lowercased() == audioCodec.rawValue }
+            .sorted(by: audioCodec.baselineComparator)
+            .first
+    }
 }
 
 extension VideoCodec {
@@ -32,6 +38,21 @@ extension VideoCodec {
         case .vp9:
             return vp9Comparator
         case .av1:
+            return noOpComparator
+        case .none:
+            return noOpComparator
+        }
+    }
+}
+
+extension AudioCodec {
+    fileprivate var baselineComparator: (RTCRtpCodecCapability, RTCRtpCodecCapability) -> Bool {
+        switch self {
+        case .none:
+            return noOpComparator
+        case .opus:
+            return noOpComparator
+        case .red:
             return noOpComparator
         }
     }

@@ -32,17 +32,6 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
 
     /// A subject for publishing track events.
     let subject: PassthroughSubject<TrackEvent, Never>
-
-    /// The local video track, if available.
-    var localTrack: RTCMediaStreamTrack? {
-        (localMediaManager as? LocalVideoMediaAdapter)?.localTrack
-    }
-
-    /// The mid (Media Stream Identification) of the local video track, if available.
-    var mid: String? {
-        (localMediaManager as? LocalVideoMediaAdapter)?.mid
-    }
-
     /// Convenience initializer for creating a VideoMediaAdapter with a LocalVideoMediaAdapter.
     ///
     /// - Parameters:
@@ -143,6 +132,16 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo()
+    }
+
     // MARK: - Video
 
     /// Updates the camera position.
@@ -219,7 +218,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: The set of active encoding identifiers.
     func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
         (localMediaManager as? LocalVideoMediaAdapter)?
             .changePublishQuality(with: layerSettings)
