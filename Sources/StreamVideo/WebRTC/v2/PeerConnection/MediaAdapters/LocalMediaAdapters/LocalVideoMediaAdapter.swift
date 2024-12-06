@@ -30,25 +30,22 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The video configuration for the call.
     private let videoConfig: VideoConfig
 
+    private var publishOptions: [PublishOptions.VideoPublishOptions]
+
     /// The factory for creating the capturer.
     private let capturerFactory: VideoCapturerProviding
 
     /// The stream identifiers for this video adapter.
     private let streamIds: [String]
 
-    private let videoCaptureSessionProvider: VideoCaptureSessionProvider
+    private let transceiverStorage = MediaTransceiverStorage(for: .video)
 
-    /// The local video track.
-    private(set) var localTrack: RTCVideoTrack?
+    private let primaryTrack: RTCVideoTrack
+
+    private let videoCaptureSessionProvider: VideoCaptureSessionProvider
 
     /// The video capturer.
     private var capturer: CameraVideoCapturing?
-
-    /// The RTP transceiver for sending video.
-    private var sender: RTCRtpTransceiver?
-
-    /// The mid (Media Stream Identification) of the sender.
-    var mid: String? { sender?.mid }
 
     /// A publisher that emits track events.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -62,6 +59,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: TODO
     ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
@@ -70,6 +68,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory(),
         videoCaptureSessionProvider: VideoCaptureSessionProvider
@@ -80,15 +79,37 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.sfuAdapter = sfuAdapter
         self.videoOptions = videoOptions
         self.videoConfig = videoConfig
+        self.publishOptions = publishOptions.video
         self.subject = subject
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
+        primaryTrack = {
+            if let activeSession = videoCaptureSessionProvider.activeSession {
+                return activeSession.localTrack
+            } else {
+                return peerConnectionFactory.makeVideoTrack(
+                    source: peerConnectionFactory.makeVideoSource(forScreenShare: false)
+                )
+            }
+        }()
         streamIds = ["\(sessionID):video"]
+        primaryTrack.isEnabled = false
     }
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        sender?.sender.track = nil
+        Task { @MainActor [transceiverStorage] in
+            transceiverStorage.removeAll()
+        }
+
+        log.debug(
+            """
+            Local videoTracks will be deallocated
+                primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
     }
 
     // MARK: - LocalMediaManaging
@@ -102,46 +123,56 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        let hasVideo = ownCapabilities.contains(.sendVideo)
-
-        if hasVideo, localTrack == nil {
-            try await makeVideoTrack(
-                settings.cameraPosition == .front ? .front : .back
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .video,
+                track: primaryTrack
             )
-            if sender == nil, settings.videoOn, let localTrack {
-                setUpTransceiverIfRequired(localTrack)
-            }
-        } else if !hasVideo {
-            Task { [weak self] in
-                do {
-                    try await self?.capturer?.stopCapture()
-                } catch {
-                    log.error(error)
-                }
-            }
+        )
+
+        guard ownCapabilities.contains(.sendVideo) else {
+            try await videoCaptureSessionProvider.activeSession?.capturer.stopCapture()
+            videoCaptureSessionProvider.activeSession = nil
+            log.debug("Active video capture session stopped because user has no capabilities for video.")
+            return
         }
+
+        try await configureActiveVideoCaptureSession(
+            position: settings.cameraPosition == .back ? .back : .front,
+            track: primaryTrack
+        )
     }
 
     /// Starts publishing the local video track.
     func publish() {
-        Task { @MainActor [weak self] in
+        Task { @MainActor in
             guard
-                let self,
-                let localTrack,
-                localTrack.isEnabled == false || sender == nil,
-                let activeSession = videoCaptureSessionProvider.activeSession
+                !primaryTrack.isEnabled
             else {
                 return
             }
 
             do {
-                try await activeSession.capturer.startCapture(
-                    device: activeSession.device
-                )
+                try await startVideoCapturingSession()
+                primaryTrack.isEnabled = true
 
-                setUpTransceiverIfRequired(localTrack)
-                localTrack.isEnabled = true
-                log.debug("Local videoTrack trackId:\(localTrack.trackId) is now published.")
+                publishOptions
+                    .forEach {
+                        addOrUpdateTransceiver(
+                            for: $0,
+                            with: primaryTrack.clone(from: peerConnectionFactory)
+                        )
+                    }
+
+                log.debug(
+                    """
+                    Local videoTracks are now published
+                        primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                        clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                    """,
+                    subsystems: .webRTC
+                )
             } catch {
                 log.error(error)
             }
@@ -151,15 +182,32 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Stops publishing the local video track.
     func unpublish() {
         Task { @MainActor [weak self] in
-            guard
-                let self,
-                let sender,
-                let localTrack
-            else { return }
-            sender.sender.track = nil
-            localTrack.isEnabled = false
-            try? await capturer?.stopCapture()
-            log.debug("Local videoTrack trackId:\(localTrack.trackId) is now unpublished.")
+            do {
+                guard
+                    let self,
+                    primaryTrack.isEnabled
+                else {
+                    return
+                }
+
+                primaryTrack.isEnabled = false
+
+                transceiverStorage
+                    .forEach { $0.value.sender.track?.isEnabled = false }
+
+                try await stopVideoCapturingSession()
+
+                log.debug(
+                    """
+                    Local videoTracks are now unpublished:
+                        primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                        clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                    """,
+                    subsystems: .webRTC
+                )
+            } catch {
+                log.error(error, subsystems: .webRTC)
+            }
         }
     }
 
@@ -169,24 +217,218 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        guard let localTrack else { return }
         let isMuted = !settings.videoOn
-        let isLocalMuted = localTrack.isEnabled == false
-        guard isMuted != isLocalMuted || sender == nil else {
-            return
+        let isLocalMuted = primaryTrack.isEnabled == false
+
+        if isMuted != isLocalMuted {
+            try await sfuAdapter.updateTrackMuteState(
+                .video,
+                isMuted: isMuted,
+                for: sessionID
+            )
         }
 
-        try await sfuAdapter.updateTrackMuteState(
-            .video,
-            isMuted: isMuted,
-            for: sessionID
-        )
-
-        if isMuted, localTrack.isEnabled {
+        if isMuted, primaryTrack.isEnabled {
             unpublish()
         } else if !isMuted {
             publish()
         }
+    }
+
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        self.publishOptions = publishOptions.video
+
+        guard primaryTrack.isEnabled else { return }
+
+        for publishOption in self.publishOptions {
+            addOrUpdateTransceiver(
+                for: publishOption,
+                with: primaryTrack.clone(from: peerConnectionFactory)
+            )
+        }
+
+        let activePublishOptions = Set(self.publishOptions)
+
+        transceiverStorage
+            .filter {
+                if let key = $0.key.base as? PublishOptions.VideoPublishOptions {
+                    return !activePublishOptions.contains(key)
+                } else {
+                    return false
+                }
+            }
+            .forEach { $0.value.sender.track = nil }
+
+        log.debug(
+            """
+            Local videoTracks updated with:
+                PublishOptions:
+                    \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
+                
+                TransceiverStorage:
+                    \(transceiverStorage)
+            """,
+            subsystems: .webRTC
+        )
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        transceiverStorage
+            .filter { $0.value.sender.track != nil }
+            .compactMap { key, transceiver in
+                guard
+                    let publishOptions = key.base as? PublishOptions.VideoPublishOptions
+                else {
+                    return nil
+                }
+                var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
+                trackInfo.trackType = .video
+                trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
+                trackInfo.layers = transceiver
+                    .sender
+                    .parameters
+                    .encodings
+                    .map { Stream_Video_Sfu_Models_VideoLayer($0, publishOptions: publishOptions) }
+                trackInfo.mid = transceiver.mid
+                trackInfo.muted = transceiver.sender.track?.isEnabled ?? true
+                return trackInfo
+            }
+    }
+
+    /// Changes the publishing quality based on active encodings.
+    ///
+    /// - Parameter activeEncodings: The set of active encoding identifiers.
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
+    ) {
+        for videoSender in layerSettings {
+            guard
+                let codec = VideoCodec(rawValue: videoSender.codec.name),
+                let transceiver = transceiverStorage.get(for: PublishOptions.VideoPublishOptions(
+                    id: Int(videoSender.publishOptionID),
+                    codec: codec
+                ))
+            else {
+                continue
+            }
+
+            var hasChanges = false
+            let params = transceiver
+                .sender
+                .parameters
+
+            guard
+                !params.encodings.isEmpty
+            else {
+                log.warning("Update publish quality, No suitable video encoding quality found", subsystems: .webRTC)
+                return
+            }
+
+            let isUsingSVCCodec = {
+                if let preferredCodec = params.codecs.first {
+                    return VideoCodec(preferredCodec).isSVC
+                } else {
+                    return false
+                }
+            }()
+            var updatedEncodings = [RTCRtpEncodingParameters]()
+
+            for encoding in params.encodings {
+                let layerSettings = isUsingSVCCodec
+                    // for SVC, we only have one layer (q) and often rid is omitted
+                    ? videoSender.layers.first
+                    // for non-SVC, we need to find the layer by rid (simulcast)
+                    : videoSender.layers.first(where: { $0.name == encoding.rid })
+
+                // flip 'active' flag only when necessary
+                if layerSettings?.active != encoding.isActive {
+                    encoding.isActive = layerSettings?.active ?? false
+                    hasChanges = true
+                }
+
+                // skip the rest of the settings if the layer is disabled or not found
+                guard let layerSettings else {
+                    updatedEncodings.append(encoding)
+                    continue
+                }
+
+                if
+                    layerSettings.scaleResolutionDownBy >= 1,
+                    layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0)
+                {
+                    encoding.scaleResolutionDownBy = .init(value: layerSettings.scaleResolutionDownBy)
+                    hasChanges = true
+                }
+
+                if
+                    layerSettings.maxBitrate > 0,
+                    layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0)
+                {
+                    encoding.maxBitrateBps = .init(value: layerSettings.maxBitrate)
+                    hasChanges = true
+                }
+
+                if
+                    layerSettings.maxFramerate > 0,
+                    layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0)
+                {
+                    encoding.maxFramerate = .init(value: layerSettings.maxFramerate)
+                    hasChanges = true
+                }
+
+                if
+                    !layerSettings.scalabilityMode.isEmpty,
+                    layerSettings.scalabilityMode != encoding.scalabilityMode
+                {
+                    encoding.scalabilityMode = layerSettings.scalabilityMode
+                    hasChanges = true
+                }
+
+                updatedEncodings.append(encoding)
+            }
+
+            let activeLayers = videoSender
+                .layers
+                .filter { $0.active }
+                .map {
+                    let value = [
+                        "name:\($0.name)",
+                        "scaleResolutionDownBy:\($0.scaleResolutionDownBy)",
+                        "maxBitrate:\($0.maxBitrate)",
+                        "maxFramerate:\($0.maxFramerate)",
+                        "scalabilityMode:\($0.scalabilityMode)"
+                    ]
+                    return "[\(value.joined(separator: ","))]"
+                }
+
+            guard hasChanges else {
+                log.info(
+                    "Update publish quality, no change: \(activeLayers.joined(separator: ","))",
+                    subsystems: .webRTC
+                )
+                return
+            }
+            log.info(
+                "Update publish quality, enabled rids: \(activeLayers.joined(separator: ","))",
+                subsystems: .webRTC
+            )
+            params.encodings = updatedEncodings
+            transceiver.sender.parameters = params
+        }
+
+//        TODO:
+//        Task { @MainActor in
+//            do {
+//                try await videoCapturePolicy.updateCaptureQuality(
+//                    with: .init(layerSettings.map(\.name)),
+//                    for: videoCaptureSessionProvider.activeSession
+//                )
+//            } catch {
+//                log.error(error)
+//            }
+//        }
     }
 
     // MARK: - Camera Video
@@ -197,7 +439,10 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCameraPosition(
         _ position: AVCaptureDevice.Position
     ) async throws {
-        try await capturer?.setCameraPosition(position)
+        try await configureActiveVideoCaptureSession(
+            position: position,
+            track: primaryTrack
+        )
     }
 
     /// Sets a video filter.
@@ -259,216 +504,196 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             .removeCapturePhotoOutput(capturePhotoOutput)
     }
 
-    /// Changes the publishing quality based on active encodings.
-    ///
-    /// - Parameter activeEncodings: The set of active encoding identifiers.
-    func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
-    ) {
-        guard
-            let sender,
-            !layerSettings.isEmpty
-        else {
-            return
-        }
-
-        var hasChanges = false
-        let params = sender
-            .sender
-            .parameters
-
-        guard
-            !params.encodings.isEmpty
-        else {
-            log.warning("Update publish quality, No suitable video encoding quality found", subsystems: .webRTC)
-            return
-        }
-
-        let isUsingSVCCodec = {
-            if
-                let preferredCodec = params.codecs.first,
-                let videoCodec = VideoCodec(preferredCodec) {
-                return videoCodec.isSVC
-            } else {
-                return false
-            }
-        }()
-        var updatedEncodings = [RTCRtpEncodingParameters]()
-
-        for encoding in params.encodings {
-            let layerSettings = isUsingSVCCodec
-                // for SVC, we only have one layer (q) and often rid is omitted
-                ? layerSettings.first
-                // for non-SVC, we need to find the layer by rid (simulcast)
-                : layerSettings.first(where: { $0.name == encoding.rid })
-
-            // flip 'active' flag only when necessary
-            if layerSettings?.active != encoding.isActive {
-                encoding.isActive = layerSettings?.active ?? false
-                hasChanges = true
-            }
-
-            // skip the rest of the settings if the layer is disabled or not found
-            guard let layerSettings else {
-                updatedEncodings.append(encoding)
-                continue
-            }
-
-            if
-                layerSettings.scaleResolutionDownBy >= 1,
-                layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0)
-            {
-                encoding.scaleResolutionDownBy = .init(value: layerSettings.scaleResolutionDownBy)
-                hasChanges = true
-            }
-
-            if
-                layerSettings.maxBitrate > 0,
-                layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0)
-            {
-                encoding.maxBitrateBps = .init(value: layerSettings.maxBitrate)
-                hasChanges = true
-            }
-
-            if
-                layerSettings.maxFramerate > 0,
-                layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0)
-            {
-                encoding.maxFramerate = .init(value: layerSettings.maxFramerate)
-                hasChanges = true
-            }
-
-            if
-                !layerSettings.scalabilityMode.isEmpty,
-                layerSettings.scalabilityMode != encoding.scalabilityMode
-            {
-                encoding.scalabilityMode = layerSettings.scalabilityMode
-                hasChanges = true
-            }
-
-            updatedEncodings.append(encoding)
-        }
-
-        let activeLayers = layerSettings
-            .filter { $0.active }
-            .map {
-                let value = [
-                    "name:\($0.name)",
-                    "scaleResolutionDownBy:\($0.scaleResolutionDownBy)",
-                    "maxBitrate:\($0.maxBitrate)",
-                    "maxFramerate:\($0.maxFramerate)",
-                    "scalabilityMode:\($0.scalabilityMode)"
-                ]
-                return "[\(value.joined(separator: ","))]"
-            }
-
-        guard hasChanges else {
-            log.info(
-                "Update publish quality, no change: \(activeLayers.joined(separator: ","))",
-                subsystems: .webRTC
-            )
-            return
-        }
-        log.info(
-            "Update publish quality, enabled rids: \(activeLayers.joined(separator: ","))",
-            subsystems: .webRTC
-        )
-        params.encodings = updatedEncodings
-        sender.sender.parameters = params
-
-        Task { @MainActor in
-            do {
-                try await videoCapturePolicy.updateCaptureQuality(
-                    with: .init(layerSettings.map(\.name)),
-                    for: videoCaptureSessionProvider.activeSession
-                )
-            } catch {
-                log.error(error)
-            }
-        }
-    }
-
     // MARK: - Private helpers
 
-    /// Creates a new video track with the specified camera position.
-    ///
-    /// - Parameter position: The camera position to use.
-    private func makeVideoTrack(
-        _ position: AVCaptureDevice.Position
+    private func configureActiveVideoCaptureSession(
+        position: AVCaptureDevice.Position,
+        track: RTCVideoTrack
     ) async throws {
-        if
-            let activeSession = videoCaptureSessionProvider.activeSession,
-            activeSession.position == position {
-            capturer = activeSession.capturer
-            localTrack = activeSession.localTrack
-            localTrack?.isEnabled = false
-
-            subject.send(
-                .added(
-                    id: sessionID,
-                    trackType: .video,
-                    track: activeSession.localTrack
-                )
-            )
-        } else {
-            let videoSource = peerConnectionFactory
-                .makeVideoSource(forScreenShare: false)
-            let videoTrack = peerConnectionFactory.makeVideoTrack(source: videoSource)
-            localTrack = videoTrack
-            /// This is important to be false once we setUp as the activation will happen once
-            /// publish is called (in order also to inform the SFU via the didUpdateCallSettings).
-            videoTrack.isEnabled = false
-
-            log.debug(
-                """
-                VideoTrack generated
-                address:\(Unmanaged.passUnretained(videoTrack).toOpaque())
-                trackId:\(videoTrack.trackId)
-                mid: \(sender?.mid ?? "-")
-                """
-            )
-
-            subject.send(
-                .added(
-                    id: sessionID,
-                    trackType: .video,
-                    track: videoTrack
-                )
-            )
-
+        if videoCaptureSessionProvider.activeSession == nil {
             let cameraCapturer = capturerFactory.buildCameraCapturer(
-                source: videoSource,
-                options: videoOptions,
+                source: track.source,
                 filters: videoConfig.videoFilters
             )
             capturer = cameraCapturer
 
-            let device = cameraCapturer.capturingDevice(for: position)
-            try await cameraCapturer.startCapture(device: device)
-
+            videoCaptureSessionProvider.activeSession = .init(
+                position: position,
+                device: nil,
+                localTrack: track,
+                capturer: cameraCapturer
+            )
+        } else if
+            let activeSession = videoCaptureSessionProvider.activeSession,
+            activeSession.device == nil,
+            activeSession.position != position {
+            videoCaptureSessionProvider.activeSession = .init(
+                position: position,
+                device: nil,
+                localTrack: activeSession.localTrack,
+                capturer: activeSession.capturer
+            )
+        } else if
+            let activeSession = videoCaptureSessionProvider.activeSession,
+            activeSession.position != position {
+            // We are currently capturing
+            let device = activeSession.capturer.capturingDevice(for: position)
             videoCaptureSessionProvider.activeSession = .init(
                 position: position,
                 device: device,
-                localTrack: videoTrack,
-                capturer: cameraCapturer
+                localTrack: activeSession.localTrack,
+                capturer: activeSession.capturer
             )
+            try await activeSession.capturer.setCameraPosition(position)
         }
     }
 
-    private func setUpTransceiverIfRequired(_ localTrack: RTCVideoTrack) {
-        if sender == nil {
-            sender = peerConnection.addTransceiver(
-                with: localTrack,
-                init: RTCRtpTransceiverInit(
+    private func startVideoCapturingSession() async throws {
+        let capturingDimension = publishOptions
+            .map(\.dimensions)
+            .max(by: { $0.width < $1.width && $0.height < $1.height })
+        let frameRate = publishOptions.map(\.frameRate).max()
+
+        guard
+            let activeSession = videoCaptureSessionProvider.activeSession,
+            activeSession.device == nil,
+            let device = activeSession.capturer.capturingDevice(for: activeSession.position),
+            let capturingDimension,
+            let frameRate
+        else {
+            log.debug(
+                """
+                Active video capture session hasn't been configured for capturing.
+                    isActiveSessionAlive: \(videoCaptureSessionProvider.activeSession != nil) 
+                    isCapturingDeviceAlive: \(videoCaptureSessionProvider.activeSession?.device != nil)
+                    CapturingDimensions: \(capturingDimension ?? .zero)
+                    FrameRate: \(frameRate ?? 0)
+                """,
+                subsystems: .webRTC
+            )
+            return
+        }
+
+        try await activeSession.capturer.startCapture(
+            with: .init(
+                position: activeSession.position,
+                dimensions: capturingDimension,
+                frameRate: frameRate
+            )
+        )
+        videoCaptureSessionProvider.activeSession = .init(
+            position: activeSession.position,
+            device: device,
+            localTrack: activeSession.localTrack,
+            capturer: activeSession.capturer
+        )
+
+        log.debug(
+            """
+            Active video capture session started
+                position: \(activeSession.position)
+                device: \(device)
+                track: \(activeSession.localTrack.trackId)
+                capturer: \(activeSession.capturer)
+            """,
+            subsystems: .webRTC
+        )
+    }
+
+    private func stopVideoCapturingSession() async throws {
+        guard
+            let activeSession = videoCaptureSessionProvider.activeSession,
+            activeSession.device != nil
+        else {
+            log.debug(
+                """
+                Active video capture session hasn't been configured for capturing.
+                    isActiveSessionAlive: \(videoCaptureSessionProvider.activeSession != nil) 
+                    isCapturingDeviceAlive: \(videoCaptureSessionProvider.activeSession?.device != nil)
+                """,
+                subsystems: .webRTC
+            )
+            return
+        }
+        try await activeSession.capturer.stopCapture()
+        videoCaptureSessionProvider.activeSession = .init(
+            position: activeSession.position,
+            device: nil,
+            localTrack: activeSession.localTrack,
+            capturer: activeSession.capturer
+        )
+
+        log.debug(
+            """
+            Active video capture session stopped
+                position: \(activeSession.position)
+                track: \(activeSession.localTrack.trackId)
+                capturer: \(activeSession.capturer)
+            """,
+            subsystems: .webRTC
+        )
+    }
+
+    private func addOrUpdateTransceiver(
+        for options: PublishOptions.VideoPublishOptions,
+        with track: RTCVideoTrack
+    ) {
+        if let transceiver = transceiverStorage.get(for: options) {
+            transceiver.sender.track = track
+        } else {
+            let transceiver = peerConnection.addTransceiver(
+                with: track,
+                init: .init(
                     trackType: .video,
                     direction: .sendOnly,
                     streamIds: streamIds,
-                    layers: videoOptions.videoLayers,
-                    preferredVideoCodec: videoOptions.preferredVideoCodec
+                    videoOptions: options
                 )
             )
-        } else {
-            sender?.sender.track = localTrack
+            transceiverStorage.set(transceiver, for: options)
+        }
+    }
+}
+
+extension Stream_Video_Sfu_Models_VideoLayer {
+
+    init(
+        _ layer: RTCRtpEncodingParameters,
+        publishOptions: PublishOptions.VideoPublishOptions
+    ) {
+        rid = layer.rid ?? (publishOptions.capturingLayers.spatialLayers == 1 ? "q" : "")
+        bitrate = layer.maxBitrateBps?.uint32Value ?? UInt32(publishOptions.bitrate)
+        fps = layer.maxFramerate?.uint32Value ?? UInt32(publishOptions.frameRate)
+        videoDimension = .init()
+        videoDimension.width = UInt32(publishOptions.dimensions.width)
+        videoDimension.height = UInt32(publishOptions.dimensions.height)
+
+        if rid.count != 1 {
+            log.warning(
+                "Stream_Video_Sfu_Models_VideoLayer with rid longer/smaller than 1 character is invalid.",
+                subsystems: .webRTC
+            )
+        }
+
+        if bitrate == 0 {
+            log.warning(
+                "Stream_Video_Sfu_Models_VideoLayer with bitrate=0 is invalid.",
+                subsystems: .webRTC
+            )
+        }
+
+        if fps == 0 {
+            log.warning(
+                "Stream_Video_Sfu_Models_VideoLayer with fps=0 is invalid.",
+                subsystems: .webRTC
+            )
+        }
+
+        if !hasVideoDimension {
+            log.warning(
+                "Stream_Video_Sfu_Models_VideoLayer without videoDimension is invalid.",
+                subsystems: .webRTC
+            )
         }
     }
 }
