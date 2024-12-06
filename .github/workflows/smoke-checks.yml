@@ -27,14 +27,14 @@ concurrency:
 
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
-  IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.4)"
+  IOS_SIMULATOR_DEVICE: "iPhone 16 Pro (18.1)"
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
   test-llc-debug:
     name: Test LLC (Debug)
-    runs-on: macos-14
+    runs-on: macos-15
     if: ${{ github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     env:
       STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
@@ -49,9 +49,6 @@ jobs:
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 40
-      env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
     - name: Run Sonar analysis
       run: bundle exec fastlane sonar_upload
       env:
@@ -88,7 +85,7 @@ jobs:
 
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
-    runs-on: macos-14
+    runs-on: macos-15
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
@@ -100,10 +97,7 @@ jobs:
         SKIP_MINT_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
-      timeout-minutes: 40
-      env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
+      timeout-minutes: 120
     - name: Parse xcresult
       if: failure()
       run: |
@@ -119,7 +113,7 @@ jobs:
 
   test-uikit-debug:
     name: Test UIKit (Debug)
-    runs-on: macos-14
+    runs-on: macos-15
     if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
@@ -132,10 +126,7 @@ jobs:
         SKIP_BREW_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
-      timeout-minutes: 40
-      env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
+      timeout-minutes: 120
     - name: Parse xcresult
       if: failure()
       run: |
@@ -203,7 +194,7 @@ jobs:
 
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
-    runs-on: macos-14
+    runs-on: macos-15
     needs: test-llc-debug
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     steps:
@@ -263,7 +254,7 @@ jobs:
 
   test-e2e-debug:
     name: Test E2E UI (Debug)
-    runs-on: macos-14
+    runs-on: macos-15
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     needs:
       - allure_testops_launch
@@ -292,8 +283,6 @@ jobs:
       run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
       timeout-minutes: 60
       env:
-        XCODE_VERSION: "15.2" # the most stable pair of Xcode
-        IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)" # and iOS
         MATRIX_SIZE: ${{ strategy.job-total }}
         STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
         STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}

@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '15.3'
+xcode_version = ENV['XCODE_VERSION'] || '16.1'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 podspec_names = ['StreamVideo', 'StreamVideo-XCFramework', 'StreamVideoSwiftUI', 'StreamVideoSwiftUI-XCFramework', 'StreamVideoUIKit', 'StreamVideoUIKit-XCFramework']
@@ -16,7 +16,6 @@ video_buddy_port = 5678
 app_secret = ENV.fetch('STREAM_VIDEO_SECRET', nil)
 derived_data_path = 'derived_data'
 source_packages_path = 'spm_cache'
-buildcache_xcargs = 'CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++'
 gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
@@ -92,7 +91,6 @@ lane :publish_release do |options|
   UI.user_error!('Release version cannot be empty') if release_version.to_s.empty?
   ensure_git_branch(branch: 'main')
 
-  xcversion(version: '15.0.1')
   clean_products
   build_xcframeworks
   compress_frameworks
@@ -215,8 +213,7 @@ lane :build_test_app_and_frameworks do
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     clean: is_localhost,
-    build_for_testing: true,
-    xcargs: buildcache_xcargs
+    build_for_testing: true
   )
 end
 
@@ -237,7 +234,7 @@ lane :test do |options|
     number_of_retries: 3,
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing],
-    xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
+    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
   }
 
   begin
@@ -293,7 +290,6 @@ private_lane :test_ui do |options|
     skip_build: options[:skip_build],
     result_bundle: true,
     devices: options[:device],
-    xcargs: buildcache_xcargs,
     build_for_testing: options[:build_for_testing],
     fail_build: !record_mode
   )
@@ -309,9 +305,9 @@ private_lane :test_ui do |options|
     end
 
     pr_create(
-      title: '[CI] Snapshots',
+      title: "[CI][#{options[:scheme]}] Snapshots",
       base_branch: current_branch,
-      head_branch: "#{current_branch}-snapshots"
+      head_branch: "#{current_branch}-#{options[:scheme]}-Snapshots"
     )
   end
 end
@@ -404,7 +400,7 @@ lane :test_e2e do |options|
     devices: options[:device],
     prelaunch_simulator: is_ci,
     number_of_retries: 3,
-    xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
+    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
   }
 
   if is_localhost
@@ -501,7 +497,6 @@ private_lane :build_example_app do |options|
     configuration: 'Debug',
     derived_data_path: options[:derived_data_path],
     cloned_source_packages_path: source_packages_path,
-    xcargs: buildcache_xcargs,
     build_for_testing: true
   )
 end
