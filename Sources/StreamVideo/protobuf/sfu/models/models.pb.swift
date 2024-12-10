@@ -931,6 +931,23 @@ struct Stream_Video_Sfu_Models_VideoLayer {
   fileprivate var _videoDimension: Stream_Video_Sfu_Models_VideoDimension? = nil
 }
 
+/// SubscribeOption represents the configuration options for subscribing to a track.
+struct Stream_Video_Sfu_Models_SubscribeOption {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The type of the track being subscribed (e.g., video, screenshare).
+  var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
+
+  /// The codecs supported by the subscriber for decoding tracks.
+  var codecs: [Stream_Video_Sfu_Models_Codec] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 /// PublishOption represents the configuration options for publishing a track.
 struct Stream_Video_Sfu_Models_PublishOption {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -1334,6 +1351,7 @@ extension Stream_Video_Sfu_Models_Participant: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_StreamQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoDimension: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoLayer: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_SubscribeOption: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_PublishOption: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Codec: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ICETrickle: @unchecked Sendable {}
@@ -1859,6 +1877,44 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
     if lhs.bitrate != rhs.bitrate {return false}
     if lhs.fps != rhs.fps {return false}
     if lhs.quality != rhs.quality {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_SubscribeOption: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".SubscribeOption"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "track_type"),
+    2: .same(proto: "codecs"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.codecs) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.trackType != .unspecified {
+      try visitor.visitSingularEnumField(value: self.trackType, fieldNumber: 1)
+    }
+    if !self.codecs.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.codecs, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_SubscribeOption, rhs: Stream_Video_Sfu_Models_SubscribeOption) -> Bool {
+    if lhs.trackType != rhs.trackType {return false}
+    if lhs.codecs != rhs.codecs {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

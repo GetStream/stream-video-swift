@@ -790,6 +790,11 @@ struct Stream_Video_Sfu_Event_JoinRequest {
     set {_uniqueStorage()._preferredPublishOptions = newValue}
   }
 
+  var preferredSubscribeOptions: [Stream_Video_Sfu_Models_SubscribeOption] {
+    get {return _storage._preferredSubscribeOptions}
+    set {_uniqueStorage()._preferredSubscribeOptions = newValue}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -2288,6 +2293,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     6: .standard(proto: "fast_reconnect"),
     7: .standard(proto: "reconnect_details"),
     9: .standard(proto: "preferred_publish_options"),
+    10: .standard(proto: "preferred_subscribe_options"),
   ]
 
   fileprivate class _StorageClass {
@@ -2300,6 +2306,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     var _fastReconnect: Bool = false
     var _reconnectDetails: Stream_Video_Sfu_Event_ReconnectDetails? = nil
     var _preferredPublishOptions: [Stream_Video_Sfu_Models_PublishOption] = []
+    var _preferredSubscribeOptions: [Stream_Video_Sfu_Models_SubscribeOption] = []
 
     static let defaultInstance = _StorageClass()
 
@@ -2315,6 +2322,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       _fastReconnect = source._fastReconnect
       _reconnectDetails = source._reconnectDetails
       _preferredPublishOptions = source._preferredPublishOptions
+      _preferredSubscribeOptions = source._preferredSubscribeOptions
     }
   }
 
@@ -2342,6 +2350,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         case 7: try { try decoder.decodeSingularMessageField(value: &_storage._reconnectDetails) }()
         case 8: try { try decoder.decodeSingularStringField(value: &_storage._publisherSdp) }()
         case 9: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredPublishOptions) }()
+        case 10: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredSubscribeOptions) }()
         default: break
         }
       }
@@ -2381,6 +2390,9 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       if !_storage._preferredPublishOptions.isEmpty {
         try visitor.visitRepeatedMessageField(value: _storage._preferredPublishOptions, fieldNumber: 9)
       }
+      if !_storage._preferredSubscribeOptions.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._preferredSubscribeOptions, fieldNumber: 10)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2399,6 +2411,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         if _storage._fastReconnect != rhs_storage._fastReconnect {return false}
         if _storage._reconnectDetails != rhs_storage._reconnectDetails {return false}
         if _storage._preferredPublishOptions != rhs_storage._preferredPublishOptions {return false}
+        if _storage._preferredSubscribeOptions != rhs_storage._preferredSubscribeOptions {return false}
         return true
       }
       if !storagesAreEqual {return false}
