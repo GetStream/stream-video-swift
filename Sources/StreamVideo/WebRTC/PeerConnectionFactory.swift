@@ -43,14 +43,6 @@ final class PeerConnectionFactory: @unchecked Sendable {
         defaultDecoder.supportedCodecs()
     }
 
-    func setPreferredEncodingCodec(_ videoCodec: VideoCodec) {
-        if let preferredCodec = defaultEncoder.supportedCodecs().first(where: { $0.name.lowercased() == videoCodec.rawValue }) {
-            defaultEncoder.preferredCodec = preferredCodec
-        } else {
-            log.warning("Unable to set preferred encoding codec \(videoCodec.rawValue).")
-        }
-    }
-
     /// Creates or retrieves a PeerConnectionFactory instance for a given
     /// audio processing module.
     /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
@@ -78,6 +70,8 @@ final class PeerConnectionFactory: @unchecked Sendable {
     deinit {
         PeerConnectionFactoryStorage.shared.remove(for: audioProcessingModule)
     }
+
+    // MARK: - Builders
 
     /// Creates a video source, optionally configured for screen sharing.
     /// - Parameter forScreenShare: Boolean indicating if the source is for screen sharing.
@@ -159,6 +153,26 @@ final class PeerConnectionFactory: @unchecked Sendable {
         }
 
         return peerConnection
+    }
+
+    // MARK: - Capabilities
+
+    func codecCapabilities(
+        for audioCodec: AudioCodec
+    ) -> RTCRtpCodecCapability? {
+        factory
+            .rtpSenderCapabilities(forKind: kRTCMediaStreamTrackKindAudio)
+            .codecs
+            .baseline(for: audioCodec)
+    }
+
+    func codecCapabilities(
+        for videoCodec: VideoCodec
+    ) -> RTCRtpCodecCapability? {
+        factory
+            .rtpSenderCapabilities(forKind: kRTCMediaStreamTrackKindVideo)
+            .codecs
+            .baseline(for: videoCodec)
     }
 }
 

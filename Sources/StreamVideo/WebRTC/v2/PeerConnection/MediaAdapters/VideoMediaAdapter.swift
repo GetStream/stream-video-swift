@@ -32,17 +32,6 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
 
     /// A subject for publishing track events.
     let subject: PassthroughSubject<TrackEvent, Never>
-
-    /// The local video track, if available.
-    var localTrack: RTCMediaStreamTrack? {
-        (localMediaManager as? LocalVideoMediaAdapter)?.localTrack
-    }
-
-    /// The mid (Media Stream Identification) of the local video track, if available.
-    var mid: String? {
-        (localMediaManager as? LocalVideoMediaAdapter)?.mid
-    }
-
     /// Convenience initializer for creating a VideoMediaAdapter with a LocalVideoMediaAdapter.
     ///
     /// - Parameters:
@@ -52,6 +41,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: TODO
     ///   - subject: A subject for publishing track events.
     convenience init(
         sessionID: String,
@@ -60,6 +50,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider
     ) {
@@ -74,6 +65,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 subject: subject,
                 videoCaptureSessionProvider: videoCaptureSessionProvider
             ),
@@ -138,6 +130,16 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter settings: The updated call settings.
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         try await localMediaManager.didUpdateCallSettings(settings)
+    }
+
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo()
     }
 
     // MARK: - Video
@@ -216,7 +218,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: The set of active encoding identifiers.
     func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
         (localMediaManager as? LocalVideoMediaAdapter)?
             .changePublishQuality(with: layerSettings)

@@ -15,7 +15,6 @@ protocol VideoCapturerProviding {
     /// - Returns: An object conforming to `CameraVideoCapturing` for camera capture.
     func buildCameraCapturer(
         source: RTCVideoSource,
-        options: VideoOptions,
         filters: [VideoFilter]
     ) -> CameraVideoCapturing
 
@@ -40,17 +39,14 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
     /// Creates a camera capturer with the given parameters.
     /// - Parameters:
     ///   - source: The video source for the capturer.
-    ///   - options: Configuration options for the video capture.
     ///   - filters: An array of video filters to apply.
     /// - Returns: A `VideoCapturer` instance for camera capture.
     func buildCameraCapturer(
         source: RTCVideoSource,
-        options: VideoOptions,
         filters: [VideoFilter]
     ) -> CameraVideoCapturing {
         VideoCapturer(
             videoSource: source,
-            videoOptions: options,
             videoFilters: filters
         )
     }

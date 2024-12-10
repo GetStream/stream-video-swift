@@ -38,11 +38,6 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         (localMediaManager as? LocalScreenShareMediaAdapter)?.localTrack
     }
 
-    /// The mid (Media Stream Identification) of the local screen share track, if available.
-    var mid: String? {
-        (localMediaManager as? LocalScreenShareMediaAdapter)?.mid
-    }
-
     /// Convenience initializer for creating a ScreenShareMediaAdapter with a LocalScreenShareMediaAdapter.
     ///
     /// - Parameters:
@@ -52,6 +47,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - PublishOptions: -
     ///   - subject: A subject for publishing track events.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
     convenience init(
@@ -61,6 +57,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -75,6 +72,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 subject: subject,
                 screenShareSessionProvider: screenShareSessionProvider
             ),
@@ -141,6 +139,23 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         _ settings: CallSettings
     ) async throws {
         try await localMediaManager.didUpdateCallSettings(settings)
+    }
+
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
+    ) {
+        (localMediaManager as? LocalScreenShareMediaAdapter)?
+            .changePublishQuality(with: layerSettings)
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo()
     }
 
     // MARK: - ScreenSharing

@@ -51,6 +51,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private var setUpSubject: CurrentValueSubject<Bool, Never> = .init(false)
     var videoOptions: VideoOptions
     var audioSettings: AudioSettings
+    var publishOptions: PublishOptions {
+        didSet { didUpdatePublishOptions(publishOptions) }
+    }
 
     // MARK: State
 
@@ -63,12 +66,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    func localTrack(of type: TrackType) -> RTCMediaStreamTrack? {
-        mediaAdapter.localTrack(of: type)
-    }
-
-    func mid(for type: TrackType) -> String? {
-        mediaAdapter.mid(for: type)
+    func trackInfo(for type: TrackType) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        mediaAdapter.trackInfo(for: type)
     }
 
     /// Initializes the RTCPeerConnectionCoordinator with necessary dependencies.
@@ -82,6 +81,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - videoConfig: Configuration for video processing.
     ///   - callSettings: Settings for the current call.
     ///   - audioSettings: Settings for audio processing.
+    ///   - publishOptions: TODO
     ///   - sfuAdapter: Adapter for communicating with the SFU.
     ///   - audioSession: The audio session to be used.
     ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
@@ -95,6 +95,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         audioSettings: AudioSettings,
+        publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
@@ -106,6 +107,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             videoOptions: videoOptions,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             mediaAdapter: .init(
                 sessionID: sessionId,
@@ -115,6 +117,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
             )
@@ -128,6 +131,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         videoOptions: VideoOptions,
         callSettings: CallSettings,
         audioSettings: AudioSettings,
+        publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         mediaAdapter: MediaAdapter
     ) {
@@ -136,6 +140,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         self.videoOptions = videoOptions
         self.callSettings = callSettings
         self.audioSettings = audioSettings
+        self.publishOptions = publishOptions
         self.peerConnection = peerConnection
         self.sfuAdapter = sfuAdapter
         subsystem = peerType == .publisher
@@ -305,6 +310,18 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         try await mediaAdapter.didUpdateCallSettings(settings)
     }
 
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) {
+        Task {
+            do {
+                try await mediaAdapter.didUpdatePublishOptions(publishOptions)
+            } catch {
+                log.error(error)
+            }
+        }
+    }
+
     // MARK: - Actions
 
     /// Creates an offer for the peer connection.
@@ -363,6 +380,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             type:\(peerType)
             sessionID: \(sessionId)
             sfu: \(sfuAdapter.hostname)
+            SDP: \(sessionDescription.sdp.singleLine)
             """,
             subsystems: subsystem
         )
@@ -383,6 +401,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             type:\(peerType)
             sessionID: \(sessionId)
             sfu: \(sfuAdapter.hostname)
+            SDP: \(sessionDescription.sdp.singleLine)
             """,
             subsystems: subsystem
         )
@@ -537,9 +556,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: A set of active encoding identifiers.
     func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
-        mediaAdapter.changePublishQuality(with: layerSettings)
+        Task {
+            await mediaAdapter.changePublishQuality(with: event)
+        }
     }
 
     // MARK: - ScreenSharing
@@ -591,17 +612,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
                 let offer = try await self
                     .createOffer(constraints: constraints)
-                    .withOpusDTX(audioSettings.opusDtxEnabled)
-                    .withRedundantCoding(audioSettings.redundantCodingEnabled)
 
                 try await setLocalDescription(offer)
 
                 try await ensureSetUpHasBeenCompleted()
 
-                let tracksInfo = WebRTCJoinRequestFactory().buildAnnouncedTracks(
-                    self,
-                    videoOptions: videoOptions
-                )
+                let tracksInfo = WebRTCJoinRequestFactory()
+                    .buildAnnouncedTracks(self)
 
                 log.debug(
                     """
@@ -611,8 +628,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     sessionID: \(sessionId)
                     sfu: \(sfuAdapter.hostname)
                     tracksInfo:
-                        hasAudio: \(tracksInfo.contains { $0.trackType == .audio })
-                        hasVideo: \(tracksInfo.contains { $0.trackType == .video })
+                        audio: 
+                            \(tracksInfo.filter { $0.trackType == .audio })
+                        video: 
+                            \(tracksInfo.filter { $0.trackType == .video })
                         hasScreenSharing: \(tracksInfo.contains { $0.trackType == .screenShare })
                     """,
                     subsystems: subsystem

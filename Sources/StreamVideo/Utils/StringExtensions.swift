@@ -45,3 +45,11 @@ extension String {
         return components[1]
     }
 }
+
+extension String {
+
+    var singleLine: String {
+        replacingOccurrences(of: "\r\n", with: " ")
+            .replacingOccurrences(of: "\n", with: " ")
+    }
+}

@@ -24,22 +24,22 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     private let videoOptions: VideoOptions
     /// Configuration settings for video.
     private let videoConfig: VideoConfig
+    private var publishOptions: PublishOptions
     /// The factory for creating the capturer.
     private let capturerFactory: VideoCapturerProviding
     /// Provider for screen sharing session information.
     private let screenShareSessionProvider: ScreenShareSessionProvider
-
-    /// The local video track used for screen sharing.
-    private(set) var localTrack: RTCVideoTrack?
     /// The type of screen sharing currently active.
     private var screenSharingType: ScreensharingType?
     /// The video capturer used to capture screen content.
     private var capturer: VideoCapturing?
-    /// The RTP transceiver used to send the screen sharing track.
-    private var sender: RTCRtpTransceiver?
 
-    /// The media stream identifier (mid) of the sender.
-    var mid: String? { sender?.mid }
+    private let transceiverStorage = MediaTransceiverStorage(for: .screenshare)
+
+    /// The local video track used for screen sharing.
+    private(set) var localTrack: RTCVideoTrack?
+    /// The RTP transceiver used to send the screen sharing track.
+    private var transceiver: RTCRtpTransceiver?
 
     /// A subject for publishing track-related events.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -62,6 +62,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider,
         capturerFactory: VideoCapturerProviding = StreamVideoCapturerFactory()
@@ -72,6 +73,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.sfuAdapter = sfuAdapter
         self.videoOptions = videoOptions
         self.videoConfig = videoConfig
+        self.publishOptions = publishOptions
         self.subject = subject
         self.screenShareSessionProvider = screenShareSessionProvider
         self.capturerFactory = capturerFactory
@@ -83,7 +85,18 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     /// Cleans up resources when the instance is being deallocated.
     deinit {
-        sender?.sender.track = nil
+        Task { @MainActor [transceiverStorage] in
+            transceiverStorage.removeAll()
+        }
+
+        log.debug(
+            """
+            Local screenShareTracks will be deallocated
+                primary: \(localTrack?.trackId ?? "n/a") isEnabled:\(localTrack?.isEnabled ?? false)
+                clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+            """,
+            subsystems: .webRTC
+        )
     }
 
     // MARK: - LocalMediaManaging
@@ -106,13 +119,13 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             let localTrack,
             let screenSharingType,
             let capturer,
-            localTrack.isEnabled == false || sender == nil
+            localTrack.isEnabled == false || transceiver == nil
         else {
             return
         }
 
-        if sender == nil {
-            sender = peerConnection.addTransceiver(
+        if transceiver == nil {
+            transceiver = peerConnection.addTransceiver(
                 with: localTrack,
                 init: RTCRtpTransceiverInit(
                     trackType: .screenshare,
@@ -122,11 +135,17 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 )
             )
         } else {
-            sender?.sender.track = localTrack
+            transceiver?.sender.track = localTrack
         }
         Task {
             do {
-                try await capturer.startCapture(device: nil)
+                try await capturer.startCapture(
+                    with: .init(
+                        position: .front,
+                        dimensions: .full,
+                        frameRate: 20
+                    )
+                )
             } catch {
                 log.error(error, subsystems: .webRTC)
             }
@@ -137,7 +156,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     /// Unpublishes the local screen sharing track from the peer connection.
     func unpublish() {
-        guard let sender, let localTrack else { return }
+        guard let transceiver, let localTrack else { return }
         Task {
             do {
                 try await capturer?.stopCapture()
@@ -145,7 +164,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 log.error(error, subsystems: .webRTC)
             }
         }
-        sender.sender.track = nil
+        transceiver.sender.track = nil
         localTrack.isEnabled = false
         log.debug(
             """
@@ -166,6 +185,22 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         /* No-op */
     }
 
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        /* No-op */
+    }
+
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
+    ) {
+        /* No-op */
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        []
+    }
+
     // MARK: - Screensharing
 
     /// Begins screen sharing of the specified type.
@@ -183,9 +218,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
         if type != screenSharingType {
             localTrack = nil
-            sender?.sender.track = nil
-            sender?.stopInternal()
-            sender = nil
+            transceiver?.sender.track = nil
+            transceiver?.stopInternal()
+            transceiver = nil
         }
 
         if localTrack == nil {
@@ -224,6 +259,27 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     // MARK: - Private helpers
 
+    private func addOrUpdateTransceiver(
+        for options: PublishOptions.VideoPublishOptions,
+        with track: RTCVideoTrack,
+        screenSharingType: ScreensharingType
+    ) {
+        if let transceiver = transceiverStorage.get(for: options) {
+            transceiver.sender.track = track
+        } else {
+            let transceiver = peerConnection.addTransceiver(
+                with: track,
+                init: .init(
+                    trackType: .video,
+                    direction: .sendOnly,
+                    streamIds: ["\(sessionID)-screenshare-\(screenSharingType)"],
+                    videoOptions: options
+                )
+            )
+            transceiverStorage.set(transceiver, for: options)
+        }
+    }
+
     /// Creates a new video track for screen sharing.
     ///
     /// - Parameter screenSharingType: The type of screen sharing to set up.
@@ -242,7 +298,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             ScreenShareTrack generated
             address:\(Unmanaged.passUnretained(videoTrack).toOpaque())
             trackId:\(videoTrack.trackId)
-            mid: \(sender?.mid ?? "-")
+            mid: \(transceiver?.mid ?? "-")
             screenSharingType: \(screenSharingType)
             """
         )

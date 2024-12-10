@@ -33,14 +33,6 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// A subject for publishing track events.
     let subject: PassthroughSubject<TrackEvent, Never>
 
-    /// The local audio track, if available.
-    var localTrack: RTCMediaStreamTrack? {
-        (localMediaManager as? LocalAudioMediaAdapter)?.localTrack
-    }
-
-    /// The mid (Media Stream Identification) of the local audio track, if available.
-    var mid: String? { (localMediaManager as? LocalAudioMediaAdapter)?.mid }
-
     /// Convenience initializer for creating an AudioMediaAdapter with a LocalAudioMediaAdapter.
     ///
     /// - Parameters:
@@ -55,6 +47,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
+        publishOptions: [PublishOptions.AudioPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.init(
@@ -66,6 +59,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
                 peerConnection: peerConnection,
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
+                publishOptions: publishOptions,
                 subject: subject
             ),
             subject: subject
@@ -124,11 +118,28 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         )
     }
 
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo()
+    }
+
     /// Updates the audio media based on new call settings.
     ///
     /// - Parameter settings: The updated call settings.
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         try await localMediaManager.didUpdateCallSettings(settings)
+    }
+
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
+    ) {
+        (localMediaManager as? LocalAudioMediaAdapter)?
+            .changePublishQuality(with: layerSettings)
     }
 
     // MARK: - Observers

@@ -106,6 +106,11 @@ final class SFUEventAdapter {
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantUpdated.self)
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleParticipantUpdated($0) }
             .store(in: disposableBag)
+
+        sfuAdapter
+            .publisher(eventType: Stream_Video_Sfu_Event_ChangePublishOptions.self)
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleChangePublishOptions($0) }
+            .store(in: disposableBag)
     }
 
     // MARK: - Event handlers
@@ -173,18 +178,9 @@ final class SFUEventAdapter {
     private func handleChangePublishQuality(
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) async {
-        guard
-            let layerSettings = event
-            .videoSenders
-            .first?
-            .layers
-        else {
-            return
-        }
-
         await stateAdapter
             .publisher?
-            .changePublishQuality(with: layerSettings)
+            .changePublishQuality(with: event)
     }
 
     /// Handles a ParticipantJoined event.
@@ -470,7 +466,7 @@ final class SFUEventAdapter {
             else {
                 return participants
             }
-            
+
             updatedParticipants[event.participant.sessionID] = event
                 .participant
                 .toCallParticipant()
@@ -480,5 +476,12 @@ final class SFUEventAdapter {
                 .withUpdated(screensharingTrack: participant.screenshareTrack)
             return updatedParticipants
         }
+    }
+
+    private func handleChangePublishOptions(
+        _ event: Stream_Video_Sfu_Event_ChangePublishOptions
+    ) async {
+        await stateAdapter
+            .set(publishOptions: .init(event.publishOptions))
     }
 }
