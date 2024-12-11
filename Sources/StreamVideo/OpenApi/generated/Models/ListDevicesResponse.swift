@@ -6,10 +6,10 @@ import Foundation
 
 public final class ListDevicesResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var devices: [Device]
+    public var devices: [DeviceResponse]
     public var duration: String
 
-    public init(devices: [Device], duration: String) {
+    public init(devices: [DeviceResponse], duration: String) {
         self.devices = devices
         self.duration = duration
     }
