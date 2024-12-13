@@ -21,7 +21,7 @@ protocol RTCPeerConnectionCoordinatorProviding {
     ///   - videoConfig: Configuration settings for video.
     ///   - callSettings: Settings related to the overall call.
     ///   - audioSettings: Settings for audio configuration.
-    ///   - publishOptions: TODO
+    ///   - publishOptions: The publishOptions to use to create the initial tracks.
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.

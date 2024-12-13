@@ -58,7 +58,7 @@ extension VideoCodec {
             return vp9Comparator
         case .av1:
             return noOpComparator
-        case .none:
+        case .unknown:
             return noOpComparator
         }
     }
@@ -71,7 +71,7 @@ extension AudioCodec {
     /// The comparator currently applies no specific ordering for audio codecs.
     fileprivate var baselineComparator: (RTCRtpCodecCapability, RTCRtpCodecCapability) -> Bool {
         switch self {
-        case .none:
+        case .unknown:
             return noOpComparator
         case .opus:
             return noOpComparator

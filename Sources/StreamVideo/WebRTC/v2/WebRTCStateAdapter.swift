@@ -55,8 +55,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         didSet { didUpdate(videoOptions: videoOptions) }
     }
 
-    /// Published property to track video options and update them.
-    @Published private(set) var publishOptions: PublishOptions = .default {
+    /// Published property to track publish options and update them.
+    @Published private(set) var publishOptions: PublishOptions = .init() {
         didSet { didUpdate(publishOptions: publishOptions) }
     }
 
@@ -504,7 +504,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         subscriber?.videoOptions = videoOptions
     }
 
-    /// Updates the video options and notifies the publisher and subscriber.
+    /// Updates the publish options and notifies the publisher.
     private func didUpdate(publishOptions: PublishOptions) {
         publisher?.publishOptions = publishOptions
     }

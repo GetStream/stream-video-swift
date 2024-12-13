@@ -39,7 +39,7 @@ final class MediaAdapter {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
-    ///   - publishOptions: TODO
+    ///   - publishOptions: The publishOptions to use for creating the initial tracks
     ///   - audioSession: The audio session manager.
     ///   - videoCaptureSessionProvider: Provides access to the active video capturing session.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.

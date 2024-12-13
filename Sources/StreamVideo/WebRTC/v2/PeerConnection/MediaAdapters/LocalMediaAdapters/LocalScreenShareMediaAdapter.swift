@@ -8,34 +8,33 @@ import StreamWebRTC
 
 /// A class that adapts local screen sharing media for use in a streaming context.
 ///
-/// This class manages the local screen sharing track, handling its publication,
-/// unpublication, and interaction with the peer connection.
+/// This class manages the lifecycle of local screen sharing, including its
+/// publication, unpublication, and interaction with the WebRTC peer connection.
+/// It integrates with WebRTC components and handles screen sharing sessions
+/// dynamically based on user actions.
 final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The unique identifier for the current session.
     private let sessionID: String
     /// The peer connection used for WebRTC communication.
     private let peerConnection: StreamRTCPeerConnectionProtocol
-    /// Factory for creating peer connection related objects.
+    /// Factory for creating WebRTC-related objects such as tracks and sources.
     private let peerConnectionFactory: PeerConnectionFactory
-    /// Adapter for communicating with the Selective Forwarding Unit (SFU).
+    /// Adapter for interacting with the Selective Forwarding Unit (SFU).
     private var sfuAdapter: SFUAdapter
-
+    /// The publishing options for video tracks, including dimensions and frame rate.
     private var publishOptions: [PublishOptions.VideoPublishOptions]
-    /// The factory for creating the capturer.
+    /// Factory for creating video capturers.
     private let capturerFactory: VideoCapturerProviding
-    /// Provider for screen sharing session information.
+    /// Provider for managing screen sharing sessions.
     private let screenShareSessionProvider: ScreenShareSessionProvider
-    /// The type of screen sharing currently active.
-
+    /// The primary video track used for screen sharing.
     private let primaryTrack: RTCVideoTrack
-
-    /// The screenshare capturer.
+    /// The screen sharing capturer for capturing screen frames.
     private var capturer: StreamVideoCapturer?
-
+    /// Storage for managing transceivers associated with the screen sharing session.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .screenshare)
-
-    /// A subject for publishing track-related events.
+    /// A publisher that emits events related to the screen sharing track.
     let subject: PassthroughSubject<TrackEvent, Never>
 
     /// Initializes a new instance of the LocalScreenShareMediaAdapter.
@@ -43,10 +42,12 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// - Parameters:
     ///   - sessionID: The unique identifier for the current session.
     ///   - peerConnection: The peer connection used for WebRTC communication.
-    ///   - peerConnectionFactory: Factory for creating peer connection related objects.
-    ///   - sfuAdapter: Adapter for communicating with the Selective Forwarding Unit (SFU).
+    ///   - peerConnectionFactory: Factory for creating WebRTC-related objects.
+    ///   - sfuAdapter: Adapter for interacting with the SFU.
+    ///   - publishOptions: Initial publishing options for video tracks.
     ///   - subject: A subject for publishing track-related events.
-    ///   - screenShareSessionProvider: Provider for screen sharing session information.
+    ///   - screenShareSessionProvider: Provider for managing screen sharing sessions.
+    ///   - capturerFactory: Factory for creating video capturers. Defaults to `StreamVideoCapturerFactory`.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -65,6 +66,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.subject = subject
         self.screenShareSessionProvider = screenShareSessionProvider
         self.capturerFactory = capturerFactory
+
+        // Initialize the primary track, using the existing session's local track if available.
         primaryTrack = {
             let source = screenShareSessionProvider
                 .activeSession?
@@ -79,6 +82,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     }
 
     /// Cleans up resources when the instance is being deallocated.
+    ///
+    /// This method removes all transceivers from storage and logs deallocation details.
     deinit {
         Task { @MainActor [transceiverStorage] in
             transceiverStorage.removeAll()
@@ -115,6 +120,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     }
 
     /// Publishes the local screen sharing track to the peer connection.
+    ///
+    /// This method enables the primary screen sharing track and creates
+    /// transceivers based on the specified publish options.
     func publish() {
         Task { @MainActor in
             guard
@@ -128,14 +136,13 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 try await startScreenShareCapturingSession()
                 primaryTrack.isEnabled = true
 
-                publishOptions
-                    .forEach {
-                        addOrUpdateTransceiver(
-                            for: $0,
-                            with: primaryTrack.clone(from: peerConnectionFactory),
-                            screenSharingType: activeSession.screenSharingType
-                        )
-                    }
+                publishOptions.forEach {
+                    addOrUpdateTransceiver(
+                        for: $0,
+                        with: primaryTrack.clone(from: peerConnectionFactory),
+                        screenSharingType: activeSession.screenSharingType
+                    )
+                }
 
                 log.debug(
                     """
@@ -152,6 +159,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     }
 
     /// Unpublishes the local screen sharing track from the peer connection.
+    ///
+    /// This method disables the primary screen sharing track and all associated
+    /// transceivers, and stops the screen sharing capturing session.
     func unpublish() {
         Task { @MainActor [weak self] in
             do {
@@ -165,8 +175,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
                 primaryTrack.isEnabled = false
 
-                transceiverStorage
-                    .forEach { $0.value.sender.track?.isEnabled = false }
+                transceiverStorage.forEach { $0.value.sender.track?.isEnabled = false }
 
                 try await stopScreenShareCapturingSession()
 
@@ -193,6 +202,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         /* No-op */
     }
 
+    /// Updates the publishing options for the screen sharing track.
+    ///
+    /// - Parameter publishOptions: The new publishing options to apply.
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
@@ -222,7 +234,6 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             Local screenShareTracks updated with:
                 PublishOptions:
                     \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
-                
                 TransceiverStorage:
                     \(transceiverStorage)
             """,
@@ -230,12 +241,19 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         )
     }
 
+    /// Adjusts the publishing quality of the screen sharing track.
+    ///
+    /// - Parameter layerSettings: The new quality settings for video layers.
     func changePublishQuality(
         with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
         /* No-op */
     }
 
+    /// Retrieves information about the active screen sharing tracks.
+    ///
+    /// - Returns: An array of track information including track ID, layers,
+    ///   and mute state.
     func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
         transceiverStorage
             .filter { $0.value.sender.track != nil }
@@ -256,7 +274,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     // MARK: - Screensharing
 
-    /// Begins screen sharing of the specified type.
+    /// Begins a screen sharing session of the specified type.
     ///
     /// - Parameters:
     ///   - type: The type of screen sharing to begin.
@@ -299,8 +317,14 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         unpublish()
     }
 
-    // MARK: - Private helpers
+    // MARK: - Private Helpers
 
+    /// Adds or updates a transceiver for a given track and publishing option.
+    ///
+    /// - Parameters:
+    ///   - options: The publishing options for the track.
+    ///   - track: The video track to add or update.
+    ///   - screenSharingType: The type of screen sharing.
     private func addOrUpdateTransceiver(
         for options: PublishOptions.VideoPublishOptions,
         with track: RTCVideoTrack,
@@ -323,6 +347,11 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         }
     }
 
+    /// Configures the active screen sharing session with the given type and track.
+    ///
+    /// - Parameters:
+    ///   - screenSharingType: The type of screen sharing.
+    ///   - track: The video track to use for the session.
     private func configureActiveScreenShareSession(
         screenSharingType: ScreensharingType,
         track: RTCVideoTrack
@@ -358,6 +387,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         }
     }
 
+    /// Starts the screen sharing capturing session.
+    ///
+    /// Configures the session with the highest specified dimensions and frame rate.
     private func startScreenShareCapturingSession() async throws {
         let capturingDimension = publishOptions
             .map(\.dimensions)
@@ -398,6 +430,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         )
     }
 
+    /// Stops the current screen sharing capturing session.
+    ///
+    /// Cleans up the active session and stops the associated capturer.
     private func stopScreenShareCapturingSession() async throws {
         guard
             let activeSession = screenShareSessionProvider.activeSession
