@@ -22,15 +22,6 @@ public struct CallStatsReport: Sendable {
     public let participantsStats: ParticipantsStats
     /// The timestamp when the call stats report was generated.
     public let timestamp: Double
-
-    public var publishedCodecs: Set<String> {
-        Set(
-            publisherBaseStats
-                .compactMap(\.codec)
-                .compactMap { $0.split(separator: "/").last }
-                .map(String.init)
-        )
-    }
 }
 
 /// A struct representing statistics for participants in the call.

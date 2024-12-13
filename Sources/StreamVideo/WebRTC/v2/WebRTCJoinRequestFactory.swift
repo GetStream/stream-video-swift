@@ -29,6 +29,7 @@ struct WebRTCJoinRequestFactory {
     /// - Parameters:
     ///   - connectionType: The type of connection for the join request.
     ///   - coordinator: The WebRTC coordinator.
+    ///   - publisherSdp: The publisher's SDP.
     ///   - subscriberSdp: The subscriber's SDP.
     ///   - reconnectAttempt: The number of reconnect attempts.
     ///   - publisher: The RTC peer connection coordinator for publishing.

@@ -8,10 +8,10 @@ import StreamWebRTC
 /// A factory class for creating WebRTC-related objects such as peer connections,
 /// video sources, and audio tracks.
 final class PeerConnectionFactory: @unchecked Sendable {
-
+    
     /// The audio processing module associated with this factory.
     private let audioProcessingModule: RTCAudioProcessingModule
-
+    
     /// Lazy-loaded RTCPeerConnectionFactory instance.
     private lazy var factory: RTCPeerConnectionFactory = {
         let encoderFactory = RTCVideoEncoderFactorySimulcast(
@@ -26,23 +26,23 @@ final class PeerConnectionFactory: @unchecked Sendable {
             audioProcessingModule: audioProcessingModule
         )
     }()
-
+    
     /// Lazy-loaded default video encoder factory.
     private lazy var defaultEncoder = RTCDefaultVideoEncoderFactory()
-
+    
     /// Lazy-loaded default video decoder factory.
     private lazy var defaultDecoder = RTCDefaultVideoDecoderFactory()
-
+    
     /// Array of supported video codec information for encoding.
     var supportedVideoCodecEncoding: [RTCVideoCodecInfo] {
         defaultEncoder.supportedCodecs()
     }
-
+    
     /// Array of supported video codec information for decoding.
     var supportedVideoCodecDecoding: [RTCVideoCodecInfo] {
         defaultDecoder.supportedCodecs()
     }
-
+    
     /// Creates or retrieves a PeerConnectionFactory instance for a given
     /// audio processing module.
     /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
@@ -58,7 +58,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
             return .init(audioProcessingModule)
         }
     }
-
+    
     /// Private initializer to ensure instances are created through the `build` method.
     /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.
     private init(_ audioProcessingModule: RTCAudioProcessingModule) {
@@ -66,13 +66,13 @@ final class PeerConnectionFactory: @unchecked Sendable {
         _ = factory
         PeerConnectionFactoryStorage.shared.store(self, for: audioProcessingModule)
     }
-
+    
     deinit {
         PeerConnectionFactoryStorage.shared.remove(for: audioProcessingModule)
     }
-
+    
     // MARK: - Builders
-
+    
     /// Creates a video source, optionally configured for screen sharing.
     /// - Parameter forScreenShare: Boolean indicating if the source is for screen sharing.
     /// - Returns: An RTCVideoSource instance.
@@ -87,7 +87,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         )
         return result
     }
-
+    
     /// Creates a video track from a given video source.
     /// - Parameter source: The RTCVideoSource to use for the track.
     /// - Returns: An RTCVideoTrack instance.
@@ -102,7 +102,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         )
         return result
     }
-
+    
     /// Creates an audio source with optional constraints.
     /// - Parameter constraints: Optional RTCMediaConstraints for the audio source.
     /// - Returns: An RTCAudioSource instance.
@@ -116,7 +116,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         )
         return result
     }
-
+    
     /// Creates an audio track from a given audio source.
     /// - Parameter source: The RTCAudioSource to use for the track.
     /// - Returns: An RTCAudioTrack instance.
@@ -131,7 +131,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         )
         return result
     }
-
+    
     /// Creates a peer connection with the specified configuration, constraints, and delegate.
     /// - Parameters:
     ///   - configuration: The RTCConfiguration to use.
@@ -151,12 +151,29 @@ final class PeerConnectionFactory: @unchecked Sendable {
         ) else {
             throw ClientError.Unexpected()
         }
-
+        
         return peerConnection
     }
-
+    
     // MARK: - Capabilities
-
+    
+    /// Retrieves codec capabilities for a specific audio codec.
+    ///
+    /// - Parameter audioCodec: The `AudioCodec` for which to fetch codec capabilities.
+    /// - Returns: An `RTCRtpCodecCapability` instance if the codec is supported,
+    ///   or `nil` if no matching capability is found.
+    ///
+    /// ## Overview
+    /// This method queries the audio codec capabilities available in the underlying
+    /// WebRTC framework for use in RTP (Real-Time Protocol) streaming. It ensures
+    /// that only the baseline configuration of the codec is returned.
+    ///
+    /// ## Example
+    /// ```swift
+    /// if let capability = factory.codecCapabilities(for: .opus) {
+    ///     print("Supports Opus codec with capability: \(capability)")
+    /// }
+    /// ```
     func codecCapabilities(
         for audioCodec: AudioCodec
     ) -> RTCRtpCodecCapability? {
@@ -165,7 +182,24 @@ final class PeerConnectionFactory: @unchecked Sendable {
             .codecs
             .baseline(for: audioCodec)
     }
-
+    
+    /// Retrieves codec capabilities for a specific video codec.
+    ///
+    /// - Parameter videoCodec: The `VideoCodec` for which to fetch codec capabilities.
+    /// - Returns: An `RTCRtpCodecCapability` instance if the codec is supported,
+    ///   or `nil` if no matching capability is found.
+    ///
+    /// ## Overview
+    /// This method queries the video codec capabilities available in the underlying
+    /// WebRTC framework for use in RTP (Real-Time Protocol) streaming. It ensures
+    /// that only the baseline configuration of the codec is returned.
+    ///
+    /// ## Example
+    /// ```swift
+    /// if let capability = factory.codecCapabilities(for: .h264) {
+    ///     print("Supports H.264 codec with capability: \(capability)")
+    /// }
+    /// ```
     func codecCapabilities(
         for videoCodec: VideoCodec
     ) -> RTCRtpCodecCapability? {
@@ -180,13 +214,13 @@ final class PeerConnectionFactory: @unchecked Sendable {
 final class PeerConnectionFactoryStorage {
     /// Shared singleton instance of PeerConnectionFactoryStorage.
     static let shared = PeerConnectionFactoryStorage()
-
+    
     /// Dictionary to store PeerConnectionFactory instances, keyed by module address.
     private var storage: [String: PeerConnectionFactory] = [:]
-
+    
     /// Queue to ensure thread-safe access to the storage.
     private let queue = UnfairQueue()
-
+    
     /// Stores a PeerConnectionFactory instance for a given RTCAudioProcessingModule.
     /// - Parameters:
     ///   - factory: The PeerConnectionFactory to store.
@@ -199,7 +233,7 @@ final class PeerConnectionFactoryStorage {
             storage[key(for: module)] = factory
         }
     }
-
+    
     /// Retrieves a PeerConnectionFactory instance for a given RTCAudioProcessingModule.
     /// - Parameter module: The RTCAudioProcessingModule to lookup.
     /// - Returns: The associated PeerConnectionFactory, if found.
@@ -208,7 +242,7 @@ final class PeerConnectionFactoryStorage {
             storage[key(for: module)]
         }
     }
-
+    
     /// Removes a PeerConnectionFactory instance for a given RTCAudioProcessingModule.
     /// If the storage becomes empty after removal, it cleans up SSL.
     /// - Parameter module: The RTCAudioProcessingModule to remove.
@@ -223,7 +257,7 @@ final class PeerConnectionFactoryStorage {
             }
         }
     }
-
+    
     private func key(for object: AnyObject) -> String {
         "\(Unmanaged.passUnretained(object).toOpaque())"
     }

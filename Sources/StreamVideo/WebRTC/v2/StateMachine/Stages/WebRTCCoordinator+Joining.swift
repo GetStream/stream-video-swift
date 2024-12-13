@@ -300,6 +300,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
         }
 
         /// Performs the join process.
+        /// The steps we should follow are:
+        /// - Wait for the joinResponse.
+        /// - Extract the publishOptions from the joinResponse and update the WebRTCStateAdapter.
+        /// - If we are not fastReconnecting, configure our peerConnections (and restore screenSharing)
+        /// if required.
+        /// - Extract participants from the joinResponse and update the WebRTCStateAdapter.
+        /// - Extract callSettings from the joinResponse and update the WebRTCStateAdapter.
+        /// - Extract fastReconnectionDeadline from the joinResponse and update the context.
+        /// - Wait for the webSocket state to become `.connected`.
+        /// - Report telemetry.
+        ///
         /// - Parameters:
         ///   - coordinator: The WebRTC coordinator.
         ///   - sfuAdapter: The SFU adapter.
