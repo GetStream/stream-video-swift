@@ -6,10 +6,10 @@ import Foundation
 import ReplayKit
 import StreamWebRTC
 
-final class BroadcastStartCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
+final class BroadcastCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
 
     private struct Session {
-        var frameRate: Int = 15
+        var frameRate: Int = .defaultScreenShareFrameRate
         var adaptedOutputFormat: Bool = false
         var preferredDimensions: CGSize
         var videoSource: RTCVideoSource
@@ -32,7 +32,9 @@ final class BroadcastStartCaptureHandler: StreamVideoCapturerActionHandler, @unc
                 videoCapturerDelegate: videoCapturerDelegate
             )
         case .stopCapture:
+            broadcastBufferReader.stopCapturing()
             activeSession = nil
+            log.debug("\(type(of: self)) stopped capturing.", subsystems: .videoCapturer)
         default:
             break
         }
