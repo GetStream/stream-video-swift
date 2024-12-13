@@ -85,7 +85,17 @@ struct DemoStatsView: View {
                             viewModel,
                             title: "PUBLISH RESOLUTION",
                             value: "none",
-                            titleTransformer: { publishResolutionTitle(for: $0) },
+                            titleTransformer: { report in
+                                let codec = report?
+                                    .publisherBaseStats
+                                    .last?
+                                    .codec
+                                if let codec = codec?.split(separator: "/").last {
+                                    return "PUBLISH RESOLUTION(\(codec))"
+                                } else {
+                                    return "PUBLISH RESOLUTION"
+                                }
+                            },
                             valueTransformer: { resolutionFormatter(from: $0?.publisherStats) }
                         )
                     } _: {
@@ -211,16 +221,6 @@ struct DemoStatsView: View {
         let diff = newValue - oldValue
         let bits = diff * 8
         return bytesFormatter(from: max(bits / statsCollectionInterval, 0))
-    }
-
-    private func publishResolutionTitle(
-        for report: CallStatsReport?
-    ) -> String {
-        if let codecs = report?.publishedCodecs, !codecs.isEmpty {
-            return "PUBLISH RESOLUTION(\(codecs.joined(separator: ",")))"
-        } else {
-            return "PUBLISH RESOLUTION"
-        }
     }
 }
 

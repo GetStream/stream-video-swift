@@ -523,6 +523,9 @@ final class SFUEventAdapter {
         }
     }
 
+    /// Handles a ChangePublishOptions event.
+    ///
+    /// - Parameter event: The ChangePublishOptions event to handle.
     private func handleChangePublishOptions(
         _ event: Stream_Video_Sfu_Event_ChangePublishOptions
     ) async {

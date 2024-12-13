@@ -78,6 +78,7 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     public static let thermalState = Self(rawValue: 1 << 11)
     /// The subsystem responsible for interacting with the AudioSession.
     public static let audioSession = Self(rawValue: 1 << 12)
+    /// The subsystem responsible for VideoCapturing components.
     public static let videoCapturer = Self(rawValue: 1 << 13)
 
     public var description: String {

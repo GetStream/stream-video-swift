@@ -5,13 +5,30 @@
 import AVFoundation
 import Foundation
 
-/// Extension adding utility for retrieving frame rate range of an `AVCaptureDevice.Format`.
+/// Extension adding utility methods for `AVCaptureDevice.Format` to simplify
+/// working with video capture formats, such as retrieving dimensions and
+/// supported frame rates.
 extension AVCaptureDevice.Format {
 
+    /// The video dimensions (width and height in pixels) of the capture format.
+    ///
+    /// - Returns: A `CMVideoDimensions` structure representing the format's
+    ///   width and height.
+    ///
+    /// This property retrieves the dimensions directly from the format's
+    /// description. Useful for comparing and selecting formats based on size.
     var dimensions: CMVideoDimensions {
         CMVideoFormatDescriptionGetDimensions(formatDescription)
     }
 
+    /// Computes the area difference between the format's dimensions and a target.
+    ///
+    /// - Parameter target: The target video dimensions to compare against.
+    /// - Returns: An `Int32` representing the absolute difference in area
+    ///   (width × height) between the format's dimensions and the target.
+    ///
+    /// This method is used to evaluate how closely a format's dimensions
+    /// match a desired size.
     func areaDiff(_ target: CMVideoDimensions) -> Int32 {
         abs(dimensions.area - target.area)
     }
@@ -41,36 +58,5 @@ extension AVCaptureDevice.Format {
             .max() ?? 0
 
         return (Int(minFrameRate)...Int(maxFrameRate))
-    }
-}
-
-extension Array where Element == AVCaptureDevice.Format {
-    enum Requirement {
-        case area(preferredDimensions: CMVideoDimensions)
-        case frameRate(preferredFrameRate: Int)
-        case minimumAreaDifference(preferredDimensions: CMVideoDimensions)
-    }
-
-    func first(with requirements: [Requirement]) -> AVCaptureDevice.Format? {
-        var possibleResults = self
-
-        for requirement in requirements {
-            switch requirement {
-            case let .area(preferredDimensions: preferredDimensions):
-                possibleResults = possibleResults.filter { $0.dimensions.area >= preferredDimensions.area }
-            case let .frameRate(preferredFrameRate: preferredFrameRate):
-                possibleResults = possibleResults.filter { $0.frameRateRange.contains(preferredFrameRate) }
-            case let .minimumAreaDifference(preferredDimensions):
-                let result = possibleResults
-                    .min { $0.areaDiff(preferredDimensions) < $1.areaDiff(preferredDimensions) }
-                if let result {
-                    possibleResults = [result]
-                } else {
-                    possibleResults = []
-                }
-            }
-        }
-
-        return possibleResults.first
     }
 }

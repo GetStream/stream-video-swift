@@ -9,6 +9,7 @@ import StreamWebRTC
 /// Represents a WebRTC peer connection with additional Stream-specific functionality.
 final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked Sendable {
 
+    /// A dictionary groups transceivers based on the type of their carrying track.
     @Atomic private var transceiversMap: [TrackType: [RTCRtpTransceiver]] = [:]
 
     /// The remote session description of the peer connection.

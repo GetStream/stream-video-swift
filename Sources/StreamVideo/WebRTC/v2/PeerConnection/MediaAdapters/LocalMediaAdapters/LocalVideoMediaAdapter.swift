@@ -8,62 +8,74 @@ import Foundation
 import StreamWebRTC
 
 /// A class that manages local video media for a call session.
+///
+/// `LocalVideoMediaAdapter` handles the configuration, lifecycle, and
+/// publication of local video tracks in a WebRTC session. It supports dynamic
+/// video settings such as camera switching, zoom, and focus, and integrates
+/// seamlessly with the WebRTC framework.
 final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     @Injected(\.videoCapturePolicy) private var videoCapturePolicy
     @Injected(\.captureDeviceProvider) private var captureDeviceProvider
 
-    /// The unique identifier for the current session.
+    /// A unique identifier representing the current call session.
     private let sessionID: String
 
-    /// The WebRTC peer connection.
+    /// The WebRTC peer connection used for handling media streams.
     private let peerConnection: StreamRTCPeerConnectionProtocol
 
-    /// The factory for creating WebRTC peer connection components.
+    /// A factory for creating WebRTC components such as video sources and tracks.
     private let peerConnectionFactory: PeerConnectionFactory
 
-    /// The adapter for communicating with the Selective Forwarding Unit (SFU).
+    /// An adapter for communicating with the Selective Forwarding Unit (SFU).
     private var sfuAdapter: SFUAdapter
 
-    /// The video options for the call.
+    /// Options that define the video settings for the current call.
     private let videoOptions: VideoOptions
 
-    /// The video configuration for the call.
+    /// Configuration details for video, such as resolution and frame rate.
     private let videoConfig: VideoConfig
 
+    /// The current publish options for the video track, defining encodings and layers.
     private var publishOptions: [PublishOptions.VideoPublishOptions]
 
-    /// The factory for creating the capturer.
+    /// A factory for creating video capturers based on the current settings.
     private let capturerFactory: VideoCapturerProviding
 
-    /// The stream identifiers for this video adapter.
+    /// Stream identifiers associated with this adapter, used for tracking.
     private let streamIds: [String]
 
+    /// A storage container for managing video transceivers.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .video)
 
+    /// The primary video track used in the current session.
     private let primaryTrack: RTCVideoTrack
 
+    /// A provider for managing the video capture session.
     private let videoCaptureSessionProvider: VideoCaptureSessionProvider
 
-    /// The video capturer.
+    /// The capturer responsible for capturing video frames.
     private var capturer: StreamVideoCapturer?
 
-    /// A publisher that emits track events.
+    /// A publisher that emits events related to video track changes.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
 
-    /// Initializes a new instance of the local video media adapter.
+    /// Initializes a new instance of the `LocalVideoMediaAdapter`.
     ///
     /// - Parameters:
-    ///   - sessionID: The unique identifier for the current session.
-    ///   - peerConnection: The WebRTC peer connection.
-    ///   - peerConnectionFactory: The factory for creating WebRTC peer connection components.
-    ///   - sfuAdapter: The adapter for communicating with the SFU.
-    ///   - videoOptions: The video options for the call.
-    ///   - videoConfig: The video configuration for the call.
-    ///   - publishOptions: TODO
-    ///   - subject: A publisher that emits track events.
+    ///   - sessionID: A unique identifier for the call session.
+    ///   - peerConnection: The WebRTC peer connection for handling media.
+    ///   - peerConnectionFactory: A factory for creating WebRTC components.
+    ///   - sfuAdapter: An adapter for communicating with the SFU.
+    ///   - videoOptions: The video settings for the call.
+    ///   - videoConfig: Configuration for video, such as resolution and frame rate.
+    ///   - publishOptions: Initial publish options for the video track.
+    ///   - subject: A publisher for track-related events.
+    ///   - capturerFactory: A factory for creating video capturers. Defaults to `StreamVideoCapturerFactory`.
+    ///   - videoCaptureSessionProvider: A provider for managing video capture sessions.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -86,6 +98,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
+
+        // Initialize the primary video track, either from the active session or a new source.
         primaryTrack = {
             let source = videoCaptureSessionProvider
                 .activeSession?
@@ -94,13 +108,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return peerConnectionFactory.makeVideoTrack(source: source)
         }()
         primaryTrack.isEnabled = false
-        videoCaptureSessionProvider
-            .activeSession?
-            .localTrack = primaryTrack
+        videoCaptureSessionProvider.activeSession?.localTrack = primaryTrack
         streamIds = ["\(sessionID):video"]
     }
 
     /// Cleans up resources when the instance is deallocated.
+    ///
+    /// Removes all transceivers from storage and logs details about the
+    /// deallocation process.
     deinit {
         Task { @MainActor [transceiverStorage] in
             transceiverStorage.removeAll()
@@ -108,7 +123,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
         log.debug(
             """
-            Local videoTracks will be deallocated
+            Local video tracks will be deallocated:
                 primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
                 clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
             """,
@@ -239,6 +254,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
     }
 
+    /// Updates the publish options for the video track.
+    ///
+    /// - Parameter publishOptions: The updated publish options.
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
@@ -272,6 +290,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
     }
 
+    /// Retrieves track information for the local video tracks.
+    ///
+    /// - Returns: An array of track information, including ID and layers.
     func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
         transceiverStorage
             .filter { $0.value.sender.track != nil }
@@ -500,6 +521,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     // MARK: - Private helpers
 
+    /// Configures the active video capture session.
+    ///
+    /// - Parameters:
+    ///   - position: The desired camera position.
+    ///   - track: The video track to configure.
     private func configureActiveVideoCaptureSession(
         position: AVCaptureDevice.Position,
         track: RTCVideoTrack
@@ -541,6 +567,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
     }
 
+    /// Starts the video capturing session.
+    ///
+    /// Configures the session with the highest resolution and frame rate based on publish options.
     private func startVideoCapturingSession() async throws {
         let capturingDimension = publishOptions
             .map(\.dimensions)
@@ -591,6 +620,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
     }
 
+    /// Stops the video capturing session.
+    ///
+    /// Cleans up the active session and stops the capturer.
     private func stopVideoCapturingSession() async throws {
         guard
             let activeSession = videoCaptureSessionProvider.activeSession,
@@ -625,6 +657,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
     }
 
+    /// Adds or updates a transceiver for a video track.
+    ///
+    /// - Parameters:
+    ///   - options: The publish options for the track.
+    ///   - track: The video track to add or update.
     private func addOrUpdateTransceiver(
         for options: PublishOptions.VideoPublishOptions,
         with track: RTCVideoTrack

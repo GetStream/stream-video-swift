@@ -32,7 +32,7 @@ extension RTCRtpTransceiverInit {
             return .init(
                 direction: .sendOnly,
                 streamIds: ["temp-audio"],
-                audioOptions: .init(id: 0, codec: .none)
+                audioOptions: .init(id: 0, codec: .unknown)
             )
         case .video, .screenshare:
             let streamId = trackType == .video ? "temp-video" : "temp-screenshare"
@@ -115,17 +115,11 @@ extension RTCRtpTransceiverInit {
             videoOptions,
             trackType: trackType == .video ? .video : .screenShare
         )
-        let videoLayers = VideoLayerFactory()
-            .videoLayers(for: publishOption)
+        let videoLayers = publishOption.videoLayers()
 
-        var sendEncodings = videoLayers
+        let sendEncodings = videoLayers
             .map { RTCRtpEncodingParameters($0, videoPublishOptions: videoOptions) }
-
-        if videoOptions.codec.isSVC {
-            sendEncodings = sendEncodings
-                .filter { $0.rid == VideoLayer.full.quality.rawValue }
-            sendEncodings.first?.rid = VideoLayer.quarter.quality.rawValue
-        }
+            .prepareIfRequired(usesSVCCodec: videoOptions.codec.isSVC)
 
         if trackType == .screenshare {
             sendEncodings.forEach { $0.isActive = true }
