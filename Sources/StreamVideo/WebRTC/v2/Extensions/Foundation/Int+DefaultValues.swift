@@ -11,6 +11,9 @@ extension Int {
     /// Typically used for video publishing when no specific frame rate is set.
     public static let defaultFrameRate: Int = 30
 
+    /// The default frame rate for screenShare streams.
+    public static let defaultScreenShareFrameRate: Int = 25
+
     /// The maximum bitrate for video streams, in bits per second.
     ///
     /// Used to limit the data rate for video publishing to optimize quality

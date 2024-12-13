@@ -136,8 +136,7 @@ actor StreamVideoCapturer {
             videoCapturer: videoCapturer,
             videoCapturerDelegate: videoCapturerDelegate,
             actionHandlers: [
-                SimulatorStartCaptureHandler(),
-                SimulatorStopCaptureHandler()
+                SimulatorCaptureHandler()
             ]
         )
         #else
@@ -150,8 +149,7 @@ actor StreamVideoCapturer {
             videoCapturerDelegate: videoCapturerDelegate,
             actionHandlers: [
                 CameraBackgroundAccessHandler(),
-                CameraStartCaptureHandler(),
-                CameraStopCaptureHandler(),
+                CameraCaptureHandler(),
                 CameraFocusHandler(),
                 CameraCapturePhotoHandler(),
                 CameraVideoOutputHandler(),
@@ -169,8 +167,7 @@ actor StreamVideoCapturer {
             videoCapturer: RTCVideoCapturer(delegate: videoSource),
             videoCapturerDelegate: videoSource,
             actionHandlers: [
-                ScreenShareStartCaptureHandler(),
-                ScreenShareStopCaptureHandler()
+                ScreenShareCaptureHandler()
             ]
         )
     }
@@ -183,8 +180,7 @@ actor StreamVideoCapturer {
             videoCapturer: RTCVideoCapturer(delegate: videoSource),
             videoCapturerDelegate: videoSource,
             actionHandlers: [
-                BroadcastStartCaptureHandler(),
-                BroadcastStopCaptureHandler()
+                BroadcastCaptureHandler()
             ]
         )
     }

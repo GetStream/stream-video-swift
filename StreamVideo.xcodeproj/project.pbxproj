@@ -542,20 +542,16 @@
 		40E363452D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */; };
 		40E363492D09F6BB0028C52A /* StreamVideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363482D09F6B20028C52A /* StreamVideoCapturer.swift */; };
 		40E3634C2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3634B2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift */; };
-		40E3634E2D09FDE50028C52A /* CameraStartCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3634D2D09FDDF0028C52A /* CameraStartCaptureHandler.swift */; };
+		40E3634E2D09FDE50028C52A /* CameraCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3634D2D09FDDF0028C52A /* CameraCaptureHandler.swift */; };
 		40E363502D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3634F2D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift */; };
 		40E363522D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */; };
-		40E363562D0A11D30028C52A /* CameraStopCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363552D0A11D30028C52A /* CameraStopCaptureHandler.swift */; };
 		40E363592D0A139E0028C52A /* CameraFocusHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363582D0A139E0028C52A /* CameraFocusHandler.swift */; };
 		40E3635B2D0A15E40028C52A /* CameraCapturePhotoHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3635A2D0A15E40028C52A /* CameraCapturePhotoHandler.swift */; };
 		40E3635D2D0A17C10028C52A /* CameraVideoOutputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3635C2D0A17C10028C52A /* CameraVideoOutputHandler.swift */; };
 		40E3635F2D0A18B10028C52A /* CameraZoomHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3635E2D0A18B10028C52A /* CameraZoomHandler.swift */; };
-		40E363622D0A1C2E0028C52A /* SimulatorStartCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363612D0A1C2E0028C52A /* SimulatorStartCaptureHandler.swift */; };
-		40E363642D0A1C360028C52A /* SimulatorStopCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363632D0A1C360028C52A /* SimulatorStopCaptureHandler.swift */; };
-		40E3636C2D0A24390028C52A /* ScreenShareStartCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3636B2D0A24310028C52A /* ScreenShareStartCaptureHandler.swift */; };
-		40E3636E2D0A26B40028C52A /* ScreenShareStopCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3636D2D0A26B40028C52A /* ScreenShareStopCaptureHandler.swift */; };
-		40E363712D0A27640028C52A /* BroadcastStartCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363702D0A27640028C52A /* BroadcastStartCaptureHandler.swift */; };
-		40E363732D0A277C0028C52A /* BroadcastStopCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363722D0A277C0028C52A /* BroadcastStopCaptureHandler.swift */; };
+		40E363622D0A1C2E0028C52A /* SimulatorCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363612D0A1C2E0028C52A /* SimulatorCaptureHandler.swift */; };
+		40E3636C2D0A24390028C52A /* ScreenShareCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3636B2D0A24310028C52A /* ScreenShareCaptureHandler.swift */; };
+		40E363712D0A27640028C52A /* BroadcastCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363702D0A27640028C52A /* BroadcastCaptureHandler.swift */; };
 		40E363752D0A2C6B0028C52A /* CGSize+Adapt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363742D0A2C6B0028C52A /* CGSize+Adapt.swift */; };
 		40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */; };
 		40E9B3B12BCD755F00ACF18F /* MemberResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */; };
@@ -1877,20 +1873,16 @@
 		40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Format+Convenience.swift"; sourceTree = "<group>"; };
 		40E363482D09F6B20028C52A /* StreamVideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoCapturer.swift; sourceTree = "<group>"; };
 		40E3634B2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraBackgroundAccessHandler.swift; sourceTree = "<group>"; };
-		40E3634D2D09FDDF0028C52A /* CameraStartCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStartCaptureHandler.swift; sourceTree = "<group>"; };
+		40E3634D2D09FDDF0028C52A /* CameraCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureHandler.swift; sourceTree = "<group>"; };
 		40E3634F2D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCaptureDeviceProvider.swift; sourceTree = "<group>"; };
 		40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice+OutputFormat.swift"; sourceTree = "<group>"; };
-		40E363552D0A11D30028C52A /* CameraStopCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraStopCaptureHandler.swift; sourceTree = "<group>"; };
 		40E363582D0A139E0028C52A /* CameraFocusHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFocusHandler.swift; sourceTree = "<group>"; };
 		40E3635A2D0A15E40028C52A /* CameraCapturePhotoHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCapturePhotoHandler.swift; sourceTree = "<group>"; };
 		40E3635C2D0A17C10028C52A /* CameraVideoOutputHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraVideoOutputHandler.swift; sourceTree = "<group>"; };
 		40E3635E2D0A18B10028C52A /* CameraZoomHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraZoomHandler.swift; sourceTree = "<group>"; };
-		40E363612D0A1C2E0028C52A /* SimulatorStartCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorStartCaptureHandler.swift; sourceTree = "<group>"; };
-		40E363632D0A1C360028C52A /* SimulatorStopCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorStopCaptureHandler.swift; sourceTree = "<group>"; };
-		40E3636B2D0A24310028C52A /* ScreenShareStartCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenShareStartCaptureHandler.swift; sourceTree = "<group>"; };
-		40E3636D2D0A26B40028C52A /* ScreenShareStopCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenShareStopCaptureHandler.swift; sourceTree = "<group>"; };
-		40E363702D0A27640028C52A /* BroadcastStartCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastStartCaptureHandler.swift; sourceTree = "<group>"; };
-		40E363722D0A277C0028C52A /* BroadcastStopCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastStopCaptureHandler.swift; sourceTree = "<group>"; };
+		40E363612D0A1C2E0028C52A /* SimulatorCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorCaptureHandler.swift; sourceTree = "<group>"; };
+		40E3636B2D0A24310028C52A /* ScreenShareCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenShareCaptureHandler.swift; sourceTree = "<group>"; };
+		40E363702D0A27640028C52A /* BroadcastCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastCaptureHandler.swift; sourceTree = "<group>"; };
 		40E363742D0A2C6B0028C52A /* CGSize+Adapt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+Adapt.swift"; sourceTree = "<group>"; };
 		40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferReaderKey.swift; sourceTree = "<group>"; };
 		40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberResponse+Dummy.swift"; sourceTree = "<group>"; };
@@ -4167,8 +4159,7 @@
 			isa = PBXGroup;
 			children = (
 				40E3634B2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift */,
-				40E3634D2D09FDDF0028C52A /* CameraStartCaptureHandler.swift */,
-				40E363552D0A11D30028C52A /* CameraStopCaptureHandler.swift */,
+				40E3634D2D09FDDF0028C52A /* CameraCaptureHandler.swift */,
 				40E363582D0A139E0028C52A /* CameraFocusHandler.swift */,
 				40E3635E2D0A18B10028C52A /* CameraZoomHandler.swift */,
 				40E3635A2D0A15E40028C52A /* CameraCapturePhotoHandler.swift */,
@@ -4180,8 +4171,7 @@
 		40E363602D0A1C180028C52A /* Simulator */ = {
 			isa = PBXGroup;
 			children = (
-				40E363612D0A1C2E0028C52A /* SimulatorStartCaptureHandler.swift */,
-				40E363632D0A1C360028C52A /* SimulatorStopCaptureHandler.swift */,
+				40E363612D0A1C2E0028C52A /* SimulatorCaptureHandler.swift */,
 			);
 			path = Simulator;
 			sourceTree = "<group>";
@@ -4189,8 +4179,7 @@
 		40E3636A2D0A24280028C52A /* ScreenShare */ = {
 			isa = PBXGroup;
 			children = (
-				40E3636B2D0A24310028C52A /* ScreenShareStartCaptureHandler.swift */,
-				40E3636D2D0A26B40028C52A /* ScreenShareStopCaptureHandler.swift */,
+				40E3636B2D0A24310028C52A /* ScreenShareCaptureHandler.swift */,
 			);
 			path = ScreenShare;
 			sourceTree = "<group>";
@@ -4198,8 +4187,7 @@
 		40E3636F2D0A27590028C52A /* Broadcast */ = {
 			isa = PBXGroup;
 			children = (
-				40E363702D0A27640028C52A /* BroadcastStartCaptureHandler.swift */,
-				40E363722D0A277C0028C52A /* BroadcastStopCaptureHandler.swift */,
+				40E363702D0A27640028C52A /* BroadcastCaptureHandler.swift */,
 			);
 			path = Broadcast;
 			sourceTree = "<group>";
@@ -6565,7 +6553,7 @@
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
 				402D0E8A2D0C94E600E9B83F /* RTCVideoTrack+Clone.swift in Sources */,
 				406B3BD92C8F337000FC93A1 /* MediaAdapting.swift in Sources */,
-				40E363622D0A1C2E0028C52A /* SimulatorStartCaptureHandler.swift in Sources */,
+				40E363622D0A1C2E0028C52A /* SimulatorCaptureHandler.swift in Sources */,
 				4065839B2B877ADA00B4F979 /* CIImage+Sendable.swift in Sources */,
 				84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */,
 				84A737CE28F4716E001A6769 /* signal.pb.swift in Sources */,
@@ -6581,7 +6569,6 @@
 				406B3C3C2C9197FF00FC93A1 /* WebRTCConfiguration.swift in Sources */,
 				84D2E37829DC856D001D2118 /* CallMemberUpdatedPermissionEvent.swift in Sources */,
 				84F3B0E0289150B10088751D /* CallParticipant.swift in Sources */,
-				40E363562D0A11D30028C52A /* CameraStopCaptureHandler.swift in Sources */,
 				406B3BEB2C8F386100FC93A1 /* RTCRtpReceiver+CustomStringConvertible.swift in Sources */,
 				842B8E292A2DFED900863A87 /* StartTranscriptionResponse.swift in Sources */,
 				843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */,
@@ -6663,7 +6650,6 @@
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
 				40BBC4DE2C63A507002AEF92 /* WebRTCCoordinator+CleanUp.swift in Sources */,
 				84CD12222C73831000056640 /* CallRtmpBroadcastStoppedEvent.swift in Sources */,
-				40E3636E2D0A26B40028C52A /* ScreenShareStopCaptureHandler.swift in Sources */,
 				40FB15212BF78FA100D5E580 /* Publisher+NextValue.swift in Sources */,
 				40F646242C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift in Sources */,
 				40382F282C88B80C00C2D00F /* SignalServerEvent.swift in Sources */,
@@ -6727,7 +6713,7 @@
 				40FA12F22B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift in Sources */,
 				8490032629D308A000AD9BB4 /* TranscriptionSettings.swift in Sources */,
 				841BAA342BD15CDE000C73E4 /* GeolocationResult.swift in Sources */,
-				40E363712D0A27640028C52A /* BroadcastStartCaptureHandler.swift in Sources */,
+				40E363712D0A27640028C52A /* BroadcastCaptureHandler.swift in Sources */,
 				848CCCEB2AB8ED8F002E83A2 /* CallHLSBroadcastingStoppedEvent.swift in Sources */,
 				40BBC4C42C638789002AEF92 /* RTCPeerConnectionCoordinator.swift in Sources */,
 				4067F3152CDA4094002E28BD /* StreamRTCAudioSession.swift in Sources */,
@@ -6952,7 +6938,7 @@
 				4159F1902C86FA41002B94D3 /* PublisherAggregateStats.swift in Sources */,
 				40C4DF482C1C2BFC0035DBC2 /* LastParticipantAutoLeavePolicy.swift in Sources */,
 				82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */,
-				40E3634E2D09FDE50028C52A /* CameraStartCaptureHandler.swift in Sources */,
+				40E3634E2D09FDE50028C52A /* CameraCaptureHandler.swift in Sources */,
 				406583922B877A1600B4F979 /* BackgroundImageFilterProcessor.swift in Sources */,
 				8490DD23298D5330007E53D2 /* Data+Gzip.swift in Sources */,
 				84DC38B829ADFCFD00946713 /* UpdateUserPermissionsResponse.swift in Sources */,
@@ -6973,7 +6959,7 @@
 				842B8E1D2A2DFED900863A87 /* EgressHLSResponse.swift in Sources */,
 				848CCCE82AB8ED8F002E83A2 /* StartHLSBroadcastingResponse.swift in Sources */,
 				84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */,
-				40E3636C2D0A24390028C52A /* ScreenShareStartCaptureHandler.swift in Sources */,
+				40E3636C2D0A24390028C52A /* ScreenShareCaptureHandler.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
 				4012B1892BFC9E6F006B0031 /* UnfairQueue.swift in Sources */,
 				840F59922A77FDCB00EF3EB2 /* UnpinResponse.swift in Sources */,
@@ -7022,14 +7008,12 @@
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				40BBC4CE2C639054002AEF92 /* WebRTCCoordinator+Error.swift in Sources */,
-				40E363732D0A277C0028C52A /* BroadcastStopCaptureHandler.swift in Sources */,
 				848CCCEA2AB8ED8F002E83A2 /* RecordSettingsResponse.swift in Sources */,
 				40BBC4A62C623D03002AEF92 /* RTCRtpTransceiverDirection+CustomStringConvertible.swift in Sources */,
 				84DC38BA29ADFCFD00946713 /* CallResponse.swift in Sources */,
 				843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */,
 				842E70DF2B91E84800D2D68B /* HealthCheckEvent.swift in Sources */,
 				84DC388F29ADFCFD00946713 /* CodableHelper.swift in Sources */,
-				40E363642D0A1C360028C52A /* SimulatorStopCaptureHandler.swift in Sources */,
 				8409465A29AF4EEC007AF5BF /* ReactionResponse.swift in Sources */,
 				402F04AA2B70ED8600CA1986 /* Statistics+Convenience.swift in Sources */,
 				8490032429D308A000AD9BB4 /* RingSettings.swift in Sources */,

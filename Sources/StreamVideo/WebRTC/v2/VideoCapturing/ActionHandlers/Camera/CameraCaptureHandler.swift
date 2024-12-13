@@ -7,7 +7,7 @@ import CoreMedia
 import Foundation
 import StreamWebRTC
 
-final class CameraStartCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
+final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
 
     private struct Configuration: Equatable, Sendable {
         /// The camera position to use for capturing (e.g., front or back camera).
@@ -78,8 +78,14 @@ final class CameraStartCaptureHandler: StreamVideoCapturerActionHandler, @unchec
                 videoCapturerDelegate: videoCapturerDelegate
             )
 
-        case .stopCapture:
+        case let .stopCapture(videoCapturer):
             activeConfiguration = nil
+            guard
+                let cameraVideoCapturer = videoCapturer as? RTCCameraVideoCapturer
+            else {
+                return
+            }
+            await executeStop(cameraVideoCapturer)
         default:
             break
         }
@@ -237,5 +243,14 @@ final class CameraStartCaptureHandler: StreamVideoCapturerActionHandler, @unchec
             "\(type(of: self)) updated capturing with configuration position:\(configuration.position) dimensions:\(configuration.dimensions) frameRate:\(configuration.frameRate).",
             subsystems: .videoCapturer
         )
+    }
+
+    private func executeStop(_ videoCapturer: RTCCameraVideoCapturer) async {
+        await withCheckedContinuation { continuation in
+            videoCapturer.stopCapture {
+                continuation.resume()
+            }
+        }
+        log.debug("\(type(of: self)) stopped capturing.", subsystems: .videoCapturer)
     }
 }

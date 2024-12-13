@@ -4,7 +4,7 @@
 
 import Foundation
 
-final class SimulatorStartCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
+final class SimulatorCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
 
     // MARK: - StreamVideoCapturerActionHandler
 
@@ -15,6 +15,11 @@ final class SimulatorStartCaptureHandler: StreamVideoCapturerActionHandler, @unc
                 return
             }
             simulatorCapturer.startCapturing()
+        case let .stopCapture(videoCapturer):
+            guard let simulatorCapturer = videoCapturer as? SimulatorScreenCapturer else {
+                return
+            }
+            simulatorCapturer.stopCapturing()
         default:
             break
         }

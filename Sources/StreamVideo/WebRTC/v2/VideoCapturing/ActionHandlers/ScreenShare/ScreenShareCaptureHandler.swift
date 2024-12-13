@@ -6,7 +6,7 @@ import Foundation
 import ReplayKit
 import StreamWebRTC
 
-final class ScreenShareStartCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
+final class ScreenShareCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
 
     private let recorder: RPScreenRecorder
     private var activeSession: Session?
@@ -33,6 +33,7 @@ final class ScreenShareStartCaptureHandler: StreamVideoCapturerActionHandler, @u
             )
         case .stopCapture:
             activeSession = nil
+            try await stop()
         default:
             break
         }
@@ -146,5 +147,25 @@ final class ScreenShareStartCaptureHandler: StreamVideoCapturerActionHandler, @u
             activeSession.videoCapturer,
             didCapture: rtcFrame
         )
+    }
+
+    private func stop() async throws {
+        try await withCheckedThrowingContinuation { [weak self] continuation in
+            guard
+                let recorder = self?.recorder,
+                recorder.isRecording
+            else {
+                continuation.resume()
+                return
+            }
+
+            recorder.stopCapture { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
     }
 }
