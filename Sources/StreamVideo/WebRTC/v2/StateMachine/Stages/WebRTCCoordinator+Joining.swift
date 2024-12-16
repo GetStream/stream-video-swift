@@ -342,12 +342,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try Task.checkCancellation()
 
-            if !isFastReconnecting {
-                try await coordinator.stateAdapter.configurePeerConnections()
-            }
-
-            try Task.checkCancellation()
-
             let participants = joinResponse
                 .callState
                 .participants
@@ -360,22 +354,30 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try Task.checkCancellation()
 
+            sfuAdapter.sendHealthCheck()
+
+            try Task.checkCancellation()
+
+            if !isFastReconnecting {
+                try await coordinator.stateAdapter.configurePeerConnections()
+            }
+
+            try Task.checkCancellation()
+
             try await coordinator
                 .stateAdapter
                 .publisher?
                 .didUpdateCallSettings(await coordinator.stateAdapter.callSettings)
-
-            sfuAdapter.sendHealthCheck()
-
-            context.fastReconnectDeadlineSeconds = TimeInterval(
-                joinResponse.fastReconnectDeadlineSeconds
-            )
 
             try Task.checkCancellation()
 
             try await context.authenticator.waitForConnect(on: sfuAdapter)
 
             try Task.checkCancellation()
+
+            context.fastReconnectDeadlineSeconds = TimeInterval(
+                joinResponse.fastReconnectDeadlineSeconds
+            )
 
             reportTelemetry(
                 sessionId: await coordinator.stateAdapter.sessionID,

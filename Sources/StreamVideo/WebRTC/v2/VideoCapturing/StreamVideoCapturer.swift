@@ -197,6 +197,12 @@ actor StreamVideoCapturer {
         self.actionHandlers = actionHandlers
     }
 
+    // MARK: - Accessors
+
+    func actionHandler<T: StreamVideoCapturerActionHandler>() -> T? {
+        actionHandlers.first { $0 is T } as? T
+    }
+
     // MARK: - Actions
 
     func startCapture(

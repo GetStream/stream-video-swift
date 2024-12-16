@@ -35,12 +35,18 @@ extension RTCRtpTransceiverInit {
                 audioOptions: .init(id: 0, codec: .unknown)
             )
         case .video, .screenshare:
-            let streamId = trackType == .video ? "temp-video" : "temp-screenshare"
             return .init(
                 trackType: trackType,
                 direction: .sendOnly,
-                streamIds: [streamId],
-                videoOptions: .init(codec: .h264)
+                streamIds: [
+                    trackType == .video ? "temp-video" : "temp-screenshare"
+                ],
+                videoOptions: .init(
+                    codec: .h264,
+                    capturingLayers: trackType == .video
+                        ? .init(spatialLayers: 3, temporalLayers: 1)
+                        : .init(spatialLayers: 1, temporalLayers: 1)
+                )
             )
         default:
             return .init()
@@ -115,11 +121,25 @@ extension RTCRtpTransceiverInit {
             videoOptions,
             trackType: trackType == .video ? .video : .screenShare
         )
-        let videoLayers = publishOption.videoLayers()
+
+        let videoLayers = publishOption.videoLayers(
+            spatialLayersRequired: videoOptions.capturingLayers.spatialLayers
+        )
 
         let sendEncodings = videoLayers
-            .map { RTCRtpEncodingParameters($0, videoPublishOptions: videoOptions) }
-            .prepareIfRequired(usesSVCCodec: videoOptions.codec.isSVC)
+            .enumerated()
+            .map {
+                let scaleDownFactor = max(1, 2 * $0.offset)
+                return RTCRtpEncodingParameters(
+                    $0.element,
+                    videoPublishOptions: videoOptions,
+                    frameRate: videoOptions.frameRate,
+                    bitrate: videoOptions.bitrate / scaleDownFactor,
+                    scaleDownFactor: scaleDownFactor
+                )
+            }
+            .reversed()
+            .prepare()
 
         if trackType == .screenshare {
             sendEncodings.forEach { $0.isActive = true }

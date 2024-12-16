@@ -33,7 +33,7 @@ extension Stream_Video_Sfu_Models_PublishOption {
     ///   and bitrate for each successive quality level.
     /// - The layers are returned in reverse order to prioritize lower-quality layers first.
     func videoLayers(
-        qualities: [VideoLayer.Quality] = [.full, .half, .quarter]
+        spatialLayersRequired: Int
     ) -> [VideoLayer] {
         // Extract base dimensions and bitrate from the publish option.
         let publishOptionWidth = Int(videoDimension.width)
@@ -44,6 +44,7 @@ extension Stream_Video_Sfu_Models_PublishOption {
         var scaleDownFactor: Int = 1
 
         // Array to hold the generated video layers.
+        var qualities: [VideoLayer.Quality] = [.full, .half, .quarter]
         var videoLayers: [VideoLayer] = []
         for quality in qualities {
             // Calculate dimensions and bitrate for the current quality level.
@@ -65,7 +66,12 @@ extension Stream_Video_Sfu_Models_PublishOption {
             scaleDownFactor *= 2
         }
 
-        // Reverse the order of the layers so lower quality layers come first.
-        return videoLayers.reversed()
+        if spatialLayersRequired < 3 {
+            let unnecessaryLayers = videoLayers.count - spatialLayersRequired
+            // We start removing from the lowest qualities that are at the end.
+            videoLayers = videoLayers.dropLast(unnecessaryLayers)
+        }
+
+        return videoLayers
     }
 }

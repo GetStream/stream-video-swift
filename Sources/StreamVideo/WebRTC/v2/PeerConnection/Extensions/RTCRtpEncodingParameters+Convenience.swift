@@ -57,18 +57,20 @@ extension RTCRtpEncodingParameters {
     ///     based on the `scaleDownFactor` from the `layer`.
     convenience init(
         _ layer: VideoLayer,
-        videoPublishOptions: PublishOptions.VideoPublishOptions
+        videoPublishOptions: PublishOptions.VideoPublishOptions,
+        frameRate: Int,
+        bitrate: Int,
+        scaleDownFactor: Int = 1
     ) {
         self.init()
         rid = layer.quality.rawValue
-        maxFramerate = (videoPublishOptions.frameRate) as NSNumber
-        maxBitrateBps = (layer.maxBitrate) as NSNumber
+        maxFramerate = frameRate as NSNumber
+        maxBitrateBps = bitrate as NSNumber
         if videoPublishOptions.codec.isSVC {
             scalabilityMode = videoPublishOptions.capturingLayers.scalabilityMode
+            scaleResolutionDownBy = 1 as NSNumber
         } else {
-            if let scaleDownFactor = layer.scaleDownFactor {
-                scaleResolutionDownBy = (scaleDownFactor) as NSNumber
-            }
+            scaleResolutionDownBy = scaleDownFactor as NSNumber
         }
     }
 }
