@@ -15,7 +15,7 @@ extension Publisher {
     func nextValue(
         dropFirst: Int = 0,
         timeout: TimeInterval? = nil,
-        file: StaticString = #file,
+        file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
     ) async throws -> Output {
