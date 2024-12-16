@@ -18,15 +18,20 @@ extension Array where Element: RTCRtpEncodingParameters {
     /// - Parameter isSVC: A Boolean indicating whether an SVC codec is in use.
     /// - Returns: The modified array of `RTCRtpEncodingParameters` if SVC is used,
     ///   or the original array if SVC is not used.
-    func prepareIfRequired(usesSVCCodec isSVC: Bool) -> Self {
-        guard isSVC else {
-            return self
-        }
-
-        // Filter for the highest-quality layer and adjust its `rid` if necessary.
-        let rewriteResult = filter { $0.rid == VideoLayer.Quality.full.rawValue }
-        rewriteResult.first?.rid = VideoLayer.Quality.quarter.rawValue
-
-        return rewriteResult
+    func prepare() -> Self {
+        enumerated()
+            .map {
+                switch $0.offset {
+                case 0:
+                    $0.element.rid = VideoLayer.Quality.quarter.rawValue
+                case 1:
+                    $0.element.rid = VideoLayer.Quality.half.rawValue
+                case 2:
+                    $0.element.rid = VideoLayer.Quality.full.rawValue
+                default:
+                    break
+                }
+                return $0.element
+            }
     }
 }
