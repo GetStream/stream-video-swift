@@ -48,7 +48,7 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
         let configuration = RTCAudioSessionConfiguration.default
         audioSession.updateConfiguration(
             functionName: #function,
-            file: #file,
+            file: #fileID,
             line: #line
         ) {
             try $0.setConfiguration(.default)
@@ -242,7 +242,7 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
 
                 audioSession.updateConfiguration(
                     functionName: #function,
-                    file: #file,
+                    file: #fileID,
                     line: #line
                 ) {
                     try $0.setMode(mode.rawValue)
@@ -271,7 +271,7 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
         )
         audioSession.updateConfiguration(
             functionName: #function,
-            file: #file,
+            file: #fileID,
             line: #line
         ) { try $0.setActive(isActive) }
     }

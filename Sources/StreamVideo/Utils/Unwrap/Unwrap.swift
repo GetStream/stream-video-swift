@@ -14,7 +14,7 @@ import Foundation
 ///   - errorMessage: A custom error message that will be used in the thrown
 ///                   `ClientError` if the value is `nil`. The default is
 ///                   `"Unavailable value"`.
-///   - file: The file from which the function was called, using the `#file`
+///   - file: The file from which the function was called, using the `#fileID`
 ///           directive to capture the source location. Default is the
 ///           calling file.
 ///   - line: The line number from which the function was called, using the
@@ -35,7 +35,7 @@ import Foundation
 func unwrap<T>(
     _ value: T?,
     errorMessage: String = "Unavailable value",
-    file: StaticString = #file,
+    file: StaticString = #fileID,
     line: UInt = #line
 ) throws -> T {
     guard let value else {

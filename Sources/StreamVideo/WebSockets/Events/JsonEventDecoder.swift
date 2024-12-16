@@ -31,11 +31,11 @@ extension ClientError {
     }
     
     public class EventDecoding: ClientError {
-        override init(_ message: String, _ file: StaticString = #file, _ line: UInt = #line) {
+        override init(_ message: String, _ file: StaticString = #fileID, _ line: UInt = #line) {
             super.init(message, file, line)
         }
         
-        init<T>(missingValue: String, for type: T.Type, _ file: StaticString = #file, _ line: UInt = #line) {
+        init<T>(missingValue: String, for type: T.Type, _ file: StaticString = #fileID, _ line: UInt = #line) {
             super.init("`\(missingValue)` field can't be `nil` for the `\(type)` event.", file, line)
         }
     }

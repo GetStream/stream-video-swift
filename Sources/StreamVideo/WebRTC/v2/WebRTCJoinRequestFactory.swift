@@ -42,7 +42,7 @@ struct WebRTCJoinRequestFactory {
         subscriberSdp: String,
         reconnectAttempt: UInt32,
         publisher: RTCPeerConnectionCoordinator?,
-        file: StaticString = #file,
+        file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
     ) async -> Stream_Video_Sfu_Event_JoinRequest {
@@ -82,7 +82,7 @@ struct WebRTCJoinRequestFactory {
         coordinator: WebRTCCoordinator,
         reconnectAttempt: UInt32,
         publisher: RTCPeerConnectionCoordinator?,
-        file: StaticString = #file,
+        file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
     ) async -> Stream_Video_Sfu_Event_ReconnectDetails? {
@@ -172,7 +172,7 @@ struct WebRTCJoinRequestFactory {
     func buildAnnouncedTracks(
         _ publisher: RTCPeerConnectionCoordinator?,
         videoOptions: VideoOptions,
-        file: StaticString = #file,
+        file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
@@ -227,7 +227,7 @@ struct WebRTCJoinRequestFactory {
         _ previousSessionID: String?,
         coordinator: WebRTCCoordinator,
         incomingVideoQualitySettings: IncomingVideoQualitySettings,
-        file: StaticString = #file,
+        file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
     ) async -> [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
