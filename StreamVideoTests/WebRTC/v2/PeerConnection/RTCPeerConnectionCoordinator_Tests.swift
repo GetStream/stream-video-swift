@@ -53,6 +53,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         videoOptions: .init(),
         callSettings: .init(),
         audioSettings: .dummy(opusDtxEnabled: true, redundantCodingEnabled: true),
+        publishOptions: .dummy(),
         sfuAdapter: mockSFUStack.adapter,
         mediaAdapter: mediaAdapter
     )

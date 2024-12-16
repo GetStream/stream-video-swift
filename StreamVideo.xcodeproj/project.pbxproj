@@ -425,6 +425,8 @@
 		40AF6A452C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AF6A442C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift */; };
 		40AF6A492C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AF6A482C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift */; };
 		40AF6A4B2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AF6A4A2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift */; };
+		40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
+		40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
 		40B499CA2AC1A5E100A53B60 /* OSLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */; };
 		40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */; };
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
@@ -1758,6 +1760,7 @@
 		40AF6A442C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_LeavingStageTests.swift; sourceTree = "<group>"; };
 		40AF6A482C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_CleanUpStageTests.swift; sourceTree = "<group>"; };
 		40AF6A4A2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift; sourceTree = "<group>"; };
+		40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PublishOptions+Dummy.swift"; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
 		40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTranscriptionButtonView.swift; sourceTree = "<group>"; };
@@ -4195,6 +4198,7 @@
 				403CA9BA2CCA548D001A88C2 /* Stream_Video_Sfu_Event_VideoLayerSetting+Dummy.swift */,
 				40382F3E2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift */,
 				40F0175E2BBEF11600E89FD1 /* AudioSettings+Dummy.swift */,
+				40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */,
 				40F0175C2BBEF0E200E89FD1 /* BackstageSettings+Dummy.swift */,
 				40F0175A2BBEF0C100E89FD1 /* BroadcastSettingsResponse+Dummy.swift */,
 				40F017722BBEF28600E89FD1 /* CallAcceptedEvent+Dummy.swift */,
@@ -7090,6 +7094,7 @@
 				403FB1562BFE1FC00047A696 /* StreamCallStateMachineStageErrorStage_Tests.swift in Sources */,
 				40E18AB42CD522F700A65C9F /* RecursiveQueueTests.swift in Sources */,
 				40AF6A4B2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift in Sources */,
+				40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */,
 				842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */,
 				40C9E4552C988CE100802B28 /* WebRTCJoinRequestFactory_Tests.swift in Sources */,
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
@@ -7435,6 +7440,7 @@
 				82FF40C02A17C73C00B4D95E /* CallingGroupView_Tests.swift in Sources */,
 				40245F612BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift in Sources */,
 				407AF71A2B6163DD00E9E3E7 /* StreamMediaDurationFormatter_Tests.swift in Sources */,
+				40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */,
 				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
 				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
 				82FF40CA2A17C76400B4D95E /* MicrophoneCheckView_Tests.swift in Sources */,

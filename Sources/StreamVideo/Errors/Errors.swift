@@ -56,7 +56,7 @@ public class ClientError: Error, CustomStringConvertible {
     ///   - error: an external error.
     ///   - file: a file name source of an error.
     ///   - line: a line source of an error.
-    public init(with error: Error? = nil, _ file: StaticString = #file, _ line: UInt = #line) {
+    public init(with error: Error? = nil, _ file: StaticString = #fileID, _ line: UInt = #line) {
         underlyingError = error
         location = .init(file: "\(file)", line: Int(line))
         if let aErr = error as? APIError {
