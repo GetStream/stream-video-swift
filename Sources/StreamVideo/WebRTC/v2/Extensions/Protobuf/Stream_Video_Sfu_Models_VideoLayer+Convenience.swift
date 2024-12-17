@@ -48,7 +48,11 @@ extension Stream_Video_Sfu_Models_VideoLayer {
         _ layer: RTCRtpEncodingParameters,
         publishOptions: PublishOptions.VideoPublishOptions
     ) {
-        rid = layer.rid ?? (publishOptions.codec.isSVC ? "q" : "")
+        rid = layer.rid ?? (
+            publishOptions.capturingLayers.spatialLayers == 1 || publishOptions.codec.isSVC
+                ? "q"
+                : ""
+        )
         bitrate = layer.maxBitrateBps?.uint32Value ?? UInt32(publishOptions.bitrate)
         fps = layer.maxFramerate?.uint32Value ?? UInt32(publishOptions.frameRate)
         videoDimension = .init()
