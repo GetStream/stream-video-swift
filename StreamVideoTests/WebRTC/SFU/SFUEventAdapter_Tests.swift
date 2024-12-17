@@ -129,11 +129,11 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             event,
             wrappedEvent: .sfuEvent(.changePublishQuality(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
-        ) { [layerSetting] _ in
+        ) { [event] _ in
             let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
             return mockPublisher
-                .recordedInputPayload([Stream_Video_Sfu_Event_VideoLayerSetting].self, for: .changePublishQuality)?
-                .first == [layerSetting]
+                .recordedInputPayload(Stream_Video_Sfu_Event_ChangePublishQuality.self, for: .changePublishQuality)?
+                .first == event
         }
     }
 

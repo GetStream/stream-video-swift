@@ -16,24 +16,34 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
     /// The unique identifier for the current session.
     private let sessionID: String
+
     /// The peer connection used for WebRTC communication.
     private let peerConnection: StreamRTCPeerConnectionProtocol
+
     /// Factory for creating WebRTC-related objects such as tracks and sources.
     private let peerConnectionFactory: PeerConnectionFactory
+
     /// Adapter for interacting with the Selective Forwarding Unit (SFU).
     private var sfuAdapter: SFUAdapter
+
     /// The publishing options for video tracks, including dimensions and frame rate.
     private var publishOptions: [PublishOptions.VideoPublishOptions]
+
     /// Factory for creating video capturers.
     private let capturerFactory: VideoCapturerProviding
+
     /// Provider for managing screen sharing sessions.
     private let screenShareSessionProvider: ScreenShareSessionProvider
-    /// The primary video track used for screen sharing.
-    private let primaryTrack: RTCVideoTrack
+
     /// The screen sharing capturer for capturing screen frames.
     private var capturer: StreamVideoCapturer?
+
     /// Storage for managing transceivers associated with the screen sharing session.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .screenshare)
+
+    /// The primary video track used for screen sharing.
+    let primaryTrack: RTCVideoTrack
+
     /// A publisher that emits events related to the screen sharing track.
     let subject: PassthroughSubject<TrackEvent, Never>
 

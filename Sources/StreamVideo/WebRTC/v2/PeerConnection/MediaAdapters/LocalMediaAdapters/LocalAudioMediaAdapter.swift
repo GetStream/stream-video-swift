@@ -38,11 +38,11 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     /// A storage for managing audio transceivers.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.AudioPublishOptions>(for: .audio)
 
-    /// The primary audio track for this adapter.
-    private let primaryTrack: RTCAudioTrack
-
     /// The last applied audio call settings.
     private var lastUpdatedCallSettings: CallSettings.Audio?
+
+    /// The primary audio track for this adapter.
+    let primaryTrack: RTCAudioTrack
 
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
