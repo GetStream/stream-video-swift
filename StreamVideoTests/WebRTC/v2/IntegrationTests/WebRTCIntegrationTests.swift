@@ -76,7 +76,11 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
                 // -- Joining
                 .concurrent(
                     [
-                        .init(delay: 0.5) { self.mockStack.joinResponse([.dummy(id: await self.stateAdapter.sessionID)]) },
+                        .init(delay: 0.5) {
+                            self.mockStack.joinResponse(
+                                [.dummy(id: await self.stateAdapter.sessionID)]
+                            )
+                        },
                         .init {
                             self.mockStack.webRTCAuthenticator.stub(
                                 for: .waitForConnect,
@@ -104,7 +108,9 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
                 
                 // -- Joined
                 .concurrent([
-                    .init { self.mockStack.participantJoined(.dummy(id: "2")) },
+                    .init {
+                        self.mockStack.participantJoined(.dummy(id: "2"))
+                    },
                     .init { self.mockStack.participantJoined(.dummy(id: "3")) },
                     .init { await self.mockStack.addTrack(kind: .video, for: "2") },
                     .init { await self.mockStack.addTrack(kind: .audio, for: "2") },
