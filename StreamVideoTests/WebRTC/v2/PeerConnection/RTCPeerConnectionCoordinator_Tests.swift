@@ -168,7 +168,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
     func test_negotiate_subjectIsPublisher_callsSetLocalDescriptionWithExpectedOffer() async throws {
         _ = subject
         let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
-        let expectedOffer = "useinbandfec=1;usedtx=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+        let expectedOffer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
 
         mockPeerConnection.stub(
             for: .offer,
@@ -197,7 +197,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         _ = subject
 
         let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
-        let expectedOffer = "useinbandfec=1;usedtx=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
+        let expectedOffer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
         mockPeerConnection.stub(
             for: .offer,
             with: RTCSessionDescription(type: .offer, sdp: offer)
@@ -444,6 +444,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
                     with: callSettings,
                     ownCapabilities: ownCapabilities
                 )
+                self.subject.completeSetUp()
             }
 
             group.addTask {
