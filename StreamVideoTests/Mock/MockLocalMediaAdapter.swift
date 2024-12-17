@@ -7,6 +7,7 @@ import Combine
 import StreamWebRTC
 
 final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
+
     // MARK: - Mockable
 
     typealias FunctionKey = MockFunctionKey
@@ -26,6 +27,8 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
         case didUpdateCallSettings
         case publish
         case unpublish
+        case trackInfo
+        case didUpdatePublishOptions
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -33,6 +36,8 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
         case didUpdateCallSettings(settings: CallSettings)
         case publish
         case unpublish
+        case trackInfo
+        case didUpdatePublishOptions(publishOptions: PublishOptions)
 
         var payload: Any {
             switch self {
@@ -44,6 +49,10 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
                 return ()
             case .unpublish:
                 return ()
+            case .trackInfo:
+                return ()
+            case let .didUpdatePublishOptions(publishOptions):
+                return publishOptions
             }
         }
     }
@@ -71,5 +80,15 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         stubbedFunctionInput[.didUpdateCallSettings]?
             .append(.didUpdateCallSettings(settings: settings))
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        stubbedFunctionInput[.trackInfo]?.append(.trackInfo)
+        return stubbedFunction[.trackInfo] as? [Stream_Video_Sfu_Models_TrackInfo] ?? []
+    }
+
+    func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws {
+        stubbedFunctionInput[.didUpdatePublishOptions]?
+            .append(.didUpdatePublishOptions(publishOptions: publishOptions))
     }
 }
