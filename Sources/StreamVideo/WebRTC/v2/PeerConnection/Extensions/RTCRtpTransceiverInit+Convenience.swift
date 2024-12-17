@@ -139,6 +139,13 @@ extension RTCRtpTransceiverInit {
                 )
             }
             .reversed()
+            .filter {
+                if videoOptions.codec.isSVC {
+                    return $0.rid == VideoLayer.Quality.full.rawValue
+                } else {
+                    return true
+                }
+            }
             .prepare()
 
         if trackType == .screenshare {
