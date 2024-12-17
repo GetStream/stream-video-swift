@@ -156,7 +156,7 @@ extension RTCRtpTransceiverInit {
 
         log.debug(
             """
-            RTCRtpTransceiverInit from VideoPublishOptions:
+            RTCRtpTransceiverInit for trackType:\(trackType) from VideoPublishOptions:
                 VideoCodec: \(videoOptions.codec)
                 Bitrate: \(videoOptions.bitrate)
                 FrameRate: \(videoOptions.frameRate)
