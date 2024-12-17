@@ -38,7 +38,7 @@ final class MockRTCPeerConnectionCoordinator:
     }
 
     enum MockFunctionInputKey: Payloadable {
-        case changePublishQuality(layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting])
+        case changePublishQuality(event: Stream_Video_Sfu_Event_ChangePublishQuality)
         case didUpdateCallSettings(callSettings: CallSettings)
         case didUpdateCameraPosition(position: AVCaptureDevice.Position)
         case mid(type: TrackType)
@@ -59,8 +59,8 @@ final class MockRTCPeerConnectionCoordinator:
 
         var payload: Any {
             switch self {
-            case let .changePublishQuality(layerSettings):
-                return layerSettings
+            case let .changePublishQuality(event):
+                return event
             case let .didUpdateCallSettings(callSettings):
                 return callSettings
             case let .didUpdateCameraPosition(position):
@@ -133,6 +133,7 @@ final class MockRTCPeerConnectionCoordinator:
         videoConfig: VideoConfig = .dummy(),
         callSettings: CallSettings = .init(),
         audioSettings: AudioSettings = .init(),
+        publishOptions: PublishOptions = .init(),
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
@@ -149,6 +150,7 @@ final class MockRTCPeerConnectionCoordinator:
             videoConfig: videoConfig,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
@@ -156,10 +158,10 @@ final class MockRTCPeerConnectionCoordinator:
     }
 
     override func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
         stubbedFunctionInput[.changePublishQuality]?
-            .append(.changePublishQuality(layerSettings: layerSettings))
+            .append(.changePublishQuality(event: event))
     }
 
     override func didUpdateCallSettings(_ settings: CallSettings) async throws {
@@ -181,28 +183,6 @@ final class MockRTCPeerConnectionCoordinator:
     ) async throws {
         stubbedFunctionInput[.didUpdateCameraPosition]?
             .append(.didUpdateCameraPosition(position: position))
-    }
-
-    override func mid(for type: TrackType) -> String? {
-        stubbedFunctionInput[.mid]?.append(.mid(type: type))
-        if let result = stubbedMid[type] {
-            return result
-        } else if let result = stubbedFunction[.mid] as? String {
-            return result
-        } else {
-            return nil
-        }
-    }
-
-    override func localTrack(of type: TrackType) -> RTCMediaStreamTrack? {
-        stubbedFunctionInput[.localTrack]?.append(.mid(type: type))
-        if let result = stubbedTrack[type] {
-            return result
-        } else if let result = stubbedFunction[.localTrack] as? RTCMediaStreamTrack {
-            return result
-        } else {
-            return nil
-        }
     }
 
     override func restartICE() {
@@ -252,7 +232,7 @@ final class MockRTCPeerConnectionCoordinator:
         stubbedFunctionInput[.stopScreenSharing]?.append(.stopScreenSharing)
     }
 
-    override func focus(at point: CGPoint) throws {
+    override func focus(at point: CGPoint) async throws {
         stubbedFunctionInput[.focus]?.append(
             .focus(point: point)
         )
@@ -260,7 +240,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.addCapturePhotoOutput]?.append(
             .addCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput)
         )
@@ -268,7 +248,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.removeCapturePhotoOutput]?.append(
             .removeCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput)
         )
@@ -276,7 +256,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.addVideoOutput]?.append(
             .addVideoOutput(videoOutput: videoOutput)
         )
@@ -284,13 +264,13 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.removeVideoOutput]?.append(
             .removeVideoOutput(videoOutput: videoOutput)
         )
     }
 
-    override func zoom(by factor: CGFloat) throws {
+    override func zoom(by factor: CGFloat) async throws {
         stubbedFunctionInput[.zoom]?.append(
             .zoom(factor: factor)
         )

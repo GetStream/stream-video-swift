@@ -39,7 +39,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
     }
 
     // MARK: - init(direction:streamIds:videoOptions:)
-
+    // MARK: Non-SVC
     func test_init_trackTypeVideo_nonSVC_3SpatialLayers_returnsCorrectlyConfiguredTransceiverInit() throws {
         try assertInit(
             .video,
@@ -76,6 +76,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
         )
     }
 
+    // MARK: SVC
     func test_init_trackTypeVideo_svc_1SpatialLayers_3TemporalLayers_returnsCorrectlyConfiguredTransceiverInit() throws {
         try assertInit(
             .video,
@@ -106,6 +107,30 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
             videoOptions: .init(
                 codec: .av1,
                 capturingLayers: .init(spatialLayers: 1, temporalLayers: 1),
+                bitrate: 1_000_000,
+                frameRate: 30
+            )
+        )
+    }
+
+    func test_init_trackTypeVideo_svc_2SpatialLayers_1TemporalLayers_returnsCorrectlyConfiguredTransceiverInit() throws {
+        try assertInit(
+            .video,
+            videoOptions: .init(
+                codec: .av1,
+                capturingLayers: .init(spatialLayers: 2, temporalLayers: 1),
+                bitrate: 1_000_000,
+                frameRate: 30
+            )
+        )
+    }
+
+    func test_init_trackTypeVideo_svc_3SpatialLayers_1TemporalLayers_returnsCorrectlyConfiguredTransceiverInit() throws {
+        try assertInit(
+            .video,
+            videoOptions: .init(
+                codec: .av1,
+                capturingLayers: .init(spatialLayers: 2, temporalLayers: 1),
                 bitrate: 1_000_000,
                 frameRate: 30
             )
@@ -170,12 +195,21 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
             line: line
         )
 
-        XCTAssertEqual(
-            subject.sendEncodings.count,
-            videoOptions.capturingLayers.spatialLayers,
-            file: file,
-            line: line
-        )
+        if videoOptions.codec.isSVC {
+            XCTAssertEqual(
+                subject.sendEncodings.count,
+                1,
+                file: file,
+                line: line
+            )
+        } else {
+            XCTAssertEqual(
+                subject.sendEncodings.count,
+                videoOptions.capturingLayers.spatialLayers,
+                file: file,
+                line: line
+            )
+        }
 
         for (offset, sendEncoding) in subject.sendEncodings.enumerated() {
             switch offset {

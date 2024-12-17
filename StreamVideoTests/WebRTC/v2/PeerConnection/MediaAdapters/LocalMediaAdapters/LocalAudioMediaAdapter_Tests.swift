@@ -7,12 +7,13 @@ import Combine
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class LocalAudioMediaAdapter_Tests: XCTestCase {
+final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private let mockActiveCallProvider: MockActiveCallProvider! = .init()
     private let mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
     private var disposableBag: DisposableBag! = .init()
     private lazy var sessionId: String! = .unique
+    private lazy var publishOptions: [PublishOptions.AudioPublishOptions] = []
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
@@ -24,6 +25,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         peerConnection: mockPeerConnection,
         peerConnectionFactory: peerConnectionFactory,
         sfuAdapter: mockSFUStack.adapter,
+        publishOptions: publishOptions,
         subject: spySubject
     )
 
@@ -44,7 +46,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
     // MARK: - setUp(with:ownCapabilities:)
 
-    func test_setUp_hasAudioCapabilityAndAudioOn_noLocalTrack_createsAndAddsTrackAndTransceiver() async throws {
+    func test_setUp_hasAudioCapabilityAndAudioOn_addsTrack() async throws {
         try await assertTrackEvent(
             filter: {
                 switch $0 {
@@ -66,11 +68,10 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
             XCTAssertTrue(track is RTCAudioTrack)
         }
 
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
-        XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_setUp_hasAudioCapabilityAudioIsOff_noLocalTrack_createsTrackWithoutTransceiver() async throws {
+    func test_setUp_hasAudioCapabilityAudioIsOff_addsTrack() async throws {
         try await assertTrackEvent(
             filter: {
                 switch $0 {
@@ -92,12 +93,11 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
             XCTAssertTrue(track is RTCAudioTrack)
         }
 
-        XCTAssertNotNil(subject.localTrack)
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
-        XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
+        XCTAssertNotNil(subject.primaryTrack)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_setUp_doesNotHavesAudioCapability_noLocalTrack_doesNotCreateTrack() async throws {
+    func test_setUp_doesNotHaveAudioCapability_doesNotAddTrack() async throws {
         try await assertTrackEvent(
             isInverted: true
         ) { subject in
@@ -106,8 +106,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
                 ownCapabilities: []
             )
         }
-        XCTAssertNil(subject.localTrack)
-        XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
     // MARK: - didUpdateCallSettings(_:)
@@ -143,7 +141,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
             with: .init(audioOn: true),
             ownCapabilities: [.sendAudio]
         )
-        subject.localTrack?.isEnabled = true
+        subject.primaryTrack.isEnabled = true
 
         try await subject.didUpdateCallSettings(.init(audioOn: false))
 
@@ -154,13 +152,138 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         XCTAssertTrue(request.muteStates[0].muted)
     }
 
-    // MARK: - publish
+    // MARK: - didUpdatePublishOptions
 
-    func test_publish_disabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
+    func test_didUpdatePublishOptions_primaryTrackIsNotEnabled_nothingHappens() async throws {
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                audio: [.dummy(codec: .opus)]
+            )
+        )
+
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 0)
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiverGetsUpdatedTrack() async throws {
+        self.publishOptions = [.dummy(codec: .opus)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+            )
+        }
+        subject.publish()
+        await fulfillment { (self.mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.track != nil }
+        let currentPublishedTrack = try XCTUnwrap((mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.track)
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                audio: [.dummy(codec: .opus)]
+            )
+        )
+        let updatedPublishedTrack = try XCTUnwrap((mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.track)
+        XCTAssertNotEqual(currentPublishedTrack.trackId, updatedPublishedTrack.trackId)
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
+        self.publishOptions = [.dummy(codec: .opus)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+            )
+        }
+        subject.publish()
+        await fulfillment { (self.mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.track != nil }
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                audio: [.dummy(codec: .red)]
+            )
+        )
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_existinTransceiverNotInPublishOptionsGetsTrackNullified() async throws {
+        self.publishOptions = [.dummy(codec: .opus)]
+        let opusTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .opus))
+        let redTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .red))
+        mockPeerConnection.stub(for: .addTransceiver, with: opusTransceiver)
+        subject.publish()
+        await fulfillment { opusTransceiver.sender.track != nil }
+        mockPeerConnection.stub(for: .addTransceiver, with: redTransceiver)
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                audio: [.dummy(codec: .red)]
+            )
+        )
+
+        await fulfillment { opusTransceiver.sender.track == nil }
+    }
+
+    // MARK: - trackInfo
+
+    func test_trackInfo_noPublishedTransceivers_returnsEmptyArray() {
+        XCTAssertTrue(subject.trackInfo().isEmpty)
+    }
+
+    func test_trackInfo_twoPublishedTransceivers_returnsCorrectArray() async throws {
+        // Note: Any call to the addTransceiver method will return the same
+        // object reference. However, for this test case's needs the mock
+        // below is sufficient.
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .audio)
+            with: try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .opus))
         )
+        publishOptions = [
+            .dummy(codec: .opus),
+            .dummy(codec: .red)
+        ]
+        subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+
+        let trackInfo = subject.trackInfo()
+        XCTAssertEqual(trackInfo.count, 2)
+        // We only test the first trackInfo entry as both will use the same
+        // transceiver during the tests.
+        XCTAssertEqual(trackInfo[0].trackType, .audio)
+        XCTAssertFalse(trackInfo[0].muted)
+    }
+
+    func test_trackInfo_onePublishedAndOneUnpublisheTransceivers_returnsCorrectArray() async throws {
+        let opusTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .opus))
+        let redTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .red))
+        mockPeerConnection.stub(for: .addTransceiver, with: opusTransceiver)
+        publishOptions = [.dummy(codec: .opus)]
+        subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+        mockPeerConnection.stub(for: .addTransceiver, with: redTransceiver)
+        try await subject.didUpdatePublishOptions(
+            .dummy(audio: [.dummy(codec: .red)])
+        )
+
+        let trackInfo = subject.trackInfo()
+        XCTAssertEqual(trackInfo.count, 1)
+        XCTAssertEqual(trackInfo[0].trackType, .audio)
+        XCTAssertNotEqual(trackInfo[0].trackID, opusTransceiver.sender.track?.trackId)
+        XCTAssertEqual(trackInfo[0].trackID, redTransceiver.sender.track?.trackId)
+    }
+
+
+    // MARK: - publish
+
+    func test_publish_disabledLocalTrack_withOnePublishOption_enablesAndAddsTrackAndTransceiver() async throws {
+        publishOptions = [.dummy(codec: .opus)]
+
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+            )
+        }
+
         try await subject.setUp(
             with: .init(audioOn: false),
             ownCapabilities: [.sendAudio]
@@ -168,42 +291,46 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == true }
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
         XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
-    }
-
-    func test_publish_disabledLocalTrack_transceiverHasBeenCreated_enablesAndAddsTrack() async throws {
-        mockPeerConnection.stub(
-            for: .addTransceiver,
-            with: try makeTransceiver(of: .audio)
+        let addTransceiverPayloadType = (
+            trackType: TrackType,
+            track: RTCMediaStreamTrack,
+            transceiverInit: RTCRtpTransceiverInit
+        ).self
+        let transceiverCall = try XCTUnwrap(
+            mockPeerConnection.recordedInputPayload(addTransceiverPayloadType, for: .addTransceiver)?.first
         )
-        try await subject.setUp(
-            with: .init(audioOn: true),
-            ownCapabilities: [.sendAudio]
-        )
-
-        subject.publish()
-
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
-        XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
+        XCTAssertNotEqual(transceiverCall.track.trackId, subject.primaryTrack.trackId)
+        XCTAssertEqual(transceiverCall.track.kind, subject.primaryTrack.kind)
+        XCTAssertEqual(transceiverCall.trackType, .audio)
     }
 
     // MARK: - unpublish
 
     func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
-        mockPeerConnection.stub(
-            for: .addTransceiver,
-            with: try makeTransceiver(of: .audio)
-        )
+        publishOptions = [.dummy(codec: .opus)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+            )
+        }
         try await subject.setUp(
             with: .init(audioOn: true),
             ownCapabilities: [.sendAudio]
         )
-        subject.localTrack?.isEnabled = true
+        subject.publish()
 
         subject.unpublish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == false }
+        await fulfillment { self.subject.primaryTrack.isEnabled == false }
+        let transceiver = try XCTUnwrap(
+            mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver
+        )
+        XCTAssertNotEqual(transceiver.sender.track?.trackId, subject.primaryTrack.trackId)
+        XCTAssertEqual(transceiver.sender.track?.kind, subject.primaryTrack.kind)
+        XCTAssertFalse(transceiver.sender.track?.isEnabled ?? true)
     }
 
     // MARK: - Private
@@ -261,7 +388,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
         streamIds: [String] = [.unique],
-        layers: [VideoLayer]? = nil
+        audioOptions: PublishOptions.AudioPublishOptions
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
             temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(
@@ -274,10 +401,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase {
         return temporaryPeerConnection!.addTransceiver(
             of: type == .audio ? .audio : .video,
             init: RTCRtpTransceiverInit(
-                trackType: type,
                 direction: direction,
                 streamIds: streamIds,
-                layers: layers
+                audioOptions: audioOptions
             )
         )!
     }
