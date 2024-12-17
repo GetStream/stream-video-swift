@@ -8,7 +8,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     
     public var backstage: Bool
     public var blockedUserIds: [String]
-    public var captioning: Bool?
+    public var captioning: Bool
     public var cid: String
     public var createdAt: Date
     public var createdBy: UserResponse
@@ -32,7 +32,7 @@ public final class CallResponse: @unchecked Sendable, Codable, JSONEncodable, Ha
     public init(
         backstage: Bool,
         blockedUserIds: [String],
-        captioning: Bool? = nil,
+        captioning: Bool,
         cid: String,
         createdAt: Date,
         createdBy: UserResponse,

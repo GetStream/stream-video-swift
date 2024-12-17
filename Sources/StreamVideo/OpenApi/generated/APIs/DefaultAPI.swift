@@ -318,7 +318,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse {
+    open func sendCallEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse {
         var path = "/video/call/{type}/{id}/event"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -797,7 +797,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func stopLive(type: String, id: String) async throws -> StopLiveResponse {
+    open func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse {
         var path = "/video/call/{type}/{id}/stop_live"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -809,7 +809,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: stopLiveRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopLiveResponse.self, from: $0)
@@ -1125,7 +1126,7 @@ protocol DefaultAPIEndpoints {
         
     func deleteCall(type: String, id: String, deleteCallRequest: DeleteCallRequest) async throws -> DeleteCallResponse
         
-    func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse
+    func sendCallEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse
         
     func collectUserFeedback(
         type: String,
@@ -1179,7 +1180,7 @@ protocol DefaultAPIEndpoints {
         
     func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse
         
-    func stopLive(type: String, id: String) async throws -> StopLiveResponse
+    func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse
         
     func stopRecording(type: String, id: String) async throws -> StopRecordingResponse
         

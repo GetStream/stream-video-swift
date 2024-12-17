@@ -6,7 +6,6 @@ import Foundation
 
 public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var banned: Bool
     public var blockedUserIds: [String]
     public var createdAt: Date
     public var custom: [String: RawJSON]
@@ -18,14 +17,12 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
     public var language: String
     public var lastActive: Date?
     public var name: String?
-    public var online: Bool
     public var revokeTokensIssuedBefore: Date?
     public var role: String
     public var teams: [String]
     public var updatedAt: Date
 
     public init(
-        banned: Bool,
         blockedUserIds: [String],
         createdAt: Date,
         custom: [String: RawJSON],
@@ -37,13 +34,11 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         language: String,
         lastActive: Date? = nil,
         name: String? = nil,
-        online: Bool,
         revokeTokensIssuedBefore: Date? = nil,
         role: String,
         teams: [String],
         updatedAt: Date
     ) {
-        self.banned = banned
         self.blockedUserIds = blockedUserIds
         self.createdAt = createdAt
         self.custom = custom
@@ -55,7 +50,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         self.language = language
         self.lastActive = lastActive
         self.name = name
-        self.online = online
         self.revokeTokensIssuedBefore = revokeTokensIssuedBefore
         self.role = role
         self.teams = teams
@@ -63,7 +57,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case banned
         case blockedUserIds = "blocked_user_ids"
         case createdAt = "created_at"
         case custom
@@ -75,7 +68,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         case language
         case lastActive = "last_active"
         case name
-        case online
         case revokeTokensIssuedBefore = "revoke_tokens_issued_before"
         case role
         case teams
@@ -83,8 +75,7 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
     }
     
     public static func == (lhs: UserEventPayload, rhs: UserEventPayload) -> Bool {
-        lhs.banned == rhs.banned &&
-            lhs.blockedUserIds == rhs.blockedUserIds &&
+        lhs.blockedUserIds == rhs.blockedUserIds &&
             lhs.createdAt == rhs.createdAt &&
             lhs.custom == rhs.custom &&
             lhs.deactivatedAt == rhs.deactivatedAt &&
@@ -95,7 +86,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
             lhs.language == rhs.language &&
             lhs.lastActive == rhs.lastActive &&
             lhs.name == rhs.name &&
-            lhs.online == rhs.online &&
             lhs.revokeTokensIssuedBefore == rhs.revokeTokensIssuedBefore &&
             lhs.role == rhs.role &&
             lhs.teams == rhs.teams &&
@@ -103,7 +93,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(banned)
         hasher.combine(blockedUserIds)
         hasher.combine(createdAt)
         hasher.combine(custom)
@@ -115,7 +104,6 @@ public final class UserEventPayload: @unchecked Sendable, Codable, JSONEncodable
         hasher.combine(language)
         hasher.combine(lastActive)
         hasher.combine(name)
-        hasher.combine(online)
         hasher.combine(revokeTokensIssuedBefore)
         hasher.combine(role)
         hasher.combine(teams)

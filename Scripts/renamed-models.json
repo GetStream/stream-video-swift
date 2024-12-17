@@ -1,0 +1,21 @@
+{
+  "QueryCallMembersResponse": "QueryMembersResponse",
+  "QueryCallMembersRequest": "QueryMembersRequest",
+  "Response": "ModelResponse",
+  "SendCallEventRequest": "SendEventRequest",
+  "SendCallEventResponse": "SendEventResponse",
+  "AudioSettingsResponse": "AudioSettings",
+  "SortParam": "SortParamRequest",
+  "WSAuthMessage": "WSAuthMessageRequest",
+  "TranscriptionSettingsResponse": "TranscriptionSettings",
+  "SendCallEvent": "SendEvent",
+  "BackstageSettingsResponse": "BackstageSettings",
+  "GeofenceSettingsResponse": "GeofenceSettings",
+  "LayoutSettingsRequest": "LayoutSettings",
+  "RingSettingsResponse": "RingSettings",
+  "ScreensharingSettingsResponse": "ScreensharingSettings",
+  "ThumbnailsSettingsResponse": "ThumbnailsSettings",
+  "VideoSettingsResponse": "VideoSettings",
+  "TimeStats": "Stats",
+  "NoiseCancellationSettings": "NoiseCancellationSettingsRequest"
+}

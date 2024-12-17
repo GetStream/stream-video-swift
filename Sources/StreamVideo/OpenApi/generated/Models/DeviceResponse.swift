@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class Device: @unchecked Sendable, Codable, JSONEncodable, Hashable {
+public final class DeviceResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var createdAt: Date
     public var disabled: Bool?
@@ -46,7 +46,7 @@ public final class Device: @unchecked Sendable, Codable, JSONEncodable, Hashable
         case voip
     }
     
-    public static func == (lhs: Device, rhs: Device) -> Bool {
+    public static func == (lhs: DeviceResponse, rhs: DeviceResponse) -> Bool {
         lhs.createdAt == rhs.createdAt &&
             lhs.disabled == rhs.disabled &&
             lhs.disabledReason == rhs.disabledReason &&

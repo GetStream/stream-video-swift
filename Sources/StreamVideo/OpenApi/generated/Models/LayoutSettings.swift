@@ -25,12 +25,20 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, 
         }
     }
     
+    public var detectOrientation: Bool?
     public var externalAppUrl: String?
     public var externalCssUrl: String?
     public var name: Name
     public var options: [String: RawJSON]?
 
-    public init(externalAppUrl: String? = nil, externalCssUrl: String? = nil, name: Name, options: [String: RawJSON]? = nil) {
+    public init(
+        detectOrientation: Bool? = nil,
+        externalAppUrl: String? = nil,
+        externalCssUrl: String? = nil,
+        name: Name,
+        options: [String: RawJSON]? = nil
+    ) {
+        self.detectOrientation = detectOrientation
         self.externalAppUrl = externalAppUrl
         self.externalCssUrl = externalCssUrl
         self.name = name
@@ -38,6 +46,7 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, 
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
+        case detectOrientation = "detect_orientation"
         case externalAppUrl = "external_app_url"
         case externalCssUrl = "external_css_url"
         case name
@@ -45,13 +54,15 @@ public final class LayoutSettings: @unchecked Sendable, Codable, JSONEncodable, 
     }
     
     public static func == (lhs: LayoutSettings, rhs: LayoutSettings) -> Bool {
-        lhs.externalAppUrl == rhs.externalAppUrl &&
+        lhs.detectOrientation == rhs.detectOrientation &&
+            lhs.externalAppUrl == rhs.externalAppUrl &&
             lhs.externalCssUrl == rhs.externalCssUrl &&
             lhs.name == rhs.name &&
             lhs.options == rhs.options
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(detectOrientation)
         hasher.combine(externalAppUrl)
         hasher.combine(externalCssUrl)
         hasher.combine(name)

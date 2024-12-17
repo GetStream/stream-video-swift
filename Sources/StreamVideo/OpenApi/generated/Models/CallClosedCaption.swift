@@ -10,9 +10,9 @@ public final class CallClosedCaption: @unchecked Sendable, Codable, JSONEncodabl
     public var speakerId: String
     public var startTime: Date
     public var text: String
-    public var user: UserResponse?
+    public var user: UserResponse
 
-    public init(endTime: Date, speakerId: String, startTime: Date, text: String, user: UserResponse? = nil) {
+    public init(endTime: Date, speakerId: String, startTime: Date, text: String, user: UserResponse) {
         self.endTime = endTime
         self.speakerId = speakerId
         self.startTime = startTime
