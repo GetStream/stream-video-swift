@@ -162,6 +162,7 @@ open class CallViewModel: ObservableObject {
     private var recordingUpdates: AnyCancellable?
     private var screenSharingUpdates: AnyCancellable?
     private var callSettingsUpdates: AnyCancellable?
+    private var applicationLifecycleUpdates: AnyCancellable?
 
     private var ringingTimer: Foundation.Timer?
     private var lastScreenSharingParticipant: CallParticipant?
@@ -216,6 +217,7 @@ open class CallViewModel: ObservableObject {
         localCallSettingsChange = callSettings != nil
 
         subscribeToCallEvents()
+        subscribeToApplicationLifecycleEvents()
         pictureInPictureAdapter.onSizeUpdate = { [weak self] in
             self?.updateTrackSize($0, for: $1)
         }
@@ -834,6 +836,40 @@ open class CallViewModel: ObservableObject {
 
     private func participantAutoLeavePolicyTriggered() {
         leaveCall()
+    }
+
+    private func subscribeToApplicationLifecycleEvents() {
+        #if canImport(UIKit)
+        /// If we are running on a UIKit application, we observe the application state in order to disable
+        /// PictureInPicture when active but the app is in foreground.
+        applicationLifecycleUpdates = NotificationCenter.default
+            .publisher(for: UIApplication.didBecomeActiveNotification)
+            .sink { [weak self] _ in self?.applicationDidBecomeActive() }
+        log.debug("\(type(of: self)) now observes application lifecycle.")
+        #endif
+    }
+
+    private func applicationDidBecomeActive() {
+        guard let call else { return }
+
+        let tracksToBeActivated = call
+            .state
+            .participants
+            .filter { $0.hasVideo && $0.track?.isEnabled == false }
+
+        guard !tracksToBeActivated.isEmpty else {
+            log.debug("\(type(of: self)) application lifecycle observer found no tracks to activate.")
+            return
+        }
+
+        log.debug(
+            """
+            \(tracksToBeActivated.count) tracks have been deactivate while in background 
+            and now the app is active need to be activated again.
+            """
+        )
+
+        tracksToBeActivated.forEach { $0.track?.isEnabled = true }
     }
 }
 

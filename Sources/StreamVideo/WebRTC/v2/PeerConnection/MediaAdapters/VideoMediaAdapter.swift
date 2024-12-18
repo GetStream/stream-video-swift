@@ -32,17 +32,6 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
 
     /// A subject for publishing track events.
     let subject: PassthroughSubject<TrackEvent, Never>
-
-    /// The local video track, if available.
-    var localTrack: RTCMediaStreamTrack? {
-        (localMediaManager as? LocalVideoMediaAdapter)?.localTrack
-    }
-
-    /// The mid (Media Stream Identification) of the local video track, if available.
-    var mid: String? {
-        (localMediaManager as? LocalVideoMediaAdapter)?.mid
-    }
-
     /// Convenience initializer for creating a VideoMediaAdapter with a LocalVideoMediaAdapter.
     ///
     /// - Parameters:
@@ -52,6 +41,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: TODO
     ///   - subject: A subject for publishing track events.
     convenience init(
         sessionID: String,
@@ -60,6 +50,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
         videoCaptureSessionProvider: VideoCaptureSessionProvider
     ) {
@@ -74,6 +65,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 subject: subject,
                 videoCaptureSessionProvider: videoCaptureSessionProvider
             ),
@@ -140,6 +132,16 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo()
+    }
+
     // MARK: - Video
 
     /// Updates the camera position.
@@ -163,15 +165,15 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// Zooms the camera by a given factor.
     ///
     /// - Parameter factor: The zoom factor.
-    func zoom(by factor: CGFloat) throws {
-        try (localMediaManager as? LocalVideoMediaAdapter)?.zoom(by: factor)
+    func zoom(by factor: CGFloat) async throws {
+        try await(localMediaManager as? LocalVideoMediaAdapter)?.zoom(by: factor)
     }
 
     /// Focuses the camera at a given point.
     ///
     /// - Parameter point: The point to focus on.
-    func focus(at point: CGPoint) throws {
-        try (localMediaManager as? LocalVideoMediaAdapter)?.focus(at: point)
+    func focus(at point: CGPoint) async throws {
+        try await(localMediaManager as? LocalVideoMediaAdapter)?.focus(at: point)
     }
 
     /// Adds a video output to the capture session.
@@ -179,8 +181,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter videoOutput: The video output to add.
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
-        try (localMediaManager as? LocalVideoMediaAdapter)?.addVideoOutput(videoOutput)
+    ) async throws {
+        try await(localMediaManager as? LocalVideoMediaAdapter)?.addVideoOutput(videoOutput)
     }
 
     /// Removes a video output from the capture session.
@@ -188,8 +190,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter videoOutput: The video output to remove.
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
-        try (localMediaManager as? LocalVideoMediaAdapter)?.removeVideoOutput(videoOutput)
+    ) async throws {
+        try await(localMediaManager as? LocalVideoMediaAdapter)?.removeVideoOutput(videoOutput)
     }
 
     /// Adds a photo output to the capture session.
@@ -197,8 +199,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter capturePhotoOutput: The photo output to add.
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
-        try (localMediaManager as? LocalVideoMediaAdapter)?
+    ) async throws {
+        try await(localMediaManager as? LocalVideoMediaAdapter)?
             .addCapturePhotoOutput(capturePhotoOutput)
     }
 
@@ -207,8 +209,8 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter capturePhotoOutput: The photo output to remove.
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
-        try (localMediaManager as? LocalVideoMediaAdapter)?
+    ) async throws {
+        try await(localMediaManager as? LocalVideoMediaAdapter)?
             .removeCapturePhotoOutput(capturePhotoOutput)
     }
 
@@ -216,7 +218,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter activeEncodings: The set of active encoding identifiers.
     func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
         (localMediaManager as? LocalVideoMediaAdapter)?
             .changePublishQuality(with: layerSettings)
@@ -229,15 +231,17 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter stream: The video stream to add.
     private func add(_ stream: RTCMediaStream) {
         queue.sync { streams.append(stream) }
-        if let videoTrack = stream.videoTracks.first {
-            subject.send(
-                .added(
+
+        stream
+            .videoTracks
+            .map {
+                TrackEvent.added(
                     id: stream.trackId,
                     trackType: .video,
-                    track: videoTrack
+                    track: $0
                 )
-            )
-        }
+            }
+            .forEach { subject.send($0) }
     }
 
     /// Removes a video stream and notifies observers.
@@ -247,14 +251,16 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         queue.sync {
             streams = streams.filter { $0.streamId != stream.streamId }
         }
-        if let videoTrack = stream.videoTracks.first {
-            subject.send(
-                .removed(
-                    id: stream.streamId,
+
+        stream
+            .videoTracks
+            .map {
+                TrackEvent.removed(
+                    id: stream.trackId,
                     trackType: .video,
-                    track: videoTrack
+                    track: $0
                 )
-            )
-        }
+            }
+            .forEach { subject.send($0) }
     }
 }

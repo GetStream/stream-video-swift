@@ -103,6 +103,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// Executes the disconnected stage logic.
         private func execute() {
             context.sfuEventObserver = nil
+            context.flowError = nil
+            context.disconnectionSource = nil
             Task {
                 let statsReporter = await context
                     .coordinator?

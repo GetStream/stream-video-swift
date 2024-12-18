@@ -60,9 +60,12 @@ protocol StreamRTCPeerConnectionProtocol: AnyObject {
     ///   - transceiverInit: The initialization parameters for the transceiver.
     /// - Returns: The created RTCRtpTransceiver, or nil if creation fails.
     func addTransceiver(
+        trackType: TrackType,
         with track: RTCMediaStreamTrack,
         init transceiverInit: RTCRtpTransceiverInit
     ) -> RTCRtpTransceiver?
+
+    func transceivers(for trackType: TrackType) -> [RTCRtpTransceiver]
 
     /// Adds an ICE candidate to the peer connection.
     /// - Parameter candidate: The ICE candidate to add.

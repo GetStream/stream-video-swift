@@ -29,8 +29,12 @@ final class StreamPictureInPictureTrackStateAdapter {
             /// When the 'activeTrack' property changes, this didSet observer is called.
             /// If the adapter is enabled and the new 'activeTrack' is different from the old one,
             /// it disables the old track (if it exists).
-            if isEnabled, oldValue?.trackId != activeTrack?.trackId {
-                oldValue?.isEnabled = false
+            if isEnabled, oldValue?.trackId != activeTrack?.trackId, let oldValue {
+                oldValue.isEnabled = false
+                log.info(
+                    "⚙️ Previously active track:\(oldValue.trackId) for picture-in-picture will be disabled now.",
+                    subsystems: .pictureInPicture
+                )
             }
         }
     }
@@ -59,10 +63,10 @@ final class StreamPictureInPictureTrackStateAdapter {
                 .sink { [weak self] _ in
                     self?.checkTracksState()
                 }
-            log.debug("✅ Activated.")
+            log.debug("✅ Activated.", subsystems: .pictureInPicture)
         } else {
             /// If 'isActive' is false, it cancels the observer.
-            log.debug("❌ Disabled.")
+            log.debug("❌ Disabled.", subsystems: .pictureInPicture)
         }
     }
 
@@ -70,7 +74,10 @@ final class StreamPictureInPictureTrackStateAdapter {
     private func checkTracksState() {
         let activeTrack = self.activeTrack
         if let activeTrack, !activeTrack.isEnabled {
-            log.info("⚙️Active track:\(activeTrack.trackId) for picture-in-picture will be enabled now.")
+            log.info(
+                "⚙️ Active track:\(activeTrack.trackId) for picture-in-picture will be enabled now.",
+                subsystems: .pictureInPicture
+            )
             activeTrack.isEnabled = true
         }
     }

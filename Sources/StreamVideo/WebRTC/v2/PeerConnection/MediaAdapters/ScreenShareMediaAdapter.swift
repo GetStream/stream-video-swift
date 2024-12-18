@@ -33,16 +33,6 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// A subject for publishing track events.
     let subject: PassthroughSubject<TrackEvent, Never>
 
-    /// The local screen share track, if available.
-    var localTrack: RTCMediaStreamTrack? {
-        (localMediaManager as? LocalScreenShareMediaAdapter)?.localTrack
-    }
-
-    /// The mid (Media Stream Identification) of the local screen share track, if available.
-    var mid: String? {
-        (localMediaManager as? LocalScreenShareMediaAdapter)?.mid
-    }
-
     /// Convenience initializer for creating a ScreenShareMediaAdapter with a LocalScreenShareMediaAdapter.
     ///
     /// - Parameters:
@@ -52,6 +42,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - PublishOptions: -
     ///   - subject: A subject for publishing track events.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
     convenience init(
@@ -59,8 +50,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
-        videoOptions: VideoOptions,
-        videoConfig: VideoConfig,
+        publishOptions: [PublishOptions.VideoPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -73,8 +63,7 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
                 peerConnection: peerConnection,
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
-                videoOptions: videoOptions,
-                videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 subject: subject,
                 screenShareSessionProvider: screenShareSessionProvider
             ),
@@ -143,6 +132,23 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
+    ) {
+        (localMediaManager as? LocalScreenShareMediaAdapter)?
+            .changePublishQuality(with: layerSettings)
+    }
+
+    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo()
+    }
+
     // MARK: - ScreenSharing
 
     /// Begins screen sharing of the specified type.
@@ -184,15 +190,17 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter stream: The screen share stream to add.
     private func add(_ stream: RTCMediaStream) {
         queue.sync { streams.append(stream) }
-        if let videoTrack = stream.videoTracks.first {
-            subject.send(
-                .added(
+
+        stream
+            .videoTracks
+            .map {
+                TrackEvent.added(
                     id: stream.trackId,
                     trackType: .screenshare,
-                    track: videoTrack
+                    track: $0
                 )
-            )
-        }
+            }
+            .forEach { subject.send($0) }
     }
 
     /// Removes a screen share stream and notifies observers.
@@ -202,14 +210,16 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
         queue.sync {
             streams = streams.filter { $0.streamId != stream.streamId }
         }
-        if let videoTrack = stream.audioTracks.first {
-            subject.send(
-                .removed(
-                    id: stream.streamId,
+
+        stream
+            .videoTracks
+            .map {
+                TrackEvent.removed(
+                    id: stream.trackId,
                     trackType: .screenshare,
-                    track: videoTrack
+                    track: $0
                 )
-            )
-        }
+            }
+            .forEach { subject.send($0) }
     }
 }

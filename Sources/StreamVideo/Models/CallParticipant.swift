@@ -326,6 +326,32 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         )
     }
 
+    public func withUpdated(trackLookupPrefix: String) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt,
+            audioLevel: audioLevel,
+            audioLevels: audioLevels,
+            pin: pin
+        )
+    }
+
     public func withUpdated(
         isSpeaking: Bool,
         audioLevel: Float

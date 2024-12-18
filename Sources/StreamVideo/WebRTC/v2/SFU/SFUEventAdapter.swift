@@ -49,62 +49,102 @@ final class SFUEventAdapter {
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ConnectionQualityChanged.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) for userIds:\($0.connectionQualityUpdates.map(\.userID).joined(separator: ","))."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleConnectionQualityChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_AudioLevelChanged.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) for userIds:\($0.audioLevels.map(\.userID).joined(separator: ","))."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleAudioLevelChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ChangePublishQuality.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) with \($0.audioSenders.endIndex) audioRenders and \($0.videoSenders.endIndex) videoRenderers."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleChangePublishQuality($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantJoined.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) on callCid:\($0.callCid) for participant:\($0.participant.name)."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleParticipantJoined($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantLeft.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) on callCid:\($0.callCid) for participant:\($0.participant.name)."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleParticipantLeft($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_DominantSpeakerChanged.self)
+            .log(.debug, subsystems: .sfu) { "Processing SFU event of type:\($0.name) for userId:\($0.userID)." }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleDominantSpeakerChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) with participants:\($0.callState.participants.map(\.name).joined(separator: ","))."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleJoinResponse($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_HealthCheckResponse.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) with anonymous:\($0.participantCount.anonymous) total:\($0.participantCount.total)."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleHealthCheckResponse($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_TrackPublished.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) for userID:\($0.userID) trackType:\($0.type.rawValue)."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleTrackPublished($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_TrackUnpublished.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\($0.name) for userID:\($0.userID) trackType:\($0.type.rawValue)."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleTrackUnpublished($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_PinsChanged.self)
+            .log(.debug, subsystems: .sfu) { "Processing SFU event of type:\(type(of: $0))." }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handlePinsChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_ParticipantUpdated.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\(type(of: $0)) on callCid:\($0.callCid) participant:\($0.participant.name)."
+            }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleParticipantUpdated($0) }
+            .store(in: disposableBag)
+
+        sfuAdapter
+            .publisher(eventType: Stream_Video_Sfu_Event_ChangePublishOptions.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\(type(of: $0)) on callCid:\($0.publishOptions.map(\.trackType.description).joined(separator: ",")) reason:\($0.reason)."
+            }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleChangePublishOptions($0) }
             .store(in: disposableBag)
     }
 
@@ -173,18 +213,9 @@ final class SFUEventAdapter {
     private func handleChangePublishQuality(
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) async {
-        guard
-            let layerSettings = event
-            .videoSenders
-            .first?
-            .layers
-        else {
-            return
-        }
-
         await stateAdapter
             .publisher?
-            .changePublishQuality(with: layerSettings)
+            .changePublishQuality(with: event)
     }
 
     /// Handles a ParticipantJoined event.
@@ -367,6 +398,11 @@ final class SFUEventAdapter {
                 break
             }
 
+            if event.hasParticipant, let participant = updatedParticipants[sessionID] {
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(trackLookupPrefix: event.participant.trackLookupPrefix)
+            }
+
             return updatedParticipants
         }
     }
@@ -426,6 +462,11 @@ final class SFUEventAdapter {
                 break
             }
 
+            if event.hasParticipant, let participant = updatedParticipants[sessionID] {
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(trackLookupPrefix: event.participant.trackLookupPrefix)
+            }
+
             return updatedParticipants
         }
     }
@@ -470,7 +511,7 @@ final class SFUEventAdapter {
             else {
                 return participants
             }
-            
+
             updatedParticipants[event.participant.sessionID] = event
                 .participant
                 .toCallParticipant()
@@ -480,5 +521,15 @@ final class SFUEventAdapter {
                 .withUpdated(screensharingTrack: participant.screenshareTrack)
             return updatedParticipants
         }
+    }
+
+    /// Handles a ChangePublishOptions event.
+    ///
+    /// - Parameter event: The ChangePublishOptions event to handle.
+    private func handleChangePublishOptions(
+        _ event: Stream_Video_Sfu_Event_ChangePublishOptions
+    ) async {
+        await stateAdapter
+            .set(publishOptions: .init(event.publishOptions))
     }
 }

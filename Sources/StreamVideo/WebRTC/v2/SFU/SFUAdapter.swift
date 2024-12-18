@@ -430,6 +430,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
         try Task.checkCancellation()
 
+        log.debug(request, subsystems: .sfu)
         let task = Task { [request, signalService] in
             try Task.checkCancellation()
             return try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {

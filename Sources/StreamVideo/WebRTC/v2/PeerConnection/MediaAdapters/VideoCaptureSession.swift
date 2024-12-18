@@ -14,7 +14,7 @@ struct VideoCaptureSession {
     var localTrack: RTCVideoTrack
 
     /// The video capturer for the screen share.
-    var capturer: CameraVideoCapturing & Sendable
+    var capturer: StreamVideoCapturer
 }
 
 /// A class that provides and manages the active screen sharing session.
@@ -47,6 +47,21 @@ final class VideoCaptureSessionProvider {
             } catch {
                 log.error(error)
             }
+        }
+    }
+}
+
+extension AVCaptureDevice.Position: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unspecified:
+            return ".unspecified"
+        case .back:
+            return ".back"
+        case .front:
+            return ".front"
+        @unknown default:
+            return ".unknown(\(rawValue)"
         }
     }
 }
