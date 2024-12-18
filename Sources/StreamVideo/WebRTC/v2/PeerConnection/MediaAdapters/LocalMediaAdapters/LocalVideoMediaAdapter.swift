@@ -63,7 +63,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
 
-    private let publishUnpublishProcessingQueue = SerialActorQueue()
+    private let processingQueue = SerialActorQueue()
 
     /// Initializes a new instance of the `LocalVideoMediaAdapter`.
     ///
@@ -167,7 +167,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Starts publishing the local video track.
     func publish() {
-        publishUnpublishProcessingQueue.async { @MainActor [weak self] in
+        processingQueue.async { @MainActor [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
@@ -188,7 +188,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                         for: $0,
                         with: self
                             .primaryTrack
-                            .clone(from: self.peerConnectionFactory)
+                            .clone(from: self.peerConnectionFactory),
+                        addTrackOnExistingTransceiver: true
                     )
                 }
 
@@ -205,7 +206,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Stops publishing the local video track.
     func unpublish() {
-        publishUnpublishProcessingQueue.async { [weak self] in
+        processingQueue.async { [weak self] in
             guard
                 let self,
                 primaryTrack.isEnabled
@@ -267,34 +268,42 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        guard primaryTrack.isEnabled else { return }
+        processingQueue.async { [weak self] in
+            guard
+                let self,
+                primaryTrack.isEnabled
+            else {
+                return
+            }
 
-        self.publishOptions = publishOptions.video
+            self.publishOptions = publishOptions.video
 
-        for publishOption in self.publishOptions {
-            addOrUpdateTransceiver(
-                for: publishOption,
-                with: primaryTrack.clone(from: peerConnectionFactory)
+            for publishOption in self.publishOptions {
+                addOrUpdateTransceiver(
+                    for: publishOption,
+                    with: primaryTrack.clone(from: peerConnectionFactory),
+                    addTrackOnExistingTransceiver: false
+                )
+            }
+
+            let activePublishOptions = Set(self.publishOptions)
+
+            transceiverStorage
+                .filter { !activePublishOptions.contains($0.key) }
+                .forEach { $0.value.sender.track = nil }
+
+            log.debug(
+                """
+                Local videoTracks updated with:
+                    PublishOptions:
+                        \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
+                    
+                    TransceiverStorage:
+                        \(transceiverStorage)
+                """,
+                subsystems: .webRTC
             )
         }
-
-        let activePublishOptions = Set(self.publishOptions)
-
-        transceiverStorage
-            .filter { !activePublishOptions.contains($0.key) }
-            .forEach { $0.value.sender.track = nil }
-
-        log.debug(
-            """
-            Local videoTracks updated with:
-                PublishOptions:
-                    \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
-                
-                TransceiverStorage:
-                    \(transceiverStorage)
-            """,
-            subsystems: .webRTC
-        )
     }
 
     /// Retrieves track information for the local video tracks.
@@ -320,137 +329,140 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func changePublishQuality(
         with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
-        for videoSender in layerSettings {
-            let key = PublishOptions.VideoPublishOptions(
-                id: Int(videoSender.publishOptionID),
-                codec: VideoCodec(videoSender.codec)
-            )
-            guard
-                let transceiver = transceiverStorage.get(for: key)
-            else {
-                log.debug(
-                    """
-                    We didn't apply publish quality change because transceiver 
-                    not found for publishOptionID:\(videoSender.publishOptionID) and codec:\(VideoCodec(videoSender.codec)). 
-                    Available transceivers: \(transceiverStorage.map { "publishOptionID:\($0.key.id), codec:\($0.key.codec)" })
-                    """,
-                    subsystems: .webRTC
+        processingQueue.async { [weak self] in
+            guard let self else { return }
+            for videoSender in layerSettings {
+                let key = PublishOptions.VideoPublishOptions(
+                    id: Int(videoSender.publishOptionID),
+                    codec: VideoCodec(videoSender.codec)
                 )
-                continue
-            }
-
-            var hasChanges = false
-            let params = transceiver
-                .sender
-                .parameters
-
-            guard
-                !params.encodings.isEmpty
-            else {
-                log.warning("Update publish quality, No suitable video encoding quality found", subsystems: .webRTC)
-                return
-            }
-
-            let isUsingSVCCodec = {
-                if let preferredCodec = params.codecs.first {
-                    return VideoCodec(preferredCodec).isSVC
-                } else {
-                    return false
-                }
-            }()
-            var updatedEncodings = [RTCRtpEncodingParameters]()
-
-            for encoding in params.encodings {
-                let layerSettings = isUsingSVCCodec
-                    // for SVC, we only have one layer (q) and often rid is omitted
-                    ? videoSender.layers.first
-                    // for non-SVC, we need to find the layer by rid (simulcast)
-                    : videoSender.layers.first(where: { $0.name == encoding.rid })
-
-                // flip 'active' flag only when necessary
-                if layerSettings?.active != encoding.isActive {
-                    encoding.isActive = layerSettings?.active ?? false
-                    hasChanges = true
-                }
-
-                // skip the rest of the settings if the layer is disabled or not found
-                guard let layerSettings else {
-                    updatedEncodings.append(encoding)
+                guard
+                    let transceiver = transceiverStorage.get(for: key)
+                else {
+                    log.debug(
+                        """
+                        We didn't apply publish quality change because transceiver 
+                        not found for publishOptionID:\(videoSender.publishOptionID) and codec:\(VideoCodec(videoSender.codec)). 
+                        Available transceivers: \(transceiverStorage.map { "publishOptionID:\($0.key.id), codec:\($0.key.codec)" })
+                        """,
+                        subsystems: .webRTC
+                    )
                     continue
                 }
 
-                if
-                    layerSettings.scaleResolutionDownBy >= 1,
-                    layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0)
-                {
-                    encoding.scaleResolutionDownBy = .init(value: layerSettings.scaleResolutionDownBy)
-                    hasChanges = true
+                var hasChanges = false
+                let params = transceiver
+                    .sender
+                    .parameters
+
+                guard
+                    !params.encodings.isEmpty
+                else {
+                    log.warning("Update publish quality, No suitable video encoding quality found", subsystems: .webRTC)
+                    return
                 }
 
-                if
-                    layerSettings.maxBitrate > 0,
-                    layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0)
-                {
-                    encoding.maxBitrateBps = .init(value: layerSettings.maxBitrate)
-                    hasChanges = true
+                let isUsingSVCCodec = {
+                    if let preferredCodec = params.codecs.first {
+                        return VideoCodec(preferredCodec).isSVC
+                    } else {
+                        return false
+                    }
+                }()
+                var updatedEncodings = [RTCRtpEncodingParameters]()
+
+                for encoding in params.encodings {
+                    let layerSettings = isUsingSVCCodec
+                        // for SVC, we only have one layer (q) and often rid is omitted
+                        ? videoSender.layers.first
+                        // for non-SVC, we need to find the layer by rid (simulcast)
+                        : videoSender.layers.first(where: { $0.name == encoding.rid })
+
+                    // flip 'active' flag only when necessary
+                    if layerSettings?.active != encoding.isActive {
+                        encoding.isActive = layerSettings?.active ?? false
+                        hasChanges = true
+                    }
+
+                    // skip the rest of the settings if the layer is disabled or not found
+                    guard let layerSettings else {
+                        updatedEncodings.append(encoding)
+                        continue
+                    }
+
+                    if
+                        layerSettings.scaleResolutionDownBy >= 1,
+                        layerSettings.scaleResolutionDownBy != Float(truncating: encoding.scaleResolutionDownBy ?? 0)
+                    {
+                        encoding.scaleResolutionDownBy = .init(value: layerSettings.scaleResolutionDownBy)
+                        hasChanges = true
+                    }
+
+                    if
+                        layerSettings.maxBitrate > 0,
+                        layerSettings.maxBitrate != Int32(truncating: encoding.maxBitrateBps ?? 0)
+                    {
+                        encoding.maxBitrateBps = .init(value: layerSettings.maxBitrate)
+                        hasChanges = true
+                    }
+
+                    if
+                        layerSettings.maxFramerate > 0,
+                        layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0)
+                    {
+                        encoding.maxFramerate = .init(value: layerSettings.maxFramerate)
+                        hasChanges = true
+                    }
+
+                    if
+                        !layerSettings.scalabilityMode.isEmpty,
+                        layerSettings.scalabilityMode != encoding.scalabilityMode
+                    {
+                        encoding.scalabilityMode = layerSettings.scalabilityMode
+                        hasChanges = true
+                    }
+
+                    updatedEncodings.append(encoding)
                 }
 
-                if
-                    layerSettings.maxFramerate > 0,
-                    layerSettings.maxFramerate != Int32(truncating: encoding.maxFramerate ?? 0)
-                {
-                    encoding.maxFramerate = .init(value: layerSettings.maxFramerate)
-                    hasChanges = true
+                let activeLayers = videoSender
+                    .layers
+                    .filter { $0.active }
+                    .map {
+                        let value = [
+                            "name:\($0.name)",
+                            "scaleResolutionDownBy:\($0.scaleResolutionDownBy)",
+                            "maxBitrate:\($0.maxBitrate)",
+                            "maxFramerate:\($0.maxFramerate)",
+                            "scalabilityMode:\($0.scalabilityMode)"
+                        ]
+                        return "[\(value.joined(separator: ","))]"
+                    }
+
+                guard hasChanges else {
+                    log.info(
+                        "Update publish quality, no change: \(activeLayers.joined(separator: ","))",
+                        subsystems: .webRTC
+                    )
+                    return
                 }
-
-                if
-                    !layerSettings.scalabilityMode.isEmpty,
-                    layerSettings.scalabilityMode != encoding.scalabilityMode
-                {
-                    encoding.scalabilityMode = layerSettings.scalabilityMode
-                    hasChanges = true
-                }
-
-                updatedEncodings.append(encoding)
-            }
-
-            let activeLayers = videoSender
-                .layers
-                .filter { $0.active }
-                .map {
-                    let value = [
-                        "name:\($0.name)",
-                        "scaleResolutionDownBy:\($0.scaleResolutionDownBy)",
-                        "maxBitrate:\($0.maxBitrate)",
-                        "maxFramerate:\($0.maxFramerate)",
-                        "scalabilityMode:\($0.scalabilityMode)"
-                    ]
-                    return "[\(value.joined(separator: ","))]"
-                }
-
-            guard hasChanges else {
                 log.info(
-                    "Update publish quality, no change: \(activeLayers.joined(separator: ","))",
+                    "Update publish quality for publishOptionID:\(videoSender.publishOptionID) codec:\(VideoCodec(videoSender.codec)), enabled rids: \(activeLayers.joined(separator: ","))",
                     subsystems: .webRTC
                 )
-                return
+                params.encodings = updatedEncodings
+                transceiver.sender.parameters = params
             }
-            log.info(
-                "Update publish quality for publishOptionID:\(videoSender.publishOptionID) codec:\(VideoCodec(videoSender.codec)), enabled rids: \(activeLayers.joined(separator: ","))",
-                subsystems: .webRTC
-            )
-            params.encodings = updatedEncodings
-            transceiver.sender.parameters = params
-        }
 
-        Task { @MainActor in
-            do {
-                try await videoCapturePolicy.updateCaptureQuality(
-                    with: .init(layerSettings.map(\.name)),
-                    for: videoCaptureSessionProvider.activeSession
-                )
-            } catch {
-                log.error(error)
+            Task { @MainActor [videoCapturePolicy, videoCaptureSessionProvider] in
+                do {
+                    try await videoCapturePolicy.updateCaptureQuality(
+                        with: .init(layerSettings.map(\.name)),
+                        for: videoCaptureSessionProvider.activeSession
+                    )
+                } catch {
+                    log.error(error)
+                }
             }
         }
     }
@@ -677,8 +689,13 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - track: The video track to add or update.
     private func addOrUpdateTransceiver(
         for options: PublishOptions.VideoPublishOptions,
-        with track: RTCVideoTrack
+        with track: RTCVideoTrack,
+        addTrackOnExistingTransceiver: Bool
     ) {
+        guard !transceiverStorage.contains(key: options) || addTrackOnExistingTransceiver else {
+            return
+        }
+
         if let transceiver = transceiverStorage.get(for: options) {
             transceiver.sender.track = track
         } else {

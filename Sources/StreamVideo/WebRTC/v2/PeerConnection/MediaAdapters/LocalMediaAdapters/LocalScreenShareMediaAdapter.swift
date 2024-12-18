@@ -140,6 +140,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                     addOrUpdateTransceiver(
                         for: $0,
                         with: primaryTrack.clone(from: peerConnectionFactory),
+                        addTrackOnExistingTransceiver: true,
                         screenSharingType: activeSession.screenSharingType
                     )
                 }
@@ -219,6 +220,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             addOrUpdateTransceiver(
                 for: publishOption,
                 with: primaryTrack.clone(from: peerConnectionFactory),
+                addTrackOnExistingTransceiver: false,
                 screenSharingType: activeSession.screenSharingType
             )
         }
@@ -259,7 +261,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             .filter { $0.value.sender.track != nil }
             .compactMap { publishOptions, transceiver in
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
-                trackInfo.trackType = .screenShare
+                trackInfo.trackType = .video
                 trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
                 trackInfo.layers = publishOptions.buildLayers(for: .screenshare)
                 trackInfo.mid = transceiver.mid
@@ -324,8 +326,13 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     private func addOrUpdateTransceiver(
         for options: PublishOptions.VideoPublishOptions,
         with track: RTCVideoTrack,
+        addTrackOnExistingTransceiver: Bool,
         screenSharingType: ScreensharingType
     ) {
+        guard !transceiverStorage.contains(key: options) || addTrackOnExistingTransceiver else {
+            return
+        }
+
         if let transceiver = transceiverStorage.get(for: options) {
             transceiver.sender.track = track
         } else {
