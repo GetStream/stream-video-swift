@@ -88,6 +88,8 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// A size ratio threshold used to determine if skipping frames is required.
     private let sizeRatioThreshold: CGFloat = 15
 
+    private let isLoggingEnabled = false
+
     // MARK: - Lifecycle
 
     @available(*, unavailable)
@@ -131,14 +133,17 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         // has changed.
         trackSize = .init(width: Int(frame.width), height: Int(frame.height))
 
-        log.debug("→ Received frame with trackSize:\(trackSize)", subsystems: .pictureInPicture)
+        logMessage(
+            .debug,
+            message: "→ Received frame with trackSize:\(trackSize)"
+        )
 
         defer {
             handleFrameSkippingIfRequired()
         }
 
         guard shouldRenderFrame else {
-            log.debug("→ Skipping frame.")
+            logMessage(.debug, message: "→ Skipping frame.")
             return
         }
 
@@ -146,10 +151,16 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(frame, targetSize: contentSize)?
             .buffer as? StreamRTCYUVBuffer,
             let sampleBuffer = yuvBuffer.sampleBuffer {
-            log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.", subsystems: .pictureInPicture)
+            logMessage(
+                .debug,
+                message: "➕ Buffer for trackId:\(track?.trackId ?? "n/a") added."
+            )
             bufferPublisher.send(sampleBuffer)
         } else {
-            log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.", subsystems: .pictureInPicture)
+            logMessage(
+                .warning,
+                message: "Failed to convert \(type(of: frame.buffer)) CMSampleBuffer."
+            )
         }
     }
 
@@ -174,21 +185,24 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             buffer.isValid
         else {
             contentView.renderingComponent.flush()
-            log.debug("🔥 Display layer flushed.", subsystems: .pictureInPicture)
+            logMessage(.debug, message: "🔥 Display layer flushed.")
             return
         }
 
-        log.debug("⚙️ Processing buffer for trackId:\(trackId).", subsystems: .pictureInPicture)
+        logMessage(
+            .debug,
+            message: "⚙️ Processing buffer for trackId:\(trackId)."
+        )
         if #available(iOS 14.0, *) {
             if contentView.renderingComponent.requiresFlushToResumeDecoding == true {
                 contentView.renderingComponent.flush()
-                log.debug("🔥 Display layer for track:\(trackId) flushed.", subsystems: .pictureInPicture)
+                logMessage(.debug, message: "🔥 Display layer for track:\(trackId) flushed.")
             }
         }
 
         if contentView.renderingComponent.isReadyForMoreMediaData {
             contentView.renderingComponent.enqueue(buffer)
-            log.debug("✅ Buffer for trackId:\(trackId) enqueued.", subsystems: .pictureInPicture)
+            logMessage(.debug, message: "✅ Buffer for trackId:\(trackId) enqueued.")
         }
     }
 
@@ -206,7 +220,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             .sink { [weak self] in self?.process($0) }
 
         track.add(self)
-        log.debug("⏳ Frame streaming for Picture-in-Picture started.", subsystems: .pictureInPicture)
+        logMessage(
+            .debug,
+            message: "⏳ Frame streaming for Picture-in-Picture started."
+        )
     }
 
     /// A method that stops the frame consumption from the track. Used automatically when the rendering
@@ -217,7 +234,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         bufferUpdatesCancellable = nil
         track?.remove(self)
         contentView.renderingComponent.flush()
-        log.debug("Frame streaming for Picture-in-Picture stopped.", subsystems: .pictureInPicture)
+        logMessage(.debug, message: "Frame streaming for Picture-in-Picture stopped.")
     }
 
     /// A method used to calculate rendering required properties, every time the trackSize changes.
@@ -239,7 +256,9 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         /// to the value that fits.
         pictureInPictureWindowSizePolicy.trackSize = trackSize
 
-        log.debug(
+        logMessage(
+            .debug,
+            message:
             """
             contentSize:\(contentSize)
             trackId:\(track?.trackId ?? "n/a")
@@ -249,7 +268,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             skippedFrames:\(skippedFrames)
             widthDiffRatio:\(widthDiffRatio)
             heightDiffRatio:\(heightDiffRatio)
-            """, subsystems: .pictureInPicture
+            """
         )
     }
 
@@ -261,9 +280,9 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             } else {
                 skippedFrames += 1
             }
-            log.debug(
-                "noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames)",
-                subsystems: .pictureInPicture
+            logMessage(
+                .debug,
+                message: "noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames)"
             )
         } else if skippedFrames > 0 {
             skippedFrames = 0
@@ -277,5 +296,27 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         skippedFrames = 0
         requiresResize = false
         startFrameStreaming(for: track, on: window)
+    }
+
+    private func logMessage(
+        _ level: LogLevel,
+        message: String,
+        error: Error? = nil,
+        file: StaticString = #file,
+        functionName: StaticString = #function,
+        line: UInt = #line
+    ) {
+        guard isLoggingEnabled else {
+            return
+        }
+        log.log(
+            level,
+            functionName: functionName,
+            fileName: file,
+            lineNumber: line,
+            message: message,
+            subsystems: .pictureInPicture,
+            error: error
+        )
     }
 }
