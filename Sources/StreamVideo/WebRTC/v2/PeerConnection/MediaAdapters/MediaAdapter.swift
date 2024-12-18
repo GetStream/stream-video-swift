@@ -237,7 +237,7 @@ final class MediaAdapter {
 
             group.addTask {
                 videoMediaAdapter.changePublishQuality(
-                    with: event.videoSenders.filter { $0.trackType == .screenShare }
+                    with: event.videoSenders.filter { $0.trackType == .video }
                 )
             }
 

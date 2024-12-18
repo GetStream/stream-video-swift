@@ -56,6 +56,13 @@ struct PublishOptions: Sendable, Hashable {
             hasher.combine(id)
             hasher.combine(codec)
         }
+
+        static func == (
+            lhs: AudioPublishOptions,
+            rhs: AudioPublishOptions
+        ) -> Bool {
+            lhs.id == rhs.id && lhs.codec == rhs.codec
+        }
     }
 
     /// Options for configuring video publishing.
@@ -155,6 +162,13 @@ struct PublishOptions: Sendable, Hashable {
         func hash(into hasher: inout Hasher) {
             hasher.combine(id)
             hasher.combine(codec)
+        }
+
+        static func == (
+            lhs: VideoPublishOptions,
+            rhs: VideoPublishOptions
+        ) -> Bool {
+            lhs.id == rhs.id && lhs.codec == rhs.codec
         }
     }
 

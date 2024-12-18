@@ -68,7 +68,6 @@ extension RTCRtpEncodingParameters {
         maxBitrateBps = bitrate as NSNumber
         if videoPublishOptions.codec.isSVC {
             scalabilityMode = videoPublishOptions.capturingLayers.scalabilityMode
-            scaleResolutionDownBy = 1 as NSNumber
         } else {
             scaleResolutionDownBy = scaleDownFactor as NSNumber
         }
