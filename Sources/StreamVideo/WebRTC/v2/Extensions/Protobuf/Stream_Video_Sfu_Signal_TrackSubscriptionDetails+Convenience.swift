@@ -22,8 +22,9 @@ extension Stream_Video_Sfu_Signal_TrackSubscriptionDetails {
         type: Stream_Video_Sfu_Models_TrackType
     ) {
         userID = userId
-        dimension = size.map { Stream_Video_Sfu_Models_VideoDimension($0) }
-            ?? Stream_Video_Sfu_Models_VideoDimension()
+        if type == .video || type == .screenShare {
+            dimension = size.map { Stream_Video_Sfu_Models_VideoDimension($0) } ?? Stream_Video_Sfu_Models_VideoDimension()
+        }
         sessionID = sessionId
         trackType = type
     }
