@@ -128,12 +128,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
             primaryTrack.isEnabled = true
 
             publishOptions.forEach {
-                addOrUpdateTransceiver(
+                addTransceiverIfRequired(
                     for: $0,
-                    with: primaryTrack.clone(from: peerConnectionFactory),
-                    addTrackOnExistingTransceiver: true
+                    with: primaryTrack.clone(from: peerConnectionFactory)
                 )
             }
+
+            let activePublishOptions = Set(self.publishOptions)
+            transceiverStorage
+                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
 
             await audioRecorder.startRecording()
 
@@ -211,18 +214,16 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         self.publishOptions = publishOptions.audio
 
         for option in self.publishOptions {
-            addOrUpdateTransceiver(
+            addTransceiverIfRequired(
                 for: option,
-                with: primaryTrack.clone(from: peerConnectionFactory),
-                addTrackOnExistingTransceiver: false
+                with: primaryTrack.clone(from: peerConnectionFactory)
             )
         }
 
         let activePublishOptions = Set(self.publishOptions)
 
         transceiverStorage
-            .filter { !activePublishOptions.contains($0.key) }
-            .forEach { $0.value.sender.track = nil }
+            .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
 
         log.debug(
             """
@@ -273,28 +274,23 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     /// - Parameters:
     ///   - options: The options for publishing the audio track.
     ///   - track: The audio track to be added or updated.
-    private func addOrUpdateTransceiver(
+    private func addTransceiverIfRequired(
         for options: PublishOptions.AudioPublishOptions,
-        with track: RTCAudioTrack,
-        addTrackOnExistingTransceiver: Bool
+        with track: RTCAudioTrack
     ) {
-        guard !transceiverStorage.contains(key: options) || addTrackOnExistingTransceiver else {
+        guard !transceiverStorage.contains(key: options) else {
             return
         }
 
-        if let transceiver = transceiverStorage.get(for: options) {
-            transceiver.sender.track = track
-        } else {
-            let transceiver = peerConnection.addTransceiver(
-                trackType: .audio,
-                with: track,
-                init: .init(
-                    direction: .sendOnly,
-                    streamIds: streamIds,
-                    audioOptions: options
-                )
+        let transceiver = peerConnection.addTransceiver(
+            trackType: .audio,
+            with: track,
+            init: .init(
+                direction: .sendOnly,
+                streamIds: streamIds,
+                audioOptions: options
             )
-            transceiverStorage.set(transceiver, for: options)
-        }
+        )
+        transceiverStorage.set(transceiver, for: options)
     }
 }
