@@ -111,7 +111,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         )
 
         guard let formatDescription = formatDescription else {
-            log.error("Cannot create sample buffer formatDescription.")
+            log.error("Cannot create sample buffer formatDescription.", subsystems: .pictureInPicture)
             return nil
         }
 
@@ -124,7 +124,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         )
 
         guard let buffer = sampleBuffer else {
-            log.error("Cannot create sample buffer")
+            log.error("Cannot create sample buffer", subsystems: .pictureInPicture)
             return nil
         }
 
@@ -187,11 +187,11 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             if error == kvImageNoError {
                 return pixelBuffer
             } else {
-                log.error(error)
+                log.error(error, subsystems: .pictureInPicture)
                 return nil
             }
         } catch {
-            log.error(error)
+            log.error(error, subsystems: .pictureInPicture)
             return nil
         }
     }
