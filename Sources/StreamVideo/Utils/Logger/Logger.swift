@@ -30,7 +30,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .mediaAdapter,
         .thermalState,
         .audioSession,
-        .videoCapturer
+        .videoCapturer,
+        .pictureInPicture
     ]
 
     /// All subsystems within the SDK.
@@ -48,7 +49,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .mediaAdapter,
         .thermalState,
         .audioSession,
-        .videoCapturer
+        .videoCapturer,
+        .pictureInPicture
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -80,6 +82,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     public static let audioSession = Self(rawValue: 1 << 12)
     /// The subsystem responsible for VideoCapturing components.
     public static let videoCapturer = Self(rawValue: 1 << 13)
+    /// The subsystem responsible for PicutreInPicture.
+    public static let pictureInPicture = Self(rawValue: 1 << 14)
 
     public var description: String {
         switch rawValue {
@@ -111,6 +115,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "audioSession"
         case LogSubsystem.videoCapturer.rawValue:
             return "videoCapturer"
+        case LogSubsystem.pictureInPicture.rawValue:
+            return "picture-in-picture"
         default:
             return "unknown(rawValue:\(rawValue)"
         }

@@ -261,7 +261,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             .filter { $0.value.sender.track != nil }
             .compactMap { publishOptions, transceiver in
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
-                trackInfo.trackType = .video
+                trackInfo.trackType = .screenShare
                 trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
                 trackInfo.layers = publishOptions.buildLayers(for: .screenshare)
                 trackInfo.mid = transceiver.mid

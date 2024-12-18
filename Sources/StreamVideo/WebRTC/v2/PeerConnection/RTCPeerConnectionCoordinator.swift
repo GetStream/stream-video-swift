@@ -762,7 +762,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         }
         log.error(
             """
-            PeerConnection tracks and transceivers mismatch
+            PeerConnection tracks and transceivers mismatch for trackType:\(trackType)
             Identifier: \(identifier)
             type:\(peerType)
             sessionID: \(sessionId)

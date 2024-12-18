@@ -131,7 +131,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         // has changed.
         trackSize = .init(width: Int(frame.width), height: Int(frame.height))
 
-        log.debug("→ Received frame with trackSize:\(trackSize)")
+        log.debug("→ Received frame with trackSize:\(trackSize)", subsystems: .pictureInPicture)
 
         defer {
             handleFrameSkippingIfRequired()
@@ -146,10 +146,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(frame, targetSize: contentSize)?
             .buffer as? StreamRTCYUVBuffer,
             let sampleBuffer = yuvBuffer.sampleBuffer {
-            log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.")
+            log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.", subsystems: .pictureInPicture)
             bufferPublisher.send(sampleBuffer)
         } else {
-            log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.")
+            log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.", subsystems: .pictureInPicture)
         }
     }
 
@@ -174,21 +174,21 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             buffer.isValid
         else {
             contentView.renderingComponent.flush()
-            log.debug("🔥 Display layer flushed.")
+            log.debug("🔥 Display layer flushed.", subsystems: .pictureInPicture)
             return
         }
 
-        log.debug("⚙️ Processing buffer for trackId:\(trackId).")
+        log.debug("⚙️ Processing buffer for trackId:\(trackId).", subsystems: .pictureInPicture)
         if #available(iOS 14.0, *) {
             if contentView.renderingComponent.requiresFlushToResumeDecoding == true {
                 contentView.renderingComponent.flush()
-                log.debug("🔥 Display layer for track:\(trackId) flushed.")
+                log.debug("🔥 Display layer for track:\(trackId) flushed.", subsystems: .pictureInPicture)
             }
         }
 
         if contentView.renderingComponent.isReadyForMoreMediaData {
             contentView.renderingComponent.enqueue(buffer)
-            log.debug("✅ Buffer for trackId:\(trackId) enqueued.")
+            log.debug("✅ Buffer for trackId:\(trackId) enqueued.", subsystems: .pictureInPicture)
         }
     }
 
@@ -206,7 +206,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             .sink { [weak self] in self?.process($0) }
 
         track.add(self)
-        log.debug("⏳ Frame streaming for Picture-in-Picture started.")
+        log.debug("⏳ Frame streaming for Picture-in-Picture started.", subsystems: .pictureInPicture)
     }
 
     /// A method that stops the frame consumption from the track. Used automatically when the rendering
@@ -217,7 +217,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         bufferUpdatesCancellable = nil
         track?.remove(self)
         contentView.renderingComponent.flush()
-        log.debug("Frame streaming for Picture-in-Picture stopped.")
+        log.debug("Frame streaming for Picture-in-Picture stopped.", subsystems: .pictureInPicture)
     }
 
     /// A method used to calculate rendering required properties, every time the trackSize changes.
@@ -249,7 +249,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             skippedFrames:\(skippedFrames)
             widthDiffRatio:\(widthDiffRatio)
             heightDiffRatio:\(heightDiffRatio)
-            """
+            """, subsystems: .pictureInPicture
         )
     }
 
@@ -261,7 +261,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             } else {
                 skippedFrames += 1
             }
-            log.debug("noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames)")
+            log.debug(
+                "noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames)",
+                subsystems: .pictureInPicture
+            )
         } else if skippedFrames > 0 {
             skippedFrames = 0
         }
