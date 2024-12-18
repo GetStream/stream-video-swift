@@ -165,7 +165,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiverGetsUpdatedTrack() async throws {
-        self.publishOptions = [.dummy(codec: .opus)]
+        publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
             mockPeerConnection.stub(
                 for: .addTransceiver,
@@ -174,19 +174,25 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
         subject.publish()
         await fulfillment { (self.mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.track != nil }
-        let currentPublishedTrack = try XCTUnwrap((mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.track)
+        let currentPublishedTrack = try XCTUnwrap(
+            (mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?
+                .sender.track
+        )
 
         try await subject.didUpdatePublishOptions(
             .dummy(
                 audio: [.dummy(codec: .opus)]
             )
         )
-        let updatedPublishedTrack = try XCTUnwrap((mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.track)
+        let updatedPublishedTrack = try XCTUnwrap(
+            (mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?
+                .sender.track
+        )
         XCTAssertNotEqual(currentPublishedTrack.trackId, updatedPublishedTrack.trackId)
     }
 
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
-        self.publishOptions = [.dummy(codec: .opus)]
+        publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
             mockPeerConnection.stub(
                 for: .addTransceiver,
@@ -206,7 +212,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_existinTransceiverNotInPublishOptionsGetsTrackNullified() async throws {
-        self.publishOptions = [.dummy(codec: .opus)]
+        publishOptions = [.dummy(codec: .opus)]
         let opusTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .opus))
         let redTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .red))
         mockPeerConnection.stub(for: .addTransceiver, with: opusTransceiver)
@@ -270,7 +276,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNotEqual(trackInfo[0].trackID, opusTransceiver.sender.track?.trackId)
         XCTAssertEqual(trackInfo[0].trackID, redTransceiver.sender.track?.trackId)
     }
-
 
     // MARK: - publish
 

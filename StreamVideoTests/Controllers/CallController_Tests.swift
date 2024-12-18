@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 @preconcurrency import XCTest
 
- final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
+final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private static var videoConfig: VideoConfig! = .dummy()
 
@@ -640,4 +640,4 @@ import AVFoundation
                 .participants.count == 1
         }
     }
- }
+}

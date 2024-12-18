@@ -39,7 +39,9 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
     }
 
     // MARK: - init(direction:streamIds:videoOptions:)
+
     // MARK: Non-SVC
+
     func test_init_trackTypeVideo_nonSVC_3SpatialLayers_returnsCorrectlyConfiguredTransceiverInit() throws {
         try assertInit(
             .video,
@@ -77,6 +79,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
     }
 
     // MARK: SVC
+
     func test_init_trackTypeVideo_svc_1SpatialLayers_3TemporalLayers_returnsCorrectlyConfiguredTransceiverInit() throws {
         try assertInit(
             .video,
@@ -239,8 +242,8 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
             }
 
             let scaleDownFactor = videoOptions.codec.isSVC
-            ? 1
-            : try XCTUnwrap(sendEncoding.scaleResolutionDownBy?.intValue)
+                ? 1
+                : try XCTUnwrap(sendEncoding.scaleResolutionDownBy?.intValue)
             XCTAssertEqual(
                 sendEncoding.maxFramerate?.intValue,
                 videoOptions.frameRate,
@@ -274,6 +277,5 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
                 )
             }
         }
-
     }
 }
