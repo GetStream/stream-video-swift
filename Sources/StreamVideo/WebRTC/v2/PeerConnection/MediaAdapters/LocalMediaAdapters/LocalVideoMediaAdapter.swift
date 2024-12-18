@@ -63,6 +63,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
 
+    private let publishUnpublishProcessingQueue = SerialActorQueue()
+
     /// Initializes a new instance of the `LocalVideoMediaAdapter`.
     ///
     /// - Parameters:
@@ -165,68 +167,73 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Starts publishing the local video track.
     func publish() {
-        Task { @MainActor in
+        publishUnpublishProcessingQueue.async { @MainActor [weak self] in
             guard
+                let self,
                 !primaryTrack.isEnabled
             else {
                 return
             }
+            primaryTrack.isEnabled = true
 
             do {
                 try await startVideoCapturingSession()
-                primaryTrack.isEnabled = true
-
-                publishOptions
-                    .forEach {
-                        addOrUpdateTransceiver(
-                            for: $0,
-                            with: primaryTrack.clone(from: peerConnectionFactory)
-                        )
-                    }
-
-                log.debug(
-                    """
-                    Local videoTracks are now published
-                        primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
-                    """,
-                    subsystems: .webRTC
-                )
             } catch {
                 log.error(error)
             }
+
+            publishOptions
+                .forEach {
+                    self.addOrUpdateTransceiver(
+                        for: $0,
+                        with: self
+                            .primaryTrack
+                            .clone(from: self.peerConnectionFactory)
+                    )
+                }
+
+            log.debug(
+                """
+                Local videoTracks are now published
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
         }
     }
 
     /// Stops publishing the local video track.
     func unpublish() {
-        Task { @MainActor [weak self] in
-            do {
-                guard
-                    let self,
-                    primaryTrack.isEnabled
-                else {
-                    return
-                }
-
-                primaryTrack.isEnabled = false
-
-                transceiverStorage
-                    .forEach { $0.value.sender.track?.isEnabled = false }
-
-                try await stopVideoCapturingSession()
-
-                log.debug(
-                    """
-                    Local videoTracks are now unpublished:
-                        primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
-                    """,
-                    subsystems: .webRTC
-                )
-            } catch {
-                log.error(error, subsystems: .webRTC)
+        publishUnpublishProcessingQueue.async { [weak self] in
+            guard
+                let self,
+                primaryTrack.isEnabled
+            else {
+                return
             }
+
+            primaryTrack.isEnabled = false
+
+            transceiverStorage
+                .forEach { $0.value.sender.track?.isEnabled = false }
+
+            Task { @MainActor [weak self] in
+                do {
+                    try await self?.stopVideoCapturingSession()
+                } catch {
+                    log.error(error, subsystems: .webRTC)
+                }
+            }
+
+            log.debug(
+                """
+                Local videoTracks are now unpublished:
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
         }
     }
 
@@ -318,13 +325,21 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
         for videoSender in layerSettings {
+            let key = PublishOptions.VideoPublishOptions(
+                id: Int(videoSender.publishOptionID),
+                codec: VideoCodec(videoSender.codec)
+            )
             guard
-                let codec = VideoCodec(rawValue: videoSender.codec.name),
-                let transceiver = transceiverStorage.get(for: PublishOptions.VideoPublishOptions(
-                    id: Int(videoSender.publishOptionID),
-                    codec: codec
-                ))
+                let transceiver = transceiverStorage.get(for: key)
             else {
+                log.debug(
+                    """
+                    We didn't apply publish quality change because transceiver 
+                    not found for publishOptionID:\(videoSender.publishOptionID) and codec:\(VideoCodec(videoSender.codec)). 
+                    Available transceivers: \(transceiverStorage.map { "publishOptionID:\($0.key.id), codec:\($0.key.codec)" })
+                    """,
+                    subsystems: .webRTC
+                )
                 continue
             }
 
@@ -614,7 +629,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 position: \(activeSession.position)
                 device: \(device)
                 track: \(activeSession.localTrack.trackId)
-                capturer: \(activeSession.capturer)
+                capturer: \(Unmanaged.passUnretained(activeSession.capturer).toOpaque())
+                dimensions: \(capturingDimension)
+                frameRate: \(frameRate)
             """,
             subsystems: .webRTC
         )
