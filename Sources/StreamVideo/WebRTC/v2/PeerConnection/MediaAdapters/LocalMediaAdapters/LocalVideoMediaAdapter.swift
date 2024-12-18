@@ -184,14 +184,18 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
             publishOptions
                 .forEach {
-                    self.addOrUpdateTransceiver(
+                    self.addTransceiverIfRequired(
                         for: $0,
                         with: self
                             .primaryTrack
-                            .clone(from: self.peerConnectionFactory),
-                        addTrackOnExistingTransceiver: true
+                            .clone(from: self.peerConnectionFactory)
                     )
                 }
+
+            let activePublishOptions = Set(self.publishOptions)
+
+            transceiverStorage
+                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
 
             log.debug(
                 """
@@ -279,18 +283,16 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             self.publishOptions = publishOptions.video
 
             for publishOption in self.publishOptions {
-                addOrUpdateTransceiver(
+                addTransceiverIfRequired(
                     for: publishOption,
-                    with: primaryTrack.clone(from: peerConnectionFactory),
-                    addTrackOnExistingTransceiver: false
+                    with: primaryTrack.clone(from: peerConnectionFactory)
                 )
             }
 
             let activePublishOptions = Set(self.publishOptions)
 
             transceiverStorage
-                .filter { !activePublishOptions.contains($0.key) }
-                .forEach { $0.value.sender.track = nil }
+                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
 
             log.debug(
                 """
@@ -687,29 +689,24 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// - Parameters:
     ///   - options: The publish options for the track.
     ///   - track: The video track to add or update.
-    private func addOrUpdateTransceiver(
+    private func addTransceiverIfRequired(
         for options: PublishOptions.VideoPublishOptions,
-        with track: RTCVideoTrack,
-        addTrackOnExistingTransceiver: Bool
+        with track: RTCVideoTrack
     ) {
-        guard !transceiverStorage.contains(key: options) || addTrackOnExistingTransceiver else {
+        guard !transceiverStorage.contains(key: options) else {
             return
         }
 
-        if let transceiver = transceiverStorage.get(for: options) {
-            transceiver.sender.track = track
-        } else {
-            let transceiver = peerConnection.addTransceiver(
+        let transceiver = peerConnection.addTransceiver(
+            trackType: .video,
+            with: track,
+            init: .init(
                 trackType: .video,
-                with: track,
-                init: .init(
-                    trackType: .video,
-                    direction: .sendOnly,
-                    streamIds: streamIds,
-                    videoOptions: options
-                )
+                direction: .sendOnly,
+                streamIds: streamIds,
+                videoOptions: options
             )
-            transceiverStorage.set(transceiver, for: options)
-        }
+        )
+        transceiverStorage.set(transceiver, for: options)
     }
 }

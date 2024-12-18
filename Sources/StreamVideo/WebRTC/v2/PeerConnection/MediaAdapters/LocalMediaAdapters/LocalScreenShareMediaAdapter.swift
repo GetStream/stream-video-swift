@@ -137,13 +137,17 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 primaryTrack.isEnabled = true
 
                 publishOptions.forEach {
-                    addOrUpdateTransceiver(
+                    addTransceiverIfRequired(
                         for: $0,
                         with: primaryTrack.clone(from: peerConnectionFactory),
-                        addTrackOnExistingTransceiver: true,
                         screenSharingType: activeSession.screenSharingType
                     )
                 }
+
+                let activePublishOptions = Set(self.publishOptions)
+
+                transceiverStorage
+                    .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
 
                 log.debug(
                     """
@@ -217,10 +221,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         self.publishOptions = publishOptions.screenShare
 
         for publishOption in self.publishOptions {
-            addOrUpdateTransceiver(
+            addTransceiverIfRequired(
                 for: publishOption,
                 with: primaryTrack.clone(from: peerConnectionFactory),
-                addTrackOnExistingTransceiver: false,
                 screenSharingType: activeSession.screenSharingType
             )
         }
@@ -228,8 +231,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         let activePublishOptions = Set(self.publishOptions)
 
         transceiverStorage
-            .filter { !activePublishOptions.contains($0.key) }
-            .forEach { $0.value.sender.track = nil }
+            .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
 
         log.debug(
             """
@@ -323,31 +325,26 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///   - options: The publishing options for the track.
     ///   - track: The video track to add or update.
     ///   - screenSharingType: The type of screen sharing.
-    private func addOrUpdateTransceiver(
+    private func addTransceiverIfRequired(
         for options: PublishOptions.VideoPublishOptions,
         with track: RTCVideoTrack,
-        addTrackOnExistingTransceiver: Bool,
         screenSharingType: ScreensharingType
     ) {
-        guard !transceiverStorage.contains(key: options) || addTrackOnExistingTransceiver else {
+        guard !transceiverStorage.contains(key: options) else {
             return
         }
 
-        if let transceiver = transceiverStorage.get(for: options) {
-            transceiver.sender.track = track
-        } else {
-            let transceiver = peerConnection.addTransceiver(
+        let transceiver = peerConnection.addTransceiver(
+            trackType: .screenshare,
+            with: track,
+            init: .init(
                 trackType: .screenshare,
-                with: track,
-                init: .init(
-                    trackType: .screenshare,
-                    direction: .sendOnly,
-                    streamIds: ["\(sessionID)-screenshare-\(screenSharingType)"],
-                    videoOptions: options
-                )
+                direction: .sendOnly,
+                streamIds: ["\(sessionID)-screenshare-\(screenSharingType)"],
+                videoOptions: options
             )
-            transceiverStorage.set(transceiver, for: options)
-        }
+        )
+        transceiverStorage.set(transceiver, for: options)
     }
 
     /// Configures the active screen sharing session with the given type and track.
