@@ -130,7 +130,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
             publishOptions.forEach {
                 addOrUpdateTransceiver(
                     for: $0,
-                    with: primaryTrack.clone(from: peerConnectionFactory)
+                    with: primaryTrack.clone(from: peerConnectionFactory),
+                    addTrackOnExistingTransceiver: true
                 )
             }
 
@@ -212,7 +213,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
         for option in self.publishOptions {
             addOrUpdateTransceiver(
                 for: option,
-                with: primaryTrack.clone(from: peerConnectionFactory)
+                with: primaryTrack.clone(from: peerConnectionFactory),
+                addTrackOnExistingTransceiver: false
             )
         }
 
@@ -273,8 +275,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     ///   - track: The audio track to be added or updated.
     private func addOrUpdateTransceiver(
         for options: PublishOptions.AudioPublishOptions,
-        with track: RTCAudioTrack
+        with track: RTCAudioTrack,
+        addTrackOnExistingTransceiver: Bool
     ) {
+        guard !transceiverStorage.contains(key: options) || addTrackOnExistingTransceiver else {
+            return
+        }
+
         if let transceiver = transceiverStorage.get(for: options) {
             transceiver.sender.track = track
         } else {
