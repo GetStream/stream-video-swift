@@ -307,11 +307,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
                 trackInfo.trackType = .video
                 trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
-                trackInfo.layers = transceiver
-                    .sender
-                    .parameters
-                    .encodings
-                    .map { Stream_Video_Sfu_Models_VideoLayer($0, publishOptions: publishOptions) }
+                trackInfo.layers = publishOptions.buildLayers(for: .video)
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = transceiver.sender.track?.isEnabled ?? true
                 return trackInfo
@@ -440,7 +436,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 return
             }
             log.info(
-                "Update publish quality, enabled rids: \(activeLayers.joined(separator: ","))",
+                "Update publish quality for publishOptionID:\(videoSender.publishOptionID) codec:\(VideoCodec(videoSender.codec)), enabled rids: \(activeLayers.joined(separator: ","))",
                 subsystems: .webRTC
             )
             params.encodings = updatedEncodings
