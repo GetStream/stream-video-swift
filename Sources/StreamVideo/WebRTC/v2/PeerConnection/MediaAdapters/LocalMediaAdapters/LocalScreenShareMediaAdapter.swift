@@ -261,11 +261,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
                 trackInfo.trackType = .screenShare
                 trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
-                trackInfo.layers = transceiver
-                    .sender
-                    .parameters
-                    .encodings
-                    .map { Stream_Video_Sfu_Models_VideoLayer($0, publishOptions: publishOptions) }
+                trackInfo.layers = publishOptions.buildLayers(for: .screenshare)
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = transceiver.sender.track?.isEnabled ?? true
                 return trackInfo

@@ -170,6 +170,39 @@ struct PublishOptions: Sendable, Hashable {
         ) -> Bool {
             lhs.id == rhs.id && lhs.codec == rhs.codec
         }
+
+        func buildLayers(for trackType: TrackType) -> [Stream_Video_Sfu_Models_VideoLayer] {
+            let publishOption = Stream_Video_Sfu_Models_PublishOption(
+                self,
+                trackType: trackType == .video ? .video : .screenShare
+            )
+
+            let result = publishOption
+                .videoLayers(spatialLayersRequired: capturingLayers.spatialLayers)
+                .enumerated()
+                .map { (offset, element) in
+                    let scaleDownFactor = max(1, offset * 2)
+                    var result = Stream_Video_Sfu_Models_VideoLayer()
+                    result.rid = element.quality.rawValue
+                    result.bitrate = UInt32(bitrate / scaleDownFactor)
+                    result.fps = UInt32(frameRate)
+                    result.videoDimension = .init()
+                    result.videoDimension.width = UInt32(dimensions.width / CGFloat(scaleDownFactor))
+                    result.videoDimension.height = UInt32(dimensions.height / CGFloat(scaleDownFactor))
+                    return result
+                }
+                .reversed()
+                .prepare()
+
+            if result.endIndex != capturingLayers.spatialLayers {
+                log.warning(
+                    "Capturing layers should match the generated trackInfo layers.",
+                    subsystems: .sfu
+                )
+            }
+
+            return result
+        }
     }
 
     /// Original publish option models received from the server.
