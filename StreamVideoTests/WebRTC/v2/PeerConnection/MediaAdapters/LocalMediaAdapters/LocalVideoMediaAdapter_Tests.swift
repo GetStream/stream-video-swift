@@ -23,6 +23,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         sfuAdapter: mockSFUStack.adapter,
         videoOptions: .init(),
         videoConfig: .dummy(),
+        publishOptions: [.dummy(codec: .h264)],
         subject: spySubject,
         capturerFactory: mockCapturerFactory,
         videoCaptureSessionProvider: .init()
@@ -73,7 +74,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
+        XCTAssertFalse(subject.primaryTrack.isEnabled ?? true)
         XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
@@ -96,8 +97,8 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        XCTAssertNotNil(subject.localTrack)
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
+        XCTAssertNotNil(subject.primaryTrack)
+        XCTAssertFalse(subject.primaryTrack.isEnabled ?? true)
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
     }
 
@@ -112,7 +113,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             )
         })
 
-        XCTAssertNil(subject.localTrack)
+        XCTAssertNil(subject.primaryTrack)
         XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
         XCTAssertEqual(mockCapturer.stubbedFunctionInput[.capturingDevice]?.count, 0)
         XCTAssertEqual(mockCapturer.stubbedFunctionInput[.startCapture]?.count, 0)
@@ -166,7 +167,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             with: .init(videoOn: true),
             ownCapabilities: [.sendVideo]
         )
-        subject.localTrack?.isEnabled = true
+        subject.primaryTrack.isEnabled = true
 
         try await subject.didUpdateCallSettings(.init(videoOn: false))
 
@@ -182,7 +183,10 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     func test_publish_disabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video)
+            with: try makeTransceiver(
+                of: .video,
+                videoOptions: .dummy(codec: .h264)
+            )
         )
         try await subject.setUp(
             with: .init(videoOn: false),
@@ -191,14 +195,17 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == true }
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
         XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
     }
 
     func test_publish_disabledLocalTrack_transceiverHasBeenCreated_enablesAndAddsTrack() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video, layers: VideoLayer.default)
+            with: try makeTransceiver(
+                of: .video,
+                videoOptions: .dummy(codec: .h264)
+            )
         )
         try await subject.setUp(
             with: .init(videoOn: true),
@@ -207,31 +214,36 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == true }
-        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
+        XCTAssertTrue(subject.primaryTrack.isEnabled ?? false)
         XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 1)
         XCTAssertEqual(
             (mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.parameters.encodings.flatMap(\.rid),
             ["q", "h", "f"]
         )
     }
-    
+
     // MARK: - unpublish
 
     func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video)
+            with: try makeTransceiver(
+                of: .video,
+                videoOptions: .dummy(
+                    codec: .h264
+                )
+            )
         )
         try await subject.setUp(
             with: .init(videoOn: true),
             ownCapabilities: [.sendVideo]
         )
-        subject.localTrack?.isEnabled = true
+        subject.primaryTrack.isEnabled = true
 
         subject.unpublish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == false }
+        await fulfillment { self.subject.primaryTrack.isEnabled == false }
     }
 
     // MARK: - didUpdateCameraPosition(_:)
@@ -282,7 +294,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             ownCapabilities: [.sendVideo]
         )
 
-        try subject.zoom(by: 10)
+        try await subject.zoom(by: 10)
 
         XCTAssertEqual(
             mockCapturer.recordedInputPayload(CGFloat.self, for: .zoom)?.last,
@@ -300,7 +312,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             ownCapabilities: [.sendVideo]
         )
 
-        try subject.focus(at: .init(x: 10, y: 30))
+        try await subject.focus(at: .init(x: 10, y: 30))
 
         XCTAssertEqual(
             mockCapturer.recordedInputPayload(CGPoint.self, for: .focus)?.last,
@@ -319,7 +331,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         )
         let videoOutput = AVCaptureVideoDataOutput()
 
-        try subject.addVideoOutput(videoOutput)
+        try await subject.addVideoOutput(videoOutput)
 
         XCTAssertTrue(
             mockCapturer.recordedInputPayload(AVCaptureVideoDataOutput.self, for: .addVideoOutput)?.last === videoOutput
@@ -337,7 +349,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         )
         let videoOutput = AVCaptureVideoDataOutput()
 
-        try subject.removeVideoOutput(videoOutput)
+        try await subject.removeVideoOutput(videoOutput)
 
         XCTAssertTrue(
             mockCapturer.recordedInputPayload(AVCaptureVideoDataOutput.self, for: .removeVideoOutput)?.last === videoOutput
@@ -355,7 +367,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         )
         let videoOutput = AVCapturePhotoOutput()
 
-        try subject.addCapturePhotoOutput(videoOutput)
+        try await subject.addCapturePhotoOutput(videoOutput)
 
         XCTAssertTrue(
             mockCapturer.recordedInputPayload(AVCapturePhotoOutput.self, for: .addCapturePhotoOutput)?.last === videoOutput
@@ -373,7 +385,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         )
         let videoOutput = AVCapturePhotoOutput()
 
-        try subject.removeCapturePhotoOutput(videoOutput)
+        try await subject.removeCapturePhotoOutput(videoOutput)
 
         XCTAssertTrue(
             mockCapturer.recordedInputPayload(AVCapturePhotoOutput.self, for: .removeCapturePhotoOutput)?.last === videoOutput
@@ -383,45 +395,46 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     // MARK: - changePublishQuality(_:)
 
     func test_changePublishQuality_transceiverWasUpdatedCorrectly() async throws {
-        let transceiver = try makeTransceiver(of: .video, layers: VideoLayer.default)
-        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
-        try await subject.setUp(
-            with: .init(videoOn: true, cameraPosition: .back),
-            ownCapabilities: [.sendVideo]
-        )
-        subject.publish()
-
-        let scalabilityMode = "L2T1"
-        var layer = Stream_Video_Sfu_Event_VideoLayerSetting.dummy(
-            name: "q",
-            isActive: true,
-            scalabilityMode: scalabilityMode,
-            maxFramerate: 30,
-            maxBitrate: 120,
-            scaleResolutionDownBy: 2
-        )
-
-        subject.changePublishQuality(
-            with: [
-                layer
-            ]
-        )
-
-        let activeEncoding = try XCTUnwrap(
-            transceiver
-                .sender
-                .parameters
-                .encodings
-                .filter { $0.isActive }
-                .first
-        )
-
-        XCTAssertEqual(activeEncoding.rid, "q")
-        XCTAssertTrue(activeEncoding.isActive)
-        XCTAssertEqual(activeEncoding.maxBitrateBps, 120)
-        XCTAssertEqual(activeEncoding.maxFramerate, 30)
-        XCTAssertEqual(activeEncoding.scaleResolutionDownBy, 2)
-        XCTAssertEqual(activeEncoding.scalabilityMode, scalabilityMode)
+        fatalError()
+//        let transceiver = try makeTransceiver(of: .video, layers: VideoLayer.default)
+//        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+//        try await subject.setUp(
+//            with: .init(videoOn: true, cameraPosition: .back),
+//            ownCapabilities: [.sendVideo]
+//        )
+//        subject.publish()
+//
+//        let scalabilityMode = "L2T1"
+//        var layer = Stream_Video_Sfu_Event_VideoLayerSetting.dummy(
+//            name: "q",
+//            isActive: true,
+//            scalabilityMode: scalabilityMode,
+//            maxFramerate: 30,
+//            maxBitrate: 120,
+//            scaleResolutionDownBy: 2
+//        )
+//
+//        subject.changePublishQuality(
+//            with: [
+//                layer
+//            ]
+//        )
+//
+//        let activeEncoding = try XCTUnwrap(
+//            transceiver
+//                .sender
+//                .parameters
+//                .encodings
+//                .filter { $0.isActive }
+//                .first
+//        )
+//
+//        XCTAssertEqual(activeEncoding.rid, "q")
+//        XCTAssertTrue(activeEncoding.isActive)
+//        XCTAssertEqual(activeEncoding.maxBitrateBps, 120)
+//        XCTAssertEqual(activeEncoding.maxFramerate, 30)
+//        XCTAssertEqual(activeEncoding.scaleResolutionDownBy, 2)
+//        XCTAssertEqual(activeEncoding.scalabilityMode, scalabilityMode)
     }
 
     // MARK: - Private
@@ -465,7 +478,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
         streamIds: [String] = [.unique],
-        layers: [VideoLayer]? = nil
+        videoOptions: PublishOptions.VideoPublishOptions
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
             temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(
@@ -481,7 +494,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
                 trackType: type,
                 direction: direction,
                 streamIds: streamIds,
-                layers: layers
+                videoOptions: videoOptions
             )
         )!
     }
