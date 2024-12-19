@@ -171,6 +171,17 @@ struct PublishOptions: Sendable, Hashable {
             lhs.id == rhs.id && lhs.codec == rhs.codec
         }
 
+        /// Builds video layers for the specified track type.
+        ///
+        /// This method creates an array of `Stream_Video_Sfu_Models_VideoLayer`
+        /// objects based on the current video publish options and the specified
+        /// track type. The layers are configured with appropriate bitrate, frameRate
+        /// dimensions and resolution identifiers (RIDs). Then the layers are being
+        /// reversed and remapped their RIDs based on their position in the array.
+        ///
+        /// - Parameter trackType: The type of track for which to build layers
+        ///   (e.g., video or screen share).
+        /// - Returns: An array of `Stream_Video_Sfu_Models_VideoLayer` objects.
         func buildLayers(for trackType: TrackType) -> [Stream_Video_Sfu_Models_VideoLayer] {
             let publishOption = Stream_Video_Sfu_Models_PublishOption(
                 self,

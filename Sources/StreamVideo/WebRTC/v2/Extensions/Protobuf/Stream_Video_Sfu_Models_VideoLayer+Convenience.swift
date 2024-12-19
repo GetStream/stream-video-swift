@@ -5,6 +5,14 @@
 import Foundation
 import StreamWebRTC
 
+protocol RTCRtpEncodingParametersProtocol {
+    var rid: String? { get }
+    var maxBitrateBps: NSNumber? { get }
+    var maxFramerate: NSNumber? { get }
+}
+
+extension RTCRtpEncodingParameters: RTCRtpEncodingParametersProtocol {}
+
 extension Stream_Video_Sfu_Models_VideoLayer {
 
     /// Initializes a `Stream_Video_Sfu_Models_VideoLayer` from a `VideoLayer`.
@@ -45,7 +53,7 @@ extension Stream_Video_Sfu_Models_VideoLayer {
     ///     - `fps` (frames per second) set to `0`.
     ///     - Missing video dimensions.
     init(
-        _ layer: RTCRtpEncodingParameters,
+        _ layer: RTCRtpEncodingParametersProtocol,
         publishOptions: PublishOptions.VideoPublishOptions
     ) {
         rid = layer.rid ?? (

@@ -14,6 +14,8 @@ import UIKit
 /// A controller class for picture-in-picture whenever that is possible.
 final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
 
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+
     // MARK: - Properties
 
     /// The RTCVideoTrack for which the picture-in-picture session is created.
@@ -189,13 +191,10 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     }
 
     private func subscribeToApplicationStateNotifications() {
-        #if canImport(UIKit)
-        /// If we are running on a UIKit application, we observe the application state in order to disable
-        /// PictureInPicture when active but the app is in foreground.
-        didAppBecomeActiveCancellable = NotificationCenter.default
-            .publisher(for: UIApplication.didBecomeActiveNotification)
+        didAppBecomeActiveCancellable = applicationStateAdapter
+            .$state
+            .filter { $0 == .foreground }
             .sink { [weak self] _ in self?.applicationDidBecomeActive() }
-        #endif
     }
 
     private func applicationDidBecomeActive() {

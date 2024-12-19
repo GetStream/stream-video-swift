@@ -46,6 +46,10 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
         """
     }
 
+    var isEmpty: Bool { storage.isEmpty }
+
+    var count: Int { storage.count }
+
     /// Initializes a new `MediaTransceiverStorage` for a specific track type.
     ///
     /// - Parameter trackType: The type of track (e.g., audio, video, screen share).
