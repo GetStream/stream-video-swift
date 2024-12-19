@@ -48,11 +48,17 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A storage container for managing video transceivers.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .video)
 
+    /// The primary video track used in the current session.
+    let primaryTrack: RTCVideoTrack
+
     /// A provider for managing the video capture session.
     private let videoCaptureSessionProvider: VideoCaptureSessionProvider
 
     /// The capturer responsible for capturing video frames.
     private var capturer: StreamVideoCapturer?
+
+    /// A publisher that emits events related to video track changes.
+    let subject: PassthroughSubject<TrackEvent, Never>
 
     /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
