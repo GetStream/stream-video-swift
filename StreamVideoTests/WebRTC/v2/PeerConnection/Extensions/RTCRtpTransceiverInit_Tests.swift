@@ -188,12 +188,14 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
         XCTAssertEqual(
             subject.direction,
             direction,
+            "direction should be \(direction).",
             file: file,
             line: line
         )
         XCTAssertEqual(
             subject.streamIds,
             [streamID],
+            "streamIds should be \([streamID]).",
             file: file,
             line: line
         )
@@ -202,6 +204,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
             XCTAssertEqual(
                 subject.sendEncodings.count,
                 1,
+                "sendEncoding count should be 1.",
                 file: file,
                 line: line
             )
@@ -209,6 +212,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
             XCTAssertEqual(
                 subject.sendEncodings.count,
                 videoOptions.capturingLayers.spatialLayers,
+                "sendEncodings count should be \(videoOptions.capturingLayers.spatialLayers).",
                 file: file,
                 line: line
             )
@@ -220,6 +224,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
                 XCTAssertEqual(
                     sendEncoding.rid,
                     VideoLayer.Quality.quarter.rawValue,
+                    "rid should be set to \(VideoLayer.Quality.quarter.rawValue).",
                     file: file,
                     line: line
                 )
@@ -227,6 +232,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
                 XCTAssertEqual(
                     sendEncoding.rid,
                     VideoLayer.Quality.half.rawValue,
+                    "rid should be set to \(VideoLayer.Quality.half.rawValue).",
                     file: file,
                     line: line
                 )
@@ -234,6 +240,7 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
                 XCTAssertEqual(
                     sendEncoding.rid,
                     VideoLayer.Quality.full.rawValue,
+                    "rid should be set to \(VideoLayer.Quality.full.rawValue).",
                     file: file,
                     line: line
                 )
@@ -247,31 +254,42 @@ final class RTCRtpTransceiverInit_Tests: XCTestCase {
             XCTAssertEqual(
                 sendEncoding.maxFramerate?.intValue,
                 videoOptions.frameRate,
+                "frameRate should be set to \(videoOptions.frameRate).",
                 file: file,
                 line: line
             )
             XCTAssertEqual(
                 sendEncoding.maxBitrateBps?.intValue,
                 videoOptions.bitrate / scaleDownFactor,
-                file: file,
-                line: line
-            )
-            XCTAssertEqual(
-                sendEncoding.scaleResolutionDownBy?.intValue,
-                scaleDownFactor,
+                "bitrate should be set to \(videoOptions.bitrate / scaleDownFactor).",
                 file: file,
                 line: line
             )
             if videoOptions.codec.isSVC {
+                XCTAssertNil(
+                    sendEncoding.scaleResolutionDownBy,
+                    "scaleDownFactor should not be set.",
+                    file: file,
+                    line: line
+                )
                 XCTAssertEqual(
                     sendEncoding.scalabilityMode,
                     videoOptions.capturingLayers.scalabilityMode,
+                    "scalability mode should be set to \(videoOptions.capturingLayers.scalabilityMode).",
                     file: file,
                     line: line
                 )
             } else {
+                XCTAssertEqual(
+                    sendEncoding.scaleResolutionDownBy?.intValue,
+                    scaleDownFactor,
+                    "scaleDownFactor should be set to \(scaleDownFactor).",
+                    file: file,
+                    line: line
+                )
                 XCTAssertNil(
                     sendEncoding.scalabilityMode,
+                    "scalability mode should not be set.",
                     file: file,
                     line: line
                 )
