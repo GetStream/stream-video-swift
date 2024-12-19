@@ -49,7 +49,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .video)
 
     /// The primary video track used in the current session.
-    private let primaryTrack: RTCVideoTrack
+    let primaryTrack: RTCVideoTrack
 
     /// A provider for managing the video capture session.
     private let videoCaptureSessionProvider: VideoCaptureSessionProvider

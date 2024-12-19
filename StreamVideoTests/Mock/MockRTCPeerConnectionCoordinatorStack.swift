@@ -28,6 +28,7 @@ struct MockRTCPeerConnectionCoordinatorStack {
         videoOptions: VideoOptions = .init(),
         callSettings: CallSettings = .init(),
         audioSettings: AudioSettings = .init(),
+        publishOptions: PublishOptions = .init(),
         sessionId: String = .unique,
         peerConnection: MockRTCPeerConnection = .init(),
         peerConnectionFactory: PeerConnectionFactory = .mock(),
@@ -89,6 +90,7 @@ struct MockRTCPeerConnectionCoordinatorStack {
             videoOptions: videoOptions,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: mockSFUStack.adapter,
             mediaAdapter: mediaAdapter
         )
