@@ -5,6 +5,15 @@
 import Foundation
 import StreamWebRTC
 
+protocol RTCRtpCodecCapabilityProtocol {
+    var name: String { get }
+    var fmtp: String { get }
+    var clockRate: NSNumber? { get }
+    var preferredPayloadType: NSNumber? { get }
+}
+
+extension RTCRtpCodecCapability: RTCRtpCodecCapabilityProtocol {}
+
 /// Extension adding a convenience initializer for `Stream_Video_Sfu_Models_Codec`.
 extension Stream_Video_Sfu_Models_Codec {
 
@@ -22,7 +31,7 @@ extension Stream_Video_Sfu_Models_Codec {
     ///     defaults to `0` if absent.
     ///   - `payloadType` is derived from the codec's `preferredPayloadType` or
     ///     defaults to `0` if absent.
-    init(_ source: RTCRtpCodecCapability) {
+    init(_ source: RTCRtpCodecCapabilityProtocol) {
         name = source.name
         fmtp = source.fmtp
         clockRate = source.clockRate?.uint32Value ?? 0

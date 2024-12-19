@@ -23,4 +23,56 @@ extension PeerConnectionFactory {
     func mockVideoTrack(forScreenShare: Bool) -> RTCVideoTrack {
         makeVideoTrack(source: makeVideoSource(forScreenShare: forScreenShare))
     }
+
+    func mockMediaStream(streamID: String = UUID().uuidString) -> RTCMediaStream {
+        factory.mediaStream(withStreamId: streamID)
+    }
+
+    func mockTransceiver(
+        direction: RTCRtpTransceiverDirection = .sendOnly,
+        streamIds: [String] = [.unique],
+        audioOptions: PublishOptions.AudioPublishOptions
+    ) throws -> RTCRtpTransceiver {
+        if _pc == nil {
+            _pc = try makePeerConnection(
+                configuration: .init(),
+                constraints: .defaultConstraints,
+                delegate: nil
+            )
+        }
+
+        return _pc!.addTransceiver(
+            of: .audio,
+            init: RTCRtpTransceiverInit(
+                direction: direction,
+                streamIds: streamIds,
+                audioOptions: audioOptions
+            )
+        )!
+    }
+
+    func mockTransceiver(
+        of trackType: TrackType,
+        direction: RTCRtpTransceiverDirection = .sendOnly,
+        streamIds: [String] = [.unique],
+        videoOptions: PublishOptions.VideoPublishOptions
+    ) throws -> RTCRtpTransceiver {
+        if _pc == nil {
+            _pc = try makePeerConnection(
+                configuration: .init(),
+                constraints: .defaultConstraints,
+                delegate: nil
+            )
+        }
+
+        return _pc!.addTransceiver(
+            of: .video,
+            init: RTCRtpTransceiverInit(
+                trackType: trackType,
+                direction: direction,
+                streamIds: streamIds,
+                videoOptions: videoOptions
+            )
+        )!
+    }
 }

@@ -14,6 +14,7 @@ open class CallViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
+    @Injected(\.applicationStateAdapter) var applicationStateAdapter
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -839,14 +840,10 @@ open class CallViewModel: ObservableObject {
     }
 
     private func subscribeToApplicationLifecycleEvents() {
-        #if canImport(UIKit)
-        /// If we are running on a UIKit application, we observe the application state in order to disable
-        /// PictureInPicture when active but the app is in foreground.
-        applicationLifecycleUpdates = NotificationCenter.default
-            .publisher(for: UIApplication.didBecomeActiveNotification)
+        applicationLifecycleUpdates = applicationStateAdapter
+            .$state
+            .filter { $0 == .foreground }
             .sink { [weak self] _ in self?.applicationDidBecomeActive() }
-        log.debug("\(type(of: self)) now observes application lifecycle.")
-        #endif
     }
 
     private func applicationDidBecomeActive() {

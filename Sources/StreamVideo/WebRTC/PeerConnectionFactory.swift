@@ -13,7 +13,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
     private let audioProcessingModule: RTCAudioProcessingModule
     
     /// Lazy-loaded RTCPeerConnectionFactory instance.
-    private lazy var factory: RTCPeerConnectionFactory = {
+    private(set) lazy var factory: RTCPeerConnectionFactory = {
         let encoderFactory = RTCVideoEncoderFactorySimulcast(
             primary: defaultEncoder,
             fallback: defaultEncoder
@@ -70,7 +70,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
     deinit {
         PeerConnectionFactoryStorage.shared.remove(for: audioProcessingModule)
     }
-    
+
     // MARK: - Builders
     
     /// Creates a video source, optionally configured for screen sharing.
@@ -131,7 +131,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
         )
         return result
     }
-    
+
     /// Creates a peer connection with the specified configuration, constraints, and delegate.
     /// - Parameters:
     ///   - configuration: The RTCConfiguration to use.
