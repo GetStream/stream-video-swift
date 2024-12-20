@@ -29,7 +29,7 @@ public class VideoCapturePolicy: @unchecked Sendable {
     /// Override this method in subclasses to implement specific policies for
     /// adjusting capture quality. By default, this method performs no action.
     func updateCaptureQuality(
-        with activeEncodings: Set<String>,
+        with preferredDimensions: CGSize,
         for activeSession: VideoCaptureSession?
     ) async throws { /* No operation by default */ }
 }
@@ -51,7 +51,7 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
     private let neuralEngineExistsProvider: () -> Bool
 
     /// The most recently applied active encodings.
-    private var lastActiveEncodings: Set<String>?
+    private var lastPreferredDimensions: CGSize?
 
     /// Initializes the adaptive video capture policy.
     ///
@@ -74,39 +74,25 @@ final class AdaptiveVideoCapturePolicy: VideoCapturePolicy, @unchecked Sendable 
     /// conditions necessitate a change and if the requested encodings differ
     /// from the current settings.
     override func updateCaptureQuality(
-        with activeEncodings: Set<String>,
+        with preferredDimensions: CGSize,
         for activeSession: VideoCaptureSession?
     ) async throws {
         // Ensure there is a need to update capture quality and an active session exists.
         guard
             shouldUpdateCaptureQuality,
-            lastActiveEncodings != activeEncodings,
-            let activeSession,
-            let device = activeSession.device
+            lastPreferredDimensions != preferredDimensions,
+            let activeSession
         else { return }
 
-        // Filter available video codecs based on the requested encodings.
-        let videoCodecs = VideoLayer
-            .default
-            .filter { activeEncodings.contains($0.quality.rawValue) }
-
-        // Determine the preferred resolution based on the requested encodings.
-        let preferredDimensions: CGSize = {
-            if videoCodecs.contains(where: { $0.quality == VideoLayer.full.quality }) {
-                return .full
-            } else if videoCodecs.contains(where: { $0.quality == VideoLayer.half.quality }) {
-                return .half
-            } else {
-                return .quarter
-            }
-        }()
-
         // Apply the updated capture quality to the active session.
-        try await activeSession.capturer
-            .updateCaptureQuality(preferredDimensions, on: device)
-        lastActiveEncodings = activeEncodings
+        try await activeSession
+            .capturer
+            .updateCaptureQuality(preferredDimensions)
+
+        lastPreferredDimensions = preferredDimensions
+
         log.debug(
-            "Video capture quality adapted to [\(activeEncodings.sorted().joined(separator: ","))].",
+            "Video capture quality adapted to \(preferredDimensions).",
             subsystems: .webRTC
         )
     }

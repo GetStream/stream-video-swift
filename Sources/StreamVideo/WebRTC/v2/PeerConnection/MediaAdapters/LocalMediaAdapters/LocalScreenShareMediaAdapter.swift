@@ -36,7 +36,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     private let screenShareSessionProvider: ScreenShareSessionProvider
 
     /// The screen sharing capturer for capturing screen frames.
-    private var capturer: StreamVideoCapturer?
+    private var capturer: StreamVideoCapturing?
 
     /// Storage for managing transceivers associated with the screen sharing session.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .screenshare)
@@ -424,6 +424,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         }
 
         try await activeSession.capturer.startCapture(
+            position: .front, // It doesn't matter
             dimensions: capturingDimension,
             frameRate: frameRate
         )
