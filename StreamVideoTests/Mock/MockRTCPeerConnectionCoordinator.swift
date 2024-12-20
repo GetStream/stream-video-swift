@@ -35,6 +35,7 @@ final class MockRTCPeerConnectionCoordinator:
         case addVideoOutput
         case removeVideoOutput
         case zoom
+        case trackInfo
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -56,6 +57,7 @@ final class MockRTCPeerConnectionCoordinator:
         case addVideoOutput(videoOutput: AVCaptureVideoDataOutput)
         case removeVideoOutput(videoOutput: AVCaptureVideoDataOutput)
         case zoom(factor: CGFloat)
+        case trackInfo(trackType: TrackType)
 
         var payload: Any {
             switch self {
@@ -95,6 +97,8 @@ final class MockRTCPeerConnectionCoordinator:
                 return videoOutput
             case let .zoom(factor):
                 return factor
+            case let .trackInfo(trackType):
+                return trackType
             }
         }
     }
@@ -117,6 +121,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     var stubbedMid: [TrackType: String] = [:]
     var stubbedTrack: [TrackType: RTCMediaStreamTrack] = [:]
+    var stubbedTrackInfo: [TrackType: [Stream_Video_Sfu_Models_TrackInfo]] = [:]
 
     override var disconnectedPublisher: AnyPublisher<Void, Never> {
         if let stub = stubbedProperty[propertyKey(for: \.disconnectedPublisher)] as? AnyPublisher<Void, Never> {
@@ -274,5 +279,14 @@ final class MockRTCPeerConnectionCoordinator:
         stubbedFunctionInput[.zoom]?.append(
             .zoom(factor: factor)
         )
+    }
+
+    override func trackInfo(
+        for type: TrackType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        stubbedFunctionInput[.trackInfo]?.append(
+            .trackInfo(trackType: type)
+        )
+        return stubbedTrackInfo[type] ?? []
     }
 }
