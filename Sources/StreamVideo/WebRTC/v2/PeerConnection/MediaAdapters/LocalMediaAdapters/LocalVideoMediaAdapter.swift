@@ -55,7 +55,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private let videoCaptureSessionProvider: VideoCaptureSessionProvider
 
     /// The capturer responsible for capturing video frames.
-    private var capturer: StreamVideoCapturer?
+    private var capturer: StreamVideoCapturing?
 
     /// A publisher that emits events related to video track changes.
     let subject: PassthroughSubject<TrackEvent, Never>
@@ -456,16 +456,32 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 transceiver.sender.parameters = params
             }
 
-            Task { @MainActor [videoCapturePolicy, videoCaptureSessionProvider] in
-                do {
-                    try await videoCapturePolicy.updateCaptureQuality(
-                        with: .init(layerSettings.map(\.name)),
-                        for: videoCaptureSessionProvider.activeSession
-                    )
-                } catch {
-                    log.error(error)
-                }
-            }
+            await adaptCaptureDimensions(for: layerSettings)
+        }
+    }
+
+    @MainActor
+    private func adaptCaptureDimensions(
+        for layerSettings: [Stream_Video_Sfu_Event_VideoSender]
+    ) async {
+        let dimensions = layerSettings
+            .map { PublishOptions.VideoPublishOptions(id: Int($0.publishOptionID), codec: VideoCodec($0.codec)) }
+            .filter { transceiverStorage.contains(key: $0) }
+            .map(\.dimensions)
+
+        guard
+            let preferredDimensions = dimensions.max(by: { $0.width * $0.height < $1.width * $1.height })
+        else {
+            return
+        }
+
+        do {
+            try await videoCapturePolicy.updateCaptureQuality(
+                with: preferredDimensions,
+                for: videoCaptureSessionProvider.activeSession
+            )
+        } catch {
+            log.error(error, subsystems: .sfu)
         }
     }
 
@@ -639,7 +655,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 position: \(activeSession.position)
                 device: \(device)
                 track: \(activeSession.localTrack.trackId)
-                capturer: \(Unmanaged.passUnretained(activeSession.capturer).toOpaque())
+                capturer: \(activeSession.capturer)
                 dimensions: \(capturingDimension)
                 frameRate: \(frameRate)
             """,

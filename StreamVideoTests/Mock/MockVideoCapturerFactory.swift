@@ -45,28 +45,28 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable {
     }
 
     init() {
-//        stub(for: .buildCameraCapturer, with: StreamVideoCapturer.mock(videoSource: ))
-//        stub(for: .buildScreenCapturer, with: MockVideoCapturer())
+        stub(for: .buildCameraCapturer, with: MockStreamVideoCapturer())
+        stub(for: .buildScreenCapturer, with: MockStreamVideoCapturer())
     }
 
     // MARK: - VideoCapturerProviding
 
     func buildCameraCapturer(
         source: RTCVideoSource
-    ) -> StreamVideoCapturer {
+    ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildCameraCapturer]?
             .append(
                 .buildCameraCapturer(
                     source: source
                 )
             )
-        return stubbedFunction[.buildCameraCapturer] as! StreamVideoCapturer
+        return stubbedFunction[.buildCameraCapturer] as! StreamVideoCapturing
     }
     
     func buildScreenCapturer(
         _ type: ScreensharingType,
         source: RTCVideoSource
-    ) -> StreamVideoCapturer {
+    ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildScreenCapturer]?
             .append(
                 .buildScreenCapturer(
@@ -74,6 +74,6 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable {
                     source: source
                 )
             )
-        return stubbedFunction[.buildScreenCapturer] as! StreamVideoCapturer
+        return stubbedFunction[.buildScreenCapturer] as! StreamVideoCapturing
     }
 }

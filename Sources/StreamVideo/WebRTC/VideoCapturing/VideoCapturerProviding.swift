@@ -22,7 +22,7 @@ protocol VideoCapturerProviding {
     /// which can be further configured to process video frames.
     func buildCameraCapturer(
         source: RTCVideoSource
-    ) -> StreamVideoCapturer
+    ) -> StreamVideoCapturing
 
     /// Builds a screen capturer based on the specified type and source.
     ///
@@ -36,7 +36,7 @@ protocol VideoCapturerProviding {
     func buildScreenCapturer(
         _ type: ScreensharingType,
         source: RTCVideoSource
-    ) -> StreamVideoCapturer
+    ) -> StreamVideoCapturing
 }
 
 /// A concrete implementation of `VideoCapturerProviding` for creating video capturers.
@@ -56,8 +56,8 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
     /// where a camera is the video input source.
     func buildCameraCapturer(
         source: RTCVideoSource
-    ) -> StreamVideoCapturer {
-        .cameraCapturer(with: source)
+    ) -> StreamVideoCapturing {
+        StreamVideoCapturer.cameraCapturer(with: source)
     }
 
     /// Creates a screen capturer based on the provided type and source.
@@ -75,12 +75,12 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
     func buildScreenCapturer(
         _ type: ScreensharingType,
         source: RTCVideoSource
-    ) -> StreamVideoCapturer {
+    ) -> StreamVideoCapturing {
         switch type {
         case .inApp:
-            return .screenShareCapturer(with: source)
+            return StreamVideoCapturer.screenShareCapturer(with: source)
         case .broadcast:
-            return .broadcastCapturer(with: source)
+            return StreamVideoCapturer.broadcastCapturer(with: source)
         }
     }
 }

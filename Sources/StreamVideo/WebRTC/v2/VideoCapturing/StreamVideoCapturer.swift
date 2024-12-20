@@ -9,7 +9,7 @@ protocol StreamVideoCapturerActionHandler: Sendable {
     func handle(_ action: StreamVideoCapturer.Action) async throws
 }
 
-actor StreamVideoCapturer {
+actor StreamVideoCapturer: StreamVideoCapturing {
 
     enum Action: @unchecked Sendable, CustomStringConvertible {
     case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
@@ -258,10 +258,9 @@ actor StreamVideoCapturer {
     }
 
     func updateCaptureQuality(
-        _ dimensions: CGSize,
-        on device: AVCaptureDevice
+        _ dimensions: CGSize
     ) async throws {
-        guard videoCaptureSession != nil else { return }
+        guard let device = videoCaptureSession?.activeVideoCaptureDevice else { return }
         _ = try await enqueueOperation(
             for: .updateCaptureQuality(
                 dimensions: dimensions,
