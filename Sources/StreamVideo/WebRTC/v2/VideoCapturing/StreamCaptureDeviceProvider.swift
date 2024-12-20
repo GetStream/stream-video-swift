@@ -7,20 +7,20 @@ import StreamWebRTC
 
 final class StreamCaptureDeviceProvider {
 
-    private let firstResultIfMiss: Bool
+    private let useFallback: Bool
 
     private var devices: [AVCaptureDevice] {
         RTCCameraVideoCapturer.captureDevices()
     }
 
-    init(firstResultIfMiss: Bool = true) {
-        self.firstResultIfMiss = firstResultIfMiss
+    init(useFallback: Bool = true) {
+        self.useFallback = useFallback
     }
 
     func device(for position: AVCaptureDevice.Position) -> AVCaptureDevice? {
         if let deviceFound = devices.first(where: { $0.position == position }) {
             return deviceFound
-        } else if firstResultIfMiss {
+        } else if useFallback {
             return devices.first
         } else {
             return nil

@@ -562,6 +562,30 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: publishOptionsChanged
+
+    func test_handleChangePublishOptions_givenEvent_whenPublished_thenUpdatesPublishOptions() async throws {
+        try await stateAdapter.configurePeerConnections()
+        let publisher = await stateAdapter.publisher
+
+        let participantA = CallParticipant.dummy()
+        let participantB = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_ChangePublishOptions()
+        var option = Stream_Video_Sfu_Models_PublishOption()
+        option.bitrate = 100
+        option.codec = .dummy(name: "av1")
+        option.trackType = .video
+        event.publishOptions = [option]
+        event.reason = .unique
+        let expected = PublishOptions(event.publishOptions)
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.changePublishOptions(event)),
+            initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) { _ in await self.stateAdapter.publishOptions == expected }
+    }
+
     // MARK: - Private helpers
 
     private func assert<T>(
