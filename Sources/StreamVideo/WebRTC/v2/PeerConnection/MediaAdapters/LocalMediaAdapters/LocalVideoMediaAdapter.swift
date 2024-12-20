@@ -312,8 +312,29 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Retrieves track information for the local video tracks.
     ///
     /// - Returns: An array of track information, including ID and layers.
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
-        transceiverStorage
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        let transceivers = {
+            switch collectionType {
+            case .allAvailable:
+                return transceiverStorage
+                    .filter { $0.value.sender.track != nil }
+            case .lastPublishOptions:
+                return publishOptions
+                    .compactMap {
+                        if
+                            let transceiver = transceiverStorage.get(for: $0),
+                            transceiver.sender.track != nil {
+                            return ($0, transceiver)
+                        } else {
+                            return nil
+                        }
+                    }
+            }
+        }()
+
+        return transceivers
             .filter { $0.value.sender.track != nil }
             .compactMap { publishOptions, transceiver in
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()

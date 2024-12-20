@@ -118,8 +118,10 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         )
     }
 
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
-        localMediaManager.trackInfo()
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo(for: collectionType)
     }
 
     /// Updates the audio media based on new call settings.

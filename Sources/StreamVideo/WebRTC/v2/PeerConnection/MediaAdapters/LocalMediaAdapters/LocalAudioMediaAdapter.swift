@@ -245,9 +245,29 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// - Returns: An array of `Stream_Video_Sfu_Models_TrackInfo` representing
     ///   the local audio tracks.
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
-        transceiverStorage
-            .filter { $0.value.sender.track != nil }
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        let transceivers = {
+            switch collectionType {
+            case .allAvailable:
+                return transceiverStorage
+                    .filter { $0.value.sender.track != nil }
+            case .lastPublishOptions:
+                return publishOptions
+                    .compactMap {
+                        if
+                            let transceiver = transceiverStorage.get(for: $0),
+                            transceiver.sender.track != nil {
+                            return ($0, transceiver)
+                        } else {
+                            return nil
+                        }
+                    }
+            }
+        }()
+
+        return transceivers
             .map { _, transceiver in
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
                 trackInfo.trackType = .audio

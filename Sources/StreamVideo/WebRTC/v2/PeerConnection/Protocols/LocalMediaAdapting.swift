@@ -35,7 +35,7 @@ protocol LocalMediaAdapting {
     /// This method should be called when the local participant wants to stop sharing their media.
     func unpublish()
 
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo]
+    func trackInfo(for collectionType: RTCPeerConnectionTrackInfoCollectionType) -> [Stream_Video_Sfu_Models_TrackInfo]
 
     /// Updates the adapter with new call settings.
     ///

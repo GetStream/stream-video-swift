@@ -103,6 +103,7 @@ struct WebRTCJoinRequestFactory {
         case .fastReconnect:
             result.announcedTracks = buildAnnouncedTracks(
                 publisher,
+                collectionType: .allAvailable,
                 file: file,
                 function: function,
                 line: line
@@ -123,6 +124,7 @@ struct WebRTCJoinRequestFactory {
         case let .migration(fromHostname):
             result.announcedTracks = buildAnnouncedTracks(
                 publisher,
+                collectionType: .lastPublishOptions,
                 file: file,
                 function: function,
                 line: line
@@ -144,6 +146,7 @@ struct WebRTCJoinRequestFactory {
         case let .rejoin(fromSessionID):
             result.announcedTracks = buildAnnouncedTracks(
                 publisher,
+                collectionType: .lastPublishOptions,
                 file: file,
                 function: function,
                 line: line
@@ -175,6 +178,7 @@ struct WebRTCJoinRequestFactory {
     /// - Returns: An array of announced tracks.
     func buildAnnouncedTracks(
         _ publisher: RTCPeerConnectionCoordinator?,
+        collectionType: RTCPeerConnectionTrackInfoCollectionType,
         file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
@@ -185,9 +189,9 @@ struct WebRTCJoinRequestFactory {
             return result
         }
 
-        result.append(contentsOf: publisher.trackInfo(for: .audio))
-        result.append(contentsOf: publisher.trackInfo(for: .video))
-        result.append(contentsOf: publisher.trackInfo(for: .screenshare))
+        result.append(contentsOf: publisher.trackInfo(for: .audio, collectionType: collectionType))
+        result.append(contentsOf: publisher.trackInfo(for: .video, collectionType: collectionType))
+        result.append(contentsOf: publisher.trackInfo(for: .screenshare, collectionType: collectionType))
 
         return result
     }

@@ -189,14 +189,17 @@ final class MediaAdapter {
         }
     }
 
-    func trackInfo(for type: TrackType) -> [Stream_Video_Sfu_Models_TrackInfo] {
+    func trackInfo(
+        for type: TrackType,
+        collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
         switch type {
         case .audio:
-            return audioMediaAdapter.trackInfo()
+            return audioMediaAdapter.trackInfo(for: collectionType)
         case .video:
-            return videoMediaAdapter.trackInfo()
+            return videoMediaAdapter.trackInfo(for: collectionType)
         case .screenshare:
-            return screenShareMediaAdapter.trackInfo()
+            return screenShareMediaAdapter.trackInfo(for: collectionType)
         default:
             return []
         }

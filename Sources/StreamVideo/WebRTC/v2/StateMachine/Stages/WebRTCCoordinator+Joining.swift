@@ -177,7 +177,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                                     isFastReconnecting: false
                                 ),
                                 reconnectAttempt: context.reconnectAttempts,
-                                publisher: await coordinator.stateAdapter.publisher
+                                publisher: context.previousSessionPublisher
                             )
                     )
 
@@ -236,7 +236,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                                     isFastReconnecting: false
                                 ),
                                 reconnectAttempt: context.reconnectAttempts,
-                                publisher: coordinator.stateAdapter.publisher
+                                publisher: context.previousSessionPublisher
                             )
                     )
                     context.reconnectAttempts += 1

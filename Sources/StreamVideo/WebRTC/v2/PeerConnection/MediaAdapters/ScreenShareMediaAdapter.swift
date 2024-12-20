@@ -145,8 +145,10 @@ final class ScreenShareMediaAdapter: MediaAdapting, @unchecked Sendable {
             .changePublishQuality(with: layerSettings)
     }
 
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
-        localMediaManager.trackInfo()
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo(for: collectionType)
     }
 
     // MARK: - ScreenSharing

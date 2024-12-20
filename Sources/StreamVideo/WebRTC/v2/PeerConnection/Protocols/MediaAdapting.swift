@@ -12,7 +12,9 @@ protocol MediaAdapting {
     /// A subject for publishing track events.
     var subject: PassthroughSubject<TrackEvent, Never> { get }
 
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo]
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo]
 
     /// Sets up the media adapter with the given settings and capabilities.
     ///

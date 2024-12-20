@@ -6,6 +6,11 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+enum RTCPeerConnectionTrackInfoCollectionType {
+    case allAvailable
+    case lastPublishOptions
+}
+
 /// Coordinates the peer connection, managing media, ICE, and SFU interactions.
 class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
@@ -72,8 +77,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    func trackInfo(for type: TrackType) -> [Stream_Video_Sfu_Models_TrackInfo] {
-        mediaAdapter.trackInfo(for: type)
+    func trackInfo(
+        for type: TrackType,
+        collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        mediaAdapter.trackInfo(for: type, collectionType: collectionType)
     }
 
     /// Initializes the RTCPeerConnectionCoordinator with necessary dependencies.
@@ -627,7 +635,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             try await ensureSetUpHasBeenCompleted()
 
             let tracksInfo = WebRTCJoinRequestFactory()
-                .buildAnnouncedTracks(self)
+                .buildAnnouncedTracks(self, collectionType: .allAvailable)
 
             validateTracksAndTransceivers(.video, tracksInfo: tracksInfo)
             validateTracksAndTransceivers(.screenshare, tracksInfo: tracksInfo)

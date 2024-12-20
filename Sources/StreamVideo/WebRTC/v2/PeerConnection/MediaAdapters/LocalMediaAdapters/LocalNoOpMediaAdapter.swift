@@ -51,7 +51,9 @@ final class LocalNoOpMediaAdapter: LocalMediaAdapting {
     }
 
     /// A no-op implementation of the trackInfo method.
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] { [] }
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] { [] }
 
     /// A no-op implementation of the method to handle updated call settings.
     ///
