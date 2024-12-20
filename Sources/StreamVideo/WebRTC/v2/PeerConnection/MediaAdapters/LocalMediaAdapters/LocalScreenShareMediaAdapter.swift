@@ -41,6 +41,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// Storage for managing transceivers associated with the screen sharing session.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .screenshare)
 
+    private let processingQueue = SerialActorQueue()
+
     /// The primary video track used for screen sharing.
     let primaryTrack: RTCVideoTrack
 
@@ -223,36 +225,40 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        guard
-            primaryTrack.isEnabled,
-            let activeSession = screenShareSessionProvider.activeSession
-        else { return }
+        processingQueue.async { [weak self] in
+            guard let self else { return }
 
-        self.publishOptions = publishOptions.screenShare
+            self.publishOptions = publishOptions.screenShare
 
-        for publishOption in self.publishOptions {
-            addTransceiverIfRequired(
-                for: publishOption,
-                with: primaryTrack.clone(from: peerConnectionFactory),
-                screenSharingType: activeSession.screenSharingType
+            guard
+                primaryTrack.isEnabled,
+                let activeSession = screenShareSessionProvider.activeSession
+            else { return }
+
+            for publishOption in self.publishOptions {
+                addTransceiverIfRequired(
+                    for: publishOption,
+                    with: primaryTrack.clone(from: peerConnectionFactory),
+                    screenSharingType: activeSession.screenSharingType
+                )
+            }
+
+            let activePublishOptions = Set(self.publishOptions)
+
+            transceiverStorage
+                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
+
+            log.debug(
+                """
+                Local screenShareTracks updated with:
+                    PublishOptions:
+                        \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
+                    TransceiverStorage:
+                        \(transceiverStorage)
+                """,
+                subsystems: .webRTC
             )
         }
-
-        let activePublishOptions = Set(self.publishOptions)
-
-        transceiverStorage
-            .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
-
-        log.debug(
-            """
-            Local screenShareTracks updated with:
-                PublishOptions:
-                    \(self.publishOptions.map { "\($0)" }.joined(separator: "\n"))
-                TransceiverStorage:
-                    \(transceiverStorage)
-            """,
-            subsystems: .webRTC
-        )
     }
 
     /// Adjusts the publishing quality of the screen sharing track.

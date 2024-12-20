@@ -12,7 +12,7 @@ import StreamWebRTC
 /// updating of local audio tracks within a WebRTC session. It integrates
 /// with WebRTC components and supports features like muting, quality updates,
 /// and SFU communication.
-final class LocalAudioMediaAdapter: LocalMediaAdapting {
+final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The audio recorder for capturing audio during the call session.
     @Injected(\.callAudioRecorder) private var audioRecorder
@@ -40,6 +40,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
 
     /// The last applied audio call settings.
     private var lastUpdatedCallSettings: CallSettings.Audio?
+
+    private let processingQueue = SerialActorQueue()
 
     /// The primary audio track for this adapter.
     let primaryTrack: RTCAudioTrack
@@ -209,30 +211,34 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting {
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        guard primaryTrack.isEnabled else { return }
+        processingQueue.async { [weak self] in
+            guard let self else { return }
 
-        self.publishOptions = publishOptions.audio
+            self.publishOptions = publishOptions.audio
 
-        for option in self.publishOptions {
-            addTransceiverIfRequired(
-                for: option,
-                with: primaryTrack.clone(from: peerConnectionFactory)
+            guard primaryTrack.isEnabled else { return }
+
+            for option in self.publishOptions {
+                addTransceiverIfRequired(
+                    for: option,
+                    with: primaryTrack.clone(from: peerConnectionFactory)
+                )
+            }
+
+            let activePublishOptions = Set(self.publishOptions)
+
+            transceiverStorage
+                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
+
+            log.debug(
+                """
+                Local audio tracks updated:
+                    PublishOptions: \(self.publishOptions)
+                    TransceiverStorage: \(transceiverStorage)
+                """,
+                subsystems: .webRTC
             )
         }
-
-        let activePublishOptions = Set(self.publishOptions)
-
-        transceiverStorage
-            .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
-
-        log.debug(
-            """
-            Local audio tracks updated:
-                PublishOptions: \(self.publishOptions)
-                TransceiverStorage: \(transceiverStorage)
-            """,
-            subsystems: .webRTC
-        )
     }
 
     /// Returns track information for the local audio tracks.

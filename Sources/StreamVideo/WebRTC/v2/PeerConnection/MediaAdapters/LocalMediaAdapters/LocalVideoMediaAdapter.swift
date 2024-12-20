@@ -273,14 +273,15 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ publishOptions: PublishOptions
     ) async throws {
         processingQueue.async { [weak self] in
+            guard let self else { return }
+
+            self.publishOptions = publishOptions.video
+
             guard
-                let self,
                 primaryTrack.isEnabled
             else {
                 return
             }
-
-            self.publishOptions = publishOptions.video
 
             for publishOption in self.publishOptions {
                 addTransceiverIfRequired(
