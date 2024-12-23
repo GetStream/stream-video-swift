@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamVideo
 #if canImport(UIKit)
 import UIKit
 #endif
