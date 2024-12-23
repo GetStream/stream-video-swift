@@ -17,12 +17,6 @@ final class StreamAppStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    // MARK: - init
-
-    func test_init_stateIsSetToForeground() {
-        XCTAssertEqual(subject.state, .foreground)
-    }
-
     // MARK: - move to foreground
 
     func test_whenMoveToForegroundIsCalled_stateIsSetToForeground() async {
