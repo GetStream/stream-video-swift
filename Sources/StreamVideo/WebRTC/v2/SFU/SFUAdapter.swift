@@ -137,7 +137,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     ///   - line: The line from which we are requesting the publisher. Used for logging.
     func publisher<T>(
         eventType: T.Type,
-        file: StaticString = #file,
+        file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
     ) -> AnyPublisher<T, Never> {
@@ -575,7 +575,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
     private func statusCheck(
         functionName: StaticString = #function,
-        filename: StaticString = #file,
+        filename: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         guard !isConnected else { return }

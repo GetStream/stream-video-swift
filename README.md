@@ -214,20 +214,31 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 1.1.0 milestone - June
 
-- [ ] Closed Captions and multi language support for transcriptions
 - [x] Improve noise reduction/cancelation
-- [ ] Improved support for teams & multi-tenant
-- [ ] Waiting rooms
-- [ ] Session timers
-- [ ] Manual quality selection (currently it's always automatic)
-- [ ] Query call session endpoint + better missed calls support
-- [ ] Audio only call tutorial for each SDK
-- [ ] WHIP
-- [ ] AV1
-- [ ] RTMP out
+- [x] Improved support for teams & multi-tenant
+- [x] Session timers
+- [x] RTMP out
 
-### After 1.1
+### 1.2.0 milestone - September
 
+- [x] Reconnection V2
+- [x] PiP improvements
+- [x] Missed calls support
+- [x] Joining calls ahead of time
+
+### 1.3.0 milestone - December
+
+- [x] Manual quality selection (currently it's always automatic)
+- [x] Improve performance on lower end devices
+- [x] AV1 & VP9 support
+- [ ] Closed Captions and multi language support for transcriptions
+- [ ] Codec negotiation
+
+### After 1.3
+
+- Waiting rooms
+- Audio only call tutorial for each SDK
+- Query call session endpoint + better missed calls support
 - SIP
 - Breakout rooms
 - Transcription Summaries

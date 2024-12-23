@@ -445,7 +445,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func enqueue(
         _ operation: @escaping ParticipantOperation,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         /// Creates a new asynchronous task for the operation.

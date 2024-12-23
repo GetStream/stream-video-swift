@@ -303,7 +303,7 @@ public class Logger {
     public func callAsFunction(
         _ level: LogLevel,
         functionName: StaticString = #function,
-        fileName: StaticString = #filePath,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line,
         message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
@@ -332,7 +332,7 @@ public class Logger {
     public func log(
         _ level: LogLevel,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line,
         message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
@@ -371,7 +371,7 @@ public class Logger {
         _ message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         log(
@@ -396,7 +396,7 @@ public class Logger {
         _ message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         log(
@@ -421,7 +421,7 @@ public class Logger {
         _ message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         log(
@@ -447,7 +447,7 @@ public class Logger {
         subsystems: LogSubsystem = .other,
         error: Error? = nil,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         log(
@@ -472,7 +472,7 @@ public class Logger {
         _ message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         guard !condition() else { return }
@@ -499,7 +499,7 @@ public class Logger {
         _ message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
         if StreamRuntimeCheck.assertionsEnabled {

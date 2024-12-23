@@ -132,7 +132,7 @@ extension Publisher {
         _ level: LogLevel,
         subsystems: LogSubsystem = .other,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line,
         messageBuilder: ((Self.Output) -> String)? = nil
     ) -> Publishers.Log<Self> {

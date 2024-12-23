@@ -9,7 +9,7 @@ extension Array {
         _ level: LogLevel,
         subsystems: LogSubsystem = .other,
         functionName: StaticString = #function,
-        fileName: StaticString = #file,
+        fileName: StaticString = #fileID,
         lineNumber: UInt = #line,
         messageBuilder: ((Self) -> String)? = nil
     ) -> Self {
