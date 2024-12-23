@@ -527,7 +527,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         )
         mockPublisher?.stubbedTrackInfo = expected
 
-        let result = subject.buildAnnouncedTracks(mockPublisher)
+        let result = subject.buildAnnouncedTracks(mockPublisher, collectionType: .allAvailable)
         let expected: [Stream_Video_Sfu_Models_TrackInfo] = (expected[.audio] ?? [])
             + (expected[.video] ?? [])
             + (expected[.screenshare] ?? [])

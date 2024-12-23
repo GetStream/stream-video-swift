@@ -282,7 +282,8 @@ final class MockRTCPeerConnectionCoordinator:
     }
 
     override func trackInfo(
-        for type: TrackType
+        for type: TrackType,
+        collectionType: RTCPeerConnectionTrackInfoCollectionType
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
         stubbedFunctionInput[.trackInfo]?.append(
             .trackInfo(trackType: type)

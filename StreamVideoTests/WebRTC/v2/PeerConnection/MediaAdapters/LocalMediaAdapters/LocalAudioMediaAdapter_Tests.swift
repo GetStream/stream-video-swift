@@ -232,7 +232,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - trackInfo
 
     func test_trackInfo_noPublishedTransceivers_returnsEmptyArray() {
-        XCTAssertTrue(subject.trackInfo().isEmpty)
+        XCTAssertTrue(subject.trackInfo(for: .allAvailable).isEmpty)
     }
 
 //    func test_trackInfo_twoPublishedTransceivers_returnsCorrectArray() async throws {

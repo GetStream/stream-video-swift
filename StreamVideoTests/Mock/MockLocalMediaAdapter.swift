@@ -86,6 +86,10 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
         stubbedFunctionInput[.trackInfo]?.append(.trackInfo)
         return stubbedFunction[.trackInfo] as? [Stream_Video_Sfu_Models_TrackInfo] ?? []
     }
+    
+    func trackInfo(for collectionType: RTCPeerConnectionTrackInfoCollectionType) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        trackInfo()
+    }
 
     func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws {
         stubbedFunctionInput[.didUpdatePublishOptions]?
