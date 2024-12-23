@@ -343,6 +343,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 trackInfo.layers = publishOptions.buildLayers(for: .video)
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = transceiver.sender.track?.isEnabled ?? true
+                trackInfo.codec = publishOptions.codec(for: .video)
                 return trackInfo
             }
     }

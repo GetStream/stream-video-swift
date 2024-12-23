@@ -170,6 +170,16 @@ struct PublishOptions: Sendable, Hashable {
         ) -> Bool {
             lhs.id == rhs.id && lhs.codec == rhs.codec
         }
+        
+        /// Returns the codec for the specified track type.
+        /// - Parameter trackType: The type of track for which to get the codec.
+        /// - Returns: The codec for the specified track type.
+        func codec(for trackType: TrackType) -> Stream_Video_Sfu_Models_Codec {
+            Stream_Video_Sfu_Models_PublishOption(
+                self,
+                trackType: trackType == .video ? .video : .screenShare
+            ).codec
+        }
 
         /// Builds video layers for the specified track type.
         ///
