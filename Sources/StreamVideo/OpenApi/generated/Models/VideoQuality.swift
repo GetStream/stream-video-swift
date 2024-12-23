@@ -6,10 +6,10 @@ import Foundation
 
 public final class VideoQuality: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
-    public var resolution: VideoDimension?
+    public var resolution: VideoResolution?
     public var usageType: String?
 
-    public init(resolution: VideoDimension? = nil, usageType: String? = nil) {
+    public init(resolution: VideoResolution? = nil, usageType: String? = nil) {
         self.resolution = resolution
         self.usageType = usageType
     }

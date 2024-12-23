@@ -12,6 +12,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
     public var callStatus: String
     public var createdAt: Date?
     public var firstStatsTime: Date
+    public var minUserRating: Int?
     public var qualityScore: Int?
 
     public init(
@@ -21,6 +22,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         callStatus: String,
         createdAt: Date? = nil,
         firstStatsTime: Date,
+        minUserRating: Int? = nil,
         qualityScore: Int? = nil
     ) {
         self.callCid = callCid
@@ -29,6 +31,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         self.callStatus = callStatus
         self.createdAt = createdAt
         self.firstStatsTime = firstStatsTime
+        self.minUserRating = minUserRating
         self.qualityScore = qualityScore
     }
     
@@ -39,6 +42,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         case callStatus = "call_status"
         case createdAt = "created_at"
         case firstStatsTime = "first_stats_time"
+        case minUserRating = "min_user_rating"
         case qualityScore = "quality_score"
     }
     
@@ -49,6 +53,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
             lhs.callStatus == rhs.callStatus &&
             lhs.createdAt == rhs.createdAt &&
             lhs.firstStatsTime == rhs.firstStatsTime &&
+            lhs.minUserRating == rhs.minUserRating &&
             lhs.qualityScore == rhs.qualityScore
     }
 
@@ -59,6 +64,7 @@ public final class CallStatsReportSummaryResponse: @unchecked Sendable, Codable,
         hasher.combine(callStatus)
         hasher.combine(createdAt)
         hasher.combine(firstStatsTime)
+        hasher.combine(minUserRating)
         hasher.combine(qualityScore)
     }
 }

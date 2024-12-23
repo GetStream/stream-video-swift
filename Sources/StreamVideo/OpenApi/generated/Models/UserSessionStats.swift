@@ -6,6 +6,7 @@ import Foundation
 
 public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
+    public var averageConnectionTime: Float?
     public var browser: String?
     public var browserVersion: String?
     public var currentIp: String?
@@ -59,6 +60,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     public var webrtcVersion: String?
 
     public init(
+        averageConnectionTime: Float? = nil,
         browser: String? = nil,
         browserVersion: String? = nil,
         currentIp: String? = nil,
@@ -111,6 +113,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
         truncated: Bool? = nil,
         webrtcVersion: String? = nil
     ) {
+        self.averageConnectionTime = averageConnectionTime
         self.browser = browser
         self.browserVersion = browserVersion
         self.currentIp = currentIp
@@ -165,6 +168,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     }
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
+        case averageConnectionTime = "average_connection_time"
         case browser
         case browserVersion = "browser_version"
         case currentIp = "current_ip"
@@ -219,7 +223,8 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     }
     
     public static func == (lhs: UserSessionStats, rhs: UserSessionStats) -> Bool {
-        lhs.browser == rhs.browser &&
+        lhs.averageConnectionTime == rhs.averageConnectionTime &&
+            lhs.browser == rhs.browser &&
             lhs.browserVersion == rhs.browserVersion &&
             lhs.currentIp == rhs.currentIp &&
             lhs.currentSfu == rhs.currentSfu &&
@@ -273,6 +278,7 @@ public final class UserSessionStats: @unchecked Sendable, Codable, JSONEncodable
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(averageConnectionTime)
         hasher.combine(browser)
         hasher.combine(browserVersion)
         hasher.combine(currentIp)

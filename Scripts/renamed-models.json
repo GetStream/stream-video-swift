@@ -17,5 +17,7 @@
   "ThumbnailsSettingsResponse": "ThumbnailsSettings",
   "VideoSettingsResponse": "VideoSettings",
   "TimeStats": "Stats",
-  "NoiseCancellationSettings": "NoiseCancellationSettingsRequest"
+  "NoiseCancellationSettings": "NoiseCancellationSettingsRequest",
+  "VideoDimension": "VideoResolution",
+  "DeviceResponse": "Device"
 }

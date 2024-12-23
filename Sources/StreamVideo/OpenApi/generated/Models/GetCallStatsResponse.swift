@@ -7,6 +7,7 @@ import Foundation
 public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     
     public var aggregated: AggregatedStats?
+    public var averageConnectionTime: Float?
     public var callDurationSeconds: Int
     public var callStatus: String
     public var callTimeline: CallTimeline?
@@ -24,6 +25,7 @@ public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncod
 
     public init(
         aggregated: AggregatedStats? = nil,
+        averageConnectionTime: Float? = nil,
         callDurationSeconds: Int,
         callStatus: String,
         callTimeline: CallTimeline? = nil,
@@ -40,6 +42,7 @@ public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncod
         sfus: [SFULocationResponse]
     ) {
         self.aggregated = aggregated
+        self.averageConnectionTime = averageConnectionTime
         self.callDurationSeconds = callDurationSeconds
         self.callStatus = callStatus
         self.callTimeline = callTimeline
@@ -58,6 +61,7 @@ public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncod
     
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case aggregated
+        case averageConnectionTime = "average_connection_time"
         case callDurationSeconds = "call_duration_seconds"
         case callStatus = "call_status"
         case callTimeline = "call_timeline"
@@ -76,6 +80,7 @@ public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncod
     
     public static func == (lhs: GetCallStatsResponse, rhs: GetCallStatsResponse) -> Bool {
         lhs.aggregated == rhs.aggregated &&
+            lhs.averageConnectionTime == rhs.averageConnectionTime &&
             lhs.callDurationSeconds == rhs.callDurationSeconds &&
             lhs.callStatus == rhs.callStatus &&
             lhs.callTimeline == rhs.callTimeline &&
@@ -94,6 +99,7 @@ public final class GetCallStatsResponse: @unchecked Sendable, Codable, JSONEncod
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(aggregated)
+        hasher.combine(averageConnectionTime)
         hasher.combine(callDurationSeconds)
         hasher.combine(callStatus)
         hasher.combine(callTimeline)

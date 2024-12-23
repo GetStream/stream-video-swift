@@ -665,7 +665,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse {
+    open func startClosedCaptions(
+        type: String,
+        id: String,
+        startClosedCaptionsRequest: StartClosedCaptionsRequest
+    ) async throws -> StartClosedCaptionsResponse {
         var path = "/video/call/{type}/{id}/start_closed_captions"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -677,7 +681,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: startClosedCaptionsRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StartClosedCaptionsResponse.self, from: $0)
@@ -778,7 +783,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse {
+    open func stopClosedCaptions(
+        type: String,
+        id: String,
+        stopClosedCaptionsRequest: StopClosedCaptionsRequest
+    ) async throws -> StopClosedCaptionsResponse {
         var path = "/video/call/{type}/{id}/stop_closed_captions"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -790,7 +799,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: stopClosedCaptionsRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopClosedCaptionsResponse.self, from: $0)
@@ -836,7 +846,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func stopTranscription(type: String, id: String) async throws -> StopTranscriptionResponse {
+    open func stopTranscription(
+        type: String,
+        id: String,
+        stopTranscriptionRequest: StopTranscriptionRequest
+    ) async throws -> StopTranscriptionResponse {
         var path = "/video/call/{type}/{id}/stop_transcription"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -848,7 +862,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: stopTranscriptionRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopTranscriptionResponse.self, from: $0)
@@ -1105,6 +1120,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(EmptyResponse.self, from: $0)
         }
     }
+
+    open func queryAggregateCallStats(queryAggregateCallStatsRequest: QueryAggregateCallStatsRequest) async throws
+        -> QueryAggregateCallStatsResponse {
+        let path = "/video/stats"
+        
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST",
+            request: queryAggregateCallStatsRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(QueryAggregateCallStatsResponse.self, from: $0)
+        }
+    }
 }
 
 protocol DefaultAPIEndpoints {
@@ -1166,7 +1195,8 @@ protocol DefaultAPIEndpoints {
         
     func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
         
-    func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse
+    func startClosedCaptions(type: String, id: String, startClosedCaptionsRequest: StartClosedCaptionsRequest) async throws
+        -> StartClosedCaptionsResponse
         
     func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws
         -> StartRecordingResponse
@@ -1178,13 +1208,15 @@ protocol DefaultAPIEndpoints {
         
     func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
         
-    func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse
+    func stopClosedCaptions(type: String, id: String, stopClosedCaptionsRequest: StopClosedCaptionsRequest) async throws
+        -> StopClosedCaptionsResponse
         
     func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse
         
     func stopRecording(type: String, id: String) async throws -> StopRecordingResponse
         
-    func stopTranscription(type: String, id: String) async throws -> StopTranscriptionResponse
+    func stopTranscription(type: String, id: String, stopTranscriptionRequest: StopTranscriptionRequest) async throws
+        -> StopTranscriptionResponse
         
     func listTranscriptions(type: String, id: String) async throws -> ListTranscriptionsResponse
         
@@ -1213,4 +1245,7 @@ protocol DefaultAPIEndpoints {
     func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
         
     func videoConnect() async throws -> Void
+        
+    func queryAggregateCallStats(queryAggregateCallStatsRequest: QueryAggregateCallStatsRequest) async throws
+        -> QueryAggregateCallStatsResponse
 }

@@ -11,7 +11,7 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
     public var custom: [String: RawJSON]
     public var deactivatedAt: Date?
     public var deletedAt: Date?
-    public var devices: [DeviceResponse]
+    public var devices: [Device]
     public var id: String
     public var image: String?
     public var language: String
@@ -29,7 +29,7 @@ public final class OwnUserResponse: @unchecked Sendable, Codable, JSONEncodable,
         custom: [String: RawJSON],
         deactivatedAt: Date? = nil,
         deletedAt: Date? = nil,
-        devices: [DeviceResponse],
+        devices: [Device],
         id: String,
         image: String? = nil,
         language: String,
