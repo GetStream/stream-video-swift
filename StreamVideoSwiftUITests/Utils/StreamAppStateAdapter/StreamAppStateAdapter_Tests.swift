@@ -4,7 +4,8 @@
 
 import Foundation
 @testable import StreamVideo
-import XCTest
+@testable import StreamVideoSwiftUI
+@preconcurrency import XCTest
 
 final class StreamAppStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
