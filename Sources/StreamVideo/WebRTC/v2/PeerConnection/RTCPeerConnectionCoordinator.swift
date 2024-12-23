@@ -757,7 +757,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                         return false
                     }
                 }
-                .compactMap(\.trackID)
+                .map(\.trackID)
         )
         let transceivers = Set(
             peerConnection
