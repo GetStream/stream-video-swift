@@ -248,21 +248,24 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        let isMuted = !settings.videoOn
-        let isLocalMuted = primaryTrack.isEnabled == false
+        processingQueue.async { [weak self] in
+            guard let self else { return }
+            let isMuted = !settings.videoOn
+            let isLocalMuted = primaryTrack.isEnabled == false
 
-        if isMuted != isLocalMuted {
-            try await sfuAdapter.updateTrackMuteState(
-                .video,
-                isMuted: isMuted,
-                for: sessionID
-            )
-        }
+            if isMuted != isLocalMuted {
+                try await sfuAdapter.updateTrackMuteState(
+                    .video,
+                    isMuted: isMuted,
+                    for: sessionID
+                )
+            }
 
-        if isMuted, primaryTrack.isEnabled {
-            unpublish()
-        } else if !isMuted {
-            publish()
+            if isMuted, primaryTrack.isEnabled {
+                unpublish()
+            } else if !isMuted {
+                publish()
+            }
         }
     }
 
@@ -342,7 +345,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
                 trackInfo.layers = publishOptions.buildLayers(for: .video)
                 trackInfo.mid = transceiver.mid
-                trackInfo.muted = transceiver.sender.track?.isEnabled ?? true
+                trackInfo.muted = !(transceiver.sender.track?.isEnabled ?? false)
                 trackInfo.codec = publishOptions.codec(for: .video)
                 return trackInfo
             }

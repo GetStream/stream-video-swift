@@ -183,26 +183,29 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        guard lastUpdatedCallSettings != settings.audio else { return }
-
-        let isMuted = !settings.audioOn
-        let isLocalMuted = !primaryTrack.isEnabled
-
-        if isMuted != isLocalMuted {
-            try await sfuAdapter.updateTrackMuteState(
-                .audio,
-                isMuted: isMuted,
-                for: sessionID
-            )
+        processingQueue.async { [weak self] in
+            guard let self else { return }
+            guard lastUpdatedCallSettings != settings.audio else { return }
+            
+            let isMuted = !settings.audioOn
+            let isLocalMuted = !primaryTrack.isEnabled
+            
+            if isMuted != isLocalMuted {
+                try await sfuAdapter.updateTrackMuteState(
+                    .audio,
+                    isMuted: isMuted,
+                    for: sessionID
+                )
+            }
+            
+            if isMuted, primaryTrack.isEnabled {
+                unpublish()
+            } else if !isMuted {
+                publish()
+            }
+            
+            lastUpdatedCallSettings = settings.audio
         }
-
-        if isMuted, primaryTrack.isEnabled {
-            unpublish()
-        } else if !isMuted {
-            publish()
-        }
-
-        lastUpdatedCallSettings = settings.audio
     }
 
     /// Updates the publish options for the local audio track.
@@ -273,7 +276,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 trackInfo.trackType = .audio
                 trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
                 trackInfo.mid = transceiver.mid
-                trackInfo.muted = !(transceiver.sender.track?.isEnabled ?? true)
+                trackInfo.muted = !(transceiver.sender.track?.isEnabled ?? false)
                 return trackInfo
             }
     }
