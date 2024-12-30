@@ -9,7 +9,7 @@ private var _pc: RTCPeerConnection?
 
 extension PeerConnectionFactory {
     static func mock(
-        _ audioProcessingModule: AudioProcessingModule = MockAudioProcessingModule()
+        _ audioProcessingModule: AudioProcessingModule = MockAudioProcessingModule.shared
     ) -> PeerConnectionFactory {
         .build(
             audioProcessingModule: audioProcessingModule

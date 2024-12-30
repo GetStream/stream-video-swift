@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// Represents different audio codecs.
-public enum AudioCodec: String, CustomStringConvertible {
+public enum AudioCodec: String, CustomStringConvertible, Sendable {
     case opus
     case red
     case unknown

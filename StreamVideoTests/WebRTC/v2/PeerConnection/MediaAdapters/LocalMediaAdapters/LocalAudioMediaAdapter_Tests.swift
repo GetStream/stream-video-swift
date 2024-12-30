@@ -128,6 +128,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
 
         try await subject.didUpdateCallSettings(.init(audioOn: true))
+        await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil }
 
         let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
@@ -144,6 +145,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.primaryTrack.isEnabled = true
 
         try await subject.didUpdateCallSettings(.init(audioOn: false))
+        await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil }
 
         let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)

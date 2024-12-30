@@ -38,3 +38,20 @@ extension Stream_Video_Sfu_Models_Codec {
         payloadType = source.preferredPayloadType?.uint32Value ?? 0
     }
 }
+
+/// Extension adding a convenience initializer for `Stream_Video_Sfu_Models_Codec`.
+extension Stream_Video_Sfu_Models_Codec {
+
+    /// Initializes a `Stream_Video_Sfu_Models_Codec` from a `VideoCodec`.
+    ///
+    /// This initializer converts the codec information from the `VideoCodec`
+    /// enumeration into a `Stream_Video_Sfu_Models_Codec` model.
+    ///
+    /// - Parameter source: The `VideoCodec` to convert.
+    ///
+    /// - Note:
+    ///   - `name` is mapped directly from the codec's raw value.
+    init(_ source: VideoCodec) {
+        self.name = source.rawValue
+    }
+}

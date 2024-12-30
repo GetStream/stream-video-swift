@@ -305,7 +305,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 trackInfo.layers = publishOptions.buildLayers(for: .screenshare)
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = !(transceiver.sender.track?.isEnabled ?? false)
-                trackInfo.codec = publishOptions.codec(for: .screenshare)
+                trackInfo.codec = .init(publishOptions.codec)
                 return trackInfo
             }
     }

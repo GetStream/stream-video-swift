@@ -17,7 +17,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     private lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
     private lazy var callId: String! = UUID().uuidString
     private lazy var participants: [Member]! = [firstUser, secondUser]
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule())
+    private lazy var peerConnectionFactory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule.shared)
 
     private var cId: String { callCid(from: callId, callType: callType) }
 

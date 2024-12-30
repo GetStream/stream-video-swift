@@ -144,7 +144,7 @@ final class MockRTCPeerConnectionCoordinator:
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) throws {
         let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: MockAudioProcessingModule()
+            audioProcessingModule: MockAudioProcessingModule.shared
         )
         self.init(
             sessionId: .unique,
