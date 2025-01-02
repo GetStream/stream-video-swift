@@ -97,6 +97,34 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_reportIncomingCall_withIconTemplateImageData_callUpdateWasConfiguredCorrectly() throws {
+        subject = .init()
+        let expectedData = String.unique.data(using: .utf8)
+        subject.iconTemplateImageData = expectedData
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        XCTAssertEqual(subject.callProvider.configuration.iconTemplateImageData, expectedData)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_withoutIconTemplateImageData_callUpdateWasConfiguredCorrectly() throws {
+        subject = .init()
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        XCTAssertNil(subject.callProvider.configuration.iconTemplateImageData)
+    }
+
+    @MainActor
     func test_reportIncomingCall_callProviderWasCalledWithExpectedValues() {
         // Given
         let expectation = self.expectation(description: "Report Incoming Call")

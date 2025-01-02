@@ -20,6 +20,12 @@ open class CallKitAdapter {
         set { callKitService.iconTemplateImageData = newValue }
     }
 
+    /// The ringtone sound to use for CallKit ringing calls.
+    open var ringtoneSound: String? {
+        get { callKitService.ringtoneSound }
+        set { callKitService.ringtoneSound = newValue }
+    }
+
     /// The callSettings to use when joining a call (after accepting it on CallKit)
     /// default: nil
     open var callSettings: CallSettings? {
