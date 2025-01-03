@@ -1081,22 +1081,9 @@ struct Stream_Video_Sfu_Models_TrackInfo {
 
   var muted: Bool = false
 
-  var codec: Stream_Video_Sfu_Models_Codec {
-    get {return _codec ?? Stream_Video_Sfu_Models_Codec()}
-    set {_codec = newValue}
-  }
-  /// Returns true if `codec` has been explicitly set.
-  var hasCodec: Bool {return self._codec != nil}
-  /// Clears the value of `codec`. Subsequent reads from it will return its default value.
-  mutating func clearCodec() {self._codec = nil}
-
-  var publishOptionID: Int32 = 0
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
-
-  fileprivate var _codec: Stream_Video_Sfu_Models_Codec? = nil
 }
 
 struct Stream_Video_Sfu_Models_Error {
@@ -2122,8 +2109,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     8: .same(proto: "stereo"),
     9: .same(proto: "red"),
     10: .same(proto: "muted"),
-    11: .same(proto: "codec"),
-    12: .standard(proto: "publish_option_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2140,18 +2125,12 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 8: try { try decoder.decodeSingularBoolField(value: &self.stereo) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.red) }()
       case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
-      case 11: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
-      case 12: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.trackID.isEmpty {
       try visitor.visitSingularStringField(value: self.trackID, fieldNumber: 1)
     }
@@ -2176,12 +2155,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.muted != false {
       try visitor.visitSingularBoolField(value: self.muted, fieldNumber: 10)
     }
-    try { if let v = self._codec {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
-    } }()
-    if self.publishOptionID != 0 {
-      try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 12)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2194,8 +2167,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.stereo != rhs.stereo {return false}
     if lhs.red != rhs.red {return false}
     if lhs.muted != rhs.muted {return false}
-    if lhs._codec != rhs._codec {return false}
-    if lhs.publishOptionID != rhs.publishOptionID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
