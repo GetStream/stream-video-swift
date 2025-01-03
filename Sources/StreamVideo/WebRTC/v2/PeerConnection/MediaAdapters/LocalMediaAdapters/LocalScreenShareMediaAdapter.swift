@@ -306,6 +306,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = !(transceiver.sender.track?.isEnabled ?? false)
                 trackInfo.codec = .init(publishOptions.codec)
+                trackInfo.publishOptionID = Int32(publishOptions.id)
                 return trackInfo
             }
     }
