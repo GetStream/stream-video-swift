@@ -43,6 +43,21 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - videoConfig: The video configuration for the call.
     ///   - publishOptions: TODO
     ///   - subject: A subject for publishing track events.
+    /// Convenience initializer for creating a VideoMediaAdapter with a
+    /// LocalVideoMediaAdapter.
+    ///
+    /// - Parameters:
+    ///   - sessionID: The unique identifier for the current session.
+    ///   - peerConnection: The WebRTC peer connection.
+    ///   - peerConnectionFactory: The factory for creating WebRTC peer
+    ///     connection components.
+    ///   - sfuAdapter: The adapter for communicating with the SFU.
+    ///   - videoOptions: The video options for the call.
+    ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: The video publish options for the call.
+    ///   - subject: A subject for publishing track events.
+    ///   - videoCaptureSessionProvider: The provider for video capture
+    ///     sessions.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -132,12 +147,23 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
+    /// Updates the publish options asynchronously.
+    ///
+    /// - Parameter publishOptions: The new publish options to be applied.
+    /// - Throws: An error if the update fails.
+    /// - Note: This method calls `didUpdatePublishOptions` on the local media
+    /// manager.
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
         try await localMediaManager.didUpdatePublishOptions(publishOptions)
     }
 
+    /// Retrieves track information for a given collection type.
+    ///
+    /// - Parameter collectionType: The type of track info collection.
+    /// - Returns: An array of `Stream_Video_Sfu_Models_TrackInfo` objects.
+    /// - Note: This method calls `trackInfo` on the local media manager.
     func trackInfo(
         for collectionType: RTCPeerConnectionTrackInfoCollectionType
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {

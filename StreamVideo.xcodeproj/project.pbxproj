@@ -355,6 +355,8 @@
 		40AA2EDC2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EDB2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift */; };
 		40AA2EDE2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EDD2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift */; };
 		40AA2EE22AE0137E000DCA5C /* ClipCorners.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EE02AE00179000DCA5C /* ClipCorners.swift */; };
+		40AAD17E2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */; };
+		40AAD1802D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */; };
 		40AB34B22C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */; };
@@ -1754,6 +1756,8 @@
 		40AA2EDB2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalParticipantsListView.swift; sourceTree = "<group>"; };
 		40AA2EDD2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightSpeakerView.swift; sourceTree = "<group>"; };
 		40AA2EE02AE00179000DCA5C /* ClipCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipCorners.swift; sourceTree = "<group>"; };
+		40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Position+Convenience.swift"; sourceTree = "<group>"; };
+		40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCPeerConnectionTrackInfoCollectionType.swift; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUAdapter.swift; sourceTree = "<group>"; };
 		40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSessionConfiguration+WaitsForConnectivity.swift"; sourceTree = "<group>"; };
@@ -3960,6 +3964,7 @@
 				40BBC4832C623C6E002AEF92 /* Adapters */,
 				40BBC4882C623C6E002AEF92 /* Models */,
 				40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */,
+				40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */,
 				40BBC4892C623C6E002AEF92 /* RTCPeerConnectionCoordinator.swift */,
 				40BBC4BF2C629408002AEF92 /* RTCTemporaryPeerConnection.swift */,
 			);
@@ -4257,6 +4262,7 @@
 		40E363412D09F2A70028C52A /* AVFoundation */ = {
 			isa = PBXGroup;
 			children = (
+				40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */,
 				40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */,
 				40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */,
 			);
@@ -6650,6 +6656,7 @@
 				40DFA88F2CC11137003DCE05 /* UpdateCallResponse.swift in Sources */,
 				40DFA88E2CC1111E003DCE05 /* CallState.swift in Sources */,
 				4029E94E2CB8162900E1D571 /* IncomingVideoQualitySettings.swift in Sources */,
+				40AAD1802D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift in Sources */,
 				846D16242A52C3D50036CE4C /* CameraManager.swift in Sources */,
 				848CCCE52AB8ED8F002E83A2 /* StopHLSBroadcastingResponse.swift in Sources */,
 				84F07BD12CB4804900422E58 /* NoiseCancellationSettingsRequest.swift in Sources */,
@@ -6989,6 +6996,7 @@
 				84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */,
 				406B3BEF2C8F38CE00FC93A1 /* RTCPeerConnectionEvent.swift in Sources */,
 				40070F392CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift in Sources */,
+				40AAD17E2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift in Sources */,
 				842E70D22B91BE1700D2D68B /* StartTranscriptionRequest.swift in Sources */,
 				84DC389E29ADFCFD00946713 /* CallCreatedEvent.swift in Sources */,
 				842B8E202A2DFED900863A87 /* CallSessionParticipantLeftEvent.swift in Sources */,

@@ -6,11 +6,6 @@ import Combine
 import Foundation
 import StreamWebRTC
 
-enum RTCPeerConnectionTrackInfoCollectionType {
-    case allAvailable
-    case lastPublishOptions
-}
-
 /// Coordinates the peer connection, managing media, ICE, and SFU interactions.
 class RTCPeerConnectionCoordinator: @unchecked Sendable {
 

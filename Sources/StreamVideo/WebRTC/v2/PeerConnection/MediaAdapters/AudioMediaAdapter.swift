@@ -40,8 +40,8 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - peerConnection: The WebRTC peer connection.
     ///   - peerConnectionFactory: The factory for creating WebRTC peer connection components.
     ///   - sfuAdapter: The adapter for communicating with the SFU.
+    ///   - publishOptions: The options for publishing audio.
     ///   - subject: A subject for publishing track events.
-    ///   - audioSession: The audio session manager.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
@@ -118,6 +118,10 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         )
     }
 
+    /// Retrieves track information for a specified collection type.
+    ///
+    /// - Parameter collectionType: The type of track information collection.
+    /// - Returns: An array of `Stream_Video_Sfu_Models_TrackInfo` objects.
     func trackInfo(
         for collectionType: RTCPeerConnectionTrackInfoCollectionType
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
@@ -131,12 +135,21 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         try await localMediaManager.didUpdateCallSettings(settings)
     }
 
+    /// Updates the publish options for the audio media adapter.
+    ///
+    /// - Parameter publishOptions: The new publish options to be applied.
+    /// - Throws: An error if the update fails.
+    /// - Note: This function is asynchronous and may throw an error.
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
         try await localMediaManager.didUpdatePublishOptions(publishOptions)
     }
 
+    /// Changes the publish quality of the audio media adapter.
+    ///
+    /// - Parameter layerSettings: An array of `Stream_Video_Sfu_Event_AudioSender`
+    ///   objects representing the new layer settings.
     func changePublishQuality(
         with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
     ) {
