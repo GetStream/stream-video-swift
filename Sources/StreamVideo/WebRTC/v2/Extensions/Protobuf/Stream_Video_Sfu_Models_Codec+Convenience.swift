@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -52,6 +52,6 @@ extension Stream_Video_Sfu_Models_Codec {
     /// - Note:
     ///   - `name` is mapped directly from the codec's raw value.
     init(_ source: VideoCodec) {
-        self.name = source.rawValue
+        name = source.rawValue
     }
 }
