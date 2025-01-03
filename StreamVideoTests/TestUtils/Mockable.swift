@@ -54,3 +54,16 @@ extension Mockable {
         stubbedFunctionInput[key] = []
     }
 }
+
+final class StubVariantResultProvider<Value> {
+
+    var provider: (Int) -> Value
+
+    init(_ provider: @escaping (Int) -> Value) {
+        self.provider = provider
+    }
+
+    func getResult(for iteration: Int) -> Value {
+        provider(iteration)
+    }
+}

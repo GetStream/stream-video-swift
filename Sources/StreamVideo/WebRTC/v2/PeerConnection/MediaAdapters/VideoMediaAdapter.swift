@@ -32,17 +32,7 @@ final class VideoMediaAdapter: MediaAdapting, @unchecked Sendable {
 
     /// A subject for publishing track events.
     let subject: PassthroughSubject<TrackEvent, Never>
-    /// Convenience initializer for creating a VideoMediaAdapter with a LocalVideoMediaAdapter.
-    ///
-    /// - Parameters:
-    ///   - sessionID: The unique identifier for the current session.
-    ///   - peerConnection: The WebRTC peer connection.
-    ///   - peerConnectionFactory: The factory for creating WebRTC peer connection components.
-    ///   - sfuAdapter: The adapter for communicating with the SFU.
-    ///   - videoOptions: The video options for the call.
-    ///   - videoConfig: The video configuration for the call.
-    ///   - publishOptions: TODO
-    ///   - subject: A subject for publishing track events.
+    
     /// Convenience initializer for creating a VideoMediaAdapter with a
     /// LocalVideoMediaAdapter.
     ///

@@ -29,6 +29,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
         case unpublish
         case trackInfo
         case didUpdatePublishOptions
+        case changePublishQuality
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -36,7 +37,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
         case didUpdateCallSettings(settings: CallSettings)
         case publish
         case unpublish
-        case trackInfo
+        case trackInfo(collectionType: RTCPeerConnectionTrackInfoCollectionType)
         case didUpdatePublishOptions(publishOptions: PublishOptions)
 
         var payload: Any {
@@ -49,8 +50,8 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
                 return ()
             case .unpublish:
                 return ()
-            case .trackInfo:
-                return ()
+            case let .trackInfo(collectionType):
+                return collectionType
             case let .didUpdatePublishOptions(publishOptions):
                 return publishOptions
             }
@@ -82,15 +83,11 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
             .append(.didUpdateCallSettings(settings: settings))
     }
 
-    func trackInfo() -> [Stream_Video_Sfu_Models_TrackInfo] {
-        stubbedFunctionInput[.trackInfo]?.append(.trackInfo)
+    func trackInfo(for collectionType: RTCPeerConnectionTrackInfoCollectionType) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        stubbedFunctionInput[.trackInfo]?.append(.trackInfo(collectionType: collectionType))
         return stubbedFunction[.trackInfo] as? [Stream_Video_Sfu_Models_TrackInfo] ?? []
     }
     
-    func trackInfo(for collectionType: RTCPeerConnectionTrackInfoCollectionType) -> [Stream_Video_Sfu_Models_TrackInfo] {
-        trackInfo()
-    }
-
     func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws {
         stubbedFunctionInput[.didUpdatePublishOptions]?
             .append(.didUpdatePublishOptions(publishOptions: publishOptions))

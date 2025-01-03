@@ -108,7 +108,13 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
     ) async throws -> RTCSessionDescription {
         stubbedFunctionInput[.offer]?
             .append(.offer(constraints: constraints))
-        return stubbedFunction[.offer] as! RTCSessionDescription
+        if let result = stubbedFunction[.offer] as? RTCSessionDescription {
+            return result
+        } else if let result = stubbedFunction[.offer] as? StubVariantResultProvider<RTCSessionDescription> {
+            return result.getResult(for: timesCalled(.offer))
+        } else {
+            return RTCSessionDescription(type: .offer, sdp: .unique)
+        }
     }
 
     func answer(

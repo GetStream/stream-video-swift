@@ -72,6 +72,12 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
+    /// Retrieves track information for a specified track type and collection type.
+    ///
+    /// - Parameters:
+    ///   - type: The type of track to retrieve information for.
+    ///   - collectionType: The collection type for the track information.
+    /// - Returns: An array of `Stream_Video_Sfu_Models_TrackInfo` objects.
     func trackInfo(
         for type: TrackType,
         collectionType: RTCPeerConnectionTrackInfoCollectionType
@@ -260,6 +266,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         }
     }
 
+    /// Completes the setup process by sending a `true` value to the `setUpSubject`.
+    ///
+    /// This method must be called to ensure that `ensureSetUpHasBeenCompleted` returns `true`.
     func completeSetUp() {
         setUpSubject.send(true)
     }
@@ -323,6 +332,12 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         try await mediaAdapter.didUpdateCallSettings(settings)
     }
 
+    /// Updates the publish options for the peer connection.
+    ///
+    /// This method applies the new publish options to all media adapters including
+    /// audio, video, and screenshare.
+    ///
+    /// - Parameter publishOptions: The new publish options to apply.
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) {
@@ -632,6 +647,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             let tracksInfo = WebRTCJoinRequestFactory()
                 .buildAnnouncedTracks(self, collectionType: .allAvailable)
 
+            // This is only used for debugging and internal validation.
             validateTracksAndTransceivers(.video, tracksInfo: tracksInfo)
             validateTracksAndTransceivers(.screenshare, tracksInfo: tracksInfo)
 

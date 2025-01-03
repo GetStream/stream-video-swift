@@ -357,6 +357,8 @@
 		40AA2EE22AE0137E000DCA5C /* ClipCorners.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EE02AE00179000DCA5C /* ClipCorners.swift */; };
 		40AAD17E2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */; };
 		40AAD1802D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */; };
+		40AAD1822D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */; };
+		40AAD1832D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */; };
 		40AB34B22C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */; };
@@ -1758,6 +1760,7 @@
 		40AA2EE02AE00179000DCA5C /* ClipCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipCorners.swift; sourceTree = "<group>"; };
 		40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Position+Convenience.swift"; sourceTree = "<group>"; };
 		40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCPeerConnectionTrackInfoCollectionType.swift; sourceTree = "<group>"; };
+		40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift"; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUAdapter.swift; sourceTree = "<group>"; };
 		40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSessionConfiguration+WaitsForConnectivity.swift"; sourceTree = "<group>"; };
@@ -4343,6 +4346,7 @@
 		40F017432BBEEE6200E89FD1 /* Dummy */ = {
 			isa = PBXGroup;
 			children = (
+				40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */,
 				40B48C562D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift */,
 				403CA9BD2CCA54A4001A88C2 /* Stream_Video_Sfu_Models_Codec+Dummy.swift */,
 				403CA9BA2CCA548D001A88C2 /* Stream_Video_Sfu_Event_VideoLayerSetting+Dummy.swift */,
@@ -7377,6 +7381,7 @@
 				40B48C122D14C43F002C4EAB /* PublishOptions_Tests.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */,
+				40AAD1832D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */,
 				84CC05892A530C3F00EE9815 /* SpeakerManager_Tests.swift in Sources */,
 				8251E62B2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				406B3C3F2C919BB300FC93A1 /* MockSFUStack.swift in Sources */,
@@ -7631,6 +7636,7 @@
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
 				84DCA20C2A38300C000C3411 /* StreamVideoTestCase.swift in Sources */,
 				82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */,
+				40AAD1822D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */,
 				40382F452C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */,
 				82E3BA382A0BADB8001AB93E /* CallController_Mock.swift in Sources */,
 				40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */,
