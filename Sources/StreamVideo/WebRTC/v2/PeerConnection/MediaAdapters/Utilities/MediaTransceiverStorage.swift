@@ -17,7 +17,7 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     private let trackType: TrackType
 
     /// Internal dictionary storing `RTCRtpTransceiver` instances by a hashable key.
-    private var storage: [KeyType: RTCRtpTransceiver] = [:]
+    private var storage: [KeyType: (transceiver: RTCRtpTransceiver, track: RTCMediaStreamTrack)] = [:]
 
     /// A serial queue used to synchronize access to the storage.
     private let storageQueue = UnfairQueue()
@@ -29,11 +29,11 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     var description: String {
         let storageSnapshot = storageQueue.sync { self.storage }
         let active = storageSnapshot
-            .filter { $1.sender.track?.isEnabled == true }
-            .map { "\($0.key) → \($0.value.sender.track?.trackId ?? "unavailable trackId")" }
+            .filter { $1.transceiver.sender.track?.isEnabled == true }
+            .map { "\($0.key) → trackOnTransceiver:\($0.value.transceiver.sender.track != nil) trackID:\($0.value.track.trackId)" }
             .joined(separator: "\n")
         let inactive = storageSnapshot
-            .filter { $1.sender.track?.isEnabled != true }
+            .filter { $1.transceiver.sender.track == nil }
             .map { "\($0.key)" }
             .joined(separator: "\n")
 
@@ -61,7 +61,7 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     deinit {
         storageQueue.sync {
             storage.forEach {
-                $0.value.sender.track = nil
+                $0.value.transceiver.sender.track = nil
             }
             storage.removeAll()
         }
@@ -71,7 +71,7 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     ///
     /// - Parameter key: The key used to look up the transceiver.
     /// - Returns: The `RTCRtpTransceiver` associated with the key, or `nil` if not found.
-    func get(for key: KeyType) -> RTCRtpTransceiver? {
+    func get(for key: KeyType) -> (transceiver: RTCRtpTransceiver, track: RTCMediaStreamTrack)? {
         storageQueue.sync {
             storage[key]
         }
@@ -82,12 +82,12 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     /// - Parameters:
     ///   - value: The transceiver to store, or `nil` to remove the key from storage.
     ///   - key: The key used to associate with the transceiver.
-    func set(_ value: RTCRtpTransceiver?, for key: KeyType) {
+    func set(_ value: RTCRtpTransceiver, track: RTCMediaStreamTrack, for key: KeyType) {
         if contains(key: key) {
             log.warning("TransceiverStorage for trackType: \(trackType) will overwrite existing value for key: \(key).")
         }
         storageQueue.sync {
-            storage[key] = value
+            storage[key] = (value, track)
         }
     }
 
@@ -105,7 +105,7 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     /// before removing them from the storage.
     func removeAll() {
         storageQueue.sync {
-            storage.forEach { $0.value.sender.track = nil }
+            storage.forEach { $0.value.transceiver.sender.track = nil }
             storage.removeAll()
         }
     }
@@ -115,7 +115,7 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     /// - Parameter value: The `RTCRtpReceiver` whose associated key is requested.
     /// - Returns: The key associated with the receiver, or `nil` if not found.
     func key(for value: RTCRtpReceiver) -> KeyType? {
-        storageQueue.sync { storage.first(where: { $0.value === value })?.key }
+        storageQueue.sync { storage.first(where: { $0.value.transceiver === value })?.key }
     }
 
     // MARK: Sequence
@@ -125,11 +125,11 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     /// - Returns: An iterator for `(key: Key, value: RTCRtpTransceiver)` pairs.
     func makeIterator() -> AnyIterator<(
         key: KeyType,
-        value: RTCRtpTransceiver
+        value: (transceiver: RTCRtpTransceiver, track: RTCMediaStreamTrack)
     )> {
         let elements = storageQueue
             .sync { storage }
-            .map { (key: KeyType, value: RTCRtpTransceiver) in
+            .map { (key: KeyType, value: (transceiver: RTCRtpTransceiver, track: RTCMediaStreamTrack)) in
                 (key: key, value: value)
             }
         return AnyIterator(elements.makeIterator())

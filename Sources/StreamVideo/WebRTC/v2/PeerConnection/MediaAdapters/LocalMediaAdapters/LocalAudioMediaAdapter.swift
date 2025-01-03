@@ -92,7 +92,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             """
             Local audio tracks will be deallocated:
                 primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
             """,
             subsystems: .webRTC
         )
@@ -138,7 +138,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
             let activePublishOptions = Set(self.publishOptions)
             transceiverStorage
-                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
+                .forEach {
+                    if activePublishOptions.contains($0.key) {
+                        $0.value.track.isEnabled = true
+                        $0.value.transceiver.sender.track = $0.value.track
+                    } else {
+                        $0.value.track.isEnabled = false
+                        $0.value.transceiver.sender.track = nil
+                    }
+                }
 
             await audioRecorder.startRecording()
 
@@ -146,7 +154,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 """
                 Local audio tracks are now published:
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )
@@ -162,15 +170,14 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
             primaryTrack.isEnabled = false
 
-            transceiverStorage.forEach {
-                $0.value.sender.track?.isEnabled = false
-            }
+            transceiverStorage
+                .forEach { $0.value.track.isEnabled = false }
 
             log.debug(
                 """
                 Local audio tracks are now unpublished:
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )
@@ -231,7 +238,15 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             let activePublishOptions = Set(self.publishOptions)
 
             transceiverStorage
-                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
+                .forEach {
+                    if activePublishOptions.contains($0.key) {
+                        $0.value.track.isEnabled = true
+                        $0.value.transceiver.sender.track = $0.value.track
+                    } else {
+                        $0.value.track.isEnabled = false
+                        $0.value.transceiver.sender.track = nil
+                    }
+                }
 
             log.debug(
                 """
@@ -255,14 +270,14 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             switch collectionType {
             case .allAvailable:
                 return transceiverStorage
-                    .filter { $0.value.sender.track != nil }
+                    .map { ($0, $1.transceiver, $1.track) }
             case .lastPublishOptions:
                 return publishOptions
                     .compactMap {
                         if
-                            let transceiver = transceiverStorage.get(for: $0),
-                            transceiver.sender.track != nil {
-                            return ($0, transceiver)
+                            let entry = transceiverStorage.get(for: $0),
+                            entry.transceiver.sender.track != nil {
+                            return ($0, entry.transceiver, entry.track)
                         } else {
                             return nil
                         }
@@ -271,12 +286,12 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }()
 
         return transceivers
-            .map { _, transceiver in
+            .map { _, transceiver, track in
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
                 trackInfo.trackType = .audio
-                trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
+                trackInfo.trackID = track.trackId
                 trackInfo.mid = transceiver.mid
-                trackInfo.muted = !(transceiver.sender.track?.isEnabled ?? false)
+                trackInfo.muted = !track.isEnabled
                 return trackInfo
             }
     }
@@ -311,15 +326,20 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
 
-        let transceiver = peerConnection.addTransceiver(
-            trackType: .audio,
-            with: track,
-            init: .init(
-                direction: .sendOnly,
-                streamIds: streamIds,
-                audioOptions: options
+        guard
+            let transceiver = peerConnection.addTransceiver(
+                trackType: .audio,
+                with: track,
+                init: .init(
+                    direction: .sendOnly,
+                    streamIds: streamIds,
+                    audioOptions: options
+                )
             )
-        )
-        transceiverStorage.set(transceiver, for: options)
+        else {
+            log.warning("Unable to create transceiver for options:\(options).", subsystems: .webRTC)
+            return
+        }
+        transceiverStorage.set(transceiver, track: track, for: options)
     }
 }

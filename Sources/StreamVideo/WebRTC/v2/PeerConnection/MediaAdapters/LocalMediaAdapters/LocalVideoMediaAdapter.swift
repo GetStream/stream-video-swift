@@ -127,7 +127,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             """
             Local video tracks will be deallocated:
                 primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
             """,
             subsystems: .webRTC
         )
@@ -195,13 +195,21 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             let activePublishOptions = Set(self.publishOptions)
 
             transceiverStorage
-                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
+                .forEach {
+                    if activePublishOptions.contains($0.key) {
+                        $0.value.track.isEnabled = true
+                        $0.value.transceiver.sender.track = $0.value.track
+                    } else {
+                        $0.value.track.isEnabled = false
+                        $0.value.transceiver.sender.track = nil
+                    }
+                }
 
             log.debug(
                 """
                 Local videoTracks are now published
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )
@@ -221,7 +229,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             primaryTrack.isEnabled = false
 
             transceiverStorage
-                .forEach { $0.value.sender.track?.isEnabled = false }
+                .forEach { $0.value.track.isEnabled = false }
 
             Task { @MainActor [weak self] in
                 do {
@@ -235,7 +243,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 """
                 Local videoTracks are now unpublished:
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.sender.track?.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )
@@ -296,7 +304,15 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             let activePublishOptions = Set(self.publishOptions)
 
             transceiverStorage
-                .forEach { $0.value.sender.track?.isEnabled = activePublishOptions.contains($0.key) }
+                .forEach {
+                    if activePublishOptions.contains($0.key) {
+                        $0.value.track.isEnabled = true
+                        $0.value.transceiver.sender.track = $0.value.track
+                    } else {
+                        $0.value.track.isEnabled = false
+                        $0.value.transceiver.sender.track = nil
+                    }
+                }
 
             log.debug(
                 """
@@ -318,18 +334,18 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func trackInfo(
         for collectionType: RTCPeerConnectionTrackInfoCollectionType
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
-        let transceivers = {
+        let entries: [(PublishOptions.VideoPublishOptions, RTCRtpTransceiver, RTCMediaStreamTrack)] = {
             switch collectionType {
             case .allAvailable:
                 return transceiverStorage
-                    .filter { $0.value.sender.track != nil }
+                    .map { ($0, $1.transceiver, $1.track) }
             case .lastPublishOptions:
                 return publishOptions
                     .compactMap {
                         if
-                            let transceiver = transceiverStorage.get(for: $0),
-                            transceiver.sender.track != nil {
-                            return ($0, transceiver)
+                            let entry = transceiverStorage.get(for: $0),
+                            entry.transceiver.sender.track != nil {
+                            return ($0, entry.transceiver, entry.track)
                         } else {
                             return nil
                         }
@@ -337,15 +353,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             }
         }()
 
-        return transceivers
-            .filter { $0.value.sender.track != nil }
-            .compactMap { publishOptions, transceiver in
+        return entries
+            .compactMap { publishOptions, transceiver, track in
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
                 trackInfo.trackType = .video
-                trackInfo.trackID = transceiver.sender.track?.trackId ?? ""
+                trackInfo.trackID = track.trackId
                 trackInfo.layers = publishOptions.buildLayers(for: .video)
                 trackInfo.mid = transceiver.mid
-                trackInfo.muted = !(transceiver.sender.track?.isEnabled ?? false)
+                trackInfo.muted = !track.isEnabled
                 trackInfo.codec = .init(publishOptions.codec)
                 trackInfo.publishOptionID = Int32(publishOptions.id)
                 return trackInfo
@@ -366,7 +381,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     codec: VideoCodec(videoSender.codec)
                 )
                 guard
-                    let transceiver = transceiverStorage.get(for: key)
+                    let transceiver = transceiverStorage.get(for: key)?.transceiver
                 else {
                     log.debug(
                         """
@@ -493,7 +508,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ) async {
         let dimensions = layerSettings
             .map { PublishOptions.VideoPublishOptions(id: Int($0.publishOptionID), codec: VideoCodec($0.codec)) }
-            .filter { transceiverStorage.contains(key: $0) }
+            .filter { transceiverStorage.get(for: $0)?.transceiver.sender.track != nil }
             .map(\.dimensions)
 
         guard
@@ -740,16 +755,21 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
 
-        let transceiver = peerConnection.addTransceiver(
-            trackType: .video,
-            with: track,
-            init: .init(
+        guard
+            let transceiver = peerConnection.addTransceiver(
                 trackType: .video,
-                direction: .sendOnly,
-                streamIds: streamIds,
-                videoOptions: options
+                with: track,
+                init: .init(
+                    trackType: .video,
+                    direction: .sendOnly,
+                    streamIds: streamIds,
+                    videoOptions: options
+                )
             )
-        )
-        transceiverStorage.set(transceiver, for: options)
+        else {
+            log.warning("Unable to create transceiver for options:\(options).", subsystems: .webRTC)
+            return
+        }
+        transceiverStorage.set(transceiver, track: track, for: options)
     }
 }
