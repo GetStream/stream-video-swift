@@ -1090,6 +1090,8 @@ struct Stream_Video_Sfu_Models_TrackInfo {
   /// Clears the value of `codec`. Subsequent reads from it will return its default value.
   mutating func clearCodec() {self._codec = nil}
 
+  var publishOptionID: Int32 = 0
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -2121,6 +2123,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     9: .same(proto: "red"),
     10: .same(proto: "muted"),
     11: .same(proto: "codec"),
+    12: .standard(proto: "publish_option_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2138,6 +2141,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 9: try { try decoder.decodeSingularBoolField(value: &self.red) }()
       case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
       case 11: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
+      case 12: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
       default: break
       }
     }
@@ -2175,6 +2179,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     try { if let v = self._codec {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
     } }()
+    if self.publishOptionID != 0 {
+      try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 12)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2188,6 +2195,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.red != rhs.red {return false}
     if lhs.muted != rhs.muted {return false}
     if lhs._codec != rhs._codec {return false}
+    if lhs.publishOptionID != rhs.publishOptionID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
