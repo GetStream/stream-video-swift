@@ -138,7 +138,17 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
     ) -> RTCRtpTransceiver? {
         stubbedFunctionInput[.addTransceiver]?
             .append(.addTransceiver(trackType: trackType, track: track, transceiverInit: transceiverInit))
-        return stubbedFunction[.addTransceiver] as? RTCRtpTransceiver
+        if let result = stubbedFunction[.addTransceiver] as? RTCRtpTransceiver {
+            result.sender.track = track
+            return result
+        } else if
+            let provider = stubbedFunction[.addTransceiver] as? StubVariantResultProvider<RTCRtpTransceiver> {
+            let result = provider.getResult(for: timesCalled(.addTransceiver))
+            result.sender.track = track
+            return result
+        } else {
+            return nil
+        }
     }
 
     func transceivers(
