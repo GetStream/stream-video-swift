@@ -330,6 +330,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try Task.checkCancellation()
 
+            let subscriberEventBucket = SFUEventBucket(sfuAdapter)
+
             let joinResponse = try await sfuAdapter
                 .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
                 .nextValue(timeout: WebRTCConfiguration.timeout.join)
@@ -360,6 +362,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             if !isFastReconnecting {
                 try await coordinator.stateAdapter.configurePeerConnections()
+
+                // TODO: Add comments
+                sfuAdapter.consume(
+                    Stream_Video_Sfu_Event_SubscriberOffer.self,
+                    bucket: subscriberEventBucket
+                )
             }
 
             try Task.checkCancellation()

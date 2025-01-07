@@ -406,11 +406,28 @@ final class WebRTCCoordinator: @unchecked Sendable {
         preferredVideoCodec: VideoCodec,
         maxBitrate: Int
     ) async {
-        await stateAdapter.set(publishOptions: PublishOptions(
-            video: [
-                .init(codec: preferredVideoCodec, bitrate: maxBitrate)
-            ]
-        ))
+        let fmtp = stateAdapter
+            .peerConnectionFactory
+            .codecCapabilities(for: preferredVideoCodec)?.fmtp ?? ""
+
+        if fmtp.isEmpty {
+            log.warning(
+                "Unable to detect fmtp for video codec:\(preferredVideoCodec).",
+                subsystems: .webRTC
+            )
+        }
+
+        await stateAdapter.set(
+            publishOptions: PublishOptions(
+                video: [
+                    .init(
+                        codec: preferredVideoCodec,
+                        fmtp: fmtp,
+                        bitrate: maxBitrate
+                    )
+                ]
+            )
+        )
     }
 
     // MARK: - Private

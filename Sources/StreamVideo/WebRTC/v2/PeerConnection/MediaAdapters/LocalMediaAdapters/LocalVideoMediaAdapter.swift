@@ -362,6 +362,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = !track.isEnabled
                 trackInfo.codec = .init(publishOptions.codec)
+                trackInfo.codec.fmtp = publishOptions.fmtp
                 trackInfo.publishOptionID = Int32(publishOptions.id)
                 return trackInfo
             }
@@ -507,7 +508,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         for layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) async {
         let dimensions = layerSettings
-            .map { PublishOptions.VideoPublishOptions(id: Int($0.publishOptionID), codec: VideoCodec($0.codec)) }
+            // TODO: REMOVE EMPTY STRING
+            .map { PublishOptions.VideoPublishOptions(id: Int($0.publishOptionID), codec: VideoCodec($0.codec), fmtp: "") }
             .filter { transceiverStorage.get(for: $0)?.transceiver.sender.track != nil }
             .map(\.dimensions)
 

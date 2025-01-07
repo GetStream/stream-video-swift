@@ -108,6 +108,8 @@ struct PublishOptions: Sendable, Hashable {
         /// Dimensions of the video stream, specified in width and height.
         var dimensions: CGSize
 
+        var fmtp: String
+
         /// Initializes video options from a server model.
         ///
         /// - Parameter publishOption: The video publish option model from the server.
@@ -124,6 +126,7 @@ struct PublishOptions: Sendable, Hashable {
                 width: Int(publishOption.videoDimension.width),
                 height: Int(publishOption.videoDimension.height)
             )
+            fmtp = publishOption.codec.fmtp
         }
 
         /// Initializes video options with specific parameters.
@@ -139,6 +142,7 @@ struct PublishOptions: Sendable, Hashable {
         init(
             id: Int = 0,
             codec: VideoCodec,
+            fmtp: String = "",
             capturingLayers: PublishOptions.VideoPublishOptions.CapturingLayers = .init(
                 spatialLayers: .maxSpatialLayers,
                 temporalLayers: .maxTemporalLayers
@@ -149,6 +153,7 @@ struct PublishOptions: Sendable, Hashable {
         ) {
             self.id = id
             self.codec = codec
+            self.fmtp = fmtp
             self.capturingLayers = capturingLayers
             self.bitrate = bitrate
             self.frameRate = frameRate

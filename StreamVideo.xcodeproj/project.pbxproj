@@ -359,6 +359,7 @@
 		40AAD1802D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */; };
 		40AAD1822D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */; };
 		40AAD1832D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */; };
+		40AAD1852D2D41F400D10330 /* SFUDebouncedEventAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1842D2D41F400D10330 /* SFUDebouncedEventAdapter.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */; };
 		40AB34B22C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */; };
@@ -1761,6 +1762,7 @@
 		40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Position+Convenience.swift"; sourceTree = "<group>"; };
 		40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCPeerConnectionTrackInfoCollectionType.swift; sourceTree = "<group>"; };
 		40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift"; sourceTree = "<group>"; };
+		40AAD1842D2D41F400D10330 /* SFUDebouncedEventAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUDebouncedEventAdapter.swift; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUAdapter.swift; sourceTree = "<group>"; };
 		40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSessionConfiguration+WaitsForConnectivity.swift"; sourceTree = "<group>"; };
@@ -3767,6 +3769,7 @@
 				40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */,
 				40C6891D2C6661990054528A /* SFUEventAdapter.swift */,
 				40C689192C64F74F0054528A /* SFUSignalService.swift */,
+				40AAD1842D2D41F400D10330 /* SFUDebouncedEventAdapter.swift */,
 			);
 			path = SFU;
 			sourceTree = "<group>";
@@ -6923,6 +6926,7 @@
 				84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
+				40AAD1852D2D41F400D10330 /* SFUDebouncedEventAdapter.swift in Sources */,
 				845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */,
 				40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */,
 				402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */,

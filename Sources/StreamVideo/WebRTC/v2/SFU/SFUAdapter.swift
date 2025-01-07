@@ -65,6 +65,20 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     /// The hostname of the SFU service.
     var hostname: String { signalService.hostname }
 
+    var publisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> {
+        webSocket
+            .eventSubject
+            .compactMap {
+                switch $0 {
+                case let .sfuEvent(event):
+                    return event
+                default:
+                    return nil
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+
     // MARK: - CustomStringConvertible
 
     var description: String {
@@ -239,6 +253,24 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         event.requestPayload = .leaveCallRequest(payload)
 
         webSocket.engine?.send(message: event)
+    }
+
+    func consume<EventType>(
+        _ eventType: EventType.Type,
+        bucket: SFUEventBucket
+    ) {
+        let events = bucket.consume(eventType)
+
+        guard !events.isEmpty else {
+            log.debug("No events found in bucket to consume from sfuAdapter:\(self).", subsystems: .sfu)
+            return
+        }
+
+        log.debug(
+            "\(events.endIndex) event(s) of type \(eventType) found in bucket and will consume on sfuAdapter:\(self).",
+            subsystems: .sfu
+        )
+        events.forEach { webSocket.eventSubject.send(.sfuEvent($0)) }
     }
 
     // MARK: - Service
@@ -473,6 +505,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 return try await signalService.sendAnswer(sendAnswerRequest: request)
             }
         }
+        log.debug(request, subsystems: .sfu)
         task.store(in: requestDisposableBag)
         let response = try await task.value
         signalService.subject.send(response)
