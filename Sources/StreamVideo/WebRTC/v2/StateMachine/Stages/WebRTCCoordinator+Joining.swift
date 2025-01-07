@@ -330,6 +330,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try Task.checkCancellation()
 
+            // We create an event bucket in which we collect all SFU events
+            // that will be received until the moment our PeerConnections have
+            // been setup.
             let subscriberEventBucket = SFUEventBucket(sfuAdapter)
 
             let joinResponse = try await sfuAdapter
@@ -363,7 +366,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
             if !isFastReconnecting {
                 try await coordinator.stateAdapter.configurePeerConnections()
 
-                // TODO: Add comments
+                // Once our PeerConnection have been created we consume the
+                // eventBucket we created above in order to re-apply any event
+                // that our PeerConnections missed during the initialisation.
+                //
+                // Specifically, below we are consuming any SubscriberOffer event
+                // that has being received before our Subscriber was ready to
+                // process it. This scenario is possible to occur if we join
+                // a call where another user is already publishing audio.
                 sfuAdapter.consume(
                     Stream_Video_Sfu_Event_SubscriberOffer.self,
                     bucket: subscriberEventBucket

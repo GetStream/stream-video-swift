@@ -9,10 +9,14 @@ import XCTest
 final class MediaTransceiverStorage_Tests: XCTestCase {
 
     private lazy var factory: PeerConnectionFactory! = .mock()
+    private lazy var trackA: RTCMediaStreamTrack! = factory.mockVideoTrack(forScreenShare: false)
+    private lazy var trackB: RTCMediaStreamTrack! = factory.mockVideoTrack(forScreenShare: true)
     private lazy var subject: MediaTransceiverStorage<String>! = .init(for: .video)
 
     override func tearDown() {
         subject = nil
+        trackA = nil
+        trackB = nil
         factory = nil
         super.tearDown()
     }
@@ -26,30 +30,23 @@ final class MediaTransceiverStorage_Tests: XCTestCase {
     // MARK: - Storage Operations
 
     func test_addTransceiver() throws {
-        subject.set(try makeTransceiver(), for: "transceiver1")
+        subject.set(try makeTransceiver(), track: trackA, for: "transceiver1")
 
         XCTAssertEqual(subject.count, 1)
     }
 
     func test_getTransceiver() throws {
         let transceiver = try makeTransceiver()
-        subject.set(transceiver, for: "transceiver1")
+        subject.set(transceiver, track: trackA, for: "transceiver1")
 
-        let retrievedTransceiver = subject.get(for: "transceiver1")
-        XCTAssertTrue(retrievedTransceiver === transceiver)
-    }
-
-    func test_removeTransceiver() throws {
-        subject.set(try makeTransceiver(), for: "transceiver1")
-
-        subject.set(nil, for: "transceiver1")
-
-        XCTAssertNil(subject.get(for: "transceiver1"))
+        let entry = try XCTUnwrap(subject.get(for: "transceiver1"))
+        XCTAssertTrue(entry.transceiver === transceiver)
+        XCTAssertTrue(entry.track === trackA)
     }
 
     func test_removeAllTransceivers() throws {
-        subject.set(try makeTransceiver(), for: "transceiver1")
-        subject.set(try makeTransceiver(), for: "transceiver2")
+        subject.set(try makeTransceiver(), track: trackA, for: "transceiver1")
+        subject.set(try makeTransceiver(), track: trackB, for: "transceiver2")
 
         subject.removeAll()
 

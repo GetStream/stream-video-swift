@@ -107,7 +107,9 @@ struct PublishOptions: Sendable, Hashable {
         var frameRate: Int
         /// Dimensions of the video stream, specified in width and height.
         var dimensions: CGSize
-
+        /// Represents the codec parameters formatted as a string. It will either
+        /// be provided by the source or it should be derived by using
+        /// `PeerConnectionFactory.codecCapabilities(videoCodec)?.fmtp`
         var fmtp: String
 
         /// Initializes video options from a server model.

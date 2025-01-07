@@ -406,6 +406,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
         preferredVideoCodec: VideoCodec,
         maxBitrate: Int
     ) async {
+        // For the request videoCodec, we query WebRTC to get the best
+        // fmtp to use.
         let fmtp = stateAdapter
             .peerConnectionFactory
             .codecCapabilities(for: preferredVideoCodec)?.fmtp ?? ""

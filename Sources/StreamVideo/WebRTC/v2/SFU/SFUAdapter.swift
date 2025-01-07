@@ -64,7 +64,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     var connectURL: URL { webSocket.connectURL }
     /// The hostname of the SFU service.
     var hostname: String { signalService.hostname }
-
+    /// A Combine publisher that allows observation of *all events* received by the adapter.
     var publisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> {
         webSocket
             .eventSubject
