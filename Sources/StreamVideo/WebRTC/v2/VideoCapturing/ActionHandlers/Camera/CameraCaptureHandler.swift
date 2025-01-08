@@ -176,23 +176,15 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
     private func startCapture(
         on videoCapturer: RTCCameraVideoCapturer,
         videoCapturerDelegate: RTCVideoCapturerDelegate,
-        with device: AVCaptureDevice,
+        with device: CaptureDeviceProtocol,
         format: AVCaptureDevice.Format,
         configuration: Configuration
     ) async throws {
-        try await withCheckedThrowingContinuation { continuation in
-            videoCapturer.startCapture(
-                with: device,
-                format: format,
-                fps: configuration.frameRate.clamped(to: format.frameRateRange)
-            ) { error in
-                if let error {
-                    continuation.resume(throwing: ClientError(error.localizedDescription))
-                } else {
-                    continuation.resume()
-                }
-            }
-        } as Void
+        try await videoCapturer.startCapture(
+            with: device,
+            format: format,
+            fps: configuration.frameRate.clamped(to: format.frameRateRange)
+        )
 
         if let videoCapturerDelegate = videoCapturerDelegate as? StreamVideoCaptureHandler {
             videoCapturerDelegate.currentCameraPosition = device.position

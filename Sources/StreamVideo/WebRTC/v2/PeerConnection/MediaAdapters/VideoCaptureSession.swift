@@ -8,7 +8,7 @@ import StreamWebRTC
 struct VideoCaptureSession {
     var position: AVCaptureDevice.Position
 
-    var device: AVCaptureDevice?
+    var device: CaptureDeviceProtocol?
 
     /// The local video track for the screen share.
     var localTrack: RTCVideoTrack

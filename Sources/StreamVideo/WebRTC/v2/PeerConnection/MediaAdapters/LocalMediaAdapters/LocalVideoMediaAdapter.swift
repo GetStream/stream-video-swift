@@ -165,6 +165,33 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
     }
 
+    /// Updates the local video media based on new call settings.
+    ///
+    /// - Parameter settings: The updated call settings.
+    func didUpdateCallSettings(
+        _ settings: CallSettings
+    ) async throws {
+        processingQueue.async { [weak self] in
+            guard let self else { return }
+            let isMuted = !settings.videoOn
+            let isLocalMuted = primaryTrack.isEnabled == false
+
+            if isMuted != isLocalMuted {
+                try await sfuAdapter.updateTrackMuteState(
+                    .video,
+                    isMuted: isMuted,
+                    for: sessionID
+                )
+            }
+
+            if isMuted, primaryTrack.isEnabled {
+                unpublish()
+            } else if !isMuted {
+                publish()
+            }
+        }
+    }
+
     /// Starts publishing the local video track.
     func publish() {
         processingQueue.async { @MainActor [weak self] in
@@ -247,33 +274,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 """,
                 subsystems: .webRTC
             )
-        }
-    }
-
-    /// Updates the local video media based on new call settings.
-    ///
-    /// - Parameter settings: The updated call settings.
-    func didUpdateCallSettings(
-        _ settings: CallSettings
-    ) async throws {
-        processingQueue.async { [weak self] in
-            guard let self else { return }
-            let isMuted = !settings.videoOn
-            let isLocalMuted = primaryTrack.isEnabled == false
-
-            if isMuted != isLocalMuted {
-                try await sfuAdapter.updateTrackMuteState(
-                    .video,
-                    isMuted: isMuted,
-                    for: sessionID
-                )
-            }
-
-            if isMuted, primaryTrack.isEnabled {
-                unpublish()
-            } else if !isMuted {
-                publish()
-            }
         }
     }
 

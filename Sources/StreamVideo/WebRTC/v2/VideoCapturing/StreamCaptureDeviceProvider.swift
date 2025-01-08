@@ -5,7 +5,12 @@
 import Foundation
 import StreamWebRTC
 
-final class StreamCaptureDeviceProvider {
+protocol CaptureDeviceProviding {
+    func device(for position: AVCaptureDevice.Position) -> CaptureDeviceProtocol?
+    func device(for position: CameraPosition) -> CaptureDeviceProtocol?
+}
+
+final class StreamCaptureDeviceProvider: CaptureDeviceProviding {
 
     private let useFallback: Bool
 
@@ -17,7 +22,7 @@ final class StreamCaptureDeviceProvider {
         self.useFallback = useFallback
     }
 
-    func device(for position: AVCaptureDevice.Position) -> AVCaptureDevice? {
+    func device(for position: AVCaptureDevice.Position) -> CaptureDeviceProtocol? {
         if let deviceFound = devices.first(where: { $0.position == position }) {
             return deviceFound
         } else if useFallback {
@@ -27,18 +32,18 @@ final class StreamCaptureDeviceProvider {
         }
     }
 
-    func device(for position: CameraPosition) -> AVCaptureDevice? {
+    func device(for position: CameraPosition) -> CaptureDeviceProtocol? {
         device(for: position == .front ? AVCaptureDevice.Position.front : .back)
     }
 }
 
-extension StreamCaptureDeviceProvider: InjectionKey {
-    static var currentValue: StreamCaptureDeviceProvider = .init()
+enum CaptureDeviceProviderKey: InjectionKey {
+    static var currentValue: CaptureDeviceProviding = StreamCaptureDeviceProvider()
 }
 
 extension InjectedValues {
-    var captureDeviceProvider: StreamCaptureDeviceProvider {
-        get { Self[StreamCaptureDeviceProvider.self] }
-        set { Self[StreamCaptureDeviceProvider.self] = newValue }
+    var captureDeviceProvider: CaptureDeviceProviding {
+        get { Self[CaptureDeviceProviderKey.self] }
+        set { Self[CaptureDeviceProviderKey.self] = newValue }
     }
 }
