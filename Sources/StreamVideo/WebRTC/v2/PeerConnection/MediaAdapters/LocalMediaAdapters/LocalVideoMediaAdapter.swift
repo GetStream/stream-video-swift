@@ -127,7 +127,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             """
             Local video tracks will be deallocated:
                 primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                clones: \(transceiverStorage.compactMap { $0.value.track.trackId }.joined(separator: ","))
             """,
             subsystems: .webRTC
         )
@@ -236,7 +236,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 """
                 Local videoTracks are now published
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.compactMap { $0.value.track.trackId }.joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )
@@ -270,7 +270,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 """
                 Local videoTracks are now unpublished:
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.compactMap { $0.value.track.trackId }.joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )
