@@ -364,7 +364,6 @@
 		40AAD1892D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1882D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift */; };
 		40AAD18A2D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1882D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift */; };
 		40AAD18C2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD18B2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift */; };
-		40AAD18D2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD18B2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift */; };
 		40AAD18F2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD18E2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift */; };
 		40AAD1912D2EF18A00D10330 /* MockCaptureDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1902D2EF18A00D10330 /* MockCaptureDevice.swift */; };
 		40AAD1932D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1922D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift */; };
@@ -7600,7 +7599,6 @@
 				841FF5152A5E99B400809BBB /* CallEventsHandler_Tests.swift in Sources */,
 				82E3BA462A0BAE1E001AB93E /* VirtualTime.swift in Sources */,
 				40382F422C89CF9700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */,
-				40AAD18D2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift in Sources */,
 				40B48C572D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */,
 				82FF40B72A17C6CD00B4D95E /* ReconnectionView_Tests.swift in Sources */,
 				829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */,
