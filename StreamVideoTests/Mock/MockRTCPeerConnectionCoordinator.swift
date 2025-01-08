@@ -36,6 +36,7 @@ final class MockRTCPeerConnectionCoordinator:
         case removeVideoOutput
         case zoom
         case trackInfo
+        case statsReport
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -58,6 +59,7 @@ final class MockRTCPeerConnectionCoordinator:
         case removeVideoOutput(videoOutput: AVCaptureVideoDataOutput)
         case zoom(factor: CGFloat)
         case trackInfo(trackType: TrackType)
+        case statsReport
 
         var payload: Any {
             switch self {
@@ -99,6 +101,8 @@ final class MockRTCPeerConnectionCoordinator:
                 return factor
             case let .trackInfo(trackType):
                 return trackType
+            case .statsReport:
+                return ()
             }
         }
     }
@@ -289,5 +293,10 @@ final class MockRTCPeerConnectionCoordinator:
             .trackInfo(trackType: type)
         )
         return stubbedTrackInfo[type] ?? []
+    }
+
+    override func statsReport() async throws -> StreamRTCStatisticsReport {
+        stubbedFunctionInput[.statsReport]?.append(.statsReport)
+        return (stubbedFunction[.statsReport] as? StreamRTCStatisticsReport) ?? .init(nil)
     }
 }

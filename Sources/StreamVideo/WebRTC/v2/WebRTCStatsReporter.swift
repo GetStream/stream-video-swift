@@ -158,17 +158,23 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     private func collectStats() {
         activeCollectionTask?.cancel()
         activeCollectionTask = Task { [weak self] in
-            guard let self, let hostname = sfuAdapter?.hostname else { return }
+            guard
+                let self,
+                let hostname = sfuAdapter?.hostname
+            else {
+                return
+            }
+
             do {
-                async let statsPublisher = publisher?.statsReport()
-                async let statsSubscriber = subscriber?.statsReport()
+                async let statsPublisher = publisher?.statsReport() ?? .init(nil)
+                async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
 
                 try Task.checkCancellation()
-                let result = try await [statsPublisher, statsSubscriber]
+                let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
 
                 let report = callStatisticsReporter.buildReport(
-                    publisherReport: .init(result[safe: 0] ?? nil),
-                    subscriberReport: .init(result[safe: 1] ?? nil),
+                    publisherReport: result.first ?? .init(nil),
+                    subscriberReport: result.last ?? .init(nil),
                     datacenter: hostname
                 )
 

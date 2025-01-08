@@ -481,8 +481,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Returns: An RTCStatisticsReport containing the connection statistics.
     /// - Throws: An error if retrieving statistics fails.
-    func statsReport() async throws -> RTCStatisticsReport? {
-        try await peerConnection.statistics()
+    func statsReport() async throws -> StreamRTCStatisticsReport {
+        let result = try await peerConnection.statistics()
+        return .init(result)
     }
 
     // MARK: - Video

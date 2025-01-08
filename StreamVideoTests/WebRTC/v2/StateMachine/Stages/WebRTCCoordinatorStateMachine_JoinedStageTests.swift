@@ -579,7 +579,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
-        let initialStatsReporter = WebRTCStatsReporter(interval: 12, sessionID: sessionId)
+        let initialStatsReporter = WebRTCStatsReporter(
+            deliveryInterval: 12,
+            sessionID: sessionId
+        )
         await stateAdapter.set(statsReporter: initialStatsReporter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
@@ -601,7 +604,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
-        let initialStatsReporter = WebRTCStatsReporter(interval: 11, sessionID: .unique)
+        let initialStatsReporter = WebRTCStatsReporter(deliveryInterval: 11, sessionID: .unique)
         await stateAdapter.set(statsReporter: initialStatsReporter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
