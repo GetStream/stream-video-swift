@@ -297,7 +297,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         publishOptions = [.dummy(codec: .opus)]
         subject.publish()
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
-        mockPeerConnection.stub(for: .addTransceiver, with: redTransceiver)
         try await subject.didUpdatePublishOptions(
             .dummy(audio: [.dummy(codec: .red)])
         )

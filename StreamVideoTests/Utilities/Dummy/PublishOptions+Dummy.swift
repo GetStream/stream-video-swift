@@ -37,6 +37,7 @@ extension PublishOptions.VideoPublishOptions {
     static func dummy(
         id: Int = 0,
         codec: VideoCodec,
+        fmtp: String = .unique,
         capturingLayers: PublishOptions.VideoPublishOptions.CapturingLayers = .init(
             spatialLayers: .maxSpatialLayers,
             temporalLayers: .maxTemporalLayers
@@ -48,6 +49,7 @@ extension PublishOptions.VideoPublishOptions {
         .init(
             id: id,
             codec: codec,
+            fmtp: fmtp,
             capturingLayers: capturingLayers,
             bitrate: bitrate,
             frameRate: frameRate,
