@@ -4,7 +4,7 @@
 
 import Combine
 @testable import StreamVideo
-import StreamWebRTC
+@preconcurrency import StreamWebRTC
 @preconcurrency import XCTest
 
 final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
@@ -215,7 +215,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
     }
 
-    func test_didUpdatePublishOptions_primaryTrackIsEnabled_existingTransceiverNotInPublishOptionsGetsTrackDisabled() async throws {
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_existingTransceiverNotInPublishOptionsGetsTrackNullified() async throws {
         publishOptions = [.dummy(codec: .opus)]
         let opusTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .opus))
         let redTransceiver = try makeTransceiver(of: .audio, audioOptions: .dummy(codec: .red))
@@ -230,7 +230,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        await fulfillment { opusTransceiver.sender.track?.isEnabled == false }
+        await fulfillment { opusTransceiver.sender.track == nil }
     }
 
     // MARK: - trackInfo
@@ -273,7 +273,8 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         publishOptions = [.dummy(codec: .opus)]
         subject.publish()
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
-        mockPeerConnection.stub(for: .addTransceiver, with: redTransceiver)
+        var opusTrackId = try XCTUnwrap(opusTransceiver.sender.track?.trackId)
+
         try await subject.didUpdatePublishOptions(
             .dummy(audio: [.dummy(codec: .red)])
         )
@@ -281,7 +282,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
         let trackInfo = subject.trackInfo(for: .allAvailable)
         XCTAssertEqual(trackInfo.count, 2)
-        let opusTrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == opusTransceiver.sender.track?.trackId }))
+        let opusTrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == opusTrackId }))
         let redTrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == redTransceiver.sender.track?.trackId }))
         XCTAssertEqual(opusTrackInfo.trackType, .audio)
         XCTAssertEqual(redTrackInfo.trackType, .audio)
