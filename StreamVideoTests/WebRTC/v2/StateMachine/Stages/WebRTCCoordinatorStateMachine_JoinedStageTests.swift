@@ -587,7 +587,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
         await wait(for: 1)
         let newStatsReporter = await stateAdapter.statsReporter
-        XCTAssertEqual(newStatsReporter?.interval, 12)
+        XCTAssertEqual(newStatsReporter?.deliveryInterval, 12)
         XCTAssertTrue(newStatsReporter?.publisher === publisher)
         XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
         XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)
@@ -609,10 +609,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
         await fulfillment {
             let newStatsReporter = await stateAdapter.statsReporter
-            return newStatsReporter !== initialStatsReporter && newStatsReporter?.interval == 11
+            return newStatsReporter !== initialStatsReporter && newStatsReporter?.deliveryInterval == 11
         }
         let newStatsReporter = await stateAdapter.statsReporter
-        XCTAssertEqual(newStatsReporter?.interval, 11)
+        XCTAssertEqual(newStatsReporter?.deliveryInterval, 11)
         XCTAssertTrue(newStatsReporter?.publisher === publisher)
         XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
         XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)

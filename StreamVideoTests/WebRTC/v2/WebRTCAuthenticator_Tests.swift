@@ -241,7 +241,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             .coordinator
             .stateAdapter
             .statsReporter
-        XCTAssertEqual(statsReporter?.interval, 12)
+        XCTAssertEqual(statsReporter?.deliveryInterval, 12)
     }
 
     // MARK: - waitForAuthentication

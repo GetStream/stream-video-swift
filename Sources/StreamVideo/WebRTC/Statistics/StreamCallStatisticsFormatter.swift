@@ -222,6 +222,13 @@ struct StreamCallStatisticsFormatter {
             result.averageJitterInMs *= 1000
             result.averageRoundTripTimeInMs *= 1000
         }
+
+        // Remove `none` qualityLimitationReason if others exist
+        if !qualityLimitationReasons.isEmpty, qualityLimitationReasons.count > 1 {
+            qualityLimitationReasons = qualityLimitationReasons
+                .filter { $0 != "none" }
+        }
+
         result.qualityLimitationReasons = qualityLimitationReasons
             .sorted()
             .joined(separator: ",")

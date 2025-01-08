@@ -31,7 +31,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: -
 
     func test_sfuAdapterNil_reportWasNotCollectedAndSentCorrectly() async throws {
-        await wait(for: subject.interval + 1)
+        await wait(for: subject.deliveryInterval + 1)
 
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
     }
@@ -39,7 +39,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_sfuAdapterNotNil_reportWasCollectedAndSentCorrectly() async throws {
         subject.sfuAdapter = mockSFUStack.adapter
 
-        await wait(for: subject.interval + 1)
+        await wait(for: subject.deliveryInterval + 1)
 
         let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
         XCTAssertTrue(request.subscriberStats.isEmpty)
@@ -52,7 +52,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
 
         subject.sfuAdapter = mockSFUStack.adapter
 
-        await wait(for: subject.interval + 1)
+        await wait(for: subject.deliveryInterval + 1)
 
         let request = try XCTUnwrap(mockSFUStack.service.sendStatsWasCalledWithRequest)
         XCTAssertTrue(request.subscriberStats.isEmpty)
@@ -64,7 +64,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
         subject.sfuAdapter = mockSFUStack.adapter
-        await wait(for: subject.interval - 1)
+        await wait(for: subject.deliveryInterval - 1)
         
         let sfuStack = MockSFUStack()
         subject.sfuAdapter = sfuStack.adapter
@@ -74,7 +74,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
         XCTAssertNil(sfuStack.service.sendStatsWasCalledWithRequest)
 
-        await wait(for: subject.interval)
+        await wait(for: subject.deliveryInterval)
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
         XCTAssertNotNil(sfuStack.service.sendStatsWasCalledWithRequest)
     }
@@ -83,7 +83,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_setInterval_withSFUAdapterIntervalMoreThanZero_reportWasCollectedAndSentCorrectly() async throws {
         subject.sfuAdapter = mockSFUStack.adapter
-        subject.interval = 1
+        subject.deliveryInterval = 1
 
         await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
 
@@ -96,12 +96,12 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_setInterval_withSFUAdapterIntervalMoreThanZeroThenResetsToZero_secondReportWasNotCollectedAndSentCorrectly(
     ) async throws {
         subject.sfuAdapter = mockSFUStack.adapter
-        subject.interval = 1
+        subject.deliveryInterval = 1
         await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
-        subject.interval = 0
+        subject.deliveryInterval = 0
         mockSFUStack.service.sendStatsWasCalledWithRequest = nil
 
-        await wait(for: subject.interval + 0.5)
+        await wait(for: subject.deliveryInterval + 0.5)
 
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
     }

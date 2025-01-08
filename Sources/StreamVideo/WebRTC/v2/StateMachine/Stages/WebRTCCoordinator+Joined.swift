@@ -488,7 +488,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                 /// Set the stats reporting interval and associate the reporter with the publisher,
                 /// subscriber, and SFU adapter.
-                statsReporter.interval = await stateAdapter.statsReporter?.interval ?? 0
+                statsReporter.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
                 statsReporter.publisher = await stateAdapter.publisher
                 statsReporter.subscriber = await stateAdapter.subscriber
                 statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
@@ -498,7 +498,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             } else {
                 /// If the session ID matches, update the existing stats reporter.
                 let statsReporter = await stateAdapter.statsReporter
-                statsReporter?.interval = await stateAdapter.statsReporter?.interval ?? 0
+                statsReporter?.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
                 statsReporter?.publisher = await stateAdapter.publisher
                 statsReporter?.subscriber = await stateAdapter.subscriber
                 statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter

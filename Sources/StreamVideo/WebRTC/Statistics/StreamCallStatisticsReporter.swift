@@ -42,7 +42,7 @@ struct StreamCallStatisticsReporter {
         /// Compiles the final report using aggregated statistics and raw data from both
         /// the publisher and subscriber, along with participant statistics and the report timestamp.
         return CallStatsReport(
-            datacenter: datacenter,
+            datacenter: URL(string: datacenter)?.host ?? datacenter,
             publisherStats: publisherReportBuilder.aggregatedReport, /// Aggregated statistics for the publisher.
             publisherRawStats: publisherReport.source, /// Raw statistics for the publisher.
             publisherBaseStats: publisherReportBuilder.baseReport,
