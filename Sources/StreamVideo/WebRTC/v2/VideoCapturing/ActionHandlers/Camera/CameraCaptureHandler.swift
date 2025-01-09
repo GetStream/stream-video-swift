@@ -128,6 +128,13 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
             configuration: configuration
         )
 
+        // If the capturer is already active, since iOS 18, we need to explicitly
+        // stop the current capturing session before we start one with the new
+        // configuration.
+        if activeConfiguration != nil {
+            await videoCapturer.stopCapture()
+        }
+
         try await startCapture(
             on: videoCapturer,
             videoCapturerDelegate: videoCapturerDelegate,
