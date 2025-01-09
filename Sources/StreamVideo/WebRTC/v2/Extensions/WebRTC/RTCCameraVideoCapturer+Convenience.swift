@@ -4,6 +4,15 @@
 
 import StreamWebRTC
 
+/// An extension of `RTCCameraVideoCapturer` to add a convenience method for
+/// starting the video capture with a specified device, format, and frame rate.
+///
+/// - Parameters:
+///   - device: The capturing device conforming to `CaptureDeviceProtocol`.
+///   - format: The desired `AVCaptureDevice.Format` for the capture.
+///   - fps: The desired frame rate for the capture.
+/// - Throws: `ClientError` if the device is not supported or if an error
+///   occurs during the capture start process.
 extension RTCCameraVideoCapturer {
     func startCapture(
         with device: CaptureDeviceProtocol,

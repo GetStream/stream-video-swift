@@ -28,7 +28,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
 
     /// The interval at which statistics are collected and reported, in seconds.
     ///
-    /// Setting this property automatically reschedules the collection timer.
+    /// Setting this property automatically reschedules the delivery timer.
     var deliveryInterval: TimeInterval { didSet { scheduleDelivery(with: deliveryInterval) } }
 
     /// The SFU adapter used to send collected statistics.
@@ -36,6 +36,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// Setting this property triggers a reset of the collection and delivery processes.
     var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
 
+    /// The interval at which statistics are collected, in seconds. Defaults to 2.
     private var collectionInterval: TimeInterval { didSet { scheduleCollection(with: collectionInterval) } }
 
     /// Cancellable for the collection timer.

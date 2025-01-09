@@ -255,6 +255,14 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocket.engine?.send(message: event)
     }
 
+    /// Consumes events of a specified type from the given event bucket.
+    ///
+    /// This method retrieves all events of the specified type from the provided
+    /// `SFUEventBucket` and sends them through the WebSocket's event subject.
+    ///
+    /// - Parameters:
+    ///   - eventType: The type of events to consume.
+    ///   - bucket: The `SFUEventBucket` from which to consume events.
     func consume<EventType>(
         _ eventType: EventType.Type,
         bucket: SFUEventBucket
@@ -262,7 +270,10 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         let events = bucket.consume(eventType)
 
         guard !events.isEmpty else {
-            log.debug("No events found in bucket to consume from sfuAdapter:\(self).", subsystems: .sfu)
+            log.debug(
+                "No events found in bucket to consume from sfuAdapter:\(self).",
+                subsystems: .sfu
+            )
             return
         }
 
