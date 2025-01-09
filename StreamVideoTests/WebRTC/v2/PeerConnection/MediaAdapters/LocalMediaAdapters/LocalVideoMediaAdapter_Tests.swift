@@ -63,6 +63,19 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - init
+
+    func test_init_videoCaptureShareSessionExists_primaryTrackSourceSameAsActiveSession() {
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
+        videoCaptureSessionProvider.activeSession = .init(
+            position: .front,
+            localTrack: track,
+            capturer: mockVideoCapturer
+        )
+
+        XCTAssertTrue(subject.primaryTrack.source === track.source)
+    }
+
     // MARK: - setUp(with:ownCapabilities:)
 
     func test_setUp_hasVideoCapabilityAndVideoOn_addsTrack() async throws {
@@ -208,6 +221,85 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .video)
         XCTAssertTrue(request.muteStates[0].muted)
+    }
+
+    // MARK: - didUpdatePublishOptions
+
+    func test_didUpdatePublishOptions_primaryTrackIsNotEnabled_nothingHappens() async throws {
+        subject.primaryTrack.isEnabled = false
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                video: [.dummy(codec: .av1)]
+            )
+        )
+
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 0)
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiveExists_noTransceiverWasAdded() async throws {
+        publishOptions = [.dummy(codec: .h264)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .video, videoOptions: publishOption)
+            )
+        }
+        subject.primaryTrack.isEnabled = true
+
+        try await subject.didUpdatePublishOptions(.init(video: publishOptions))
+
+        await wait(for: 2)
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 1)
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiverDoesNotExist_transceiverWasAdded(
+    ) async throws {
+        publishOptions = [.dummy(codec: .h264)]
+        subject.primaryTrack.isEnabled = true
+
+        try await subject.didUpdatePublishOptions(.init(video: publishOptions))
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
+        publishOptions = [.dummy(id: 0, codec: .h264)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .video, videoOptions: publishOption)
+            )
+        }
+        // We call publish to simulate the publishing flow that will create
+        // all necessary transceveivers on the PeerConnection
+        subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                video: [.dummy(id: 1, codec: .av1)]
+            )
+        )
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_existingTransceiverNotInPublishOptionsGetsTrackNullified() async throws {
+        publishOptions = [.dummy(codec: .h264)]
+        let h264Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        let av1Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .av1))
+        mockPeerConnection.stub(for: .addTransceiver, with: h264Transceiver)
+        subject.publish()
+        await fulfillment { h264Transceiver.sender.track != nil }
+        mockPeerConnection.stub(for: .addTransceiver, with: av1Transceiver)
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                video: [.dummy(codec: .av1)]
+            )
+        )
+
+        await fulfillment { h264Transceiver.sender.track == nil }
     }
 
     // MARK: - trackInfo

@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable {
+final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked Sendable {
     enum MockFunctionKey: Hashable, CaseIterable {
         case startCapture
         case stopCapture

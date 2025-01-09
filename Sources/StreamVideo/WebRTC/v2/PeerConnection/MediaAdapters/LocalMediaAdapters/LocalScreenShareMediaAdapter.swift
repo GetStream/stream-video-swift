@@ -105,7 +105,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             """
             Local screenShareTracks will be deallocated
                 primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.compactMap { $0.value.track.trackId }.joined(separator: ","))
+                clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
             """,
             subsystems: .webRTC
         )
@@ -136,8 +136,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// This method enables the primary screen sharing track and creates
     /// transceivers based on the specified publish options.
     func publish() {
-        Task { @MainActor in
+        processingQueue.async { @MainActor [weak self] in
             guard
+                let self,
                 !primaryTrack.isEnabled,
                 let activeSession = screenShareSessionProvider.activeSession
             else {
@@ -149,9 +150,9 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 primaryTrack.isEnabled = true
 
                 publishOptions.forEach {
-                    addTransceiverIfRequired(
+                    self.addTransceiverIfRequired(
                         for: $0,
-                        with: primaryTrack.clone(from: peerConnectionFactory),
+                        with: self.primaryTrack.clone(from: self.peerConnectionFactory),
                         screenSharingType: activeSession.screenSharingType
                     )
                 }
@@ -173,7 +174,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                     """
                     Local screenShareTracks are now published
                         primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.compactMap { $0.value.track.trackId }.joined(separator: ","))
+                        clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
                     """,
                     subsystems: .webRTC
                 )
@@ -188,7 +189,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// This method disables the primary screen sharing track and all associated
     /// transceivers, and stops the screen sharing capturing session.
     func unpublish() {
-        Task { @MainActor [weak self] in
+        processingQueue.async { @MainActor [weak self] in
             do {
                 guard
                     let self,
@@ -208,7 +209,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                     """
                     Local screenShareTracks are now unpublished:
                         primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.compactMap { $0.value.track.trackId }.joined(separator: ","))
+                        clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
                     """,
                     subsystems: .webRTC
                 )
@@ -321,6 +322,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = !track.isEnabled
                 trackInfo.codec = .init(publishOptions.codec)
+                trackInfo.codec.fmtp = publishOptions.fmtp
                 trackInfo.publishOptionID = Int32(publishOptions.id)
                 return trackInfo
             }
@@ -339,10 +341,6 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ) async throws {
         guard ownCapabilities.contains(.screenshare) else {
             try await stopScreenShareCapturingSession()
-            return
-        }
-
-        guard screenShareSessionProvider.activeSession == nil || !primaryTrack.isEnabled else {
             return
         }
 
