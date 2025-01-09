@@ -92,7 +92,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             """
             Local audio tracks will be deallocated:
                 primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
             """,
             subsystems: .webRTC
         )
@@ -154,7 +154,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 """
                 Local audio tracks are now published:
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )
@@ -177,7 +177,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 """
                 Local audio tracks are now unpublished:
                     primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
                 """,
                 subsystems: .webRTC
             )

@@ -105,7 +105,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             """
             Local screenShareTracks will be deallocated
                 primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
             """,
             subsystems: .webRTC
         )
@@ -174,7 +174,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                     """
                     Local screenShareTracks are now published
                         primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                        clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
                     """,
                     subsystems: .webRTC
                 )
@@ -209,7 +209,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                     """
                     Local screenShareTracks are now unpublished:
                         primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.compactMap(\.value.track.trackId).joined(separator: ","))
+                        clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
                     """,
                     subsystems: .webRTC
                 )
