@@ -288,6 +288,7 @@
 		406B3C552C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C542C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift */; };
 		406B3C5B2C92CFFD00FC93A1 /* WebRTCCoordinatorStateMachine_JoinedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C5A2C92CFFD00FC93A1 /* WebRTCCoordinatorStateMachine_JoinedStageTests.swift */; };
 		406B3C5D2C92E37600FC93A1 /* MockInternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C5C2C92E37500FC93A1 /* MockInternetConnection.swift */; };
+		4079A90E2D31528400434E74 /* SFUOverrideConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4079A90D2D31528400434E74 /* SFUOverrideConfiguration.swift */; };
 		407AF7142B615D3300E9E3E7 /* CallDurationView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407AF7132B615D3300E9E3E7 /* CallDurationView_Tests.swift */; };
 		407AF7162B61602B00E9E3E7 /* ControlBadgeView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407AF7152B61602B00E9E3E7 /* ControlBadgeView_Tests.swift */; };
 		407AF7182B61619900E9E3E7 /* ParticipantListButton_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407AF7172B61619900E9E3E7 /* ParticipantListButton_Tests.swift */; };
@@ -1707,6 +1708,7 @@
 		406B3C542C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_JoiningStageTests.swift; sourceTree = "<group>"; };
 		406B3C5A2C92CFFD00FC93A1 /* WebRTCCoordinatorStateMachine_JoinedStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_JoinedStageTests.swift; sourceTree = "<group>"; };
 		406B3C5C2C92E37500FC93A1 /* MockInternetConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInternetConnection.swift; sourceTree = "<group>"; };
+		4079A90D2D31528400434E74 /* SFUOverrideConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUOverrideConfiguration.swift; sourceTree = "<group>"; };
 		407AF7132B615D3300E9E3E7 /* CallDurationView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDurationView_Tests.swift; sourceTree = "<group>"; };
 		407AF7152B61602B00E9E3E7 /* ControlBadgeView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView_Tests.swift; sourceTree = "<group>"; };
 		407AF7172B61619900E9E3E7 /* ParticipantListButton_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantListButton_Tests.swift; sourceTree = "<group>"; };
@@ -3467,6 +3469,14 @@
 				40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */,
 			);
 			path = Stages;
+			sourceTree = "<group>";
+		};
+		4079A90C2D31525900434E74 /* SFUOverrideConfiguration */ = {
+			isa = PBXGroup;
+			children = (
+				4079A90D2D31528400434E74 /* SFUOverrideConfiguration.swift */,
+			);
+			path = SFUOverrideConfiguration;
 			sourceTree = "<group>";
 		};
 		408679F52BD12EFC00D027E0 /* AudioFilter */ = {
@@ -5353,6 +5363,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				4079A90C2D31525900434E74 /* SFUOverrideConfiguration */,
 				402D0E862D0C914F00E9B83F /* SerialActor */,
 				40034C2F2CFE168900A318B1 /* LocaleProvider */,
 				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
@@ -6788,6 +6799,7 @@
 				84DC38DD29ADFCFD00946713 /* Models.swift in Sources */,
 				842D3B5F29F6D3720051698A /* DeviceData.swift in Sources */,
 				842E70D02B91BE1700D2D68B /* ClosedCaptionEvent.swift in Sources */,
+				4079A90E2D31528400434E74 /* SFUOverrideConfiguration.swift in Sources */,
 				40E3632E2D09DBFA0028C52A /* Int+DefaultValues.swift in Sources */,
 				40E363382D09E6560028C52A /* Array+Prepare.swift in Sources */,
 				842D3B5829F667660051698A /* CreateDeviceRequest.swift in Sources */,

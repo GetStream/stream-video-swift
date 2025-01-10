@@ -40,6 +40,18 @@ struct DebugMenu: View {
         }
     }
 
+    @State private var sfuOverride = AppEnvironment.sfuOverride {
+        didSet {
+            AppEnvironment.sfuOverride = sfuOverride
+            switch sfuOverride {
+            case .none:
+                SFUOverrideConfiguration.currentValue = nil
+            case .custom(let value):
+                SFUOverrideConfiguration.currentValue = value
+            }
+        }
+    }
+
     @State private var supportedDeeplinks = AppEnvironment.supportedDeeplinks {
         didSet { AppEnvironment.supportedDeeplinks = supportedDeeplinks }
     }
@@ -83,11 +95,14 @@ struct DebugMenu: View {
     @State private var isLogsViewerVisible = false
 
     @State private var presentsCustomEnvironmentSetup = false
+    @State private var presentsSFUOverride = false
 
     @State private var customCallExpirationValue = 0
     @State private var presentsCustomCallExpiration = false
 
     @State private var customTokenExpirationValue = 0
+
+    @State private var customSFUOverride: String = ""
     @State private var presentsCustomTokenExpiration = false
 
     @State private var customDisconnectionTimeoutValue: TimeInterval = 0
@@ -119,6 +134,13 @@ struct DebugMenu: View {
                 additionalItems: { customEnvironmentView },
                 label: "Environment"
             ) { self.baseURL = $0 }
+
+            makeMenu(
+                for: [.none],
+                currentValue: sfuOverride,
+                additionalItems: { customSFUOverrideView },
+                label: "SFU Override"
+            ) { self.sfuOverride = $0 }
 
             makeMultipleSelectMenu(
                 for: AppEnvironment.SupportedDeeplink.allCases,
@@ -238,7 +260,9 @@ struct DebugMenu: View {
                         apiKey: apiKey,
                         token: token
                     ) {
-                        self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
+                        if !apiKey.isEmpty, !token.isEmpty {
+                            self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
+                        }
                         presentsCustomEnvironmentSetup = false
                     }
                 } else {
@@ -250,6 +274,31 @@ struct DebugMenu: View {
                         self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
                         presentsCustomEnvironmentSetup = false
                     }
+                }
+            }
+        }
+        .sheet(isPresented: $presentsSFUOverride) {
+            NavigationView {
+                if case let .custom(configuration) = AppEnvironment.sfuOverride {
+                    DemoSFUOverrideView(
+                        configuration: configuration) {
+                            if $0.edgeName.isEmpty {
+                                self.sfuOverride = .none
+                            } else {
+                                self.sfuOverride = .custom($0)
+                            }
+                            presentsSFUOverride = false
+                        }
+                } else {
+                    DemoSFUOverrideView(
+                        configuration: .empty) {
+                            if $0.edgeName.isEmpty {
+                                self.sfuOverride = .none
+                            } else {
+                                self.sfuOverride = .custom($0)
+                            }
+                            presentsSFUOverride = false
+                        }
                 }
             }
         }
@@ -288,6 +337,7 @@ struct DebugMenu: View {
                 self.preferredCallType = customPreferredCallType
             }
         )
+
     }
 
     @ViewBuilder
@@ -305,6 +355,31 @@ struct DebugMenu: View {
         } else {
             Button {
                 presentsCustomEnvironmentSetup = true
+            } label: {
+                Label {
+                    Text("Custom")
+                } icon: {
+                    EmptyView()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customSFUOverrideView: some View {
+        if case let .custom(value) = AppEnvironment.sfuOverride {
+            Button {
+                presentsSFUOverride = true
+            } label: {
+                Label {
+                    Text("Custom (\(value.edgeName))")
+                } icon: {
+                    Image(systemName: "checkmark")
+                }
+            }
+        } else {
+            Button {
+                presentsSFUOverride = true
             } label: {
                 Label {
                     Text("Custom")

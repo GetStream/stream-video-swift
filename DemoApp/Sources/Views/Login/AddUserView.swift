@@ -145,6 +145,114 @@ struct DemoCustomEnvironmentView: View {
     }
 }
 
+@MainActor
+struct DemoSFUOverrideView: View {
+
+    @Injected(\.appearance) var appearance
+    @Environment(\.presentationMode) var presentationMode
+
+    @State var edgeName: String
+    @State var twirpConfiguration: SFUOverrideConfiguration.TwirpConfiguration
+    @State private var configuration: SFUOverrideConfiguration
+    var completionHandler: (SFUOverrideConfiguration) -> Void
+
+    init(
+        configuration: SFUOverrideConfiguration,
+        completionHandler: @escaping (SFUOverrideConfiguration) -> Void
+    ) {
+        self.configuration = configuration
+        self.edgeName = configuration.edgeName
+        self.twirpConfiguration = configuration.twirpConfiguration
+        self.completionHandler = completionHandler
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack {
+                TextField("Edge Name", text: $edgeName)
+                    .textFieldStyle(DemoTextfieldStyle())
+
+                if !edgeName.isEmpty {
+                    Group {
+                        urlPreview
+                        wsEndpointPreview
+                    }
+                    .padding(.vertical)
+                }
+
+                Button {
+                    completionHandler(configuration)
+                } label: {
+                    CallButtonView(
+                        title: "Complete Setup",
+                        isDisabled: buttonDisabled
+                    )
+                    .disabled(buttonDisabled)
+                }
+                Spacer()
+            }
+        }
+        .padding()
+        .navigationTitle("Custom Environment")
+        .onChange(of: edgeName) { edgeName in
+            self.configuration = .init(
+                edgeName: edgeName,
+                twirpConfiguration: twirpConfiguration
+            )
+        }
+        .onChange(of: twirpConfiguration) { twirpConfiguration in
+            self.configuration = .init(
+                edgeName: edgeName,
+                twirpConfiguration: twirpConfiguration
+            )
+        }
+    }
+
+    private var buttonDisabled: Bool {
+        edgeName.isEmpty || URL(string: configuration.url) == nil || URL(string: configuration.ws) == nil
+    }
+
+    @ViewBuilder
+    private var urlPreview: some View {
+        let value = configuration.url
+        let isValid = URL(string: value) != nil
+        HStack {
+            Menu {
+                Button { twirpConfiguration = .none } label: { Label { Text("None") } icon: { if twirpConfiguration == .none { Image(systemName: "checkmark") } } }
+                Button { twirpConfiguration = .http } label: { Label { Text("HTTP") } icon: { if twirpConfiguration == .http { Image(systemName: "checkmark") } } }
+                Button { twirpConfiguration = .https } label: { Label { Text("HTTPS") } icon: { if twirpConfiguration == .https { Image(systemName: "checkmark") } } }
+            } label: { Label { EmptyView() } icon: { Image(systemName: "gearshape.fill") }.layoutPriority(2).foregroundColor(.white) }
+
+            TextField("", text: .constant(value))
+                .disabled(true)
+                .textFieldStyle(DemoTextfieldStyle())
+
+            Image(systemName: isValid ? "checkmark" : "xmark")
+                .foregroundColor(.white)
+                .padding(4)
+                .background(isValid ? Color.green : .red)
+                .clipShape(Circle())
+        }
+    }
+
+    @ViewBuilder
+    private var wsEndpointPreview: some View {
+        let value = configuration.ws
+        let isValid = URL(string: value) != nil
+        HStack {
+            TextField("", text: .constant(value))
+                .disabled(true)
+                .textFieldStyle(DemoTextfieldStyle())
+
+            Image(systemName: isValid ? "checkmark" : "xmark")
+                .foregroundColor(.white)
+                .padding(4)
+                .background(isValid ? Color.green : .red)
+                .clipShape(Circle())
+        }
+    }
+}
+
 struct DemoCheckboxView<Label: View, CheckIcon: View>: View {
     @Binding var isChecked: Bool
     var label: () -> Label

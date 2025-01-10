@@ -103,7 +103,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         let sfuAdapter = SFUAdapter(
             serviceConfiguration: .init(
                 url: try unwrap(
-                    .init(string: response.credentials.server.url),
+                    .init(string: response.credentials.server.urlWithOverrideIfRequired()),
                     errorMessage: "Server URL is invalid."
                 ),
                 apiKey: coordinator.stateAdapter.apiKey,
@@ -111,7 +111,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             ),
             webSocketConfiguration: .init(
                 url: try unwrap(
-                    .init(string: response.credentials.server.wsEndpoint),
+                    .init(string: response.credentials.server.wsEndpointWithOverrideIfRequired()),
                     errorMessage: "WebSocket URL is invalid."
                 ),
                 eventNotificationCenter: .init()

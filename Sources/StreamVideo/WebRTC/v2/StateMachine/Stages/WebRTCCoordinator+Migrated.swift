@@ -93,7 +93,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     /// From the ``JoinCallResponse`` we got from the authenticator, we extract
                     /// the name of the SFU we are currently connected, so we can use it later on
                     /// during `migration`.
-                    context.currentSFU = response.credentials.server.edgeName
+                    context.currentSFU = response.credentials.server.edgeNameWithOverrideIfRequired()
                     log.debug(
                         "Migrating from \(context.migratingFromSFU) → \(context.currentSFU).",
                         subsystems: .webRTC

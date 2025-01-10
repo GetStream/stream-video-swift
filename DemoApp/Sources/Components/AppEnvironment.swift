@@ -525,6 +525,25 @@ extension AppEnvironment {
     static var preferredCallType: String?
 }
 
+extension AppEnvironment {
+
+    enum SFUOverride: Hashable, Debuggable {
+        case none
+        case custom(SFUOverrideConfiguration)
+
+        var title: String {
+            switch self {
+            case .none:
+                return "None"
+            case let .custom(value):
+                return "\(value.edgeName)"
+            }
+        }
+    }
+
+    static var sfuOverride: SFUOverride = .none
+}
+
 extension String: Debuggable {
     var title: String {
         self

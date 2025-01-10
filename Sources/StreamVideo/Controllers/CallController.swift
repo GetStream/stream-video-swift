@@ -554,7 +554,7 @@ class CallController: @unchecked Sendable {
 
     private func didFetch(_ response: JoinCallResponse) async {
         let sessionId = await webRTCCoordinator.stateAdapter.sessionID
-        currentSFU = response.credentials.server.edgeName
+        currentSFU = response.credentials.server.edgeNameWithOverrideIfRequired()
         Task { @MainActor [weak self] in
             self?.call?.state.sessionId = sessionId
             self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
