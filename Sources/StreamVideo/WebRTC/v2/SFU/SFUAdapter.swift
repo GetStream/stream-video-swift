@@ -443,6 +443,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         log.debug(request, subsystems: .sfu)
         task.store(in: requestDisposableBag)
         let response = try await task.value
+        log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
@@ -519,6 +520,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         log.debug(request, subsystems: .sfu)
         task.store(in: requestDisposableBag)
         let response = try await task.value
+        log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
