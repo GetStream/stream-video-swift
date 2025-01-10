@@ -54,4 +54,8 @@ extension Stream_Video_Sfu_Models_Codec {
     init(_ source: VideoCodec) {
         name = source.rawValue
     }
+
+    init(_ source: AudioCodec) {
+        name = source.rawValue
+    }
 }

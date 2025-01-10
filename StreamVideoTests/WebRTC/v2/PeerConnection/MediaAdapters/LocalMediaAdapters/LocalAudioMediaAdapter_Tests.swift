@@ -257,11 +257,16 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
 
         let trackInfo = subject.trackInfo(for: .allAvailable)
+        let opusTrackInfo = try XCTUnwrap(trackInfo.first { $0.codec.name == "opus" })
+        let redTrackInfo = try XCTUnwrap(trackInfo.first { $0.codec.name == "red" })
+
         XCTAssertEqual(trackInfo.count, 2)
-        XCTAssertEqual(trackInfo.first?.trackType, .audio)
-        XCTAssertFalse(trackInfo.first?.muted ?? true)
-        XCTAssertEqual(trackInfo.last?.trackType, .audio)
-        XCTAssertFalse(trackInfo.last?.muted ?? true)
+        XCTAssertEqual(opusTrackInfo.trackType, .audio)
+        XCTAssertFalse(opusTrackInfo.muted)
+        XCTAssertEqual(opusTrackInfo.codec.name, "opus")
+        XCTAssertEqual(redTrackInfo.trackType, .audio)
+        XCTAssertFalse(redTrackInfo.muted)
+        XCTAssertEqual(redTrackInfo.codec.name, "red")
     }
 
     func test_trackInfo_allAvailable_onePublishedAndOneUnpublishedTransceivers_returnsCorrectArray() async throws {
@@ -273,7 +278,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         publishOptions = [.dummy(codec: .opus)]
         subject.publish()
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
-        var opusTrackId = try XCTUnwrap(opusTransceiver.sender.track?.trackId)
+        let opusTrackId = try XCTUnwrap(opusTransceiver.sender.track?.trackId)
 
         try await subject.didUpdatePublishOptions(
             .dummy(audio: [.dummy(codec: .red)])
@@ -306,6 +311,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(trackInfo.count, 1)
         XCTAssertEqual(trackInfo.first?.trackType, .audio)
         XCTAssertEqual(trackInfo.first?.trackID, redTransceiver.sender.track?.trackId)
+        XCTAssertEqual(trackInfo.first?.codec.name, "red")
     }
 
     // MARK: - publish

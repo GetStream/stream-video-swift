@@ -286,12 +286,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }()
 
         return transceivers
-            .map { _, transceiver, track in
+            .map { publishOptions, transceiver, track in
                 var trackInfo = Stream_Video_Sfu_Models_TrackInfo()
                 trackInfo.trackType = .audio
                 trackInfo.trackID = track.trackId
                 trackInfo.mid = transceiver.mid
                 trackInfo.muted = !track.isEnabled
+                trackInfo.codec = .init(publishOptions.codec)
                 return trackInfo
             }
     }

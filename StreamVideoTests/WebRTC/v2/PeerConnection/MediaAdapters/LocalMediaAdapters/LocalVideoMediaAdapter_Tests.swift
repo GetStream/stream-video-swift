@@ -347,7 +347,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         publishOptions = [.dummy(codec: .h264)]
         subject.publish()
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
-        var h264TrackId = try XCTUnwrap(h264Transceiver.sender.track?.trackId)
+        let h264TrackId = try XCTUnwrap(h264Transceiver.sender.track?.trackId)
 
         try await subject.didUpdatePublishOptions(
             .dummy(video: [.dummy(codec: .av1)])
@@ -356,10 +356,10 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
         let trackInfo = subject.trackInfo(for: .allAvailable)
         XCTAssertEqual(trackInfo.count, 2)
-        let opusTrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == h264TrackId }))
-        let redTrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == av1Transceiver.sender.track?.trackId }))
-        XCTAssertEqual(opusTrackInfo.trackType, .video)
-        XCTAssertEqual(redTrackInfo.trackType, .video)
+        let h264TrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == h264TrackId }))
+        let av1TrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == av1Transceiver.sender.track?.trackId }))
+        XCTAssertEqual(h264TrackInfo.trackType, .video)
+        XCTAssertEqual(av1TrackInfo.trackType, .video)
     }
 
     func test_trackInfo_lastPublishOpions_onePublishedAndOneUnpublishedTransceivers_returnsCorrectArray() async throws {
@@ -380,6 +380,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(trackInfo.count, 1)
         XCTAssertEqual(trackInfo.first?.trackType, .video)
         XCTAssertEqual(trackInfo.first?.trackID, av1Transceiver.sender.track?.trackId)
+        XCTAssertEqual(trackInfo.first?.codec.name, "av1")
     }
 
     // MARK: - publish
