@@ -17,6 +17,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     @Injected(\.videoCapturePolicy) private var videoCapturePolicy
     @Injected(\.captureDeviceProvider) private var captureDeviceProvider
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     /// A unique identifier representing the current call session.
     private let sessionID: String
@@ -38,6 +39,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The current publish options for the video track, defining encodings and layers.
     private var publishOptions: [PublishOptions.VideoPublishOptions]
+
+    private var callSettings: CallSettings?
 
     /// A factory for creating video capturers based on the current settings.
     private let capturerFactory: VideoCapturerProviding
@@ -152,6 +155,35 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             )
         )
 
+        callSettings = settings
+
+        if #available(iOS 16.0, *), AVCaptureSession().isMultitaskingCameraAccessSupported {
+        } else {
+            applicationStateAdapter
+                .$state
+                .filter { [weak self] in $0 == .background && self?.callSettings?.videoOn == true }
+                .sinkTask { [weak sfuAdapter, sessionID] _ in
+                    try await sfuAdapter?.updateTrackMuteState(
+                        .video,
+                        isMuted: true,
+                        for: sessionID
+                    )
+                }
+                .store(in: disposableBag)
+
+            applicationStateAdapter
+                .$state
+                .filter { [weak self] in $0 == .foreground && self?.callSettings?.videoOn == true }
+                .sinkTask { [weak sfuAdapter, sessionID] _ in
+                    try await sfuAdapter?.updateTrackMuteState(
+                        .video,
+                        isMuted: false,
+                        for: sessionID
+                    )
+                }
+                .store(in: disposableBag)
+        }
+
         guard ownCapabilities.contains(.sendVideo) else {
             try await videoCaptureSessionProvider.activeSession?.capturer.stopCapture()
             videoCaptureSessionProvider.activeSession = nil
@@ -173,6 +205,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ) async throws {
         processingQueue.async { [weak self] in
             guard let self else { return }
+            callSettings = settings
+
             let isMuted = !settings.videoOn
             let isLocalMuted = primaryTrack.isEnabled == false
 
