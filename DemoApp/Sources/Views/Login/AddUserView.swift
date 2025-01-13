@@ -161,8 +161,8 @@ struct DemoSFUOverrideView: View {
         completionHandler: @escaping (SFUOverrideConfiguration) -> Void
     ) {
         self.configuration = configuration
-        self.edgeName = configuration.edgeName
-        self.twirpConfiguration = configuration.twirpConfiguration
+        edgeName = configuration.edgeName
+        twirpConfiguration = configuration.twirpConfiguration
         self.completionHandler = completionHandler
     }
 
@@ -218,10 +218,18 @@ struct DemoSFUOverrideView: View {
         let isValid = URL(string: value) != nil
         HStack {
             Menu {
-                Button { twirpConfiguration = .none } label: { Label { Text("None") } icon: { if twirpConfiguration == .none { Image(systemName: "checkmark") } } }
-                Button { twirpConfiguration = .http } label: { Label { Text("HTTP") } icon: { if twirpConfiguration == .http { Image(systemName: "checkmark") } } }
-                Button { twirpConfiguration = .https } label: { Label { Text("HTTPS") } icon: { if twirpConfiguration == .https { Image(systemName: "checkmark") } } }
-            } label: { Label { EmptyView() } icon: { Image(systemName: "gearshape.fill") }.layoutPriority(2).foregroundColor(.white) }
+                Button { twirpConfiguration = .none } label: {
+                    Label { Text("None") } icon: { if twirpConfiguration == .none { Image(systemName: "checkmark") } }
+                }
+                Button { twirpConfiguration = .http } label: {
+                    Label { Text("HTTP") } icon: { if twirpConfiguration == .http { Image(systemName: "checkmark") } }
+                }
+                Button { twirpConfiguration = .https } label: {
+                    Label { Text("HTTPS") } icon: { if twirpConfiguration == .https { Image(systemName: "checkmark") } }
+                }
+            } label: {
+                Label { EmptyView() } icon: { Image(systemName: "gearshape.fill") }.layoutPriority(2).foregroundColor(.white)
+            }
 
             TextField("", text: .constant(value))
                 .disabled(true)

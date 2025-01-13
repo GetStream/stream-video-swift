@@ -46,7 +46,7 @@ struct DebugMenu: View {
             switch sfuOverride {
             case .none:
                 SFUOverrideConfiguration.currentValue = nil
-            case .custom(let value):
+            case let .custom(value):
                 SFUOverrideConfiguration.currentValue = value
             }
         }
@@ -281,24 +281,26 @@ struct DebugMenu: View {
             NavigationView {
                 if case let .custom(configuration) = AppEnvironment.sfuOverride {
                     DemoSFUOverrideView(
-                        configuration: configuration) {
-                            if $0.edgeName.isEmpty {
-                                self.sfuOverride = .none
-                            } else {
-                                self.sfuOverride = .custom($0)
-                            }
-                            presentsSFUOverride = false
+                        configuration: configuration
+                    ) {
+                        if $0.edgeName.isEmpty {
+                            self.sfuOverride = .none
+                        } else {
+                            self.sfuOverride = .custom($0)
                         }
+                        presentsSFUOverride = false
+                    }
                 } else {
                     DemoSFUOverrideView(
-                        configuration: .empty) {
-                            if $0.edgeName.isEmpty {
-                                self.sfuOverride = .none
-                            } else {
-                                self.sfuOverride = .custom($0)
-                            }
-                            presentsSFUOverride = false
+                        configuration: .empty
+                    ) {
+                        if $0.edgeName.isEmpty {
+                            self.sfuOverride = .none
+                        } else {
+                            self.sfuOverride = .custom($0)
                         }
+                        presentsSFUOverride = false
+                    }
                 }
             }
         }
@@ -337,7 +339,6 @@ struct DebugMenu: View {
                 self.preferredCallType = customPreferredCallType
             }
         )
-
     }
 
     @ViewBuilder

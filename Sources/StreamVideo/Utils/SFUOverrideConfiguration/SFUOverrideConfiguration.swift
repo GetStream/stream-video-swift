@@ -1,8 +1,5 @@
 //
-//  LocalSFUDebugConfiguration.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 10/1/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -22,7 +19,7 @@ public struct SFUOverrideConfiguration: Hashable {
     public init(edgeName: String, twirpConfiguration: TwirpConfiguration) {
         self.edgeName = edgeName
         self.twirpConfiguration = twirpConfiguration
-        self.url = {
+        url = {
             switch twirpConfiguration {
             case .none:
                 return "\(edgeName)/twirp"
@@ -32,7 +29,7 @@ public struct SFUOverrideConfiguration: Hashable {
                 return "https://\(edgeName)/twirp"
             }
         }()
-        self.ws = "wss://\(edgeName)/ws"
+        ws = "ws://\(edgeName)/ws"
     }
 
     public static var empty = SFUOverrideConfiguration(edgeName: "", twirpConfiguration: .none)
