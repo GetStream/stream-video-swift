@@ -341,14 +341,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .$participants
                 .removeDuplicates()
                 .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
-                .sinkTask(storeIn: disposableBag) { [weak self] _ in
-                    guard let self else { return }
-                    do {
-                        try await updateSubscriptions()
-                    } catch {
-                        transitionDisconnectOrError(error)
-                    }
-                }
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.updateSubscriptions() }
                 .store(in: disposableBag) // Store the Combine subscription in the disposable bag.
         }
 
@@ -552,7 +545,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///
         /// - Throws: An error if the subscriptions cannot be updated or if the task
         ///   is cancelled during execution.
-        private func updateSubscriptions() async throws {
+        private func updateSubscriptions() async {
             guard
                 let coordinator = context.coordinator,
                 let sfuAdapter = await coordinator.stateAdapter.sfuAdapter
@@ -571,22 +564,31 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     incomingVideoQualitySettings: incomingVideoQualitySettings
                 )
 
-            try Task.checkCancellation()
+            do {
+                try Task.checkCancellation()
 
-            let participants = await coordinator.stateAdapter.participants
+                let participants = await coordinator.stateAdapter.participants
 
-            log.debug(
-                """
-                Updating subscriptions for \(participants.count - 1) participants 
-                with incomingVideoQualitySettings: \(incomingVideoQualitySettings).
-                """,
-                subsystems: .webRTC
-            )
+                log.debug(
+                    """
+                    Updating subscriptions for \(participants.count - 1) participants 
+                    with incomingVideoQualitySettings: \(incomingVideoQualitySettings).
+                    """,
+                    subsystems: .webRTC
+                )
 
-            try await sfuAdapter.updateSubscriptions(
-                tracks: tracks,
-                for: await coordinator.stateAdapter.sessionID
-            )
+                try await sfuAdapter.updateSubscriptions(
+                    tracks: tracks,
+                    for: await coordinator.stateAdapter.sessionID
+                )
+            } catch {
+                log.warning(
+                    """
+                    UpdateSubscriptions failed with error:\(error).
+                    """,
+                    subsystems: .webRTC
+                )
+            }
         }
     }
 }
