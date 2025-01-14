@@ -78,7 +78,7 @@ struct DemoManualQualitySelectionButtonView: View {
     private func buttonView(
         for manualQuality: ManualQuality
     ) -> some View {
-        let title = {
+        let title: String = {
             switch manualQuality {
             case .auto:
                 return "Auto quality"
