@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.15.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.15.0)
+_January 14, 2025_
+
 ### ✅ Added
 - CallKit availability policies allows you to control wether `Callkit` should be enabled/disabled based on different rules [#611](https://github.com/GetStream/stream-video-swift/pull/611)
 - Support for setting a ringtone for CallKit calls [#628](https://github.com/GetStream/stream-video-swift/pull/628)
