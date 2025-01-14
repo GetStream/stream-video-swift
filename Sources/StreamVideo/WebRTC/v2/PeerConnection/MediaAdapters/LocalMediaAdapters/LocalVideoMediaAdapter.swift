@@ -192,6 +192,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 )
             }
 
+            backgroundMuteAdapter.didUpdateCallSettings(settings)
+
             if isMuted, primaryTrack.isEnabled {
                 unpublish()
             } else if !isMuted {

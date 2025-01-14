@@ -129,6 +129,7 @@
 		4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4035913B2BC53D2A00B5B767 /* Accelerate.framework */; };
 		403793C52D35196600C752DF /* StreamAppStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C0B2D14B75B002C4EAB /* StreamAppStateAdapter.swift */; };
 		403793C72D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */; };
+		403793C92D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		40382F222C889E5500C2D00F /* DemoTranscriptionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */; };
 		40382F232C889E6500C2D00F /* DemoReconnectionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */; };
@@ -1589,6 +1590,7 @@
 		4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamActiveCallProvider.swift; sourceTree = "<group>"; };
 		4035913B2BC53D2A00B5B767 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter.swift; sourceTree = "<group>"; };
+		403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter_Tests.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		40382F272C88B80C00C2D00F /* SignalServerEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalServerEvent.swift; sourceTree = "<group>"; };
 		40382F2A2C88B84800C2D00F /* Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload+Payload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload+Payload.swift"; sourceTree = "<group>"; };
@@ -3934,6 +3936,7 @@
 			isa = PBXGroup;
 			children = (
 				40B48C3F2D14DB26002C4EAB /* MediaTransceiverStorage_Tests.swift */,
+				403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -7311,6 +7314,7 @@
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
 				40B48C2E2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift in Sources */,
 				40FE5EBF2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */,
+				403793C92D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift in Sources */,
 				40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */,
 				40AAD1872D2D717300D10330 /* SFUEventBucket_Tests.swift in Sources */,
 				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,

@@ -19,6 +19,7 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
         case removeCapturePhotoOutput
         case addVideoOutput
         case removeVideoOutput
+        case supportsBackgrounding
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -81,6 +82,10 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
 
     func stub<T>(for function: FunctionKey, with value: T) {
         stubbedFunction[function] = value
+    }
+
+    func supportsBackgrounding() async -> Bool {
+        (stubbedFunction[.supportsBackgrounding] as? Bool) ?? false
     }
 
     func startCapture(
