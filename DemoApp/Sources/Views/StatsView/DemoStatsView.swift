@@ -160,8 +160,7 @@ struct DemoStatsView: View {
         let activeCodecs = report?
             .publisherBaseStats
             .filter { $0.framesPerSecond > 0 }
-            .compactMap(\.codec)
-            .compactMap { $0.split(separator: "/").last }
+            .compactMap { $0.codec.split(separator: "/").last }
         let uniqueActiveCodecs = Set(activeCodecs ?? [])
             .sorted()
             .joined(separator: ",")
