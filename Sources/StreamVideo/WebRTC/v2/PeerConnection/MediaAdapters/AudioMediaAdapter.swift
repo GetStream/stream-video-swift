@@ -33,14 +33,6 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// A subject for publishing track events.
     let subject: PassthroughSubject<TrackEvent, Never>
 
-    /// The local audio track, if available.
-    var localTrack: RTCMediaStreamTrack? {
-        (localMediaManager as? LocalAudioMediaAdapter)?.localTrack
-    }
-
-    /// The mid (Media Stream Identification) of the local audio track, if available.
-    var mid: String? { (localMediaManager as? LocalAudioMediaAdapter)?.mid }
-
     /// Convenience initializer for creating an AudioMediaAdapter with a LocalAudioMediaAdapter.
     ///
     /// - Parameters:
@@ -48,13 +40,14 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - peerConnection: The WebRTC peer connection.
     ///   - peerConnectionFactory: The factory for creating WebRTC peer connection components.
     ///   - sfuAdapter: The adapter for communicating with the SFU.
+    ///   - publishOptions: The options for publishing audio.
     ///   - subject: A subject for publishing track events.
-    ///   - audioSession: The audio session manager.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
+        publishOptions: [PublishOptions.AudioPublishOptions],
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.init(
@@ -66,6 +59,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
                 peerConnection: peerConnection,
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
+                publishOptions: publishOptions,
                 subject: subject
             ),
             subject: subject
@@ -124,11 +118,43 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         )
     }
 
+    /// Retrieves track information for a specified collection type.
+    ///
+    /// - Parameter collectionType: The type of track information collection.
+    /// - Returns: An array of `Stream_Video_Sfu_Models_TrackInfo` objects.
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        localMediaManager.trackInfo(for: collectionType)
+    }
+
     /// Updates the audio media based on new call settings.
     ///
     /// - Parameter settings: The updated call settings.
     func didUpdateCallSettings(_ settings: CallSettings) async throws {
         try await localMediaManager.didUpdateCallSettings(settings)
+    }
+
+    /// Updates the publish options for the audio media adapter.
+    ///
+    /// - Parameter publishOptions: The new publish options to be applied.
+    /// - Throws: An error if the update fails.
+    /// - Note: This function is asynchronous and may throw an error.
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await localMediaManager.didUpdatePublishOptions(publishOptions)
+    }
+
+    /// Changes the publish quality of the audio media adapter.
+    ///
+    /// - Parameter layerSettings: An array of `Stream_Video_Sfu_Event_AudioSender`
+    ///   objects representing the new layer settings.
+    func changePublishQuality(
+        with layerSettings: [Stream_Video_Sfu_Event_AudioSender]
+    ) {
+        (localMediaManager as? LocalAudioMediaAdapter)?
+            .changePublishQuality(with: layerSettings)
     }
 
     // MARK: - Observers
@@ -138,15 +164,17 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     /// - Parameter stream: The audio stream to add.
     private func add(_ stream: RTCMediaStream) {
         queue.sync { streams.append(stream) }
-        stream.audioTracks.forEach {
-            subject.send(
-                .added(
+
+        stream
+            .audioTracks
+            .map {
+                TrackEvent.added(
                     id: stream.trackId,
                     trackType: .audio,
                     track: $0
                 )
-            )
-        }
+            }
+            .forEach { subject.send($0) }
     }
 
     /// Removes an audio stream and notifies observers.
@@ -155,15 +183,17 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     private func remove(_ stream: RTCMediaStream) {
         queue.sync {
             streams = streams.filter { $0.streamId != stream.streamId }
-            if let audioTrack = stream.audioTracks.first {
-                subject.send(
-                    .removed(
-                        id: stream.streamId,
-                        trackType: .audio,
-                        track: audioTrack
-                    )
+        }
+
+        stream
+            .audioTracks
+            .map {
+                TrackEvent.removed(
+                    id: stream.trackId,
+                    trackType: .audio,
+                    track: $0
                 )
             }
-        }
+            .forEach { subject.send($0) }
     }
 }

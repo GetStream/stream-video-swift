@@ -85,22 +85,19 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                 )
             }
         }
-        let videoOptions = await coordinator.stateAdapter.videoOptions
         await coordinator.stateAdapter.set(
-            videoOptions: videoOptions
-                .with(preferredTargetResolution: response.call.settings.video.targetResolution)
-                .with(preferredCameraPosition: {
-                    switch response.call.settings.video.cameraFacing {
-                    case .back:
-                        return .back
-                    case .external:
-                        return .front
-                    case .front:
-                        return .front
-                    case .unknown:
-                        return .front
-                    }
-                }())
+            videoOptions: .init(preferredCameraPosition: {
+                switch response.call.settings.video.cameraFacing {
+                case .back:
+                    return .back
+                case .external:
+                    return .front
+                case .front:
+                    return .front
+                case .unknown:
+                    return .front
+                }
+            }())
         )
 
         let sfuAdapter = SFUAdapter(
@@ -123,12 +120,12 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
 
         let statsReportingInterval = response.statsOptions.reportingIntervalMs / 1000
         if let statsReporter = await coordinator.stateAdapter.statsReporter {
-            statsReporter.interval = TimeInterval(statsReportingInterval)
+            statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
         } else {
             let statsReporter = WebRTCStatsReporter(
                 sessionID: await coordinator.stateAdapter.sessionID
             )
-            statsReporter.interval = TimeInterval(statsReportingInterval)
+            statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
             await coordinator.stateAdapter.set(statsReporter: statsReporter)
         }
 

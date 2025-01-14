@@ -31,7 +31,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         case iCETrickle
     }
 
-    private(set) var updateMuteStatesWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest?
+    var updateMuteStatesWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest?
     var sendStatsWasCalledWithRequest: Stream_Video_Sfu_Signal_SendStatsRequest?
     private(set) var startNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest?
     private(set) var stopNoiseCancellationWasCalledWithRequest: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest?

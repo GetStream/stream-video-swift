@@ -103,6 +103,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// Executes the disconnected stage logic.
         private func execute() {
             context.sfuEventObserver = nil
+            context.disconnectionSource = nil
             Task {
                 let statsReporter = await context
                     .coordinator?
@@ -126,6 +127,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try transition?(.migrating(context))
                 case .unknown:
                     if let error = context.flowError {
+                        context.flowError = nil
                         try transition?(.error(context, error: error))
                     } else {
                         try transition?(.leaving(context))

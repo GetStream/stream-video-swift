@@ -2,12 +2,6 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-//
-//  MockRTCVideoCapturerDelegate.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 19/9/24.
-//
 import StreamWebRTC
 
 final class MockRTCVideoCapturerDelegate: NSObject, RTCVideoCapturerDelegate {

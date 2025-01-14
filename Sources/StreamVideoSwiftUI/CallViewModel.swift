@@ -14,6 +14,7 @@ open class CallViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
+    @Injected(\.applicationStateAdapter) var applicationStateAdapter
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -162,6 +163,7 @@ open class CallViewModel: ObservableObject {
     private var recordingUpdates: AnyCancellable?
     private var screenSharingUpdates: AnyCancellable?
     private var callSettingsUpdates: AnyCancellable?
+    private var applicationLifecycleUpdates: AnyCancellable?
 
     private var ringingTimer: Foundation.Timer?
     private var lastScreenSharingParticipant: CallParticipant?
@@ -216,6 +218,7 @@ open class CallViewModel: ObservableObject {
         localCallSettingsChange = callSettings != nil
 
         subscribeToCallEvents()
+        subscribeToApplicationLifecycleEvents()
         pictureInPictureAdapter.onSizeUpdate = { [weak self] in
             self?.updateTrackSize($0, for: $1)
         }
@@ -834,6 +837,36 @@ open class CallViewModel: ObservableObject {
 
     private func participantAutoLeavePolicyTriggered() {
         leaveCall()
+    }
+
+    private func subscribeToApplicationLifecycleEvents() {
+        applicationLifecycleUpdates = applicationStateAdapter
+            .$state
+            .filter { $0 == .foreground }
+            .sink { [weak self] _ in self?.applicationDidBecomeActive() }
+    }
+
+    private func applicationDidBecomeActive() {
+        guard let call else { return }
+
+        let tracksToBeActivated = call
+            .state
+            .participants
+            .filter { $0.hasVideo && $0.track?.isEnabled == false }
+
+        guard !tracksToBeActivated.isEmpty else {
+            log.debug("\(type(of: self)) application lifecycle observer found no tracks to activate.")
+            return
+        }
+
+        log.debug(
+            """
+            \(tracksToBeActivated.count) tracks have been deactivate while in background 
+            and now the app is active need to be activated again.
+            """
+        )
+
+        tracksToBeActivated.forEach { $0.track?.isEnabled = true }
     }
 }
 

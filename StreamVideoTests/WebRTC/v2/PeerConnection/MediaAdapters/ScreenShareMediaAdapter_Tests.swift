@@ -58,4 +58,57 @@ final class ScreenShareMediaAdapter_Tests: XCTestCase {
         )
         XCTAssertEqual(actual, settings)
     }
+
+    // MARK: - didUpdatePublishOptions(_:)
+
+    func test_didUpdatePublishOptions_didUpdatePublishOptionsWasCalledOnLocalMediaAdapter() async throws {
+        let publishOptions = PublishOptions.dummy(video: [.dummy(codec: .vp9)])
+
+        try await subject.didUpdatePublishOptions(publishOptions)
+
+        let actual = try XCTUnwrap(
+            mockMediaAdapter.recordedInputPayload(PublishOptions.self, for: .didUpdatePublishOptions)?.first
+        )
+        XCTAssertEqual(actual, publishOptions)
+    }
+
+    // MARK: - trackInfo
+
+    func test_trackInfo_allAvailable_trackInfoWasCalledOnLocalMediaAdapter() {
+        let expected: [Stream_Video_Sfu_Models_TrackInfo] = [
+            .dummy(trackType: .screenShare, mid: "0"),
+            .dummy(trackType: .screenShare, mid: "1")
+        ]
+        mockMediaAdapter.stub(
+            for: .trackInfo,
+            with: expected
+        )
+
+        let actual = subject.trackInfo(for: .allAvailable)
+
+        XCTAssertEqual(
+            mockMediaAdapter.recordedInputPayload(RTCPeerConnectionTrackInfoCollectionType.self, for: .trackInfo)?.first,
+            .allAvailable
+        )
+        XCTAssertEqual(actual, expected)
+    }
+
+    func test_trackInfo_lastPublishOptions_trackInfoWasCalledOnLocalMediaAdapter() {
+        let expected: [Stream_Video_Sfu_Models_TrackInfo] = [
+            .dummy(trackType: .screenShare, mid: "0"),
+            .dummy(trackType: .screenShare, mid: "1")
+        ]
+        mockMediaAdapter.stub(
+            for: .trackInfo,
+            with: expected
+        )
+
+        let actual = subject.trackInfo(for: .lastPublishOptions)
+
+        XCTAssertEqual(
+            mockMediaAdapter.recordedInputPayload(RTCPeerConnectionTrackInfoCollectionType.self, for: .trackInfo)?.first,
+            .lastPublishOptions
+        )
+        XCTAssertEqual(actual, expected)
+    }
 }

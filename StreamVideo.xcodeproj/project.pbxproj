@@ -8,12 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40013DDB2B87AA2300915453 /* SerialActor.swift */; };
+		40034C202CFDABE600A318B1 /* PublishOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C1F2CFDABE600A318B1 /* PublishOptions.swift */; };
 		40034C262CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */; };
 		40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */; };
 		40034C2A2CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C292CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */; };
 		40034C2C2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */; };
 		40034C2E2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C2D2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */; };
 		40034C312CFE168D00A318B1 /* StreamLocaleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C302CFE168D00A318B1 /* StreamLocaleProvider.swift */; };
+		40070F392CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40070F382CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */; };
+		40070F3B2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40070F3A2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift */; };
 		40073B6F2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */; };
 		40073B752C456E06006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */; };
 		40073B762C456E0E006A2867 /* StreamPictureInPictureWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */; };
@@ -108,6 +111,10 @@
 		402C544B2B6B9FF000672BFB /* CallButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4091460A2B690AA4007F3C17 /* CallButtonView.swift */; };
 		402C545B2B6BE50500672BFB /* MockStreamStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402C545A2B6BE50500672BFB /* MockStreamStatistics.swift */; };
 		402C545D2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402C545C2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift */; };
+		402D0E852D0C914900E9B83F /* SerialActorQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402D0E842D0C914900E9B83F /* SerialActorQueue.swift */; };
+		402D0E882D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402D0E872D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift */; };
+		402D0E8A2D0C94E600E9B83F /* RTCVideoTrack+Clone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402D0E892D0C94E600E9B83F /* RTCVideoTrack+Clone.swift */; };
+		402D0E8C2D0C94F900E9B83F /* CallSettings+Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402D0E8B2D0C94F900E9B83F /* CallSettings+Audio.swift */; };
 		402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
 		402F04A92B70ED8600CA1986 /* StreamCallStatisticsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A62B70ED8600CA1986 /* StreamCallStatisticsReporter.swift */; };
 		402F04AA2B70ED8600CA1986 /* Statistics+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A72B70ED8600CA1986 /* Statistics+Convenience.swift */; };
@@ -120,6 +127,9 @@
 		4031D7F82B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */; };
 		4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */; };
 		4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4035913B2BC53D2A00B5B767 /* Accelerate.framework */; };
+		403793C52D35196600C752DF /* StreamAppStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C0B2D14B75B002C4EAB /* StreamAppStateAdapter.swift */; };
+		403793C72D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */; };
+		403793C92D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		40382F222C889E5500C2D00F /* DemoTranscriptionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */; };
 		40382F232C889E6500C2D00F /* DemoReconnectionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC47D2C62287F002AEF92 /* DemoReconnectionButtonView.swift */; };
@@ -142,6 +152,10 @@
 		40382F472C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F442C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift */; };
 		40382F482C89D03700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F412C89CF9300C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift */; };
 		40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */; };
+		4039F0C02D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */; };
+		4039F0CA2D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */; };
+		4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0CB2D0241120078159E /* AudioCodec.swift */; };
+		4039F0CF2D024DDF0078159E /* MediaTransceiverStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0CE2D024DDF0078159E /* MediaTransceiverStorage.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
 		403CA9B22CC7BAD6001A88C2 /* VideoLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403CA9B12CC7BAD6001A88C2 /* VideoLayer.swift */; };
@@ -185,6 +199,10 @@
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
+		406128812CF32FEF007F5CDC /* SDPLineVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */; };
+		406128832CF33000007F5CDC /* SDPParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128822CF33000007F5CDC /* SDPParser.swift */; };
+		406128882CF33029007F5CDC /* RTPMapVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128872CF33029007F5CDC /* RTPMapVisitor.swift */; };
+		4061288B2CF33088007F5CDC /* SupportedPrefix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4061288A2CF33088007F5CDC /* SupportedPrefix.swift */; };
 		4063033F2AD847EC0091AE77 /* CallState_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4063033E2AD847EC0091AE77 /* CallState_Tests.swift */; };
 		406303422AD848000091AE77 /* CallParticipant_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406303412AD848000091AE77 /* CallParticipant_Mock.swift */; };
 		406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 406303442AD942ED0091AE77 /* GoogleSignInSwift */; };
@@ -252,8 +270,6 @@
 		406B3C162C90343300FC93A1 /* LocalVideoMediaAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C152C90342E00FC93A1 /* LocalVideoMediaAdapter_Tests.swift */; };
 		406B3C192C90385100FC93A1 /* VideoCapturerProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C182C90384800FC93A1 /* VideoCapturerProviding.swift */; };
 		406B3C1C2C903A2B00FC93A1 /* MockVideoCapturerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C1A2C903A2500FC93A1 /* MockVideoCapturerFactory.swift */; };
-		406B3C202C903B0700FC93A1 /* MockCameraVideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C1E2C903B0000FC93A1 /* MockCameraVideoCapturer.swift */; };
-		406B3C252C903BDE00FC93A1 /* MockVideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C222C903BD700FC93A1 /* MockVideoCapturer.swift */; };
 		406B3C272C904F7100FC93A1 /* LocalScreenShareMediaAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C262C904F6900FC93A1 /* LocalScreenShareMediaAdapter_Tests.swift */; };
 		406B3C292C905E9D00FC93A1 /* AudioMediaAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C282C905E9D00FC93A1 /* AudioMediaAdapter_Tests.swift */; };
 		406B3C2B2C90601600FC93A1 /* MockLocalMediaAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C2A2C90601600FC93A1 /* MockLocalMediaAdapter.swift */; };
@@ -342,6 +358,21 @@
 		40AA2EDC2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EDB2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift */; };
 		40AA2EDE2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EDD2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift */; };
 		40AA2EE22AE0137E000DCA5C /* ClipCorners.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EE02AE00179000DCA5C /* ClipCorners.swift */; };
+		40AAD17E2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */; };
+		40AAD1802D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */; };
+		40AAD1822D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */; };
+		40AAD1832D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */; };
+		40AAD1852D2D41F400D10330 /* SFUEventBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1842D2D41F400D10330 /* SFUEventBucket.swift */; };
+		40AAD1872D2D717300D10330 /* SFUEventBucket_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1862D2D717300D10330 /* SFUEventBucket_Tests.swift */; };
+		40AAD1892D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1882D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift */; };
+		40AAD18A2D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1882D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift */; };
+		40AAD18C2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD18B2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift */; };
+		40AAD18F2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD18E2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift */; };
+		40AAD1912D2EF18A00D10330 /* MockCaptureDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1902D2EF18A00D10330 /* MockCaptureDevice.swift */; };
+		40AAD1932D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1922D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift */; };
+		40AAD1952D2EF36B00D10330 /* CaptureDeviceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1942D2EF36B00D10330 /* CaptureDeviceProtocol.swift */; };
+		40AAD1972D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1962D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift */; };
+		40AAD1982D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AAD1962D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */; };
 		40AB34B22C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */; };
@@ -410,6 +441,35 @@
 		40AF6A452C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AF6A442C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift */; };
 		40AF6A492C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AF6A482C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift */; };
 		40AF6A4B2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AF6A4A2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift */; };
+		40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
+		40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
+		40B48C122D14C43F002C4EAB /* PublishOptions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C112D14C43F002C4EAB /* PublishOptions_Tests.swift */; };
+		40B48C152D14C93B002C4EAB /* CGSize_AdaptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C142D14C93B002C4EAB /* CGSize_AdaptTests.swift */; };
+		40B48C172D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C162D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift */; };
+		40B48C1A2D14C9BE002C4EAB /* CMVideoDimensions_DefaultValuesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C192D14C9BE002C4EAB /* CMVideoDimensions_DefaultValuesTests.swift */; };
+		40B48C1D2D14CA25002C4EAB /* Array_PrepareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C1C2D14CA25002C4EAB /* Array_PrepareTests.swift */; };
+		40B48C1F2D14CAFC002C4EAB /* Comparable_ClampedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C1E2D14CAFC002C4EAB /* Comparable_ClampedTests.swift */; };
+		40B48C212D14CB1B002C4EAB /* Int_DefaultValuesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C202D14CB1B002C4EAB /* Int_DefaultValuesTests.swift */; };
+		40B48C232D14CB8A002C4EAB /* Publisher_TaskSinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C222D14CB8A002C4EAB /* Publisher_TaskSinkTests.swift */; };
+		40B48C282D14CDD5002C4EAB /* StreamVideoSfuModelsCodec_ConvenienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C272D14CDD5002C4EAB /* StreamVideoSfuModelsCodec_ConvenienceTests.swift */; };
+		40B48C2A2D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C292D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift */; };
+		40B48C2C2D14D0FF002C4EAB /* StreamVideoSfuModelsPublishOption_ConvenienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C2B2D14D0FF002C4EAB /* StreamVideoSfuModelsPublishOption_ConvenienceTests.swift */; };
+		40B48C2E2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C2D2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift */; };
+		40B48C302D14D308002C4EAB /* MockRTCRtpEncodingParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C2F2D14D308002C4EAB /* MockRTCRtpEncodingParameters.swift */; };
+		40B48C322D14D361002C4EAB /* StreamVideoSfuModelsVideoLayer_ConvenienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C312D14D361002C4EAB /* StreamVideoSfuModelsVideoLayer_ConvenienceTests.swift */; };
+		40B48C342D14D3E6002C4EAB /* StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C332D14D3E6002C4EAB /* StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests.swift */; };
+		40B48C372D14D424002C4EAB /* RTCAudioTrack_CloneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C362D14D424002C4EAB /* RTCAudioTrack_CloneTests.swift */; };
+		40B48C392D14D496002C4EAB /* RTCVideoTrack_CloneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C382D14D496002C4EAB /* RTCVideoTrack_CloneTests.swift */; };
+		40B48C3B2D14D6CF002C4EAB /* RTCMediaStream_ConvenienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C3A2D14D6CF002C4EAB /* RTCMediaStream_ConvenienceTests.swift */; };
+		40B48C3D2D14D7EF002C4EAB /* RTCRtpTransceiverInit_ConvenienceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C3C2D14D7EF002C4EAB /* RTCRtpTransceiverInit_ConvenienceTests.swift */; };
+		40B48C402D14DB26002C4EAB /* MediaTransceiverStorage_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C3F2D14DB26002C4EAB /* MediaTransceiverStorage_Tests.swift */; };
+		40B48C472D14E803002C4EAB /* StreamVideoCapturing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C462D14E803002C4EAB /* StreamVideoCapturing.swift */; };
+		40B48C492D14E822002C4EAB /* MockStreamVideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C482D14E822002C4EAB /* MockStreamVideoCapturer.swift */; };
+		40B48C4C2D14F721002C4EAB /* RTPMapVisitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C4B2D14F721002C4EAB /* RTPMapVisitorTests.swift */; };
+		40B48C4F2D14F77B002C4EAB /* SupportedPrefix_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C4E2D14F77B002C4EAB /* SupportedPrefix_Tests.swift */; };
+		40B48C512D14F7AE002C4EAB /* SDPParser_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C502D14F7AE002C4EAB /* SDPParser_Tests.swift */; };
+		40B48C572D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C562D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift */; };
+		40B48C582D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C562D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift */; };
 		40B499CA2AC1A5E100A53B60 /* OSLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */; };
 		40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */; };
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
@@ -430,7 +490,6 @@
 		40BBC4A22C623D03002AEF92 /* RTCSignalingState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4972C623D02002AEF92 /* RTCSignalingState+CustomStringConvertible.swift */; };
 		40BBC4A32C623D03002AEF92 /* RTCIceGatheringState+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4982C623D02002AEF92 /* RTCIceGatheringState+CustomStringConvertible.swift */; };
 		40BBC4A42C623D03002AEF92 /* RTCRtpTransceiverInit+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4992C623D03002AEF92 /* RTCRtpTransceiverInit+Convenience.swift */; };
-		40BBC4A52C623D03002AEF92 /* RTCSessionDescription+AudioSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC49A2C623D03002AEF92 /* RTCSessionDescription+AudioSettings.swift */; };
 		40BBC4A62C623D03002AEF92 /* RTCRtpTransceiverDirection+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC49B2C623D03002AEF92 /* RTCRtpTransceiverDirection+CustomStringConvertible.swift */; };
 		40BBC4A72C623D03002AEF92 /* StreamRTCPeerConnection+DelegatePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC49C2C623D03002AEF92 /* StreamRTCPeerConnection+DelegatePublisher.swift */; };
 		40BBC4AC2C627304002AEF92 /* AudioMediaAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4AB2C627304002AEF92 /* AudioMediaAdapter.swift */; };
@@ -519,6 +578,27 @@
 		40E18AAF2CD51E9400A65C9F /* LockQueuing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E18AAE2CD51E8E00A65C9F /* LockQueuing.swift */; };
 		40E18AB22CD51FC100A65C9F /* UnfairQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E18AB12CD51FC100A65C9F /* UnfairQueueTests.swift */; };
 		40E18AB42CD522F700A65C9F /* RecursiveQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E18AB32CD522F700A65C9F /* RecursiveQueueTests.swift */; };
+		40E3632E2D09DBFA0028C52A /* Int+DefaultValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3632D2D09DBFA0028C52A /* Int+DefaultValues.swift */; };
+		40E363312D09DC650028C52A /* CGSize+DefaultValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363302D09DC650028C52A /* CGSize+DefaultValues.swift */; };
+		40E363362D09E4C80028C52A /* Stream_Video_Sfu_Models_VideoQuality+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363352D09E4C80028C52A /* Stream_Video_Sfu_Models_VideoQuality+Convenience.swift */; };
+		40E363382D09E6560028C52A /* Array+Prepare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363372D09E6560028C52A /* Array+Prepare.swift */; };
+		40E3633E2D09EF560028C52A /* CMVideoDimensions+DefaultValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3633D2D09EF560028C52A /* CMVideoDimensions+DefaultValues.swift */; };
+		40E363402D09F0950028C52A /* Comparable+Clamped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3633F2D09F0950028C52A /* Comparable+Clamped.swift */; };
+		40E363452D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */; };
+		40E363492D09F6BB0028C52A /* StreamVideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363482D09F6B20028C52A /* StreamVideoCapturer.swift */; };
+		40E3634C2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3634B2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift */; };
+		40E3634E2D09FDE50028C52A /* CameraCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3634D2D09FDDF0028C52A /* CameraCaptureHandler.swift */; };
+		40E363502D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3634F2D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift */; };
+		40E363522D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */; };
+		40E363592D0A139E0028C52A /* CameraFocusHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363582D0A139E0028C52A /* CameraFocusHandler.swift */; };
+		40E3635B2D0A15E40028C52A /* CameraCapturePhotoHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3635A2D0A15E40028C52A /* CameraCapturePhotoHandler.swift */; };
+		40E3635D2D0A17C10028C52A /* CameraVideoOutputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3635C2D0A17C10028C52A /* CameraVideoOutputHandler.swift */; };
+		40E3635F2D0A18B10028C52A /* CameraZoomHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3635E2D0A18B10028C52A /* CameraZoomHandler.swift */; };
+		40E363622D0A1C2E0028C52A /* SimulatorCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363612D0A1C2E0028C52A /* SimulatorCaptureHandler.swift */; };
+		40E3636C2D0A24390028C52A /* ScreenShareCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E3636B2D0A24310028C52A /* ScreenShareCaptureHandler.swift */; };
+		40E363712D0A27640028C52A /* BroadcastCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363702D0A27640028C52A /* BroadcastCaptureHandler.swift */; };
+		40E363752D0A2C6B0028C52A /* CGSize+Adapt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363742D0A2C6B0028C52A /* CGSize+Adapt.swift */; };
+		40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */; };
 		40E9B3B12BCD755F00ACF18F /* MemberResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */; };
 		40E9B3B32BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */; };
 		40E9B3B52BCD93F500ACF18F /* Credentials+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */; };
@@ -749,7 +829,6 @@
 		840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C42A6FED2900917B30 /* IntExtensions.swift */; };
 		840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C62A6FF20B00917B30 /* BroadcastObserver.swift */; };
 		840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C82A6FF9A200917B30 /* BroadcastConstants.swift */; };
-		840042CB2A701C2000917B30 /* BroadcastUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042CA2A701C2000917B30 /* BroadcastUtils.swift */; };
 		840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042CC2A7020FD00917B30 /* BroadcastPickerView.swift */; };
 		840042CF2A70212D00917B30 /* ScreensharingControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042CE2A70212D00917B30 /* ScreensharingControls.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
@@ -758,7 +837,6 @@
 		840626722A37A431004B8748 /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840626702A37A431004B8748 /* IncomingCall.swift */; };
 		8406269A2A37A5E2004B8748 /* CallEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840626992A37A5E2004B8748 /* CallEvents.swift */; };
 		8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8406269B2A37A653004B8748 /* CallEventsHandler.swift */; };
-		8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */; };
 		84093811288A90390089A35B /* DetailedCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* DetailedCallingView.swift */; };
 		8409465629AF4EEC007AF5BF /* CallReactionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */; };
 		8409465729AF4EEC007AF5BF /* CallRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465129AF4EEC007AF5BF /* CallRecording.swift */; };
@@ -808,7 +886,6 @@
 		841BAA492BD15CDE000C73E4 /* CollectUserFeedbackRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA302BD15CDE000C73E4 /* CollectUserFeedbackRequest.swift */; };
 		841F2C8029429DEC00D8D655 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
 		841FF5032A5D6FEC00809BBB /* CallsController_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5022A5D6FEC00809BBB /* CallsController_Tests.swift */; };
-		841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */; };
 		841FF5152A5E99B400809BBB /* CallEventsHandler_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5142A5E99B400809BBB /* CallEventsHandler_Tests.swift */; };
 		841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5162A5EA7F600809BBB /* CallParticipants_Tests.swift */; };
 		841FF51B2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */; };
@@ -890,7 +967,6 @@
 		8434C542289BC0B00001490A /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C541289BC0B00001490A /* L10n.swift */; };
 		8435EB9029CDAADA00E02651 /* ParticipantsGridLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8435EB8F29CDAADA00E02651 /* ParticipantsGridLayout.swift */; };
 		8435EB9229CDAD0D00E02651 /* ParticipantsFullScreenLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8435EB9129CDAD0D00E02651 /* ParticipantsFullScreenLayout.swift */; };
-		843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CC28C647B600839D99 /* VideoCapturer.swift */; };
 		843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CE28C7898A00839D99 /* VideoOptions.swift */; };
 		843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697D028C7A23300839D99 /* ParticipantsGridView.swift */; };
 		843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843B707429C270C300AB0573 /* ReconnectionView.swift */; };
@@ -951,15 +1027,12 @@
 		845C09952C10A7D700F725B3 /* SessionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09902C0E0B7600F725B3 /* SessionTimer.swift */; };
 		845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C09962C11AAA100F725B3 /* RejectCallRequest.swift */; };
 		845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */; };
-		845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */; };
 		8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
 		8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */; };
 		8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593329BB5CE200134EA0 /* HTTPConfig.swift */; };
 		8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593529BB6B4E00134EA0 /* EdgeResponse.swift */; };
 		8469593829BB6B4E00134EA0 /* GetEdgesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593629BB6B4E00134EA0 /* GetEdgesResponse.swift */; };
 		8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593D29BF214700134EA0 /* ViewExtensions.swift */; };
-		846A06CE29E056C40084C264 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CD29E056C40084C264 /* StringExtensions.swift */; };
-		846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */; };
 		846BA2AD2A9F602C001AD0AF /* SampleBufferVideoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */; };
 		846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D16212A52B8D00036CE4C /* MicrophoneManager.swift */; };
 		846D16242A52C3D50036CE4C /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D16232A52C3D50036CE4C /* CameraManager.swift */; };
@@ -988,8 +1061,6 @@
 		847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B62A260CF0000714CE /* CustomCallView.swift */; };
 		847BE09C29DADE0100B55D21 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09B29DADE0100B55D21 /* Call.swift */; };
 		847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D001F29C8AB1E00DD0A50 /* RecordingView.swift */; };
-		8487D8AD2A67F4EC00536ED4 /* ScreenshareCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */; };
-		8487D8B02A697E9A00536ED4 /* VideoCapturing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8487D8AF2A697E9A00536ED4 /* VideoCapturing.swift */; };
 		848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73BF2926314F0089AA6E /* MinimizedCallView.swift */; };
 		848A73C229269E7D0089AA6E /* CornerDraggableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73C129269E7D0089AA6E /* CornerDraggableView.swift */; };
 		848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
@@ -1045,6 +1116,7 @@
 		8493227E29093A420013C029 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
 		8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
+		849A05122D199EE2004C33F2 /* StreamAppStateAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C0F2D14B901002C4EAB /* StreamAppStateAdapter_Tests.swift */; };
 		849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8A297AFCC80072A12D /* PreJoiningView.swift */; };
 		849EDA8D297AFD840072A12D /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8C297AFD840072A12D /* Camera.swift */; };
 		849EDA8F297AFE1C0072A12D /* PreJoiningViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8E297AFE1C0072A12D /* PreJoiningViewModel.swift */; };
@@ -1083,7 +1155,6 @@
 		84BAD77A2A6BFEF900733156 /* BroadcastBufferUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7792A6BFEF900733156 /* BroadcastBufferUploader.swift */; };
 		84BAD77C2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD77B2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift */; };
 		84BAD77E2A6BFFB200733156 /* BroadcastSampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD77D2A6BFFB200733156 /* BroadcastSampleHandler.swift */; };
-		84BAD7822A6C013100733156 /* BroadcastScreenCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */; };
 		84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7832A6C01AF00733156 /* BroadcastBufferReader.swift */; };
 		84BB570E2A20D7BB0002C123 /* Mapping_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */; };
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
@@ -1437,12 +1508,15 @@
 
 /* Begin PBXFileReference section */
 		40013DDB2B87AA2300915453 /* SerialActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor.swift; sourceTree = "<group>"; };
+		40034C1F2CFDABE600A318B1 /* PublishOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishOptions.swift; sourceTree = "<group>"; };
 		40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAvailabilityPolicyProtocol.swift; sourceTree = "<group>"; };
 		40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAvailabilityPolicy.swift; sourceTree = "<group>"; };
 		40034C292CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitRegionBasedAvailabilityPolicy.swift; sourceTree = "<group>"; };
 		40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAlwaysAvailabilityPolicy.swift; sourceTree = "<group>"; };
 		40034C2D2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitRegionBasedAvailabilityPolicy.swift; sourceTree = "<group>"; };
 		40034C302CFE168D00A318B1 /* StreamLocaleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamLocaleProvider.swift; sourceTree = "<group>"; };
+		40070F382CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_Codec+Convenience.swift"; sourceTree = "<group>"; };
+		40070F3A2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_PublishOption+Convenience.swift"; sourceTree = "<group>"; };
 		40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureWindowSizePolicy.swift; sourceTree = "<group>"; };
 		40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureVideoRendererTests.swift; sourceTree = "<group>"; };
 		40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy.swift; sourceTree = "<group>"; };
@@ -1500,6 +1574,10 @@
 		4029E95B2CB9449900E1D571 /* CallParticipant_TrackSubscriptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant_TrackSubscriptionTests.swift; sourceTree = "<group>"; };
 		402C545A2B6BE50500672BFB /* MockStreamStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamStatistics.swift; sourceTree = "<group>"; };
 		402C545C2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsFormatter_Tests.swift; sourceTree = "<group>"; };
+		402D0E842D0C914900E9B83F /* SerialActorQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActorQueue.swift; sourceTree = "<group>"; };
+		402D0E872D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioTrack+Clone.swift"; sourceTree = "<group>"; };
+		402D0E892D0C94E600E9B83F /* RTCVideoTrack+Clone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCVideoTrack+Clone.swift"; sourceTree = "<group>"; };
+		402D0E8B2D0C94F900E9B83F /* CallSettings+Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallSettings+Audio.swift"; sourceTree = "<group>"; };
 		402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatViewModel.swift; sourceTree = "<group>"; };
 		402F04A62B70ED8600CA1986 /* StreamCallStatisticsReporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsReporter.swift; sourceTree = "<group>"; };
 		402F04A72B70ED8600CA1986 /* Statistics+Convenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Statistics+Convenience.swift"; sourceTree = "<group>"; };
@@ -1511,6 +1589,8 @@
 		4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorderTests.swift; sourceTree = "<group>"; };
 		4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamActiveCallProvider.swift; sourceTree = "<group>"; };
 		4035913B2BC53D2A00B5B767 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter.swift; sourceTree = "<group>"; };
+		403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter_Tests.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		40382F272C88B80C00C2D00F /* SignalServerEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalServerEvent.swift; sourceTree = "<group>"; };
 		40382F2A2C88B84800C2D00F /* Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload+Payload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload+Payload.swift"; sourceTree = "<group>"; };
@@ -1524,6 +1604,10 @@
 		40382F412C89CF9300C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift"; sourceTree = "<group>"; };
 		40382F442C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_Participant+Convenience.swift"; sourceTree = "<group>"; };
 		40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRTCPeerConnection.swift; sourceTree = "<group>"; };
+		4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCRtpCodecCapability+Convenience.swift"; sourceTree = "<group>"; };
+		4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift"; sourceTree = "<group>"; };
+		4039F0CB2D0241120078159E /* AudioCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCodec.swift; sourceTree = "<group>"; };
+		4039F0CE2D024DDF0078159E /* MediaTransceiverStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTransceiverStorage.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
 		403CA9B12CC7BAD6001A88C2 /* VideoLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLayer.swift; sourceTree = "<group>"; };
@@ -1561,6 +1645,10 @@
 		4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAsyncImage.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
+		406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineVisitor.swift; sourceTree = "<group>"; };
+		406128822CF33000007F5CDC /* SDPParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPParser.swift; sourceTree = "<group>"; };
+		406128872CF33029007F5CDC /* RTPMapVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPMapVisitor.swift; sourceTree = "<group>"; };
+		4061288A2CF33088007F5CDC /* SupportedPrefix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedPrefix.swift; sourceTree = "<group>"; };
 		4063033E2AD847EC0091AE77 /* CallState_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState_Tests.swift; sourceTree = "<group>"; };
 		406303412AD848000091AE77 /* CallParticipant_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant_Mock.swift; sourceTree = "<group>"; };
 		406583852B87694B00B4F979 /* BlurBackgroundVideoFilter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurBackgroundVideoFilter.swift; sourceTree = "<group>"; };
@@ -1602,8 +1690,6 @@
 		406B3C152C90342E00FC93A1 /* LocalVideoMediaAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVideoMediaAdapter_Tests.swift; sourceTree = "<group>"; };
 		406B3C182C90384800FC93A1 /* VideoCapturerProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturerProviding.swift; sourceTree = "<group>"; };
 		406B3C1A2C903A2500FC93A1 /* MockVideoCapturerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockVideoCapturerFactory.swift; sourceTree = "<group>"; };
-		406B3C1E2C903B0000FC93A1 /* MockCameraVideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCameraVideoCapturer.swift; sourceTree = "<group>"; };
-		406B3C222C903BD700FC93A1 /* MockVideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockVideoCapturer.swift; sourceTree = "<group>"; };
 		406B3C262C904F6900FC93A1 /* LocalScreenShareMediaAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalScreenShareMediaAdapter_Tests.swift; sourceTree = "<group>"; };
 		406B3C282C905E9D00FC93A1 /* AudioMediaAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMediaAdapter_Tests.swift; sourceTree = "<group>"; };
 		406B3C2A2C90601600FC93A1 /* MockLocalMediaAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLocalMediaAdapter.swift; sourceTree = "<group>"; };
@@ -1687,6 +1773,18 @@
 		40AA2EDB2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalParticipantsListView.swift; sourceTree = "<group>"; };
 		40AA2EDD2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightSpeakerView.swift; sourceTree = "<group>"; };
 		40AA2EE02AE00179000DCA5C /* ClipCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipCorners.swift; sourceTree = "<group>"; };
+		40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Position+Convenience.swift"; sourceTree = "<group>"; };
+		40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCPeerConnectionTrackInfoCollectionType.swift; sourceTree = "<group>"; };
+		40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift"; sourceTree = "<group>"; };
+		40AAD1842D2D41F400D10330 /* SFUEventBucket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUEventBucket.swift; sourceTree = "<group>"; };
+		40AAD1862D2D717300D10330 /* SFUEventBucket_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUEventBucket_Tests.swift; sourceTree = "<group>"; };
+		40AAD1882D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift"; sourceTree = "<group>"; };
+		40AAD18B2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamRTCStatisticsReport+Dummy.swift"; sourceTree = "<group>"; };
+		40AAD18E2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCaptureDeviceProvider.swift; sourceTree = "<group>"; };
+		40AAD1902D2EF18A00D10330 /* MockCaptureDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCaptureDevice.swift; sourceTree = "<group>"; };
+		40AAD1922D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCCameraVideoCapturer+Convenience.swift"; sourceTree = "<group>"; };
+		40AAD1942D2EF36B00D10330 /* CaptureDeviceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDeviceProtocol.swift; sourceTree = "<group>"; };
+		40AAD1962D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Event_VideoSender+Dummy.swift"; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUAdapter.swift; sourceTree = "<group>"; };
 		40AB34B12C5D04AE00B5B6B3 /* URLSessionConfiguration+WaitsForConnectivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSessionConfiguration+WaitsForConnectivity.swift"; sourceTree = "<group>"; };
@@ -1716,6 +1814,35 @@
 		40AF6A442C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_LeavingStageTests.swift; sourceTree = "<group>"; };
 		40AF6A482C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_CleanUpStageTests.swift; sourceTree = "<group>"; };
 		40AF6A4A2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift; sourceTree = "<group>"; };
+		40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PublishOptions+Dummy.swift"; sourceTree = "<group>"; };
+		40B48C0B2D14B75B002C4EAB /* StreamAppStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAppStateAdapter.swift; sourceTree = "<group>"; };
+		40B48C0F2D14B901002C4EAB /* StreamAppStateAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAppStateAdapter_Tests.swift; sourceTree = "<group>"; };
+		40B48C112D14C43F002C4EAB /* PublishOptions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishOptions_Tests.swift; sourceTree = "<group>"; };
+		40B48C142D14C93B002C4EAB /* CGSize_AdaptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSize_AdaptTests.swift; sourceTree = "<group>"; };
+		40B48C162D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSize_DefaultValuesTests.swift; sourceTree = "<group>"; };
+		40B48C192D14C9BE002C4EAB /* CMVideoDimensions_DefaultValuesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMVideoDimensions_DefaultValuesTests.swift; sourceTree = "<group>"; };
+		40B48C1C2D14CA25002C4EAB /* Array_PrepareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array_PrepareTests.swift; sourceTree = "<group>"; };
+		40B48C1E2D14CAFC002C4EAB /* Comparable_ClampedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comparable_ClampedTests.swift; sourceTree = "<group>"; };
+		40B48C202D14CB1B002C4EAB /* Int_DefaultValuesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int_DefaultValuesTests.swift; sourceTree = "<group>"; };
+		40B48C222D14CB8A002C4EAB /* Publisher_TaskSinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Publisher_TaskSinkTests.swift; sourceTree = "<group>"; };
+		40B48C272D14CDD5002C4EAB /* StreamVideoSfuModelsCodec_ConvenienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoSfuModelsCodec_ConvenienceTests.swift; sourceTree = "<group>"; };
+		40B48C292D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRTCRtpCodecCapability.swift; sourceTree = "<group>"; };
+		40B48C2B2D14D0FF002C4EAB /* StreamVideoSfuModelsPublishOption_ConvenienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoSfuModelsPublishOption_ConvenienceTests.swift; sourceTree = "<group>"; };
+		40B48C2D2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoSfuModelsPublishOption_VideoLayersTests.swift; sourceTree = "<group>"; };
+		40B48C2F2D14D308002C4EAB /* MockRTCRtpEncodingParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRTCRtpEncodingParameters.swift; sourceTree = "<group>"; };
+		40B48C312D14D361002C4EAB /* StreamVideoSfuModelsVideoLayer_ConvenienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoSfuModelsVideoLayer_ConvenienceTests.swift; sourceTree = "<group>"; };
+		40B48C332D14D3E6002C4EAB /* StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests.swift; sourceTree = "<group>"; };
+		40B48C362D14D424002C4EAB /* RTCAudioTrack_CloneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioTrack_CloneTests.swift; sourceTree = "<group>"; };
+		40B48C382D14D496002C4EAB /* RTCVideoTrack_CloneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCVideoTrack_CloneTests.swift; sourceTree = "<group>"; };
+		40B48C3A2D14D6CF002C4EAB /* RTCMediaStream_ConvenienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCMediaStream_ConvenienceTests.swift; sourceTree = "<group>"; };
+		40B48C3C2D14D7EF002C4EAB /* RTCRtpTransceiverInit_ConvenienceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCRtpTransceiverInit_ConvenienceTests.swift; sourceTree = "<group>"; };
+		40B48C3F2D14DB26002C4EAB /* MediaTransceiverStorage_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTransceiverStorage_Tests.swift; sourceTree = "<group>"; };
+		40B48C462D14E803002C4EAB /* StreamVideoCapturing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoCapturing.swift; sourceTree = "<group>"; };
+		40B48C482D14E822002C4EAB /* MockStreamVideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamVideoCapturer.swift; sourceTree = "<group>"; };
+		40B48C4B2D14F721002C4EAB /* RTPMapVisitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPMapVisitorTests.swift; sourceTree = "<group>"; };
+		40B48C4E2D14F77B002C4EAB /* SupportedPrefix_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedPrefix_Tests.swift; sourceTree = "<group>"; };
+		40B48C502D14F7AE002C4EAB /* SDPParser_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPParser_Tests.swift; sourceTree = "<group>"; };
+		40B48C562D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_TrackInfo+Dummy.swift"; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
 		40BBC4762C6227D5002AEF92 /* DemoTranscriptionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTranscriptionButtonView.swift; sourceTree = "<group>"; };
@@ -1736,7 +1863,6 @@
 		40BBC4972C623D02002AEF92 /* RTCSignalingState+CustomStringConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RTCSignalingState+CustomStringConvertible.swift"; sourceTree = "<group>"; };
 		40BBC4982C623D02002AEF92 /* RTCIceGatheringState+CustomStringConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RTCIceGatheringState+CustomStringConvertible.swift"; sourceTree = "<group>"; };
 		40BBC4992C623D03002AEF92 /* RTCRtpTransceiverInit+Convenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RTCRtpTransceiverInit+Convenience.swift"; sourceTree = "<group>"; };
-		40BBC49A2C623D03002AEF92 /* RTCSessionDescription+AudioSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RTCSessionDescription+AudioSettings.swift"; sourceTree = "<group>"; };
 		40BBC49B2C623D03002AEF92 /* RTCRtpTransceiverDirection+CustomStringConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RTCRtpTransceiverDirection+CustomStringConvertible.swift"; sourceTree = "<group>"; };
 		40BBC49C2C623D03002AEF92 /* StreamRTCPeerConnection+DelegatePublisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StreamRTCPeerConnection+DelegatePublisher.swift"; sourceTree = "<group>"; };
 		40BBC4A92C6270F5002AEF92 /* Array+Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Logger.swift"; sourceTree = "<group>"; };
@@ -1817,6 +1943,27 @@
 		40E18AAE2CD51E8E00A65C9F /* LockQueuing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockQueuing.swift; sourceTree = "<group>"; };
 		40E18AB12CD51FC100A65C9F /* UnfairQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfairQueueTests.swift; sourceTree = "<group>"; };
 		40E18AB32CD522F700A65C9F /* RecursiveQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecursiveQueueTests.swift; sourceTree = "<group>"; };
+		40E3632D2D09DBFA0028C52A /* Int+DefaultValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+DefaultValues.swift"; sourceTree = "<group>"; };
+		40E363302D09DC650028C52A /* CGSize+DefaultValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+DefaultValues.swift"; sourceTree = "<group>"; };
+		40E363352D09E4C80028C52A /* Stream_Video_Sfu_Models_VideoQuality+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_VideoQuality+Convenience.swift"; sourceTree = "<group>"; };
+		40E363372D09E6560028C52A /* Array+Prepare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Prepare.swift"; sourceTree = "<group>"; };
+		40E3633D2D09EF560028C52A /* CMVideoDimensions+DefaultValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CMVideoDimensions+DefaultValues.swift"; sourceTree = "<group>"; };
+		40E3633F2D09F0950028C52A /* Comparable+Clamped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Comparable+Clamped.swift"; sourceTree = "<group>"; };
+		40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Format+Convenience.swift"; sourceTree = "<group>"; };
+		40E363482D09F6B20028C52A /* StreamVideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoCapturer.swift; sourceTree = "<group>"; };
+		40E3634B2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraBackgroundAccessHandler.swift; sourceTree = "<group>"; };
+		40E3634D2D09FDDF0028C52A /* CameraCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureHandler.swift; sourceTree = "<group>"; };
+		40E3634F2D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCaptureDeviceProvider.swift; sourceTree = "<group>"; };
+		40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice+OutputFormat.swift"; sourceTree = "<group>"; };
+		40E363582D0A139E0028C52A /* CameraFocusHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFocusHandler.swift; sourceTree = "<group>"; };
+		40E3635A2D0A15E40028C52A /* CameraCapturePhotoHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCapturePhotoHandler.swift; sourceTree = "<group>"; };
+		40E3635C2D0A17C10028C52A /* CameraVideoOutputHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraVideoOutputHandler.swift; sourceTree = "<group>"; };
+		40E3635E2D0A18B10028C52A /* CameraZoomHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraZoomHandler.swift; sourceTree = "<group>"; };
+		40E363612D0A1C2E0028C52A /* SimulatorCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorCaptureHandler.swift; sourceTree = "<group>"; };
+		40E3636B2D0A24310028C52A /* ScreenShareCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenShareCaptureHandler.swift; sourceTree = "<group>"; };
+		40E363702D0A27640028C52A /* BroadcastCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastCaptureHandler.swift; sourceTree = "<group>"; };
+		40E363742D0A2C6B0028C52A /* CGSize+Adapt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+Adapt.swift"; sourceTree = "<group>"; };
+		40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferReaderKey.swift; sourceTree = "<group>"; };
 		40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JoinCallResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Credentials+Dummy.swift"; sourceTree = "<group>"; };
@@ -1987,7 +2134,6 @@
 		840042C42A6FED2900917B30 /* IntExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtensions.swift; sourceTree = "<group>"; };
 		840042C62A6FF20B00917B30 /* BroadcastObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver.swift; sourceTree = "<group>"; };
 		840042C82A6FF9A200917B30 /* BroadcastConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastConstants.swift; sourceTree = "<group>"; };
-		840042CA2A701C2000917B30 /* BroadcastUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastUtils.swift; sourceTree = "<group>"; };
 		840042CC2A7020FD00917B30 /* BroadcastPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastPickerView.swift; sourceTree = "<group>"; };
 		840042CE2A70212D00917B30 /* ScreensharingControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreensharingControls.swift; sourceTree = "<group>"; };
 		8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = usr/lib/swift/libswift_Concurrency.tbd; sourceTree = SDKROOT; };
@@ -1998,7 +2144,6 @@
 		840626702A37A431004B8748 /* IncomingCall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		840626992A37A5E2004B8748 /* CallEvents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallEvents.swift; sourceTree = "<group>"; };
 		8406269B2A37A653004B8748 /* CallEventsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEventsHandler.swift; sourceTree = "<group>"; };
-		8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturingUtils.swift; sourceTree = "<group>"; };
 		84093810288A90390089A35B /* DetailedCallingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedCallingView.swift; sourceTree = "<group>"; };
 		8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallReactionEvent.swift; sourceTree = "<group>"; };
 		8409465129AF4EEC007AF5BF /* CallRecording.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallRecording.swift; sourceTree = "<group>"; };
@@ -2048,7 +2193,6 @@
 		841BAA2E2BD15CDE000C73E4 /* CallTranscriptionReadyEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallTranscriptionReadyEvent.swift; sourceTree = "<group>"; };
 		841BAA302BD15CDE000C73E4 /* CollectUserFeedbackRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectUserFeedbackRequest.swift; sourceTree = "<group>"; };
 		841FF5022A5D6FEC00809BBB /* CallsController_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsController_Tests.swift; sourceTree = "<group>"; };
-		841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturerUtils_Tests.swift; sourceTree = "<group>"; };
 		841FF5142A5E99B400809BBB /* CallEventsHandler_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEventsHandler_Tests.swift; sourceTree = "<group>"; };
 		841FF5162A5EA7F600809BBB /* CallParticipants_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipants_Tests.swift; sourceTree = "<group>"; };
 		841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SystemEnvironment+XStreamClient.swift"; sourceTree = "<group>"; };
@@ -2130,7 +2274,6 @@
 		8434C541289BC0B00001490A /* L10n.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		8435EB8F29CDAADA00E02651 /* ParticipantsGridLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridLayout.swift; sourceTree = "<group>"; };
 		8435EB9129CDAD0D00E02651 /* ParticipantsFullScreenLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsFullScreenLayout.swift; sourceTree = "<group>"; };
-		843697CC28C647B600839D99 /* VideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturer.swift; sourceTree = "<group>"; };
 		843697CE28C7898A00839D99 /* VideoOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOptions.swift; sourceTree = "<group>"; };
 		843697D028C7A23300839D99 /* ParticipantsGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridView.swift; sourceTree = "<group>"; };
 		843B707429C270C300AB0573 /* ReconnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionView.swift; sourceTree = "<group>"; };
@@ -2187,15 +2330,12 @@
 		845C09922C0E1BF900F725B3 /* DemoSessionTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSessionTimerView.swift; sourceTree = "<group>"; };
 		845C09962C11AAA100F725B3 /* RejectCallRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RejectCallRequest.swift; sourceTree = "<group>"; };
 		845E31052A7121D6004DC470 /* BroadcastObserver_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver_Tests.swift; sourceTree = "<group>"; };
-		845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastUtils_Tests.swift; sourceTree = "<group>"; };
 		8468821228DFA448003BA9EE /* UnsecureRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsecureRepository.swift; sourceTree = "<group>"; };
 		8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalServer_Tests.swift; sourceTree = "<group>"; };
 		8469593329BB5CE200134EA0 /* HTTPConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPConfig.swift; sourceTree = "<group>"; };
 		8469593529BB6B4E00134EA0 /* EdgeResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EdgeResponse.swift; sourceTree = "<group>"; };
 		8469593629BB6B4E00134EA0 /* GetEdgesResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEdgesResponse.swift; sourceTree = "<group>"; };
 		8469593D29BF214700134EA0 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
-		846A06CD29E056C40084C264 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
-		846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions_Tests.swift; sourceTree = "<group>"; };
 		846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleBufferVideoCallView.swift; sourceTree = "<group>"; };
 		846D16212A52B8D00036CE4C /* MicrophoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneManager.swift; sourceTree = "<group>"; };
 		846D16232A52C3D50036CE4C /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
@@ -2225,8 +2365,6 @@
 		847B47B62A260CF0000714CE /* CustomCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCallView.swift; sourceTree = "<group>"; };
 		847BE09B29DADE0100B55D21 /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
 		847D001F29C8AB1E00DD0A50 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
-		8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshareCapturer.swift; sourceTree = "<group>"; };
-		8487D8AF2A697E9A00536ED4 /* VideoCapturing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturing.swift; sourceTree = "<group>"; };
 		848A73BF2926314F0089AA6E /* MinimizedCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimizedCallView.swift; sourceTree = "<group>"; };
 		848A73C129269E7D0089AA6E /* CornerDraggableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerDraggableView.swift; sourceTree = "<group>"; };
 		848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ScreenSharing.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2322,7 +2460,6 @@
 		84BAD7792A6BFEF900733156 /* BroadcastBufferUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferUploader.swift; sourceTree = "<group>"; };
 		84BAD77B2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferReaderConnection.swift; sourceTree = "<group>"; };
 		84BAD77D2A6BFFB200733156 /* BroadcastSampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastSampleHandler.swift; sourceTree = "<group>"; };
-		84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastScreenCapturer.swift; sourceTree = "<group>"; };
 		84BAD7832A6C01AF00733156 /* BroadcastBufferReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferReader.swift; sourceTree = "<group>"; };
 		84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping_Tests.swift; sourceTree = "<group>"; };
 		84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactory.swift; sourceTree = "<group>"; };
@@ -2680,6 +2817,7 @@
 		401480332A5423C70029166A /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40B48C0E2D14B8F6002C4EAB /* StreamAppStateAdapter */,
 				40914C962B567B6B00F6A13E /* PictureInPicture */,
 				401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */,
 				8457BF7F2A5C18A7000AE567 /* ToastView_Tests.swift */,
@@ -2814,6 +2952,11 @@
 		4029E9582CB9445D00E1D571 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				40B48C352D14D414002C4EAB /* WebRTC */,
+				40B48C262D14CDCD002C4EAB /* Protobuf */,
+				40B48C1B2D14C9F9002C4EAB /* Foundation */,
+				40B48C182D14C9AF002C4EAB /* CoreMedia */,
+				40B48C132D14C92E002C4EAB /* CoreGraphics */,
 				4029E95B2CB9449900E1D571 /* CallParticipant_TrackSubscriptionTests.swift */,
 			);
 			path = Extensions;
@@ -2835,6 +2978,15 @@
 				402C545A2B6BE50500672BFB /* MockStreamStatistics.swift */,
 			);
 			path = Mocks;
+			sourceTree = "<group>";
+		};
+		402D0E862D0C914F00E9B83F /* SerialActor */ = {
+			isa = PBXGroup;
+			children = (
+				402D0E842D0C914900E9B83F /* SerialActorQueue.swift */,
+				40013DDB2B87AA2300915453 /* SerialActor.swift */,
+			);
+			path = SerialActor;
 			sourceTree = "<group>";
 		};
 		402F04A52B70ED8600CA1986 /* Statistics */ = {
@@ -3016,6 +3168,7 @@
 		40382F312C89A65C00C2D00F /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
+				40AAD1942D2EF36B00D10330 /* CaptureDeviceProtocol.swift */,
 				406B3BFD2C8F53CB00FC93A1 /* StreamRTCPeerConnectionProtocol.swift */,
 				406B3BEE2C8F38CD00FC93A1 /* RTCPeerConnectionEvent.swift */,
 				40BBC4AE2C627692002AEF92 /* LocalMediaAdapting.swift */,
@@ -3023,6 +3176,15 @@
 				40382F322C89A66000C2D00F /* RTCPeerConnectionCoordinatorProviding.swift */,
 			);
 			path = Protocols;
+			sourceTree = "<group>";
+		};
+		4039F0CD2D024DCE0078159E /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				4039F0CE2D024DDF0078159E /* MediaTransceiverStorage.swift */,
+				403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 		403EFC9D2BDBFDEE0057C248 /* Feedback */ = {
@@ -3094,6 +3256,25 @@
 				4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */,
 			);
 			path = AsyncImage;
+			sourceTree = "<group>";
+		};
+		4061287F2CF32FE4007F5CDC /* SDP Parsing */ = {
+			isa = PBXGroup;
+			children = (
+				406128842CF33018007F5CDC /* Visitors */,
+				4061288A2CF33088007F5CDC /* SupportedPrefix.swift */,
+				406128822CF33000007F5CDC /* SDPParser.swift */,
+			);
+			path = "SDP Parsing";
+			sourceTree = "<group>";
+		};
+		406128842CF33018007F5CDC /* Visitors */ = {
+			isa = PBXGroup;
+			children = (
+				406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */,
+				406128872CF33029007F5CDC /* RTPMapVisitor.swift */,
+			);
+			path = Visitors;
 			sourceTree = "<group>";
 		};
 		4063033D2AD847E60091AE77 /* CallState */ = {
@@ -3205,6 +3386,7 @@
 		406B3C052C8F602D00FC93A1 /* MediaAdapters */ = {
 			isa = PBXGroup;
 			children = (
+				40B48C3E2D14DB1A002C4EAB /* Utilities */,
 				408CF9CC2CAFF8FE00F56833 /* VideoCapturePolicy */,
 				406B3C042C8F602D00FC93A1 /* LocalMediaAdapters */,
 				406B3C282C905E9D00FC93A1 /* AudioMediaAdapter_Tests.swift */,
@@ -3228,6 +3410,7 @@
 		406B3C072C8F602D00FC93A1 /* v2 */ = {
 			isa = PBXGroup;
 			children = (
+				40B48C4A2D14F718002C4EAB /* SDP Parsing */,
 				4029E9582CB9445D00E1D571 /* Extensions */,
 				408CF9C12CAE885800F56833 /* IntegrationTests */,
 				40C9E4632C99886200802B28 /* WebRTCCoorindator_Tests.swift */,
@@ -3247,10 +3430,7 @@
 			isa = PBXGroup;
 			children = (
 				406B3C182C90384800FC93A1 /* VideoCapturerProviding.swift */,
-				8487D8AF2A697E9A00536ED4 /* VideoCapturing.swift */,
-				843697CC28C647B600839D99 /* VideoCapturer.swift */,
 				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
-				8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */,
 				406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */,
 			);
 			path = VideoCapturing;
@@ -3514,8 +3694,10 @@
 		40986C382CCB6D2C00510F88 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				40B48C3A2D14D6CF002C4EAB /* RTCMediaStream_ConvenienceTests.swift */,
 				40986C3B2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift */,
 				40986C392CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift */,
+				40B48C3C2D14D7EF002C4EAB /* RTCRtpTransceiverInit_ConvenienceTests.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3611,6 +3793,7 @@
 				40AB34AD2C5D02D400B5B6B3 /* SFUAdapter.swift */,
 				40C6891D2C6661990054528A /* SFUEventAdapter.swift */,
 				40C689192C64F74F0054528A /* SFUSignalService.swift */,
+				40AAD1842D2D41F400D10330 /* SFUEventBucket.swift */,
 			);
 			path = SFU;
 			sourceTree = "<group>";
@@ -3618,13 +3801,15 @@
 		40AB34AF2C5D048800B5B6B3 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				40C9E4612C99881700802B28 /* WebRTC */,
-				40C9E4492C94744E00802B28 /* Stream_Video_Sfu_Models_VideoDimension+Convenience.swift */,
-				40C9E4472C94743800802B28 /* Stream_Video_Sfu_Signal_TrackSubscriptionDetails+Convenience.swift */,
-				40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */,
-				40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */,
-				40382F342C89A6C500C2D00F /* AudioSettings+Convenience.swift */,
+				40E363412D09F2A70028C52A /* AVFoundation */,
+				40E3633C2D09EF490028C52A /* CoreMedia */,
 				40AB34B02C5D049A00B5B6B3 /* Foundation */,
+				40E363322D09DDAF0028C52A /* Protobuf */,
+				40E3632F2D09DC5D0028C52A /* CoreGraphics */,
+				40C9E4612C99881700802B28 /* WebRTC */,
+				40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */,
+				402D0E8B2D0C94F900E9B83F /* CallSettings+Audio.swift */,
+				40382F342C89A6C500C2D00F /* AudioSettings+Convenience.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3637,6 +3822,9 @@
 				40AB34B52C5D089E00B5B6B3 /* Task+Timeout.swift */,
 				40C689172C64DDC70054528A /* Publisher+TaskSink.swift */,
 				40C6891B2C657F280054528A /* Publisher+AsyncStream.swift */,
+				40E3632D2D09DBFA0028C52A /* Int+DefaultValues.swift */,
+				40E363372D09E6560028C52A /* Array+Prepare.swift */,
+				40E3633F2D09F0950028C52A /* Comparable+Clamped.swift */,
 			);
 			path = Foundation;
 			sourceTree = "<group>";
@@ -3664,6 +3852,7 @@
 				40AB34CA2C5D440600B5B6B3 /* Mocks */,
 				40AB34BE2C5D33CF00B5B6B3 /* SFUAdapter_Tests.swift */,
 				40382F2F2C88C34300C2D00F /* SFUEventAdapter_Tests.swift */,
+				40AAD1862D2D717300D10330 /* SFUEventBucket_Tests.swift */,
 			);
 			path = SFU;
 			sourceTree = "<group>";
@@ -3676,6 +3865,98 @@
 				40AB34CF2C5D443F00B5B6B3 /* MockWebSocketEngine.swift */,
 			);
 			path = Mocks;
+			sourceTree = "<group>";
+		};
+		40B48C0A2D14B707002C4EAB /* StreamAppStateAdapter */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C0B2D14B75B002C4EAB /* StreamAppStateAdapter.swift */,
+			);
+			path = StreamAppStateAdapter;
+			sourceTree = "<group>";
+		};
+		40B48C0E2D14B8F6002C4EAB /* StreamAppStateAdapter */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C0F2D14B901002C4EAB /* StreamAppStateAdapter_Tests.swift */,
+			);
+			path = StreamAppStateAdapter;
+			sourceTree = "<group>";
+		};
+		40B48C132D14C92E002C4EAB /* CoreGraphics */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C142D14C93B002C4EAB /* CGSize_AdaptTests.swift */,
+				40B48C162D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift */,
+			);
+			path = CoreGraphics;
+			sourceTree = "<group>";
+		};
+		40B48C182D14C9AF002C4EAB /* CoreMedia */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C192D14C9BE002C4EAB /* CMVideoDimensions_DefaultValuesTests.swift */,
+			);
+			path = CoreMedia;
+			sourceTree = "<group>";
+		};
+		40B48C1B2D14C9F9002C4EAB /* Foundation */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C1C2D14CA25002C4EAB /* Array_PrepareTests.swift */,
+				40B48C1E2D14CAFC002C4EAB /* Comparable_ClampedTests.swift */,
+				40B48C202D14CB1B002C4EAB /* Int_DefaultValuesTests.swift */,
+				40B48C222D14CB8A002C4EAB /* Publisher_TaskSinkTests.swift */,
+			);
+			path = Foundation;
+			sourceTree = "<group>";
+		};
+		40B48C262D14CDCD002C4EAB /* Protobuf */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C272D14CDD5002C4EAB /* StreamVideoSfuModelsCodec_ConvenienceTests.swift */,
+				40B48C2B2D14D0FF002C4EAB /* StreamVideoSfuModelsPublishOption_ConvenienceTests.swift */,
+				40B48C2D2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift */,
+				40B48C312D14D361002C4EAB /* StreamVideoSfuModelsVideoLayer_ConvenienceTests.swift */,
+				40B48C332D14D3E6002C4EAB /* StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests.swift */,
+			);
+			path = Protobuf;
+			sourceTree = "<group>";
+		};
+		40B48C352D14D414002C4EAB /* WebRTC */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C362D14D424002C4EAB /* RTCAudioTrack_CloneTests.swift */,
+				40B48C382D14D496002C4EAB /* RTCVideoTrack_CloneTests.swift */,
+			);
+			path = WebRTC;
+			sourceTree = "<group>";
+		};
+		40B48C3E2D14DB1A002C4EAB /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C3F2D14DB26002C4EAB /* MediaTransceiverStorage_Tests.swift */,
+				403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		40B48C4A2D14F718002C4EAB /* SDP Parsing */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C4D2D14F76A002C4EAB /* Visitors */,
+				40B48C502D14F7AE002C4EAB /* SDPParser_Tests.swift */,
+				40B48C4E2D14F77B002C4EAB /* SupportedPrefix_Tests.swift */,
+			);
+			path = "SDP Parsing";
+			sourceTree = "<group>";
+		};
+		40B48C4D2D14F76A002C4EAB /* Visitors */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C4B2D14F721002C4EAB /* RTPMapVisitorTests.swift */,
+			);
+			path = Visitors;
 			sourceTree = "<group>";
 		};
 		40BBC47A2C6227DF002AEF92 /* Extensions */ = {
@@ -3715,6 +3996,7 @@
 				40BBC4832C623C6E002AEF92 /* Adapters */,
 				40BBC4882C623C6E002AEF92 /* Models */,
 				40382F4F2C8B3DA800C2D00F /* StreamRTCPeerConnection.swift */,
+				40AAD17F2D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift */,
 				40BBC4892C623C6E002AEF92 /* RTCPeerConnectionCoordinator.swift */,
 				40BBC4BF2C629408002AEF92 /* RTCTemporaryPeerConnection.swift */,
 			);
@@ -3734,7 +4016,6 @@
 				40BBC4992C623D03002AEF92 /* RTCRtpTransceiverInit+Convenience.swift */,
 				406B3BDA2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift */,
 				40BBC4952C623D02002AEF92 /* RTCSdpType+CustomStringConvertible.swift */,
-				40BBC49A2C623D03002AEF92 /* RTCSessionDescription+AudioSettings.swift */,
 				40BBC4972C623D02002AEF92 /* RTCSignalingState+CustomStringConvertible.swift */,
 				406B3BDC2C8F351E00FC93A1 /* RTCIceCandidate+Sendable.swift */,
 				406B3BE02C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift */,
@@ -3759,6 +4040,7 @@
 		40BBC4B82C627F76002AEF92 /* MediaAdapters */ = {
 			isa = PBXGroup;
 			children = (
+				4039F0CD2D024DCE0078159E /* Utilities */,
 				408CF9C92CAFF45300F56833 /* VideoCapturePolicy */,
 				40BBC4AD2C627689002AEF92 /* LocalMediaAdapters */,
 				40BBC4822C623C6E002AEF92 /* MediaAdapter.swift */,
@@ -3774,6 +4056,7 @@
 		40BBC4C12C637377002AEF92 /* v2 */ = {
 			isa = PBXGroup;
 			children = (
+				40E363472D09F69D0028C52A /* VideoCapturing */,
 				40483CB72C9B1DEE00B4FCA8 /* WebRTCCoordinatorProviding.swift */,
 				40BBC4C52C638915002AEF92 /* WebRTCCoordinator.swift */,
 				40BBC4C22C6373C4002AEF92 /* WebRTCStateAdapter.swift */,
@@ -3782,6 +4065,7 @@
 				40429D5C2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift */,
 				40BBC4D72C639740002AEF92 /* WebRTCJoinRequestFactory.swift */,
 				406B3C3B2C9197FA00FC93A1 /* WebRTCConfiguration.swift */,
+				4061287F2CF32FE4007F5CDC /* SDP Parsing */,
 				40BBC4C72C639007002AEF92 /* StateMachine */,
 				40AB34AC2C5D02CB00B5B6B3 /* SFU */,
 				40AB34AF2C5D048800B5B6B3 /* Extensions */,
@@ -3904,7 +4188,11 @@
 		40C9E4612C99881700802B28 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				40AAD1922D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift */,
+				402D0E892D0C94E600E9B83F /* RTCVideoTrack+Clone.swift */,
+				402D0E872D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift */,
 				40C9E45C2C9987E300802B28 /* RTCMediaStreamTrack+Sendable.swift */,
+				4039F0BF2D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -3973,6 +4261,107 @@
 			path = Queues;
 			sourceTree = "<group>";
 		};
+		40E3632F2D09DC5D0028C52A /* CoreGraphics */ = {
+			isa = PBXGroup;
+			children = (
+				40E363302D09DC650028C52A /* CGSize+DefaultValues.swift */,
+				40E363742D0A2C6B0028C52A /* CGSize+Adapt.swift */,
+			);
+			path = CoreGraphics;
+			sourceTree = "<group>";
+		};
+		40E363322D09DDAF0028C52A /* Protobuf */ = {
+			isa = PBXGroup;
+			children = (
+				4039F0C92D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift */,
+				40070F382CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */,
+				40C9E4492C94744E00802B28 /* Stream_Video_Sfu_Models_VideoDimension+Convenience.swift */,
+				40C9E4472C94743800802B28 /* Stream_Video_Sfu_Signal_TrackSubscriptionDetails+Convenience.swift */,
+				40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */,
+				40070F3A2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift */,
+				40E363352D09E4C80028C52A /* Stream_Video_Sfu_Models_VideoQuality+Convenience.swift */,
+			);
+			path = Protobuf;
+			sourceTree = "<group>";
+		};
+		40E3633C2D09EF490028C52A /* CoreMedia */ = {
+			isa = PBXGroup;
+			children = (
+				40E3633D2D09EF560028C52A /* CMVideoDimensions+DefaultValues.swift */,
+			);
+			path = CoreMedia;
+			sourceTree = "<group>";
+		};
+		40E363412D09F2A70028C52A /* AVFoundation */ = {
+			isa = PBXGroup;
+			children = (
+				40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */,
+				40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */,
+				40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */,
+			);
+			path = AVFoundation;
+			sourceTree = "<group>";
+		};
+		40E363472D09F69D0028C52A /* VideoCapturing */ = {
+			isa = PBXGroup;
+			children = (
+				40E3634A2D09F9EB0028C52A /* ActionHandlers */,
+				40B48C462D14E803002C4EAB /* StreamVideoCapturing.swift */,
+				40E363482D09F6B20028C52A /* StreamVideoCapturer.swift */,
+				40E3634F2D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift */,
+				40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */,
+			);
+			path = VideoCapturing;
+			sourceTree = "<group>";
+		};
+		40E3634A2D09F9EB0028C52A /* ActionHandlers */ = {
+			isa = PBXGroup;
+			children = (
+				40E3636F2D0A27590028C52A /* Broadcast */,
+				40E3636A2D0A24280028C52A /* ScreenShare */,
+				40E363602D0A1C180028C52A /* Simulator */,
+				40E363572D0A137A0028C52A /* Camera */,
+			);
+			path = ActionHandlers;
+			sourceTree = "<group>";
+		};
+		40E363572D0A137A0028C52A /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				40E3634B2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift */,
+				40E3634D2D09FDDF0028C52A /* CameraCaptureHandler.swift */,
+				40E363582D0A139E0028C52A /* CameraFocusHandler.swift */,
+				40E3635E2D0A18B10028C52A /* CameraZoomHandler.swift */,
+				40E3635A2D0A15E40028C52A /* CameraCapturePhotoHandler.swift */,
+				40E3635C2D0A17C10028C52A /* CameraVideoOutputHandler.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		40E363602D0A1C180028C52A /* Simulator */ = {
+			isa = PBXGroup;
+			children = (
+				40E363612D0A1C2E0028C52A /* SimulatorCaptureHandler.swift */,
+			);
+			path = Simulator;
+			sourceTree = "<group>";
+		};
+		40E3636A2D0A24280028C52A /* ScreenShare */ = {
+			isa = PBXGroup;
+			children = (
+				40E3636B2D0A24310028C52A /* ScreenShareCaptureHandler.swift */,
+			);
+			path = ScreenShare;
+			sourceTree = "<group>";
+		};
+		40E3636F2D0A27590028C52A /* Broadcast */ = {
+			isa = PBXGroup;
+			children = (
+				40E363702D0A27640028C52A /* BroadcastCaptureHandler.swift */,
+			);
+			path = Broadcast;
+			sourceTree = "<group>";
+		};
 		40F0173C2BBEB85F00E89FD1 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -3987,10 +4376,16 @@
 		40F017432BBEEE6200E89FD1 /* Dummy */ = {
 			isa = PBXGroup;
 			children = (
+				40AAD18B2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift */,
+				40AAD1812D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift */,
+				40AAD1882D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift */,
+				40B48C562D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift */,
 				403CA9BD2CCA54A4001A88C2 /* Stream_Video_Sfu_Models_Codec+Dummy.swift */,
 				403CA9BA2CCA548D001A88C2 /* Stream_Video_Sfu_Event_VideoLayerSetting+Dummy.swift */,
+				40AAD1962D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift */,
 				40382F3E2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift */,
 				40F0175E2BBEF11600E89FD1 /* AudioSettings+Dummy.swift */,
+				40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */,
 				40F0175C2BBEF0E200E89FD1 /* BackstageSettings+Dummy.swift */,
 				40F0175A2BBEF0C100E89FD1 /* BroadcastSettingsResponse+Dummy.swift */,
 				40F017722BBEF28600E89FD1 /* CallAcceptedEvent+Dummy.swift */,
@@ -4464,6 +4859,7 @@
 				842747EB29EED59000E063AD /* JSONDecoder_Tests.swift */,
 				8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */,
 				841FF5162A5EA7F600809BBB /* CallParticipants_Tests.swift */,
+				40B48C112D14C43F002C4EAB /* PublishOptions_Tests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -4486,12 +4882,10 @@
 				40C4DF4E2C1C41470035DBC2 /* ParticipantAutoLeavePolicy */,
 				403FB14A2BFE14690047A696 /* StateMachine */,
 				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
-				846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */,
 				842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */,
 				8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */,
 				84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */,
 				84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */,
-				845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */,
 				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
 				84D6E5392B3AD10000D0056C /* RepeatingTimer_Tests.swift */,
 				4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */,
@@ -4705,6 +5099,8 @@
 				84DCA2132A38A428000C3411 /* CoordinatorModels.swift */,
 				40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */,
 				8454A3182AAB374B00A012C6 /* CallStatsReport.swift */,
+				40034C1F2CFDABE600A318B1 /* PublishOptions.swift */,
+				4039F0CB2D0241120078159E /* AudioCodec.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -4822,6 +5218,10 @@
 		8492B87629081CE700006649 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
+				40AAD18E2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift */,
+				40B48C482D14E822002C4EAB /* MockStreamVideoCapturer.swift */,
+				40B48C292D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift */,
+				40B48C2F2D14D308002C4EAB /* MockRTCRtpEncodingParameters.swift */,
 				4067F3182CDA469C002E28BD /* MockAudioSession.swift */,
 				409774AD2CC1979F00E0D3EE /* MockCallController.swift */,
 				40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */,
@@ -4835,9 +5235,7 @@
 				406B3C402C919F5100FC93A1 /* MockRTCPeerConnectionCoordinatorStack.swift */,
 				406B3C3E2C919BAE00FC93A1 /* MockSFUStack.swift */,
 				406B3C1A2C903A2500FC93A1 /* MockVideoCapturerFactory.swift */,
-				406B3C1E2C903B0000FC93A1 /* MockCameraVideoCapturer.swift */,
 				406B3C2A2C90601600FC93A1 /* MockLocalMediaAdapter.swift */,
-				406B3C222C903BD700FC93A1 /* MockVideoCapturer.swift */,
 				406B3C0D2C8F865F00FC93A1 /* MockStreamCallAudioRecorder.swift */,
 				406B3C112C8F86FF00FC93A1 /* MockActiveCallProvider.swift */,
 				406B3C092C8F604A00FC93A1 /* PeerConnectionFactory+Mock.swift */,
@@ -4863,6 +5261,7 @@
 				401338752BF2489C007318BD /* MockCXCallController.swift */,
 				401338772BF248B9007318BD /* MockStreamVideo.swift */,
 				401338792BF248CC007318BD /* MockCall.swift */,
+				40AAD1902D2EF18A00D10330 /* MockCaptureDevice.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -4960,42 +5359,41 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40B48C0A2D14B707002C4EAB /* StreamAppStateAdapter */,
+				402D0E862D0C914F00E9B83F /* SerialActor */,
 				40034C2F2CFE168900A318B1 /* LocaleProvider */,
-				4067F3062CDA32F0002E28BD /* AudioSession */,
-				408CF9C42CAEC24500F56833 /* ScreenPropertiesAdapter */,
-				40C9E44F2C9880D300802B28 /* Unwrap */,
-				40382F2C2C88B87500C2D00F /* ReflectiveStringConvertible */,
-				40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */,
-				40C2B5BC2C2C447700EC2C2D /* RejectionReasonProvider */,
-				40C2B5B42C2B604800EC2C2D /* DisposableBag */,
-				40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */,
-				408937892C062B0B000EEB69 /* UUIDProviding */,
-				403FF3DF2BA1D20E0092CE8A /* Queues */,
-				40FB150D2BF77CA200D5E580 /* StateMachine */,
-				40FB15082BF74C0A00D5E580 /* CallCache */,
-				8456E6C7287EC343004E180E /* Logger */,
-				84C2997C28784BB30034B735 /* Utils.swift */,
-				84AF64D4287C79320012A503 /* RawJSON.swift */,
-				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
+				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				84A7E183288362DF00526C98 /* Atomic.swift */,
-				84A7E1A72883E46200526C98 /* Timers.swift */,
+				40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */,
 				841947972886D9CD0007B36E /* BundleExtensions.swift */,
+				40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */,
+				8490DD22298D5330007E53D2 /* Data+Gzip.swift */,
 				84B9A56C29112F39004DE31A /* EndpointConfig.swift */,
+				840042C42A6FED2900917B30 /* IntExtensions.swift */,
+				84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */,
+				40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */,
+				84AF64D4287C79320012A503 /* RawJSON.swift */,
+				846E4B0029D2D372003733AB /* Sorting.swift */,
+				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
 				8268615F290A7556005BFFED /* SystemEnvironment.swift */,
 				841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */,
-				8490DD22298D5330007E53D2 /* Data+Gzip.swift */,
-				846E4B0029D2D372003733AB /* Sorting.swift */,
-				846A06CD29E056C40084C264 /* StringExtensions.swift */,
-				84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */,
-				840042C42A6FED2900917B30 /* IntExtensions.swift */,
-				840042CA2A701C2000917B30 /* BroadcastUtils.swift */,
-				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
-				40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */,
-				40013DDB2B87AA2300915453 /* SerialActor.swift */,
+				84A7E1A72883E46200526C98 /* Timers.swift */,
 				40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */,
-				40C4DF432C1C261D0035DBC2 /* Publisher+WeakAssign.swift */,
+				84C2997C28784BB30034B735 /* Utils.swift */,
+				4067F3062CDA32F0002E28BD /* AudioSession */,
+				40FB15082BF74C0A00D5E580 /* CallCache */,
 				402F04AC2B714E9B00CA1986 /* DeviceOrientation */,
+				40C2B5B42C2B604800EC2C2D /* DisposableBag */,
+				8456E6C7287EC343004E180E /* Logger */,
+				40C4DF402C1C21360035DBC2 /* ParticipantAutoLeavePolicy */,
+				403FF3DF2BA1D20E0092CE8A /* Queues */,
+				40382F2C2C88B87500C2D00F /* ReflectiveStringConvertible */,
+				40C2B5BC2C2C447700EC2C2D /* RejectionReasonProvider */,
+				408CF9C42CAEC24500F56833 /* ScreenPropertiesAdapter */,
+				40FB150D2BF77CA200D5E580 /* StateMachine */,
+				40C9E44F2C9880D300802B28 /* Unwrap */,
+				408937892C062B0B000EEB69 /* UUIDProviding */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -5014,9 +5412,7 @@
 		84BAD7762A6BFE7200733156 /* Screensharing */ = {
 			isa = PBXGroup;
 			children = (
-				8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */,
 				840042C62A6FF20B00917B30 /* BroadcastObserver.swift */,
-				84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */,
 				84EBA4A12A72B81100577297 /* BroadcastBufferConnection.swift */,
 				84BAD7772A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift */,
 				84BAD7792A6BFEF900733156 /* BroadcastBufferUploader.swift */,
@@ -5076,7 +5472,6 @@
 				845E31042A7121BE004DC470 /* Screensharing */,
 				8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */,
 				8446AF902A4D84F4002AB07B /* Retries_Tests.swift */,
-				841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */,
 				40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */,
 			);
 			path = WebRTC;
@@ -5398,24 +5793,24 @@
 		84F737EE287C13AC00A363F4 /* StreamVideo */ = {
 			isa = PBXGroup;
 			children = (
+				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
+				82B82F2229114001001B5FD7 /* Info.plist */,
 				847BE09B29DADE0100B55D21 /* Call.swift */,
+				84530C6B2A3C4E0700F2678E /* CallState.swift */,
+				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
+				8492B874290808AE00006649 /* StreamVideoEnvironment.swift */,
+				8478EB12288A054B00525538 /* VideoConfig.swift */,
 				40FB01FF2BAC8A4000A1C206 /* CallKit */,
 				846D16202A52B8A10036CE4C /* CallSettings */,
-				84530C6B2A3C4E0700F2678E /* CallState.swift */,
 				84EA5D3D28C09A95004D3531 /* Controllers */,
 				84C299712876E77E0034B735 /* DependencyInjection */,
 				8456E6D8287EC436004E180E /* Errors */,
 				8206D8512A5FF30E0099F5EC /* Generated */,
 				84A7E1772881921000526C98 /* HTTPClient */,
-				82B82F2229114001001B5FD7 /* Info.plist */,
 				8456E6D9287EC46D004E180E /* Models */,
 				84B57D3A2981645900E4E709 /* OpenApi */,
 				84ED240B286C9500002A3186 /* protobuf */,
-				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
-				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
-				8492B874290808AE00006649 /* StreamVideoEnvironment.swift */,
 				84AF64D3287C79220012A503 /* Utils */,
-				8478EB12288A054B00525538 /* VideoConfig.swift */,
 				84FC2C1C28ACF29300181490 /* WebRTC */,
 				84A7E17A2883624500526C98 /* WebSockets */,
 			);
@@ -6299,7 +6694,9 @@
 				40DFA8902CC11146003DCE05 /* APIKey.swift in Sources */,
 				40DFA88F2CC11137003DCE05 /* UpdateCallResponse.swift in Sources */,
 				40DFA88E2CC1111E003DCE05 /* CallState.swift in Sources */,
+				403793C72D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift in Sources */,
 				4029E94E2CB8162900E1D571 /* IncomingVideoQualitySettings.swift in Sources */,
+				40AAD1802D27FC5E00D10330 /* RTCPeerConnectionTrackInfoCollectionType.swift in Sources */,
 				846D16242A52C3D50036CE4C /* CameraManager.swift in Sources */,
 				848CCCE52AB8ED8F002E83A2 /* StopHLSBroadcastingResponse.swift in Sources */,
 				84F07BD12CB4804900422E58 /* NoiseCancellationSettingsRequest.swift in Sources */,
@@ -6320,6 +6717,7 @@
 				84E5C51C2A013C440003A27A /* PushNotificationsConfig.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
 				8449824E2C738A830029734D /* StopAllRTMPBroadcastsResponse.swift in Sources */,
+				40E363522D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift in Sources */,
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
 				40149DD02B7E839500473176 /* AudioSessionProtocol.swift in Sources */,
 				40DFA88D2CC10FF3003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift in Sources */,
@@ -6329,8 +6727,11 @@
 				40BBC48F2C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift in Sources */,
 				40034C2C2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
+				402D0E882D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
+				402D0E8A2D0C94E600E9B83F /* RTCVideoTrack+Clone.swift in Sources */,
 				406B3BD92C8F337000FC93A1 /* MediaAdapting.swift in Sources */,
+				40E363622D0A1C2E0028C52A /* SimulatorCaptureHandler.swift in Sources */,
 				4065839B2B877ADA00B4F979 /* CIImage+Sendable.swift in Sources */,
 				84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */,
 				84A737CE28F4716E001A6769 /* signal.pb.swift in Sources */,
@@ -6352,7 +6753,6 @@
 				842B8E2A2A2DFED900863A87 /* CallSessionResponse.swift in Sources */,
 				841BAA452BD15CDE000C73E4 /* UserInfoResponse.swift in Sources */,
 				8490032129D308A000AD9BB4 /* RingSettingsRequest.swift in Sources */,
-				846A06CE29E056C40084C264 /* StringExtensions.swift in Sources */,
 				8409465629AF4EEC007AF5BF /* CallReactionEvent.swift in Sources */,
 				4159F1722C86FA41002B94D3 /* PublishedTrackInfo.swift in Sources */,
 				84DCA21F2A39DA15000C3411 /* APIHelper.swift in Sources */,
@@ -6362,12 +6762,15 @@
 				84D91E9D2C7CB0AA00B163A0 /* CallRtmpBroadcastFailedEvent.swift in Sources */,
 				84A737D028F4716E001A6769 /* models.pb.swift in Sources */,
 				846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */,
+				40E3634C2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift in Sources */,
 				842E70DB2B91BE1700D2D68B /* ListTranscriptionsResponse.swift in Sources */,
 				4012B1902BFCA4D3006B0031 /* StreamCallStateMachine+AcceptedStage.swift in Sources */,
 				40BBC4A12C623D03002AEF92 /* RTCMediaStream+Convenience.swift in Sources */,
 				84DCA20E2A3885FE000C3411 /* Permissions.swift in Sources */,
 				842E70D82B91BE1700D2D68B /* StatsOptions.swift in Sources */,
 				4067F30B2CDA3359002E28BD /* AVAudioSessionRouteDescription+Convenience.swift in Sources */,
+				40E3635F2D0A18B10028C52A /* CameraZoomHandler.swift in Sources */,
+				40E363312D09DC650028C52A /* CGSize+DefaultValues.swift in Sources */,
 				40BBC48E2C623C6E002AEF92 /* PeerConnectionType.swift in Sources */,
 				84BAD77E2A6BFFB200733156 /* BroadcastSampleHandler.swift in Sources */,
 				40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */,
@@ -6381,15 +6784,19 @@
 				84AF64D2287C78E70012A503 /* User.swift in Sources */,
 				84274F482884251600CF8794 /* InternetConnection.swift in Sources */,
 				84DC389129ADFCFD00946713 /* VideoSettings.swift in Sources */,
+				4039F0CA2D0222E40078159E /* Stream_Video_Sfu_Models_PublishOption+VideoLayers.swift in Sources */,
 				842E70D12B91BE1700D2D68B /* CallDeletedEvent.swift in Sources */,
 				8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */,
 				43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */,
 				40BBC49E2C623D03002AEF92 /* RTCIceConnectionState+CustomStringConvertible.swift in Sources */,
 				84A7E18C288363AC00526C98 /* EventNotificationCenter.swift in Sources */,
+				40E363492D09F6BB0028C52A /* StreamVideoCapturer.swift in Sources */,
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,
 				84DC38DD29ADFCFD00946713 /* Models.swift in Sources */,
 				842D3B5F29F6D3720051698A /* DeviceData.swift in Sources */,
 				842E70D02B91BE1700D2D68B /* ClosedCaptionEvent.swift in Sources */,
+				40E3632E2D09DBFA0028C52A /* Int+DefaultValues.swift in Sources */,
+				40E363382D09E6560028C52A /* Array+Prepare.swift in Sources */,
 				842D3B5829F667660051698A /* CreateDeviceRequest.swift in Sources */,
 				84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */,
 				4159F1932C86FA41002B94D3 /* UserMuteResponse.swift in Sources */,
@@ -6397,6 +6804,7 @@
 				402F04A92B70ED8600CA1986 /* StreamCallStatisticsReporter.swift in Sources */,
 				8490DD1F298D39D9007E53D2 /* JsonEventDecoder.swift in Sources */,
 				40FB15192BF77EE700D5E580 /* StreamCallStateMachine+IdleStage.swift in Sources */,
+				40E3633E2D09EF560028C52A /* CMVideoDimensions+DefaultValues.swift in Sources */,
 				40382F2B2C88B84800C2D00F /* Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload+Payload.swift in Sources */,
 				84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */,
 				40034C312CFE168D00A318B1 /* StreamLocaleProvider.swift in Sources */,
@@ -6411,11 +6819,13 @@
 				4159F16D2C86FA41002B94D3 /* UserUpdatedEvent.swift in Sources */,
 				84A4DDBD2A3B35030097F3E9 /* LocationFetcher.swift in Sources */,
 				84DC38B529ADFCFD00946713 /* CallStateResponseFields.swift in Sources */,
+				40B48C472D14E803002C4EAB /* StreamVideoCapturing.swift in Sources */,
 				842E70D72B91BE1700D2D68B /* CallRecordingFailedEvent.swift in Sources */,
 				40BBC4BE2C6280E4002AEF92 /* LocalScreenShareMediaAdapter.swift in Sources */,
 				841BAA332BD15CDE000C73E4 /* SFULocationResponse.swift in Sources */,
 				84DC38D129ADFCFD00946713 /* Credentials.swift in Sources */,
 				406B3BFE2C8F53CB00FC93A1 /* StreamRTCPeerConnectionProtocol.swift in Sources */,
+				4039F0C02D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift in Sources */,
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
 				40BBC4DE2C63A507002AEF92 /* WebRTCCoordinator+CleanUp.swift in Sources */,
 				84CD12222C73831000056640 /* CallRtmpBroadcastStoppedEvent.swift in Sources */,
@@ -6436,6 +6846,7 @@
 				406583992B877AB400B4F979 /* CIImage+Resize.swift in Sources */,
 				40BBC4A42C623D03002AEF92 /* RTCRtpTransceiverInit+Convenience.swift in Sources */,
 				841BAA382BD15CDE000C73E4 /* CallTimeline.swift in Sources */,
+				40E363592D0A139E0028C52A /* CameraFocusHandler.swift in Sources */,
 				8449824D2C738A830029734D /* StartRTMPBroadcastsResponse.swift in Sources */,
 				4159F1332C861404002B94D3 /* VideoEvent.swift in Sources */,
 				84DC38C629ADFCFD00946713 /* CallRejectedEvent.swift in Sources */,
@@ -6449,12 +6860,14 @@
 				84DC38AB29ADFCFD00946713 /* RecordSettingsRequest.swift in Sources */,
 				84EA5D3F28C09AAC004D3531 /* CallController.swift in Sources */,
 				84DC38CA29ADFCFD00946713 /* UpdateCallRequest.swift in Sources */,
+				40E363752D0A2C6B0028C52A /* CGSize+Adapt.swift in Sources */,
 				4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */,
 				84AF64D9287C79F60012A503 /* Errors.swift in Sources */,
 				84DC389429ADFCFD00946713 /* UpdateUserPermissionsRequest.swift in Sources */,
 				40BBC4D02C639054002AEF92 /* WebRTCCoordinator+Idle.swift in Sources */,
 				8456E6D3287EC343004E180E /* BaseLogDestination.swift in Sources */,
 				84DCA2142A38A428000C3411 /* CoordinatorModels.swift in Sources */,
+				4061288B2CF33088007F5CDC /* SupportedPrefix.swift in Sources */,
 				40BBC4C02C629408002AEF92 /* RTCTemporaryPeerConnection.swift in Sources */,
 				84B0091B2A4C521100CF1FA7 /* Retries.swift in Sources */,
 				84DC38CD29ADFCFD00946713 /* SendEventRequest.swift in Sources */,
@@ -6479,30 +6892,35 @@
 				40FA12F22B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift in Sources */,
 				8490032629D308A000AD9BB4 /* TranscriptionSettings.swift in Sources */,
 				841BAA342BD15CDE000C73E4 /* GeolocationResult.swift in Sources */,
+				40E363712D0A27640028C52A /* BroadcastCaptureHandler.swift in Sources */,
 				848CCCEB2AB8ED8F002E83A2 /* CallHLSBroadcastingStoppedEvent.swift in Sources */,
 				40BBC4C42C638789002AEF92 /* RTCPeerConnectionCoordinator.swift in Sources */,
 				4067F3152CDA4094002E28BD /* StreamRTCAudioSession.swift in Sources */,
 				40BBC4C62C638915002AEF92 /* WebRTCCoordinator.swift in Sources */,
 				841BAA392BD15CDE000C73E4 /* UserSessionStats.swift in Sources */,
 				406B3BD72C8F332200FC93A1 /* RTCVideoTrack+Sendable.swift in Sources */,
+				406128812CF32FEF007F5CDC /* SDPLineVisitor.swift in Sources */,
 				4067F3132CDA33C6002E28BD /* RTCAudioSessionConfiguration+Default.swift in Sources */,
 				8409465829AF4EEC007AF5BF /* SendReactionRequest.swift in Sources */,
 				40BBC4BA2C627F83002AEF92 /* TrackEvent.swift in Sources */,
+				406128832CF33000007F5CDC /* SDPParser.swift in Sources */,
 				84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */,
+				4039F0CF2D024DDF0078159E /* MediaTransceiverStorage.swift in Sources */,
 				8469593829BB6B4E00134EA0 /* GetEdgesResponse.swift in Sources */,
 				40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */,
 				84DC389A29ADFCFD00946713 /* APIError.swift in Sources */,
 				8449824B2C738A830029734D /* DeleteCallRequest.swift in Sources */,
 				84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */,
-				40BBC4A52C623D03002AEF92 /* RTCSessionDescription+AudioSettings.swift in Sources */,
 				84A7E1812883629700526C98 /* WebSocketPingController.swift in Sources */,
 				84DCA2232A39E432000C3411 /* AuthMiddlewares.swift in Sources */,
+				40034C202CFDABE600A318B1 /* PublishOptions.swift in Sources */,
 				84DC389329ADFCFD00946713 /* ScreensharingSettingsRequest.swift in Sources */,
 				40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */,
 				84EBA4A22A72B81100577297 /* BroadcastBufferConnection.swift in Sources */,
 				40FB150A2BF74C1300D5E580 /* CallCache.swift in Sources */,
 				40FB02012BAC8A4A00A1C206 /* CallKitService.swift in Sources */,
 				840F598F2A77FDCB00EF3EB2 /* PinRequest.swift in Sources */,
+				40AAD1932D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift in Sources */,
 				84DC389F29ADFCFD00946713 /* JoinCallResponse.swift in Sources */,
 				84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */,
 				4065839D2B877B6500B4F979 /* UIDevice+NeuralEngine.swift in Sources */,
@@ -6518,14 +6936,15 @@
 				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
 				841BAA442BD15CDE000C73E4 /* QueryCallStatsResponse.swift in Sources */,
 				842E70D62B91BE1700D2D68B /* StartRecordingRequest.swift in Sources */,
-				840042CB2A701C2000917B30 /* BroadcastUtils.swift in Sources */,
 				844ECF4F2A33458A0023263C /* Member.swift in Sources */,
 				40C9E4442C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift in Sources */,
 				84CD12252C73840300056640 /* CallUserMutedEvent.swift in Sources */,
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
+				40E3635D2D0A17C10028C52A /* CameraVideoOutputHandler.swift in Sources */,
 				4159F17B2C86FA41002B94D3 /* RTMPSettingsRequest.swift in Sources */,
 				84DC38A129ADFCFD00946713 /* BlockUserResponse.swift in Sources */,
+				40E363362D09E4C80028C52A /* Stream_Video_Sfu_Models_VideoQuality+Convenience.swift in Sources */,
 				4012B1942BFCAC1C006B0031 /* StreamCallStateMachine+RejectingStage.swift in Sources */,
 				40BBC4D22C639158002AEF92 /* WebRTCCoordinator+Connecting.swift in Sources */,
 				40BBC4AF2C627692002AEF92 /* LocalMediaAdapting.swift in Sources */,
@@ -6541,15 +6960,16 @@
 				84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
+				40AAD1852D2D41F400D10330 /* SFUEventBucket.swift in Sources */,
 				845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */,
 				40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */,
 				402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */,
 				40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */,
-				8487D8B02A697E9A00536ED4 /* VideoCapturing.swift in Sources */,
 				40E18AAD2CD51E5900A65C9F /* RecursiveQueue.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,
 				40BBC4D42C639371002AEF92 /* WebRTCCoordinator+Connected.swift in Sources */,
 				848CCCE62AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift in Sources */,
+				4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */,
 				4097B3832BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
 				841BAA472BD15CDE000C73E4 /* CallTranscriptionReadyEvent.swift in Sources */,
@@ -6573,12 +6993,12 @@
 				842D3B5929F667660051698A /* ListDevicesResponse.swift in Sources */,
 				84DC38BD29ADFCFD00946713 /* UserResponse.swift in Sources */,
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
-				84BAD7822A6C013100733156 /* BroadcastScreenCapturer.swift in Sources */,
 				84DC38C529ADFCFD00946713 /* GetOrCreateCallRequest.swift in Sources */,
 				40BBC48C2C623C6E002AEF92 /* MediaAdapter.swift in Sources */,
 				40FB151D2BF77EFA00D5E580 /* StreamCallStateMachine+JoinedStage.swift in Sources */,
 				40BBC4B52C627761002AEF92 /* LocalVideoMediaAdapter.swift in Sources */,
 				84DC38C429ADFCFD00946713 /* MemberResponse.swift in Sources */,
+				40E363452D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift in Sources */,
 				84DC38CB29ADFCFD00946713 /* SortParamRequest.swift in Sources */,
 				8490032529D308A000AD9BB4 /* GetCallResponse.swift in Sources */,
 				841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */,
@@ -6613,9 +7033,12 @@
 				84DC389029ADFCFD00946713 /* SendEventResponse.swift in Sources */,
 				40BBC4AC2C627304002AEF92 /* AudioMediaAdapter.swift in Sources */,
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
+				402D0E8C2D0C94F900E9B83F /* CallSettings+Audio.swift in Sources */,
 				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
 				84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */,
 				406B3BEF2C8F38CE00FC93A1 /* RTCPeerConnectionEvent.swift in Sources */,
+				40070F392CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift in Sources */,
+				40AAD17E2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift in Sources */,
 				842E70D22B91BE1700D2D68B /* StartTranscriptionRequest.swift in Sources */,
 				84DC389E29ADFCFD00946713 /* CallCreatedEvent.swift in Sources */,
 				842B8E202A2DFED900863A87 /* CallSessionParticipantLeftEvent.swift in Sources */,
@@ -6648,6 +7071,7 @@
 				406B3C432C91E41400FC93A1 /* WebRTCAuthenticator.swift in Sources */,
 				84BAD77A2A6BFEF900733156 /* BroadcastBufferUploader.swift in Sources */,
 				40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */,
+				406128882CF33029007F5CDC /* RTPMapVisitor.swift in Sources */,
 				84DC38A429ADFCFD00946713 /* BackstageSettings.swift in Sources */,
 				84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */,
 				40BBC4A72C623D03002AEF92 /* StreamRTCPeerConnection+DelegatePublisher.swift in Sources */,
@@ -6673,11 +7097,12 @@
 				84DC38D429ADFCFD00946713 /* CallSettingsResponse.swift in Sources */,
 				84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */,
 				40BBC4E42C63A5FF002AEF92 /* WebRTCCoordinator+FastReconnected.swift in Sources */,
+				402D0E852D0C914900E9B83F /* SerialActorQueue.swift in Sources */,
+				40E363502D0A03FF0028C52A /* StreamCaptureDeviceProvider.swift in Sources */,
 				842B8E2E2A2DFED900863A87 /* RejectCallResponse.swift in Sources */,
 				845C09852C0DEB5C00F725B3 /* LimitsSettingsResponse.swift in Sources */,
 				4159F1952C86FA41002B94D3 /* AggregatedStats.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
-				8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */,
 				40429D5F2C779B3D00AC7FFF /* ScreenShareSession.swift in Sources */,
 				84DC38D929ADFCFD00946713 /* OpenISO8601DateFormatter.swift in Sources */,
 				84DC38A929ADFCFD00946713 /* CallUpdatedEvent.swift in Sources */,
@@ -6687,10 +7112,12 @@
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
 				40BBC48B2C623C6E002AEF92 /* ICEAdapter.swift in Sources */,
 				4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */,
+				403793C52D35196600C752DF /* StreamAppStateAdapter.swift in Sources */,
 				84DC38B429ADFCFD00946713 /* ICEServer.swift in Sources */,
 				4159F1902C86FA41002B94D3 /* PublisherAggregateStats.swift in Sources */,
 				40C4DF482C1C2BFC0035DBC2 /* LastParticipantAutoLeavePolicy.swift in Sources */,
 				82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */,
+				40E3634E2D09FDE50028C52A /* CameraCaptureHandler.swift in Sources */,
 				406583922B877A1600B4F979 /* BackgroundImageFilterProcessor.swift in Sources */,
 				8490DD23298D5330007E53D2 /* Data+Gzip.swift in Sources */,
 				84DC38B829ADFCFD00946713 /* UpdateUserPermissionsResponse.swift in Sources */,
@@ -6711,14 +7138,15 @@
 				842B8E1D2A2DFED900863A87 /* EgressHLSResponse.swift in Sources */,
 				848CCCE82AB8ED8F002E83A2 /* StartHLSBroadcastingResponse.swift in Sources */,
 				84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */,
+				40E3636C2D0A24390028C52A /* ScreenShareCaptureHandler.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
 				4012B1892BFC9E6F006B0031 /* UnfairQueue.swift in Sources */,
 				840F59922A77FDCB00EF3EB2 /* UnpinResponse.swift in Sources */,
-				8487D8AD2A67F4EC00536ED4 /* ScreenshareCapturer.swift in Sources */,
 				84BAD7782A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift in Sources */,
 				4159F1992C86FA41002B94D3 /* CountrywiseAggregateStats.swift in Sources */,
 				40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */,
 				40BBC4E22C63A5C5002AEF92 /* WebRTCCoordinator+FastReconnecting.swift in Sources */,
+				40070F3B2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift in Sources */,
 				406B3BE92C8F384A00FC93A1 /* RTCMediaStream+CustomStringConvertible.swift in Sources */,
 				40429D612C779B7000AC7FFF /* SFUSignalService.swift in Sources */,
 				435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */,
@@ -6727,6 +7155,7 @@
 				40FB150F2BF77CEC00D5E580 /* StreamStateMachine.swift in Sources */,
 				40CB9FA42B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift in Sources */,
 				4159F1762C86FA41002B94D3 /* RTMPSettingsResponse.swift in Sources */,
+				40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */,
 				40BBC4EA2C63A665002AEF92 /* WebRTCCoordinator+Migrated.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
 				848CCCE72AB8ED8F002E83A2 /* ThumbnailsSettingsRequest.swift in Sources */,
@@ -6735,6 +7164,7 @@
 				84CD12202C73831000056640 /* CallMissedEvent.swift in Sources */,
 				842B8E1C2A2DFED900863A87 /* AcceptCallResponse.swift in Sources */,
 				40FE5EB32C9C73E0006B0881 /* StreamDeviceOrientationAdapter.swift in Sources */,
+				40AAD1952D2EF36B00D10330 /* CaptureDeviceProtocol.swift in Sources */,
 				40C9E45B2C9987CE00802B28 /* Publisher+Sendable.swift in Sources */,
 				40F18B8E2BEBB65100ADF76E /* View+OptionalPublisher.swift in Sources */,
 				40C9E4512C9880DB00802B28 /* Unwrap.swift in Sources */,
@@ -6760,17 +7190,18 @@
 				848CCCEA2AB8ED8F002E83A2 /* RecordSettingsResponse.swift in Sources */,
 				40BBC4A62C623D03002AEF92 /* RTCRtpTransceiverDirection+CustomStringConvertible.swift in Sources */,
 				84DC38BA29ADFCFD00946713 /* CallResponse.swift in Sources */,
-				843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */,
 				842E70DF2B91E84800D2D68B /* HealthCheckEvent.swift in Sources */,
 				84DC388F29ADFCFD00946713 /* CodableHelper.swift in Sources */,
 				8409465A29AF4EEC007AF5BF /* ReactionResponse.swift in Sources */,
 				402F04AA2B70ED8600CA1986 /* Statistics+Convenience.swift in Sources */,
 				8490032429D308A000AD9BB4 /* RingSettings.swift in Sources */,
 				840F598E2A77FDCB00EF3EB2 /* BroadcastSettingsRequest.swift in Sources */,
+				40E3635B2D0A15E40028C52A /* CameraCapturePhotoHandler.swift in Sources */,
 				842B8E272A2DFED900863A87 /* CallSessionEndedEvent.swift in Sources */,
 				844982482C738A830029734D /* DeleteCallResponse.swift in Sources */,
 				84DC38CF29ADFCFD00946713 /* QueryCallsRequest.swift in Sources */,
 				40BBC4D82C639740002AEF92 /* WebRTCJoinRequestFactory.swift in Sources */,
+				40E363402D09F0950028C52A /* Comparable+Clamped.swift in Sources */,
 				406B3BDD2C8F351E00FC93A1 /* RTCIceCandidate+Sendable.swift in Sources */,
 				84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */,
 				841BAA402BD15CDE000C73E4 /* UserStats.swift in Sources */,
@@ -6790,15 +7221,16 @@
 				40AF6A412C9356B700BA2935 /* WebRTCCoordinatorStateMachine_MigratingStageTests.swift in Sources */,
 				408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */,
 				84F58B7029EE914400010C4C /* BackgroundTaskScheduler_Tests.swift in Sources */,
+				40B48C3B2D14D6CF002C4EAB /* RTCMediaStream_ConvenienceTests.swift in Sources */,
 				842747F329EED8D900E063AD /* InternetConnection_Mock.swift in Sources */,
 				403FB1622BFE22A40047A696 /* StreamCallStateMachineStageRejectedStage_Tests.swift in Sources */,
 				8478A0EC29F2604A0001F860 /* ControllerTestCase.swift in Sources */,
 				406B3C312C90882700FC93A1 /* ScreenShareMediaAdapter_Tests.swift in Sources */,
 				842747EE29EED60600E063AD /* Calendar+GMT.swift in Sources */,
-				846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */,
 				84F58B8929EEAC4400010C4C /* MockFunc.swift in Sources */,
 				40F0174B2BBEEFB200E89FD1 /* VideoSettings+Dummy.swift in Sources */,
 				40E9B3B12BCD755F00ACF18F /* MemberResponse+Dummy.swift in Sources */,
+				40B48C392D14D496002C4EAB /* RTCVideoTrack_CloneTests.swift in Sources */,
 				8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */,
 				406B3C4C2C91EFA700FC93A1 /* MockCallAuthenticator.swift in Sources */,
 				40F0174D2BBEEFD500E89FD1 /* TranscriptionSettings+Dummy.swift in Sources */,
@@ -6806,21 +7238,27 @@
 				4067F3192CDA469F002E28BD /* MockAudioSession.swift in Sources */,
 				40AB34C92C5D3F2E00B5B6B3 /* ParticipantsStats+Dummy.swift in Sources */,
 				84F58B7629EE92BF00010C4C /* UniqueValues.swift in Sources */,
+				40B48C512D14F7AE002C4EAB /* SDPParser_Tests.swift in Sources */,
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
 				40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */,
 				40C9E4572C98B06E00802B28 /* WebRTCConfiguration_Tests.swift in Sources */,
+				40B48C1D2D14CA25002C4EAB /* Array_PrepareTests.swift in Sources */,
 				40C9E4592C98B1A900802B28 /* WebRTCStateAdapter_Tests.swift in Sources */,
+				40B48C212D14CB1B002C4EAB /* Int_DefaultValuesTests.swift in Sources */,
 				40F017612BBEF15E00E89FD1 /* CallParticipantResponse+Dummy.swift in Sources */,
 				40034C2E2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */,
 				406B3C552C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift in Sources */,
 				40C9E4642C99886900802B28 /* WebRTCCoorindator_Tests.swift in Sources */,
 				40F017772BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */,
+				40B48C2A2D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift in Sources */,
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
+				40B48C582D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */,
+				40B48C282D14CDD5002C4EAB /* StreamVideoSfuModelsCodec_ConvenienceTests.swift in Sources */,
 				40E9B3B52BCD93F500ACF18F /* Credentials+Dummy.swift in Sources */,
 				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
 				40E9B3B72BCD941600ACF18F /* SFUResponse+Dummy.swift in Sources */,
 				40382F432C89CF9700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */,
-				406B3C252C903BDE00FC93A1 /* MockVideoCapturer.swift in Sources */,
+				40B48C1F2D14CAFC002C4EAB /* Comparable_ClampedTests.swift in Sources */,
 				40F017672BBEF1B700E89FD1 /* CallIngressResponse+Dummy.swift in Sources */,
 				406B3C4F2C91F0CA00FC93A1 /* WebRTCCoordinatorStateMachine_ConnectingStageTests.swift in Sources */,
 				40C9E44C2C948A1F00802B28 /* WebRTCAuthenticator_Tests.swift in Sources */,
@@ -6834,27 +7272,35 @@
 				403FB1542BFE1E360047A696 /* StreamCallStateMachineStageIdleStage_Tests.swift in Sources */,
 				406B3C342C908B0A00FC93A1 /* ICEAdapter_Tests.swift in Sources */,
 				40AB34CC2C5D440E00B5B6B3 /* MockSignalServer.swift in Sources */,
-				845E31082A712389004DC470 /* BroadcastUtils_Tests.swift in Sources */,
 				4029E9572CB943E800E1D571 /* CollectionDelayedUpdateObserver_Tests.swift in Sources */,
+				40AAD1892D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift in Sources */,
+				40AAD1912D2EF18A00D10330 /* MockCaptureDevice.swift in Sources */,
 				406B3C5B2C92CFFD00FC93A1 /* WebRTCCoordinatorStateMachine_JoinedStageTests.swift in Sources */,
 				84F58B8729EEABF700010C4C /* EventBatcher_Mock.swift in Sources */,
+				40B48C302D14D308002C4EAB /* MockRTCRtpEncodingParameters.swift in Sources */,
 				40F017572BBEF07B00E89FD1 /* GeofenceSettings+Dummy.swift in Sources */,
 				40C9E4532C9888C100802B28 /* WebRTCMigrationStatusObserver_Tests.swift in Sources */,
 				40DE867D2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift in Sources */,
 				40483CBA2C9B1E6600B4FCA8 /* MockWebRTCCoordinatorFactory.swift in Sources */,
 				845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */,
 				4029E9552CB9436F00E1D571 /* IncomingVideoQualitySettings_Tests.swift in Sources */,
+				40B48C402D14DB26002C4EAB /* MediaTransceiverStorage_Tests.swift in Sources */,
 				40F017392BBEAF6400E89FD1 /* MockCallKitService.swift in Sources */,
 				403FB1602BFE22840047A696 /* StreamCallStateMachineStageRejectingStage_Tests.swift in Sources */,
 				40F017402BBEBC6500E89FD1 /* MockCallKitPushNotificationAdapter.swift in Sources */,
 				40986C3E2CD1148F00510F88 /* AudioSession_Tests.swift in Sources */,
 				403FB1512BFE1AA90047A696 /* StreamCallStateMachine_Tests.swift in Sources */,
 				406B3C532C92007900FC93A1 /* WebRTCCoordinatorStateMachine_ConnectedStageTests.swift in Sources */,
+				40B48C172D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift in Sources */,
+				40B48C342D14D3E6002C4EAB /* StreamVideoSfuSignalTrackSubscriptionDetails_ConvenienceTests.swift in Sources */,
+				40B48C4F2D14F77B002C4EAB /* SupportedPrefix_Tests.swift in Sources */,
 				84F58B8129EE9C4900010C4C /* WebSocketPingController_Delegate.swift in Sources */,
 				40AB34D02C5D443F00B5B6B3 /* MockWebSocketEngine.swift in Sources */,
+				40B48C322D14D361002C4EAB /* StreamVideoSfuModelsVideoLayer_ConvenienceTests.swift in Sources */,
 				406B3C0F2C8F866100FC93A1 /* MockStreamCallAudioRecorder.swift in Sources */,
 				40AB34CE2C5D442800B5B6B3 /* MockWebSocketClient.swift in Sources */,
 				8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
+				40B48C1A2D14C9BE002C4EAB /* CMVideoDimensions_DefaultValuesTests.swift in Sources */,
 				403FB15E2BFE224D0047A696 /* StreamCallStateMachineStageAcceptedStage_Tests.swift in Sources */,
 				408CF9C32CAE886D00F56833 /* WebRTCIntegrationTests.swift in Sources */,
 				8414081329F28B5700FF2D7C /* RTCConfiguration_Tests.swift in Sources */,
@@ -6862,14 +7308,17 @@
 				403FB1562BFE1FC00047A696 /* StreamCallStateMachineStageErrorStage_Tests.swift in Sources */,
 				40E18AB42CD522F700A65C9F /* RecursiveQueueTests.swift in Sources */,
 				40AF6A4B2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift in Sources */,
+				40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */,
 				842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */,
 				40C9E4552C988CE100802B28 /* WebRTCJoinRequestFactory_Tests.swift in Sources */,
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
+				40B48C2E2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift in Sources */,
 				40FE5EBF2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */,
+				403793C92D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift in Sources */,
 				40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */,
+				40AAD1872D2D717300D10330 /* SFUEventBucket_Tests.swift in Sources */,
 				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,
 				406B3C142C8F870400FC93A1 /* MockActiveCallProvider.swift in Sources */,
-				841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */,
 				40C2B5C62C2D7AED00EC2C2D /* RejectionReasonProvider_Tests.swift in Sources */,
 				403FB15C2BFE22170047A696 /* StreamCallStateMachineStageAcceptingStage_Tests.swift in Sources */,
 				841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */,
@@ -6907,6 +7356,8 @@
 				84DC44982BA3ACC70050290C /* CallStatsReporting_Tests.swift in Sources */,
 				84F58B7229EE922700010C4C /* WebSocketConnectionState_Tests.swift in Sources */,
 				40FE5EBD2C9C82A6006B0881 /* MockRTCVideoCapturerDelegate.swift in Sources */,
+				40B48C4C2D14F721002C4EAB /* RTPMapVisitorTests.swift in Sources */,
+				40B48C152D14C93B002C4EAB /* CGSize_AdaptTests.swift in Sources */,
 				40382F3D2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */,
 				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
@@ -6920,17 +7371,19 @@
 				40F0173B2BBEB1A900E89FD1 /* CallKitAdapterTests.swift in Sources */,
 				403FB1492BFDF3950047A696 /* CallCache_Tests.swift in Sources */,
 				40AB34BA2C5D2F6200B5B6B3 /* Task_TimeoutTests.swift in Sources */,
+				40AAD1972D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift in Sources */,
 				40A0E9642B88DE830089E8D3 /* SerialActor_Tests.swift in Sources */,
 				40F017692BBEF1DA00E89FD1 /* EgressHLSResponse+Dummy.swift in Sources */,
 				40382F3F2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift in Sources */,
+				40AAD18C2D2EC82700D10330 /* StreamRTCStatisticsReport+Dummy.swift in Sources */,
 				40AF6A452C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift in Sources */,
 				84F58B8B29EEACAD00010C4C /* WebSocketEngine_Mock.swift in Sources */,
 				84F58B8D29EEAE2D00010C4C /* AssertAsync.swift in Sources */,
+				40B48C232D14CB8A002C4EAB /* Publisher_TaskSinkTests.swift in Sources */,
 				842747F629EEDB1300E063AD /* EventBatcher_Tests.swift in Sources */,
 				4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */,
 				84F58B8529EEABC100010C4C /* EventDecoder_Mock.swift in Sources */,
 				8414081129F284A800FF2D7C /* AssertJSONEqual.swift in Sources */,
-				406B3C202C903B0700FC93A1 /* MockCameraVideoCapturer.swift in Sources */,
 				40382F382C89C0F500C2D00F /* MockRTCPeerConnectionCoordinator.swift in Sources */,
 				4097B37E2BF4B06A0057992D /* GetCallResponse+Dummy.swift in Sources */,
 				846D16292A52F3A10036CE4C /* MicrophoneManager_Tests.swift in Sources */,
@@ -6958,25 +7411,30 @@
 				40C4DF502C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift in Sources */,
 				4013387C2BF248E9007318BD /* Mockable.swift in Sources */,
 				406B3C512C91F8C000FC93A1 /* MockWebRTCAuthenticator.swift in Sources */,
+				40B48C492D14E822002C4EAB /* MockStreamVideoCapturer.swift in Sources */,
 				402C545B2B6BE50500672BFB /* MockStreamStatistics.swift in Sources */,
 				8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */,
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
 				40F0175F2BBEF11600E89FD1 /* AudioSettings+Dummy.swift in Sources */,
 				40986C3A2CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift in Sources */,
 				40F0176F2BBEF22D00E89FD1 /* CallResponse+Dummy.swift in Sources */,
+				40B48C372D14D424002C4EAB /* RTCAudioTrack_CloneTests.swift in Sources */,
 				40F0174F2BBEEFED00E89FD1 /* ThumbnailsSettings+Dummy.swift in Sources */,
 				842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */,
 				401338782BF248B9007318BD /* MockStreamVideo.swift in Sources */,
 				84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */,
 				40AF6A432C93585B00BA2935 /* WebRTCCoordinatorStateMachine_MigratedStageTests.swift in Sources */,
+				40B48C122D14C43F002C4EAB /* PublishOptions_Tests.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */,
+				40AAD1832D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */,
 				84CC05892A530C3F00EE9815 /* SpeakerManager_Tests.swift in Sources */,
 				8251E62B2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				406B3C3F2C919BB300FC93A1 /* MockSFUStack.swift in Sources */,
 				403FB14C2BFE14760047A696 /* Publisher_NextTests.swift in Sources */,
 				84A4DCBB2A41DC6E00B1D1BF /* AsyncAssert.swift in Sources */,
 				406B3C162C90343300FC93A1 /* LocalVideoMediaAdapter_Tests.swift in Sources */,
+				40B48C3D2D14D7EF002C4EAB /* RTCRtpTransceiverInit_ConvenienceTests.swift in Sources */,
 				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
 				40F017512BBEF00500E89FD1 /* ScreensharingSettings+Dummy.swift in Sources */,
 				40AF6A492C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift in Sources */,
@@ -6986,6 +7444,7 @@
 				402C545D2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift in Sources */,
 				40AB34C72C5D3F0400B5B6B3 /* CallStatsReport+Dummy.swift in Sources */,
 				40986C3C2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift in Sources */,
+				40B48C2C2D14D0FF002C4EAB /* StreamVideoSfuModelsPublishOption_ConvenienceTests.swift in Sources */,
 				406B3C1C2C903A2B00FC93A1 /* MockVideoCapturerFactory.swift in Sources */,
 				84BB570E2A20D7BB0002C123 /* Mapping_Tests.swift in Sources */,
 				8251E62F2A17BEEF00E7257A /* ImageFactory.swift in Sources */,
@@ -6994,6 +7453,7 @@
 				4063033F2AD847EC0091AE77 /* CallState_Tests.swift in Sources */,
 				408CF9CE2CAFF90A00F56833 /* VideoCapturePolicy_Tests.swift in Sources */,
 				406B3C2F2C90864900FC93A1 /* VideoMediaAdapter_Tests.swift in Sources */,
+				40AAD18F2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift in Sources */,
 				843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */,
 				4031D7F82B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift in Sources */,
 				403CA9BE2CCA54A4001A88C2 /* Stream_Video_Sfu_Models_Codec+Dummy.swift in Sources */,
@@ -7147,6 +7607,7 @@
 				841FF5152A5E99B400809BBB /* CallEventsHandler_Tests.swift in Sources */,
 				82E3BA462A0BAE1E001AB93E /* VirtualTime.swift in Sources */,
 				40382F422C89CF9700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */,
+				40B48C572D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */,
 				82FF40B72A17C6CD00B4D95E /* ReconnectionView_Tests.swift in Sources */,
 				829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */,
 				829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */,
@@ -7163,6 +7624,7 @@
 				82E3BA402A0BADF9001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
 				403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */,
+				40AAD18A2D2D719A00D10330 /* Stream_Video_Sfu_Event_SubscriberOffer+Dummy.swift in Sources */,
 				40245F452BE2746300FCF075 /* CallIngressResponse+Dummy.swift in Sources */,
 				40245F462BE2746300FCF075 /* GeofenceSettings+Dummy.swift in Sources */,
 				40245F472BE2746300FCF075 /* CallRejectedEvent+Dummy.swift in Sources */,
@@ -7207,6 +7669,8 @@
 				82FF40C02A17C73C00B4D95E /* CallingGroupView_Tests.swift in Sources */,
 				40245F612BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift in Sources */,
 				407AF71A2B6163DD00E9E3E7 /* StreamMediaDurationFormatter_Tests.swift in Sources */,
+				40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */,
+				40AAD1982D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift in Sources */,
 				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
 				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
 				82FF40CA2A17C76400B4D95E /* MicrophoneCheckView_Tests.swift in Sources */,
@@ -7220,6 +7684,7 @@
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
 				84DCA20C2A38300C000C3411 /* StreamVideoTestCase.swift in Sources */,
 				82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */,
+				40AAD1822D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */,
 				40382F452C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */,
 				82E3BA382A0BADB8001AB93E /* CallController_Mock.swift in Sources */,
 				40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */,
@@ -7244,6 +7709,7 @@
 				82FF40CC2A17C76B00B4D95E /* OutgoingCallView_Tests.swift in Sources */,
 				403CA9BF2CCA54A4001A88C2 /* Stream_Video_Sfu_Models_Codec+Dummy.swift in Sources */,
 				40382F402C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift in Sources */,
+				849A05122D199EE2004C33F2 /* StreamAppStateAdapter_Tests.swift in Sources */,
 				82E3BA4E2A0BAE4D001AB93E /* VirtualTimer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

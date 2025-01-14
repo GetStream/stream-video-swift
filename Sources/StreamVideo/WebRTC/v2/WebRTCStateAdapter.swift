@@ -55,6 +55,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         didSet { didUpdate(videoOptions: videoOptions) }
     }
 
+    /// Published property to track publish options and update them.
+    @Published private(set) var publishOptions: PublishOptions = .init() {
+        didSet { didUpdate(publishOptions: publishOptions) }
+    }
+
     @Published private(set) var connectOptions: ConnectOptions = .init(iceServers: [])
     @Published private(set) var ownCapabilities: Set<OwnCapability> = []
     @Published private(set) var sfuAdapter: SFUAdapter?
@@ -131,13 +136,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func set(audioSettings value: AudioSettings) { self.audioSettings = value }
 
     /// Sets the video options.
-    func set(videoOptions value: VideoOptions) {
-        self.videoOptions = value
-        
-        // Note that the preferredEncodingCodec won't affect any transceivers
-        // that have already been created.
-        peerConnectionFactory.setPreferredEncodingCodec(value.preferredVideoCodec)
-    }
+    func set(videoOptions value: VideoOptions) { self.videoOptions = value }
+
+    /// Sets the publish options.
+    func set(publishOptions value: PublishOptions) { self.publishOptions = value }
 
     /// Sets the connection options.
     func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
@@ -222,6 +224,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             videoConfig: videoConfig,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
@@ -239,6 +242,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             videoConfig: videoConfig,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
@@ -260,13 +264,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             }
             .store(in: peerConnectionsDisposableBag)
 
+        /// We setUp and restoreScreenSharing on  the publisher in order to prepare all required tracks
+        /// for publication. In that way, negotiation will wait until ``completeSetUp`` has been called.
+        /// Then, with all the tracks prepared, will continue the negotiation flow.
         try await publisher.setUp(
             with: callSettings,
             ownCapabilities: Array(
                 ownCapabilities
             )
         )
+        self.publisher = publisher
+        try await restoreScreenSharing()
         publisher.setVideoFilter(videoFilter)
+        publisher.completeSetUp()
 
         try await subscriber.setUp(
             with: callSettings,
@@ -274,9 +284,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 ownCapabilities
             )
         )
-
-        self.publisher = publisher
         self.subscriber = subscriber
+        subscriber.completeSetUp()
     }
 
     /// Cleans up the WebRTC session by closing connections and resetting
@@ -493,6 +502,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private func didUpdate(videoOptions: VideoOptions) {
         publisher?.videoOptions = videoOptions
         subscriber?.videoOptions = videoOptions
+    }
+
+    /// Updates the publish options and notifies the publisher.
+    private func didUpdate(publishOptions: PublishOptions) {
+        publisher?.publishOptions = publishOptions
     }
 
     // MARK: Participant Operations

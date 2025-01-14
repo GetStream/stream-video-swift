@@ -32,6 +32,7 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
         case addCandidate
         case restartICE
         case close
+        case transceivers
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -40,10 +41,11 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
         case offer(constraints: RTCMediaConstraints)
         case answer(constraints: RTCMediaConstraints)
         case statistics
-        case addTransceiver(track: RTCMediaStreamTrack, transceiverInit: RTCRtpTransceiverInit)
+        case addTransceiver(trackType: TrackType, track: RTCMediaStreamTrack, transceiverInit: RTCRtpTransceiverInit)
         case addCandidate(candidate: RTCIceCandidate)
         case restartICE
         case close
+        case transceivers(trackType: TrackType)
 
         var payload: Any {
             switch self {
@@ -57,14 +59,16 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
                 return constraints
             case .statistics:
                 return ()
-            case let .addTransceiver(track, transceiverInit):
-                return (track, transceiverInit)
+            case let .addTransceiver(trackType, track, transceiverInit):
+                return (trackType, track, transceiverInit)
             case let .addCandidate(candidate):
                 return candidate
             case .restartICE:
                 return ()
             case .close:
                 return ()
+            case let .transceivers(trackType):
+                return trackType
             }
         }
     }
@@ -104,7 +108,13 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
     ) async throws -> RTCSessionDescription {
         stubbedFunctionInput[.offer]?
             .append(.offer(constraints: constraints))
-        return stubbedFunction[.offer] as! RTCSessionDescription
+        if let result = stubbedFunction[.offer] as? RTCSessionDescription {
+            return result
+        } else if let result = stubbedFunction[.offer] as? StubVariantResultProvider<RTCSessionDescription> {
+            return result.getResult(for: timesCalled(.offer))
+        } else {
+            return RTCSessionDescription(type: .offer, sdp: .unique)
+        }
     }
 
     func answer(
@@ -122,12 +132,31 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
     }
 
     func addTransceiver(
+        trackType: TrackType,
         with track: RTCMediaStreamTrack,
         init transceiverInit: RTCRtpTransceiverInit
     ) -> RTCRtpTransceiver? {
         stubbedFunctionInput[.addTransceiver]?
-            .append(.addTransceiver(track: track, transceiverInit: transceiverInit))
-        return stubbedFunction[.addTransceiver] as? RTCRtpTransceiver
+            .append(.addTransceiver(trackType: trackType, track: track, transceiverInit: transceiverInit))
+        if let result = stubbedFunction[.addTransceiver] as? RTCRtpTransceiver {
+            result.sender.track = track
+            return result
+        } else if
+            let provider = stubbedFunction[.addTransceiver] as? StubVariantResultProvider<RTCRtpTransceiver> {
+            let result = provider.getResult(for: timesCalled(.addTransceiver))
+            result.sender.track = track
+            return result
+        } else {
+            return nil
+        }
+    }
+
+    func transceivers(
+        for trackType: TrackType
+    ) -> [RTCRtpTransceiver] {
+        stubbedFunctionInput[.transceivers]?
+            .append(.transceivers(trackType: trackType))
+        return stubbedFunction[.transceivers] as? [RTCRtpTransceiver] ?? []
     }
 
     func add(_ candidate: RTCIceCandidate) async throws {

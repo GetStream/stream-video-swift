@@ -216,8 +216,6 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             .stateAdapter
             .videoOptions
         XCTAssertEqual(videoOptions.preferredCameraPosition, .back)
-        XCTAssertEqual(videoOptions.preferredDimensions.height, 200)
-        XCTAssertEqual(videoOptions.preferredDimensions.width, 300)
     }
 
     func test_authenticate_updatesIntervalOnStatsReporter() async throws {
@@ -243,7 +241,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase {
             .coordinator
             .stateAdapter
             .statsReporter
-        XCTAssertEqual(statsReporter?.interval, 12)
+        XCTAssertEqual(statsReporter?.deliveryInterval, 12)
     }
 
     // MARK: - waitForAuthentication

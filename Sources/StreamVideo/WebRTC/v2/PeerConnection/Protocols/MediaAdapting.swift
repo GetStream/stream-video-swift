@@ -12,11 +12,9 @@ protocol MediaAdapting {
     /// A subject for publishing track events.
     var subject: PassthroughSubject<TrackEvent, Never> { get }
 
-    /// The local media track managed by this adapter, if any.
-    var localTrack: RTCMediaStreamTrack? { get }
-
-    /// The mid (Media Stream Identification) of the local track, if available.
-    var mid: String? { get }
+    func trackInfo(
+        for collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo]
 
     /// Sets up the media adapter with the given settings and capabilities.
     ///
@@ -34,4 +32,6 @@ protocol MediaAdapting {
     /// - Parameter settings: The updated call settings.
     /// - Throws: An error if the update process fails.
     func didUpdateCallSettings(_ settings: CallSettings) async throws
+
+    func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws
 }

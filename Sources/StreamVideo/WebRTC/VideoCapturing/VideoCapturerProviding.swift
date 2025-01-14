@@ -5,82 +5,82 @@
 import StreamWebRTC
 
 /// A protocol defining methods for creating video capturing objects.
+///
+/// `VideoCapturerProviding` enables the creation of video capturers for camera
+/// and screen sharing. Implementations can define how capturers are configured
+/// and initialized, supporting custom sources and optional filters.
 protocol VideoCapturerProviding {
 
-    /// Builds a camera capturer with the specified source, options, and filters.
-    /// - Parameters:
-    ///   - source: The video source for the capturer.
-    ///   - options: Configuration options for the video capture.
-    ///   - filters: An array of video filters to apply.
-    /// - Returns: An object conforming to `CameraVideoCapturing` for camera capture.
+    /// Builds a camera capturer with the specified source.
+    ///
+    /// - Parameter source: The video source for the capturer, responsible for
+    ///   providing captured frames.
+    /// - Returns: An instance of `StreamVideoCapturer` for managing camera-based
+    ///   video capturing.
+    ///
+    /// This method is used for creating a video capturer for a camera input,
+    /// which can be further configured to process video frames.
     func buildCameraCapturer(
-        source: RTCVideoSource,
-        options: VideoOptions,
-        filters: [VideoFilter]
-    ) -> CameraVideoCapturing
+        source: RTCVideoSource
+    ) -> StreamVideoCapturing
 
-    /// Builds a screen capturer with the specified type, source, options, and filters.
+    /// Builds a screen capturer based on the specified type and source.
+    ///
     /// - Parameters:
-    ///   - type: The type of screen sharing to perform.
-    ///   - source: The video source for the capturer.
-    ///   - options: Configuration options for the video capture.
-    ///   - filters: An array of video filters to apply.
-    /// - Returns: An object conforming to `VideoCapturing` for screen capture.
+    ///   - type: The type of screen sharing (`.inApp` or `.broadcast`).
+    ///   - source: The video source for the capturer, providing the captured frames.
+    /// - Returns: An instance of `StreamVideoCapturer` for managing screen sharing.
+    ///
+    /// Depending on the screen sharing type, this method creates a capturer that
+    /// supports either in-app screen sharing or broadcasting functionality.
     func buildScreenCapturer(
         _ type: ScreensharingType,
-        source: RTCVideoSource,
-        options: VideoOptions,
-        filters: [VideoFilter]
-    ) -> VideoCapturing
+        source: RTCVideoSource
+    ) -> StreamVideoCapturing
 }
 
 /// A concrete implementation of `VideoCapturerProviding` for creating video capturers.
+///
+/// `StreamVideoCapturerFactory` provides capturers for both camera and screen sharing
+/// scenarios. It supports flexible configurations and integrates with the WebRTC stack
+/// to manage video capturing effectively.
 final class StreamVideoCapturerFactory: VideoCapturerProviding {
 
-    /// Creates a camera capturer with the given parameters.
-    /// - Parameters:
-    ///   - source: The video source for the capturer.
-    ///   - options: Configuration options for the video capture.
-    ///   - filters: An array of video filters to apply.
-    /// - Returns: A `VideoCapturer` instance for camera capture.
+    /// Creates a camera capturer using the specified video source.
+    ///
+    /// - Parameter source: The video source for the capturer, responsible for
+    ///   providing captured frames.
+    /// - Returns: A `StreamVideoCapturer` instance configured for camera capturing.
+    ///
+    /// This method initializes a camera capturer, suitable for use in scenarios
+    /// where a camera is the video input source.
     func buildCameraCapturer(
-        source: RTCVideoSource,
-        options: VideoOptions,
-        filters: [VideoFilter]
-    ) -> CameraVideoCapturing {
-        VideoCapturer(
-            videoSource: source,
-            videoOptions: options,
-            videoFilters: filters
-        )
+        source: RTCVideoSource
+    ) -> StreamVideoCapturing {
+        StreamVideoCapturer.cameraCapturer(with: source)
     }
 
-    /// Creates a screen capturer based on the specified type and parameters.
+    /// Creates a screen capturer based on the provided type and source.
+    ///
     /// - Parameters:
-    ///   - type: The type of screen sharing to perform.
-    ///   - source: The video source for the capturer.
-    ///   - options: Configuration options for the video capture.
-    ///   - filters: An array of video filters to apply.
-    /// - Returns: A `VideoCapturing` instance for screen capture, either `ScreenshareCapturer` or `BroadcastScreenCapturer`.
+    ///   - type: The type of screen sharing (`.inApp` or `.broadcast`).
+    ///   - source: The video source for the capturer, providing the captured frames.
+    /// - Returns: A `StreamVideoCapturer` instance configured for screen sharing.
+    ///
+    /// This method dynamically creates a capturer based on the screen sharing type:
+    /// - `.inApp`: Configures a capturer for sharing within the app.
+    /// - `.broadcast`: Configures a capturer for system-level broadcast sharing.
+    ///
+    /// Use this method to support flexible screen sharing needs.
     func buildScreenCapturer(
         _ type: ScreensharingType,
-        source: RTCVideoSource,
-        options: VideoOptions,
-        filters: [VideoFilter]
-    ) -> VideoCapturing {
+        source: RTCVideoSource
+    ) -> StreamVideoCapturing {
         switch type {
         case .inApp:
-            return ScreenshareCapturer(
-                videoSource: source,
-                videoOptions: options,
-                videoFilters: filters
-            )
+            return StreamVideoCapturer.screenShareCapturer(with: source)
         case .broadcast:
-            return BroadcastScreenCapturer(
-                videoSource: source,
-                videoOptions: options,
-                videoFilters: filters
-            )
+            return StreamVideoCapturer.broadcastCapturer(with: source)
         }
     }
 }

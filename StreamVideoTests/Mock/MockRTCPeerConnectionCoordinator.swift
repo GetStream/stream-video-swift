@@ -35,10 +35,12 @@ final class MockRTCPeerConnectionCoordinator:
         case addVideoOutput
         case removeVideoOutput
         case zoom
+        case trackInfo
+        case statsReport
     }
 
     enum MockFunctionInputKey: Payloadable {
-        case changePublishQuality(layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting])
+        case changePublishQuality(event: Stream_Video_Sfu_Event_ChangePublishQuality)
         case didUpdateCallSettings(callSettings: CallSettings)
         case didUpdateCameraPosition(position: AVCaptureDevice.Position)
         case mid(type: TrackType)
@@ -56,11 +58,13 @@ final class MockRTCPeerConnectionCoordinator:
         case addVideoOutput(videoOutput: AVCaptureVideoDataOutput)
         case removeVideoOutput(videoOutput: AVCaptureVideoDataOutput)
         case zoom(factor: CGFloat)
+        case trackInfo(trackType: TrackType)
+        case statsReport
 
         var payload: Any {
             switch self {
-            case let .changePublishQuality(layerSettings):
-                return layerSettings
+            case let .changePublishQuality(event):
+                return event
             case let .didUpdateCallSettings(callSettings):
                 return callSettings
             case let .didUpdateCameraPosition(position):
@@ -95,6 +99,10 @@ final class MockRTCPeerConnectionCoordinator:
                 return videoOutput
             case let .zoom(factor):
                 return factor
+            case let .trackInfo(trackType):
+                return trackType
+            case .statsReport:
+                return ()
             }
         }
     }
@@ -117,6 +125,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     var stubbedMid: [TrackType: String] = [:]
     var stubbedTrack: [TrackType: RTCMediaStreamTrack] = [:]
+    var stubbedTrackInfo: [TrackType: [Stream_Video_Sfu_Models_TrackInfo]] = [:]
 
     override var disconnectedPublisher: AnyPublisher<Void, Never> {
         if let stub = stubbedProperty[propertyKey(for: \.disconnectedPublisher)] as? AnyPublisher<Void, Never> {
@@ -133,12 +142,13 @@ final class MockRTCPeerConnectionCoordinator:
         videoConfig: VideoConfig = .dummy(),
         callSettings: CallSettings = .init(),
         audioSettings: AudioSettings = .init(),
+        publishOptions: PublishOptions = .init(),
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) throws {
         let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: MockAudioProcessingModule()
+            audioProcessingModule: MockAudioProcessingModule.shared
         )
         self.init(
             sessionId: .unique,
@@ -149,6 +159,7 @@ final class MockRTCPeerConnectionCoordinator:
             videoConfig: videoConfig,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider
@@ -156,10 +167,10 @@ final class MockRTCPeerConnectionCoordinator:
     }
 
     override func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
         stubbedFunctionInput[.changePublishQuality]?
-            .append(.changePublishQuality(layerSettings: layerSettings))
+            .append(.changePublishQuality(event: event))
     }
 
     override func didUpdateCallSettings(_ settings: CallSettings) async throws {
@@ -181,28 +192,6 @@ final class MockRTCPeerConnectionCoordinator:
     ) async throws {
         stubbedFunctionInput[.didUpdateCameraPosition]?
             .append(.didUpdateCameraPosition(position: position))
-    }
-
-    override func mid(for type: TrackType) -> String? {
-        stubbedFunctionInput[.mid]?.append(.mid(type: type))
-        if let result = stubbedMid[type] {
-            return result
-        } else if let result = stubbedFunction[.mid] as? String {
-            return result
-        } else {
-            return nil
-        }
-    }
-
-    override func localTrack(of type: TrackType) -> RTCMediaStreamTrack? {
-        stubbedFunctionInput[.localTrack]?.append(.mid(type: type))
-        if let result = stubbedTrack[type] {
-            return result
-        } else if let result = stubbedFunction[.localTrack] as? RTCMediaStreamTrack {
-            return result
-        } else {
-            return nil
-        }
     }
 
     override func restartICE() {
@@ -252,7 +241,7 @@ final class MockRTCPeerConnectionCoordinator:
         stubbedFunctionInput[.stopScreenSharing]?.append(.stopScreenSharing)
     }
 
-    override func focus(at point: CGPoint) throws {
+    override func focus(at point: CGPoint) async throws {
         stubbedFunctionInput[.focus]?.append(
             .focus(point: point)
         )
@@ -260,7 +249,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.addCapturePhotoOutput]?.append(
             .addCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput)
         )
@@ -268,7 +257,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.removeCapturePhotoOutput]?.append(
             .removeCapturePhotoOutput(capturePhotoOutput: capturePhotoOutput)
         )
@@ -276,7 +265,7 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.addVideoOutput]?.append(
             .addVideoOutput(videoOutput: videoOutput)
         )
@@ -284,15 +273,30 @@ final class MockRTCPeerConnectionCoordinator:
 
     override func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
+    ) async throws {
         stubbedFunctionInput[.removeVideoOutput]?.append(
             .removeVideoOutput(videoOutput: videoOutput)
         )
     }
 
-    override func zoom(by factor: CGFloat) throws {
+    override func zoom(by factor: CGFloat) async throws {
         stubbedFunctionInput[.zoom]?.append(
             .zoom(factor: factor)
         )
+    }
+
+    override func trackInfo(
+        for type: TrackType,
+        collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        stubbedFunctionInput[.trackInfo]?.append(
+            .trackInfo(trackType: type)
+        )
+        return stubbedTrackInfo[type] ?? []
+    }
+
+    override func statsReport() async throws -> StreamRTCStatisticsReport {
+        stubbedFunctionInput[.statsReport]?.append(.statsReport)
+        return (stubbedFunction[.statsReport] as? StreamRTCStatisticsReport) ?? .init(nil)
     }
 }

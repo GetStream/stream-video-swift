@@ -85,17 +85,7 @@ struct DemoStatsView: View {
                             viewModel,
                             title: "PUBLISH RESOLUTION",
                             value: "none",
-                            titleTransformer: { report in
-                                let codec = report?
-                                    .publisherBaseStats
-                                    .last?
-                                    .codec
-                                if let codec = codec?.split(separator: "/").last {
-                                    return "PUBLISH RESOLUTION(\(codec))"
-                                } else {
-                                    return "PUBLISH RESOLUTION"
-                                }
-                            },
+                            titleTransformer: { publishQualityFormatter($0) },
                             valueTransformer: { resolutionFormatter(from: $0?.publisherStats) }
                         )
                     } _: {
@@ -162,6 +152,25 @@ struct DemoStatsView: View {
             rhs()
                 .frame(maxWidth: .infinity)
         }
+    }
+
+    private func publishQualityFormatter(
+        _ report: CallStatsReport?
+    ) -> String {
+        let activeCodecs = report?
+            .publisherBaseStats
+            .filter { $0.framesPerSecond > 0 }
+            .compactMap(\.codec)
+            .compactMap { $0.split(separator: "/").last }
+        let uniqueActiveCodecs = Set(activeCodecs ?? [])
+            .sorted()
+            .joined(separator: ",")
+
+        guard !uniqueActiveCodecs.isEmpty else {
+            return "PUBLISH RESOLUTION"
+        }
+
+        return "PUBLISH RESOLUTION(\(uniqueActiveCodecs))"
     }
 
     private func resolutionFormatter(

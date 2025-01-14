@@ -97,7 +97,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     func test_cleanUp_callIsNil() async throws {
         subject.call = .dummy()
-        
+
         subject.cleanUp()
 
         XCTAssertNil(subject.call)
@@ -503,13 +503,14 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             maxBitrate: 1000
         )
 
-        let videoOptions = await mockWebRTCCoordinatorFactory
+        let publishOptions = await mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .videoOptions
-        XCTAssertEqual(videoOptions.preferredVideoCodec, .vp9)
-        XCTAssertEqual(videoOptions.preferredBitrate, 1000)
+            .publishOptions
+        XCTAssertEqual(publishOptions.video.count, 1)
+        XCTAssertEqual(publishOptions.video.first?.codec, .vp9)
+        XCTAssertEqual(publishOptions.video.first?.bitrate, 1000)
     }
 
     // MARK: - Private helpers

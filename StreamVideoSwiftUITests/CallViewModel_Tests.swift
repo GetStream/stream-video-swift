@@ -4,6 +4,7 @@
 
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import StreamWebRTC
 import XCTest
 
 final class CallViewModel_Tests: StreamVideoTestCase {
@@ -16,6 +17,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     private lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
     private lazy var callId: String! = UUID().uuidString
     private lazy var participants: [Member]! = [firstUser, secondUser]
+    private lazy var peerConnectionFactory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule.shared)
 
     private var cId: String { callCid(from: callId, callType: callType) }
 
@@ -30,6 +32,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         secondUser = nil
         firstUser = nil
         mockResponseBuilder = nil
+        peerConnectionFactory = nil
         super.tearDown()
     }
 
@@ -857,6 +860,58 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 expectedCount: 4
             )
         ])
+    }
+
+    // MARK: - Move to foreground
+
+    @MainActor
+    func test_applicationDidBecomeActive_activatesAllTracksRequired() async throws {
+        // Setup call
+        let callViewModel = CallViewModel()
+        await fulfillment { callViewModel.isSubscribedToCallEvents }
+
+        callViewModel.startCall(callType: .default, callId: callId, members: [])
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+            callViewModel.callingState == .inCall
+        }
+        let call = try XCTUnwrap(callViewModel.call)
+        let trackA = try XCTUnwrap(
+            RTCVideoTrack.dummy(
+                kind: .video,
+                peerConnectionFactory: peerConnectionFactory
+            ) as? RTCVideoTrack
+        )
+        let trackB = try XCTUnwrap(
+            RTCVideoTrack.dummy(
+                kind: .video,
+                peerConnectionFactory: peerConnectionFactory
+            ) as? RTCVideoTrack
+        )
+        let trackC = try XCTUnwrap(
+            RTCVideoTrack.dummy(
+                kind: .video,
+                peerConnectionFactory: peerConnectionFactory
+            ) as? RTCVideoTrack
+        )
+        trackA.isEnabled = false
+        trackB.isEnabled = false
+        trackC.isEnabled = false
+        call.state.participantsMap = [
+            CallParticipant.dummy(id: call.state.sessionId), // Local participant
+            CallParticipant.dummy(hasVideo: true, track: trackA),
+            CallParticipant.dummy(hasVideo: true, track: trackB),
+            CallParticipant.dummy(hasVideo: false, track: trackC)
+        ].reduce(into: [String: CallParticipant]()) { $0[$1.id] = $1 }
+
+        NotificationCenter.default.post(.init(name: UIApplication.didEnterBackgroundNotification))
+        await fulfillment { InjectedValues[\.applicationStateAdapter].state == .background }
+
+        NotificationCenter.default.post(.init(name: UIApplication.willEnterForegroundNotification))
+        await fulfillment { InjectedValues[\.applicationStateAdapter].state == .foreground }
+
+        await fulfillment { trackA.isEnabled && trackB.isEnabled }
+        XCTAssertFalse(trackC.isEnabled)
     }
 
     private struct ParticipantsScenario {

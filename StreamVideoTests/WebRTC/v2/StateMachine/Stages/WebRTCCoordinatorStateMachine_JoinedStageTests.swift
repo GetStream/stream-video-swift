@@ -234,6 +234,41 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
+    func test_transition_participantsUpdatedUpdateSubscriptionsFails_noReconnectionOccurs() async throws {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+        var response = Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse()
+        response.error = .init()
+        response.error.code = .requestValidationFailed
+        response.error.message = "update subscriptions error"
+        mockCoordinatorStack?
+            .sfuStack
+            .service
+            .stub(for: .updateSubscriptions, with: response)
+
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
+        await assertTransitionAfterTrigger(
+            expectedTarget: nil
+        ) { [mockCoordinatorStack] in
+            await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
+                [
+                    sessionId: .dummy(id: sessionId, hasAudio: true),
+                    "0": .dummy(hasAudio: true),
+                    "1": .dummy(hasAudio: true)
+                ]
+            }
+        } validationHandler: { _ in }
+
+        let request = try? XCTUnwrap(mockCoordinatorStack.sfuStack.service.updateSubscriptionsWasCalledWithRequest)
+        XCTAssertEqual(request?.tracks.count, 2)
+    }
+
     // MARK: observeConnection
 
     func test_transition_webSocketDisconnectsWithSFUErrorWithShouldRetryTrue_transitionsToDisconnectCorrectlyConfigured() async {
@@ -579,7 +614,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
-        let initialStatsReporter = WebRTCStatsReporter(interval: 12, sessionID: sessionId)
+        let initialStatsReporter = WebRTCStatsReporter(
+            deliveryInterval: 12,
+            sessionID: sessionId
+        )
         await stateAdapter.set(statsReporter: initialStatsReporter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
@@ -587,7 +625,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
         await wait(for: 1)
         let newStatsReporter = await stateAdapter.statsReporter
-        XCTAssertEqual(newStatsReporter?.interval, 12)
+        XCTAssertEqual(newStatsReporter?.deliveryInterval, 12)
         XCTAssertTrue(newStatsReporter?.publisher === publisher)
         XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
         XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)
@@ -601,7 +639,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
-        let initialStatsReporter = WebRTCStatsReporter(interval: 11, sessionID: .unique)
+        let initialStatsReporter = WebRTCStatsReporter(deliveryInterval: 11, sessionID: .unique)
         await stateAdapter.set(statsReporter: initialStatsReporter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
@@ -609,10 +647,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
         await fulfillment {
             let newStatsReporter = await stateAdapter.statsReporter
-            return newStatsReporter !== initialStatsReporter && newStatsReporter?.interval == 11
+            return newStatsReporter !== initialStatsReporter && newStatsReporter?.deliveryInterval == 11
         }
         let newStatsReporter = await stateAdapter.statsReporter
-        XCTAssertEqual(newStatsReporter?.interval, 11)
+        XCTAssertEqual(newStatsReporter?.deliveryInterval, 11)
         XCTAssertTrue(newStatsReporter?.publisher === publisher)
         XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
         XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)
@@ -712,6 +750,10 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                     transitionExpectation
                         .expectationDescription =
                         "Expectation to land on id:\(expectedTarget) but instead landed on id:\(target.id)."
+                } else if expectedTarget == nil {
+                    // If we expect no transition but one occurs we fulfil
+                    // the expectation to propagate the error.
+                    transitionExpectation.fulfill()
                 }
             }
         }
@@ -723,7 +765,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             }
 
             group.addTask {
-                await self.fulfillment(of: [transitionExpectation], timeout: defaultTimeout)
+                await self.fulfillment(of: [transitionExpectation], timeout: transitionExpectation.isInverted ? 2 : defaultTimeout)
                 if transitionExpectation.isInverted {
                     await validationHandler(subject!)
                 }

@@ -102,16 +102,24 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_setVideoOptions_shouldUpdateVideoOptions() async throws {
         let expected = VideoOptions(
-            preferredTargetResolution: .dummy(bitrate: 10000, height: 200, width: 300),
-            preferredFormat: nil,
-            preferredFps: 109_999
+            preferredCameraPosition: .back
         )
 
         await subject.set(videoOptions: expected)
 
-        await assertEqualAsync(await subject.videoOptions.preferredDimensions.width, expected.preferredDimensions.width)
-        await assertEqualAsync(await subject.videoOptions.preferredDimensions.height, expected.preferredDimensions.height)
-        await assertEqualAsync(await subject.videoOptions.preferredFps, expected.preferredFps)
+        await assertEqualAsync(await subject.videoOptions.preferredCameraPosition, expected.preferredCameraPosition)
+    }
+
+    // MARK: - setPublishOptions
+
+    func test_setPublishOptions_shouldUpdatePublishOptions() async throws {
+        let expected = PublishOptions(
+            video: [.dummy(codec: .av1)]
+        )
+
+        await subject.set(publishOptions: expected)
+
+        await assertEqualAsync(await subject.publishOptions, expected)
     }
 
     // MARK: - setConnectOptions
@@ -324,6 +332,82 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    func test_configurePeerConnections_withSFU_completesSetUp() async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        let videoFilter = VideoFilter(
+            id: .unique,
+            name: .unique,
+            filter: { _ in fatalError() }
+        )
+        await subject.set(videoFilter: videoFilter)
+        let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
+        await subject.set(ownCapabilities: ownCapabilities)
+        let callSettings = CallSettings(cameraPosition: .back)
+        await subject.set(callSettings: callSettings)
+
+        try await subject.configurePeerConnections()
+
+        await fulfillment { await self.subject.publisher != nil }
+
+        let _publisher = await subject.publisher
+        let publisher = try XCTUnwrap(_publisher)
+        let _subscriber = await subject.subscriber
+        let subscriber = try XCTUnwrap(_subscriber)
+
+        _ = await Task(timeout: 1) {
+            try await publisher.ensureSetUpHasBeenCompleted()
+        }.result
+
+        _ = await Task(timeout: 1) {
+            try await subscriber.ensureSetUpHasBeenCompleted()
+        }.result
+    }
+
+    func test_configurePeerConnections_withActiveSession_shouldBeginScreenSharing() async throws {
+        let sfuStack = MockSFUStack()
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true),
+            screenSharingType: .inApp,
+            capturer: MockStreamVideoCapturer()
+        )
+        let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
+        await subject.set(ownCapabilities: ownCapabilities)
+
+        try await subject.configurePeerConnections()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                (ScreensharingType, [OwnCapability]).self,
+                for: .beginScreenSharing
+            )?.first?.0,
+            .inApp
+        )
+        XCTAssertEqual(
+            mockPublisher.recordedInputPayload(
+                (ScreensharingType, [OwnCapability]).self,
+                for: .beginScreenSharing
+            )?.first?.1,
+            [.blockUsers]
+        )
+    }
+
+    func test_configurePeerConnections_withoutActiveSession_shouldNotBeginScreenSharing() async throws {
+        let sfuStack = MockSFUStack()
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
+        await subject.set(ownCapabilities: ownCapabilities)
+
+        try await subject.configurePeerConnections()
+        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+
+        XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_shouldResetProperties() async throws {
@@ -394,54 +478,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.participantsCount, 12)
         await assertEqualAsync(await subject.anonymousCount, 22)
         await assertEqualAsync(await subject.participantPins, pins)
-    }
-
-    // MARK: - restoreScreenSharing
-
-    func test_restoreScreenSharing_withActiveSession_shouldBeginScreenSharing() async throws {
-        let sfuStack = MockSFUStack()
-        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        await subject.set(sfuAdapter: sfuStack.adapter)
-        try await subject.configurePeerConnections()
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
-        screenShareSessionProvider.activeSession = .init(
-            localTrack: await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true),
-            screenSharingType: .inApp,
-            capturer: MockVideoCapturer()
-        )
-        let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
-        await subject.set(ownCapabilities: ownCapabilities)
-
-        try await subject.restoreScreenSharing()
-
-        XCTAssertEqual(
-            mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
-                for: .beginScreenSharing
-            )?.first?.0,
-            .inApp
-        )
-        XCTAssertEqual(
-            mockPublisher.recordedInputPayload(
-                (ScreensharingType, [OwnCapability]).self,
-                for: .beginScreenSharing
-            )?.first?.1,
-            [.blockUsers]
-        )
-    }
-
-    func test_restoreScreenSharing_withoutActiveSession_shouldNotBeginScreenSharing() async throws {
-        let sfuStack = MockSFUStack()
-        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        await subject.set(sfuAdapter: sfuStack.adapter)
-        try await subject.configurePeerConnections()
-        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
-        let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
-        await subject.set(ownCapabilities: ownCapabilities)
-
-        try await subject.restoreScreenSharing()
-
-        XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
     }
 
     // MARK: - didAddTrack
@@ -572,15 +608,13 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
         let newVideoOptions = VideoOptions(
-            preferredTargetResolution: .dummy(),
-            preferredFormat: nil,
-            preferredFps: 17
+            preferredCameraPosition: .back
         )
 
         await subject.set(videoOptions: newVideoOptions)
 
-        XCTAssertEqual(mockPublisher.videoOptions.preferredFps, 17)
-        XCTAssertEqual(mockSubscriber.videoOptions.preferredFps, 17)
+        XCTAssertEqual(mockPublisher.videoOptions.preferredCameraPosition, .back)
+        XCTAssertEqual(mockSubscriber.videoOptions.preferredCameraPosition, .back)
     }
 
     // MARK: - didUpdateParticipants
