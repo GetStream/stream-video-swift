@@ -6,6 +6,8 @@ import AVFoundation
 import Foundation
 
 protocol StreamVideoCapturing: AnyObject {
+    func supportsBackgrounding() async -> Bool
+
     func startCapture(
         position: AVCaptureDevice.Position,
         dimensions: CGSize,

@@ -17,7 +17,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     @Injected(\.videoCapturePolicy) private var videoCapturePolicy
     @Injected(\.captureDeviceProvider) private var captureDeviceProvider
-    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     /// A unique identifier representing the current call session.
     private let sessionID: String
@@ -67,6 +66,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private let disposableBag = DisposableBag()
 
     private let processingQueue = SerialActorQueue()
+    private let backgroundMuteAdapter: ApplicationLifecycleVideoMuteAdapter
 
     /// Initializes a new instance of the `LocalVideoMediaAdapter`.
     ///
@@ -103,6 +103,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
+        backgroundMuteAdapter = .init(sessionID: sessionID, sfuAdapter: sfuAdapter)
 
         // Initialize the primary video track, either from the active session or a new source.
         primaryTrack = {
@@ -156,33 +157,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         )
 
         callSettings = settings
-
-        if #available(iOS 16.0, *), AVCaptureSession().isMultitaskingCameraAccessSupported {
-        } else {
-            applicationStateAdapter
-                .$state
-                .filter { [weak self] in $0 == .background && self?.callSettings?.videoOn == true }
-                .sinkTask { [weak sfuAdapter, sessionID] _ in
-                    try await sfuAdapter?.updateTrackMuteState(
-                        .video,
-                        isMuted: true,
-                        for: sessionID
-                    )
-                }
-                .store(in: disposableBag)
-
-            applicationStateAdapter
-                .$state
-                .filter { [weak self] in $0 == .foreground && self?.callSettings?.videoOn == true }
-                .sinkTask { [weak sfuAdapter, sessionID] _ in
-                    try await sfuAdapter?.updateTrackMuteState(
-                        .video,
-                        isMuted: false,
-                        for: sessionID
-                    )
-                }
-                .store(in: disposableBag)
-        }
 
         guard ownCapabilities.contains(.sendVideo) else {
             try await videoCaptureSessionProvider.activeSession?.capturer.stopCapture()
@@ -725,6 +699,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             localTrack: activeSession.localTrack,
             capturer: activeSession.capturer
         )
+
+        await backgroundMuteAdapter.observeApplicationLifecycle(activeSession.capturer)
 
         log.debug(
             """
