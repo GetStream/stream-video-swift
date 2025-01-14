@@ -695,14 +695,17 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             dimensions: capturingDimension,
             frameRate: frameRate
         )
+
+        // We update the backgroundMuteAdapter so it can begin observing appState
+        // if required.
+        await backgroundMuteAdapter.didStartCapturing(with: activeSession.capturer)
+
         videoCaptureSessionProvider.activeSession = .init(
             position: activeSession.position,
             device: device,
             localTrack: activeSession.localTrack,
             capturer: activeSession.capturer
         )
-
-        await backgroundMuteAdapter.didStartCapturing(with: activeSession.capturer)
 
         log.debug(
             """
