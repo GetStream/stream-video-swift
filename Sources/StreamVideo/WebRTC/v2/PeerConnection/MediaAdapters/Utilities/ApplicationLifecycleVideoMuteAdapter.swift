@@ -27,7 +27,7 @@ final class ApplicationLifecycleVideoMuteAdapter {
         disposableBag.removeAll()
     }
 
-    func observeApplicationLifecycle(_ capturer: StreamVideoCapturing) async {
+    func didStartCapturing(with capturer: StreamVideoCapturing) async {
         guard await capturer.supportsBackgrounding() == false else {
             return
         }

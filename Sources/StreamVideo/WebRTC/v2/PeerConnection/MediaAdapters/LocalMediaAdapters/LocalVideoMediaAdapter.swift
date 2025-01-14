@@ -700,7 +700,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             capturer: activeSession.capturer
         )
 
-        await backgroundMuteAdapter.observeApplicationLifecycle(activeSession.capturer)
+        await backgroundMuteAdapter.didStartCapturing(with: activeSession.capturer)
 
         log.debug(
             """
