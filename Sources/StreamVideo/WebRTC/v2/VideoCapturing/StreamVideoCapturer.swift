@@ -203,6 +203,14 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         actionHandlers.first { $0 is T } as? T
     }
 
+    func supportsBackgrounding() -> Bool {
+        if #available(iOS 16.0, *) {
+            return videoCaptureSession?.isMultitaskingCameraAccessSupported ?? false
+        } else {
+            return false
+        }
+    }
+
     // MARK: - Actions
 
     func startCapture(

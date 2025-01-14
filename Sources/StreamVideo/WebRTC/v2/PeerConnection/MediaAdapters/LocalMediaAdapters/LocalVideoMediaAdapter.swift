@@ -39,6 +39,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The current publish options for the video track, defining encodings and layers.
     private var publishOptions: [PublishOptions.VideoPublishOptions]
 
+    private var callSettings: CallSettings?
+
     /// A factory for creating video capturers based on the current settings.
     private let capturerFactory: VideoCapturerProviding
 
@@ -64,6 +66,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private let disposableBag = DisposableBag()
 
     private let processingQueue = SerialActorQueue()
+    private let backgroundMuteAdapter: ApplicationLifecycleVideoMuteAdapter
 
     /// Initializes a new instance of the `LocalVideoMediaAdapter`.
     ///
@@ -100,6 +103,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
         self.capturerFactory = capturerFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
+        backgroundMuteAdapter = .init(sessionID: sessionID, sfuAdapter: sfuAdapter)
 
         // Initialize the primary video track, either from the active session or a new source.
         primaryTrack = {
@@ -152,6 +156,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             )
         )
 
+        callSettings = settings
+
         guard ownCapabilities.contains(.sendVideo) else {
             try await videoCaptureSessionProvider.activeSession?.capturer.stopCapture()
             videoCaptureSessionProvider.activeSession = nil
@@ -173,6 +179,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ) async throws {
         processingQueue.async { [weak self] in
             guard let self else { return }
+            callSettings = settings
+
             let isMuted = !settings.videoOn
             let isLocalMuted = primaryTrack.isEnabled == false
 
@@ -183,6 +191,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     for: sessionID
                 )
             }
+
+            backgroundMuteAdapter.didUpdateCallSettings(settings)
 
             if isMuted, primaryTrack.isEnabled {
                 unpublish()
@@ -685,6 +695,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             dimensions: capturingDimension,
             frameRate: frameRate
         )
+
+        // We update the backgroundMuteAdapter so it can begin observing appState
+        // if required.
+        await backgroundMuteAdapter.didStartCapturing(with: activeSession.capturer)
+
         videoCaptureSessionProvider.activeSession = .init(
             position: activeSession.position,
             device: device,
