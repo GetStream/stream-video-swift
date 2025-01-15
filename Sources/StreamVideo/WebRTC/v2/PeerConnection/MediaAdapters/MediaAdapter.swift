@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -8,19 +8,19 @@ import StreamWebRTC
 
 /// A class that manages audio, video, and screen sharing media for a call session.
 final class MediaAdapter {
-
+    
     /// The adapter for managing audio media.
     private let audioMediaAdapter: AudioMediaAdapter
-
+    
     /// The adapter for managing video media.
     private let videoMediaAdapter: VideoMediaAdapter
-
+    
     /// The adapter for managing screen share media.
     private let screenShareMediaAdapter: ScreenShareMediaAdapter
-
+    
     /// A subject for publishing track events.
     private let subject: PassthroughSubject<TrackEvent, Never>
-
+    
     /// A publisher for track events.
     /// - Note: We streamline track updates to a userInteractive queue to ensure, no events loss.
     var trackPublisher: AnyPublisher<TrackEvent, Never> {
@@ -28,7 +28,7 @@ final class MediaAdapter {
             .receive(on: DispatchQueue.global(qos: .userInteractive))
             .eraseToAnyPublisher()
     }
-
+    
     /// Initializes a new instance of the media adapter.
     ///
     /// - Parameters:
@@ -39,6 +39,7 @@ final class MediaAdapter {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
+    ///   - publishOptions: The publishOptions to use for creating the initial tracks
     ///   - audioSession: The audio session manager.
     ///   - videoCaptureSessionProvider: Provides access to the active video capturing session.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
@@ -50,11 +51,12 @@ final class MediaAdapter {
         sfuAdapter: SFUAdapter,
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
+        publishOptions: PublishOptions,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
         let subject = PassthroughSubject<TrackEvent, Never>()
-
+        
         switch peerConnectionType {
         case .subscriber:
             self.init(
@@ -81,7 +83,7 @@ final class MediaAdapter {
                     subject: subject
                 )
             )
-
+            
         case .publisher:
             self.init(
                 subject: subject,
@@ -90,6 +92,7 @@ final class MediaAdapter {
                     peerConnection: peerConnection,
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,
+                    publishOptions: publishOptions.audio,
                     subject: subject
                 ),
                 videoMediaAdapter: .init(
@@ -99,6 +102,7 @@ final class MediaAdapter {
                     sfuAdapter: sfuAdapter,
                     videoOptions: videoOptions,
                     videoConfig: videoConfig,
+                    publishOptions: publishOptions.video,
                     subject: subject,
                     videoCaptureSessionProvider: videoCaptureSessionProvider
                 ),
@@ -107,15 +111,14 @@ final class MediaAdapter {
                     peerConnection: peerConnection,
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,
-                    videoOptions: videoOptions,
-                    videoConfig: videoConfig,
+                    publishOptions: publishOptions.screenShare,
                     subject: subject,
                     screenShareSessionProvider: screenShareSessionProvider
                 )
             )
         }
     }
-
+    
     init(
         subject: PassthroughSubject<TrackEvent, Never>,
         audioMediaAdapter: AudioMediaAdapter,
@@ -127,7 +130,7 @@ final class MediaAdapter {
         self.videoMediaAdapter = videoMediaAdapter
         self.screenShareMediaAdapter = screenShareMediaAdapter
     }
-
+    
     /// Sets up the media adapters with the given settings and capabilities.
     ///
     /// - Parameters:
@@ -144,25 +147,25 @@ final class MediaAdapter {
                     ownCapabilities: ownCapabilities
                 )
             }
-
+            
             group.addTask {
                 try await videoMediaAdapter.setUp(
                     with: settings,
                     ownCapabilities: ownCapabilities
                 )
             }
-
+            
             group.addTask {
                 try await screenShareMediaAdapter.setUp(
                     with: settings,
                     ownCapabilities: ownCapabilities
                 )
             }
-
+            
             while try await group.next() != nil {}
         }
     }
-
+    
     /// Updates the media adapters based on new call settings.
     ///
     /// - Parameter settings: The updated call settings.
@@ -173,55 +176,96 @@ final class MediaAdapter {
             group.addTask {
                 try await audioMediaAdapter.didUpdateCallSettings(settings)
             }
-
+            
             group.addTask {
                 try await videoMediaAdapter.didUpdateCallSettings(settings)
             }
-
+            
             group.addTask {
                 try await screenShareMediaAdapter.didUpdateCallSettings(settings)
             }
-
+            
             while try await group.next() != nil {}
         }
     }
-
-    /// Returns the local track for the specified track type.
+    
+    /// Retrieves track information for a specified track type and collection type.
     ///
-    /// - Parameter type: The type of track to retrieve.
-    /// - Returns: The local media track, if available.
-    func localTrack(of type: TrackType) -> RTCMediaStreamTrack? {
+    /// - Parameters:
+    ///   - type: The type of track (audio, video, screenshare).
+    ///   - collectionType: The collection type for the track info.
+    /// - Returns: An array of track information models.
+    func trackInfo(
+        for type: TrackType,
+        collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
         switch type {
         case .audio:
-            return audioMediaAdapter.localTrack
+            return audioMediaAdapter.trackInfo(for: collectionType)
         case .video:
-            return videoMediaAdapter.localTrack
+            return videoMediaAdapter.trackInfo(for: collectionType)
         case .screenshare:
-            return screenShareMediaAdapter.localTrack
+            return screenShareMediaAdapter.trackInfo(for: collectionType)
         default:
-            return nil
+            return []
         }
     }
-
-    /// Returns the mid (Media Stream Identification) for the specified track type.
+    
+    /// Updates the media adapters based on new publish options.
     ///
-    /// - Parameter type: The type of track to retrieve the mid for.
-    /// - Returns: The mid of the track, if available.
-    func mid(for type: TrackType) -> String? {
-        switch type {
-        case .audio:
-            return audioMediaAdapter.mid
-        case .video:
-            return videoMediaAdapter.mid
-        case .screenshare:
-            return screenShareMediaAdapter.mid
-        default:
-            return nil
+    /// - Parameter publishOptions: The updated publish options.
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) async throws {
+        try await withThrowingTaskGroup(of: Void.self) {
+            [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
+            group.addTask {
+                try await audioMediaAdapter.didUpdatePublishOptions(publishOptions)
+            }
+            
+            group.addTask {
+                try await videoMediaAdapter.didUpdatePublishOptions(publishOptions)
+            }
+            
+            group.addTask {
+                try await screenShareMediaAdapter.didUpdatePublishOptions(publishOptions)
+            }
+            
+            while try await group.next() != nil {}
         }
     }
-
+    
+    /// Changes the publishing quality based on active encodings.
+    ///
+    /// - Parameter activeEncodings: The set of active encoding identifiers.
+    func changePublishQuality(
+        with event: Stream_Video_Sfu_Event_ChangePublishQuality
+    ) async {
+        await withTaskGroup(of: Void.self) { [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
+            group.addTask {
+                audioMediaAdapter.changePublishQuality(
+                    with: event.audioSenders.filter { $0.trackType == .audio }
+                )
+            }
+            
+            group.addTask {
+                videoMediaAdapter.changePublishQuality(
+                    with: event.videoSenders.filter { $0.trackType == .video }
+                )
+            }
+            
+            group.addTask {
+                screenShareMediaAdapter.changePublishQuality(
+                    with: event.videoSenders.filter { $0.trackType == .screenShare }
+                )
+            }
+            
+            while await group.next() != nil {}
+        }
+    }
+    
     // MARK: - Video
-
+    
     /// Updates the camera position.
     ///
     /// - Parameter position: The new camera position.
@@ -230,75 +274,66 @@ final class MediaAdapter {
     ) async throws {
         try await videoMediaAdapter.didUpdateCameraPosition(position)
     }
-
+    
     /// Sets a video filter.
     ///
     /// - Parameter videoFilter: The video filter to apply.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         videoMediaAdapter.setVideoFilter(videoFilter)
     }
-
+    
     /// Zooms the camera by a given factor.
     ///
     /// - Parameter factor: The zoom factor.
-    func zoom(by factor: CGFloat) throws {
-        try videoMediaAdapter.zoom(by: factor)
+    func zoom(by factor: CGFloat) async throws {
+        try await videoMediaAdapter.zoom(by: factor)
     }
-
+    
     /// Focuses the camera at a given point.
     ///
     /// - Parameter point: The point to focus on.
-    func focus(at point: CGPoint) throws {
-        try videoMediaAdapter.focus(at: point)
+    func focus(at point: CGPoint) async throws {
+        try await videoMediaAdapter.focus(at: point)
     }
-
+    
     /// Adds a video output to the capture session.
     ///
     /// - Parameter videoOutput: The video output to add.
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
-        try videoMediaAdapter.addVideoOutput(videoOutput)
+    ) async throws {
+        try await videoMediaAdapter.addVideoOutput(videoOutput)
     }
-
+    
     /// Removes a video output from the capture session.
     ///
     /// - Parameter videoOutput: The video output to remove.
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
-        try videoMediaAdapter.removeVideoOutput(videoOutput)
+    ) async throws {
+        try await videoMediaAdapter.removeVideoOutput(videoOutput)
     }
-
+    
     /// Adds a photo output to the capture session.
     ///
     /// - Parameter capturePhotoOutput: The photo output to add.
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
-        try videoMediaAdapter.addCapturePhotoOutput(capturePhotoOutput)
+    ) async throws {
+        try await videoMediaAdapter.addCapturePhotoOutput(capturePhotoOutput)
     }
-
+    
     /// Removes a photo output from the capture session.
     ///
     /// - Parameter capturePhotoOutput: The photo output to remove.
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
-        try videoMediaAdapter.removeCapturePhotoOutput(capturePhotoOutput)
+    ) async throws {
+        try await videoMediaAdapter.removeCapturePhotoOutput(capturePhotoOutput)
     }
-
-    /// Changes the publishing quality based on active encodings.
-    ///
-    /// - Parameter activeEncodings: The set of active encoding identifiers.
-    func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
-    ) {
-        videoMediaAdapter.changePublishQuality(with: layerSettings)
-    }
-
+    
     // MARK: - ScreenSharing
-
+    
     /// Begins screen sharing of the specified type.
     ///
     /// - Parameters:
@@ -313,7 +348,7 @@ final class MediaAdapter {
             ownCapabilities: ownCapabilities
         )
     }
-
+    
     /// Stops the current screen sharing session.
     func stopScreenSharing() async throws {
         try await screenShareMediaAdapter.stopScreenSharing()

@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -40,7 +40,10 @@ final class OSLogDestination: BaseLogDestination {
             extendedDetails += "[\(logDetails.functionName)] "
         }
 
-        let extendedMessage = "\(extendedDetails)> \(logDetails.message)"
+        var extendedMessage = "\(extendedDetails)> \(logDetails.message)"
+        if let error = logDetails.error {
+            extendedMessage += "[Error: \(error)]"
+        }
         let formattedMessage = LogConfig
             .formatters
             .reduce(extendedMessage) { $1.format(logDetails: logDetails, message: $0) }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 @testable import StreamVideo
@@ -27,65 +27,53 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable {
 
     enum MockFunctionInputKey: Payloadable {
         case buildCameraCapturer(
-            source: RTCVideoSource,
-            options: VideoOptions,
-            filters: [VideoFilter]
+            source: RTCVideoSource
         )
         case buildScreenCapturer(
             type: ScreensharingType,
-            source: RTCVideoSource,
-            options: VideoOptions,
-            filters: [VideoFilter]
+            source: RTCVideoSource
         )
 
         var payload: Any {
             switch self {
-            case let .buildCameraCapturer(source, options, filters):
-                return (source, options, filters)
-            case let .buildScreenCapturer(type, source, options, filters):
-                return (type, source, options, filters)
+            case let .buildCameraCapturer(source):
+                return (source)
+            case let .buildScreenCapturer(type, source):
+                return (type, source)
             }
         }
     }
 
     init() {
-        stub(for: .buildCameraCapturer, with: MockCameraVideoCapturer())
-        stub(for: .buildScreenCapturer, with: MockVideoCapturer())
+        stub(for: .buildCameraCapturer, with: MockStreamVideoCapturer())
+        stub(for: .buildScreenCapturer, with: MockStreamVideoCapturer())
     }
 
     // MARK: - VideoCapturerProviding
 
     func buildCameraCapturer(
-        source: RTCVideoSource,
-        options: VideoOptions,
-        filters: [VideoFilter]
-    ) -> CameraVideoCapturing {
+        source: RTCVideoSource
+    ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildCameraCapturer]?
             .append(
                 .buildCameraCapturer(
-                    source: source,
-                    options: options,
-                    filters: filters
+                    source: source
                 )
             )
-        return stubbedFunction[.buildCameraCapturer] as! CameraVideoCapturing
+        return stubbedFunction[.buildCameraCapturer] as! StreamVideoCapturing
     }
     
     func buildScreenCapturer(
         _ type: ScreensharingType,
-        source: RTCVideoSource,
-        options: VideoOptions,
-        filters: [VideoFilter]
-    ) -> VideoCapturing {
+        source: RTCVideoSource
+    ) -> StreamVideoCapturing {
         stubbedFunctionInput[.buildScreenCapturer]?
             .append(
                 .buildScreenCapturer(
                     type: type,
-                    source: source,
-                    options: options,
-                    filters: filters
+                    source: source
                 )
             )
-        return stubbedFunction[.buildScreenCapturer] as! VideoCapturing
+        return stubbedFunction[.buildScreenCapturer] as! StreamVideoCapturing
     }
 }

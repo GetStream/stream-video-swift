@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -19,13 +19,22 @@ extension RTCMediaStream {
 
     /// Determines the type of track based on the stream's identifier.
     var trackType: TrackType {
-        if streamId.hasSuffix(screenShareTrackType) {
+        let components = streamId.components(separatedBy: ":")
+        guard
+            components.endIndex > 1
+        else {
+            return .unknown
+        }
+        let component = components[1]
+
+        switch component {
+        case screenShareTrackType:
             return .screenshare
-        } else if streamId.hasSuffix(videoTrackType) {
+        case videoTrackType:
             return .video
-        } else if streamId.hasSuffix(audioTrackType) {
+        case audioTrackType:
             return .audio
-        } else {
+        default:
             return .unknown
         }
     }

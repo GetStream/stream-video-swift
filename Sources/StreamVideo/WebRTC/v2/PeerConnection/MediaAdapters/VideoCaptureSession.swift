@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -8,13 +8,13 @@ import StreamWebRTC
 struct VideoCaptureSession {
     var position: AVCaptureDevice.Position
 
-    var device: AVCaptureDevice?
+    var device: CaptureDeviceProtocol?
 
     /// The local video track for the screen share.
     var localTrack: RTCVideoTrack
 
     /// The video capturer for the screen share.
-    var capturer: CameraVideoCapturing & Sendable
+    var capturer: StreamVideoCapturing
 }
 
 /// A class that provides and manages the active screen sharing session.

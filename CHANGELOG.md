@@ -4,8 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.15.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.15.0)
+_January 14, 2025_
+
 ### ✅ Added
 - CallKit availability policies allows you to control wether `Callkit` should be enabled/disabled based on different rules [#611](https://github.com/GetStream/stream-video-swift/pull/611)
+- Support for setting a ringtone for CallKit calls [#628](https://github.com/GetStream/stream-video-swift/pull/628)
+- Codec negotiation during calls (#606)(https://github.com/GetStream/stream-video-swift/pull/606)
+- When moving to background/foreground while your video is active, if the device doesn't support [AVCaptureSession.isMultitaskingCameraAccessSupported](https://developer.apple.com/documentation/avfoundation/avcapturesession/ismultitaskingcameraaccesssupported) the SDK will mute/unmute the track to ensure that other participants have some feedback from your track. [#633](https://github.com/GetStream/stream-video-swift/pull/633)
 
 ### 🐞 Fixed
 - By observing the `CallKitPushNotificationAdapter.deviceToken` you will be notified with an empty `deviceToken` value, once the object unregister push notifications. [#608](https://github.com/GetStream/stream-video-swift/pull/608)

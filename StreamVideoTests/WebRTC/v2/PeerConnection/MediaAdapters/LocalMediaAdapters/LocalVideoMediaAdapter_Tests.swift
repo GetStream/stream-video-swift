@@ -1,21 +1,25 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
 @testable import StreamVideo
-import StreamWebRTC
+@preconcurrency import StreamWebRTC
 @preconcurrency import XCTest
 
-final class LocalVideoMediaAdapter_Tests: XCTestCase {
+final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private let mockActiveCallProvider: MockActiveCallProvider! = .init()
     private let mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
     private lazy var sessionId: String! = .unique
+    private lazy var publishOptions: [PublishOptions.VideoPublishOptions]! = [.dummy(codec: .h264)]
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = MockSFUStack()
     private lazy var mockCapturerFactory: MockVideoCapturerFactory! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
+    private lazy var videoCaptureSessionProvider: VideoCaptureSessionProvider! = .init()
+    private lazy var mockVideoCapturer: MockStreamVideoCapturer! = .init()
+    private lazy var mockCaptureDeviceProvider: MockCaptureDeviceProvider! = .init()
     private lazy var subject: LocalVideoMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,
@@ -23,9 +27,10 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         sfuAdapter: mockSFUStack.adapter,
         videoOptions: .init(),
         videoConfig: .dummy(),
+        publishOptions: publishOptions,
         subject: spySubject,
         capturerFactory: mockCapturerFactory,
-        videoCaptureSessionProvider: .init()
+        videoCaptureSessionProvider: videoCaptureSessionProvider
     )
     private var temporaryPeerConnection: RTCPeerConnection?
     private var disposableBag: DisposableBag! = .init()
@@ -35,6 +40,8 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     override func setUp() {
         super.setUp()
         InjectedValues[\.simulatorStreamFile] = .init(fileURLWithPath: .unique)
+        InjectedValues[\.captureDeviceProvider] = mockCaptureDeviceProvider
+        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockVideoCapturer)
 
         RTCSetMinDebugLogLevel(.verbose)
         RTCEnableMetrics()
@@ -42,6 +49,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
     override func tearDown() {
         subject = nil
+        publishOptions = nil
         spySubject = nil
         mockCapturerFactory = nil
         mockSFUStack = nil
@@ -49,12 +57,28 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         peerConnectionFactory = nil
         temporaryPeerConnection = nil
         disposableBag = nil
+        videoCaptureSessionProvider = nil
+        mockVideoCapturer = nil
+        mockCaptureDeviceProvider = nil
         super.tearDown()
+    }
+
+    // MARK: - init
+
+    func test_init_videoCaptureShareSessionExists_primaryTrackSourceSameAsActiveSession() {
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
+        videoCaptureSessionProvider.activeSession = .init(
+            position: .front,
+            localTrack: track,
+            capturer: mockVideoCapturer
+        )
+
+        XCTAssertTrue(subject.primaryTrack.source === track.source)
     }
 
     // MARK: - setUp(with:ownCapabilities:)
 
-    func test_setUp_hasVideoCapabilityAndVideoOn_noLocalTrack_createsAndAddsTrackAndTransceiver() async throws {
+    func test_setUp_hasVideoCapabilityAndVideoOn_addsTrack() async throws {
         try await assertTrackEvent {
             switch $0 {
             case let .added(id, trackType, track):
@@ -73,64 +97,84 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
-        XCTAssertNotNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_setUp_hasVideoCapabilityVideoOff_noLocalTrack_createsTrackWithoutTransceiver() async throws {
-        try await assertTrackEvent {
-            switch $0 {
-            case let .added(id, trackType, track):
-                return (id, trackType, track)
-            default:
-                return nil
+    func test_setUp_hasVideoCapabilityVideoIsOff_addsTrack() async throws {
+        try await assertTrackEvent(
+            filter: {
+                switch $0 {
+                case let .added(id, trackType, track):
+                    return (id, trackType, track)
+                default:
+                    return nil
+                }
+            },
+            operation: { subject in
+                try await subject.setUp(
+                    with: .init(videoOn: false),
+                    ownCapabilities: [.sendVideo]
+                )
             }
-        } operation: { subject in
-            try await subject.setUp(
-                with: .init(videoOn: false),
-                ownCapabilities: [.sendVideo]
-            )
-        } validation: { [sessionId] id, trackType, track in
+        ) { [sessionId] id, trackType, track in
             XCTAssertEqual(id, sessionId)
             XCTAssertEqual(trackType, .video)
             XCTAssertTrue(track is RTCVideoTrack)
         }
 
-        XCTAssertNotNil(subject.localTrack)
-        XCTAssertFalse(subject.localTrack?.isEnabled ?? true)
-        XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
+        XCTAssertNotNil(subject.primaryTrack)
+        XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_setUp_doesNotHaveVideoCapability_noLocalTrack_doesNotCreateTrack() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
+    func test_setUp_hasVideoCapabilityCameraPositionIsFront_configuresVideoCaptureSessionCorrectly() async throws {
+        try await subject.setUp(
+            with: .init(videoOn: false, cameraPosition: .front),
+            ownCapabilities: [.sendVideo]
+        )
 
-        try await assertTrackEvent(isInverted: true, operation: { subject in
+        XCTAssertEqual(mockCapturerFactory.timesCalled(.buildCameraCapturer), 1)
+        XCTAssertTrue(videoCaptureSessionProvider.activeSession?.capturer === mockVideoCapturer)
+        XCTAssertEqual(videoCaptureSessionProvider.activeSession?.localTrack.trackId, subject.primaryTrack.trackId)
+        XCTAssertEqual(videoCaptureSessionProvider.activeSession?.position, .front)
+    }
+
+    func test_setUp_hasVideoCapabilityCameraPositionIsBack_configuresVideoCaptureSessionCorrectly() async throws {
+        try await subject.setUp(
+            with: .init(videoOn: false, cameraPosition: .back),
+            ownCapabilities: [.sendVideo]
+        )
+
+        XCTAssertEqual(mockCapturerFactory.timesCalled(.buildCameraCapturer), 1)
+        XCTAssertTrue(videoCaptureSessionProvider.activeSession?.capturer === mockVideoCapturer)
+        XCTAssertEqual(videoCaptureSessionProvider.activeSession?.localTrack.trackId, subject.primaryTrack.trackId)
+        XCTAssertEqual(videoCaptureSessionProvider.activeSession?.position, .back)
+    }
+
+    func test_setUp_doesNotHaveVideoCapability_doesNotAddTrack() async throws {
+        try await assertTrackEvent(
+            isInverted: true
+        ) { subject in
             try await subject.setUp(
                 with: .init(videoOn: true),
                 ownCapabilities: []
             )
-        })
-
-        XCTAssertNil(subject.localTrack)
-        XCTAssertNil(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.first)
-        XCTAssertEqual(mockCapturer.stubbedFunctionInput[.capturingDevice]?.count, 0)
-        XCTAssertEqual(mockCapturer.stubbedFunctionInput[.startCapture]?.count, 0)
+        }
     }
 
-    func test_setUp_hasVideoCapabilityAndVideoOn_noLocalTrack_capturerWasCorrectlyConfigured() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
-
-        // When
-        try await subject.setUp(
-            with: .init(videoOn: true),
-            ownCapabilities: [.sendVideo]
+    func test_setUp_doesNotHaveVideoCapability_stopsCaptureOnActiveSession() async throws {
+        videoCaptureSessionProvider.activeSession = .init(
+            position: .front,
+            localTrack: peerConnectionFactory.mockVideoTrack(forScreenShare: false),
+            capturer: mockVideoCapturer
         )
 
-        // Then
-        XCTAssertEqual(mockCapturer.stubbedFunctionInput[.capturingDevice]?.count, 1)
-        XCTAssertEqual(mockCapturer.stubbedFunctionInput[.startCapture]?.count, 1)
+        try await subject.setUp(
+            with: .init(videoOn: true),
+            ownCapabilities: []
+        )
+
+        await fulfillment { self.mockVideoCapturer.timesCalled(.stopCapture) > 1 }
+        XCTAssertNil(videoCaptureSessionProvider.activeSession)
     }
 
     // MARK: - didUpdateCallSettings(_:)
@@ -154,6 +198,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         try await subject.didUpdateCallSettings(.init(videoOn: true))
 
+        await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil }
         let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
@@ -166,10 +211,11 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
             with: .init(videoOn: true),
             ownCapabilities: [.sendVideo]
         )
-        subject.localTrack?.isEnabled = true
+        subject.primaryTrack.isEnabled = true
 
         try await subject.didUpdateCallSettings(.init(videoOn: false))
 
+        await fulfillment { self.mockSFUStack.service.updateMuteStatesWasCalledWithRequest != nil }
         let request = try XCTUnwrap(mockSFUStack.service.updateMuteStatesWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionId)
         XCTAssertEqual(request.muteStates.count, 1)
@@ -177,12 +223,175 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         XCTAssertTrue(request.muteStates[0].muted)
     }
 
+    // MARK: - didUpdatePublishOptions
+
+    func test_didUpdatePublishOptions_primaryTrackIsNotEnabled_nothingHappens() async throws {
+        subject.primaryTrack.isEnabled = false
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                video: [.dummy(codec: .av1)]
+            )
+        )
+
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 0)
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiveExists_noTransceiverWasAdded() async throws {
+        publishOptions = [.dummy(codec: .h264)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .video, videoOptions: publishOption)
+            )
+        }
+        subject.primaryTrack.isEnabled = true
+
+        try await subject.didUpdatePublishOptions(.init(video: publishOptions))
+
+        await wait(for: 2)
+        XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 1)
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiverDoesNotExist_transceiverWasAdded(
+    ) async throws {
+        publishOptions = [.dummy(codec: .h264)]
+        subject.primaryTrack.isEnabled = true
+
+        try await subject.didUpdatePublishOptions(.init(video: publishOptions))
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
+        publishOptions = [.dummy(id: 0, codec: .h264)]
+        try publishOptions.forEach { publishOption in
+            mockPeerConnection.stub(
+                for: .addTransceiver,
+                with: try makeTransceiver(of: .video, videoOptions: publishOption)
+            )
+        }
+        // We call publish to simulate the publishing flow that will create
+        // all necessary transceveivers on the PeerConnection
+        subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                video: [.dummy(id: 1, codec: .av1)]
+            )
+        )
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+    }
+
+    func test_didUpdatePublishOptions_primaryTrackIsEnabled_existingTransceiverNotInPublishOptionsGetsTrackNullified() async throws {
+        publishOptions = [.dummy(codec: .h264)]
+        let h264Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        let av1Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .av1))
+        mockPeerConnection.stub(for: .addTransceiver, with: h264Transceiver)
+        subject.publish()
+        await fulfillment { h264Transceiver.sender.track != nil }
+        mockPeerConnection.stub(for: .addTransceiver, with: av1Transceiver)
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(
+                video: [.dummy(codec: .av1)]
+            )
+        )
+
+        await fulfillment { h264Transceiver.sender.track == nil }
+    }
+
+    // MARK: - trackInfo
+
+    func test_trackInfo_noPublishedTransceivers_returnsEmptyArray() {
+        XCTAssertTrue(subject.trackInfo(for: .allAvailable).isEmpty)
+    }
+
+    func test_trackInfo_allAvailable_twoPublishedTransceivers_returnsCorrectArray() async throws {
+        mockPeerConnection.stub(
+            for: .addTransceiver,
+            with: StubVariantResultProvider {
+                try! self.makeTransceiver(of: .video, videoOptions: .dummy(codec: $0 == 0 ? .h264 : .av1))
+            }
+        )
+        publishOptions = [
+            .dummy(codec: .h264, fmtp: "a"),
+            .dummy(codec: .av1, fmtp: "b")
+        ]
+        subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+
+        let trackInfo = subject.trackInfo(for: .allAvailable)
+        let h264TrackInfo = try XCTUnwrap(trackInfo.first { $0.codec.name == "h264" })
+        let av1TrackInfo = try XCTUnwrap(trackInfo.first { $0.codec.name == "av1" })
+
+        XCTAssertEqual(trackInfo.count, 2)
+        XCTAssertEqual(h264TrackInfo.trackType, .video)
+        XCTAssertFalse(h264TrackInfo.muted)
+        XCTAssertEqual(h264TrackInfo.codec.name, "h264")
+        XCTAssertEqual(h264TrackInfo.codec.fmtp, "a")
+        XCTAssertEqual(av1TrackInfo.trackType, .video)
+        XCTAssertFalse(av1TrackInfo.muted)
+        XCTAssertEqual(av1TrackInfo.codec.name, "av1")
+        XCTAssertEqual(av1TrackInfo.codec.fmtp, "b")
+        XCTAssertNotEqual(h264TrackInfo.trackID, av1TrackInfo.trackID)
+    }
+
+    func test_trackInfo_allAvailable_onePublishedAndOneUnpublishedTransceivers_returnsCorrectArray() async throws {
+        let h264Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        let av1Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .av1))
+        mockPeerConnection.stub(for: .addTransceiver, with: StubVariantResultProvider {
+            $0 == 1 ? h264Transceiver : av1Transceiver
+        })
+        publishOptions = [.dummy(codec: .h264)]
+        subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+        let h264TrackId = try XCTUnwrap(h264Transceiver.sender.track?.trackId)
+
+        try await subject.didUpdatePublishOptions(
+            .dummy(video: [.dummy(codec: .av1)])
+        )
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+        let trackInfo = subject.trackInfo(for: .allAvailable)
+        XCTAssertEqual(trackInfo.count, 2)
+        let h264TrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == h264TrackId }))
+        let av1TrackInfo = try XCTUnwrap(trackInfo.first(where: { $0.trackID == av1Transceiver.sender.track?.trackId }))
+        XCTAssertEqual(h264TrackInfo.trackType, .video)
+        XCTAssertEqual(av1TrackInfo.trackType, .video)
+    }
+
+    func test_trackInfo_lastPublishOpions_onePublishedAndOneUnpublishedTransceivers_returnsCorrectArray() async throws {
+        let h264Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        let av1Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .av1))
+        mockPeerConnection.stub(for: .addTransceiver, with: StubVariantResultProvider {
+            $0 == 1 ? h264Transceiver : av1Transceiver
+        })
+        publishOptions = [.dummy(codec: .h264)]
+        subject.publish()
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+        try await subject.didUpdatePublishOptions(
+            .dummy(video: [.dummy(codec: .av1)])
+        )
+
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+        let trackInfo = subject.trackInfo(for: .lastPublishOptions)
+        XCTAssertEqual(trackInfo.count, 1)
+        XCTAssertEqual(trackInfo.first?.trackType, .video)
+        XCTAssertEqual(trackInfo.first?.trackID, av1Transceiver.sender.track?.trackId)
+        XCTAssertEqual(trackInfo.first?.codec.name, "av1")
+    }
+
     // MARK: - publish
 
     func test_publish_disabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video)
+            with: try makeTransceiver(
+                of: .video,
+                videoOptions: .dummy(codec: .h264)
+            )
         )
         try await subject.setUp(
             with: .init(videoOn: false),
@@ -191,15 +400,13 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == true }
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
         XCTAssertEqual(mockPeerConnection.stubbedFunctionInput[.addTransceiver]?.count, 1)
     }
 
     func test_publish_disabledLocalTrack_transceiverHasBeenCreated_enablesAndAddsTrack() async throws {
-        mockPeerConnection.stub(
-            for: .addTransceiver,
-            with: try makeTransceiver(of: .video, layers: VideoLayer.default)
-        )
+        let mockTransceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        mockPeerConnection.stub(for: .addTransceiver, with: mockTransceiver)
         try await subject.setUp(
             with: .init(videoOn: true),
             ownCapabilities: [.sendVideo]
@@ -207,67 +414,83 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
 
         subject.publish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == true }
-        XCTAssertTrue(subject.localTrack?.isEnabled ?? false)
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+        XCTAssertTrue(mockTransceiver.sender.track?.isEnabled ?? false)
         XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 1)
-        XCTAssertEqual(
-            (mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver)?.sender.parameters.encodings.flatMap(\.rid),
-            ["q", "h", "f"]
-        )
     }
-    
+
     // MARK: - unpublish
 
-    func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
+    func test_unpublish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
+        let mockTransceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        mockPeerConnection.stub(for: .addTransceiver, with: mockTransceiver)
+        try await subject.setUp(
+            with: .init(videoOn: true),
+            ownCapabilities: [.sendVideo]
+        )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        await fulfillment { mockTransceiver.sender.track?.isEnabled == true }
+        XCTAssertTrue(subject.primaryTrack.isEnabled)
+
+        subject.unpublish()
+
+        await fulfillment {
+            self.subject.primaryTrack.isEnabled == false && mockTransceiver.sender.track?.isEnabled == false
+        }
+    }
+
+    func test_unpublish_enabledLocalTrack_stopsCapturingOnActiveSession() async throws {
+        let mockCaptureDevice = MockCaptureDevice()
+        mockCaptureDevice.stub(for: \.position, with: .front)
+        mockCaptureDeviceProvider.stubbedFunction[.deviceForAVPosition] = mockCaptureDevice
         mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video)
+            with: try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
         )
         try await subject.setUp(
             with: .init(videoOn: true),
             ownCapabilities: [.sendVideo]
         )
-        subject.localTrack?.isEnabled = true
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        await fulfillment { self.videoCaptureSessionProvider.activeSession?.device != nil }
 
         subject.unpublish()
 
-        await fulfillment { self.subject.localTrack?.isEnabled == false }
+        await fulfillment { self.mockVideoCapturer.timesCalled(.stopCapture) == 1 }
     }
 
     // MARK: - didUpdateCameraPosition(_:)
 
     func test_didUpdateCameraPosition_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        await fulfillment { self.videoCaptureSessionProvider.activeSession?.position == .back }
 
         try await subject.didUpdateCameraPosition(.front)
 
-        XCTAssertEqual(
-            mockCapturer.recordedInputPayload(AVCaptureDevice.Position.self, for: .setCameraPosition)?.last,
-            .front
-        )
+        await fulfillment { self.videoCaptureSessionProvider.activeSession?.position == .front }
     }
 
     // MARK: - setVideoFilter(_:)
 
     func test_setVideoFilter_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
 
         subject.setVideoFilter(
             .init(id: "test", name: "test", filter: { _ in fatalError() })
         )
 
+        await fulfillment { self.mockVideoCapturer.timesCalled(.setVideoFilter) == 1 }
         XCTAssertEqual(
-            mockCapturer.recordedInputPayload(VideoFilter.self, for: .setVideoFilter)?.last?.id,
+            mockVideoCapturer.recordedInputPayload(VideoFilter.self, for: .setVideoFilter)?.first?.id,
             "test"
         )
     }
@@ -275,17 +498,16 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     // MARK: - zoom(by:)
 
     func test_zoom_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
 
-        try subject.zoom(by: 10)
+        try await subject.zoom(by: 10)
 
         XCTAssertEqual(
-            mockCapturer.recordedInputPayload(CGFloat.self, for: .zoom)?.last,
+            mockVideoCapturer.recordedInputPayload(CGFloat.self, for: .zoom)?.last,
             10
         )
     }
@@ -293,17 +515,16 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     // MARK: - focus(at:)
 
     func test_focus_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
 
-        try subject.focus(at: .init(x: 10, y: 30))
+        try await subject.focus(at: .init(x: 10, y: 30))
 
         XCTAssertEqual(
-            mockCapturer.recordedInputPayload(CGPoint.self, for: .focus)?.last,
+            mockVideoCapturer.recordedInputPayload(CGPoint.self, for: .focus)?.last,
             .init(x: 10, y: 30)
         )
     }
@@ -311,101 +532,112 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
     // MARK: - addVideoOutput(_:)
 
     func test_addVideoOutput_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
         let videoOutput = AVCaptureVideoDataOutput()
 
-        try subject.addVideoOutput(videoOutput)
+        try await subject.addVideoOutput(videoOutput)
 
         XCTAssertTrue(
-            mockCapturer.recordedInputPayload(AVCaptureVideoDataOutput.self, for: .addVideoOutput)?.last === videoOutput
+            mockVideoCapturer.recordedInputPayload(AVCaptureVideoDataOutput.self, for: .addVideoOutput)?.last === videoOutput
         )
     }
 
     // MARK: - removeVideoOutput(_:)
 
     func test_removeVideoOutput_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
         let videoOutput = AVCaptureVideoDataOutput()
 
-        try subject.removeVideoOutput(videoOutput)
+        try await subject.removeVideoOutput(videoOutput)
 
         XCTAssertTrue(
-            mockCapturer.recordedInputPayload(AVCaptureVideoDataOutput.self, for: .removeVideoOutput)?.last === videoOutput
+            mockVideoCapturer.recordedInputPayload(AVCaptureVideoDataOutput.self, for: .removeVideoOutput)?.last === videoOutput
         )
     }
 
     // MARK: - addCapturePhotoOutput(_:)
 
     func test_addCapturePhotoOutput_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
         let videoOutput = AVCapturePhotoOutput()
 
-        try subject.addCapturePhotoOutput(videoOutput)
+        try await subject.addCapturePhotoOutput(videoOutput)
 
         XCTAssertTrue(
-            mockCapturer.recordedInputPayload(AVCapturePhotoOutput.self, for: .addCapturePhotoOutput)?.last === videoOutput
+            mockVideoCapturer.recordedInputPayload(AVCapturePhotoOutput.self, for: .addCapturePhotoOutput)?.last === videoOutput
         )
     }
 
     // MARK: - removeCapturePhotoOutput(_:)
 
     func test_removeCapturePhotoOutput_videoCapturerWasCalledWithExpectedInput() async throws {
-        let mockCapturer = MockCameraVideoCapturer()
-        mockCapturerFactory.stub(for: .buildCameraCapturer, with: mockCapturer)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
         let videoOutput = AVCapturePhotoOutput()
 
-        try subject.removeCapturePhotoOutput(videoOutput)
+        try await subject.removeCapturePhotoOutput(videoOutput)
 
         XCTAssertTrue(
-            mockCapturer.recordedInputPayload(AVCapturePhotoOutput.self, for: .removeCapturePhotoOutput)?.last === videoOutput
+            mockVideoCapturer.recordedInputPayload(AVCapturePhotoOutput.self, for: .removeCapturePhotoOutput)?.last === videoOutput
         )
     }
 
     // MARK: - changePublishQuality(_:)
 
-    func test_changePublishQuality_transceiverWasUpdatedCorrectly() async throws {
-        let transceiver = try makeTransceiver(of: .video, layers: VideoLayer.default)
+    func test_changePublishQuality_forActiveTransceiver_transceiverWasUpdatedCorrectly() async throws {
+        let transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
         mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
         try await subject.setUp(
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
-        subject.publish()
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
 
         let scalabilityMode = "L2T1"
-        var layer = Stream_Video_Sfu_Event_VideoLayerSetting.dummy(
-            name: "q",
-            isActive: true,
-            scalabilityMode: scalabilityMode,
-            maxFramerate: 30,
-            maxBitrate: 120,
-            scaleResolutionDownBy: 2
-        )
 
         subject.changePublishQuality(
             with: [
-                layer
+                .dummy(
+                    codec: .dummy(name: "h264"),
+                    layers: [
+                        .dummy(
+                            name: "q",
+                            isActive: true,
+                            scalabilityMode: scalabilityMode,
+                            maxFramerate: 30,
+                            maxBitrate: 120,
+                            scaleResolutionDownBy: 2
+                        )
+                    ],
+                    trackType: .video
+                )
             ]
         )
+
+        await fulfillment {
+            transceiver
+                .sender
+                .parameters
+                .encodings
+                .filter { $0.isActive }
+                .first?.rid == "q"
+        }
 
         let activeEncoding = try XCTUnwrap(
             transceiver
@@ -415,13 +647,59 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
                 .filter { $0.isActive }
                 .first
         )
-
         XCTAssertEqual(activeEncoding.rid, "q")
         XCTAssertTrue(activeEncoding.isActive)
         XCTAssertEqual(activeEncoding.maxBitrateBps, 120)
         XCTAssertEqual(activeEncoding.maxFramerate, 30)
         XCTAssertEqual(activeEncoding.scaleResolutionDownBy, 2)
         XCTAssertEqual(activeEncoding.scalabilityMode, scalabilityMode)
+    }
+
+    func test_changePublishQuality_forInactiveTransceiver_transceiverWasUpdatedCorrectly() async throws {
+        let transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        let av1Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .av1))
+        mockPeerConnection.stub(for: .addTransceiver, with: StubVariantResultProvider {
+            $0 == 1 ? transceiver : av1Transceiver
+        })
+        try await subject.setUp(
+            with: .init(videoOn: true, cameraPosition: .back),
+            ownCapabilities: [.sendVideo]
+        )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+        try await subject.didUpdatePublishOptions(.dummy(video: [.dummy(codec: .av1)]))
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 2 }
+
+        let scalabilityMode = "L2T4"
+
+        subject.changePublishQuality(
+            with: [
+                .dummy(
+                    codec: .dummy(name: "av1"),
+                    layers: [
+                        .dummy(
+                            name: "q",
+                            isActive: true,
+                            scalabilityMode: scalabilityMode,
+                            maxFramerate: 30,
+                            maxBitrate: 120,
+                            scaleResolutionDownBy: 2
+                        )
+                    ],
+                    trackType: .video
+                )
+            ]
+        )
+
+        await wait(for: 1)
+        XCTAssertTrue(
+            transceiver
+                .sender
+                .parameters
+                .encodings
+                .filter { $0.scalabilityMode == scalabilityMode }
+                .isEmpty
+        )
     }
 
     // MARK: - Private
@@ -465,7 +743,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
         of type: TrackType,
         direction: RTCRtpTransceiverDirection = .sendOnly,
         streamIds: [String] = [.unique],
-        layers: [VideoLayer]? = nil
+        videoOptions: PublishOptions.VideoPublishOptions
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
             temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(
@@ -481,7 +759,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase {
                 trackType: type,
                 direction: direction,
                 streamIds: streamIds,
-                layers: layers
+                videoOptions: videoOptions
             )
         )!
     }

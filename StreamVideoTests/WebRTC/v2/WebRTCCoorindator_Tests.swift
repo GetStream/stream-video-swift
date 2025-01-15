@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -539,11 +539,13 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             maxBitrate: 1000
         )
 
-        let videoOptions = await subject
+        let publishOptions = await subject
             .stateAdapter
-            .videoOptions
-        XCTAssertEqual(videoOptions.preferredVideoCodec, .vp9)
-        XCTAssertEqual(videoOptions.preferredBitrate, 1000)
+            .publishOptions
+        XCTAssertEqual(publishOptions.video.count, 1)
+        let videoPublishOptions = try XCTUnwrap(publishOptions.video.first)
+        XCTAssertEqual(videoPublishOptions.codec, .vp9)
+        XCTAssertEqual(videoPublishOptions.bitrate, 1000)
     }
 
     // MARK: - Private helpers

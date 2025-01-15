@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import CallKit
@@ -94,6 +94,34 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         default:
             XCTFail()
         }
+    }
+
+    @MainActor
+    func test_reportIncomingCall_withIconTemplateImageData_callUpdateWasConfiguredCorrectly() throws {
+        subject = .init()
+        let expectedData = String.unique.data(using: .utf8)
+        subject.iconTemplateImageData = expectedData
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        XCTAssertEqual(subject.callProvider.configuration.iconTemplateImageData, expectedData)
+    }
+
+    @MainActor
+    func test_reportIncomingCall_withoutIconTemplateImageData_callUpdateWasConfiguredCorrectly() throws {
+        subject = .init()
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
+        ) { _ in }
+
+        XCTAssertNil(subject.callProvider.configuration.iconTemplateImageData)
     }
 
     @MainActor

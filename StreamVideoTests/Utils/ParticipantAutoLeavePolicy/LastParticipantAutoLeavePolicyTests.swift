@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -121,7 +121,12 @@ final class LastParticipantAutoLeavePolicyTests: XCTestCase, @unchecked Sendable
         mockParticipantsJoined(currentParticipantsCount, on: activeCall)
         await fulfillment(file: file, line: line) { activeCall.state.participantsMap.count == currentParticipantsCount }
 
-        await safeFulfillment(of: [triggerExpectation], file: file, line: line)
+        await safeFulfillment(
+            of: [triggerExpectation],
+            timeout: expectsTrigger ? defaultTimeout : 5,
+            file: file,
+            line: line
+        )
     }
 
     private func mockRingingCall(_ call: Call?) {

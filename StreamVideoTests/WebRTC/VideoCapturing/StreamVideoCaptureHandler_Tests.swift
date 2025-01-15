@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -11,8 +11,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var source: MockRTCVideoCapturerDelegate! = .init()
     private lazy var subject: StreamVideoCaptureHandler! = .init(
-        source: source,
-        filters: []
+        source: source
     )
 
     // MARK: - Lifecycle

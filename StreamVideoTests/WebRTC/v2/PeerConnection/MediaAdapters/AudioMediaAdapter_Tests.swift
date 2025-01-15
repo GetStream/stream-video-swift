@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -59,5 +59,58 @@ final class AudioMediaAdapter_Tests: XCTestCase {
             mockMediaAdapter.recordedInputPayload(CallSettings.self, for: .didUpdateCallSettings)?.first
         )
         XCTAssertEqual(actual, settings)
+    }
+
+    // MARK: - didUpdatePublishOptions(_:)
+
+    func test_didUpdatePublishOptions_didUpdatePublishOptionsWasCalledOnLocalMediaAdapter() async throws {
+        let publishOptions = PublishOptions.dummy(audio: [.dummy(codec: .red)])
+
+        try await subject.didUpdatePublishOptions(publishOptions)
+
+        let actual = try XCTUnwrap(
+            mockMediaAdapter.recordedInputPayload(PublishOptions.self, for: .didUpdatePublishOptions)?.first
+        )
+        XCTAssertEqual(actual, publishOptions)
+    }
+
+    // MARK: - trackInfo
+
+    func test_trackInfo_allAvailable_trackInfoWasCalledOnLocalMediaAdapter() {
+        let expected: [Stream_Video_Sfu_Models_TrackInfo] = [
+            .dummy(trackType: .audio, mid: "0"),
+            .dummy(trackType: .audio, mid: "1")
+        ]
+        mockMediaAdapter.stub(
+            for: .trackInfo,
+            with: expected
+        )
+
+        let actual = subject.trackInfo(for: .allAvailable)
+
+        XCTAssertEqual(
+            mockMediaAdapter.recordedInputPayload(RTCPeerConnectionTrackInfoCollectionType.self, for: .trackInfo)?.first,
+            .allAvailable
+        )
+        XCTAssertEqual(actual, expected)
+    }
+
+    func test_trackInfo_lastPublishOptions_trackInfoWasCalledOnLocalMediaAdapter() {
+        let expected: [Stream_Video_Sfu_Models_TrackInfo] = [
+            .dummy(trackType: .audio, mid: "0"),
+            .dummy(trackType: .audio, mid: "1")
+        ]
+        mockMediaAdapter.stub(
+            for: .trackInfo,
+            with: expected
+        )
+
+        let actual = subject.trackInfo(for: .lastPublishOptions)
+
+        XCTAssertEqual(
+            mockMediaAdapter.recordedInputPayload(RTCPeerConnectionTrackInfoCollectionType.self, for: .trackInfo)?.first,
+            .lastPublishOptions
+        )
+        XCTAssertEqual(actual, expected)
     }
 }

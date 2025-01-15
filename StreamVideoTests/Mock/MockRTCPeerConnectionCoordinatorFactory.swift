@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -18,6 +18,7 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         audioSettings: AudioSettings,
+        publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
@@ -31,6 +32,7 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
             videoConfig: videoConfig,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider

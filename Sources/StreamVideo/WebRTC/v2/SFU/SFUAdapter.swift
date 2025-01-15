@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -64,6 +64,20 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     var connectURL: URL { webSocket.connectURL }
     /// The hostname of the SFU service.
     var hostname: String { signalService.hostname }
+    /// A Combine publisher that allows observation of *all events* received by the adapter.
+    var publisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> {
+        webSocket
+            .eventSubject
+            .compactMap {
+                switch $0 {
+                case let .sfuEvent(event):
+                    return event
+                default:
+                    return nil
+                }
+            }
+            .eraseToAnyPublisher()
+    }
 
     // MARK: - CustomStringConvertible
 
@@ -241,6 +255,35 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocket.engine?.send(message: event)
     }
 
+    /// Consumes events of a specified type from the given event bucket.
+    ///
+    /// This method retrieves all events of the specified type from the provided
+    /// `SFUEventBucket` and sends them through the WebSocket's event subject.
+    ///
+    /// - Parameters:
+    ///   - eventType: The type of events to consume.
+    ///   - bucket: The `SFUEventBucket` from which to consume events.
+    func consume<EventType>(
+        _ eventType: EventType.Type,
+        bucket: SFUEventBucket
+    ) {
+        let events = bucket.consume(eventType)
+
+        guard !events.isEmpty else {
+            log.debug(
+                "No events found in bucket to consume from sfuAdapter:\(self).",
+                subsystems: .sfu
+            )
+            return
+        }
+
+        log.debug(
+            "\(events.endIndex) event(s) of type \(eventType) found in bucket and will consume on sfuAdapter:\(self).",
+            subsystems: .sfu
+        )
+        events.forEach { webSocket.eventSubject.send(.sfuEvent($0)) }
+    }
+
     // MARK: - Service
 
     /// Updates the mute state of a specific track.
@@ -400,6 +443,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         log.debug(request, subsystems: .sfu)
         task.store(in: requestDisposableBag)
         let response = try await task.value
+        log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
@@ -430,6 +474,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
         try Task.checkCancellation()
 
+        log.debug(request, subsystems: .sfu)
         let task = Task { [request, signalService] in
             try Task.checkCancellation()
             return try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {
@@ -472,8 +517,10 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 return try await signalService.sendAnswer(sendAnswerRequest: request)
             }
         }
+        log.debug(request, subsystems: .sfu)
         task.store(in: requestDisposableBag)
         let response = try await task.value
+        log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error

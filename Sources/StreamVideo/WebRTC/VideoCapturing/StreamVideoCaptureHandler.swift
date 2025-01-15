@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -11,7 +11,6 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     @Injected(\.orientationAdapter) private var orientationAdapter
 
     let source: RTCVideoCapturerDelegate
-    let filters: [VideoFilter]
     let context: CIContext
     let colorSpace: CGColorSpace
     var selectedFilter: VideoFilter?
@@ -24,11 +23,9 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
 
     init(
         source: RTCVideoCapturerDelegate,
-        filters: [VideoFilter],
         handleRotation: Bool = true
     ) {
         self.source = source
-        self.filters = filters
         self.handleRotation = handleRotation
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()

@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 @testable import StreamVideo
@@ -31,6 +31,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - buildRequest
 
     func test_buildRequest_connectionTypeDefault_returnsCorrectJoinRequest() async throws {
+        let publisherSdp = String.unique
         let subscriberSdp = String.unique
         let token = String.unique
         let mockPublisher = try MockRTCPeerConnectionCoordinator(
@@ -49,6 +50,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         let result = await subject.buildRequest(
             with: .default,
             coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp,
             subscriberSdp: subscriberSdp,
             reconnectAttempt: 12,
             publisher: mockPublisher
@@ -67,6 +69,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_buildRequest_connectionTypeFastReconnect_returnsCorrectJoinRequest() async throws {
+        let publisherSdp = String.unique
         let subscriberSdp = String.unique
         let token = String.unique
         let mockPublisher = try MockRTCPeerConnectionCoordinator(
@@ -85,6 +88,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         let result = await subject.buildRequest(
             with: .fastReconnect,
             coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp,
             subscriberSdp: subscriberSdp,
             reconnectAttempt: 12,
             publisher: mockPublisher
@@ -103,6 +107,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_buildRequest_connectionTypeMigrate_returnsCorrectJoinRequest() async throws {
+        let publisherSdp = String.unique
         let subscriberSdp = String.unique
         let token = String.unique
         let mockPublisher = try MockRTCPeerConnectionCoordinator(
@@ -122,6 +127,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         let result = await subject.buildRequest(
             with: .migration(fromHostname: fromSfuID),
             coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp,
             subscriberSdp: subscriberSdp,
             reconnectAttempt: 12,
             publisher: mockPublisher
@@ -140,6 +146,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_buildRequest_connectionTypeRejoin_returnsCorrectJoinRequest() async throws {
+        let publisherSdp = String.unique
         let subscriberSdp = String.unique
         let token = String.unique
         let mockPublisher = try MockRTCPeerConnectionCoordinator(
@@ -159,6 +166,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         let result = await subject.buildRequest(
             with: .rejoin(fromSessionID: previousSessionID),
             coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp,
             subscriberSdp: subscriberSdp,
             reconnectAttempt: 12,
             publisher: mockPublisher
@@ -281,143 +289,84 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - buildAnnouncedTracks
 
     func test_buildAnnouncedTracks_publisherHasOnlyAudio_returnsCorrectTrackInfo() async throws {
-        let mid = String.unique
-        let mockTrack = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockAudioTrack()
-
         try await assertAnnouncedTracks(
             .audio,
-            stubbedMid: [.audio: mid],
-            stubbedTrack: [.audio: mockTrack]
-        ) { result in
-            XCTAssertEqual(result.count, 1)
-            assertAnnouncedTrack(
-                result[0],
-                (
-                    mid,
-                    mockTrack
-                ),
-                videoCodecs: []
-            )
-        }
+            expected: [.audio: [
+                .dummy(trackID: "audio-0", trackType: .audio, mid: "0"),
+                .dummy(trackID: "audio-1", trackType: .audio, mid: "1")
+            ]]
+        )
     }
 
     func test_buildAnnouncedTracks_publisherHasOnlyVideo_returnsCorrectTrackInfo() async throws {
-        let mid = String.unique
-        let mockTrack = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: false)
-
         try await assertAnnouncedTracks(
-            .video,
-            stubbedMid: [.video: mid],
-            stubbedTrack: [.video: mockTrack]
-        ) { result in
-            XCTAssertEqual(result.count, 1)
-            assertAnnouncedTrack(
-                result[0],
-                (
-                    mid,
-                    mockTrack
+            .audio,
+            expected: [.video: [
+                .dummy(
+                    trackID: "video-0",
+                    trackType: .video,
+                    layers: [.dummy(rid: "q"), .dummy(rid: "h")],
+                    mid: "0"
                 ),
-                videoCodecs: [.quarter, .half, .full]
-            )
-        }
+                .dummy(
+                    trackID: "video-1",
+                    trackType: .video,
+                    layers: [.dummy(rid: "q")],
+                    mid: "1"
+                )
+            ]]
+        )
     }
 
     func test_buildAnnouncedTracks_publisherHasOnlyScreenSharing_returnsCorrectTrackInfo() async throws {
-        var videoOptions = VideoOptions()
-        videoOptions.videoLayers = [.screenshare]
-        let mid = String.unique
-        let mockTrack = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: true)
-
         try await assertAnnouncedTracks(
-            .screenshare,
-            stubbedMid: [.screenshare: mid],
-            stubbedTrack: [.screenshare: mockTrack]
-        ) { result in
-            XCTAssertEqual(result.count, 1)
-            assertAnnouncedTrack(
-                result[0],
-                (
-                    mid,
-                    mockTrack
+            .audio,
+            expected: [.screenshare: [
+                .dummy(
+                    trackID: "screenShare-0",
+                    trackType: .screenShare,
+                    layers: [.dummy(rid: "q"), .dummy(rid: "h")],
+                    mid: "0"
                 ),
-                videoCodecs: [.screenshare]
-            )
-        }
+                .dummy(
+                    trackID: "video-1",
+                    trackType: .screenShare,
+                    layers: [.dummy(rid: "q")],
+                    mid: "1"
+                )
+            ]]
+        )
     }
 
     func test_buildAnnouncedTracks_publisherHasAllTracks_returnsCorrectTrackInfo() async throws {
-        struct Entry { var type: TrackType; var mid: String; var track: RTCMediaStreamTrack }
-        let entries = [
-            Entry(
-                type: .audio,
-                mid: .unique,
-                track: await mockCoordinatorStack
-                    .coordinator
-                    .stateAdapter
-                    .peerConnectionFactory
-                    .mockAudioTrack()
-            ),
-            
-            Entry(
-                type: .video,
-                mid: .unique,
-                track: await mockCoordinatorStack
-                    .coordinator
-                    .stateAdapter
-                    .peerConnectionFactory
-                    .mockVideoTrack(forScreenShare: false)
-            ),
-            
-            Entry(
-                type: .screenshare,
-                mid: .unique,
-                track: await mockCoordinatorStack
-                    .coordinator
-                    .stateAdapter
-                    .peerConnectionFactory
-                    .mockVideoTrack(forScreenShare: true)
-            )
-        ]
-
-        let stubbedMid = entries.reduce(into: [TrackType: String]()) { $0[$1.type] = $1.mid }
-        let stubbedTrack = entries.reduce(into: [TrackType: RTCMediaStreamTrack]()) { $0[$1.type] = $1.track }
-
         try await assertAnnouncedTracks(
-            .screenshare,
-            stubbedMid: stubbedMid,
-            stubbedTrack: stubbedTrack
-        ) { result in
-            XCTAssertEqual(result.count, 3)
-            assertAnnouncedTrack(
-                result[0],
-                (entries[0].mid, entries[0].track),
-                videoCodecs: []
-            )
-
-            assertAnnouncedTrack(
-                result[1],
-                (entries[1].mid, entries[1].track),
-                videoCodecs: [.quarter, .half, .full]
-            )
-
-            assertAnnouncedTrack(
-                result[2],
-                (entries[2].mid, entries[2].track),
-                videoCodecs: [.screenshare]
-            )
-        }
+            .audio,
+            expected: [
+                .audio: [
+                    .dummy(
+                        trackID: "audio-0",
+                        trackType: .audio,
+                        mid: "0"
+                    )
+                ],
+                .video: [
+                    .dummy(
+                        trackID: "video-1",
+                        trackType: .video,
+                        layers: [.dummy(rid: "h")],
+                        mid: "1"
+                    )
+                ],
+                .screenshare: [
+                    .dummy(
+                        trackID: "screenShare-0",
+                        trackType: .screenShare,
+                        layers: [.dummy(rid: "q"), .dummy(rid: "h")],
+                        mid: "0"
+                    )
+                ]
+            ]
+        )
     }
 
     // MARK: - buildSubscriptionDetails
@@ -467,77 +416,122 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(result[2].trackType, .screenShare)
     }
 
+    // MARK: - buildPreferredPublishOptions
+
+    func test_buildPreferredPublishOptions_withValidSDP() async throws {
+        let publisherSdp =
+            "v=0\r\no=- 46117317 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=rtpmap:96 opus/48000/2\r\na=rtpmap:97 VP8/90000"
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(
+                publishOptions: .init(
+                    audio: [.dummy(codec: .opus)],
+                    video: [.dummy(codec: .vp8)]
+                )
+            )
+
+        let result = await subject.buildPreferredPublishOptions(
+            coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp
+        )
+
+        XCTAssertEqual(result.count, 2)
+        XCTAssertEqual(result[0].codec.name, "opus")
+        XCTAssertEqual(result[0].codec.payloadType, 96)
+        XCTAssertEqual(result[1].codec.name, "vp8")
+        XCTAssertEqual(result[1].codec.payloadType, 97)
+    }
+
+    func test_buildPreferredPublishOptions_withInvalidSDP() async throws {
+        let publisherSdp = "v=0\r\no=- 46117317 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=invalid:96 opus/48000/2"
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(publishOptions: .init(audio: [.dummy(codec: .opus)]))
+
+        let result = await subject.buildPreferredPublishOptions(
+            coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp
+        )
+
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].codec.name, "opus")
+        XCTAssertEqual(result[0].codec.payloadType, 0)
+    }
+
+    func test_buildPreferredPublishOptions_withEmptySDP() async throws {
+        let publisherSdp = ""
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(publishOptions: .init(audio: [.dummy(codec: .opus)]))
+
+        let result = await subject.buildPreferredPublishOptions(
+            coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp
+        )
+
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].codec.name, "opus")
+        XCTAssertEqual(result[0].codec.payloadType, 0)
+    }
+
+    func test_buildPreferredPublishOptions_withMultipleCodecs() async throws {
+        let publisherSdp =
+            "v=0\r\no=- 46117317 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=rtpmap:96 opus/48000/2\r\na=rtpmap:97 VP8/90000\r\na=rtpmap:98 H264/90000"
+        let publishOptions = [
+            Stream_Video_Sfu_Models_PublishOption.with {
+                $0.codec.name = "opus"
+            },
+            Stream_Video_Sfu_Models_PublishOption.with {
+                $0.codec.name = "VP8"
+            },
+            Stream_Video_Sfu_Models_PublishOption.with {
+                $0.codec.name = "H264"
+            }
+        ]
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(publishOptions: .init(
+                audio: [.dummy(codec: .opus)],
+                video: [.dummy(codec: .vp8), .dummy(codec: .h264)]
+            ))
+
+        let result = await subject.buildPreferredPublishOptions(
+            coordinator: mockCoordinatorStack.coordinator,
+            publisherSdp: publisherSdp
+        )
+
+        XCTAssertEqual(result.count, 3)
+        XCTAssertEqual(result[0].codec.name, "opus")
+        XCTAssertEqual(result[0].codec.payloadType, 96)
+        XCTAssertEqual(result[1].codec.name, "vp8")
+        XCTAssertEqual(result[1].codec.payloadType, 97)
+        XCTAssertEqual(result[2].codec.name, "h264")
+        XCTAssertEqual(result[2].codec.payloadType, 98)
+    }
+
     // MARK: - Private helpers
 
     private func assertAnnouncedTracks(
         _ trackType: TrackType,
-        stubbedMid: [TrackType: String] = [:],
-        stubbedTrack: [TrackType: RTCMediaStreamTrack] = [:],
-        isTrackEnabled: Bool = true,
-        videoOptions: VideoOptions = .init(),
-        handler: ([Stream_Video_Sfu_Models_TrackInfo]) -> Void
+        expected: [TrackType: [Stream_Video_Sfu_Models_TrackInfo]],
+        file: StaticString = #file,
+        line: UInt = #line
     ) async throws {
         let mockPublisher = try MockRTCPeerConnectionCoordinator(
             peerType: .publisher,
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
-        mockPublisher?.stubbedMid = stubbedMid
-        mockPublisher?.stubbedTrack = stubbedTrack
+        mockPublisher?.stubbedTrackInfo = expected
 
-        let result = subject.buildAnnouncedTracks(
-            mockPublisher,
-            videoOptions: videoOptions
-        )
+        let result = subject.buildAnnouncedTracks(mockPublisher, collectionType: .allAvailable)
+        let expected: [Stream_Video_Sfu_Models_TrackInfo] = (expected[.audio] ?? [])
+            + (expected[.video] ?? [])
+            + (expected[.screenshare] ?? [])
 
-        handler(result)
-    }
-
-    private func assertAnnouncedTrack(
-        _ actual: @autoclosure () -> Stream_Video_Sfu_Models_TrackInfo,
-        _ expected: @autoclosure () -> (mid: String, track: RTCMediaStreamTrack),
-        videoCodecs: [VideoLayer],
-        file: StaticString = #file,
-        line: UInt = #line
-    ) {
-        switch actual().trackType {
-        case .audio:
-            XCTAssertEqual(actual().trackID, expected().track.trackId, file: file, line: line)
-            XCTAssertEqual(actual().mid, expected().mid, file: file, line: line)
-            XCTAssertEqual(actual().trackType, .audio, file: file, line: line)
-            XCTAssertEqual(actual().muted, !expected().track.isEnabled, file: file, line: line)
-
-        case .video:
-            XCTAssertEqual(actual().trackID, expected().track.trackId, file: file, line: line)
-            XCTAssertEqual(actual().mid, expected().mid, file: file, line: line)
-            XCTAssertEqual(actual().trackType, .video, file: file, line: line)
-            XCTAssertEqual(actual().muted, !expected().track.isEnabled, file: file, line: line)
-
-            XCTAssertEqual(actual().layers.count, videoCodecs.count)
-            for (index, codec) in videoCodecs.enumerated() {
-                XCTAssertEqual(actual().layers[index].bitrate, .init(codec.maxBitrate))
-                XCTAssertEqual(actual().layers[index].fps, 30)
-                XCTAssertEqual(actual().layers[index].quality, codec.sfuQuality)
-                XCTAssertEqual(actual().layers[index].videoDimension.width, .init(codec.dimensions.width))
-                XCTAssertEqual(actual().layers[index].videoDimension.height, .init(codec.dimensions.height))
-            }
-
-        case .screenShare:
-            XCTAssertEqual(actual().trackID, expected().track.trackId, file: file, line: line)
-            XCTAssertEqual(actual().mid, expected().mid, file: file, line: line)
-            XCTAssertEqual(actual().trackType, .screenShare, file: file, line: line)
-            XCTAssertEqual(actual().muted, !expected().track.isEnabled, file: file, line: line)
-
-            XCTAssertEqual(actual().layers.count, videoCodecs.count)
-            for (index, codec) in videoCodecs.enumerated() {
-                XCTAssertEqual(actual().layers[index].bitrate, .init(codec.maxBitrate))
-                XCTAssertEqual(actual().layers[index].fps, 15)
-                XCTAssertEqual(actual().layers[index].quality, codec.sfuQuality)
-                XCTAssertEqual(actual().layers[index].videoDimension.width, .init(codec.dimensions.width))
-                XCTAssertEqual(actual().layers[index].videoDimension.height, .init(codec.dimensions.height))
-            }
-
-        default:
-            XCTFail()
-        }
+        XCTAssertEqual(result, expected, file: file, line: line)
     }
 }

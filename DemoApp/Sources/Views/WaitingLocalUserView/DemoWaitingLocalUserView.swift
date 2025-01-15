@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -151,6 +151,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                     .navigationViewStyle(.stack)
                 }
             }
+            .presentsMoreControls(viewModel: viewModel)
             .alignedToReadableContentGuide()
             .padding(.bottom)
         } else {

@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -301,6 +301,32 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
     }
 
     public func withUpdated(showTrack: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt,
+            audioLevel: audioLevel,
+            audioLevels: audioLevels,
+            pin: pin
+        )
+    }
+
+    public func withUpdated(trackLookupPrefix: String) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,

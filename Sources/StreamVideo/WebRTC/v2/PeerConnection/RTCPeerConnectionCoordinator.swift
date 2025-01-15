@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -37,6 +37,12 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let disposableBag: DisposableBag = .init()
     private let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection.serial.offer.queue")
 
+    /// `SetPublisher` and `HandleSubscriberOffer` are expected from the SFU to be sent/handled
+    /// in a serial manner. The processing queues below ensure that the respective tasks are being executed
+    /// serially.
+    private let setPublisherProcessingQueue = SerialActorQueue()
+    private let subscriberOfferProcessingQueue = SerialActorQueue()
+
     // MARK: Adapters
 
     private let mediaAdapter: MediaAdapter
@@ -51,6 +57,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private var setUpSubject: CurrentValueSubject<Bool, Never> = .init(false)
     var videoOptions: VideoOptions
     var audioSettings: AudioSettings
+    var publishOptions: PublishOptions {
+        didSet { didUpdatePublishOptions(publishOptions) }
+    }
 
     // MARK: State
 
@@ -63,12 +72,17 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    func localTrack(of type: TrackType) -> RTCMediaStreamTrack? {
-        mediaAdapter.localTrack(of: type)
-    }
-
-    func mid(for type: TrackType) -> String? {
-        mediaAdapter.mid(for: type)
+    /// Retrieves track information for a specified track type and collection type.
+    ///
+    /// - Parameters:
+    ///   - type: The type of track to retrieve information for.
+    ///   - collectionType: The collection type for the track information.
+    /// - Returns: An array of `Stream_Video_Sfu_Models_TrackInfo` objects.
+    func trackInfo(
+        for type: TrackType,
+        collectionType: RTCPeerConnectionTrackInfoCollectionType
+    ) -> [Stream_Video_Sfu_Models_TrackInfo] {
+        mediaAdapter.trackInfo(for: type, collectionType: collectionType)
     }
 
     /// Initializes the RTCPeerConnectionCoordinator with necessary dependencies.
@@ -82,6 +96,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - videoConfig: Configuration for video processing.
     ///   - callSettings: Settings for the current call.
     ///   - audioSettings: Settings for audio processing.
+    ///   - publishOptions: The publishOptions to use to publish the initial tracks.
     ///   - sfuAdapter: Adapter for communicating with the SFU.
     ///   - audioSession: The audio session to be used.
     ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
@@ -95,6 +110,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         videoConfig: VideoConfig,
         callSettings: CallSettings,
         audioSettings: AudioSettings,
+        publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
@@ -106,6 +122,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             videoOptions: videoOptions,
             callSettings: callSettings,
             audioSettings: audioSettings,
+            publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             mediaAdapter: .init(
                 sessionID: sessionId,
@@ -115,6 +132,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 sfuAdapter: sfuAdapter,
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
+                publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
             )
@@ -128,6 +146,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         videoOptions: VideoOptions,
         callSettings: CallSettings,
         audioSettings: AudioSettings,
+        publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         mediaAdapter: MediaAdapter
     ) {
@@ -136,6 +155,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         self.videoOptions = videoOptions
         self.callSettings = callSettings
         self.audioSettings = audioSettings
+        self.publishOptions = publishOptions
         self.peerConnection = peerConnection
         self.sfuAdapter = sfuAdapter
         subsystem = peerType == .publisher
@@ -185,9 +205,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         if peerType == .publisher {
             peerConnection
                 .publisher(eventType: StreamRTCPeerConnection.ShouldNegotiateEvent.self)
+                .log(.debug) { _ in "Publisher will negotiate" }
                 .receive(on: dispatchQueue)
                 .map { _ in () }
-                .sink { [weak self] in self?.negotiate() }
+                .sinkTask(queue: setPublisherProcessingQueue) { [weak self] in await self?.negotiate() }
                 .store(in: disposableBag)
         } else {
             configureSubscriberOfferObserver()
@@ -245,6 +266,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         }
     }
 
+    /// Completes the setup process by sending a `true` value to the `setUpSubject`.
+    ///
+    /// This method must be called to ensure that `ensureSetUpHasBeenCompleted` returns `true`.
+    func completeSetUp() {
+        setUpSubject.send(true)
+    }
+
     /// Sets up the peer connection with given settings and capabilities.
     ///
     /// - Parameters:
@@ -275,7 +303,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             with: settings,
             ownCapabilities: ownCapabilities
         )
-        setUpSubject.send(true)
     }
 
     /// Updates the call settings.
@@ -303,6 +330,24 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         )
         callSettings = settings
         try await mediaAdapter.didUpdateCallSettings(settings)
+    }
+
+    /// Updates the publish options for the peer connection.
+    ///
+    /// This method applies the new publish options to all media adapters including
+    /// audio, video, and screenshare.
+    ///
+    /// - Parameter publishOptions: The new publish options to apply.
+    func didUpdatePublishOptions(
+        _ publishOptions: PublishOptions
+    ) {
+        Task {
+            do {
+                try await mediaAdapter.didUpdatePublishOptions(publishOptions)
+            } catch {
+                log.error(error)
+            }
+        }
     }
 
     // MARK: - Actions
@@ -363,6 +408,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             type:\(peerType)
             sessionID: \(sessionId)
             sfu: \(sfuAdapter.hostname)
+            SDP: \(sessionDescription.sdp.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\n", with: " "))
             """,
             subsystems: subsystem
         )
@@ -383,6 +429,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             type:\(peerType)
             sessionID: \(sessionId)
             sfu: \(sfuAdapter.hostname)
+            SDP: \(sessionDescription.sdp.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\n", with: " "))
             """,
             subsystems: subsystem
         )
@@ -424,7 +471,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         case .subscriber:
             peerConnection.restartIce()
         case .publisher:
-            negotiate(constraints: .iceRestartConstraints)
+            setPublisherProcessingQueue.async { [weak self] in
+                await self?.negotiate(constraints: .iceRestartConstraints)
+            }
         }
     }
 
@@ -432,8 +481,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Returns: An RTCStatisticsReport containing the connection statistics.
     /// - Throws: An error if retrieving statistics fails.
-    func statsReport() async throws -> RTCStatisticsReport? {
-        try await peerConnection.statistics()
+    func statsReport() async throws -> StreamRTCStatisticsReport {
+        let result = try await peerConnection.statistics()
+        return .init(result)
     }
 
     // MARK: - Video
@@ -481,16 +531,16 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///
     /// - Parameter factor: The zoom factor to apply.
     /// - Throws: An error if zooming fails or is not supported by the current device.
-    func zoom(by factor: CGFloat) throws {
-        try mediaAdapter.zoom(by: factor)
+    func zoom(by factor: CGFloat) async throws {
+        try await mediaAdapter.zoom(by: factor)
     }
 
     /// Focuses the camera at a given point.
     ///
     /// - Parameter point: The point in the camera's coordinate system to focus on.
     /// - Throws: An error if focusing fails or is not supported by the current device.
-    func focus(at point: CGPoint) throws {
-        try mediaAdapter.focus(at: point)
+    func focus(at point: CGPoint) async throws {
+        try await mediaAdapter.focus(at: point)
     }
 
     /// Adds a video output to the capture session.
@@ -499,8 +549,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Throws: An error if adding the video output fails.
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
-        try mediaAdapter.addVideoOutput(videoOutput)
+    ) async throws {
+        try await mediaAdapter.addVideoOutput(videoOutput)
     }
 
     /// Removes a video output from the capture session.
@@ -509,8 +559,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Throws: An error if removing the video output fails.
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
-    ) throws {
-        try mediaAdapter.removeVideoOutput(videoOutput)
+    ) async throws {
+        try await mediaAdapter.removeVideoOutput(videoOutput)
     }
 
     /// Adds a photo output to the capture session.
@@ -519,8 +569,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Throws: An error if adding the photo output fails.
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
-        try mediaAdapter.addCapturePhotoOutput(capturePhotoOutput)
+    ) async throws {
+        try await mediaAdapter.addCapturePhotoOutput(capturePhotoOutput)
     }
 
     /// Removes a photo output from the capture session.
@@ -529,17 +579,19 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Throws: An error if removing the photo output fails.
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
-    ) throws {
-        try mediaAdapter.removeCapturePhotoOutput(capturePhotoOutput)
+    ) async throws {
+        try await mediaAdapter.removeCapturePhotoOutput(capturePhotoOutput)
     }
 
     /// Changes the publish quality with active encodings.
     ///
     /// - Parameter activeEncodings: A set of active encoding identifiers.
     func changePublishQuality(
-        with layerSettings: [Stream_Video_Sfu_Event_VideoLayerSetting]
+        with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
-        mediaAdapter.changePublishQuality(with: layerSettings)
+        Task {
+            await mediaAdapter.changePublishQuality(with: event)
+        }
     }
 
     // MARK: - ScreenSharing
@@ -574,64 +626,63 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Parameter constraints: The media constraints to use for negotiation.
     private func negotiate(
         constraints: RTCMediaConstraints = .defaultConstraints
-    ) {
-        Task { [weak self] in
-            guard let self else { return }
-            do {
-                log.debug(
-                    """
-                    PeerConnection will negotiate
-                    Identifier: \(identifier)
-                    type:\(peerType)
-                    sessionID: \(sessionId)
-                    sfu: \(sfuAdapter.hostname)
-                    """,
-                    subsystems: subsystem
+    ) async {
+        do {
+            log.debug(
+                """
+                PeerConnection will negotiate
+                Identifier: \(identifier)
+                type:\(peerType)
+                sessionID: \(sessionId)
+                sfu: \(sfuAdapter.hostname)
+                """,
+                subsystems: subsystem
+            )
+
+            let offer = try await createOffer(constraints: constraints)
+
+            try await setLocalDescription(offer)
+
+            try await ensureSetUpHasBeenCompleted()
+
+            let tracksInfo = WebRTCJoinRequestFactory()
+                .buildAnnouncedTracks(self, collectionType: .allAvailable)
+
+            // This is only used for debugging and internal validation.
+            validateTracksAndTransceivers(.video, tracksInfo: tracksInfo)
+            validateTracksAndTransceivers(.screenshare, tracksInfo: tracksInfo)
+
+            log.debug(
+                """
+                PeerConnection will setPublisher
+                Identifier: \(identifier)
+                type:\(peerType)
+                sessionID: \(sessionId)
+                sfu: \(sfuAdapter.hostname)
+                tracksInfo:
+                    audio: 
+                        \(tracksInfo.filter { $0.trackType == .audio })
+                    video: 
+                        \(tracksInfo.filter { $0.trackType == .video })
+                    hasScreenSharing: \(tracksInfo.contains { $0.trackType == .screenShare })
+                """,
+                subsystems: subsystem
+            )
+
+            let sessionDescription = try await sfuAdapter.setPublisher(
+                sessionDescription: offer.sdp,
+                tracks: tracksInfo,
+                for: sessionId
+            )
+
+            try await setRemoteDescription(
+                .init(
+                    type: .answer,
+                    sdp: sessionDescription.sdp
                 )
-
-                let offer = try await self
-                    .createOffer(constraints: constraints)
-                    .withOpusDTX(audioSettings.opusDtxEnabled)
-                    .withRedundantCoding(audioSettings.redundantCodingEnabled)
-
-                try await setLocalDescription(offer)
-
-                try await ensureSetUpHasBeenCompleted()
-
-                let tracksInfo = WebRTCJoinRequestFactory().buildAnnouncedTracks(
-                    self,
-                    videoOptions: videoOptions
-                )
-
-                log.debug(
-                    """
-                    PeerConnection will setPublisher
-                    Identifier: \(identifier)
-                    type:\(peerType)
-                    sessionID: \(sessionId)
-                    sfu: \(sfuAdapter.hostname)
-                    tracksInfo:
-                        hasAudio: \(tracksInfo.contains { $0.trackType == .audio })
-                        hasVideo: \(tracksInfo.contains { $0.trackType == .video })
-                        hasScreenSharing: \(tracksInfo.contains { $0.trackType == .screenShare })
-                    """,
-                    subsystems: subsystem
-                )
-                let sessionDescription = try await sfuAdapter.setPublisher(
-                    sessionDescription: offer.sdp,
-                    tracks: tracksInfo,
-                    for: sessionId
-                )
-
-                try await setRemoteDescription(
-                    .init(
-                        type: .answer,
-                        sdp: sessionDescription.sdp
-                    )
-                )
-            } catch {
-                log.error(error, subsystems: subsystem)
-            }
+            )
+        } catch {
+            log.error(error, subsystems: subsystem)
         }
     }
 
@@ -640,45 +691,42 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// - Parameter event: The subscriber offer event to handle.
     private func handleSubscriberOffer(
         _ event: Stream_Video_Sfu_Event_SubscriberOffer
-    ) {
-        Task { [weak self] in
-            guard let self else { return }
-            do {
-                log.debug(
-                    """
-                    PeerConnection will handleSubscriberOffer
-                    Identifier: \(identifier)
-                    type:\(peerType)
-                    sessionID: \(sessionId)
-                    sfu: \(sfuAdapter.hostname)
-                    """,
-                    subsystems: subsystem
-                )
+    ) async {
+        do {
+            log.debug(
+                """
+                PeerConnection will handleSubscriberOffer
+                Identifier: \(identifier)
+                type:\(peerType)
+                sessionID: \(sessionId)
+                sfu: \(sfuAdapter.hostname)
+                """,
+                subsystems: subsystem
+            )
 
-                let offerSdp = event.sdp
-                try await setRemoteDescription(
-                    .init(
-                        type: .offer,
-                        sdp: offerSdp
-                    )
+            let offerSdp = event.sdp
+            try await setRemoteDescription(
+                .init(
+                    type: .offer,
+                    sdp: offerSdp
                 )
+            )
 
-                let answer = try await createAnswer()
-                try await setLocalDescription(answer)
+            let answer = try await createAnswer()
+            try await setLocalDescription(answer)
 
-                try await sfuAdapter.sendAnswer(
-                    sessionDescription: answer.sdp,
-                    peerType: .subscriber,
-                    for: sessionId
-                )
-                log.debug("Subscriber offer was handled.", subsystems: subsystem)
-            } catch {
-                log.error(
-                    "Error handling offer event",
-                    subsystems: subsystem,
-                    error: error
-                )
-            }
+            try await sfuAdapter.sendAnswer(
+                sessionDescription: answer.sdp,
+                peerType: .subscriber,
+                for: sessionId
+            )
+            log.debug("Subscriber offer was handled.", subsystems: subsystem)
+        } catch {
+            log.error(
+                "Error handling offer event",
+                subsystems: subsystem,
+                error: error
+            )
         }
     }
 
@@ -688,7 +736,62 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             .publisher(eventType: Stream_Video_Sfu_Event_SubscriberOffer.self)
             .log(.debug, subsystems: subsystem)
             .receive(on: dispatchQueue)
-            .sink { [weak self] in self?.handleSubscriberOffer($0) }
+            .sinkTask(queue: subscriberOfferProcessingQueue) { [weak self] in await self?.handleSubscriberOffer($0) }
             .store(in: disposableBag)
+    }
+
+    /// Validates that the tracks intended for negotiation with the SFU match the state of the transceivers in
+    /// the peer connection.
+    ///
+    /// This method ensures that the tracks we plan to send during negotiation (as represented by the
+    /// `tracksInfo` parameter) are consistent with the transceivers in the peer connection. If there is a
+    /// mismatch, an error is logged for debugging purposes.
+    ///
+    /// - Parameters:
+    ///   - trackType: The type of track to validate (e.g., `.audio`, `.video`, or `.screenshare`).
+    ///   - tracksInfo: A collection of `TrackInfo` objects representing the tracks announced to
+    ///   the SFU during negotiation.
+    ///
+    /// The validation process compares the set of track IDs in the `tracksInfo` list against the set of
+    /// track IDs retrieved from the peer connection's transceivers for the specified `trackType`. If these
+    /// sets differ, it indicates a discrepancy between the announced tracks and the transceivers' actual state.
+    private func validateTracksAndTransceivers(
+        _ trackType: TrackType,
+        tracksInfo: [Stream_Video_Sfu_Models_TrackInfo]
+    ) {
+        let tracks = Set(
+            tracksInfo
+                .filter {
+                    switch (trackType, $0.trackType) {
+                    case (.audio, .audio), (.video, .video), (.screenshare, .screenShare):
+                        return true
+                    default:
+                        return false
+                    }
+                }
+                .map(\.trackID)
+        )
+        let transceivers = Set(
+            peerConnection
+                .transceivers(for: trackType)
+                .compactMap(\.sender.track?.trackId)
+        )
+
+        guard tracks != transceivers else {
+            return
+        }
+        log.error(
+            """
+            PeerConnection tracks and transceivers mismatch for trackType:\(trackType)
+            Identifier: \(identifier)
+            type:\(peerType)
+            sessionID: \(sessionId)
+            sfu: \(sfuAdapter.hostname)
+            
+            tracks: \(tracks.sorted().joined(separator: ","))
+            transceivers: \(transceivers.sorted().joined(separator: ","))
+            """,
+            subsystems: subsystem
+        )
     }
 }

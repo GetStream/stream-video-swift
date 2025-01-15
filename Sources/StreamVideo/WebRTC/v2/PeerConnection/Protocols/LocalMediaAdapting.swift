@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -35,10 +35,14 @@ protocol LocalMediaAdapting {
     /// This method should be called when the local participant wants to stop sharing their media.
     func unpublish()
 
+    func trackInfo(for collectionType: RTCPeerConnectionTrackInfoCollectionType) -> [Stream_Video_Sfu_Models_TrackInfo]
+
     /// Updates the adapter with new call settings.
     ///
     /// - Parameter settings: The updated call settings to apply.
     ///
     /// - Throws: An error if the update process fails.
     func didUpdateCallSettings(_ settings: CallSettings) async throws
+
+    func didUpdatePublishOptions(_ publishOptions: PublishOptions) async throws
 }

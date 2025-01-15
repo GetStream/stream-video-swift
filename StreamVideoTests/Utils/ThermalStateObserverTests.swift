@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -22,7 +22,7 @@ final class ThermalStateObserverTests: XCTestCase {
     func test_init_stateHasBeenCorrectlySetUp() {
         XCTAssertEqual(ThermalStateObserver.shared.state, ProcessInfo.processInfo.thermalState)
     }
-
+    
     func test_injectedValueWasSetCorrectly() {
         XCTAssertTrue(InjectedValues[\.thermalStateObserver] === ThermalStateObserver.shared)
     }

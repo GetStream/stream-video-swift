@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -72,10 +72,10 @@ struct DemoCustomEnvironmentView: View {
         token: String,
         completionHandler: @escaping (AppEnvironment.BaseURL, String, String) -> Void
     ) {
-        self.baseURL = baseURL
-        self.apiKey = apiKey
-        self.token = token
-        usesDefaultPushNotificationConfig = AppState.shared.pushNotificationConfiguration == .default
+        _baseURL = .init(initialValue: baseURL)
+        _apiKey = .init(initialValue: apiKey)
+        _token = .init(initialValue: token)
+        _usesDefaultPushNotificationConfig = .init(initialValue: AppState.shared.pushNotificationConfiguration == .default)
         self.completionHandler = completionHandler
     }
 

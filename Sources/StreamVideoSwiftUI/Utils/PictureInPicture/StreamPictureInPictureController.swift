@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import AVKit
@@ -13,6 +13,8 @@ import UIKit
 
 /// A controller class for picture-in-picture whenever that is possible.
 final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
+
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     // MARK: - Properties
 
@@ -101,32 +103,32 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     public func pictureInPictureControllerWillStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Will start with trackId:\(track?.trackId ?? "n/a")")
+        log.debug("Will start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
     }
 
     public func pictureInPictureControllerDidStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Did start with trackId:\(track?.trackId ?? "n/a")")
+        log.debug("Did start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
     }
 
     public func pictureInPictureController(
         _ pictureInPictureController: AVPictureInPictureController,
         failedToStartPictureInPictureWithError error: Error
     ) {
-        log.error("Failed for trackId:\(track?.trackId ?? "na/a") with error:\(error)")
+        log.error("Failed for trackId:\(track?.trackId ?? "na/a") with error:\(error)", subsystems: .pictureInPicture)
     }
 
     public func pictureInPictureControllerWillStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Will stop for trackId:\(track?.trackId ?? "n/a")")
+        log.debug("Will stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
     }
 
     public func pictureInPictureControllerDidStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Did stop for trackId:\(track?.trackId ?? "n/a")")
+        log.debug("Did stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
     }
 
     // MARK: - Private helpers
@@ -145,7 +147,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
                 pictureInPictureController?
                     .publisher(for: \.isPictureInPicturePossible)
                     .removeDuplicates()
-                    .sink { log.debug("isPictureInPicturePossible:\($0)") }
+                    .sink { log.debug("isPictureInPicturePossible:\($0)", subsystems: .pictureInPicture) }
                     .store(in: &cancellableBag)
 
                 pictureInPictureController?
@@ -184,18 +186,15 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     }
 
     private func didUpdatePictureInPictureActiveState(_ isActive: Bool) {
-        log.debug("isPictureInPictureActive:\(isActive)")
+        log.debug("isPictureInPictureActive:\(isActive)", subsystems: .pictureInPicture)
         trackStateAdapter.isEnabled = isActive
     }
 
     private func subscribeToApplicationStateNotifications() {
-        #if canImport(UIKit)
-        /// If we are running on a UIKit application, we observe the application state in order to disable
-        /// PictureInPicture when active but the app is in foreground.
-        didAppBecomeActiveCancellable = NotificationCenter.default
-            .publisher(for: UIApplication.didBecomeActiveNotification)
+        didAppBecomeActiveCancellable = applicationStateAdapter
+            .$state
+            .filter { $0 == .foreground }
             .sink { [weak self] _ in self?.applicationDidBecomeActive() }
-        #endif
     }
 
     private func applicationDidBecomeActive() {

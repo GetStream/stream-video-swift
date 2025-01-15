@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import AVFoundation
@@ -64,6 +64,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     /// The icon data for the call template.
     open var iconTemplateImageData: Data?
+    /// The ringtone sound to use for CallKit ringing calls.
+    open var ringtoneSound: String?
     /// Whether the call can be held on its own or swapped with another call.
     /// - Important: Holding a call isn't supported yet!
     open var supportsHolding: Bool = false
@@ -554,6 +556,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         configuration.supportsVideo = supportsVideo
         configuration.supportedHandleTypes = supportedHandleTypes
         configuration.iconTemplateImageData = iconTemplateImageData
+        configuration.ringtoneSound = ringtoneSound
 
         if supportsHolding {
             // Holding a call isn't supported yet.

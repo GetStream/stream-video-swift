@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -52,5 +52,18 @@ extension Mockable {
 
     mutating func resetRecords(for key: FunctionKey) {
         stubbedFunctionInput[key] = []
+    }
+}
+
+final class StubVariantResultProvider<Value> {
+
+    var provider: (Int) -> Value
+
+    init(_ provider: @escaping (Int) -> Value) {
+        self.provider = provider
+    }
+
+    func getResult(for iteration: Int) -> Value {
+        provider(iteration)
     }
 }

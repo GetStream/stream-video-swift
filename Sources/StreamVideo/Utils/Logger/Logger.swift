@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -29,7 +29,9 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .iceAdapter,
         .mediaAdapter,
         .thermalState,
-        .audioSession
+        .audioSession,
+        .videoCapturer,
+        .pictureInPicture
     ]
 
     /// All subsystems within the SDK.
@@ -46,7 +48,9 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
         .iceAdapter,
         .mediaAdapter,
         .thermalState,
-        .audioSession
+        .audioSession,
+        .videoCapturer,
+        .pictureInPicture
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -76,6 +80,10 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
     public static let thermalState = Self(rawValue: 1 << 11)
     /// The subsystem responsible for interacting with the AudioSession.
     public static let audioSession = Self(rawValue: 1 << 12)
+    /// The subsystem responsible for VideoCapturing components.
+    public static let videoCapturer = Self(rawValue: 1 << 13)
+    /// The subsystem responsible for PicutreInPicture.
+    public static let pictureInPicture = Self(rawValue: 1 << 14)
 
     public var description: String {
         switch rawValue {
@@ -105,6 +113,10 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible {
             return "thermalState"
         case LogSubsystem.audioSession.rawValue:
             return "audioSession"
+        case LogSubsystem.videoCapturer.rawValue:
+            return "videoCapturer"
+        case LogSubsystem.pictureInPicture.rawValue:
+            return "picture-in-picture"
         default:
             return "unknown(rawValue:\(rawValue)"
         }

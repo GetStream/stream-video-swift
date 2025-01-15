@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -41,7 +41,7 @@ struct DemoReconnectionButtonView: View {
     private func buttonView(
         for reconnectStrategy: ReconnectStrategy
     ) -> some View {
-        let (title, icon) = {
+        let (title, icon): (String, String) = {
             switch reconnectStrategy {
             case .fast:
                 return ("Fast", "hare")

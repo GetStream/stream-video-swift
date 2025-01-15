@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import class StreamChat.ChatChannelController
@@ -29,9 +29,7 @@ struct AppControlsWithChat: View {
 
     var body: some View {
         HStack {
-            if viewModel.callParticipants.count > 1 {
-                MoreControlsIconView(viewModel: viewModel)
-            }
+            MoreControlsIconView(viewModel: viewModel)
 
             #if !targetEnvironment(simulator)
             if !ProcessInfo.processInfo.isiOSAppOnMac {

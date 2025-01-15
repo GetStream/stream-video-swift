@@ -1,5 +1,5 @@
 //
-// Copyright © 2024 Stream.io Inc. All rights reserved.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -28,13 +28,16 @@ final class WebRTCStatsReporter: @unchecked Sendable {
 
     /// The interval at which statistics are collected and reported, in seconds.
     ///
-    /// Setting this property automatically reschedules the collection timer.
-    var interval: TimeInterval { didSet { scheduleCollection(with: interval) } }
+    /// Setting this property automatically reschedules the delivery timer.
+    var deliveryInterval: TimeInterval { didSet { scheduleDelivery(with: deliveryInterval) } }
 
     /// The SFU adapter used to send collected statistics.
     ///
     /// Setting this property triggers a reset of the collection and delivery processes.
     var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
+
+    /// The interval at which statistics are collected, in seconds. Defaults to 2.
+    private var collectionInterval: TimeInterval { didSet { scheduleCollection(with: collectionInterval) } }
 
     /// Cancellable for the collection timer.
     private var collectionCancellable: AnyCancellable?
@@ -52,24 +55,29 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
     /// A subject for publishing the latest collected statistics report.
-    private let latestReportSubject = PassthroughSubject<CallStatsReport, Never>()
+    private let latestReportSubject = CurrentValueSubject<CallStatsReport?, Never>(nil)
 
     /// A publisher for the latest statistics report.
     var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
-        latestReportSubject.eraseToAnyPublisher()
+        latestReportSubject
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
     }
 
     /// Initializes a new WebRTCStatsReporter.
     ///
     /// - Parameters:
-    ///   - interval: The interval at which to collect and report statistics, in seconds. Defaults to
+    ///   - collectionInterval: The interval at which we collect statistics, in seconds. Defaults to 2.
+    ///   - deliveryInterval: The interval at which we report statistics, in seconds. Defaults to 5.
     ///   5 seconds.
     ///   - sessionID: The session ID associated with this reporter.
     init(
-        interval: TimeInterval = 5,
+        collectionInterval: TimeInterval = 2,
+        deliveryInterval: TimeInterval = 5,
         sessionID: String
     ) {
-        self.interval = interval
+        self.collectionInterval = collectionInterval
+        self.deliveryInterval = deliveryInterval
         self.sessionID = sessionID
     }
 
@@ -98,9 +106,8 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             return
         }
 
-        scheduleCollection(with: interval)
-        deliveryCancellable = latestReportSubject
-            .sink { [weak self] in self?.deliverStats(report: $0) }
+        scheduleCollection(with: collectionInterval)
+        scheduleDelivery(with: deliveryInterval)
     }
 
     /// Schedules the periodic collection of statistics.
@@ -108,7 +115,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// - Parameter interval: The interval at which to collect statistics, in seconds.
     private func scheduleCollection(with interval: TimeInterval) {
         guard interval > 0 else {
-            log.warning("Collection interval should be greater than 0.")
+            log.warning("Collection interval should be greater than 0.", subsystems: .webRTC)
             collectionCancellable?.cancel()
             return
         }
@@ -118,9 +125,32 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             .Timer
             .publish(every: interval, on: .main, in: .default)
             .autoconnect()
+            .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
             .sink { [weak self] _ in self?.collectStats() }
 
-        log.debug("Stats collection is now scheduled with interval:\(interval).")
+        log.debug(
+            "Stats collection is now scheduled with interval:\(interval).",
+            subsystems: .webRTC
+        )
+    }
+
+    private func scheduleDelivery(with interval: TimeInterval) {
+        guard interval > 0 else {
+            log.warning("Delivery interval should be greater than 0.", subsystems: .webRTC)
+            deliveryCancellable?.cancel()
+            return
+        }
+
+        deliveryCancellable?.cancel()
+        deliveryCancellable = Foundation
+            .Timer
+            .publish(every: interval, on: .main, in: .default)
+            .autoconnect()
+            .compactMap { [weak self] _ in self?.latestReportSubject.value }
+            .log(.debug, subsystems: .webRTC) { [weak self] in
+                "Will deliver stats report (timestamp:\($0.timestamp)) on \(self?.sfuAdapter?.hostname ?? "-")."
+            }
+            .sink { [weak self] in self?.deliverStats(report: $0) }
     }
 
     /// Collects statistics from the publisher and subscriber peer connections.
@@ -129,24 +159,30 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     private func collectStats() {
         activeCollectionTask?.cancel()
         activeCollectionTask = Task { [weak self] in
-            guard let self, let hostname = sfuAdapter?.hostname else { return }
+            guard
+                let self,
+                let hostname = sfuAdapter?.hostname
+            else {
+                return
+            }
+
             do {
-                async let statsPublisher = publisher?.statsReport()
-                async let statsSubscriber = subscriber?.statsReport()
+                async let statsPublisher = publisher?.statsReport() ?? .init(nil)
+                async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
 
                 try Task.checkCancellation()
-                let result = try await [statsPublisher, statsSubscriber]
+                let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
 
                 let report = callStatisticsReporter.buildReport(
-                    publisherReport: .init(result[safe: 0] ?? nil),
-                    subscriberReport: .init(result[safe: 1] ?? nil),
+                    publisherReport: result.first ?? .init(nil),
+                    subscriberReport: result.last ?? .init(nil),
                     datacenter: hostname
                 )
 
                 try Task.checkCancellation()
                 latestReportSubject.send(report)
             } catch {
-                log.error(error)
+                log.error(error, subsystems: .webRTC)
             }
         }
     }
@@ -167,7 +203,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
                     thermalState: thermalStateObserver.state
                 )
             } catch {
-                log.error(error)
+                log.error(error, subsystems: .webRTC)
             }
         }
     }
