@@ -14,6 +14,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
     public var recording: RecordSettingsRequest?
     public var ring: RingSettingsRequest?
     public var screensharing: ScreensharingSettingsRequest?
+    public var session: SessionSettingsRequest?
     public var thumbnails: ThumbnailsSettingsRequest?
     public var transcription: TranscriptionSettingsRequest?
     public var video: VideoSettingsRequest?
@@ -27,6 +28,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         recording: RecordSettingsRequest? = nil,
         ring: RingSettingsRequest? = nil,
         screensharing: ScreensharingSettingsRequest? = nil,
+        session: SessionSettingsRequest? = nil,
         thumbnails: ThumbnailsSettingsRequest? = nil,
         transcription: TranscriptionSettingsRequest? = nil,
         video: VideoSettingsRequest? = nil
@@ -39,6 +41,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         self.recording = recording
         self.ring = ring
         self.screensharing = screensharing
+        self.session = session
         self.thumbnails = thumbnails
         self.transcription = transcription
         self.video = video
@@ -53,6 +56,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         case recording
         case ring
         case screensharing
+        case session
         case thumbnails
         case transcription
         case video
@@ -67,6 +71,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
             lhs.recording == rhs.recording &&
             lhs.ring == rhs.ring &&
             lhs.screensharing == rhs.screensharing &&
+            lhs.session == rhs.session &&
             lhs.thumbnails == rhs.thumbnails &&
             lhs.transcription == rhs.transcription &&
             lhs.video == rhs.video
@@ -81,6 +86,7 @@ public final class CallSettingsRequest: @unchecked Sendable, Codable, JSONEncoda
         hasher.combine(recording)
         hasher.combine(ring)
         hasher.combine(screensharing)
+        hasher.combine(session)
         hasher.combine(thumbnails)
         hasher.combine(transcription)
         hasher.combine(video)

@@ -14,6 +14,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
     public var recording: RecordSettingsResponse
     public var ring: RingSettings
     public var screensharing: ScreensharingSettings
+    public var session: SessionSettingsResponse
     public var thumbnails: ThumbnailsSettings
     public var transcription: TranscriptionSettings
     public var video: VideoSettings
@@ -27,6 +28,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         recording: RecordSettingsResponse,
         ring: RingSettings,
         screensharing: ScreensharingSettings,
+        session: SessionSettingsResponse,
         thumbnails: ThumbnailsSettings,
         transcription: TranscriptionSettings,
         video: VideoSettings
@@ -39,6 +41,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         self.recording = recording
         self.ring = ring
         self.screensharing = screensharing
+        self.session = session
         self.thumbnails = thumbnails
         self.transcription = transcription
         self.video = video
@@ -53,6 +56,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         case recording
         case ring
         case screensharing
+        case session
         case thumbnails
         case transcription
         case video
@@ -67,6 +71,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
             lhs.recording == rhs.recording &&
             lhs.ring == rhs.ring &&
             lhs.screensharing == rhs.screensharing &&
+            lhs.session == rhs.session &&
             lhs.thumbnails == rhs.thumbnails &&
             lhs.transcription == rhs.transcription &&
             lhs.video == rhs.video
@@ -81,6 +86,7 @@ public final class CallSettingsResponse: @unchecked Sendable, Codable, JSONEncod
         hasher.combine(recording)
         hasher.combine(ring)
         hasher.combine(screensharing)
+        hasher.combine(session)
         hasher.combine(thumbnails)
         hasher.combine(transcription)
         hasher.combine(video)

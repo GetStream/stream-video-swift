@@ -25,6 +25,7 @@ public final class TranscriptionSettings: @unchecked Sendable, Codable, JSONEnco
     
     public enum Language: String, Sendable, Codable, CaseIterable {
         case ar
+        case auto
         case ca
         case cs
         case da
