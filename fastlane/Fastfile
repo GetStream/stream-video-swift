@@ -236,11 +236,11 @@ lane :test_unified do |options|
     devices: options[:device],
     number_of_retries: 3,
     skip_build: options[:skip_build],
-    build_for_testing: options[:build_for_testing],
     xcargs: is_ci ? "#STREAM_VIDEO_SECRET=#{app_secret}" : '',
     parallel_testing: true,
     concurrent_workers: 4,
-    prelaunch_simulator: true
+    prelaunch_simulator: true,
+    build_for_testing: true,
   }
 
   # Add `testplan` only if `skip_testing` is not true
