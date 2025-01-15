@@ -65,8 +65,8 @@ jobs:
         xcresult-basenames: '["StreamVideo", "StreamVideoSwiftUI", "StreamVideoUIKit"]'
         slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
         
-  build-test-app-and-frameworks:
-    name: Build Test App and Frameworks
+  build-demo-apps:
+    name: Build Demo Apps
     runs-on: macos-15
     needs: test-sdks
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
@@ -83,37 +83,19 @@ jobs:
         SKIP_MINT_BOOTSTRAP: true
         SKIP_BREW_BOOTSTRAP: true
     
-    - name: Build
-      run: bundle exec fastlane build_test_app_and_frameworks
+    - name: Build SwiftUI Demo
+      run: bundle exec fastlane build_swiftui_demo
 
-  build-apps:
-    name: Build Demo Apps
-    runs-on: macos-14
-    needs: build-test-app-and-frameworks
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4.1.1
-    
-    - name: Bootstrap
-      uses: ./.github/actions/bootstrap
-      with:
-        parent: build-test-app-and-frameworks
-      env:
-        INSTALL_YEETD: true
-        SKIP_MINT_BOOTSTRAP: true
-        SKIP_BREW_BOOTSTRAP: true
-
-    - name: Build UIKit Demo App
+    - name: Build UIKit Demo
       run: bundle exec fastlane build_uikit_demo
 
-    - name: Build Docs Test Project
+    - name: Build Documentation
       run: bundle exec fastlane build_docs_test
 
   allure-testops-launch:
     name: Launch Allure TestOps
-    runs-on: macos-13
-    needs: build-test-app-and-frameworks
+    runs-on: macos-15
+    needs: build-demo-apps
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     outputs:
       launch_id: ${{ steps.get_launch_id.outputs.launch_id }}
@@ -124,7 +106,7 @@ jobs:
     - name: Bootstrap
       uses: ./.github/actions/ruby-cache
       with:
-        parent: build-test-app-and-frameworks
+        parent: build-demo-apps
     
     - name: Launch Allure TestOps
       run: bundle exec fastlane allure_launch
@@ -156,7 +138,7 @@ jobs:
     - name: Bootstrap
       uses: ./.github/actions/bootstrap
       with:
-        parent: build-test-app-and-frameworks
+        parent: build-demo-apps
       env:
         INSTALL_ALLURE: true
         INSTALL_VIDEO_BUDDY: true
@@ -203,7 +185,7 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-13
+    runs-on: macos-15
     needs: test-e2e-debug
     env:
       XCODE_VERSION: "15.0.1"
@@ -255,9 +237,39 @@ jobs:
     - name: Build SDK Tests
       run: bundle exec fastlane test_unified device:"${{ env.IOS_SIMULATOR_DEVICE }}" skip_testing:true build_for_testing:true
   
+  build-demo-apps-xcode-15:
+    name: Build Demo Apps in Xcode 15
+    runs-on: macos-13
+    needs: test-sdks-xcode-15
+    env:
+      XCODE_VERSION: "15.0.1"
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4.1.1
+    
+    - name: Bootstrap
+      uses: ./.github/actions/bootstrap
+      with:
+        parent: test-sdks-xcode-15
+      env:
+        INSTALL_YEETD: true
+        SKIP_MINT_BOOTSTRAP: true
+        SKIP_BREW_BOOTSTRAP: true
+    
+    - name: Build SwiftUI Demo
+      run: bundle exec fastlane build_swiftui_demo
+
+    - name: Build UIKit Demo
+      run: bundle exec fastlane build_uikit_demo
+
+    - name: Build Documentation
+      run: bundle exec fastlane build_docs_test
+
   build-xcode15-xcframework-stream-video:
     name: Build StreamVideo XCframeworks (Xcode 15.0)
-    needs: test-sdks-xcode-15
+    needs: build-demo-apps-xcode-15
     runs-on: macos-13
     env:
       XCODE_VERSION: "15.0.1"
@@ -274,7 +286,7 @@ jobs:
     - name: Bootstrap
       uses: ./.github/actions/bootstrap
       with:
-        parent: test-sdks-xcode-15
+        parent: build-demo-apps-xcode-15
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
@@ -285,7 +297,7 @@ jobs:
         
   build-xcode15-xcframework-stream-video-swiftui:
     name: Build StreamVideoSwiftUI XCframeworks (Xcode 15.0)
-    needs: test-sdks-xcode-15
+    needs: build-demo-apps-xcode-15
     runs-on: macos-13
     env:
       XCODE_VERSION: "15.0.1"
@@ -302,7 +314,7 @@ jobs:
     - name: Bootstrap
       uses: ./.github/actions/bootstrap
       with:
-        parent: test-sdks-xcode-15
+        parent: build-demo-apps-xcode-15
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
@@ -313,7 +325,7 @@ jobs:
   
   build-xcode15-xcframework-stream-video-uikit:
     name: Build StreamVideoUIKit XCframeworks (Xcode 15.0)
-    needs: test-sdks-xcode-15
+    needs: build-demo-apps-xcode-15
     runs-on: macos-13
     env:
       XCODE_VERSION: "15.0.1"
@@ -330,7 +342,7 @@ jobs:
     - name: Bootstrap
       uses: ./.github/actions/bootstrap
       with:
-        parent: test-sdks-xcode-15
+        parent: build-demo-apps-xcode-15
       env:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true

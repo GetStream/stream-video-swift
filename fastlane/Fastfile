@@ -225,6 +225,7 @@ lane :test_unified do |options|
 
   # Ensure `skip_testing` defaults to false
   skip_testing = options.fetch(:skip_testing, false)
+  build_for_testing = options.fetch(:build_for_testing, false)
 
   scan_options = {
     project: xcode_project,
@@ -240,7 +241,8 @@ lane :test_unified do |options|
     parallel_testing: true,
     concurrent_workers: 4,
     prelaunch_simulator: true,
-    skip_testing: options[:skip_testing]
+    skip_testing: skip_testing,
+    build_for_testing: options[:build_for_testing]
   }
 
   # Add `testplan` only if `skip_testing` is not true
@@ -561,7 +563,6 @@ private_lane :build_example_app do |options|
     clean: is_localhost,
     configuration: 'Debug',
     derived_data_path: derived_data_path,
-    # derived_data_path: options[:derived_data_path],
     cloned_source_packages_path: source_packages_path,
     build_for_testing: true
   )
