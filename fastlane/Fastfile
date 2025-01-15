@@ -224,7 +224,7 @@ lane :test_unified do |options|
   update_testplan_on_ci(path: "StreamVideoUnifiedTests/StreamVideoUnifiedTests.xctestplan")
 
   # Ensure `skip_testing` defaults to false
-  skip_testing = options.fetch(:skip_testing, [])
+  skip_testing = options.fetch(:skip_testing, false)
   build_for_testing = options.fetch(:build_for_testing, false)
 
   scan_options = {
@@ -241,7 +241,6 @@ lane :test_unified do |options|
     parallel_testing: true,
     concurrent_workers: 4,
     prelaunch_simulator: true,
-    skip_testing: skip_testing,
     build_for_testing: options[:build_for_testing]
   }
 
