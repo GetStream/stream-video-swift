@@ -236,7 +236,7 @@ lane :test_unified do |options|
     devices: options[:device],
     number_of_retries: 3,
     skip_build: options[:skip_build],
-    xcargs: is_ci ? "#STREAM_VIDEO_SECRET=#{app_secret}" : '',
+    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : '',
     parallel_testing: true,
     concurrent_workers: 4,
     prelaunch_simulator: true,
