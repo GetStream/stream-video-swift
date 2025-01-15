@@ -8,31 +8,32 @@ import StreamWebRTC
 
 final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
+    private static var videoConfig: VideoConfig! = .dummy()
+
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
-    private lazy var videoConfig: VideoConfig! = .dummy()
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
-    private lazy var screenShareSessionProvider: ScreenShareSessionProvider! = .init()
     private lazy var subject: WebRTCStateAdapter! = .init(
         user: user,
         apiKey: apiKey,
         callCid: callCid,
-        videoConfig: videoConfig,
-        rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
-        screenShareSessionProvider: screenShareSessionProvider
+        videoConfig: Self.videoConfig,
+        rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
     )
 
     // MARK: - Lifecycle
 
     override func tearDown() {
         subject = nil
-        screenShareSessionProvider = nil
-        rtcPeerConnectionCoordinatorFactory = nil
-        videoConfig = nil
         callCid = nil
         apiKey = nil
         user = nil
+        super.tearDown()
+    }
+
+    override class func tearDown() {
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -368,6 +369,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let sfuStack = MockSFUStack()
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         await subject.set(sfuAdapter: sfuStack.adapter)
+        let screenShareSessionProvider = await subject.screenShareSessionProvider
         screenShareSessionProvider.activeSession = .init(
             localTrack: await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true),
             screenSharingType: .inApp,
@@ -434,6 +436,34 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.participantsCount, 0)
         await assertEqualAsync(await subject.anonymousCount, 0)
         await assertEqualAsync(await subject.participantPins, [])
+    }
+
+    func test_cleanUp_shouldStopActiveCaptureSession() async throws {
+        let mockVideoCapturer = MockStreamVideoCapturer()
+        let videoCaptureSessionProvider = await subject.videoCaptureSessionProvider
+        videoCaptureSessionProvider.activeSession = .init(
+            position: .front,
+            localTrack: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false),
+            capturer: mockVideoCapturer
+        )
+
+        await subject.cleanUp()
+
+        await fulfillment { mockVideoCapturer.timesCalled(.stopCapture) > 0 }
+    }
+
+    func test_cleanUp_shouldStopActiveScreemShareSession() async throws {
+        let mockVideoCapturer = MockStreamVideoCapturer()
+        let screenShareSessionProvider = await subject.screenShareSessionProvider
+        screenShareSessionProvider.activeSession = .init(
+            localTrack: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: true),
+            screenSharingType: .inApp,
+            capturer: mockVideoCapturer
+        )
+
+        await subject.cleanUp()
+
+        await fulfillment { mockVideoCapturer.timesCalled(.stopCapture) > 0 }
     }
 
     // MARK: - cleanUpForReconnection

@@ -291,6 +291,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// Cleans up the WebRTC session by closing connections and resetting
     /// states.
     func cleanUp() async {
+        screenShareSessionProvider.activeSession = nil
+        videoCaptureSessionProvider.activeSession = nil
         peerConnectionsDisposableBag.removeAll()
         await publisher?.close()
         await subscriber?.close()
