@@ -240,7 +240,7 @@ lane :test_unified do |options|
     parallel_testing: true,
     concurrent_workers: 4,
     prelaunch_simulator: true,
-    build_for_testing: true,
+    skip_testing: options[:skip_testing]
   }
 
   # Add `testplan` only if `skip_testing` is not true
