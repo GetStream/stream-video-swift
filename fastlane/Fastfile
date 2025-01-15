@@ -224,7 +224,7 @@ lane :test_unified do |options|
   update_testplan_on_ci(path: "StreamVideoUnifiedTests/StreamVideoUnifiedTests.xctestplan")
 
   # Ensure `skip_testing` defaults to false
-  skip_testing = options.fetch(:skip_testing, false)
+  skip_testing = options.fetch(:skip_testing, [])
   build_for_testing = options.fetch(:build_for_testing, false)
 
   scan_options = {
