@@ -12,7 +12,7 @@ extension TranscriptionSettings {
     ) -> TranscriptionSettings {
         .init(
             closedCaptionMode: closedCaptionMode,
-            languages: [],
+            language: .auto,
             mode: mode
         )
     }

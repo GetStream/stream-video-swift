@@ -17,7 +17,8 @@ extension CallSettingsResponse {
         screensharing: ScreensharingSettings = ScreensharingSettings.dummy(),
         thumbnails: ThumbnailsSettings = ThumbnailsSettings.dummy(),
         transcription: TranscriptionSettings = TranscriptionSettings.dummy(),
-        video: VideoSettings = VideoSettings.dummy()
+        video: VideoSettings = VideoSettings.dummy(),
+        sessionSettings: SessionSettingsResponse = SessionSettingsResponse.dummy()
     ) -> CallSettingsResponse {
         .init(
             audio: audio,
@@ -28,6 +29,7 @@ extension CallSettingsResponse {
             recording: recording,
             ring: ring,
             screensharing: screensharing,
+            session: sessionSettings,
             thumbnails: thumbnails,
             transcription: transcription,
             video: video

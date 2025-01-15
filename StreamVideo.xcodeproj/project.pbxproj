@@ -951,6 +951,8 @@
 		842E70E12B91E90F00D2D68B /* CustomVideoEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E70E02B91E90F00D2D68B /* CustomVideoEvent.swift */; };
 		843060FD2D381A4A000E14D5 /* SessionSettingsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843060FC2D381A4A000E14D5 /* SessionSettingsResponse.swift */; };
 		843060FE2D381A4A000E14D5 /* SessionSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843060FB2D381A4A000E14D5 /* SessionSettingsRequest.swift */; };
+		843061002D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843060FF2D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift */; };
+		843061012D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843060FF2D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift */; };
 		8430FD222AB1AB4C007AA3E6 /* ParticipantPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */; };
 		8434C525289AA2E20001490A /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C524289AA2E20001490A /* Fonts.swift */; };
 		8434C527289AA2F00001490A /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C526289AA2F00001490A /* Images.swift */; };
@@ -2284,6 +2286,7 @@
 		842E70E02B91E90F00D2D68B /* CustomVideoEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomVideoEvent.swift; sourceTree = "<group>"; };
 		843060FB2D381A4A000E14D5 /* SessionSettingsRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSettingsRequest.swift; sourceTree = "<group>"; };
 		843060FC2D381A4A000E14D5 /* SessionSettingsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSettingsResponse.swift; sourceTree = "<group>"; };
+		843060FF2D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionSettingsResponse+Dummy.swift"; sourceTree = "<group>"; };
 		8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantPopoverView.swift; sourceTree = "<group>"; };
 		8434C524289AA2E20001490A /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
 		8434C526289AA2F00001490A /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
@@ -4473,6 +4476,7 @@
 				40AB34C42C5D3EE100B5B6B3 /* BaseStats+Dummy.swift */,
 				40AB34C62C5D3F0400B5B6B3 /* CallStatsReport+Dummy.swift */,
 				40AB34C82C5D3F2E00B5B6B3 /* ParticipantsStats+Dummy.swift */,
+				843060FF2D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift */,
 			);
 			path = Dummy;
 			sourceTree = "<group>";
@@ -7356,6 +7360,7 @@
 				40F017772BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */,
 				40B48C2A2D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift in Sources */,
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
+				843061002D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift in Sources */,
 				40B48C582D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */,
 				40B48C282D14CDD5002C4EAB /* StreamVideoSfuModelsCodec_ConvenienceTests.swift in Sources */,
 				40E9B3B52BCD93F500ACF18F /* Credentials+Dummy.swift in Sources */,
@@ -7713,6 +7718,7 @@
 				40382F422C89CF9700C2D00F /* Stream_Video_Sfu_Models_ConnectionQuality+Convenience.swift in Sources */,
 				40B48C572D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */,
 				82FF40B72A17C6CD00B4D95E /* ReconnectionView_Tests.swift in Sources */,
+				843061012D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift in Sources */,
 				829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */,
 				829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */,
 				82E3BA4A2A0BAE33001AB93E /* UniqueValues.swift in Sources */,
