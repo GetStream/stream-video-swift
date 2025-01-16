@@ -201,6 +201,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         let rawEvent = CallSessionParticipantLeftEvent(
             callCid: callCid,
             createdAt: Date(),
+            durationSeconds: 0,
             participant: CallParticipantResponse(
                 joinedAt: Date(),
                 role: "user",
