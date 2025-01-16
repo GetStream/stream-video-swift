@@ -1120,20 +1120,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(EmptyResponse.self, from: $0)
         }
     }
-
-    open func queryAggregateCallStats(queryAggregateCallStatsRequest: QueryAggregateCallStatsRequest) async throws
-        -> QueryAggregateCallStatsResponse {
-        let path = "/video/stats"
-        
-        let urlRequest = try makeRequest(
-            uriPath: path,
-            httpMethod: "POST",
-            request: queryAggregateCallStatsRequest
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(QueryAggregateCallStatsResponse.self, from: $0)
-        }
-    }
 }
 
 protocol DefaultAPIEndpoints {
@@ -1245,7 +1231,4 @@ protocol DefaultAPIEndpoints {
     func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
         
     func videoConnect() async throws -> Void
-        
-    func queryAggregateCallStats(queryAggregateCallStatsRequest: QueryAggregateCallStatsRequest) async throws
-        -> QueryAggregateCallStatsResponse
 }
