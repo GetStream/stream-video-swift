@@ -46,19 +46,19 @@ jobs:
             os: macos-15
             device: "iPhone 16 Pro"
             setup_runtime: false
-          - ios: 17.2
-            xcode: 15.3
-            os: macos-14
+          - ios: 17.5
+            xcode: 15.4
+            os: macos-15
             device: "iPhone 14 Pro"
             setup_runtime: false
           - ios: 16.4
-            xcode: 15.3
-            os: macos-14
+            xcode: 15.4
+            os: macos-15
             device: "iPhone 14"
             setup_runtime: true
           - ios: 15.5
             xcode: 15.4
-            os: macos-14
+            os: macos-15
             device: "iPhone 13 Pro"
             setup_runtime: true
       fail-fast: false
@@ -140,19 +140,19 @@ jobs:
             os: macos-15
             device: "iPhone 16 Pro"
             setup_runtime: false
-          - ios: 17.4
+          - ios: 17.5
             xcode: 15.4
-            os: macos-14
+            os: macos-15
             device: "iPhone 14 Pro"
             setup_runtime: false
           - ios: 16.4
-            xcode: 15.3
-            os: macos-14
+            xcode: 15.4
+            os: macos-15
             device: "iPhone 14 Pro"
             setup_runtime: true
           - ios: 15.5
-            xcode: 15.3
-            os: macos-14
+            xcode: 15.4
+            os: macos-15
             device: "iPhone 13 Pro"
             setup_runtime: true
       fail-fast: false
@@ -218,10 +218,10 @@ jobs:
 
   build-xcode15:
     name: Build SDKs (Xcode 15.0)
-    runs-on: macos-13
+    runs-on: macos-15
     if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
     env:
-      XCODE_VERSION: "15.0.1"
+      XCODE_VERSION: "15.4"
     steps:
     - name: Connect Bot
       uses: webfactory/ssh-agent@v0.7.0
@@ -248,9 +248,9 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-13
+    runs-on: macos-15
     env:
-      XCODE_VERSION: "15.0.1"
+      XCODE_VERSION: "15.4"
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
