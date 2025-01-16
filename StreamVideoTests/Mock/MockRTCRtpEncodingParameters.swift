@@ -7,6 +7,7 @@ import StreamWebRTC
 
 final class MockRTCRtpEncodingParameters: RTCRtpEncodingParametersProtocol, Mockable {
     enum MockFunctionKey: Hashable, CaseIterable { case none }
+    enum MockPropertyKey: String, Hashable { case rid, maxBitrateBps, maxFramerate }
     typealias FunctionKey = MockFunctionKey
     typealias FunctionInputKey = EmptyPayloadable
     var stubbedProperty: [String: Any] = [:]
@@ -18,6 +19,19 @@ final class MockRTCRtpEncodingParameters: RTCRtpEncodingParametersProtocol, Mock
 
     func stub<T>(for function: FunctionKey, with value: T) {
         stubbedFunction[function] = value
+    }
+
+    func propertyKey<T>(for keyPath: KeyPath<MockRTCRtpEncodingParameters, T>) -> String {
+        switch keyPath {
+        case \.rid:
+            return MockPropertyKey.rid.rawValue
+        case \.maxBitrateBps:
+            return MockPropertyKey.maxBitrateBps.rawValue
+        case \.maxFramerate:
+            return MockPropertyKey.maxFramerate.rawValue
+        default:
+            fatalError()
+        }
     }
 
     var rid: String? { self[dynamicMember: \.rid] }

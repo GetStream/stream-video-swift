@@ -5,8 +5,9 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockRTCRtpCodecCapability: RTCRtpCodecCapabilityProtocol, Mockable {
+final class MockRTCRtpCodecCapability: NSObject, RTCRtpCodecCapabilityProtocol, Mockable {
     enum MockFunctionKey: Hashable, CaseIterable { case none }
+    enum MockPropertyKey: String, Hashable { case name, fmtp, clockRate, preferredPayloadType }
     typealias FunctionKey = MockFunctionKey
     typealias FunctionInputKey = EmptyPayloadable
     var stubbedProperty: [String: Any] = [:]
@@ -18,6 +19,21 @@ final class MockRTCRtpCodecCapability: RTCRtpCodecCapabilityProtocol, Mockable {
 
     func stub<T>(for function: FunctionKey, with value: T) {
         stubbedFunction[function] = value
+    }
+
+    func propertyKey<T>(for keyPath: KeyPath<MockRTCRtpCodecCapability, T>) -> String {
+        switch keyPath {
+        case \.name:
+            return MockPropertyKey.name.rawValue
+        case \.fmtp:
+            return MockPropertyKey.fmtp.rawValue
+        case \.clockRate:
+            return MockPropertyKey.clockRate.rawValue
+        case \.preferredPayloadType:
+            return MockPropertyKey.preferredPayloadType.rawValue
+        default:
+            fatalError()
+        }
     }
 
     var name: String { self[dynamicMember: \.name] }
