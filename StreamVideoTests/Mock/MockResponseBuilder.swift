@@ -147,7 +147,7 @@ class MockResponseBuilder {
         )
         let transcriptionSettings = TranscriptionSettings(
             closedCaptionMode: .available,
-            languages: [],
+            language: .auto,
             mode: .disabled
         )
         let videoSettings = VideoSettings(
@@ -158,6 +158,7 @@ class MockResponseBuilder {
             targetResolution: .init(bitrate: 100, height: 100, width: 100)
         )
         let thumbnailsSettings = ThumbnailsSettings(enabled: false)
+        let sessionSettingsResponse = SessionSettingsResponse(inactivityTimeoutSeconds: 10)
         
         return CallSettingsResponse(
             audio: audioSettings,
@@ -168,6 +169,7 @@ class MockResponseBuilder {
             recording: recordSettings,
             ring: ringSettings,
             screensharing: screensharingSettings,
+            session: sessionSettingsResponse,
             thumbnails: thumbnailsSettings,
             transcription: transcriptionSettings,
             video: videoSettings

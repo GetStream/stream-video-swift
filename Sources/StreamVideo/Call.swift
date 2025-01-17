@@ -734,7 +734,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Stops an ongoing live call.
     @discardableResult
     public func stopLive() async throws -> StopLiveResponse {
-        try await coordinatorClient.stopLive(type: callType, id: callId)
+        try await stopLive(request: .init())
+    }
+    
+    public func stopLive(request: StopLiveRequest) async throws -> StopLiveResponse {
+        try await coordinatorClient.stopLive(
+            type: callType,
+            id: callId,
+            stopLiveRequest: request
+        )
     }
 
     // MARK: - Recording
@@ -786,7 +794,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the sending fails.
     @discardableResult
     public func sendCustomEvent(_ data: [String: RawJSON]) async throws -> SendEventResponse {
-        try await coordinatorClient.sendEvent(
+        try await coordinatorClient.sendCallEvent(
             type: callType,
             id: callId,
             sendEventRequest: SendEventRequest(custom: data)
@@ -1087,14 +1095,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Stops a conversation from being transcribed and returns whether the stop request was successful
     /// or not.
-    ///
-    /// - Returns: A StopTranscriptionResponse indicating whether the stop request was successful
+    /// - Parameter stopClosedCaptions: A boolean value indicating whether to stop closed captions.
+    /// - Returns: A StopTranscriptionResponse indicating whether the stop request was successful.
     /// or not.
     @discardableResult
-    public func stopTranscription() async throws -> StopTranscriptionResponse {
+    public func stopTranscription(
+        stopClosedCaptions: Bool? = nil
+    ) async throws -> StopTranscriptionResponse {
         try await coordinatorClient.stopTranscription(
             type: callType,
-            id: callId
+            id: callId,
+            stopTranscriptionRequest: StopTranscriptionRequest(
+                stopClosedCaptions: stopClosedCaptions
+            )
         )
     }
 

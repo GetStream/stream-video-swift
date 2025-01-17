@@ -318,7 +318,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse {
+    open func sendCallEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse {
         var path = "/video/call/{type}/{id}/event"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -665,7 +665,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse {
+    open func startClosedCaptions(
+        type: String,
+        id: String,
+        startClosedCaptionsRequest: StartClosedCaptionsRequest
+    ) async throws -> StartClosedCaptionsResponse {
         var path = "/video/call/{type}/{id}/start_closed_captions"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -677,7 +681,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: startClosedCaptionsRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StartClosedCaptionsResponse.self, from: $0)
@@ -778,7 +783,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse {
+    open func stopClosedCaptions(
+        type: String,
+        id: String,
+        stopClosedCaptionsRequest: StopClosedCaptionsRequest
+    ) async throws -> StopClosedCaptionsResponse {
         var path = "/video/call/{type}/{id}/stop_closed_captions"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -790,14 +799,15 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: stopClosedCaptionsRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopClosedCaptionsResponse.self, from: $0)
         }
     }
 
-    open func stopLive(type: String, id: String) async throws -> StopLiveResponse {
+    open func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse {
         var path = "/video/call/{type}/{id}/stop_live"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -809,7 +819,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: stopLiveRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopLiveResponse.self, from: $0)
@@ -835,7 +846,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func stopTranscription(type: String, id: String) async throws -> StopTranscriptionResponse {
+    open func stopTranscription(
+        type: String,
+        id: String,
+        stopTranscriptionRequest: StopTranscriptionRequest
+    ) async throws -> StopTranscriptionResponse {
         var path = "/video/call/{type}/{id}/stop_transcription"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -847,7 +862,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: path,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: stopTranscriptionRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopTranscriptionResponse.self, from: $0)
@@ -1125,7 +1141,7 @@ protocol DefaultAPIEndpoints {
         
     func deleteCall(type: String, id: String, deleteCallRequest: DeleteCallRequest) async throws -> DeleteCallResponse
         
-    func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse
+    func sendCallEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse
         
     func collectUserFeedback(
         type: String,
@@ -1165,7 +1181,8 @@ protocol DefaultAPIEndpoints {
         
     func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
         
-    func startClosedCaptions(type: String, id: String) async throws -> StartClosedCaptionsResponse
+    func startClosedCaptions(type: String, id: String, startClosedCaptionsRequest: StartClosedCaptionsRequest) async throws
+        -> StartClosedCaptionsResponse
         
     func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws
         -> StartRecordingResponse
@@ -1177,13 +1194,15 @@ protocol DefaultAPIEndpoints {
         
     func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
         
-    func stopClosedCaptions(type: String, id: String) async throws -> StopClosedCaptionsResponse
+    func stopClosedCaptions(type: String, id: String, stopClosedCaptionsRequest: StopClosedCaptionsRequest) async throws
+        -> StopClosedCaptionsResponse
         
-    func stopLive(type: String, id: String) async throws -> StopLiveResponse
+    func stopLive(type: String, id: String, stopLiveRequest: StopLiveRequest) async throws -> StopLiveResponse
         
     func stopRecording(type: String, id: String) async throws -> StopRecordingResponse
         
-    func stopTranscription(type: String, id: String) async throws -> StopTranscriptionResponse
+    func stopTranscription(type: String, id: String, stopTranscriptionRequest: StopTranscriptionRequest) async throws
+        -> StopTranscriptionResponse
         
     func listTranscriptions(type: String, id: String) async throws -> ListTranscriptionsResponse
         

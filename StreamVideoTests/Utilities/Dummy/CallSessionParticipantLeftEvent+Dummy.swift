@@ -11,11 +11,13 @@ extension CallSessionParticipantLeftEvent {
         createdAt: Date = Date(timeIntervalSince1970: 0),
         participant: CallParticipantResponse = CallParticipantResponse.dummy(),
         sessionId: String = "",
-        type: String = "call.session_participant_left"
+        type: String = "call.session_participant_left",
+        durationSeconds: Int = 0
     ) -> CallSessionParticipantLeftEvent {
         .init(
             callCid: callCid,
             createdAt: createdAt,
+            durationSeconds: durationSeconds,
             participant: participant,
             sessionId: sessionId
         )
