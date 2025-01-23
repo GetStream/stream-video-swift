@@ -297,7 +297,211 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             callViewModel.callingState == .inCall
         }
     }
-    
+
+    @MainActor
+    func test_incomingCall_acceptedFromSameUserElsewhere_callingStateChangesToIdle() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        await fulfillment { callViewModel.isSubscribedToCallEvents }
+
+        // When
+        let event = CallRingEvent(
+            call: mockResponseBuilder.makeCallResponse(cid: cId),
+            callCid: cId,
+            createdAt: Date(),
+            members: [],
+            sessionId: "123",
+            user: UserResponse(
+                blockedUserIds: [],
+                createdAt: Date(),
+                custom: [:],
+                id: secondUser.userId,
+                language: "",
+                role: "user",
+                teams: [],
+                updatedAt: Date()
+            ),
+            video: true
+        )
+
+        let wrapped = WrappedEvent.coordinatorEvent(.typeCallRingEvent(event))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(wrapped)
+
+        await fulfillment {
+            if case .incoming = callViewModel.callingState {
+                return true
+            } else {
+                return false
+            }
+        }
+
+        // Then
+        guard case let .incoming(call) = callViewModel.callingState else {
+            XCTFail()
+            return
+        }
+        XCTAssert(call.id == callId)
+
+        // When we receive an accept even it means we accepted somewhere else
+        eventNotificationCenter.process(
+            .coordinatorEvent(
+                .typeCallAcceptedEvent(
+                    .dummy(
+                        callCid: cId,
+                        user: firstUser.user.toUserResponse()
+                    )
+                )
+            )
+        )
+
+        // Then
+        let callingState = callViewModel.callingState
+        await fulfillment("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+            callViewModel.callingState == .idle
+        }
+    }
+
+    @MainActor
+    func test_incomingCall_anotherUserAcceptedThisCall_callingStateShouldRemainIncoming() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        await fulfillment { callViewModel.isSubscribedToCallEvents }
+
+        // When
+        let event = CallRingEvent(
+            call: mockResponseBuilder.makeCallResponse(cid: cId),
+            callCid: cId,
+            createdAt: Date(),
+            members: [],
+            sessionId: "123",
+            user: UserResponse(
+                blockedUserIds: [],
+                createdAt: Date(),
+                custom: [:],
+                id: secondUser.userId,
+                language: "",
+                role: "user",
+                teams: [],
+                updatedAt: Date()
+            ),
+            video: true
+        )
+
+        let wrapped = WrappedEvent.coordinatorEvent(.typeCallRingEvent(event))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(wrapped)
+
+        await fulfillment {
+            if case .incoming = callViewModel.callingState {
+                return true
+            } else {
+                return false
+            }
+        }
+
+        // Then
+        guard case let .incoming(call) = callViewModel.callingState else {
+            XCTFail()
+            return
+        }
+        XCTAssert(call.id == callId)
+
+        // When we receive an accept even it means we accepted somewhere else
+        eventNotificationCenter.process(
+            .coordinatorEvent(
+                .typeCallAcceptedEvent(
+                    .dummy(
+                        callCid: cId,
+                        user: secondUser.user.toUserResponse()
+                    )
+                )
+            )
+        )
+
+        // Then
+        try await XCTAssertWithDelay(
+            {
+                switch callViewModel.callingState {
+                case .incoming:
+                    return true
+                default:
+                    return false
+                }
+            }()
+        )
+    }
+
+    @MainActor
+    func test_incomingCall_acceptedAnotherCallElsewhere_callingStateShouldRemainInCall() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        await fulfillment { callViewModel.isSubscribedToCallEvents }
+
+        // When
+        let event = CallRingEvent(
+            call: mockResponseBuilder.makeCallResponse(cid: cId),
+            callCid: cId,
+            createdAt: Date(),
+            members: [],
+            sessionId: "123",
+            user: UserResponse(
+                blockedUserIds: [],
+                createdAt: Date(),
+                custom: [:],
+                id: secondUser.userId,
+                language: "",
+                role: "user",
+                teams: [],
+                updatedAt: Date()
+            ),
+            video: true
+        )
+
+        let wrapped = WrappedEvent.coordinatorEvent(.typeCallRingEvent(event))
+        let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
+        eventNotificationCenter.process(wrapped)
+
+        await fulfillment {
+            if case .incoming = callViewModel.callingState {
+                return true
+            } else {
+                return false
+            }
+        }
+
+        // Then
+        guard case let .incoming(call) = callViewModel.callingState else {
+            XCTFail()
+            return
+        }
+        XCTAssert(call.id == callId)
+
+        // When we receive an accept even it means we accepted somewhere else
+        eventNotificationCenter.process(
+            .coordinatorEvent(
+                .typeCallAcceptedEvent(
+                    .dummy(
+                        callCid: "default:\(String.unique)",
+                        user: secondUser.user.toUserResponse()
+                    )
+                )
+            )
+        )
+
+        // Then
+        try await XCTAssertWithDelay(
+            {
+                switch callViewModel.callingState {
+                case .incoming:
+                    return true
+                default:
+                    return false
+                }
+            }()
+        )
+    }
+
     @MainActor
     func test_incomingCall_rejectCall() async throws {
         // Given
