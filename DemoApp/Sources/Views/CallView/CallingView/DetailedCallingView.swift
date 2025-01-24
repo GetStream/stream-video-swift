@@ -191,7 +191,9 @@ struct DetailedCallingView: View {
                                 Text(participant.name)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             } icon: {
-                                UserAvatar(imageURL: participant.imageURL, size: imageSize)
+                                DemoAppViewFactory
+                                    .shared
+                                    .makeUserAvatar(participant.user, size: imageSize)
                             }
 
                             if selectedParticipants.contains(participant) {

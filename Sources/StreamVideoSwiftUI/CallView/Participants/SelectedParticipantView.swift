@@ -5,8 +5,8 @@
 import StreamVideo
 import SwiftUI
 
-struct SelectedParticipantView: View {
-    
+struct SelectedParticipantView<Factory: ViewFactory>: View {
+
     @Injected(\.fonts) var fonts
     
     private let avatarSize: CGFloat = 50

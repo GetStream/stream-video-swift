@@ -153,6 +153,12 @@ public protocol ViewFactory: AnyObject {
         callSettings: Binding<CallSettings>,
         call: Call?
     ) -> LocalParticipantViewModifierType
+
+    associatedtype UserAvatarViewType: View
+    func makeUserAvatar(
+        _ user: User,
+        size: CGFloat
+    ) -> UserAvatarViewType
 }
 
 extension ViewFactory {
@@ -339,6 +345,13 @@ extension ViewFactory {
                 showAllInfo: true
             )
         }
+    }
+
+    public func makeUserAvatar(
+        _ user: User,
+        size: CGFloat
+    ) -> some View {
+        UserAvatar(imageURL: user.imageURL, size: size)
     }
 }
 

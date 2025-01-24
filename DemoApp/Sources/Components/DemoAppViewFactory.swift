@@ -17,10 +17,6 @@ final class DemoAppViewFactory: ViewFactory {
         DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
     }
 
-    func makeUserAvatar(imageURL: URL?, size: CGFloat) -> AnyView {
-        .init(UserAvatar(imageURL: imageURL, size: size))
-    }
-
     func makeLobbyView(
         viewModel: CallViewModel,
         lobbyInfo: LobbyInfo,
