@@ -23,13 +23,13 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         var cid: String
         var localizedCallerName: String
         var callerId: String
-        var hasVideo: Bool?
+        var hasVideo: Bool
 
         public init(
             cid: String,
             localizedCallerName: String,
             callerId: String,
-            hasVideo: Bool? = nil
+            hasVideo: Bool
         ) {
             self.cid = cid
             self.localizedCallerName = localizedCallerName
@@ -135,7 +135,8 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             return .init(
                 cid: "unknown",
                 localizedCallerName: defaultCallText,
-                callerId: defaultCallText
+                callerId: defaultCallText,
+                hasVideo: false
             )
         }
 
@@ -153,7 +154,15 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             fallback: defaultCallText
         )
 
-        let hasVideo = streamDict[PayloadKey.video.rawValue] as? Bool
+        let hasVideo: Bool = {
+            if let booleanValue = streamDict[PayloadKey.video.rawValue] as? Bool {
+                return booleanValue
+            } else if let stringValue = streamDict[PayloadKey.video.rawValue] as? String {
+                return stringValue == "true"
+            } else {
+                return false
+            }
+        }()
 
         return .init(
             cid: cid,

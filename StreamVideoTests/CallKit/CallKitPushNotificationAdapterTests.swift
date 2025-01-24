@@ -105,18 +105,6 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     }
 
     @MainActor
-    func test_pushRegistryDidReceiveIncomingPush_typeIsVoIP_hasVideoIsNil_reportIncomingCallWasCalledAsExpected() {
-        assertDidReceivePushNotification(
-            .init(
-                cid: "123",
-                localizedCallerName: "TestUser",
-                callerId: "test_user",
-                hasVideo: nil
-            )
-        )
-    }
-
-    @MainActor
     func test_pushRegistryDidReceiveIncomingPush_typeIsVoIPWithDisplayNameAndCallerName_reportIncomingCallWasCalledAsExpected() {
         assertDidReceivePushNotification(
             .init(

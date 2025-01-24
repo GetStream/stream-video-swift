@@ -55,7 +55,8 @@ public class CallEventsHandler {
                 caller: caller,
                 type: type,
                 members: members,
-                timeout: TimeInterval(ringEvent.call.settings.ring.autoCancelTimeoutMs / 1000)
+                timeout: TimeInterval(ringEvent.call.settings.ring.autoCancelTimeoutMs / 1000),
+                video: ringEvent.video
             )
             return .incoming(incomingCall)
         case let .typeCallSessionStartedEvent(callSessionStartedEvent):

@@ -165,7 +165,7 @@ fileprivate func content() {
                                     // hasVideo: A boolean indicating if the call
                                     // will be video or only audio. Still requires
                                     // appropriate setting of ``CallSettings`.`
-                                    hasVideo: true
+                                    video: true
                                 )
                             }
                         }
