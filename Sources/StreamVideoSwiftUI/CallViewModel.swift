@@ -750,8 +750,18 @@ open class CallViewModel: ObservableObject {
         }
 
         switch callingState {
-        case .incoming where event.user?.id == streamVideo.user.id:
-            setActiveCall(call)
+        case let .incoming(incomingCall)
+            where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user
+            .id:
+            /// If the call that was accepted is the incoming call we are presenting, then we reject
+            /// and set the activeCall to the current one in order to reset the callingState to
+            /// inCall or idle.
+            Task {
+                _ = try? await streamVideo
+                    .call(callType: incomingCall.type, callId: incomingCall.id)
+                    .reject()
+                setActiveCall(call)
+            }
         case .outgoing where call?.cId == event.callCid:
             enterCall(
                 call: call,
@@ -773,7 +783,7 @@ open class CallViewModel: ObservableObject {
         case let .incoming(incomingCall) where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type):
             /// If the call that was rejected is the incoming call we are presenting, then we reject
             /// and set the activeCall to the current one in order to reset the callingState to
-            /// inCall.
+            /// inCall or idle.
             Task {
                 _ = try? await streamVideo
                     .call(callType: incomingCall.type, callId: incomingCall.id)
