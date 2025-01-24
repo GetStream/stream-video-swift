@@ -117,10 +117,36 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callerId: String,
         completion: @escaping (Error?) -> Void
     ) {
+        reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false,
+            completion: completion
+        )
+    }
+
+    /// Reports an incoming call to the CallKit framework.
+    ///
+    /// - Parameters:
+    ///   - cid: The call ID.
+    ///   - localizedCallerName: The localized caller name.
+    ///   - callerId: The caller's identifier.
+    ///   - hasVideo: Indicator if call is video or audio.
+    ///   - completion: A closure to be called upon completion.
+    @MainActor
+    open func reportIncomingCall(
+        _ cid: String,
+        localizedCallerName: String,
+        callerId: String,
+        hasVideo: Bool,
+        completion: @escaping (Error?) -> Void
+    ) {
         let (callUUID, callUpdate) = buildCallUpdate(
             cid: cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: hasVideo
         )
 
         callProvider.reportNewIncomingCall(
@@ -573,7 +599,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private func buildCallUpdate(
         cid: String,
         localizedCallerName: String,
-        callerId: String
+        callerId: String,
+        hasVideo: Bool
     ) -> (UUID, CXCallUpdate) {
         let update = CXCallUpdate()
         let idComponents = cid.components(separatedBy: ":")
@@ -589,7 +616,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
         update.localizedCallerName = localizedCallerName
         update.remoteHandle = CXHandle(type: .generic, value: callerId)
-        update.hasVideo = supportsVideo
+        update.hasVideo = hasVideo
         update.supportsDTMF = false
 
         if supportsHolding {

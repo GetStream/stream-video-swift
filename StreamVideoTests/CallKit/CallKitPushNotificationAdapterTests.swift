@@ -98,7 +98,8 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
             .init(
                 cid: "123",
                 localizedCallerName: "TestUser",
-                callerId: "test_user"
+                callerId: "test_user",
+                hasVideo: false
             )
         )
     }
@@ -109,7 +110,8 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
             .init(
                 cid: "123",
                 localizedCallerName: "TestUser",
-                callerId: "test_user"
+                callerId: "test_user",
+                hasVideo: false
             ),
             displayName: "Stream Group Call"
         )
@@ -137,7 +139,8 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
                 "call_cid": $0.cid,
                 "call_display_name": displayName,
                 "created_by_display_name": $0.localizedCallerName,
-                "created_by_id": $0.callerId
+                "created_by_id": $0.callerId,
+                "video": $0.hasVideo
             ]
         ] } ?? [:]
 
@@ -166,6 +169,12 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
             XCTAssertEqual(
                 callKitService.reportIncomingCallWasCalled?.callerId,
                 content.callerId,
+                file: file,
+                line: line
+            )
+            XCTAssertEqual(
+                callKitService.reportIncomingCallWasCalled?.hasVideo,
+                content.hasVideo,
                 file: file,
                 line: line
             )

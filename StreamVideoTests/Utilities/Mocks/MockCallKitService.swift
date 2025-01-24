@@ -6,7 +6,13 @@ import Foundation
 import StreamVideo
 
 final class MockCallKitService: CallKitService {
-    private(set) var reportIncomingCallWasCalled: (cid: String, callerName: String, callerId: String, completion: (Error?) -> Void)?
+    private(set) var reportIncomingCallWasCalled: (
+        cid: String,
+        callerName: String,
+        callerId: String,
+        hasVideo: Bool,
+        completion: (Error?) -> Void
+    )?
 
     override init() { super.init() }
 
@@ -14,8 +20,9 @@ final class MockCallKitService: CallKitService {
         _ cid: String,
         localizedCallerName: String,
         callerId: String,
+        hasVideo: Bool,
         completion: @escaping ((any Error)?) -> Void
     ) {
-        reportIncomingCallWasCalled = (cid, localizedCallerName, callerId, completion)
+        reportIncomingCallWasCalled = (cid, localizedCallerName, callerId, hasVideo, completion)
     }
 }

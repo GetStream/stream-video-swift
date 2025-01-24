@@ -57,13 +57,12 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - reportIncomingCall
 
     @MainActor
-    func test_reportIncomingCall_supportsVideo_callUpdateWasConfiguredCorrectly() throws {
-        subject.supportsVideo = true
-
+    func test_reportIncomingCall_hasVideo_callUpdateWasConfiguredCorrectly() throws {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: true
         ) { _ in }
 
         let invocation = try XCTUnwrap(callProvider.invocations.first)
@@ -78,12 +77,11 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     func test_reportIncomingCall_doesNotSupportVideo_callUpdateWasConfiguredCorrectly() throws {
-        subject.supportsVideo = false
-
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         let invocation = try XCTUnwrap(callProvider.invocations.first)
@@ -105,7 +103,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         XCTAssertEqual(subject.callProvider.configuration.iconTemplateImageData, expectedData)
@@ -118,7 +117,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         XCTAssertNil(subject.callProvider.configuration.iconTemplateImageData)
@@ -134,7 +134,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { error in
             completionError = error
             expectation.fulfill()
@@ -157,7 +158,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
-                callerId: callerId
+                callerId: callerId,
+                hasVideo: false
             ) { _ in }
         }
     }
@@ -174,7 +176,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
-                callerId: callerId
+                callerId: callerId,
+                hasVideo: false
             ) { _ in }
         }
     }
@@ -236,7 +239,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
-                callerId: callerId
+                callerId: callerId,
+                hasVideo: false
             ) { _ in }
 
             let waitExpectation = self.expectation(description: "Wait expectation")
@@ -267,7 +271,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
-                callerId: callerId
+                callerId: callerId,
+                hasVideo: false
             ) { _ in }
         }
     }
@@ -288,7 +293,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
-                callerId: callerId
+                callerId: callerId,
+                hasVideo: false
             ) { _ in }
 
             let waitExpectationA = self.expectation(description: "a")
@@ -299,7 +305,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
-                callerId: callerId
+                callerId: callerId,
+                hasVideo: false
             ) { _ in }
         }
     }
@@ -319,7 +326,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         await waitExpectation(timeout: 1)
@@ -352,7 +360,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         await waitExpectation(timeout: 1)
@@ -385,7 +394,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
         await waitExpectation(timeout: 1)
         // Accept call
@@ -421,7 +431,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         await assertReportCallEnded(.answeredElsewhere) {
@@ -448,7 +459,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         await assertReportCallEnded(.declinedElsewhere) {
@@ -472,7 +484,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         subject.provider(
@@ -502,7 +515,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             secondCallId,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         XCTAssertEqual(subject.callCount, 2)
@@ -529,7 +543,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         try await assertRequestTransaction(CXEndCallAction.self) {
@@ -549,7 +564,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         await waitExpectation(timeout: 2)
@@ -587,7 +603,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: false
         ) { _ in }
 
         await waitExpectation(timeout: 2)
@@ -746,7 +763,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             subject.reportIncomingCall(
                 cid,
                 localizedCallerName: localizedCallerName,
-                callerId: callerId
+                callerId: callerId,
+                hasVideo: false
             ) { _ in }
         }
     }
