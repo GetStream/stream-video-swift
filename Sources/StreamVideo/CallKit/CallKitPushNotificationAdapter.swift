@@ -23,13 +23,13 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         var cid: String
         var localizedCallerName: String
         var callerId: String
-        var hasVideo: Bool
+        var hasVideo: Bool?
 
         public init(
             cid: String,
             localizedCallerName: String,
             callerId: String,
-            hasVideo: Bool
+            hasVideo: Bool? = nil
         ) {
             self.cid = cid
             self.localizedCallerName = localizedCallerName
@@ -107,7 +107,6 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
 
-        callKitService.supportsVideo = content.hasVideo
         callKitService.reportIncomingCall(
             content.cid,
             localizedCallerName: content.localizedCallerName,
@@ -136,8 +135,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             return .init(
                 cid: "unknown",
                 localizedCallerName: defaultCallText,
-                callerId: defaultCallText,
-                hasVideo: false
+                callerId: defaultCallText
             )
         }
 
@@ -155,7 +153,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             fallback: defaultCallText
         )
 
-        let hasVideo = streamDict[PayloadKey.video.rawValue] as? Bool ?? false
+        let hasVideo = streamDict[PayloadKey.video.rawValue] as? Bool
 
         return .init(
             cid: cid,

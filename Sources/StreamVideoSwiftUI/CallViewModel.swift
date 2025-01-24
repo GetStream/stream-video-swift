@@ -328,6 +328,8 @@ open class CallViewModel: ObservableObject {
     ///  - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
     ///  - startsAt: An optional date when the call starts.
     ///  - backstage: An optional request for setting up backstage.
+    ///  - hasVideo: A boolean indicating if the call will be video or only audio. Still requires appropriate
+    ///   setting of ``CallSettings`.`
     public func startCall(
         callType: String,
         callId: String,
@@ -337,7 +339,8 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
-        customData: [String: RawJSON]? = nil
+        customData: [String: RawJSON]? = nil,
+        hasVideo: Bool? = nil
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
@@ -368,7 +371,8 @@ open class CallViewModel: ObservableObject {
                         custom: customData,
                         ring: ring,
                         maxDuration: maxDuration,
-                        maxParticipants: maxParticipants
+                        maxParticipants: maxParticipants,
+                        hasVideo: hasVideo
                     )
                     let timeoutSeconds = TimeInterval(
                         callData.settings.ring.autoCancelTimeoutMs / 1000

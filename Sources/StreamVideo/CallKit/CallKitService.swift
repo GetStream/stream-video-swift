@@ -109,39 +109,17 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ///   - cid: The call ID.
     ///   - localizedCallerName: The localized caller name.
     ///   - callerId: The caller's identifier.
+    ///   - hasVideo: Indicator if call is video or audio. If nil we default to the value of `supportsVideo`
     ///   - completion: A closure to be called upon completion.
     @MainActor
     open func reportIncomingCall(
         _ cid: String,
         localizedCallerName: String,
         callerId: String,
+        hasVideo: Bool? = nil,
         completion: @escaping (Error?) -> Void
     ) {
-        reportIncomingCall(
-            cid,
-            localizedCallerName: localizedCallerName,
-            callerId: callerId,
-            hasVideo: false,
-            completion: completion
-        )
-    }
-
-    /// Reports an incoming call to the CallKit framework.
-    ///
-    /// - Parameters:
-    ///   - cid: The call ID.
-    ///   - localizedCallerName: The localized caller name.
-    ///   - callerId: The caller's identifier.
-    ///   - hasVideo: Indicator if call is video or audio.
-    ///   - completion: A closure to be called upon completion.
-    @MainActor
-    open func reportIncomingCall(
-        _ cid: String,
-        localizedCallerName: String,
-        callerId: String,
-        hasVideo: Bool,
-        completion: @escaping (Error?) -> Void
-    ) {
+        let hasVideo = hasVideo ?? supportsVideo
         let (callUUID, callUpdate) = buildCallUpdate(
             cid: cid,
             localizedCallerName: localizedCallerName,
@@ -162,6 +140,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             cid:\(cid)
             callerId:\(callerId)
             callerName:\(localizedCallerName)
+            hasVideo: \(hasVideo)
             """
         )
 

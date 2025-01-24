@@ -10,7 +10,7 @@ final class MockCallKitService: CallKitService {
         cid: String,
         callerName: String,
         callerId: String,
-        hasVideo: Bool,
+        hasVideo: Bool?,
         completion: (Error?) -> Void
     )?
 
@@ -20,7 +20,7 @@ final class MockCallKitService: CallKitService {
         _ cid: String,
         localizedCallerName: String,
         callerId: String,
-        hasVideo: Bool,
+        hasVideo: Bool?,
         completion: @escaping ((any Error)?) -> Void
     ) {
         reportIncomingCallWasCalled = (cid, localizedCallerName, callerId, hasVideo, completion)

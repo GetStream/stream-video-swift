@@ -57,7 +57,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     // MARK: - reportIncomingCall
 
     @MainActor
-    func test_reportIncomingCall_hasVideo_callUpdateWasConfiguredCorrectly() throws {
+    func test_reportIncomingCall_hasVideoTrue_callUpdateWasConfiguredCorrectly() throws {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
@@ -76,12 +76,52 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
-    func test_reportIncomingCall_doesNotSupportVideo_callUpdateWasConfiguredCorrectly() throws {
+    func test_reportIncomingCall_hasVideoFalse_callUpdateWasConfiguredCorrectly() throws {
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
             callerId: callerId,
             hasVideo: false
+        ) { _ in }
+
+        let invocation = try XCTUnwrap(callProvider.invocations.first)
+
+        switch invocation {
+        case let .reportNewIncomingCall(_, update, _):
+            XCTAssertFalse(update.hasVideo)
+        default:
+            XCTFail()
+        }
+    }
+
+    @MainActor
+    func test_reportIncomingCall_hasVideoNilSupportsVideoTrue_callUpdateWasConfiguredCorrectly() throws {
+        subject.supportsVideo = true
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: nil
+        ) { _ in }
+
+        let invocation = try XCTUnwrap(callProvider.invocations.first)
+
+        switch invocation {
+        case let .reportNewIncomingCall(_, update, _):
+            XCTAssertTrue(update.hasVideo)
+        default:
+            XCTFail()
+        }
+    }
+
+    @MainActor
+    func test_reportIncomingCall_hasVideoNilSupportsVideoFalse_callUpdateWasConfiguredCorrectly() throws {
+        subject.supportsVideo = false
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: nil
         ) { _ in }
 
         let invocation = try XCTUnwrap(callProvider.invocations.first)

@@ -105,6 +105,18 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     }
 
     @MainActor
+    func test_pushRegistryDidReceiveIncomingPush_typeIsVoIP_hasVideoIsNil_reportIncomingCallWasCalledAsExpected() {
+        assertDidReceivePushNotification(
+            .init(
+                cid: "123",
+                localizedCallerName: "TestUser",
+                callerId: "test_user",
+                hasVideo: nil
+            )
+        )
+    }
+
+    @MainActor
     func test_pushRegistryDidReceiveIncomingPush_typeIsVoIPWithDisplayNameAndCallerName_reportIncomingCallWasCalledAsExpected() {
         assertDidReceivePushNotification(
             .init(
@@ -134,15 +146,21 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     ) {
         let pushPayload = MockPKPushPayload()
         pushPayload.stubType = contentType
-        pushPayload.stubDictionaryPayload = content.map { [
+        var payload: [String: Any] = content.map { [
             "stream": [
                 "call_cid": $0.cid,
                 "call_display_name": displayName,
                 "created_by_display_name": $0.localizedCallerName,
-                "created_by_id": $0.callerId,
-                "video": $0.hasVideo
+                "created_by_id": $0.callerId
             ]
         ] } ?? [:]
+
+        if let hasVideo = content?.hasVideo, var streamPayload = payload["stream"] as? [String: Any] {
+            streamPayload["video"] = hasVideo
+            payload["stream"] = streamPayload
+        }
+
+        pushPayload.stubDictionaryPayload = payload
 
         let completionWasCalledExpectation = expectation(description: "Completion was called.")
         completionWasCalledExpectation.isInverted = content == nil
