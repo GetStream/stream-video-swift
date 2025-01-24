@@ -751,7 +751,7 @@ open class CallViewModel: ObservableObject {
 
         switch callingState {
         case .incoming where event.user?.id == streamVideo.user.id:
-            rejectCall(callType: event.type, callId: event.callId)
+            setActiveCall(call)
         case .outgoing where call?.cId == event.callCid:
             enterCall(
                 call: call,
