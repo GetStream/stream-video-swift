@@ -160,7 +160,12 @@ fileprivate func content() {
                                     callType: .default,
                                     callId: UUID().uuidString,
                                     members: [.init(userId: name)],
-                                    ring: true
+                                    ring: true,
+                                    
+                                    // hasVideo: A boolean indicating if the call
+                                    // will be video or only audio. Still requires
+                                    // appropriate setting of ``CallSettings`.`
+                                    video: true
                                 )
                             }
                         }

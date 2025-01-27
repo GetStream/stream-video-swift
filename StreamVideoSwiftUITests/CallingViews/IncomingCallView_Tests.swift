@@ -19,7 +19,8 @@ final class IncomingCallView_Tests: StreamVideoUITestCase {
                 caller: members.first!.user,
                 type: callType,
                 members: members,
-                timeout: 15000
+                timeout: 15000,
+                video: false
             )
             let view = IncomingCallView(
                 callInfo: callInfo,

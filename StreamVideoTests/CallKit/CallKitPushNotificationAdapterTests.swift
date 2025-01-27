@@ -98,7 +98,8 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
             .init(
                 cid: "123",
                 localizedCallerName: "TestUser",
-                callerId: "test_user"
+                callerId: "test_user",
+                hasVideo: false
             )
         )
     }
@@ -109,7 +110,8 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
             .init(
                 cid: "123",
                 localizedCallerName: "TestUser",
-                callerId: "test_user"
+                callerId: "test_user",
+                hasVideo: false
             ),
             displayName: "Stream Group Call"
         )
@@ -132,7 +134,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     ) {
         let pushPayload = MockPKPushPayload()
         pushPayload.stubType = contentType
-        pushPayload.stubDictionaryPayload = content.map { [
+        var payload: [String: Any] = content.map { [
             "stream": [
                 "call_cid": $0.cid,
                 "call_display_name": displayName,
@@ -140,6 +142,13 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
                 "created_by_id": $0.callerId
             ]
         ] } ?? [:]
+
+        if let hasVideo = content?.hasVideo, var streamPayload = payload["stream"] as? [String: Any] {
+            streamPayload["video"] = hasVideo
+            payload["stream"] = streamPayload
+        }
+
+        pushPayload.stubDictionaryPayload = payload
 
         let completionWasCalledExpectation = expectation(description: "Completion was called.")
         completionWasCalledExpectation.isInverted = content == nil
@@ -166,6 +175,12 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
             XCTAssertEqual(
                 callKitService.reportIncomingCallWasCalled?.callerId,
                 content.callerId,
+                file: file,
+                line: line
+            )
+            XCTAssertEqual(
+                callKitService.reportIncomingCallWasCalled?.hasVideo,
+                content.hasVideo,
                 file: file,
                 line: line
             )

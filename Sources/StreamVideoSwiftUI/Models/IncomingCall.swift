@@ -17,18 +17,21 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
     public let type: String
     public let members: [Member]
     public let timeout: TimeInterval
+    public let video: Bool
 
     public init(
         id: String,
         caller: User,
         type: String,
         members: [Member],
-        timeout: TimeInterval
+        timeout: TimeInterval,
+        video: Bool = false
     ) {
         self.id = id
         self.caller = caller
         self.type = type
         self.members = members
         self.timeout = timeout
+        self.video = video
     }
 }

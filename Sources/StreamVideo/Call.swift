@@ -225,6 +225,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - maxDuration: An optional integer representing the maximum duration of the call in seconds.
     ///   - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
     ///   - backstage: An optional backstage request.
+    ///   - video: A boolean indicating if the call will be video or only audio. Still requires appropriate
+    ///   setting of ``CallSettings`.`
     /// - Returns: A `CallResponse` object representing the created call.
     /// - Throws: An error if the call creation fails.
     @discardableResult
@@ -238,7 +240,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
-        backstage: BackstageSettingsRequest? = nil
+        backstage: BackstageSettingsRequest? = nil,
+        video: Bool? = nil
     ) async throws -> CallResponse {
         var membersRequest = [MemberRequest]()
         memberIds?.forEach {
@@ -268,7 +271,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 members: membersRequest,
                 settingsOverride: settingsOverride,
                 startsAt: startsAt,
-                team: team
+                team: team,
+                video: video
             ),
             notify: notify,
             ring: ring

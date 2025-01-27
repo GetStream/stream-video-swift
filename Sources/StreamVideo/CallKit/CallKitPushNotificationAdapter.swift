@@ -15,6 +15,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         case displayName = "call_display_name"
         case createdByName = "created_by_display_name"
         case createdById = "created_by_id"
+        case video
     }
 
     /// Represents the content of a VoIP push notification.
@@ -22,15 +23,18 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         var cid: String
         var localizedCallerName: String
         var callerId: String
+        var hasVideo: Bool
 
         public init(
             cid: String,
             localizedCallerName: String,
-            callerId: String
+            callerId: String,
+            hasVideo: Bool
         ) {
             self.cid = cid
             self.localizedCallerName = localizedCallerName
             self.callerId = callerId
+            self.hasVideo = hasVideo
         }
     }
 
@@ -107,6 +111,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             content.cid,
             localizedCallerName: content.localizedCallerName,
             callerId: content.callerId,
+            hasVideo: content.hasVideo,
             completion: { error in
                 if let error {
                     log.error(error)
@@ -130,7 +135,8 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             return .init(
                 cid: "unknown",
                 localizedCallerName: defaultCallText,
-                callerId: defaultCallText
+                callerId: defaultCallText,
+                hasVideo: false
             )
         }
 
@@ -148,10 +154,21 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             fallback: defaultCallText
         )
 
+        let hasVideo: Bool = {
+            if let booleanValue = streamDict[PayloadKey.video.rawValue] as? Bool {
+                return booleanValue
+            } else if let stringValue = streamDict[PayloadKey.video.rawValue] as? String {
+                return stringValue == "true"
+            } else {
+                return false
+            }
+        }()
+
         return .init(
             cid: cid,
             localizedCallerName: localizedCallerName,
-            callerId: callerId
+            callerId: callerId,
+            hasVideo: hasVideo
         )
     }
 }
