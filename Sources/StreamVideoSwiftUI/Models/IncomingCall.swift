@@ -25,7 +25,7 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
         type: String,
         members: [Member],
         timeout: TimeInterval,
-        video: Bool
+        video: Bool = false
     ) {
         self.id = id
         self.caller = caller
