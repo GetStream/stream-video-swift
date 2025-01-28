@@ -418,6 +418,46 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertEqual(participants?[0].name, "Alexey")
         XCTAssertEqual(participants?[1].name, "Ilias")
     }
+    
+    // MARK: - RTMP Broadcasting
+    
+    func test_updateState_fromBroadcastStartedEvent() async throws {
+        // Given
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let event = CallRtmpBroadcastStartedEvent(callCid: callCid, createdAt: Date(), name: "test")
+
+        // When
+        call?.state.updateState(from: .typeCallRtmpBroadcastStartedEvent(event))
+
+        // Then
+        XCTAssert(call?.state.broadcasting == true)
+    }
+    
+    func test_updateState_fromBroadcastStoppedEvent() async throws {
+        // Given
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let event = CallRtmpBroadcastStoppedEvent(callCid: callCid, createdAt: Date(), name: "test")
+        call?.state.broadcasting = true
+
+        // When
+        call?.state.updateState(from: .typeCallRtmpBroadcastStoppedEvent(event))
+
+        // Then
+        XCTAssert(call?.state.broadcasting == false)
+    }
+    
+    func test_updateState_fromBroadcastFailedEvent() async throws {
+        // Given
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let event = CallRtmpBroadcastFailedEvent(callCid: callCid, createdAt: Date(), name: "test")
+        call?.state.broadcasting = true
+
+        // When
+        call?.state.updateState(from: .typeCallRtmpBroadcastFailedEvent(event))
+
+        // Then
+        XCTAssert(call?.state.broadcasting == false)
+    }
 
     // MARK: - Private helpers
 

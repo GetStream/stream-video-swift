@@ -715,17 +715,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameters:
     ///  - startsHls: whether hls streaming should be started.
     ///  - startRecording: whether recording should be started.
+    ///  - startRtmpBroadcasts: whether RTMP broadcasting should be started.
     ///  - startTranscription: whether transcription should be started.
     /// - Returns: `GoLiveResponse`.
     @discardableResult
     public func goLive(
         startHls: Bool? = nil,
         startRecording: Bool? = nil,
+        startRtmpBroadcasts: Bool? = nil,
         startTranscription: Bool? = nil
     ) async throws -> GoLiveResponse {
         let goLiveRequest = GoLiveRequest(
             startHls: startHls,
             startRecording: startRecording,
+            startRtmpBroadcasts: startRtmpBroadcasts,
             startTranscription: startTranscription
         )
         return try await coordinatorClient.goLive(
@@ -790,6 +793,30 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func stopHLS() async throws -> StopHLSBroadcastingResponse {
         try await coordinatorClient.stopHLSBroadcasting(type: callType, id: callId)
+    }
+    
+    /// Starts RTMP broadcasting of the call.
+    /// - Parameter request: The request to start RTMP broadcasting.
+    /// - Returns: `StartRTMPBroadcastsResponse`.
+    /// - Throws: An error if starting RTMP broadcasting.
+    @discardableResult
+    public func startRTMPBroadcast(
+        request: StartRTMPBroadcastsRequest
+    ) async throws -> StartRTMPBroadcastsResponse {
+        try await coordinatorClient.startRTMPBroadcasts(
+            type: callType,
+            id: callId,
+            startRTMPBroadcastsRequest: request
+        )
+    }
+    
+    /// Stops RTMP broadcasting of the call.
+    /// - Parameter name: The name of the RTMP broadcast.
+    /// - Returns: `StopRTMPBroadcastsResponse`.
+    /// - Throws: An error if stopping RTMP broadcasting.
+    @discardableResult
+    public func stopRTMPBroadcasts(name: String) async throws -> StopRTMPBroadcastsResponse {
+        try await coordinatorClient.stopRTMPBroadcast(type: callType, id: callId, name: name)
     }
 
     // MARK: - Events
