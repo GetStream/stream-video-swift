@@ -91,7 +91,7 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                 )
                             }
 
-                            DemoTranscriptionButtonView(viewModel: viewModel)
+                            DemoTranscriptionAndClosedCaptionsButtonView(viewModel: viewModel)
 
                             DemoMoreControlListButtonView(
                                 action: { isStatsPresented = true },

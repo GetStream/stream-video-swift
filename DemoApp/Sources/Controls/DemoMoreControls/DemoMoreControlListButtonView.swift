@@ -14,6 +14,7 @@ struct DemoMoreControlListButtonView: View {
     var centered: Bool = false
     var action: () -> Void
     var label: String
+    var disabled: Bool = false
     var icon: () -> Image
 
     var body: some View {
@@ -39,6 +40,7 @@ struct DemoMoreControlListButtonView: View {
         .background(Color(colors.participantBackground))
         .clipShape(Capsule())
         .frame(maxWidth: .infinity)
+        .disabled(disabled)
     }
 }
 

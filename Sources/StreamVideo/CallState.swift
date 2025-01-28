@@ -109,6 +109,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var ingress: Ingress?
     @Published public internal(set) var permissionRequests: [PermissionRequest] = []
     @Published public internal(set) var transcribing: Bool = false
+    @Published public internal(set) var captioning: Bool = false
     @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
     @Published public internal(set) var session: CallSessionResponse? {
         didSet {
@@ -124,6 +125,8 @@ public class CallState: ObservableObject {
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
+
+    @Published public internal(set) var closedCaptions: [CallClosedCaption] = []
 
     @Published public internal(set) var statsCollectionInterval: Int = 0
 
@@ -242,10 +245,10 @@ public class CallState: ObservableObject {
             break
         case .typeClosedCaptionEvent:
             break
-        case .typeCallTranscriptionFailedEvent:
-            transcribing = false
         case .typeCallTranscriptionReadyEvent:
             break
+        case .typeCallTranscriptionFailedEvent:
+            transcribing = false
         case .typeCallTranscriptionStartedEvent:
             transcribing = true
         case .typeCallTranscriptionStoppedEvent:
@@ -263,11 +266,11 @@ public class CallState: ObservableObject {
         case .typeUserUpdatedEvent:
             break
         case .typeCallClosedCaptionsFailedEvent:
-            break
+            captioning = false
         case .typeCallClosedCaptionsStartedEvent:
-            break
+            captioning = true
         case .typeCallClosedCaptionsStoppedEvent:
-            break
+            captioning = false
         }
     }
     
@@ -372,6 +375,7 @@ public class CallState: ObservableObject {
         backstage = response.backstage
         recordingState = response.recording ? .recording : .noRecording
         transcribing = response.transcribing
+        captioning = response.captioning
         blockedUserIds = Set(response.blockedUserIds.map { $0 })
         team = response.team
         session = response.session
@@ -397,7 +401,11 @@ public class CallState: ObservableObject {
     internal func update(statsReport: CallStatsReport?) {
         self.statsReport = statsReport
     }
-    
+
+    internal func update(closedCaptions: [CallClosedCaption]) {
+        self.closedCaptions = closedCaptions
+    }
+
     private func updateOwnCapabilities(_ event: UpdatedCallPermissionsEvent) {
         guard
             event.user.id == streamVideo.user.id

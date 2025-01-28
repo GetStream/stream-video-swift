@@ -39,6 +39,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private var eventHandlers = [EventHandler]()
     private var cancellables = DisposableBag()
 
+    /// This adapter is used to manage closed captions for the
+    /// call.
+    private lazy var closedCaptionsAdapter = ClosedCaptionsAdapter(self)
+
     internal init(
         callType: String,
         callId: String,
@@ -72,6 +76,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
 
+        _ = closedCaptionsAdapter
         callController.call = self
         speaker.call = self
         // It's important to instantiate the stateMachine as soon as possible
@@ -81,6 +86,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         subscribeToLocalCallSettingsChanges()
         subscribeToNoiseCancellationSettingsChanges()
         subscribeToTranscriptionSettingsChanges()
+        subscribeToClosedCaptionsSettingsChanges()
     }
 
     internal convenience init(
@@ -226,6 +232,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///   - maxParticipants: An optional integer representing the maximum number of participants allowed in the call.
     ///   - backstage: An optional backstage request.
     ///   - video: A boolean indicating if the call will be video or only audio. Still requires appropriate
+    ///   - transcription: An object to override the transcription Call settings from the dashboard.
     ///   setting of ``CallSettings`.`
     /// - Returns: A `CallResponse` object representing the created call.
     /// - Throws: An error if the call creation fails.
@@ -241,7 +248,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
         backstage: BackstageSettingsRequest? = nil,
-        video: Bool? = nil
+        video: Bool? = nil,
+        transcription: TranscriptionSettingsRequest? = nil
     ) async throws -> CallResponse {
         var membersRequest = [MemberRequest]()
         memberIds?.forEach {
@@ -262,7 +270,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         settingsOverride = CallSettingsRequest(
             backstage: backstage,
-            limits: limits
+            limits: limits,
+            transcription: transcription
         )
         
         let request = GetOrCreateCallRequest(
@@ -507,6 +516,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         cancellables.removeAll()
         eventHandlers.removeAll()
         callController.leave()
+        closedCaptionsAdapter.stop()
         try? stateMachine.transition(.idle(self))
         /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
         /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
@@ -1237,6 +1247,98 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
+    /// Starts closed captions for the call.
+    ///
+    /// This method enables closed captions for the call, optionally enabling
+    /// transcription, specifying an external storage location, and setting the
+    /// language for the captions.
+    ///
+    /// - Note: This operation affects all participants.
+    /// - Parameters:
+    ///   - enableTranscription: A Boolean value indicating whether transcription
+    ///     should be enabled. Default is `nil`.
+    ///   - externalStorage: An optional string specifying the external storage
+    ///     location for the captions.
+    ///   - language: An optional ``TranscriptionSettings.Language`` specifying the
+    ///   language for the captions.
+    /// - Returns: A `StartClosedCaptionsResponse` indicating the result of the
+    ///   operation.
+    /// - Throws: An error if starting closed captions fails.
+    @discardableResult
+    public func startClosedCaptions(
+        enableTranscription: Bool? = nil,
+        externalStorage: String? = nil,
+        language: TranscriptionSettings.Language? = nil
+    ) async throws -> StartClosedCaptionsResponse {
+        let response = try await coordinatorClient.startClosedCaptions(
+            type: callType,
+            id: callId,
+            startClosedCaptionsRequest: .init(
+                enableTranscription: enableTranscription,
+                externalStorage: externalStorage,
+                language: language?.rawValue
+            )
+        )
+
+        // We update the closedCaptions & transcription language to the provided
+        // one.
+        await state.settings?.transcription.language = language ?? .unknown
+
+        return response
+    }
+
+    /// Stops closed captions for the call.
+    ///
+    /// This method disables closed captions for the call, optionally stopping
+    /// transcription as well.
+    ///
+    /// - Note: This operation affects all participants.
+    /// - Parameter stopTranscription: A Boolean value indicating whether
+    ///   transcription should be stopped. Default is `nil`.
+    /// - Returns: A `StopClosedCaptionsResponse` indicating the result of the
+    ///   operation.
+    /// - Throws: An error if stopping closed captions fails.
+    @discardableResult
+    public func stopClosedCaptions(
+        stopTranscription: Bool? = nil
+    ) async throws -> StopClosedCaptionsResponse {
+        try await coordinatorClient.stopClosedCaptions(
+            type: callType,
+            id: callId,
+            stopClosedCaptionsRequest: .init(stopTranscription: stopTranscription)
+        )
+    }
+
+    /// Updates the closed captions settings with the specified presentation duration
+    /// and maximum visible items.
+    ///
+    /// - Parameters:
+    ///   - itemPresentationDuration: The duration for which each closed caption item
+    ///     is presented in seconds. Must be greater than 0.5 seconds.
+    ///   - maxVisibleItems: The maximum number of visible closed caption items.
+    ///     Must be greater than 1.
+    @MainActor
+    public func updateClosedCaptionsSettings(
+        itemPresentationDuration: TimeInterval,
+        maxVisibleItems: Int
+    ) async {
+        if itemPresentationDuration < 0.5 {
+            log.warning(
+                "ClosedCaptions configuration is invalid. itemPresentationDuration should be more than 0.5 seconds."
+            )
+        } else {
+            closedCaptionsAdapter.itemPresentationDuration = itemPresentationDuration
+        }
+
+        if maxVisibleItems <= 0 {
+            log.warning(
+                "ClosedCaptions configuration is invalid. maxVisibleItems should be more than 1."
+            )
+        } else {
+            closedCaptionsAdapter.capacity = maxVisibleItems
+        }
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
@@ -1275,7 +1377,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     @MainActor
-    func transitionDueToError(_ error: Error) {
+    internal func transitionDueToError(_ error: Error) {
         do {
             if stateMachine.currentStage.id == .joined {
                 state.disconnectionError = error
@@ -1410,6 +1512,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
+    private func subscribeToClosedCaptionsSettingsChanges() {
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            self
+                .state
+                .$settings
+                .map(\.?.transcription.closedCaptionMode)
+                .removeDuplicates()
+                .sink { [weak self] in self?.didUpdate($0) }
+                .store(in: cancellables)
+        }
+    }
+
     private func updateCallSettingsManagers(with callSettings: CallSettings) {
         microphone.status = callSettings.audioOn ? .enabled : .disabled
         camera.status = callSettings.videoOn ? .enabled : .disabled
@@ -1484,6 +1599,32 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     try await startTranscription()
                 default:
                     log.debug("TranscriptionSettings updated with mode:\(value.mode). No action required.")
+                }
+            } catch {
+                log.error(error)
+            }
+        }
+    }
+
+    /// Handles updates to transcription settings.
+    /// - Parameter value: The updated `TranscriptionSettings` value.
+    private func didUpdate(_ mode: TranscriptionSettings.ClosedCaptionMode?) {
+        guard let mode = mode else {
+            log.debug("ClosedCaptionSettings updated. No action!")
+            return
+        }
+
+        Task { @MainActor in
+            do {
+                switch mode {
+                case .disabled where state.captioning == true:
+                    log.debug("ClosedCaptionSettings updated with mode:\(mode). Will deactivate closedCaptions.")
+                    try await stopClosedCaptions()
+                case .autoOn where state.captioning == false:
+                    log.debug("ClosedCaptionSettings updated with mode:\(mode). Will activate closedCaptions.")
+                    try await startClosedCaptions()
+                default:
+                    log.debug("ClosedCaptionSettings updated with mode:\(mode). No action required.")
                 }
             } catch {
                 log.error(error)
