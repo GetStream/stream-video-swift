@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- You can now override the default `UserAvatar`, that is used across various SDK components, by using overriding the new `makeUserAvatar` method on your `ViewFactory` implementation. [#644](https://github.com/GetStream/stream-video-swift/pull/644)
 
 ### 🐞 Fixed
 - Fix an issue that was causing the video capturer to no be cleaned up when the call was ended, causing the camera access system indicator to remain on while the `CallEnded` screen is visible. [#636](https://github.com/GetStream/stream-video-swift/pull/636)
