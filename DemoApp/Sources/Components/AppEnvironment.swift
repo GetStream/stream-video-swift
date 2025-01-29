@@ -516,6 +516,26 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
+    enum ClosedCaptionsIntegration: Hashable, Debuggable {
+        case enabled, disabled
+
+        var title: String {
+            switch self {
+            case .enabled:
+                return "Enabled"
+            case .disabled:
+                return "Disabled"
+            }
+        }
+    }
+
+    static var closedCaptionsIntegration: ClosedCaptionsIntegration = {
+        .disabled
+    }()
+}
+
+extension AppEnvironment {
+
     static var availableCallTypes: [String] = [
         .development,
         .default,
