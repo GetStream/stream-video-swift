@@ -144,7 +144,7 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
             } action: {
                 execute {
                     try await viewModel.call?.stopClosedCaptions()
-                    try await viewModel.call?.startClosedCaptions(language: nil)
+                    try await viewModel.call?.startClosedCaptions(.init(language: nil))
                 }
             }
 
@@ -163,7 +163,7 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
                     }
                 ) { execute {
                     try await viewModel.call?.stopClosedCaptions()
-                    try await viewModel.call?.startClosedCaptions(language: language)
+                    try await viewModel.call?.startClosedCaptions(.init(language: language.rawValue))
                 } }
             }
         } label: {

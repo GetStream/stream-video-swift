@@ -1266,23 +1266,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if starting closed captions fails.
     @discardableResult
     public func startClosedCaptions(
-        enableTranscription: Bool? = nil,
-        externalStorage: String? = nil,
-        language: TranscriptionSettings.Language? = nil
+        _ request: StartClosedCaptionsRequest = .init()
     ) async throws -> StartClosedCaptionsResponse {
         let response = try await coordinatorClient.startClosedCaptions(
             type: callType,
             id: callId,
-            startClosedCaptionsRequest: .init(
-                enableTranscription: enableTranscription,
-                externalStorage: externalStorage,
-                language: language?.rawValue
-            )
+            startClosedCaptionsRequest: request
         )
 
         // We update the closedCaptions & transcription language to the provided
         // one.
-        await state.settings?.transcription.language = language ?? .unknown
+        await state.settings?.transcription.language = request
+            .language
+            .map { TranscriptionSettings.Language(rawValue: $0) ?? .unknown } ?? .unknown
 
         return response
     }

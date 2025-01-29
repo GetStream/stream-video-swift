@@ -11,7 +11,7 @@ struct DemoClosedCaptionsView: View {
 
     @Injected(\.colors) private var colors
 
-    @StateObject var viewModel: CallViewModel
+    @ObservedObject var viewModel: CallViewModel
     @State private var items: [CallClosedCaption] = []
 
     init(_ viewModel: CallViewModel) {
