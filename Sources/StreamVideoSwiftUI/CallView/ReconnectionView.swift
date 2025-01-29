@@ -14,7 +14,7 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
     
     public init(
         viewModel: CallViewModel,
-        viewFactory: Factory
+        viewFactory: Factory = DefaultViewFactory.shared
     ) {
         self.viewModel = viewModel
         self.viewFactory = viewFactory

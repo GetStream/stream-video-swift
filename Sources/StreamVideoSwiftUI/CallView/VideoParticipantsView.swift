@@ -14,7 +14,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
 
     public init(
-        viewFactory: Factory,
+        viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: CallViewModel,
         availableFrame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
@@ -311,11 +311,12 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
     }
 }
 
-public struct VideoCallParticipantView: View {
-    
+public struct VideoCallParticipantView<Factory: ViewFactory>: View {
+
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
-        
+
+    var viewFactory: Factory
     let participant: CallParticipant
     var id: String
     var availableFrame: CGRect
@@ -327,6 +328,7 @@ public struct VideoCallParticipantView: View {
     @State private var isUsingFrontCameraForLocalUser: Bool = false
 
     public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
         participant: CallParticipant,
         id: String? = nil,
         availableFrame: CGRect,
@@ -335,6 +337,7 @@ public struct VideoCallParticipantView: View {
         customData: [String: RawJSON],
         call: Call?
     ) {
+        self.viewFactory = viewFactory
         self.participant = participant
         self.id = id ?? participant.id
         self.availableFrame = availableFrame
@@ -367,6 +370,7 @@ public struct VideoCallParticipantView: View {
         .streamAccessibility(value: showVideo ? "1" : "0")
         .overlay(
             CallParticipantImageView(
+                viewFactory: viewFactory,
                 id: participant.id,
                 name: participant.name,
                 imageURL: participant.profileImageURL

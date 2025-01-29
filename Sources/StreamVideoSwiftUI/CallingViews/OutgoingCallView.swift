@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-public struct OutgoingCallView<CallControls: View, CallTopView: View>: View {
+public struct OutgoingCallView<CallControls: View, CallTopView: View, Factory: ViewFactory>: View {
 
     @Injected(\.streamVideo) var streamVideo
     
@@ -14,15 +14,18 @@ public struct OutgoingCallView<CallControls: View, CallTopView: View>: View {
     @Injected(\.images) var images
     @Injected(\.utils) var utils
     
+    var viewFactory: Factory
     var outgoingCallMembers: [Member]
     var callTopView: CallTopView
     var callControls: CallControls
     
     public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
         outgoingCallMembers: [Member],
         callTopView: CallTopView,
         callControls: CallControls
     ) {
+        self.viewFactory = viewFactory
         self.outgoingCallMembers = outgoingCallMembers
         self.callTopView = callTopView
         self.callControls = callControls
@@ -30,6 +33,7 @@ public struct OutgoingCallView<CallControls: View, CallTopView: View>: View {
     
     public var body: some View {
         CallConnectingView(
+            viewFactory: viewFactory,
             outgoingCallMembers: outgoingCallMembers,
             title: L10n.Call.Outgoing.title,
             callControls: callControls,

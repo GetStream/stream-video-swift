@@ -6,12 +6,17 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct CallParticipantsInfoView: View {
+public struct CallParticipantsInfoView<Factory: ViewFactory>: View {
 
+    var viewFactory: Factory
     @StateObject var viewModel: CallParticipantsInfoViewModel
     @ObservedObject var callViewModel: CallViewModel
 
-    public init(callViewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        callViewModel: CallViewModel
+    ) {
+        self.viewFactory = viewFactory
         self.callViewModel = callViewModel
         _viewModel = StateObject(
             wrappedValue: CallParticipantsInfoViewModel(
@@ -22,6 +27,7 @@ public struct CallParticipantsInfoView: View {
     
     public var body: some View {
         CallParticipantsView(
+            viewFactory: viewFactory,
             viewModel: viewModel,
             callViewModel: callViewModel
         )
@@ -29,13 +35,25 @@ public struct CallParticipantsInfoView: View {
 }
 
 @available(iOS 14.0, *)
-struct CallParticipantsView: View {
-    
+struct CallParticipantsView<Factory: ViewFactory>: View {
+
+    var viewFactory: Factory
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
     @ObservedObject var callViewModel: CallViewModel
-        
+
+    init(
+        viewFactory: Factory,
+        viewModel: CallParticipantsInfoViewModel,
+        callViewModel: CallViewModel
+    ) {
+        self.viewFactory = viewFactory
+        self.viewModel = viewModel
+        self.callViewModel = callViewModel
+    }
+
     var body: some View {
         CallParticipantsViewContainer(
+            viewFactory: viewFactory,
             viewModel: viewModel,
             participants: participants,
             call: callViewModel.call,
@@ -62,13 +80,14 @@ struct CallParticipantsView: View {
 }
 
 @available(iOS 14.0, *)
-struct CallParticipantsViewContainer: View {
-    
+struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
+
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
     
     @Injected(\.colors) var colors
     @Injected(\.images) var images
-        
+
+    var viewFactory: Factory
     var participants: [CallParticipant]
     var call: Call?
     var blockedUsers: [User]
@@ -78,8 +97,34 @@ struct CallParticipantsViewContainer: View {
     var muteTapped: () -> Void
     var closeTapped: () -> Void
     
-    @State private var listHeight: CGFloat = 0
-        
+    @State private var listHeight: CGFloat
+
+    init(
+        viewFactory: Factory,
+        viewModel: CallParticipantsInfoViewModel,
+        participants: [CallParticipant],
+        call: Call? = nil,
+        blockedUsers: [User],
+        callSettings: CallSettings,
+        inviteParticipantsShown: Binding<Bool>,
+        inviteTapped: @escaping () -> Void,
+        muteTapped: @escaping () -> Void,
+        closeTapped: @escaping () -> Void,
+        listHeight: CGFloat = 0
+    ) {
+        self.viewFactory = viewFactory
+        self.viewModel = viewModel
+        self.participants = participants
+        self.call = call
+        self.blockedUsers = blockedUsers
+        self.callSettings = callSettings
+        _inviteParticipantsShown = .init(projectedValue: inviteParticipantsShown)
+        self.inviteTapped = inviteTapped
+        self.muteTapped = muteTapped
+        self.closeTapped = closeTapped
+        self.listHeight = listHeight
+    }
+
     var body: some View {
         NavigationView {
             VStack {
@@ -87,6 +132,7 @@ struct CallParticipantsViewContainer: View {
                     LazyVStack {
                         ForEach(participants) { participant in
                             CallParticipantView(
+                                viewFactory: viewFactory,
                                 participant: participant,
                                 menuActions: viewModel.menuActions(for: participant)
                             )
@@ -117,6 +163,7 @@ struct CallParticipantsViewContainer: View {
 
                 NavigationLink(isActive: $inviteParticipantsShown) {
                     InviteParticipantsView(
+                        viewFactory: viewFactory,
                         inviteParticipantsShown: $inviteParticipantsShown,
                         currentParticipants: participants,
                         call: call
@@ -216,26 +263,42 @@ struct BlockedUsersView: View {
     }
 }
 
-struct CallParticipantView: View {
-    
+struct CallParticipantView<Factory: ViewFactory>: View {
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
     @Injected(\.images) var images
     
     private let imageSize: CGFloat = 48
-    
+
+    var viewFactory: Factory
     var participant: CallParticipant
     var menuActions: [CallParticipantMenuAction]
-    
+
+    init(
+        viewFactory: Factory,
+        participant: CallParticipant,
+        menuActions: [CallParticipantMenuAction]
+    ) {
+        self.viewFactory = viewFactory
+        self.participant = participant
+        self.menuActions = menuActions
+    }
+
     var body: some View {
         VStack(spacing: 4) {
             HStack {
-                UserAvatar(imageURL: participant.profileImageURL, size: imageSize) {
-                    CircledTitleView(
-                        title: participant.name.isEmpty
-                            ? participant.id
-                            : String(participant.name.uppercased().first!),
-                        size: imageSize
+                viewFactory.makeUserAvatar(
+                    participant.user,
+                    size: imageSize
+                ) {
+                    AnyView(
+                        CircledTitleView(
+                            title: participant.name.isEmpty
+                                ? participant.id
+                                : String(participant.name.uppercased().first!),
+                            size: imageSize
+                        )
                     )
                 }
                 .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) })

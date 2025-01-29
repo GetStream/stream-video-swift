@@ -7,7 +7,7 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
-struct DetailedCallingView: View {
+struct DetailedCallingView<Factory: ViewFactory>: View {
     enum CallAction: String, Equatable, CaseIterable {
         case startCall = "Start a call"
         case joinCall = "Join a call"
@@ -25,6 +25,7 @@ struct DetailedCallingView: View {
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
 
+    private var viewFactory: Factory
     private let imageSize: CGFloat = 32
 
     private var participants: [User] {
@@ -65,7 +66,12 @@ struct DetailedCallingView: View {
     private var isAnonymous: Bool { appState.currentUser == .anonymous }
     private var canStartCall: Bool { appState.currentUser?.type == .regular }
 
-    init(viewModel: CallViewModel, callId: String) {
+    init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel,
+        callId: String
+    ) {
+        self.viewFactory = viewFactory
         _text = .init(initialValue: callId)
         self.viewModel = viewModel
     }
@@ -191,9 +197,7 @@ struct DetailedCallingView: View {
                                 Text(participant.name)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             } icon: {
-                                DemoAppViewFactory
-                                    .shared
-                                    .makeUserAvatar(participant.user, size: imageSize)
+                                viewFactory.makeUserAvatar(participant, size: imageSize)
                             }
 
                             if selectedParticipants.contains(participant) {

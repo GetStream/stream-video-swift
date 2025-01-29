@@ -18,7 +18,7 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     private var availableFrame: CGRect
 
     public init(
-        viewFactory: Factory,
+        viewFactory: Factory = DefaultViewFactory.shared,
         participant: CallParticipant,
         idSuffix: String = "local",
         callSettings: CallSettings,

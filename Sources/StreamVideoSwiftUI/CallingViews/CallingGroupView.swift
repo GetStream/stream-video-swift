@@ -5,13 +5,24 @@
 import StreamVideo
 import SwiftUI
 
-struct CallingGroupView: View {
-    
+struct CallingGroupView<Factory: ViewFactory>: View {
+
     let easeGently = Animation.easeOut(duration: 1).repeatForever(autoreverses: true)
-    
+
+    var viewFactory: Factory
     var participants: [Member]
-    @State var isCalling = false
-    
+    @State var isCalling: Bool
+
+    init(
+        viewFactory: Factory,
+        participants: [Member],
+        isCalling: Bool = false
+    ) {
+        self.viewFactory = viewFactory
+        self.participants = participants
+        self.isCalling = .init(isCalling)
+    }
+
     var body: some View {
         VStack {
             if participants.count >= 3 {
@@ -31,6 +42,7 @@ struct CallingGroupView: View {
                     ZStack {
                         if participants.count == 3 {
                             IncomingCallParticipantView(
+                                viewFactory: viewFactory,
                                 participant: participants[2],
                                 size: .standardAvatarSize
                             )
@@ -76,6 +88,7 @@ struct CallingGroupView: View {
         animation: Animation
     ) -> some View {
         IncomingCallParticipantView(
+            viewFactory: viewFactory,
             participant: participant,
             size: .standardAvatarSize
         )
@@ -91,16 +104,27 @@ struct CallingGroupView: View {
     }
 }
 
-struct IncomingCallParticipantView: View {
-        
+struct IncomingCallParticipantView<Factory: ViewFactory>: View {
+
+    var viewFactory: Factory
     var participant: Member
-    var size: CGFloat = .expandedAvatarSize
-    
+    var size: CGFloat
+
+    init(
+        viewFactory: Factory,
+        participant: Member,
+        size: CGFloat = .expandedAvatarSize
+    ) {
+        self.viewFactory = viewFactory
+        self.participant = participant
+        self.size = size
+    }
+
     var body: some View {
-        UserAvatar(
-            imageURL: participant.user.imageURL,
+        viewFactory.makeUserAvatar(
+            participant.user,
             size: size
-        ) { CircledTitleView(title: title, size: size) }
+        ) { AnyView(CircledTitleView(title: title, size: size)) }
             .frame(width: size, height: size)
             .modifier(ShadowModifier())
             .animation(nil)

@@ -10,13 +10,24 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
     @Injected(\.fonts) var fonts
     
     private let avatarSize: CGFloat = 50
-    
+
+    var viewFactory: Factory
     var user: User
     var onUserTapped: (User) -> Void
-    
+
+    init(
+        viewFactory: Factory,
+        user: User,
+        onUserTapped: @escaping (User) -> Void
+    ) {
+        self.viewFactory = viewFactory
+        self.user = user
+        self.onUserTapped = onUserTapped
+    }
+
     var body: some View {
         VStack {
-            UserAvatar(imageURL: user.imageURL, size: avatarSize)
+            viewFactory.makeUserAvatar(user, size: avatarSize)
 
             Text(user.name)
                 .lineLimit(1)

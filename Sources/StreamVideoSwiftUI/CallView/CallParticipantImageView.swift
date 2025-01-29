@@ -5,17 +5,24 @@
 import StreamVideo
 import SwiftUI
 
-public struct CallParticipantImageView: View {
+public struct CallParticipantImageView<Factory: ViewFactory>: View {
 
     @Injected(\.colors) var colors
     
     private let size: CGFloat = 138
 
+    var viewFactory: Factory
     var id: String
     var name: String
     var imageURL: URL?
 
-    public init(id: String, name: String, imageURL: URL? = nil) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        id: String,
+        name: String,
+        imageURL: URL? = nil
+    ) {
+        self.viewFactory = viewFactory
         self.id = id
         self.name = name
         self.imageURL = imageURL
@@ -27,10 +34,15 @@ public struct CallParticipantImageView: View {
         }
         .blur(radius: 8)
         .overlay(
-            UserAvatar(imageURL: imageURL, size: size) {
-                CircledTitleView(
-                    title: name.isEmpty ? id : String(name.uppercased().first!),
-                    size: size
+            viewFactory.makeUserAvatar(
+                .init(id: id, name: name, imageURL: imageURL),
+                size: size
+            ) {
+                AnyView(
+                    CircledTitleView(
+                        title: name.isEmpty ? id : String(name.uppercased().first!),
+                        size: size
+                    )
                 )
             }
         )

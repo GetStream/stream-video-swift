@@ -15,7 +15,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
-        viewFactory: Factory,
+        viewFactory: Factory = DefaultViewFactory.shared,
         participant: CallParticipant,
         call: Call?,
         frame: CGRect,
