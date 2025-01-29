@@ -27,7 +27,7 @@ struct SelectedParticipantView<Factory: ViewFactory>: View {
 
     var body: some View {
         VStack {
-            viewFactory.makeUserAvatar(user, size: avatarSize)
+            viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
 
             Text(user.name)
                 .lineLimit(1)

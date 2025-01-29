@@ -132,7 +132,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
 
     var body: some View {
         HStack {
-            viewFactory.makeUserAvatar(user, size: avatarSize)
+            viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
 
             Text(user.name)
                 .lineLimit(1)

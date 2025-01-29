@@ -197,7 +197,10 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 Text(participant.name)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             } icon: {
-                                viewFactory.makeUserAvatar(participant, size: imageSize)
+                                viewFactory.makeUserAvatar(
+                                    participant,
+                                    with: .init(size: imageSize)
+                                )
                             }
 
                             if selectedParticipants.contains(participant) {

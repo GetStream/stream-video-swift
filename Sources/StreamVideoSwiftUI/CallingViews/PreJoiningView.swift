@@ -177,7 +177,7 @@ struct CameraCheckView<Factory: ViewFactory>: View {
 
                         viewFactory.makeUserAvatar(
                             streamVideo.user,
-                            size: 80
+                            with: .init(size: 80)
                         )
                         .accessibility(identifier: "cameraCheckView")
                         .streamAccessibility(value: "0")
@@ -351,16 +351,16 @@ struct ParticipantsInCallView<Factory: ViewFactory>: View {
                     VStack {
                         viewFactory.makeUserAvatar(
                             participant.user,
-                            size: 40
-                        ) {
-                            AnyView(
-                                CircledTitleView(
-                                    title: participant.user.name.isEmpty ? participant.user
-                                        .id : String(participant.user.name.uppercased().first!),
-                                    size: 40
+                            with: .init(size: 40) {
+                                AnyView(
+                                    CircledTitleView(
+                                        title: participant.user.name.isEmpty ? participant.user
+                                            .id : String(participant.user.name.uppercased().first!),
+                                        size: 40
+                                    )
                                 )
-                            )
-                        }
+                            }
+                        )
 
                         Text(participant.user.name)
                             .font(.caption)

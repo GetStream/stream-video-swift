@@ -148,6 +148,12 @@ public protocol ViewFactory: AnyObject {
     func makeReconnectionView(viewModel: CallViewModel) -> ReconnectionViewType
 
     associatedtype LocalParticipantViewModifierType: ViewModifier
+    /// Creates a view modifier for the local participant view.
+    /// - Parameters:
+    ///   - localParticipant: The local participant.
+    ///   - callSettings: The call settings.
+    ///   - call: The current call.
+    /// - Returns: A view modifier for the local participant view.
     func makeLocalParticipantViewModifier(
         localParticipant: CallParticipant,
         callSettings: Binding<CallSettings>,
@@ -155,10 +161,14 @@ public protocol ViewFactory: AnyObject {
     ) -> LocalParticipantViewModifierType
 
     associatedtype UserAvatarViewType: View
+    /// Creates a user avatar view.
+    /// - Parameters:
+    ///   - user: The user for whom the avatar is created.
+    ///   - options: The options for the avatar view.
+    /// - Returns: A view representing the user's avatar.
     func makeUserAvatar(
         _ user: User,
-        size: CGFloat,
-        failBackProvider: (() -> AnyView)?
+        with options: UserAvatarViewOptions
     ) -> UserAvatarViewType
 }
 
@@ -368,13 +378,12 @@ extension ViewFactory {
 
     public func makeUserAvatar(
         _ user: User,
-        size: CGFloat,
-        failBackProvider: (() -> AnyView)? = nil
+        with options: UserAvatarViewOptions
     ) -> some View {
         UserAvatar(
             imageURL: user.imageURL,
-            size: size,
-            failbackProvider: failBackProvider
+            size: options.size,
+            failbackProvider: options.failbackProvider
         )
     }
 }

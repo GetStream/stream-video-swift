@@ -123,11 +123,13 @@ struct IncomingCallParticipantView<Factory: ViewFactory>: View {
     var body: some View {
         viewFactory.makeUserAvatar(
             participant.user,
-            size: size
-        ) { AnyView(CircledTitleView(title: title, size: size)) }
-            .frame(width: size, height: size)
-            .modifier(ShadowModifier())
-            .animation(nil)
+            with: .init(size: size) {
+                AnyView(CircledTitleView(title: title, size: size))
+            }
+        )
+        .frame(width: size, height: size)
+        .modifier(ShadowModifier())
+        .animation(nil)
     }
 
     private var title: String {

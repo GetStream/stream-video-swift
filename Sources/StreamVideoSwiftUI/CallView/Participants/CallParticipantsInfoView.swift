@@ -290,17 +290,17 @@ struct CallParticipantView<Factory: ViewFactory>: View {
             HStack {
                 viewFactory.makeUserAvatar(
                     participant.user,
-                    size: imageSize
-                ) {
-                    AnyView(
-                        CircledTitleView(
-                            title: participant.name.isEmpty
-                                ? participant.id
-                                : String(participant.name.uppercased().first!),
-                            size: imageSize
+                    with: .init(size: imageSize) {
+                        AnyView(
+                            CircledTitleView(
+                                title: participant.name.isEmpty
+                                    ? participant.id
+                                    : String(participant.name.uppercased().first!),
+                                size: imageSize
+                            )
                         )
-                    )
-                }
+                    }
+                )
                 .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) })
 
                 Text(participant.name)

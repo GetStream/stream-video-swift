@@ -36,15 +36,15 @@ public struct CallParticipantImageView<Factory: ViewFactory>: View {
         .overlay(
             viewFactory.makeUserAvatar(
                 .init(id: id, name: name, imageURL: imageURL),
-                size: size
-            ) {
-                AnyView(
-                    CircledTitleView(
-                        title: name.isEmpty ? id : String(name.uppercased().first!),
-                        size: size
+                with: .init(size: size) {
+                    AnyView(
+                        CircledTitleView(
+                            title: name.isEmpty ? id : String(name.uppercased().first!),
+                            size: size
+                        )
                     )
-                )
-            }
+                }
+            )
         )
     }
 }
