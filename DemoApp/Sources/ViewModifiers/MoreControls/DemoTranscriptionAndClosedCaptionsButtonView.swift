@@ -115,18 +115,47 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
         Menu {
             selectableView(
                 TranscriptionSettings.ClosedCaptionMode.available,
-                isEqualHandler: { _ in isCaptioning }
-            ) { execute { try await viewModel.call?.startClosedCaptions() } }
+                isEqualHandler: { _ in isCaptioning && AppEnvironment.closedCaptionsIntegration == .enabled }
+            ) { execute {
+                try await viewModel.call?.startClosedCaptions()
+            }
+            }
 
             selectableView(
                 TranscriptionSettings.ClosedCaptionMode.disabled,
-                isEqualHandler: { _ in !isCaptioning }
+                isEqualHandler: { _ in !isCaptioning && AppEnvironment.closedCaptionsIntegration == .enabled }
             ) { execute { try await viewModel.call?.stopClosedCaptions() } }
+
+            Divider()
+
+            locallyDisabledView
         } label: {
             Label {
                 Text("Mode")
             } icon: {
-                Image(systemName: isCaptioning ? "captions.bubble.fill" : "captions.bubble")
+                Image(
+                    systemName: isCaptioning && AppEnvironment
+                        .closedCaptionsIntegration == .enabled ? "captions.bubble.fill" : "captions.bubble"
+                )
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var locallyDisabledView: some View {
+        Button {
+            switch AppEnvironment.closedCaptionsIntegration {
+            case .enabled:
+                AppEnvironment.closedCaptionsIntegration = .disabled
+            case .disabled:
+                AppEnvironment.closedCaptionsIntegration = .enabled
+            }
+        } label: {
+            switch AppEnvironment.closedCaptionsIntegration {
+            case .enabled:
+                Text("Deactivate locally")
+            case .disabled:
+                Text("Remove local deactivation")
             }
         }
     }
