@@ -462,6 +462,18 @@ public class Logger {
         fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
+        let error = {
+            if error is ClientError {
+                return error
+            } else if error is APIError {
+                return error
+            } else if let error {
+                return ClientError(with: error, fileName, lineNumber)
+            } else {
+                return nil
+            }
+        }()
+
         log(
             .error,
             functionName: functionName,

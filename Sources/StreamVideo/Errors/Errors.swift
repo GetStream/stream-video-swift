@@ -6,22 +6,10 @@ import Foundation
 
 extension APIError: Error {}
 
-extension Stream_Video_Sfu_Models_Error: Error, CustomStringConvertible {
-    var description: String {
-        if code == .unspecified {
-            return "-"
-        } else {
-            return """
-            code: \(code)
-            message: \(message)
-            shouldRetry: \(shouldRetry)
-            """
-        }
-    }
-}
+extension Stream_Video_Sfu_Models_Error: Error, ReflectiveStringConvertible {}
 
 /// A Client error.
-public class ClientError: Error, CustomStringConvertible {
+public class ClientError: Error, ReflectiveStringConvertible {
     public struct Location: Equatable {
         public let file: String
         public let line: Int
@@ -46,10 +34,6 @@ public class ClientError: Error, CustomStringConvertible {
     
     /// Retrieve the localized description for this error.
     public var localizedDescription: String { message ?? errorDescription ?? "" }
-    
-    public private(set) lazy var description = "Error \(type(of: self)) in \(location?.file ?? ""):\(location?.line ?? 0)"
-        + (localizedDescription.isEmpty ? "" : " -> ")
-        + localizedDescription
     
     /// A client error based on an external general error.
     /// - Parameters:

@@ -4,8 +4,8 @@
 
 import Foundation
 
-public final class APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable {
-    
+public final class APIError: @unchecked Sendable, Codable, JSONEncodable, Hashable, ReflectiveStringConvertible {
+
     public var code: Int
     public var details: [Int]
     public var duration: String
@@ -14,6 +14,13 @@ public final class APIError: @unchecked Sendable, Codable, JSONEncodable, Hashab
     public var moreInfo: String
     public var statusCode: Int
     public var unrecoverable: Bool?
+
+    public var skipRuleSet: Set<ReflectiveStringConvertibleSkipRule> {
+        [
+            .empty,
+            .nilValues
+        ]
+    }
 
     public init(
         code: Int,

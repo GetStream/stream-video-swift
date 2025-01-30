@@ -252,7 +252,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Parameter id: the id of the device (token) for push notifications.
     @discardableResult
     public func setDevice(id: String) async throws -> ModelResponse {
-        try await setDevice(
+        guard !id.isEmpty else {
+            throw ClientError("Device id must not be empty when trying to set device.")
+        }
+        return try await setDevice(
             id: id,
             pushProvider: pushNotificationsConfig.pushProviderInfo.pushProvider,
             name: pushNotificationsConfig.pushProviderInfo.name,
@@ -264,7 +267,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Parameter id: the id of the device (token) for VoIP push notifications.
     @discardableResult
     public func setVoipDevice(id: String) async throws -> ModelResponse {
-        try await setDevice(
+        guard !id.isEmpty else {
+            throw ClientError("Device id must not be empty when trying to set VoIP device.")
+        }
+        return try await setDevice(
             id: id,
             pushProvider: pushNotificationsConfig.voipPushProviderInfo.pushProvider,
             name: pushNotificationsConfig.voipPushProviderInfo.name,
@@ -276,7 +282,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Parameter id: the id of the device that will be deleted.
     @discardableResult
     public func deleteDevice(id: String) async throws -> ModelResponse {
-        try await coordinatorClient.deleteDevice(id: id)
+        guard !id.isEmpty else {
+            throw ClientError("Device id must not be empty when trying to delete device.")
+        }
+        return try await coordinatorClient.deleteDevice(id: id)
     }
     
     /// Lists the devices registered for the user.
