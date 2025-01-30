@@ -122,7 +122,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
         self.inviteTapped = inviteTapped
         self.muteTapped = muteTapped
         self.closeTapped = closeTapped
-        self.listHeight = listHeight
+        _listHeight = .init(initialValue: listHeight)
     }
 
     var body: some View {
