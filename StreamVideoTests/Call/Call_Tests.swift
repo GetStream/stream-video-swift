@@ -223,8 +223,10 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.members.first?.user.name == "newname")
     }
 
-    func test_updateState_fromTranscriptionStoppedEvent() throws {
-        try assertUpdateState(
+    // MARK: - Transcriptions
+
+    func test_updateState_fromTranscriptionStoppedEvent() async throws {
+        try await assertUpdateState(
             with: [
                 .init(
                     event: .typeCallTranscriptionStoppedEvent(
@@ -237,8 +239,8 @@ final class Call_Tests: StreamVideoTestCase {
         )
     }
 
-    func test_updateState_fromTranscriptionStartedEvent() throws {
-        try assertUpdateState(
+    func test_updateState_fromTranscriptionStartedEvent() async throws {
+        try await assertUpdateState(
             with: [
                 .init(
                     event: .typeCallTranscriptionStartedEvent(
@@ -251,8 +253,8 @@ final class Call_Tests: StreamVideoTestCase {
         )
     }
 
-    func test_updateState_transcriptionStarted_fromTranscriptionFailedEvent() throws {
-        try assertUpdateState(
+    func test_updateState_transcriptionStarted_fromTranscriptionFailedEvent() async throws {
+        try await assertUpdateState(
             with: [
                 .init(
                     event: .typeCallTranscriptionStartedEvent(
@@ -271,6 +273,8 @@ final class Call_Tests: StreamVideoTestCase {
             ]
         )
     }
+
+    // MARK: - Duration
 
     func test_call_duration() async throws {
         // Given
@@ -303,6 +307,8 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssertTrue(Int(duration) >= 1)
     }
 
+    // MARK: - setIncomingVideoQualitySettings
+
     func test_setIncomingVideoQualitySettings_updatesCallState() async throws {
         let call = streamVideo?.call(callType: callType, callId: callId)
         let incomingVideoQualitySettings = IncomingVideoQualitySettings.manual(
@@ -320,6 +326,8 @@ final class Call_Tests: StreamVideoTestCase {
         }
     }
 
+    // MARK: - setDisconnectionTimeout
+
     func test_setDisconnectionTimeout_setDisconnectionTimeoutOnCallController() async throws {
         let mockCallController = MockCallController()
         let call = MockCall(.dummy(callController: mockCallController))
@@ -336,7 +344,91 @@ final class Call_Tests: StreamVideoTestCase {
         )
     }
 
-    // MARK: - Update State from Coordinator events
+    // MARK: - ClosedCaptions
+
+    func test_updateState_fromClosedCaptionsStoppedEvent() async throws {
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallClosedCaptionsStoppedEvent(
+                        CallClosedCaptionsStoppedEvent(callCid: callCid, createdAt: .init())
+                    ),
+                    keyPath: \.state.captioning,
+                    expected: false
+                )
+            ]
+        )
+    }
+
+    func test_updateState_fromClosedCaptionsStartedEvent() async throws {
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallClosedCaptionsStartedEvent(
+                        CallClosedCaptionsStartedEvent(callCid: callCid, createdAt: .init())
+                    ),
+                    keyPath: \.state.captioning,
+                    expected: true
+                )
+            ]
+        )
+    }
+
+    func test_updateState_closedCaptionsStarted_fromClosedCaptionsFailedEvent() async throws {
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallClosedCaptionsStartedEvent(
+                        CallClosedCaptionsStartedEvent(callCid: callCid, createdAt: .init())
+                    ),
+                    keyPath: \.state.captioning,
+                    expected: true
+                ),
+                .init(
+                    event: .typeCallClosedCaptionsFailedEvent(
+                        CallClosedCaptionsFailedEvent(callCid: callCid, createdAt: .init())
+                    ),
+                    keyPath: \.state.captioning,
+                    expected: false
+                )
+            ]
+        )
+    }
+
+    func test_updateState_closedCaptionEventReceived() async throws {
+        let expected = CallClosedCaption(
+            endTime: .init(),
+            speakerId: .unique,
+            startTime: .init(),
+            text: .unique,
+            user: .dummy()
+        )
+        try await assertUpdateState(
+            with: [
+                .init(
+                    event: .typeCallClosedCaptionsStartedEvent(
+                        CallClosedCaptionsStartedEvent(callCid: callCid, createdAt: .init())
+                    ),
+                    keyPath: \.state.captioning,
+                    expected: true
+                ),
+                .init(
+                    event: .typeClosedCaptionEvent(
+                        .init(
+                            callCid: callCid,
+                            closedCaption: expected,
+                            createdAt: .init()
+                        )
+                    ),
+                    keyPath: \.state.closedCaptions,
+                    onEventUpdate: true,
+                    expected: [expected]
+                )
+            ]
+        )
+    }
+
+    // MARK: - Recording
 
     func test_coordinatorEventReceived_startedRecording_updatesStateCorrectly() async throws {
         try await assertCoordinatorEventReceived(
@@ -355,20 +447,6 @@ final class Call_Tests: StreamVideoTestCase {
             await wait(for: 1)
             XCTAssertEqual(call.state.recordingState, .noRecording)
         }
-    }
-
-    private func assertCoordinatorEventReceived(
-        _ event: VideoEvent,
-        fulfillmentHandler: @MainActor(Call) async throws -> Void
-    ) async throws {
-        let streamVideo = try XCTUnwrap(streamVideo)
-        let call = streamVideo.call(callType: callType, callId: callId)
-
-        streamVideo
-            .eventNotificationCenter
-            .process(.coordinatorEvent(event))
-
-        try await fulfillmentHandler(call)
     }
 
     // MARK: - join
@@ -465,7 +543,7 @@ final class Call_Tests: StreamVideoTestCase {
         with steps: [UpdateStateStep],
         file: StaticString = #file,
         line: UInt = #line
-    ) throws {
+    ) async throws {
         let call = try XCTUnwrap(
             streamVideo?.call(callType: callType, callId: callId),
             file: file,
@@ -473,22 +551,44 @@ final class Call_Tests: StreamVideoTestCase {
         )
 
         for step in steps {
-            call.state.updateState(from: step.event)
+            if step.onEventUpdate {
+                call.onEvent(.coordinatorEvent(step.event))
+                await fulfillment(timeout: 2) { step.validation(call) }
+            } else {
+                call.state.updateState(from: step.event)
+            }
             XCTAssertTrue(step.validation(call), file: file, line: line)
         }
+    }
+
+    private func assertCoordinatorEventReceived(
+        _ event: VideoEvent,
+        fulfillmentHandler: @MainActor(Call) async throws -> Void
+    ) async throws {
+        let streamVideo = try XCTUnwrap(streamVideo)
+        let call = streamVideo.call(callType: callType, callId: callId)
+
+        streamVideo
+            .eventNotificationCenter
+            .process(.coordinatorEvent(event))
+
+        try await fulfillmentHandler(call)
     }
 }
 
 private struct UpdateStateStep {
     var event: VideoEvent
+    var onEventUpdate: Bool
     var validation: (Call) -> Bool
 
     init<V: Equatable>(
         event: VideoEvent,
         keyPath: KeyPath<Call, V>,
+        onEventUpdate: Bool = false,
         expected: V
     ) {
         self.event = event
+        self.onEventUpdate = onEventUpdate
         validation = { $0[keyPath: keyPath] == expected }
     }
 }

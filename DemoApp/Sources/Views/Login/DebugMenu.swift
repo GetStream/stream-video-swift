@@ -111,6 +111,13 @@ struct DebugMenu: View {
         didSet { AppEnvironment.availableCallTypes = availableCallTypes }
     }
 
+    @State private var closedCaptionsIntegration: AppEnvironment.ClosedCaptionsIntegration = AppEnvironment
+        .closedCaptionsIntegration {
+        didSet {
+            AppEnvironment.closedCaptionsIntegration = closedCaptionsIntegration
+        }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -163,6 +170,12 @@ struct DebugMenu: View {
                 currentValue: pictureInPictureIntegration,
                 label: "Picture in Picture Integration"
             ) { self.pictureInPictureIntegration = $0 }
+
+            makeMenu(
+                for: [.enabled, .disabled],
+                currentValue: closedCaptionsIntegration,
+                label: "ClosedCaptions Integration"
+            ) { self.closedCaptionsIntegration = $0 }
 
             makeMenu(
                 for: [.default, .lastParticipant],
