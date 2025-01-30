@@ -24,8 +24,8 @@ struct SimpleCallingView: View {
 
     init(viewModel: CallViewModel, callId: String) {
         self.viewModel = viewModel
-        text = callId
-        callType = {
+        _text = .init(initialValue: callId)
+        _callType = .init(initialValue: {
             guard
                 !AppState.shared.deeplinkInfo.callId.isEmpty,
                 !AppState.shared.deeplinkInfo.callType.isEmpty
@@ -34,7 +34,7 @@ struct SimpleCallingView: View {
             }
 
             return AppState.shared.deeplinkInfo.callType
-        }()
+        }())
     }
 
     var body: some View {

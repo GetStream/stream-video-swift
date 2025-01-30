@@ -196,7 +196,7 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
                 } }
             }
         } label: {
-            Text("Language: \(closedCaptionsLanguage)")
+            Text("Language: \(closedCaptionsLanguage.description)")
         }
     }
 
@@ -211,12 +211,12 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
         } label: {
             if isEqualHandler(value) {
                 Label {
-                    Text("\(value)")
+                    Text(value.description)
                 } icon: {
                     Image(systemName: "checkmark")
                 }
             } else {
-                Text("\(value)")
+                Text(value.description)
             }
         }
     }
