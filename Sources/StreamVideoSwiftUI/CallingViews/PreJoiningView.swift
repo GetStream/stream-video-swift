@@ -6,11 +6,12 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct LobbyView: View {
-    
+public struct LobbyView<Factory: ViewFactory>: View {
+
     @StateObject var viewModel: LobbyViewModel
     @StateObject var microphoneChecker = MicrophoneChecker()
-    
+
+    var viewFactory: Factory
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
@@ -18,6 +19,7 @@ public struct LobbyView: View {
     var onCloseLobby: () -> Void
         
     public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: LobbyViewModel? = nil,
         callId: String,
         callType: String,
@@ -25,6 +27,7 @@ public struct LobbyView: View {
         onJoinCallTap: @escaping () -> Void,
         onCloseLobby: @escaping () -> Void
     ) {
+        self.viewFactory = viewFactory
         self.callId = callId
         self.callType = callType
         self.onJoinCallTap = onJoinCallTap
@@ -50,6 +53,7 @@ public struct LobbyView: View {
         LobbyContentView(
             viewModel: viewModel,
             microphoneChecker: microphoneChecker,
+            viewFactory: viewFactory,
             callId: callId,
             callType: callType,
             callSettings: $callSettings,
@@ -66,15 +70,16 @@ public struct LobbyView: View {
     }
 }
 
-struct LobbyContentView: View {
-    
+struct LobbyContentView<Factory: ViewFactory>: View {
+
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
     
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
-    
+
+    var viewFactory: Factory
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
@@ -113,6 +118,7 @@ struct LobbyContentView: View {
                 CameraCheckView(
                     viewModel: viewModel,
                     microphoneChecker: microphoneChecker,
+                    viewFactory: viewFactory,
                     callSettings: callSettings
                 )
 
@@ -125,6 +131,7 @@ struct LobbyContentView: View {
                 CallSettingsView(callSettings: $callSettings)
 
                 JoinCallView(
+                    viewFactory: viewFactory,
                     callId: callId,
                     callType: callType,
                     callParticipants: viewModel.participants,
@@ -143,14 +150,15 @@ struct LobbyContentView: View {
     }
 }
 
-struct CameraCheckView: View {
-    
+struct CameraCheckView<Factory: ViewFactory>: View {
+
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
     
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
+    var viewFactory: Factory
     var callSettings: CallSettings
 
     var body: some View {
@@ -167,9 +175,12 @@ struct CameraCheckView: View {
                         Rectangle()
                             .fill(colors.lobbySecondaryBackground)
 
-                        UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
-                            .accessibility(identifier: "cameraCheckView")
-                            .streamAccessibility(value: "0")
+                        viewFactory.makeUserAvatar(
+                            streamVideo.user,
+                            with: .init(size: 80)
+                        )
+                        .accessibility(identifier: "cameraCheckView")
+                        .streamAccessibility(value: "0")
                     }
                     .opacity(callSettings.videoOn ? 0 : 1)
                 }
@@ -196,10 +207,11 @@ struct CameraCheckView: View {
     }
 }
 
-struct JoinCallView: View {
-    
+struct JoinCallView<Factory: ViewFactory>: View {
+
     @Injected(\.colors) var colors
-    
+
+    var viewFactory: Factory
     var callId: String
     var callType: String
     var callParticipants: [User]
@@ -217,6 +229,7 @@ struct JoinCallView: View {
             if #available(iOS 14, *) {
                 if !callParticipants.isEmpty {
                     ParticipantsInCallView(
+                        viewFactory: viewFactory,
                         callParticipants: callParticipants
                     )
                 }
@@ -301,15 +314,24 @@ struct CallSettingsView: View {
 }
 
 @available(iOS 14.0, *)
-struct ParticipantsInCallView: View {
-    
+struct ParticipantsInCallView<Factory: ViewFactory>: View {
+
     struct ParticipantInCall: Identifiable {
         let id: String
         let user: User
     }
-    
+
+    var viewFactory: Factory
     var callParticipants: [User]
-    
+
+    init(
+        viewFactory: Factory,
+        callParticipants: [User]
+    ) {
+        self.viewFactory = viewFactory
+        self.callParticipants = callParticipants
+    }
+
     var participantsInCall: [ParticipantInCall] {
         var result = [ParticipantInCall]()
         for (index, participant) in callParticipants.enumerated() {
@@ -327,13 +349,18 @@ struct ParticipantsInCallView: View {
             LazyHStack {
                 ForEach(participantsInCall) { participant in
                     VStack {
-                        UserAvatar(imageURL: participant.user.imageURL, size: 40) {
-                            CircledTitleView(
-                                title: participant.user.name.isEmpty ? participant.user
-                                    .id : String(participant.user.name.uppercased().first!),
-                                size: 40
-                            )
-                        }
+                        viewFactory.makeUserAvatar(
+                            participant.user,
+                            with: .init(size: 40) {
+                                AnyView(
+                                    CircledTitleView(
+                                        title: participant.user.name.isEmpty ? participant.user
+                                            .id : String(participant.user.name.uppercased().first!),
+                                        size: 40
+                                    )
+                                )
+                            }
+                        )
 
                         Text(participant.user.name)
                             .font(.caption)

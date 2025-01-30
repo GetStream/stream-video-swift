@@ -17,7 +17,7 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
 
     public init(
-        viewFactory: Factory,
+        viewFactory: Factory = DefaultViewFactory.shared,
         call: Call?,
         participants: [CallParticipant],
         availableFrame: CGRect,

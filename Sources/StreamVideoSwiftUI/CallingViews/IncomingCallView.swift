@@ -7,13 +7,14 @@ import SwiftUI
 
 /// A SwiftUI view for displaying an incoming call screen.
 @available(iOS 14.0, *)
-public struct IncomingCallView: View {
+public struct IncomingCallView<Factory: ViewFactory>: View {
 
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.utils) var utils
 
+    var viewFactory: Factory
     @StateObject var viewModel: IncomingViewModel
 
     var onCallAccepted: (String) -> Void
@@ -25,6 +26,7 @@ public struct IncomingCallView: View {
     ///   - onCallAccepted: Callback when the incoming call is accepted.
     ///   - onCallRejected: Callback when the incoming call is rejected.
     public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
         callInfo: IncomingCall,
         onCallAccepted: @escaping (String) -> Void,
         onCallRejected: @escaping (String) -> Void
@@ -32,12 +34,14 @@ public struct IncomingCallView: View {
         _viewModel = StateObject(
             wrappedValue: IncomingViewModel(callInfo: callInfo)
         )
+        self.viewFactory = viewFactory
         self.onCallAccepted = onCallAccepted
         self.onCallRejected = onCallRejected
     }
 
     public var body: some View {
         IncomingCallViewContent(
+            viewFactory: viewFactory,
             callParticipants: viewModel.callParticipants,
             callInfo: viewModel.callInfo,
             onCallAccepted: onCallAccepted,
@@ -47,13 +51,14 @@ public struct IncomingCallView: View {
 }
 
 /// The content view of the incoming call screen.
-struct IncomingCallViewContent: View {
+struct IncomingCallViewContent<Factory: ViewFactory>: View {
 
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.utils) var utils
 
+    var viewFactory: Factory
     var callParticipants: [Member]
     var callInfo: IncomingCall
     var onCallAccepted: (String) -> Void
@@ -65,10 +70,12 @@ struct IncomingCallViewContent: View {
 
             if callParticipants.count > 1 {
                 CallingGroupView(
+                    viewFactory: viewFactory,
                     participants: callParticipants
                 )
             } else {
                 AnimatingParticipantView(
+                    viewFactory: viewFactory,
                     participant: callParticipants.first,
                     caller: callInfo.caller.name
                 )

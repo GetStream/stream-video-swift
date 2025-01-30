@@ -13,7 +13,11 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
     func test_callingGroupView_isCalling_snapshot() throws {
         for count in spotlightParticipants {
             let users = UserFactory.get(count)
-            let view = CallingGroupView(participants: users, isCalling: true)
+            let view = CallingGroupView(
+                viewFactory: DefaultViewFactory.shared,
+                participants: users,
+                isCalling: true
+            )
             AssertSnapshot(
                 view,
                 variants: snapshotVariants,
@@ -25,7 +29,11 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
     func test_callingGroupView_isNotCalling_snapshot() throws {
         for count in spotlightParticipants {
             let users = UserFactory.get(count)
-            let view = CallingGroupView(participants: users, isCalling: true)
+            let view = CallingGroupView(
+                viewFactory: DefaultViewFactory.shared,
+                participants: users,
+                isCalling: true
+            )
             AssertSnapshot(
                 view,
                 variants: snapshotVariants,

@@ -39,6 +39,7 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
             ZStack {
                 rootView
                 LivestreamPlayer(
+                    viewFactory: viewFactory,
                     type: call.callType,
                     id: call.callId,
                     joinPolicy: .none,

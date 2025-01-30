@@ -6,17 +6,20 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct InviteParticipantsView: View {
+public struct InviteParticipantsView<Factory: ViewFactory>: View {
 
+    var viewFactory: Factory
     @StateObject var viewModel: InviteParticipantsViewModel
     
     @Binding var inviteParticipantsShown: Bool
     
     public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
         inviteParticipantsShown: Binding<Bool>,
         currentParticipants: [CallParticipant],
         call: Call?
     ) {
+        self.viewFactory = viewFactory
         _viewModel = StateObject(
             wrappedValue: InviteParticipantsViewModel(
                 currentParticipants: currentParticipants,
@@ -34,7 +37,7 @@ public struct InviteParticipantsView: View {
             ScrollView(.horizontal) {
                 HStack(spacing: 16) {
                     ForEach(viewModel.selectedUsers) { user in
-                        SelectedParticipantView(user: user) { user in
+                        SelectedParticipantView(viewFactory: viewFactory, user: user) { user in
                             viewModel.userTapped(user)
                         }
                     }
@@ -50,6 +53,7 @@ public struct InviteParticipantsView: View {
                     }
                 } label: {
                     VideoUserView(
+                        viewFactory: viewFactory,
                         user: user,
                         isSelected: viewModel.isSelected(user: user)
                     )
@@ -105,19 +109,30 @@ struct UsersHeaderView: View {
     }
 }
 
-struct VideoUserView: View {
-    
+struct VideoUserView<Factory: ViewFactory>: View {
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
     
     private let avatarSize: CGFloat = 56
-    
+
+    var viewFactory: Factory
     var user: User
     var isSelected: Bool
-    
+
+    init(
+        viewFactory: Factory,
+        user: User,
+        isSelected: Bool
+    ) {
+        self.viewFactory = viewFactory
+        self.user = user
+        self.isSelected = isSelected
+    }
+
     var body: some View {
         HStack {
-            UserAvatar(imageURL: user.imageURL, size: avatarSize)
+            viewFactory.makeUserAvatar(user, with: .init(size: avatarSize))
 
             Text(user.name)
                 .lineLimit(1)

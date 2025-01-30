@@ -38,7 +38,7 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
 
     /// Creates a new instance of `HorizontalParticipantsListView`.
     public init(
-        viewFactory: Factory,
+        viewFactory: Factory = DefaultViewFactory.shared,
         participants: [CallParticipant],
         frame: CGRect,
         call: Call?,

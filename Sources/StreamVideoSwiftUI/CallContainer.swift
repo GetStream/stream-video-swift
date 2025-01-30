@@ -12,7 +12,11 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
     
-    public init(rootView: RootView, viewFactory: Factory, viewModel: CallViewModel) {
+    public init(
+        rootView: RootView,
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
         self.rootView = rootView
         self.viewFactory = viewFactory
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -36,7 +40,10 @@ public struct CallContainer<Factory: ViewFactory>: View {
     
     private let padding: CGFloat = 16
     
-    public init(viewFactory: Factory, viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
         self.viewFactory = viewFactory
         _viewModel = StateObject(wrappedValue: viewModel)
     }
@@ -156,7 +163,10 @@ public struct CallModifier<Factory: ViewFactory>: ViewModifier {
     var viewModel: CallViewModel
 
     @MainActor
-    public init(viewFactory: Factory, viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
     }

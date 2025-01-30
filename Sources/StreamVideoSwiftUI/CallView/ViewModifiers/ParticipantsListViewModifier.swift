@@ -13,7 +13,7 @@ extension View {
     @MainActor
     public func presentParticipantListView<Factory: ViewFactory>(
         @ObservedObject viewModel: CallViewModel,
-        viewFactory: Factory
+        viewFactory: Factory = DefaultViewFactory.shared
     ) -> some View {
         halfSheet(isPresented: $viewModel.participantsShown) {
             viewFactory.makeParticipantsListView(viewModel: viewModel)

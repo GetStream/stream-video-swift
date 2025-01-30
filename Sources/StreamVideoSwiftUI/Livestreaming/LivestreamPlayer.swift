@@ -13,7 +13,7 @@ import SwiftUI
 /// The view reacts dynamically to the state of the associated call and allows
 /// customisation of its behaviour through policies and callback actions.
 @available(iOS 14.0, *)
-public struct LivestreamPlayer: View {
+public struct LivestreamPlayer<Factory: ViewFactory>: View {
 
     /// Determines the join behavior for the livestream.
     public enum JoinPolicy {
@@ -25,6 +25,8 @@ public struct LivestreamPlayer: View {
 
     /// Accesses the color palette from the app's dependency injection.
     @Injected(\.colors) var colors
+
+    var viewFactory: Factory
 
     /// The policy that defines how users join the livestream.
     var joinPolicy: JoinPolicy
@@ -52,6 +54,7 @@ public struct LivestreamPlayer: View {
     ///   - showsLeaveCallButton: Whether to show a button to leave the call. Defaults to `false`.
     ///   - onFullScreenStateChange: A callback for fullscreen state changes.
     public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
         type: String,
         id: String,
         muted: Bool = false,
@@ -60,6 +63,7 @@ public struct LivestreamPlayer: View {
         showsLeaveCallButton: Bool = false,
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
+        self.viewFactory = viewFactory
         let viewModel = LivestreamPlayerViewModel(
             type: type,
             id: id,
@@ -86,6 +90,7 @@ public struct LivestreamPlayer: View {
                     GeometryReader { reader in
                         if let participant = state.participants.first {
                             VideoCallParticipantView(
+                                viewFactory: viewFactory,
                                 participant: participant,
                                 availableFrame: reader.frame(in: .global),
                                 contentMode: .scaleAspectFit,

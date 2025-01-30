@@ -15,7 +15,10 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
     
     private let padding: CGFloat = 16
     
-    public init(viewFactory: Factory, viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
         self.viewFactory = viewFactory
         _viewModel = BackportStateObject(wrappedValue: viewModel)
     }

@@ -15,7 +15,10 @@ public struct CallView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
 
-    public init(viewFactory: Factory, viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
     }

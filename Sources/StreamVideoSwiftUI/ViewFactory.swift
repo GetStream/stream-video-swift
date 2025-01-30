@@ -51,7 +51,7 @@ public protocol ViewFactory: AnyObject {
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
 
-    associatedtype ParticipantViewType: View = VideoCallParticipantView
+    associatedtype ParticipantViewType: View = VideoCallParticipantView<Self>
     /// Creates a view for a video call participant with the specified parameters.
     /// - Parameters:
     ///  - participant: The participant to display.
@@ -93,7 +93,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
     
-    associatedtype MinimizedCallViewType: View = MinimizedCallView
+    associatedtype MinimizedCallViewType: View = MinimizedCallView<Self>
     /// Creates the minimized call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the minimized call view slot.
@@ -148,11 +148,28 @@ public protocol ViewFactory: AnyObject {
     func makeReconnectionView(viewModel: CallViewModel) -> ReconnectionViewType
 
     associatedtype LocalParticipantViewModifierType: ViewModifier
+    /// Creates a view modifier for the local participant view.
+    /// - Parameters:
+    ///   - localParticipant: The local participant.
+    ///   - callSettings: The call settings.
+    ///   - call: The current call.
+    /// - Returns: A view modifier for the local participant view.
     func makeLocalParticipantViewModifier(
         localParticipant: CallParticipant,
         callSettings: Binding<CallSettings>,
         call: Call?
     ) -> LocalParticipantViewModifierType
+
+    associatedtype UserAvatarViewType: View
+    /// Creates a user avatar view.
+    /// - Parameters:
+    ///   - user: The user for whom the avatar is created.
+    ///   - options: The options for the avatar view.
+    /// - Returns: A view representing the user's avatar.
+    func makeUserAvatar(
+        _ user: User,
+        with options: UserAvatarViewOptions
+    ) -> UserAvatarViewType
 }
 
 extension ViewFactory {
@@ -163,6 +180,7 @@ extension ViewFactory {
 
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
         OutgoingCallView(
+            viewFactory: self,
             outgoingCallMembers: viewModel.outgoingCallMembers,
             callTopView: makeCallTopView(viewModel: viewModel),
             callControls: makeCallControlsView(viewModel: viewModel)
@@ -171,6 +189,7 @@ extension ViewFactory {
 
     public func makeJoiningCallView(viewModel: CallViewModel) -> some View {
         JoiningCallView(
+            viewFactory: self,
             callTopView: makeCallTopView(viewModel: viewModel),
             callControls: makeCallControlsView(viewModel: viewModel)
         )
@@ -178,17 +197,27 @@ extension ViewFactory {
 
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
         if #available(iOS 14.0, *) {
-            return IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
-                viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
-            }, onCallRejected: { _ in
-                viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
-            })
+            return IncomingCallView(
+                viewFactory: self,
+                callInfo: callInfo,
+                onCallAccepted: { _ in
+                    viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
+                },
+                onCallRejected: { _ in
+                    viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
+                }
+            )
         } else {
-            return IncomingCallView_iOS13(callInfo: callInfo, onCallAccepted: { _ in
-                viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
-            }, onCallRejected: { _ in
-                viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
-            })
+            return IncomingCallView_iOS13(
+                viewFactory: self,
+                callInfo: callInfo,
+                onCallAccepted: { _ in
+                    viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
+                },
+                onCallRejected: { _ in
+                    viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
+                }
+            )
         }
     }
 
@@ -218,6 +247,7 @@ extension ViewFactory {
         call: Call?
     ) -> some View {
         VideoCallParticipantView(
+            viewFactory: self,
             participant: participant,
             id: id,
             availableFrame: availableFrame,
@@ -248,7 +278,7 @@ extension ViewFactory {
     }
     
     public func makeMinimizedCallView(viewModel: CallViewModel) -> some View {
-        MinimizedCallView(viewModel: viewModel)
+        MinimizedCallView(viewFactory: self, viewModel: viewModel)
     }
 
     public func makeCallTopView(viewModel: CallViewModel) -> some View {
@@ -259,7 +289,10 @@ extension ViewFactory {
         viewModel: CallViewModel
     ) -> some View {
         if #available(iOS 14.0, *) {
-            return CallParticipantsInfoView(callViewModel: viewModel)
+            return CallParticipantsInfoView(
+                viewFactory: self,
+                callViewModel: viewModel
+            )
         } else {
             return EmptyView()
         }
@@ -297,6 +330,7 @@ extension ViewFactory {
         }
         if #available(iOS 14.0, *) {
             return LobbyView(
+                viewFactory: self,
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
                 callSettings: callSettings,
@@ -305,6 +339,7 @@ extension ViewFactory {
             )
         } else {
             return LobbyView_iOS13(
+                viewFactory: self,
                 callViewModel: viewModel,
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
@@ -340,12 +375,22 @@ extension ViewFactory {
             )
         }
     }
+
+    public func makeUserAvatar(
+        _ user: User,
+        with options: UserAvatarViewOptions
+    ) -> some View {
+        UserAvatar(
+            imageURL: user.imageURL,
+            size: options.size,
+            failbackProvider: options.failbackProvider
+        )
+    }
 }
 
-@MainActor
 public final class DefaultViewFactory: ViewFactory, @unchecked Sendable {
 
-    private init() { /* Private init. */ }
+    private nonisolated init() { /* Private init. */ }
 
-    public static let shared = DefaultViewFactory()
+    public nonisolated static let shared = DefaultViewFactory()
 }

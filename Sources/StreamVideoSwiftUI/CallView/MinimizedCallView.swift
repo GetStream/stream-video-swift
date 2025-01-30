@@ -5,14 +5,19 @@
 import StreamVideo
 import SwiftUI
 
-public struct MinimizedCallView: View {
+public struct MinimizedCallView<Factory: ViewFactory>: View {
+    var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
-    
+
     @State var callViewPlacement = CallViewPlacement.topTrailing
     
     @State private var dragAmount = CGSize.zero
         
-    public init(viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
+        self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
     
@@ -32,6 +37,7 @@ public struct MinimizedCallView: View {
         Group {
             if !viewModel.participants.isEmpty {
                 VideoCallParticipantView(
+                    viewFactory: viewFactory,
                     participant: viewModel.participants[0],
                     availableFrame: availableFrame,
                     contentMode: .scaleAspectFill,

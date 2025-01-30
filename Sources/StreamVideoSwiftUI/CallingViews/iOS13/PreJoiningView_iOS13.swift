@@ -6,12 +6,13 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS, introduced: 13, obsoleted: 14)
-struct LobbyView_iOS13: View {
-    
+public struct LobbyView_iOS13<Factory: ViewFactory>: View {
+
     @ObservedObject var callViewModel: CallViewModel
     @BackportStateObject var viewModel: LobbyViewModel
     @BackportStateObject var microphoneChecker: MicrophoneChecker
 
+    var viewFactory: Factory
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
@@ -19,6 +20,7 @@ struct LobbyView_iOS13: View {
     var onCloseLobby: () -> Void
     
     public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
         callViewModel: CallViewModel,
         callId: String,
         callType: String,
@@ -36,6 +38,7 @@ struct LobbyView_iOS13: View {
         let microphoneCheckerInstance = MicrophoneChecker()
         _microphoneChecker = BackportStateObject(wrappedValue: microphoneCheckerInstance)
         _callSettings = callSettings
+        self.viewFactory = viewFactory
         self.callId = callId
         self.callType = callType
         self.onJoinCallTap = onJoinCallTap
@@ -52,6 +55,7 @@ struct LobbyView_iOS13: View {
         LobbyContentView(
             viewModel: viewModel,
             microphoneChecker: microphoneChecker,
+            viewFactory: viewFactory,
             callId: callId,
             callType: callType,
             callSettings: $callSettings,

@@ -32,7 +32,7 @@ public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
 
     /// Creates a new instance of `SpotlightSpeakerView`.
     public init(
-        viewFactory: Factory,
+        viewFactory: Factory = DefaultViewFactory.shared,
         participant: CallParticipant,
         viewIdSuffix: String,
         call: Call?,
