@@ -75,6 +75,8 @@ fastlane/screenshots
 fastlane/test_output
 fastlane/allurectl
 fastlane/xcresults
+fastlane/sonar
+fastlane/mint
 **/metrics/
 recordings
 *.coverage.txt
