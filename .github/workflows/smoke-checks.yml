@@ -110,7 +110,6 @@ jobs:
   build-xcode15:
     name: Build SDKs (Xcode 15.0)
     runs-on: macos-13
-    needs: test-llc-debug
     if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
     env:
       XCODE_VERSION: "15.0.1"
@@ -141,7 +140,6 @@ jobs:
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
     runs-on: macos-15
-    needs: test-llc-debug
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
