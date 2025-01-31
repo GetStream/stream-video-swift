@@ -15,13 +15,6 @@ public final class APIError: @unchecked Sendable, Codable, JSONEncodable, Hashab
     public var statusCode: Int
     public var unrecoverable: Bool?
 
-    public var skipRuleSet: Set<ReflectiveStringConvertibleSkipRule> {
-        [
-            .empty,
-            .nilValues
-        ]
-    }
-
     public init(
         code: Int,
         details: [Int],

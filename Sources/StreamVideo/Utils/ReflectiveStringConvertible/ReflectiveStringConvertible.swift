@@ -121,7 +121,7 @@ public protocol ReflectiveStringConvertible: CustomStringConvertible {
 
 public extension ReflectiveStringConvertible {
     var skipRuleSet: Set<ReflectiveStringConvertibleSkipRule> {
-        []
+        [.empty, .nilValues]
     }
 
     /// The default separator used to join different parts of the string representation.
