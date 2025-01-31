@@ -187,7 +187,7 @@ jobs:
       timeout-minutes: 25
     - name: Build XCFrameworks
       run: bundle exec fastlane build_xcframeworks
-      timeout-minutes: 40
+      timeout-minutes: 60
       env:
         MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
         APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
