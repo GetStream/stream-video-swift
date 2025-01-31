@@ -462,6 +462,15 @@ public class Logger {
         fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
+        // If the error isn't conforming to ``ReflectiveStringConvertible`` we
+        // wrap it in a ``ClientError`` to provide consistent logging information.
+        let error = {
+            guard let error, (error as? ReflectiveStringConvertible) == nil else {
+                return error
+            }
+            return ClientError(with: error, fileName, lineNumber)
+        }()
+
         log(
             .error,
             functionName: functionName,

@@ -130,7 +130,7 @@ final class AppState: ObservableObject {
                 try await streamVideo?.deleteDevice(id: voipPushToken)
                 log.debug("✅ Removed VOIP push notification device for token: \(voipPushToken)")
             } catch {
-                log.error("Removing VOIP push notification device for token: \(voipPushToken)")
+                log.error("Removing VOIP push notification device for token: \(voipPushToken)", error: error)
             }
         }
         if let pushToken = unsecureRepository.currentPushToken() {
@@ -138,7 +138,7 @@ final class AppState: ObservableObject {
                 try await streamVideo?.deleteDevice(id: pushToken)
                 log.debug("✅ Removed push notification device for token: \(pushToken)")
             } catch {
-                log.error("Removing push notification device for token: \(pushToken)")
+                log.error("Removing push notification device for token: \(pushToken)", error: error)
             }
         }
         await streamVideo?.disconnect()
