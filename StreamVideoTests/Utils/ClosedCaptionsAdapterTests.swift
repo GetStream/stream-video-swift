@@ -8,7 +8,11 @@ import XCTest
 
 @MainActor
 final class ClosedCaptionsAdapterTests: XCTestCase {
-    private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo()
+    private static var videoConfig: VideoConfig! = .dummy()
+
+    private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo(
+        videoConfig: videoConfig
+    )
     private lazy var call: MockCall! = MockCall()
     private lazy var subject: ClosedCaptionsAdapter! = .init(call)
 
@@ -16,6 +20,11 @@ final class ClosedCaptionsAdapterTests: XCTestCase {
         mockedStreamVideo = nil
         call = nil
         subject = nil
+        super.tearDown()
+    }
+
+    override class func tearDown() {
+        Self.videoConfig = nil
         super.tearDown()
     }
 
