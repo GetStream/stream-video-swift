@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.16.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.16.0)
+_January 31, 2025_
+
 ### ✅ Added
 - You can now override the default `UserAvatar`, that is used across various SDK components, by using overriding the new `makeUserAvatar` method on your `ViewFactory` implementation. [#644](https://github.com/GetStream/stream-video-swift/pull/644)
 
