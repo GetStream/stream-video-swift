@@ -27,7 +27,6 @@ jobs:
   test-llc-debug:
     name: Test LLC (Debug)
     runs-on: macos-15
-    if: ${{ github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     env:
       STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     steps:
