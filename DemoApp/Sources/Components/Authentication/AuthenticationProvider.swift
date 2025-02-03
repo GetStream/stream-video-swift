@@ -97,7 +97,7 @@ enum AuthenticationProvider {
                 return UserToken(rawValue: tokenResponse.token)
             }
         }()
-        log.debug("Authentication info userId:\(tokenResponse.userId) apiKey:\(tokenResponse.apiKey) token:\(token)")
+        log.debug("Authentication response: \(tokenResponse)")
         return token
     }
 }

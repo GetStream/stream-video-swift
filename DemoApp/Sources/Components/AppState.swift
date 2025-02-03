@@ -188,7 +188,7 @@ final class AppState: ObservableObject {
             }
         } else if let pushToken, !pushToken.isEmpty {
             deferSetDevice = true
-            log.debug("Deferring push notification setup for token: \(pushToken)")
+            log.debug("Deferring push notification setup for token:\(pushToken)")
         } else {
             log.debug("Clearing up push notification token.")
         }

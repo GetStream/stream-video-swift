@@ -104,7 +104,6 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
     
     private func doRead() {
         task?.receive { [weak self] result in
-            log.debug("received new event \(result)", subsystems: .webSocket)
             guard let self = self else {
                 return
             }
@@ -112,11 +111,13 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             switch result {
             case let .success(message):
                 if case let .data(data) = message {
+                    log.debug("Received webSocket message: \(data.debugPrettyPrintedJSON)", subsystems: .webSocket)
                     self.callbackQueue.async { [weak self] in
                         self?.delegate?.webSocketDidReceiveMessage(data)
                     }
                 } else if case let .string(string) = message {
                     let messageData = Data(string.utf8)
+                    log.debug("Received webSocket message:\(messageData.debugPrettyPrintedJSON)", subsystems: .webSocket)
                     self.callbackQueue.async { [weak self] in
                         self?.delegate?.webSocketDidReceiveMessage(messageData)
                     }
@@ -124,7 +125,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                 self.doRead()
                 
             case let .failure(error):
-                log.error("Failed receiving Web Socket Message", subsystems: .webSocket, error: error)
+                log.error("Failed while trying to receive webSocket message.", subsystems: .webSocket, error: error)
             }
         }
     }
