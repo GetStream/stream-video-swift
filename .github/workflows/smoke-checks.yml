@@ -31,7 +31,7 @@ env:
 
 jobs:
   test-llc-debug:
-    name: Test
+    name: Test LLC (Debug)
     runs-on: macos-15
     env:
       STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
