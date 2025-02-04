@@ -37,12 +37,6 @@ public protocol AudioSessionProtocol: AnyObject {
     /// - Parameter delegate: The delegate conforming to `RTCAudioSessionDelegate`.
     func add(_ delegate: RTCAudioSessionDelegate)
 
-    /// Sets the audio mode of the session.
-    /// - Parameter mode: The audio mode to set, such as `.videoChat` or `.voiceChat`.
-    /// - Throws: An error if setting the mode fails, usually because the configuration hasn't been locked.
-    /// Prefer wrapping this method using `updateConfiguration`.
-    func setMode(_ mode: AVAudioSession.Mode) throws
-
     /// Configures the audio category and options for the session.
     /// - Parameters:
     ///   - category: The audio category to set, like `.playAndRecord`.
@@ -52,15 +46,9 @@ public protocol AudioSessionProtocol: AnyObject {
     /// Prefer wrapping this method using `updateConfiguration`.
     func setCategory(
         _ category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
         with categoryOptions: AVAudioSession.CategoryOptions
     ) throws
-
-    /// Activates or deactivates the audio session.
-    /// - Parameter isActive: A Boolean indicating whether the session
-    ///   should be activated.
-    /// - Throws: An error if setting the mode fails, usually because the configuration hasn't been locked.
-    /// Prefer wrapping this method using `updateConfiguration`.
-    func setActive(_ isActive: Bool) throws
 
     /// Sets the session configuration for WebRTC audio settings.
     /// - Parameter configuration: The configuration to apply to the session.
@@ -87,7 +75,7 @@ public protocol AudioSessionProtocol: AnyObject {
         file: StaticString,
         line: UInt,
         _ block: @escaping (AudioSessionProtocol) throws -> Void
-    )
+    ) async
 
     /// Requests permission to record audio from the user.
     /// - Returns: A Boolean indicating whether permission was granted.

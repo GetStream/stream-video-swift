@@ -20,6 +20,11 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// The builder used to create the AVAudioRecorder instance.
     let audioRecorderBuilder: AVAudioRecorderBuilder
 
+    private let _isRecordingSubject: CurrentValueSubject<Bool, Never> = .init(false)
+    var isRecordingPublisher: AnyPublisher<Bool, Never> {
+        _isRecordingSubject.eraseToAnyPublisher()
+    }
+
     /// A private task responsible for setting up the recorder in the background.
     private var setUpTask: Task<Void, Error>?
 
@@ -34,7 +39,9 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// A public publisher that exposes the average power of the audio signal.
     open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
 
-    @Atomic private var isRecording: Bool = false
+    @Atomic private(set) var isRecording: Bool = false {
+        willSet { _isRecordingSubject.send(newValue) }
+    }
 
     /// Indicates whether an active call is present, influencing recording behaviour.
     private var hasActiveCall: Bool = false {
@@ -112,6 +119,8 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
                 )
                 return
             }
+
+            await deferSessionActivation()
             audioRecorder.record()
             isRecording = true
             audioRecorder.isMeteringEnabled = true
@@ -133,6 +142,16 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         }
     }
 
+    private func deferSessionActivation() async {
+        guard let activeCallAudioSession else {
+            return
+        }
+        _ = try? await activeCallAudioSession
+            .canRecordPublisher
+            .filter { $0 == true }
+            .nextValue(timeout: 1)
+    }
+
     /// Stops recording audio asynchronously.
     open func stopRecording() async {
         updateMetersTimerCancellable?.cancel()
@@ -147,6 +166,10 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
         audioRecorder.stop()
         lastStartRecordingRequest = nil
+        _ = try? await audioRecorder
+            .publisher(for: \.isRecording)
+            .filter { $0 == false }
+            .nextValue(timeout: 1)
         isRecording = false
         removeRecodingFile()
         log.debug("️🎙️Recording stopped.")

@@ -12,25 +12,18 @@ import StreamWebRTC
 /// to output devices like speakers and in-ear speakers.
 final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unchecked Sendable {
 
-    /// An enum defining actions to update speaker routing based on call settings.
-    private enum SpeakerAction {
-        case routeUpdate(CallSettings)
-        case respectCallSettings(CallSettings)
-    }
+    @Injected(\.callAudioRecorder) private var callAudioRecorder
 
     /// The shared audio session instance conforming to `AudioSessionProtocol`
     /// that manages WebRTC audio settings.
     private let audioSession: AudioSessionProtocol
+    private let serialQueue = SerialActorQueue()
 
     /// The current active call settings, or `nil` if no active call is in session.
-    @Atomic private(set) var activeCallSettings: CallSettings? {
-        didSet {
-            guard activeCallSettings != oldValue else {
-                return
-            }
-            didUpdate(activeCallSettings)
-        }
-    }
+    @Atomic private(set) var activeCallSettings: CallSettings?
+
+    private let canRecordSubject = PassthroughSubject<Bool, Never>()
+    var canRecordPublisher: AnyPublisher<Bool, Never> { canRecordSubject.eraseToAnyPublisher() }
 
     /// The delegate for receiving audio session events, such as call settings
     /// updates.
@@ -46,28 +39,30 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
         super.init()
 
         /// Update the active call's `audioSession` to make available to other components.
-        StreamActiveCallAudioSessionKey.currentValue = audioSession
+        StreamActiveCallAudioSessionKey.currentValue = self
 
         audioSession.add(self)
         audioSession.useManualAudio = true
         audioSession.isAudioEnabled = true
 
         let configuration = RTCAudioSessionConfiguration.default
-        audioSession.updateConfiguration(
-            functionName: #function,
-            file: #fileID,
-            line: #line
-        ) {
-            try $0.setConfiguration(configuration)
-            log.debug(
-                "AudioSession updated \(configuration)",
-                subsystems: .audioSession
-            )
+        serialQueue.async {
+            await audioSession.updateConfiguration(
+                functionName: #function,
+                file: #fileID,
+                line: #line
+            ) {
+                try $0.setConfiguration(configuration)
+                log.debug(
+                    "AudioSession updated \(configuration)",
+                    subsystems: .audioSession
+                )
+            }
         }
     }
 
     deinit {
-        if StreamActiveCallAudioSessionKey.currentValue === audioSession {
+        if StreamActiveCallAudioSessionKey.currentValue === self {
             // Reset activeCall audioSession.
             StreamActiveCallAudioSessionKey.currentValue = nil
         }
@@ -80,7 +75,23 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) {
+        didUpdate(settings, oldValue: activeCallSettings)
         activeCallSettings = settings
+    }
+
+    func prepareForRecording() {
+        guard let activeCallSettings, !activeCallSettings.audioOn else {
+            return
+        }
+
+        let settings = activeCallSettings
+            .withUpdatedAudioState(true)
+        didUpdate(settings, oldValue: activeCallSettings)
+        self.activeCallSettings = settings
+    }
+
+    func requestRecordPermission() async -> Bool {
+        await audioSession.requestRecordPermission()
     }
 
     // MARK: - RTCAudioSessionDelegate
@@ -121,7 +132,7 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
                 callSettings: activeCallSettings.withUpdatedSpeakerState(false)
             )
 
-        case (false, true):
+        case (false, true) where session.category == AVAudioSession.Category.playAndRecord.rawValue:
             delegate?.audioSessionAdapterDidUpdateCallSettings(
                 self,
                 callSettings: activeCallSettings.withUpdatedSpeakerState(true)
@@ -130,68 +141,104 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
         default:
             break
         }
-
-//        switch reason {
-//        case .unknown:
-//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-//        case .newDeviceAvailable:
-//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-//        case .oldDeviceUnavailable:
-//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-//        case .categoryChange:
-//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-//        case .override:
-//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-//        case .wakeFromSleep:
-//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-//        case .noSuitableRouteForCategory:
-//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-//        case .routeConfigurationChange:
-//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-//        @unknown default:
-//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-//        }
     }
 
     // MARK: - Private helpers
 
-    private func didUpdate(_ callSettings: CallSettings?) {
-        performSpeakerUpdateAction(callSettings)
+    private func didUpdate(
+        _ callSettings: CallSettings?,
+        oldValue: CallSettings?,
+        file: StaticString = #file,
+        functionName: StaticString = #function,
+        line: UInt = #line
+    ) {
+        serialQueue.async { [weak self] in
+            guard let self else {
+                return
+            }
 
-        log.debug(
-            "AudioSession updated with \(callSettings?.description ?? "nil")",
-            subsystems: .audioSession
-        )
+            if callSettings?.audioOn == false, oldValue?.audioOn == true {
+                log.debug(
+                    "Will defer execution until recording has stopped.",
+                    subsystems: .audioSession,
+                    functionName: functionName,
+                    fileName: file,
+                    lineNumber: line
+                )
+                await deferExecutionUntilRecordingIsStopped()
+            }
+
+            let category: AVAudioSession.Category = callSettings?.audioOn == true || callSettings?
+                .speakerOn == true || callSettings?.videoOn == true
+                ? .playAndRecord
+                : .playback
+
+            let mode: AVAudioSession.Mode = category == .playAndRecord
+                ? callSettings?.speakerOn == true ? .videoChat : .voiceChat
+                : .default
+
+            let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
+                ? .playAndRecord
+                : .playback
+
+            let overridePort: AVAudioSession.PortOverride? = category == .playAndRecord
+                ? callSettings?.speakerOn == true ? .speaker : AVAudioSession.PortOverride.none
+                : nil
+
+            await audioSession.updateConfiguration(
+                functionName: functionName,
+                file: file,
+                line: line
+            ) { [weak self] in
+                if overridePort == nil, $0.category == AVAudioSession.Category.playAndRecord.rawValue {
+                    try $0.overrideOutputAudioPort(.none)
+                }
+
+                do {
+                    try $0.setCategory(
+                        category,
+                        mode: mode,
+                        with: categoryOptions
+                    )
+                    self?.canRecordSubject.send(category == .playAndRecord)
+                } catch {
+                    log.error(
+                        "Failed while setting category:\(category) mode:\(mode) options:\(categoryOptions)",
+                        subsystems: .audioSession,
+                        error: error,
+                        functionName: functionName,
+                        fileName: file,
+                        lineNumber: line
+                    )
+                }
+                if let overridePort {
+                    try $0.overrideOutputAudioPort(overridePort)
+                }
+            }
+
+            log.debug(
+                "AudioSession updated with callSettings: \(callSettings?.description ?? "nil")",
+                subsystems: .audioSession,
+                functionName: functionName,
+                fileName: file,
+                lineNumber: line
+            )
+        }
     }
 
-    /// Executes an action to update the speaker routing based on current
-    /// call settings.
-    /// - Parameter action: The action to perform, affecting routing.
-    private func performSpeakerUpdateAction(_ callSettings: CallSettings?) {
-        let overridePort: AVAudioSession.PortOverride = callSettings?.speakerOn == true
-            ? .speaker
-            : .none
-
-        audioSession.updateConfiguration(
-            functionName: #function,
-            file: #file,
-            line: #line
-        ) {
-            do {
-                switch overridePort {
-                case .none:
-                    try $0.setMode(.voiceChat)
-                case .speaker:
-                    try $0.setMode(.videoChat)
-                @unknown default:
-                    break
-                }
-            } catch {
-                log.error(error, subsystems: .audioSession)
-            }
-            try $0.overrideOutputAudioPort(overridePort)
+    private func deferExecutionUntilRecordingIsStopped() async {
+        do {
+            _ = try await callAudioRecorder
+                .isRecordingPublisher
+                .filter { $0 == false }
+                .nextValue(timeout: 1)
+            try await Task.sleep(nanoseconds: 250 * 1_000_000)
+        } catch {
+            log.error(
+                "Defer execution until recording has stopped failed.",
+                subsystems: .audioSession,
+                error: error
+            )
         }
     }
 }
-
-extension RTCAudioSessionConfiguration: ReflectiveStringConvertible {}
