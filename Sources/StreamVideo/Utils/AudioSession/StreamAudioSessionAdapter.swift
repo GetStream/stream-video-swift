@@ -61,7 +61,7 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
         }
     }
 
-    deinit {
+    func dismantle() {
         if StreamActiveCallAudioSessionKey.currentValue === self {
             // Reset activeCall audioSession.
             StreamActiveCallAudioSessionKey.currentValue = nil
