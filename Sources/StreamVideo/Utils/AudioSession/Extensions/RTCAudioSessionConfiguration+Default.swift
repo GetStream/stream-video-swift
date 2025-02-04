@@ -15,7 +15,7 @@ extension RTCAudioSessionConfiguration {
         // Sets the audio mode to the default system mode. This typically
         // configures the session to use system default settings for
         // playback and recording.
-        configuration.mode = AVAudioSession.Mode.default.rawValue
+        configuration.mode = AVAudioSession.Mode.videoChat.rawValue
 
         // Sets the audio category to `.playAndRecord`, enabling the session
         // to handle both audio playback and recording simultaneously.
@@ -23,8 +23,25 @@ extension RTCAudioSessionConfiguration {
         // two-way audio, like video calls.
         configuration.category = AVAudioSession.Category.playAndRecord.rawValue
 
+        configuration.categoryOptions = .playAndRecord
+
         // Returns the fully configured default WebRTC audio session
         // configuration.
         return configuration
     }()
+}
+
+extension AVAudioSession.CategoryOptions {
+
+    static var playAndRecord: AVAudioSession.CategoryOptions = [
+        .allowBluetooth,
+        .allowBluetoothA2DP,
+        .allowAirPlay
+    ]
+
+    static var playback: AVAudioSession.CategoryOptions = [
+        .allowBluetooth,
+        .allowBluetoothA2DP,
+        .allowAirPlay
+    ]
 }

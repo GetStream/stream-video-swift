@@ -41,7 +41,7 @@ public protocol AudioSessionProtocol: AnyObject {
     /// - Parameter mode: The audio mode to set, such as `.videoChat` or `.voiceChat`.
     /// - Throws: An error if setting the mode fails, usually because the configuration hasn't been locked.
     /// Prefer wrapping this method using `updateConfiguration`.
-    func setMode(_ mode: String) throws
+    func setMode(_ mode: AVAudioSession.Mode) throws
 
     /// Configures the audio category and options for the session.
     /// - Parameters:
@@ -51,7 +51,7 @@ public protocol AudioSessionProtocol: AnyObject {
     /// - Throws: An error if setting the mode fails, usually because the configuration hasn't been locked.
     /// Prefer wrapping this method using `updateConfiguration`.
     func setCategory(
-        _ category: String,
+        _ category: AVAudioSession.Category,
         with categoryOptions: AVAudioSession.CategoryOptions
     ) throws
 
