@@ -121,6 +121,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         audioSession.delegate = self
     }
 
+    deinit {
+        audioSession.dismantle()
+    }
+
     /// Sets the session ID.
     func set(sessionID value: String) {
         self.sessionID = value
