@@ -23,10 +23,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
     }
 
     /// A queue for processing audio session operations asynchronously.
-    private let processingQueue = DispatchQueue(
-        label: "io.getstream.audiosession",
-        target: .global(qos: .userInteractive)
-    )
+    private let processingQueue = SerialActorQueue()
 
     /// The shared instance of `RTCAudioSession` used for WebRTC audio
     /// configuration and management.
@@ -93,16 +90,54 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
     /// - Throws: An error if setting the category fails.
     func setCategory(
         _ category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
         with categoryOptions: AVAudioSession.CategoryOptions
     ) throws {
-        guard category != state.category || categoryOptions != state.options else {
+        guard category != state.category
+            || mode != state.mode
+            || categoryOptions != state.options
+        else {
             return
         }
-        try source.setCategory(
-            category,
-            with: categoryOptions
-        )
+
+        if category != state.category {
+            if mode != state.mode {
+                try source.setCategory(
+                    category,
+                    mode: mode,
+                    options: categoryOptions
+                )
+                try source.setActive(isActive)
+            } else {
+                try source.setCategory(
+                    category,
+                    with: categoryOptions
+                )
+            }
+        } else {
+            if mode != state.mode {
+                if categoryOptions != state.options {
+                    try source.setCategory(
+                        category,
+                        mode: mode,
+                        options: categoryOptions
+                    )
+                    try source.setActive(isActive)
+                } else {
+                    try source.setMode(mode)
+                }
+            } else if categoryOptions != state.options {
+                try source.setCategory(
+                    category,
+                    with: categoryOptions
+                )
+            } else {
+                /* No-op */
+            }
+        }
+
         state.category = category
+        state.mode = mode
         state.options = categoryOptions
     }
 
@@ -146,8 +181,8 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
         file: StaticString,
         line: UInt,
         _ block: @escaping (any AudioSessionProtocol) throws -> Void
-    ) {
-        processingQueue.async { [weak self] in
+    ) async {
+        try? await processingQueue.sync { [weak self] in
             guard let self else { return }
             source.lockForConfiguration()
             defer { source.unlockForConfiguration() }
@@ -179,13 +214,13 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
 /// A key for dependency injection of an `AudioSessionProtocol` instance
 /// that represents the active call audio session.
 struct StreamActiveCallAudioSessionKey: InjectionKey {
-    static var currentValue: AudioSessionProtocol?
+    static var currentValue: StreamAudioSessionAdapter?
 }
 
 extension InjectedValues {
     /// The active call's audio session. The value is being set on `StreamAudioSessionAdapter`
     /// `init` / `deinit`
-    var activeCallAudioSession: AudioSessionProtocol? {
+    var activeCallAudioSession: StreamAudioSessionAdapter? {
         get {
             Self[StreamActiveCallAudioSessionKey.self]
         }

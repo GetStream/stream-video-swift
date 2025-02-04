@@ -40,8 +40,5 @@ extension AVAudioSession.CategoryOptions {
     ]
 
     static var playback: AVAudioSession.CategoryOptions = [
-        .allowBluetooth,
-        .allowBluetoothA2DP,
-        .allowAirPlay
     ]
 }
