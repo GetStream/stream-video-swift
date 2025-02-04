@@ -28,7 +28,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     setup_git_config
-    xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload, :pod_lint, :stop_e2e_helpers].include?(lane)
+    xcversion(version: xcode_version) unless [:publish_release, :sonar_upload, :allure_launch, :allure_upload, :pod_lint, :stop_e2e_helpers].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
   end
@@ -246,6 +246,8 @@ lane :test do |options|
     UI.important("Re-running #{failed_tests.size} failed tests ⌛️")
     scan(scan_options.merge(only_testing: failed_tests))
   end
+
+  slather
 end
 
 desc 'Runs SwiftUI tests'
