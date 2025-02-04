@@ -23,7 +23,14 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
     private let audioSession: AudioSessionProtocol
 
     /// The current active call settings, or `nil` if no active call is in session.
-    @Atomic private(set) var activeCallSettings: CallSettings?
+    @Atomic private(set) var activeCallSettings: CallSettings? {
+        didSet {
+            guard activeCallSettings != oldValue else {
+                return
+            }
+            didUpdate(activeCallSettings)
+        }
+    }
 
     /// The delegate for receiving audio session events, such as call settings
     /// updates.
@@ -31,7 +38,7 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
 
     /// Initializes a new `StreamAudioSessionAdapter` instance, configuring
     /// the session with default settings and enabling manual audio control
-    /// for WebRTC.
+    /// for WebRTC.w
     /// - Parameter audioSession: An `AudioSessionProtocol` instance. Defaults
     ///   to `StreamRTCAudioSession`.
     required init(_ audioSession: AudioSessionProtocol = StreamRTCAudioSession()) {
@@ -51,9 +58,9 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
             file: #fileID,
             line: #line
         ) {
-            try $0.setConfiguration(.default)
+            try $0.setConfiguration(configuration)
             log.debug(
-                "AudioSession updated configuration with category: \(configuration.category) options: \(configuration.categoryOptions) mode: \(configuration.mode)",
+                "AudioSession updated \(configuration)",
                 subsystems: .audioSession
             )
         }
@@ -73,16 +80,7 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) {
-        guard settings != activeCallSettings else { return }
-
-        performSessionAction(settings.audioOutputOn)
-        performSpeakerUpdateAction(.respectCallSettings(settings))
         activeCallSettings = settings
-
-        log.debug(
-            "AudioSession updated isActive:\(settings.audioOutputOn) speakerOn:\(settings.speakerOn).",
-            subsystems: .audioSession
-        )
     }
 
     // MARK: - RTCAudioSessionDelegate
@@ -107,172 +105,93 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
         reason: AVAudioSession.RouteChangeReason,
         previousRoute: AVAudioSessionRouteDescription
     ) {
+        log.debug(
+            "AudioSession didChangeRoute reason:\(reason) currentRoute:\(session.currentRoute) previousRoute:\(previousRoute).",
+            subsystems: .audioSession
+        )
+        
         guard let activeCallSettings else {
             return
         }
 
-        switch reason {
-        case .unknown:
-            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-        case .newDeviceAvailable:
-            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-        case .oldDeviceUnavailable:
-            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-        case .categoryChange:
-            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-        case .override:
-            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-        case .wakeFromSleep:
-            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-        case .noSuitableRouteForCategory:
-            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
-        case .routeConfigurationChange:
-            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-        @unknown default:
-            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
+        switch (activeCallSettings.speakerOn, session.currentRoute.isSpeaker) {
+        case (true, false):
+            delegate?.audioSessionAdapterDidUpdateCallSettings(
+                self,
+                callSettings: activeCallSettings.withUpdatedSpeakerState(false)
+            )
+
+        case (false, true):
+            delegate?.audioSessionAdapterDidUpdateCallSettings(
+                self,
+                callSettings: activeCallSettings.withUpdatedSpeakerState(true)
+            )
+
+        default:
+            break
         }
-    }
 
-    /// Logs the status when the session can play or record.
-    /// - Parameters:
-    ///   - session: The `RTCAudioSession` instance.
-    ///   - canPlayOrRecord: A Boolean indicating whether play or record
-    ///     capabilities are available.
-    func audioSession(
-        _ session: RTCAudioSession,
-        didChangeCanPlayOrRecord canPlayOrRecord: Bool
-    ) {
-        log.info(
-            "AudioSession can playOrRecord:\(canPlayOrRecord).",
-            subsystems: .audioSession
-        )
-    }
-
-    /// Logs when the session stops playing or recording.
-    /// - Parameter session: The `RTCAudioSession` instance.
-    func audioSessionDidStopPlayOrRecord(
-        _ session: RTCAudioSession
-    ) { log.info("AudioSession cannot playOrRecord.", subsystems: .audioSession) }
-
-    /// Configures the session's active state when it changes.
-    /// - Parameters:
-    ///   - audioSession: The `RTCAudioSession` instance.
-    ///   - active: A Boolean indicating the desired active state.
-    func audioSession(
-        _ audioSession: RTCAudioSession,
-        didSetActive active: Bool
-    ) {
-        guard let activeCallSettings else { return }
-        performSessionAction(active)
-        performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
-    }
-
-    /// Logs and manages failure when setting the active state.
-    /// - Parameters:
-    ///   - audioSession: The `RTCAudioSession` instance.
-    ///   - active: The desired active state.
-    ///   - error: The error encountered during the state change.
-    func audioSession(
-        _ audioSession: RTCAudioSession,
-        failedToSetActive active: Bool,
-        error: any Error
-    ) {
-        log.error(
-            "AudioSession failedToSetActive active:\(active)",
-            subsystems: .audioSession,
-            error: error
-        )
-        performSessionAction(false)
-    }
-
-    /// Handles failure in starting audio unit playback or recording.
-    /// - Parameters:
-    ///   - audioSession: The `RTCAudioSession` instance.
-    ///   - error: The error encountered during startup.
-    func audioSession(
-        _ audioSession: RTCAudioSession,
-        audioUnitStartFailedWithError error: any Error
-    ) {
-        log.error(
-            "AudioSession audioUnitStartFailedWithError",
-            subsystems: .audioSession,
-            error: error
-        )
-        performSessionAction(false)
+//        switch reason {
+//        case .unknown:
+//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
+//        case .newDeviceAvailable:
+//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
+//        case .oldDeviceUnavailable:
+//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
+//        case .categoryChange:
+//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
+//        case .override:
+//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
+//        case .wakeFromSleep:
+//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
+//        case .noSuitableRouteForCategory:
+//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
+//        case .routeConfigurationChange:
+//            performSpeakerUpdateAction(.respectCallSettings(activeCallSettings))
+//        @unknown default:
+//            performSpeakerUpdateAction(.routeUpdate(activeCallSettings))
+//        }
     }
 
     // MARK: - Private helpers
 
+    private func didUpdate(_ callSettings: CallSettings?) {
+        performSpeakerUpdateAction(callSettings)
+
+        log.debug(
+            "AudioSession updated with \(callSettings?.description ?? "nil")",
+            subsystems: .audioSession
+        )
+    }
+
     /// Executes an action to update the speaker routing based on current
     /// call settings.
     /// - Parameter action: The action to perform, affecting routing.
-    private func performSpeakerUpdateAction(_ action: SpeakerAction) {
-        switch action {
-        case let .routeUpdate(currentCallSettings):
-            let updatedCallSettings = currentCallSettings
-                .withUpdatedSpeakerState(audioSession.isUsingSpeakerOutput)
+    private func performSpeakerUpdateAction(_ callSettings: CallSettings?) {
+        let overridePort: AVAudioSession.PortOverride = callSettings?.speakerOn == true
+            ? .speaker
+            : .none
 
-            guard currentCallSettings != updatedCallSettings else {
-                return
-            }
-
-            delegate?.audioSessionAdapterDidUpdateCallSettings(
-                self,
-                callSettings: updatedCallSettings
-            )
-            log.debug(
-                "AudioSession route requires speaker update \(currentCallSettings.speakerOn) → \(updatedCallSettings.speakerOn).",
-                subsystems: .audioSession
-            )
-
-        case let .respectCallSettings(currentCallSettings):
-            if audioSession.isUsingSpeakerOutput != currentCallSettings.speakerOn {
-                let category = audioSession.category
-                let categoryOptions: AVAudioSession.CategoryOptions = currentCallSettings.speakerOn
-                    ? [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP]
-                    : [.allowBluetooth, .allowBluetoothA2DP]
-
-                let mode: AVAudioSession.Mode = currentCallSettings.speakerOn
-                    ? .videoChat
-                    : .voiceChat
-
-                let overrideOutputAudioPort: AVAudioSession.PortOverride = currentCallSettings.speakerOn
-                    ? .speaker
-                    : .none
-
-                audioSession.updateConfiguration(
-                    functionName: #function,
-                    file: #fileID,
-                    line: #line
-                ) {
-                    try $0.setMode(mode.rawValue)
-                    try $0.setCategory(category, with: categoryOptions)
-                    try $0.overrideOutputAudioPort(overrideOutputAudioPort)
-
-                    log.debug(
-                        "AudioSession updated mode:\(mode.rawValue) category:\(category)  options:\(categoryOptions) overrideOutputAudioPort:\(overrideOutputAudioPort == .speaker ? ".speaker" : ".none")",
-                        subsystems: .audioSession
-                    )
-                }
-            }
-        }
-    }
-
-    /// Updates the active state of the session.
-    /// - Parameter isActive: A Boolean indicating if the session should be
-    ///   active.
-    private func performSessionAction(_ isActive: Bool) {
-        guard audioSession.isActive != isActive else {
-            return
-        }
-        log.debug(
-            "AudioSession will attempt to set isActive:\(isActive).",
-            subsystems: .audioSession
-        )
         audioSession.updateConfiguration(
             functionName: #function,
-            file: #fileID,
+            file: #file,
             line: #line
-        ) { try $0.setActive(isActive) }
+        ) {
+            do {
+                switch overridePort {
+                case .none:
+                    try $0.setMode(.voiceChat)
+                case .speaker:
+                    try $0.setMode(.videoChat)
+                @unknown default:
+                    break
+                }
+            } catch {
+                log.error(error, subsystems: .audioSession)
+            }
+            try $0.overrideOutputAudioPort(overridePort)
+        }
     }
 }
+
+extension RTCAudioSessionConfiguration: ReflectiveStringConvertible {}
