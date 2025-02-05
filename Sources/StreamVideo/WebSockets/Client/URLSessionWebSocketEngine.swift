@@ -10,27 +10,27 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             oldValue?.cancel()
         }
     }
-    
+
     let request: URLRequest
     private var session: URLSession?
     let delegateOperationQueue: OperationQueue
     let sessionConfiguration: URLSessionConfiguration
     var urlSessionDelegateHandler: URLSessionDelegateHandler?
-    
+
     var callbackQueue: DispatchQueue { delegateOperationQueue.underlyingQueue! }
-    
+
     weak var delegate: WebSocketEngineDelegate?
-    
+
     required init(request: URLRequest, sessionConfiguration: URLSessionConfiguration, callbackQueue: DispatchQueue) {
         self.request = request
         self.sessionConfiguration = sessionConfiguration
-        
+
         delegateOperationQueue = OperationQueue()
         delegateOperationQueue.underlyingQueue = callbackQueue
 
         super.init()
     }
-    
+
     func connect() {
         urlSessionDelegateHandler = makeURLSessionDelegateHandler()
 
@@ -64,7 +64,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         task = nil
         urlSessionDelegateHandler = nil
     }
-    
+
     func send(message: SendableEvent) {
         do {
             let data = try message.serializedData()
@@ -73,7 +73,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             log.error("Failed sending SendableEvent", subsystems: .webSocket, error: error)
         }
     }
-    
+
     func send(jsonMessage: Codable) {
         do {
             let data = try JSONEncoder().encode(jsonMessage)
@@ -82,11 +82,11 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             log.error("Failed sending JSON message", subsystems: .webSocket, error: error)
         }
     }
-    
+
     func sendPing() {
         task?.sendPing { _ in }
     }
-    
+
     private func send(data: Data) {
         let message: URLSessionWebSocketTask.Message = .data(data)
         task?.send(message) { [weak self] error in
@@ -101,28 +101,30 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             }
         }
     }
-    
+
     private func doRead() {
         task?.receive { [weak self] result in
             log.debug("received new event \(result)", subsystems: .webSocket)
-            guard let self = self else {
+            guard let self = self, task != nil else {
                 return
             }
-            
+
             switch result {
             case let .success(message):
                 if case let .data(data) = message {
                     self.callbackQueue.async { [weak self] in
+                        guard self?.task != nil else { return }
                         self?.delegate?.webSocketDidReceiveMessage(data)
                     }
                 } else if case let .string(string) = message {
                     let messageData = Data(string.utf8)
                     self.callbackQueue.async { [weak self] in
+                        guard self?.task != nil else { return }
                         self?.delegate?.webSocketDidReceiveMessage(messageData)
                     }
                 }
                 self.doRead()
-                
+
             case let .failure(error):
                 log.error("Failed receiving Web Socket Message", subsystems: .webSocket, error: error)
             }
@@ -175,7 +177,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         disconnect()
     }
 }
-    
+
 class URLSessionDelegateHandler: NSObject, URLSessionDataDelegate, URLSessionWebSocketDelegate {
     var onOpen: ((_ protocol: String?) -> Void)?
     var onClose: ((_ code: URLSessionWebSocketTask.CloseCode, _ reason: Data?) -> Void)?
