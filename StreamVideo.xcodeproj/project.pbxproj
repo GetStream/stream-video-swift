@@ -204,6 +204,7 @@
 		4049CE822BBBF74C003D07D2 /* LegacyAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CE812BBBF74C003D07D2 /* LegacyAsyncImage.swift */; };
 		4049CE842BBBF8EF003D07D2 /* StreamAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */; };
 		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
+		404AD5202D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404AD51F2D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift */; };
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
@@ -1667,6 +1668,7 @@
 		4049CE812BBBF74C003D07D2 /* LegacyAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAsyncImage.swift; sourceTree = "<group>"; };
 		4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAsyncImage.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
+		404AD51F2D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSession+HasEarpiece.swift"; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineVisitor.swift; sourceTree = "<group>"; };
 		406128822CF33000007F5CDC /* SDPParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPParser.swift; sourceTree = "<group>"; };
@@ -3424,6 +3426,7 @@
 				40B284DE2D5241FA0064C1FE /* AVAudioSessionMode+Convenience.swift */,
 				40B284E02D52422A0064C1FE /* AVAudioSessionPortOverride+Convenience.swift */,
 				40B284E22D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift */,
+				404AD51F2D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -6907,6 +6910,7 @@
 				40F646242C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift in Sources */,
 				40382F282C88B80C00C2D00F /* SignalServerEvent.swift in Sources */,
 				84BAD77C2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift in Sources */,
+				404AD5202D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift in Sources */,
 				84DC38DB29ADFCFD00946713 /* JSONDataEncoding.swift in Sources */,
 				40FB15112BF77D5800D5E580 /* StreamStateMachineStage.swift in Sources */,
 				8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */,

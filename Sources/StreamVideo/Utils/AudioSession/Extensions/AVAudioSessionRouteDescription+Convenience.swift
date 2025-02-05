@@ -7,12 +7,15 @@ import AVFoundation
 extension AVAudioSessionRouteDescription {
 
     override open var description: String {
-        let inputNames = inputs.map(\.portName).joined(separator: ",")
         let inputTypes = inputs.map(\.portType.rawValue).joined(separator: ",")
-
-        let outputNames = outputs.map(\.portName).joined(separator: ",")
         let outputTypes = outputs.map(\.portType.rawValue).joined(separator: ",")
-        return "AudioSessionRoute  isExternal:\(isExternal) input:[name:\(inputNames) types:\(inputTypes)] output:[name:\(outputNames) types:\(outputTypes)]."
+        let wrapperKey = isExternal ? ".external" : ".builtIn"
+        return [
+            wrapperKey,
+            "(",
+            ["inputs:\(inputTypes)", "outputs:\(outputTypes)"].joined(separator: ", "),
+            ")"
+        ].joined()
     }
 
     /// A set of port types that represent external audio outputs, such as

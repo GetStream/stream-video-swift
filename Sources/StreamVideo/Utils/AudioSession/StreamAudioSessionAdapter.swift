@@ -75,8 +75,9 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) {
-        didUpdate(settings, oldValue: activeCallSettings)
+        let oldValue = activeCallSettings
         activeCallSettings = settings
+        didUpdate(settings, oldValue: activeCallSettings)
     }
 
     func prepareForRecording() {
@@ -86,8 +87,9 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
 
         let settings = activeCallSettings
             .withUpdatedAudioState(true)
-        didUpdate(settings, oldValue: activeCallSettings)
+        let oldValue = activeCallSettings
         self.activeCallSettings = settings
+        didUpdate(settings, oldValue: activeCallSettings)
     }
 
     func requestRecordPermission() async -> Bool {
@@ -117,11 +119,26 @@ final class StreamAudioSessionAdapter: NSObject, RTCAudioSessionDelegate, @unche
         previousRoute: AVAudioSessionRouteDescription
     ) {
         log.debug(
-            "AudioSession didChangeRoute reason:\(reason) currentRoute:\(session.currentRoute) previousRoute:\(previousRoute).",
+            """
+            AudioSession didChangeRoute reason:\(reason) (session hasEarpiece:\(session.hasEarpiece))
+            - currentRoute:\(session.currentRoute)
+            - previousRoute:\(previousRoute)
+            """,
             subsystems: .audioSession
         )
-        
+
         guard let activeCallSettings else {
+            return
+        }
+
+        guard session.hasEarpiece else {
+            if activeCallSettings.speakerOn != session.currentRoute.isSpeaker {
+                delegate?.audioSessionAdapterDidUpdateCallSettings(
+                    self,
+                    callSettings: activeCallSettings
+                        .withUpdatedSpeakerState(session.currentRoute.isSpeaker)
+                )
+            }
             return
         }
 
