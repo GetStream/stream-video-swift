@@ -247,7 +247,7 @@ lane :test do |options|
     scan(scan_options.merge(only_testing: failed_tests))
   end
 
-  slather
+  slather unless options[:build_for_testing]
 end
 
 desc 'Runs SwiftUI tests'
