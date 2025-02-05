@@ -33,6 +33,8 @@ public protocol AudioSessionProtocol: AnyObject {
     /// A Boolean value indicating whether audio is enabled for the session.
     var isAudioEnabled: Bool { get set }
 
+    var hasEarpiece: Bool { get }
+
     /// Adds a delegate to receive updates about audio session events.
     /// - Parameter delegate: The delegate conforming to `RTCAudioSessionDelegate`.
     func add(_ delegate: RTCAudioSessionDelegate)

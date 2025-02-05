@@ -205,6 +205,7 @@
 		4049CE842BBBF8EF003D07D2 /* StreamAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */; };
 		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
 		404AD5202D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404AD51F2D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift */; };
+		404AD5222D53807B00A820A4 /* CallSettings+RTCAudioSessionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404AD5212D53807B00A820A4 /* CallSettings+RTCAudioSessionConfiguration.swift */; };
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
@@ -1669,6 +1670,7 @@
 		4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAsyncImage.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
 		404AD51F2D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSession+HasEarpiece.swift"; sourceTree = "<group>"; };
+		404AD5212D53807B00A820A4 /* CallSettings+RTCAudioSessionConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallSettings+RTCAudioSessionConfiguration.swift"; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineVisitor.swift; sourceTree = "<group>"; };
 		406128822CF33000007F5CDC /* SDPParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPParser.swift; sourceTree = "<group>"; };
@@ -3427,6 +3429,7 @@
 				40B284E02D52422A0064C1FE /* AVAudioSessionPortOverride+Convenience.swift */,
 				40B284E22D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift */,
 				404AD51F2D5378BA00A820A4 /* AVAudioSession+HasEarpiece.swift */,
+				404AD5212D53807B00A820A4 /* CallSettings+RTCAudioSessionConfiguration.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -7209,6 +7212,7 @@
 				84DC38B829ADFCFD00946713 /* UpdateUserPermissionsResponse.swift in Sources */,
 				84DC38C029ADFCFD00946713 /* UserRequest.swift in Sources */,
 				84DC389629ADFCFD00946713 /* EndCallResponse.swift in Sources */,
+				404AD5222D53807B00A820A4 /* CallSettings+RTCAudioSessionConfiguration.swift in Sources */,
 				847BE09C29DADE0100B55D21 /* Call.swift in Sources */,
 				848CCCEF2AB8ED8F002E83A2 /* ThumbnailsSettings.swift in Sources */,
 				40C4DF4D2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift in Sources */,

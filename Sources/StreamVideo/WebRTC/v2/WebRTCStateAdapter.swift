@@ -42,7 +42,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     let peerConnectionFactory: PeerConnectionFactory
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
-    let audioSession: StreamAudioSessionAdapter = .init()
+    let audioSession: StreamAudioSessionAdapter = .init(callSettings: .init())
 
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
@@ -119,6 +119,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.screenShareSessionProvider = screenShareSessionProvider
 
         audioSession.delegate = self
+        Task {
+            await $callSettings
+                .removeDuplicates()
+                .sink { [weak audioSession] in audioSession?.didUpdateCallSettings($0) }
+                .store(in: disposableBag)
+        }
     }
 
     deinit {

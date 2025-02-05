@@ -370,12 +370,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             return
                         }
 
-                        context
-                            .coordinator?
-                            .stateAdapter
-                            .audioSession
-                            .didUpdateCallSettings(callSettings)
-
                         try await publisher.didUpdateCallSettings(callSettings)
                         log.debug("Publisher and AudioSession callSettings updated.", subsystems: .webRTC)
                     } catch {

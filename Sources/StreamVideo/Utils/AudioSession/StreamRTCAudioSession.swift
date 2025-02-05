@@ -46,6 +46,8 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
     /// an external output, like Bluetooth or headphones.
     var isUsingExternalOutput: Bool { currentRoute.isExternal }
 
+    var hasEarpiece: Bool { source.hasEarpiece }
+
     /// A Boolean value indicating whether the audio session uses manual
     /// audio routing.
     var useManualAudio: Bool {
