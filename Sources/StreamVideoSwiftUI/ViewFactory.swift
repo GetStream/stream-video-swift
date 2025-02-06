@@ -181,7 +181,9 @@ extension ViewFactory {
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
         OutgoingCallView(
             viewFactory: self,
-            outgoingCallMembers: viewModel.outgoingCallMembers,
+            outgoingCallMembers: viewModel.outgoingCallMembers.isEmpty
+                ? (viewModel.call?.state.members ?? viewModel.outgoingCallMembers)
+                : viewModel.outgoingCallMembers,
             callTopView: makeCallTopView(viewModel: viewModel),
             callControls: makeCallControlsView(viewModel: viewModel)
         )

@@ -344,12 +344,14 @@ open class CallViewModel: ObservableObject {
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
-        let membersRequest = members.map(\.toMemberRequest)
+        let membersRequest: [MemberRequest]? = members.isEmpty
+            ? nil
+            : members.map(\.toMemberRequest)
         if !ring {
             enterCall(
                 callType: callType,
                 callId: callId,
-                members: membersRequest,
+                members: membersRequest ?? [],
                 ring: ring,
                 maxDuration: maxDuration,
                 maxParticipants: maxParticipants,
