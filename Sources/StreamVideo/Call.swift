@@ -277,7 +277,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,
-                members: membersRequest,
+                members: membersRequest.isEmpty ? nil : membersRequest,
                 settingsOverride: settingsOverride,
                 startsAt: startsAt,
                 team: team,
