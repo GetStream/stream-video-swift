@@ -16,16 +16,3 @@ lane :sonar_upload do
        "-Dsonar.coverageReportPaths='reports/sonarqube-generic-coverage.xml'")
   end
 end
-
-desc 'Gets Sonar options'
-private_lane :sonar_options do |options|
-  default_options = { sonar_login: ENV.fetch('SONAR_TOKEN', nil), sonar_runner_args: options[:sonar_args] }
-
-  if ENV['GITHUB_PR_NUM']
-    default_options.merge(pull_request_branch: ENV.fetch('GITHUB_HEAD_REF', nil),
-                          pull_request_base: ENV.fetch('GITHUB_BASE_REF', nil),
-                          pull_request_key: ENV['GITHUB_PR_NUM'])
-  else
-    default_options.merge(branch_name: current_branch, project_version: options[:version_number])
-  end
-end
