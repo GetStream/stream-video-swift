@@ -65,9 +65,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                     return nil
                 }
             }
-            .log(.debug, subsystems: .audioSession) { session, reason, previousRoute in
+            .log(.debug, subsystems: .audioSession) { [weak self] session, reason, previousRoute in
                 """
                 AudioSession didChangeRoute reason:\(reason)
+                - isRecording: \(self?.isRecording.description ?? "-")
                 - category: \(AVAudioSession.Category(rawValue: session.category))
                 - mode: \(AVAudioSession.Mode(rawValue: session.mode))
                 - categoryOptions: \(session.categoryOptions)
@@ -111,10 +112,19 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
         activeCallSettings = activeCallSettings.withUpdatedAudioState(true)
         try await didUpdate(activeCallSettings)
+        log.debug(
+            "AudioSession completed preparation for recording.",
+            subsystems: .audioSession
+        )
     }
 
     func requestRecordPermission() async -> Bool {
-        await audioSession.requestRecordPermission()
+        let result = await audioSession.requestRecordPermission()
+        log.debug(
+            "AudioSession completed request for recording permission.",
+            subsystems: .audioSession
+        )
+        return result
     }
 
     // MARK: - Private helpers
@@ -194,6 +204,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         functionName: StaticString = #function,
         line: UInt = #line
     ) async throws {
+        log.debug(
+            "Will reconfigure audio session with settings: \(callSettings)",
+            subsystems: .audioSession
+        )
         guard hasBeenConfigured else {
             try await configureAudioSession(settings: callSettings)
             return
@@ -214,12 +228,11 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
         let category: AVAudioSession.Category = callSettings.audioOn
             || (callSettings.speakerOn && currentDeviceHasEarpiece)
-            || callSettings.videoOn
             ? .playAndRecord
             : .playback
 
         let mode: AVAudioSession.Mode = category == .playAndRecord
-            ? callSettings.speakerOn == true ? .videoChat : .voiceChat
+            ? callSettings.videoOn == true ? .videoChat : .voiceChat
             : .default
 
         let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
