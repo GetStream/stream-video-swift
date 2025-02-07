@@ -21,10 +21,10 @@ public struct CallControlsView: View {
 
     public var body: some View {
         HStack {
-            if viewModel.call?.state.ownCapabilities.contains(.sendVideo) == true {
+            if call?.state.ownCapabilities.contains(.sendVideo) == true {
                 VideoIconView(viewModel: viewModel)
             }
-            if viewModel.call?.state.ownCapabilities.contains(.sendAudio) == true {
+            if call?.state.ownCapabilities.contains(.sendAudio) == true {
                 MicrophoneIconView(viewModel: viewModel)
             }
 
@@ -37,6 +37,15 @@ public struct CallControlsView: View {
         .padding(.horizontal, 16)
         .padding(.vertical)
         .frame(maxWidth: .infinity)
+    }
+
+    private var call: Call? {
+        switch viewModel.callingState {
+        case .incoming, .outgoing:
+            return streamVideo.state.ringingCall
+        default:
+            return viewModel.call
+        }
     }
 }
 
