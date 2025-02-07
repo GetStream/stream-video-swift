@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- The provided `CallControls` component will now respect user's capabilities in order to show/hide the video/audio buttons. [#661](https://github.com/GetStream/stream-video-swift/pull/661)
 
 # [1.16.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.16.0)
 _January 31, 2025_
