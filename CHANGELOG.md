@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- When a call is being created from another device than the one starting the call, if you don't provide any members, the SDK will get the information from the backend [#660](https://github.com/GetStream/stream-video-swift/pull/660)
 
 # [1.16.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.16.0)
 _January 31, 2025_
