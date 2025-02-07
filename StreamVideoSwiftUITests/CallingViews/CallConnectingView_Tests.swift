@@ -21,6 +21,12 @@ final class CallConnectingView_Tests: StreamVideoUITestCase {
     }
 
     func test_callConnectingView_snapshot() throws {
+        let call = try XCTUnwrap(streamVideoUI?.streamVideo.call(callType: .default, callId: .unique))
+        call.state.ownCapabilities.append(.sendAudio)
+        call.state.ownCapabilities.append(.sendVideo)
+        streamVideoUI?.streamVideo.state.ringingCall = call
+        viewModel.callingState = .outgoing
+
         let view = CallConnectingView(
             outgoingCallMembers: [],
             title: "Test title 123",
