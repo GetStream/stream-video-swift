@@ -141,6 +141,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     ) {
         guard currentDevice.deviceType == .phone else {
             if activeCallSettings.speakerOn != session.currentRoute.isSpeaker {
+                log.warning(
+                    "AudioSession cannot be switched to speakerOn:\(activeCallSettings.speakerOn) as the current device doesn't have an earpiece. Changing back CallSettings to speakOn:\(session.currentRoute.isSpeaker)",
+                    subsystems: .audioSession
+                )
                 delegate?.audioSessionAdapterDidUpdateCallSettings(
                     self,
                     callSettings: activeCallSettings
