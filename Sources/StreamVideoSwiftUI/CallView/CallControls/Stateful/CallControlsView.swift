@@ -21,8 +21,12 @@ public struct CallControlsView: View {
 
     public var body: some View {
         HStack {
-            VideoIconView(viewModel: viewModel)
-            MicrophoneIconView(viewModel: viewModel)
+            if viewModel.call?.state.ownCapabilities.contains(.sendVideo) == true {
+                VideoIconView(viewModel: viewModel)
+            }
+            if viewModel.call?.state.ownCapabilities.contains(.sendAudio) == true {
+                MicrophoneIconView(viewModel: viewModel)
+            }
 
             Spacer()
 
