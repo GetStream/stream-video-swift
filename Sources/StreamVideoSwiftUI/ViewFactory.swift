@@ -179,11 +179,18 @@ extension ViewFactory {
     }
 
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
-        OutgoingCallView(
+        var membersToShow = viewModel.outgoingCallMembers.isEmpty
+            ? (viewModel.call?.state.members ?? viewModel.outgoingCallMembers)
+            : viewModel.outgoingCallMembers
+
+        // Remove the current user from the ringing members
+        membersToShow = membersToShow.filter {
+            viewModel.streamVideo.user.id != $0.user.id
+        }
+
+        return OutgoingCallView(
             viewFactory: self,
-            outgoingCallMembers: viewModel.outgoingCallMembers.isEmpty
-                ? (viewModel.call?.state.members ?? viewModel.outgoingCallMembers)
-                : viewModel.outgoingCallMembers,
+            outgoingCallMembers: membersToShow,
             callTopView: makeCallTopView(viewModel: viewModel),
             callControls: makeCallControlsView(viewModel: viewModel)
         )
