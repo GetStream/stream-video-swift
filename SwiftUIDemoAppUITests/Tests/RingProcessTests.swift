@@ -19,7 +19,7 @@ final class RingProcessTests: StreamTestCase {
         }
         THEN("all required elements are on the screen") {
             userRobot
-                .assertConnectingView(with: participants + user)
+                .assertConnectingView(with: participants)
                 .assertCallControls()
         }
     }
@@ -38,7 +38,7 @@ final class RingProcessTests: StreamTestCase {
         }
         THEN("all required elements are on the screen") {
             userRobot
-                .assertConnectingView(with: participants + user)
+                .assertConnectingView(with: participants)
                 .assertCallControls()
         }
     }
@@ -57,7 +57,7 @@ final class RingProcessTests: StreamTestCase {
         }
         THEN("all required elements are on the screen") {
             userRobot
-                .assertConnectingView(with: participants + user)
+                .assertConnectingView(with: participants)
                 .assertCallControls()
         }
     }
@@ -76,7 +76,7 @@ final class RingProcessTests: StreamTestCase {
         }
         THEN("all required elements are on the screen") {
             userRobot
-                .assertConnectingView(with: participants + user)
+                .assertConnectingView(with: participants)
                 .assertCallControls()
         }
     }

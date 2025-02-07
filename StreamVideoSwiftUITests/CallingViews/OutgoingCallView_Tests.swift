@@ -22,11 +22,18 @@ final class OutgoingCallView_Tests: StreamVideoUITestCase {
 
     func test_outgoingCallView_snapshot() throws {
         let viewModel = CallViewModel()
-        let view = OutgoingCallView(
-            outgoingCallMembers: viewModel.outgoingCallMembers,
-            callTopView: factory.makeCallTopView(viewModel: viewModel),
-            callControls: factory.makeCallControlsView(viewModel: viewModel)
-        )
+        let call = try XCTUnwrap(streamVideoUI?.streamVideo.call(callType: .default, callId: .unique))
+        call.state.ownCapabilities.append(.sendAudio)
+        call.state.ownCapabilities.append(.sendVideo)
+        call.state.members = [
+            .init(user: viewModel.streamVideo.user),
+            .init(userId: "test-user")
+        ]
+        viewModel.callingState = .outgoing
+        viewModel.streamVideo.state.ringingCall = call
+
+        let view = factory.makeOutgoingCallView(viewModel: viewModel)
+
         AssertSnapshot(view, variants: snapshotVariants)
     }
 }

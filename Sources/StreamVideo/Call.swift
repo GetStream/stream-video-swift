@@ -251,14 +251,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         video: Bool? = nil,
         transcription: TranscriptionSettingsRequest? = nil
     ) async throws -> CallResponse {
-        var membersRequest = [MemberRequest]()
-        memberIds?.forEach {
-            membersRequest.append(.init(userId: $0))
+        let membersFromMemberIds = memberIds?
+            .map { MemberRequest(userId: $0) } ?? []
+
+        var aggregatedMembers: [MemberRequest]? = (members ?? []) + membersFromMemberIds
+        if aggregatedMembers?.isEmpty == true {
+            aggregatedMembers = nil
         }
-        members?.forEach {
-            membersRequest.append($0)
-        }
-        
+
         var settingsOverride: CallSettingsRequest?
         var limits: LimitsSettingsRequest?
         if maxDuration != nil || maxParticipants != nil {
@@ -277,7 +277,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,
-                members: membersRequest,
+                members: aggregatedMembers,
                 settingsOverride: settingsOverride,
                 startsAt: startsAt,
                 team: team,
