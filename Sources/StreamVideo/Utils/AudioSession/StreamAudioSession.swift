@@ -21,7 +21,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     private var hasBeenConfigured = false
 
     /// The current active call settings, or `nil` if no active call is in session.
-    @Atomic private var activeCallSettings: CallSettings
+    @Atomic private(set) var activeCallSettings: CallSettings
 
     var categoryPublisher: AnyPublisher<AVAudioSession.Category, Never> {
         audioSession.$state.map(\.category).eraseToAnyPublisher()
@@ -210,8 +210,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             await deferExecutionUntilRecordingIsStopped()
         }
 
+        let currentDeviceHasEarpiece = currentDevice.deviceType == .phone
+
         let category: AVAudioSession.Category = callSettings.audioOn
-            || callSettings.speakerOn
+            || (callSettings.speakerOn && currentDeviceHasEarpiece)
             || callSettings.videoOn
             ? .playAndRecord
             : .playback
