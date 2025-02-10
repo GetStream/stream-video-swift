@@ -25,6 +25,6 @@ final class JoiningCallView_Tests: StreamVideoUITestCase {
             callTopView: factory.makeCallTopView(viewModel: viewModel),
             callControls: factory.makeCallControlsView(viewModel: viewModel)
         )
-        AssertSnapshot(view, variants: snapshotVariants, record: true)
+        AssertSnapshot(view, variants: snapshotVariants)
     }
 }
