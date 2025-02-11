@@ -214,6 +214,18 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             return
         }
 
+        guard session.category == category.rawValue else {
+            log.warning(
+                """
+                AudioSession category mismatch between AVAudioSession & SDK:
+                - AVAudioSession.category: \(AVAudioSession.Category(rawValue: session.category))
+                - SDK: \(category)
+                """,
+                subsystems: .audioSession
+            )
+            return
+        }
+
         guard currentDevice.deviceType == .phone else {
             if activeCallSettings.speakerOn != session.currentRoute.isSpeaker {
                 log.warning(
