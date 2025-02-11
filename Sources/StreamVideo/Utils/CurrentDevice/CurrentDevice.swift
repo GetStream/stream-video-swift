@@ -8,7 +8,7 @@ import Foundation
 import UIKit
 #endif
 
-final class CurrentDevice {
+final class CurrentDevice: Sendable {
     enum DeviceType { case unspecified, phone, pad, tv, carPlay, mac, vision }
 
     let deviceType: DeviceType

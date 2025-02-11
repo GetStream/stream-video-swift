@@ -1335,6 +1335,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
+    // MARK: - AudioSession
+
+    public func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
+        try await callController.updateAudioSessionPolicy(policy)
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {

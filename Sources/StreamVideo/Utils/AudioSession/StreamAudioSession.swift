@@ -22,6 +22,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     /// The current active call settings, or `nil` if no active call is in session.
     @Atomic private(set) var activeCallSettings: CallSettings
+    @Atomic private(set) var ownCapabilities: Set<OwnCapability>
+    @Atomic private(set) var policy: AudioSessionPolicy
 
     var categoryPublisher: AnyPublisher<AVAudioSession.Category, Never> {
         audioSession.$state.map(\.category).eraseToAnyPublisher()
@@ -45,9 +47,13 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// - Parameter audioSession: An `AudioSessionProtocol` instance. Defaults
     ///   to `StreamRTCAudioSession`.
     required init(
-        callSettings: CallSettings
+        callSettings: CallSettings = .init(),
+        ownCapabilities: Set<OwnCapability> = [],
+        policy: AudioSessionPolicy = DefaultAudioSessionPolicy()
     ) {
         activeCallSettings = callSettings
+        self.ownCapabilities = ownCapabilities
+        self.policy = policy
 
         /// Update the active call's `audioSession` to make available to other components.
         Self.currentValue = self
@@ -94,6 +100,20 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
+    // MARK: - OwnCapabilities
+
+    /// Updates the audio session with new call settings.
+    /// - Parameter settings: The new `CallSettings` to apply.
+    func didUpdateOwnCapabilities(
+        _ ownCapabilities: Set<OwnCapability>
+    ) async throws {
+        self.ownCapabilities = ownCapabilities
+        try await didUpdate(
+            callSettings: activeCallSettings,
+            ownCapabilities: ownCapabilities
+        )
+    }
+
     // MARK: - CallSettings
 
     /// Updates the audio session with new call settings.
@@ -102,8 +122,21 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         _ settings: CallSettings
     ) async throws {
         activeCallSettings = settings
-        try await didUpdate(settings)
+        try await didUpdate(
+            callSettings: settings,
+            ownCapabilities: ownCapabilities
+        )
     }
+
+    // MARK: - Policy
+
+    func didUpdatePolicy(
+        _ policy: AudioSessionPolicy
+    ) {
+        self.policy = policy
+    }
+
+    // MARK: - Recording
 
     func prepareForRecording() async throws {
         guard !activeCallSettings.audioOn else {
@@ -111,7 +144,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
 
         activeCallSettings = activeCallSettings.withUpdatedAudioState(true)
-        try await didUpdate(activeCallSettings)
+        try await didUpdate(
+            callSettings: activeCallSettings,
+            ownCapabilities: ownCapabilities
+        )
         log.debug(
             "AudioSession completed preparation for recording.",
             subsystems: .audioSession
@@ -182,7 +218,13 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
-    private func configureAudioSession(settings: CallSettings) async throws {
+    private func configureAudioSession(
+        settings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
+        file: StaticString,
+        functionName: StaticString,
+        line: UInt
+    ) async throws {
         let configuration = settings.audioSessionConfiguration
 
         try await audioSession.setCategory(
@@ -194,26 +236,68 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         hasBeenConfigured = true
         log.debug(
             "AudioSession was configured with \(configuration)",
-            subsystems: .audioSession
+            subsystems: .audioSession,
+            functionName: functionName,
+            fileName: file,
+            lineNumber: line
         )
     }
 
     private func didUpdate(
-        _ callSettings: CallSettings,
+        callSettings: CallSettings,
+        ownCapabilities: Set<OwnCapability>,
         file: StaticString = #file,
         functionName: StaticString = #function,
         line: UInt = #line
     ) async throws {
         log.debug(
-            "Will reconfigure audio session with settings: \(callSettings)",
+            "Will reconfigure audio session with settings: \(callSettings) ownCapabilities:\(ownCapabilities) policy:\(type(of: policy)).",
             subsystems: .audioSession
         )
+
         guard hasBeenConfigured else {
-            try await configureAudioSession(settings: callSettings)
+            try await configureAudioSession(
+                settings: callSettings,
+                ownCapabilities: ownCapabilities,
+                file: file,
+                functionName: functionName,
+                line: line
+            )
             return
         }
 
-        if callSettings.audioOn == false, isRecording {
+//        let currentDeviceHasEarpiece = currentDevice.deviceType == .phone
+//
+//        let category: AVAudioSession.Category = callSettings.audioOn
+//            || (callSettings.speakerOn && currentDeviceHasEarpiece)
+//            ? .playAndRecord
+//            : .playback
+//
+//        let mode: AVAudioSession.Mode = category == .playAndRecord
+//        ? callSettings.speakerOn == true ? .videoChat : .voiceChat
+//            : .default
+//
+//        let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
+//            ? .playAndRecord
+//            : .playback
+//
+//        let overridePort: AVAudioSession.PortOverride? = category == .playAndRecord
+//            ? callSettings.speakerOn == true ? .speaker : AVAudioSession.PortOverride.none
+//            : nil
+//
+//        let configuration = AudioSessionConfiguration(
+//            category: category,
+//            mode: mode,
+//            options: categoryOptions,
+//            overrideOutputAudioPort: overridePort
+//        )
+
+        let configuration = policy.configuration(
+            for: callSettings,
+            ownCapabilities: ownCapabilities
+        )
+
+        if configuration.category == .playback, isRecording {
             log.debug(
                 "Will defer execution until recording has stopped.",
                 subsystems: .audioSession,
@@ -224,27 +308,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             await deferExecutionUntilRecordingIsStopped()
         }
 
-        let currentDeviceHasEarpiece = currentDevice.deviceType == .phone
-
-        let category: AVAudioSession.Category = callSettings.audioOn
-            || (callSettings.speakerOn && currentDeviceHasEarpiece)
-            ? .playAndRecord
-            : .playback
-
-        let mode: AVAudioSession.Mode = category == .playAndRecord
-            ? callSettings.videoOn == true ? .videoChat : .voiceChat
-            : .default
-
-        let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
-            ? .playAndRecord
-            : .playback
-
-        let overridePort: AVAudioSession.PortOverride? = category == .playAndRecord
-            ? callSettings.speakerOn == true ? .speaker : AVAudioSession.PortOverride.none
-            : nil
-
         if
-            overridePort == nil,
+            configuration.overrideOutputAudioPort == nil,
             audioSession.state.category == AVAudioSession.Category.playAndRecord
         {
             try await audioSession.overrideOutputAudioPort(.none)
@@ -252,13 +317,13 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
         do {
             try await audioSession.setCategory(
-                category,
-                mode: mode,
-                with: categoryOptions
+                configuration.category,
+                mode: configuration.mode,
+                with: configuration.options
             )
         } catch {
             log.error(
-                "Failed while setting category:\(category) mode:\(mode) options:\(categoryOptions)",
+                "Failed while setting category:\(configuration.category) mode:\(configuration.mode) options:\(configuration.options)",
                 subsystems: .audioSession,
                 error: error,
                 functionName: functionName,
@@ -267,8 +332,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             )
         }
 
-        if let overridePort {
-            try await audioSession.overrideOutputAudioPort(overridePort)
+        if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
+            try await audioSession.overrideOutputAudioPort(overrideOutputAudioPort)
         }
 
         log.debug(
@@ -303,7 +368,7 @@ extension StreamAudioSession: InjectionKey {
 }
 
 extension InjectedValues {
-    /// The active call's audio session. The value is being set on `StreamAudioSessionAdapter`
+    /// The active call's audio session. The value is being set on `StreamAudioSession`
     /// `init` / `deinit`
     var activeCallAudioSession: StreamAudioSession? {
         get {
