@@ -182,6 +182,11 @@ struct SimpleCallingView: View {
         )
     }
 
+    private func setAudioSessionPolicyOverride(for callId: String) async throws {
+        let call = streamVideo.call(callType: callType, callId: callId)
+        try await call.updateAudioSessionPolicy(AppEnvironment.audioSessionPolicy.value)
+    }
+
     private func parseURLIfRequired(_ text: String) {
         let adapter = DeeplinkAdapter()
         guard
@@ -215,6 +220,7 @@ struct SimpleCallingView: View {
         switch action {
         case .lobby:
             await setPreferredVideoCodec(for: text)
+            try? await setAudioSessionPolicyOverride(for: text)
             viewModel.enterLobby(
                 callType: callType,
                 callId: text,
@@ -222,9 +228,11 @@ struct SimpleCallingView: View {
             )
         case .join:
             await setPreferredVideoCodec(for: text)
+            try? await setAudioSessionPolicyOverride(for: text)
             viewModel.joinCall(callType: callType, callId: text)
         case let .start(callId):
             await setPreferredVideoCodec(for: callId)
+            try? await setAudioSessionPolicyOverride(for: callId)
             viewModel.startCall(
                 callType: callType,
                 callId: callId,

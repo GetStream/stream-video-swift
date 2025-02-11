@@ -536,6 +536,35 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
+    enum AudioSessionPolicyDebugConfiguration: Hashable, Debuggable, Sendable {
+        case `default`, ownCapabilities
+
+        var title: String {
+            switch self {
+            case .default:
+                return "Default"
+            case .ownCapabilities:
+                return "OwnCapabilities"
+            }
+        }
+
+        var value: AudioSessionPolicy {
+            switch self {
+            case .default:
+                return DefaultAudioSessionPolicy()
+            case .ownCapabilities:
+                return OwnCapabilitiesAudioSessionPolicy()
+            }
+        }
+    }
+
+    static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = {
+        .default
+    }()
+}
+
+extension AppEnvironment {
+
     static var availableCallTypes: [String] = [
         .development,
         .default,

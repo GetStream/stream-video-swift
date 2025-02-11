@@ -118,6 +118,10 @@ struct DebugMenu: View {
         }
     }
 
+    @State private var audioSessionPolicy = AppEnvironment.audioSessionPolicy {
+        didSet { AppEnvironment.audioSessionPolicy = audioSessionPolicy }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -176,6 +180,12 @@ struct DebugMenu: View {
                 currentValue: closedCaptionsIntegration,
                 label: "ClosedCaptions Integration"
             ) { self.closedCaptionsIntegration = $0 }
+
+            makeMenu(
+                for: [.default, .ownCapabilities],
+                currentValue: audioSessionPolicy,
+                label: "AudioSession policy"
+            ) { self.audioSessionPolicy = $0 }
 
             makeMenu(
                 for: [.default, .lastParticipant],
