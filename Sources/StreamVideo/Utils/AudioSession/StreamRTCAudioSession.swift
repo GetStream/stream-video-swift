@@ -7,9 +7,57 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+/// A protocol defining an interface for managing an audio session.
+/// This allows for dependency injection and easier testing.
+protocol AudioSessionProtocol {
+
+    /// A publisher that emits audio session events.
+    var eventPublisher: AnyPublisher<AudioSessionEvent, Never> { get }
+
+    /// A Boolean value indicating whether the audio session is active.
+    var isActive: Bool { get }
+
+    /// The current audio route description for the session.
+    var currentRoute: AVAudioSessionRouteDescription { get }
+
+    var category: AVAudioSession.Category { get }
+
+    /// A Boolean value indicating whether manual audio routing is used.
+    var useManualAudio: Bool { get set }
+
+    /// A Boolean value indicating whether audio is enabled.
+    var isAudioEnabled: Bool { get set }
+
+    /// Configures the audio session category and options.
+    /// - Parameters:
+    ///   - category: The audio category (e.g., `.playAndRecord`).
+    ///   - mode: The audio mode (e.g., `.videoChat`).
+    ///   - categoryOptions: The options for the category (e.g., `.allowBluetooth`).
+    /// - Throws: An error if setting the category fails.
+    func setCategory(
+        _ category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
+        with categoryOptions: AVAudioSession.CategoryOptions
+    ) async throws
+
+    /// Activates or deactivates the audio session.
+    /// - Parameter isActive: Whether to activate the session.
+    /// - Throws: An error if activation fails.
+    func setActive(_ isActive: Bool) async throws
+
+    /// Overrides the audio output port (e.g., to speaker).
+    /// - Parameter port: The output port override.
+    /// - Throws: An error if overriding fails.
+    func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) async throws
+
+    /// Requests permission to record audio from the user.
+    /// - Returns: `true` if permission was granted, otherwise `false`.
+    func requestRecordPermission() async -> Bool
+}
+
 /// A class implementing the `AudioSessionProtocol` that manages the WebRTC
 /// audio session for the application, handling settings and route management.
-final class StreamRTCAudioSession: @unchecked Sendable, ReflectiveStringConvertible {
+final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, ReflectiveStringConvertible {
 
     struct State: ReflectiveStringConvertible {
         var category: AVAudioSession.Category
@@ -42,6 +90,8 @@ final class StreamRTCAudioSession: @unchecked Sendable, ReflectiveStringConverti
 
     /// The current audio route description for the session.
     var currentRoute: AVAudioSessionRouteDescription { source.currentRoute }
+
+    var category: AVAudioSession.Category { state.category }
 
     /// A Boolean value indicating whether the audio session uses manual
     /// audio routing.
@@ -80,10 +130,7 @@ final class StreamRTCAudioSession: @unchecked Sendable, ReflectiveStringConverti
     func setCategory(
         _ category: AVAudioSession.Category,
         mode: AVAudioSession.Mode,
-        with categoryOptions: AVAudioSession.CategoryOptions,
-        file: StaticString = #file,
-        functionName: StaticString = #function,
-        line: UInt = #line
+        with categoryOptions: AVAudioSession.CategoryOptions
     ) async throws {
         try await performOperation { [weak self] in
             guard let self else { return }

@@ -232,7 +232,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             return
         }
         _ = try? await activeCallAudioSession
-            .categoryPublisher
+            .$category
             .filter { $0 == .playAndRecord }
             .nextValue(timeout: 1)
     }

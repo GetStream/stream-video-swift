@@ -7,40 +7,51 @@ import Combine
 import Foundation
 import StreamWebRTC
 
-/// The `StreamAudioSessionAdapter` class manages the device's audio session
-/// for an app, enabling control over activation, configuration, and routing
-/// to output devices like speakers and in-ear speakers.
+/// Manages the app’s audio session, handling activation, configuration,
+/// and routing to output devices such as speakers and in-ear speakers.
 final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
-    private var currentDevice = CurrentDevice.currentValue
-
-    private var audioRouteChangeCancellable: AnyCancellable?
-    /// The shared audio session instance conforming to `AudioSessionProtocol`
-    /// that manages WebRTC audio settings.
-    private let audioSession: StreamRTCAudioSession = .init()
-    private let processingQueue = SerialActorQueue()
+    /// Indicates if the session has been configured.
     private var hasBeenConfigured = false
 
-    /// The current active call settings, or `nil` if no active call is in session.
+    /// The last applied audio session configuration.
+    private var lastUsedConfiguration: AudioSessionConfiguration?
+
+    /// The current device as is being described by ``UIUserInterfaceIdiom``.
+    private let currentDevice = CurrentDevice.currentValue
+
+    /// The WebRTC-compatible audio session.
+    private let audioSession: AudioSessionProtocol
+
+    /// Serial execution queue for processing session updates.
+    private let processingQueue = SerialActorQueue()
+
+    /// A disposable bag holding all observation cancellable.
+    private let disposableBag = DisposableBag()
+
+    /// The current call settings, or `nil` if no active call exists.
     @Atomic private(set) var activeCallSettings: CallSettings
+
+    /// The set of the user's own audio capabilities.
     @Atomic private(set) var ownCapabilities: Set<OwnCapability>
+
+    /// The policy defining audio session behavior.
     @Atomic private(set) var policy: AudioSessionPolicy
-    @Atomic private(set) var lastUsedConfiguration: AudioSessionConfiguration?
 
-    var categoryPublisher: AnyPublisher<AVAudioSession.Category, Never> {
-        audioSession.$state.map(\.category).eraseToAnyPublisher()
-    }
+    @Published private(set) var category: AVAudioSession.Category
 
-    /// The delegate for receiving audio session events, such as call settings
-    /// updates.
+    /// Delegate for handling audio session events.
     weak var delegate: StreamAudioSessionAdapterDelegate?
 
     // MARK: - AudioSession State
 
+    /// Indicates whether the session is recording.
     @Published var isRecording: Bool = false
 
+    /// Checks if the audio session is currently active.
     var isActive: Bool { audioSession.isActive }
 
+    /// Retrieves the current audio route description.
     var currentRoute: AVAudioSessionRouteDescription { audioSession.currentRoute }
 
     /// Initializes a new `StreamAudioSessionAdapter` instance, configuring
@@ -51,19 +62,23 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     required init(
         callSettings: CallSettings = .init(),
         ownCapabilities: Set<OwnCapability> = [],
-        policy: AudioSessionPolicy = DefaultAudioSessionPolicy()
+        policy: AudioSessionPolicy = DefaultAudioSessionPolicy(),
+        audioSession: AudioSessionProtocol = StreamRTCAudioSession()
     ) {
         activeCallSettings = callSettings
         self.ownCapabilities = ownCapabilities
         self.policy = policy
+        self.audioSession = audioSession
+        category = audioSession.category
 
         /// Update the active call's `audioSession` to make available to other components.
         Self.currentValue = self
 
+        var audioSession = audioSession
         audioSession.useManualAudio = true
         audioSession.isAudioEnabled = true
 
-        audioRouteChangeCancellable = audioSession
+        audioSession
             .eventPublisher
             .compactMap {
                 guard case let .didChangeRoute(session, reason, previousRoute) = $0 else {
@@ -91,11 +106,19 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                     previousRoute: $2
                 )
             }
+            .store(in: disposableBag)
+
+        if let streamAudioSession = audioSession as? StreamRTCAudioSession {
+            streamAudioSession
+                .$state
+                .map(\.category)
+                .assign(to: \.category, onWeak: self)
+                .store(in: disposableBag)
+        }
     }
 
     nonisolated func dismantle() {
-        audioRouteChangeCancellable?.cancel()
-        audioRouteChangeCancellable = nil
+        disposableBag.removeAll()
         if Self.currentValue === self {
             // Reset activeCall audioSession.
             Self.currentValue = nil
@@ -271,7 +294,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
             if
                 configuration.overrideOutputAudioPort == nil,
-                audioSession.state.category == AVAudioSession.Category.playAndRecord
+                audioSession.category == AVAudioSession.Category.playAndRecord
             {
                 try await audioSession.overrideOutputAudioPort(.none)
             }
