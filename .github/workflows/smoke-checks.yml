@@ -8,13 +8,23 @@ on:
 
   workflow_dispatch:
     inputs:
-      swiftui_snapshots:
-        description: 'Should SwiftUI Snapshots be recorded on CI?'
+      record_snapshots_swiftui:
+        description: 'Soft-record SwiftUI snapshots on CI?'
         type: boolean
         required: false
         default: false
-      uikit_snapshots:
-        description: 'Should UIKit Snapshots be recorded on CI?'
+      remove_and_record_snapshots_swiftui:
+        description: 'Hard-record SwiftUI snapshots on CI?'
+        type: boolean
+        required: false
+        default: false
+      record_snapshots_uikit:
+        description: 'Soft-record UIKit snapshots on CI?'
+        type: boolean
+        required: false
+        default: false
+      remove_and_record_snapshots_uikit:
+        description: 'Hard-record UIKit snapshots on CI?'
         type: boolean
         required: false
         default: false
@@ -33,6 +43,7 @@ jobs:
   test-llc-debug:
     name: Test LLC (Debug)
     runs-on: macos-15
+    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && github.event.inputs.remove_and_record_snapshots_swiftui != 'true' && github.event.inputs.remove_and_record_snapshots_uikit != 'true' }}
     env:
       STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     steps:
@@ -88,7 +99,7 @@ jobs:
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
     runs-on: macos-15
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
+    if: ${{ (github.event.inputs.record_snapshots_uikit != 'true' && github.event.inputs.remove_and_record_snapshots_uikit != 'true') || (github.event.inputs.record_snapshots_swiftui == 'true' || github.event.inputs.remove_and_record_snapshots_swiftui == 'true') }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
@@ -98,7 +109,7 @@ jobs:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
+      run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_swiftui }}" remove_and_record:"${{ github.event.inputs.remove_and_record_snapshots_swiftui }}"
       timeout-minutes: 120
     - name: Parse xcresult
       if: failure()
@@ -116,7 +127,7 @@ jobs:
   test-uikit-debug:
     name: Test UIKit (Debug)
     runs-on: macos-15
-    if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
+    if: ${{ (github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.remove_and_record_snapshots_swiftui != 'true') || (github.event.inputs.record_snapshots_uikit == 'true' || github.event.inputs.remove_and_record_snapshots_uikit == 'true') }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
     steps:
@@ -126,7 +137,7 @@ jobs:
         INSTALL_YEETD: true
         SKIP_MINT_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
+      run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_uikit }}" remove_and_record:"${{ github.event.inputs.remove_and_record_snapshots_uikit }}"
       timeout-minutes: 120
     - name: Parse xcresult
       if: failure()
@@ -146,7 +157,7 @@ jobs:
     runs-on: macos-13
     env:
       XCODE_VERSION: "15.0.1"
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && github.event.inputs.remove_and_record_snapshots_swiftui != 'true' && github.event.inputs.remove_and_record_snapshots_uikit != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
       with:
@@ -197,7 +208,7 @@ jobs:
     name: Build Test App and Frameworks
     runs-on: macos-15
     needs: test-llc-debug
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && github.event.inputs.remove_and_record_snapshots_swiftui != 'true' && github.event.inputs.remove_and_record_snapshots_uikit != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
@@ -218,7 +229,7 @@ jobs:
     name: Build Demo Apps
     runs-on: macos-14
     needs: build-test-app-and-frameworks
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && github.event.inputs.remove_and_record_snapshots_swiftui != 'true' && github.event.inputs.remove_and_record_snapshots_uikit != 'true' }}
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: actions/download-artifact@v4
@@ -238,7 +249,7 @@ jobs:
     name: Launch Allure TestOps
     runs-on: macos-13
     needs: build-test-app-and-frameworks
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && github.event.inputs.remove_and_record_snapshots_swiftui != 'true' && github.event.inputs.remove_and_record_snapshots_uikit != 'true' }}
     outputs:
       launch_id: ${{ steps.get_launch_id.outputs.launch_id }}
     steps:
@@ -256,7 +267,7 @@ jobs:
   test-e2e-debug:
     name: Test E2E UI (Debug)
     runs-on: macos-15
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' && github.event.inputs.remove_and_record_snapshots_swiftui != 'true' && github.event.inputs.remove_and_record_snapshots_uikit != 'true' }}
     needs:
       - allure_testops_launch
       - build-test-app-and-frameworks
