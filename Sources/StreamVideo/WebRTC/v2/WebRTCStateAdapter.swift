@@ -540,6 +540,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
             var newParticipant = entry
                 .value
+                /// Updates the participant with a audio track if available.
+                .withUpdated(audioTrack: track(for: entry.value, of: .audio) as? RTCAudioTrack)
                 /// Updates the participant with a video track if available.
                 .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
                 /// Updates the participant with a screensharing track if available.
