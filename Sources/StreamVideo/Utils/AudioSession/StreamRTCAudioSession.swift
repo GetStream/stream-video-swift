@@ -18,7 +18,11 @@ final class StreamRTCAudioSession: @unchecked Sendable, ReflectiveStringConverti
         var overrideOutputPort: AVAudioSession.PortOverride = .none
     }
 
-    @Published private(set) var state: State
+    @Published private(set) var state: State {
+        didSet {
+            log.debug("AudioSession updated with state \(state)", subsystems: .audioSession)
+        }
+    }
 
     /// A queue for processing audio session operations asynchronously.
     private let processingQueue = SerialActorQueue()
@@ -63,11 +67,6 @@ final class StreamRTCAudioSession: @unchecked Sendable, ReflectiveStringConverti
             options: source.categoryOptions
         )
         source.add(sourceDelegate)
-
-        source
-            .publisher(for: \.category)
-            .sink { [weak self] in self?.state.category = .init(rawValue: $0) }
-            .store(in: disposableBag)
     }
 
     // MARK: - Configuration
@@ -87,54 +86,32 @@ final class StreamRTCAudioSession: @unchecked Sendable, ReflectiveStringConverti
         line: UInt = #line
     ) async throws {
         try await performOperation { [weak self] in
-            guard let self else {
+            guard let self else { return }
+
+            let state = self.state
+            let needsCategoryUpdate = category != state.category
+            let needsModeUpdate = mode != state.mode
+            let needsOptionsUpdate = categoryOptions != state.options
+
+            guard needsCategoryUpdate || needsModeUpdate || needsOptionsUpdate else {
                 return
             }
 
-            guard category != state.category
-                || mode != state.mode
-                || categoryOptions != state.options
-            else {
-                return
-            }
-
-            if category != state.category {
-                if mode != state.mode {
+            if needsCategoryUpdate || needsOptionsUpdate {
+                if needsModeUpdate {
                     try source.setCategory(
                         category,
                         mode: mode,
                         options: categoryOptions
                     )
-                    try source.setActive(isActive)
                 } else {
-                    try source.setCategory(
-                        category,
-                        with: categoryOptions
-                    )
+                    try source.setCategory(category, with: categoryOptions)
                 }
-            } else {
-                if mode != state.mode {
-                    if categoryOptions != state.options {
-                        try source.setCategory(
-                            category,
-                            mode: mode,
-                            options: categoryOptions
-                        )
-                        try source.setActive(isActive)
-                    } else {
-                        try source.setMode(mode)
-                    }
-                } else if categoryOptions != state.options {
-                    try source.setCategory(
-                        category,
-                        with: categoryOptions
-                    )
-                } else {
-                    /* No-op */
-                }
+            } else if needsModeUpdate {
+                try source.setMode(mode)
             }
 
-            state = .init(
+            self.state = .init(
                 category: category,
                 mode: mode,
                 options: categoryOptions,
@@ -170,7 +147,10 @@ final class StreamRTCAudioSession: @unchecked Sendable, ReflectiveStringConverti
                 return
             }
 
-            guard state.overrideOutputPort != port else {
+            guard
+                state.category == .playAndRecord,
+                state.overrideOutputPort != port
+            else {
                 return
             }
 

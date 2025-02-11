@@ -18,12 +18,14 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// The shared audio session instance conforming to `AudioSessionProtocol`
     /// that manages WebRTC audio settings.
     private let audioSession: StreamRTCAudioSession = .init()
+    private let processingQueue = SerialActorQueue()
     private var hasBeenConfigured = false
 
     /// The current active call settings, or `nil` if no active call is in session.
     @Atomic private(set) var activeCallSettings: CallSettings
     @Atomic private(set) var ownCapabilities: Set<OwnCapability>
     @Atomic private(set) var policy: AudioSessionPolicy
+    @Atomic private(set) var lastUsedConfiguration: AudioSessionConfiguration?
 
     var categoryPublisher: AnyPublisher<AVAudioSession.Category, Never> {
         audioSession.$state.map(\.category).eraseToAnyPublisher()
@@ -64,16 +66,16 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         audioRouteChangeCancellable = audioSession
             .eventPublisher
             .compactMap {
-                switch $0 {
-                case let .didChangeRoute(session, reason, previousRoute):
-                    return (session, reason, previousRoute)
-                default:
+                guard case let .didChangeRoute(session, reason, previousRoute) = $0 else {
                     return nil
                 }
+                return (session, reason, previousRoute)
             }
+            .filter { $0.0.isActive }
             .log(.debug, subsystems: .audioSession) { [weak self] session, reason, previousRoute in
                 """
                 AudioSession didChangeRoute reason:\(reason)
+                - isActive: \(session.isActive)
                 - isRecording: \(self?.isRecording.description ?? "-")
                 - category: \(AVAudioSession.Category(rawValue: session.category))
                 - mode: \(AVAudioSession.Mode(rawValue: session.mode))
@@ -185,6 +187,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         reason: AVAudioSession.RouteChangeReason,
         previousRoute: AVAudioSessionRouteDescription
     ) {
+        guard session.isActive else {
+            return
+        }
+
         guard currentDevice.deviceType == .phone else {
             if activeCallSettings.speakerOn != session.currentRoute.isSpeaker {
                 log.warning(
@@ -218,31 +224,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
-    private func configureAudioSession(
-        settings: CallSettings,
-        ownCapabilities: Set<OwnCapability>,
-        file: StaticString,
-        functionName: StaticString,
-        line: UInt
-    ) async throws {
-        let configuration = settings.audioSessionConfiguration
-
-        try await audioSession.setCategory(
-            .init(rawValue: configuration.category),
-            mode: .init(rawValue: configuration.mode),
-            with: configuration.categoryOptions
-        )
-
-        hasBeenConfigured = true
-        log.debug(
-            "AudioSession was configured with \(configuration)",
-            subsystems: .audioSession,
-            functionName: functionName,
-            fileName: file,
-            lineNumber: line
-        )
-    }
-
     private func didUpdate(
         callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>,
@@ -250,99 +231,75 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         functionName: StaticString = #function,
         line: UInt = #line
     ) async throws {
-        log.debug(
-            "Will reconfigure audio session with settings: \(callSettings) ownCapabilities:\(ownCapabilities) policy:\(type(of: policy)).",
-            subsystems: .audioSession
-        )
+        try await processingQueue.sync { [weak self] in
+            guard let self else {
+                return
+            }
 
-        guard hasBeenConfigured else {
-            try await configureAudioSession(
-                settings: callSettings,
-                ownCapabilities: ownCapabilities,
-                file: file,
-                functionName: functionName,
-                line: line
+            let configuration = policy.configuration(
+                for: callSettings,
+                ownCapabilities: ownCapabilities
             )
-            return
-        }
 
-//        let currentDeviceHasEarpiece = currentDevice.deviceType == .phone
-//
-//        let category: AVAudioSession.Category = callSettings.audioOn
-//            || (callSettings.speakerOn && currentDeviceHasEarpiece)
-//            ? .playAndRecord
-//            : .playback
-//
-//        let mode: AVAudioSession.Mode = category == .playAndRecord
-//        ? callSettings.speakerOn == true ? .videoChat : .voiceChat
-//            : .default
-//
-//        let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
-//            ? .playAndRecord
-//            : .playback
-//
-//        let overridePort: AVAudioSession.PortOverride? = category == .playAndRecord
-//            ? callSettings.speakerOn == true ? .speaker : AVAudioSession.PortOverride.none
-//            : nil
-//
-//        let configuration = AudioSessionConfiguration(
-//            category: category,
-//            mode: mode,
-//            options: categoryOptions,
-//            overrideOutputAudioPort: overridePort
-//        )
+            guard configuration != lastUsedConfiguration else {
+                return
+            }
 
-        let configuration = policy.configuration(
-            for: callSettings,
-            ownCapabilities: ownCapabilities
-        )
-
-        if configuration.category == .playback, isRecording {
             log.debug(
-                "Will defer execution until recording has stopped.",
+                """
+                Will configure AudioSession with 
+                - policy: \(type(of: policy)) 
+                - settings: \(callSettings) 
+                - ownCapabilities:\(ownCapabilities)
+                """,
                 subsystems: .audioSession,
                 functionName: functionName,
                 fileName: file,
                 lineNumber: line
             )
-            await deferExecutionUntilRecordingIsStopped()
-        }
 
-        if
-            configuration.overrideOutputAudioPort == nil,
-            audioSession.state.category == AVAudioSession.Category.playAndRecord
-        {
-            try await audioSession.overrideOutputAudioPort(.none)
-        }
+            if configuration.category == .playback, isRecording {
+                log.debug(
+                    "AudioSession is currently recording. Defer execution until recording has stopped.",
+                    subsystems: .audioSession,
+                    functionName: functionName,
+                    fileName: file,
+                    lineNumber: line
+                )
+                await deferExecutionUntilRecordingIsStopped()
+            }
 
-        do {
-            try await audioSession.setCategory(
-                configuration.category,
-                mode: configuration.mode,
-                with: configuration.options
-            )
-        } catch {
-            log.error(
-                "Failed while setting category:\(configuration.category) mode:\(configuration.mode) options:\(configuration.options)",
-                subsystems: .audioSession,
-                error: error,
-                functionName: functionName,
-                fileName: file,
-                lineNumber: line
-            )
-        }
+            if
+                configuration.overrideOutputAudioPort == nil,
+                audioSession.state.category == AVAudioSession.Category.playAndRecord
+            {
+                try await audioSession.overrideOutputAudioPort(.none)
+            }
 
-        if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
-            try await audioSession.overrideOutputAudioPort(overrideOutputAudioPort)
-        }
+            do {
+                workaroundForCategoryBeingSetToSoloAmbientIfRequired()
+                try await audioSession.setCategory(
+                    configuration.category,
+                    mode: configuration.mode,
+                    with: configuration.options
+                )
+            } catch {
+                log.error(
+                    "Failed while setting AudioSession category:\(configuration.category) mode:\(configuration.mode) options:\(configuration.options)",
+                    subsystems: .audioSession,
+                    error: error,
+                    functionName: functionName,
+                    fileName: file,
+                    lineNumber: line
+                )
+            }
 
-        log.debug(
-            "AudioSession updated with state \(audioSession.state)",
-            subsystems: .audioSession,
-            functionName: functionName,
-            fileName: file,
-            lineNumber: line
-        )
+            if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
+                try await audioSession.overrideOutputAudioPort(overrideOutputAudioPort)
+            }
+
+            lastUsedConfiguration = configuration
+        }
     }
 
     private func deferExecutionUntilRecordingIsStopped() async {
@@ -358,6 +315,14 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 error: error
             )
         }
+    }
+
+    private func workaroundForCategoryBeingSetToSoloAmbientIfRequired() {
+        guard !hasBeenConfigured else {
+            return
+        }
+        _ = activeCallSettings.audioSessionConfiguration
+        hasBeenConfigured = true
     }
 }
 
