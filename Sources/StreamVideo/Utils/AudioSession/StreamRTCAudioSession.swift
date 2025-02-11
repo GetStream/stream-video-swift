@@ -66,11 +66,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         var overrideOutputPort: AVAudioSession.PortOverride = .none
     }
 
-    @Published private(set) var state: State {
-        didSet {
-            log.debug("AudioSession updated with state \(state)", subsystems: .audioSession)
-        }
-    }
+    @Published private(set) var state: State
 
     /// A queue for processing audio session operations asynchronously.
     private let processingQueue = SerialActorQueue()
@@ -164,6 +160,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
                 options: categoryOptions,
                 overrideOutputPort: state.overrideOutputPort
             )
+            log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
         }
     }
 
@@ -203,6 +200,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
 
             try source.overrideOutputAudioPort(port)
             state.overrideOutputPort = port
+            log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
         }
     }
 
