@@ -59,7 +59,7 @@ protocol AudioSessionProtocol {
 /// audio session for the application, handling settings and route management.
 final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, ReflectiveStringConvertible {
 
-    struct State: ReflectiveStringConvertible {
+    struct State: ReflectiveStringConvertible, Equatable {
         var category: AVAudioSession.Category
         var mode: AVAudioSession.Mode
         var options: AVAudioSession.CategoryOptions

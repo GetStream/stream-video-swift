@@ -26,6 +26,9 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// A disposable bag holding all observation cancellable.
     private let disposableBag = DisposableBag()
 
+    /// The time to wait for recording to be stopped before we attempt to set the category to `.playback`
+    private let deferExecutionDueToRecordingInterval: TimeInterval = 1
+
     /// The current call settings, or `nil` if no active call exists.
     @Atomic private(set) var activeCallSettings: CallSettings
 
@@ -78,7 +81,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         /// other components.
         Self.currentValue = self
 
-        var audioSession = audioSession
+        var audioSession = self.audioSession
         audioSession.useManualAudio = true
         audioSession.isAudioEnabled = true
 
@@ -375,7 +378,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         do {
             _ = try await $isRecording
                 .filter { $0 == false }
-                .nextValue(timeout: 1)
+                .nextValue(timeout: deferExecutionDueToRecordingInterval)
             try await Task.sleep(nanoseconds: 250 * 1_000_000)
         } catch {
             log.error(
