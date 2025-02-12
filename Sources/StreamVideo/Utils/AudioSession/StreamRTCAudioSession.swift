@@ -160,6 +160,13 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
                 options: categoryOptions,
                 overrideOutputPort: state.overrideOutputPort
             )
+
+            let configuration = RTCAudioSessionConfiguration.webRTC()
+            configuration.category = category.rawValue
+            configuration.mode = mode.rawValue
+            configuration.categoryOptions = categoryOptions
+            RTCAudioSessionConfiguration.setWebRTC(configuration)
+
             log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
         }
     }
