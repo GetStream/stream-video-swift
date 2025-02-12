@@ -228,7 +228,7 @@ struct DemoStatsView: View {
 
         let diff = newValue - oldValue
         let bits = diff * 8
-        return bytesFormatter(from: max(bits / statsCollectionInterval, 0))
+        return bytesFormatter(from: max(bits / Int(statsCollectionInterval), 0))
     }
 }
 

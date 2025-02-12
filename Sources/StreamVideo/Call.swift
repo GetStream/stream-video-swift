@@ -87,6 +87,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         subscribeToNoiseCancellationSettingsChanges()
         subscribeToTranscriptionSettingsChanges()
         subscribeToClosedCaptionsSettingsChanges()
+        subscribeToStatsCollectionIntervalChanges()
     }
 
     internal convenience init(
@@ -1335,6 +1336,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
+    // MARK: - Stats
+
+    @MainActor
+    public func updateStatsCollectionInterval(_ interval: TimeInterval) {
+        state.statsCollectionInterval = interval
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
@@ -1517,6 +1525,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .map(\.?.transcription.closedCaptionMode)
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
+                .store(in: cancellables)
+        }
+    }
+
+    private func subscribeToStatsCollectionIntervalChanges() {
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            self
+                .state
+                .$statsCollectionInterval
+                .map { TimeInterval($0) }
+                .removeDuplicates()
+                .sinkTask(storeIn: cancellables, identifier: #function) { [weak self] in
+                    await self?.callController.updateStatsCollectionInterval($0)
+                }
                 .store(in: cancellables)
         }
     }
