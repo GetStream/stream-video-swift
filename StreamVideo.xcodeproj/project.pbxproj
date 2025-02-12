@@ -660,6 +660,7 @@
 		40F101682D5A653200C49481 /* AudioSessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F101672D5A653200C49481 /* AudioSessionPolicy.swift */; };
 		40F1016A2D5A653B00C49481 /* AudioSessionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F101692D5A653B00C49481 /* AudioSessionConfiguration.swift */; };
 		40F1016C2D5A654300C49481 /* DefaultAudioSessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F1016B2D5A654300C49481 /* DefaultAudioSessionPolicy.swift */; };
+		40F101792D5CBA2D00C49481 /* XCTAsyncUnwrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F101782D5CBA2D00C49481 /* XCTAsyncUnwrap.swift */; };
 		40F161AB2A4C6B5C00846E3E /* ScreenSharingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */; };
 		40F18B8C2BEBAC4C00ADF76E /* CallEndedViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */; };
 		40F18B8E2BEBB65100ADF76E /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F18B8D2BEBB65100ADF76E /* View+OptionalPublisher.swift */; };
@@ -2044,6 +2045,7 @@
 		40F101672D5A653200C49481 /* AudioSessionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionPolicy.swift; sourceTree = "<group>"; };
 		40F101692D5A653B00C49481 /* AudioSessionConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionConfiguration.swift; sourceTree = "<group>"; };
 		40F1016B2D5A654300C49481 /* DefaultAudioSessionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultAudioSessionPolicy.swift; sourceTree = "<group>"; };
+		40F101782D5CBA2D00C49481 /* XCTAsyncUnwrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTAsyncUnwrap.swift; sourceTree = "<group>"; };
 		40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSharingSession.swift; sourceTree = "<group>"; };
 		40F18B8D2BEBB65100ADF76E /* View+OptionalPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+OptionalPublisher.swift"; sourceTree = "<group>"; };
 		40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCredentials.swift; sourceTree = "<group>"; };
@@ -5316,6 +5318,7 @@
 				842747F929EEEC5A00E063AD /* EventLogger.swift */,
 				842747FB29EEECBA00E063AD /* AssertTestQueue.swift */,
 				8414081029F284A800FF2D7C /* AssertJSONEqual.swift */,
+				40F101782D5CBA2D00C49481 /* XCTAsyncUnwrap.swift */,
 				84DCA2102A389160000C3411 /* AssertDelay.swift */,
 				4013387B2BF248E9007318BD /* Mockable.swift */,
 			);
@@ -7541,6 +7544,7 @@
 				400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */,
 				409774AE2CC1979F00E0D3EE /* MockCallController.swift in Sources */,
 				40AB34BC2C5D30AD00B5B6B3 /* URLSessionConfiguration_WaitsForConnectivityTests.swift in Sources */,
+				40F101792D5CBA2D00C49481 /* XCTAsyncUnwrap.swift in Sources */,
 				401C1EEE2D493BE700304609 /* AsyncStreamPublisherTests.swift in Sources */,
 				40C4DF502C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift in Sources */,
 				4013387C2BF248E9007318BD /* Mockable.swift in Sources */,

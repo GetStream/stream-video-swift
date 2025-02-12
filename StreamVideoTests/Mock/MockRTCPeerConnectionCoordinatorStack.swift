@@ -12,7 +12,7 @@ struct MockRTCPeerConnectionCoordinatorStack {
     let peerConnection: MockRTCPeerConnection
     let peerConnectionFactory: PeerConnectionFactory
     let mockSFUStack: MockSFUStack
-    let audioSession: StreamAudioSessionAdapter
+    let audioSession: StreamAudioSession
     let spySubject: PassthroughSubject<TrackEvent, Never>
     let mockLocalAudioMediaAdapter: MockLocalMediaAdapter
     let mockLocalVideoMediaAdapter: MockLocalMediaAdapter
@@ -33,7 +33,7 @@ struct MockRTCPeerConnectionCoordinatorStack {
         peerConnection: MockRTCPeerConnection = .init(),
         peerConnectionFactory: PeerConnectionFactory = .mock(),
         mockSFUStack: MockSFUStack = .init(),
-        audioSession: StreamAudioSessionAdapter = .init(),
+        audioSession: StreamAudioSession = .init(),
         spySubject: PassthroughSubject<TrackEvent, Never> = .init(),
         mockLocalAudioMediaAdapter: MockLocalMediaAdapter = .init(),
         mockLocalVideoMediaAdapter: MockLocalMediaAdapter = .init(),
