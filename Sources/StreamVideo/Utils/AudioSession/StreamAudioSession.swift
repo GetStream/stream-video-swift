@@ -192,6 +192,9 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     /// Requests the record permission from the user.
     func requestRecordPermission() async -> Bool {
+        guard !isRecording else {
+            return isRecording
+        }
         let result = await audioSession.requestRecordPermission()
         log.debug(
             "AudioSession completed request for recording permission.",
@@ -303,7 +306,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
             log.debug(
                 """
-                Will configure AudioSession with 
+                Will configure AudioSession with
                 - policy: \(type(of: policy)) 
                 - settings: \(callSettings) 
                 - ownCapabilities:\(ownCapabilities)
