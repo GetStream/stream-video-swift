@@ -468,6 +468,15 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    // MARK: - Stats Collection
+
+    func updateStatsCollectionInterval(_ interval: TimeInterval) async {
+        guard let statsReporter = await webRTCCoordinator.stateAdapter.statsReporter else {
+            return
+        }
+        statsReporter.collectionInterval = interval
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {

@@ -37,7 +37,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
 
     /// The interval at which statistics are collected, in seconds. Defaults to 2.
-    private var collectionInterval: TimeInterval { didSet { scheduleCollection(with: collectionInterval) } }
+    var collectionInterval: TimeInterval { didSet { scheduleCollection(with: collectionInterval) } }
 
     /// Cancellable for the collection timer.
     private var collectionCancellable: AnyCancellable?
