@@ -161,11 +161,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
                 overrideOutputPort: state.overrideOutputPort
             )
 
-            let configuration = RTCAudioSessionConfiguration.webRTC()
-            configuration.category = category.rawValue
-            configuration.mode = mode.rawValue
-            configuration.categoryOptions = categoryOptions
-            RTCAudioSessionConfiguration.setWebRTC(configuration)
+            updateWebRTCConfiguration(with: self.state)
 
             log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
         }
@@ -232,5 +228,20 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
             defer { source.unlockForConfiguration() }
             try await operation()
         }
+    }
+
+    /// Updates the WebRTC audio session configuration.
+    ///
+    /// - Parameter state: The current state of the audio session.
+    ///
+    /// - Note: This is required to ensure that the WebRTC audio session
+    /// is configured correctly when the AVAudioSession is updated in
+    /// order to avoid unexpected changes to the category.
+    private func updateWebRTCConfiguration(with state: State) {
+        let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
+        webRTCConfiguration.category = state.category.rawValue
+        webRTCConfiguration.mode = state.mode.rawValue
+        webRTCConfiguration.categoryOptions = state.options
+        RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
     }
 }
