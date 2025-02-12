@@ -11,9 +11,6 @@ import StreamWebRTC
 /// and routing to output devices such as speakers and in-ear speakers.
 final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
-    /// Indicates if the session has been configured.
-    private var hasBeenConfigured = false
-
     /// The last applied audio session configuration.
     private var lastUsedConfiguration: AudioSessionConfiguration?
 
@@ -38,6 +35,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// The policy defining audio session behavior.
     @Atomic private(set) var policy: AudioSessionPolicy
 
+    /// Published property to track the audio session category.
     @Published private(set) var category: AVAudioSession.Category
 
     /// Delegate for handling audio session events.
@@ -56,7 +54,12 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     /// Initializes a new `StreamAudioSessionAdapter` instance, configuring
     /// the session with default settings and enabling manual audio control
-    /// for WebRTC.w
+    /// for WebRTC.
+    ///
+    /// - Parameter callSettings: The settings for the current call.
+    /// - Parameter ownCapabilities: The set of the user's own audio
+    ///   capabilities.
+    /// - Parameter policy: The policy defining audio session behavior.
     /// - Parameter audioSession: An `AudioSessionProtocol` instance. Defaults
     ///   to `StreamRTCAudioSession`.
     required init(
@@ -71,7 +74,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         self.audioSession = audioSession
         category = audioSession.category
 
-        /// Update the active call's `audioSession` to make available to other components.
+        /// Update the active call's `audioSession` to make available to
+        /// other components.
         Self.currentValue = self
 
         var audioSession = audioSession
@@ -117,6 +121,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
+    /// Removes all observers and resets the active audio session.
     nonisolated func dismantle() {
         disposableBag.removeAll()
         if Self.currentValue === self {
@@ -128,7 +133,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     // MARK: - OwnCapabilities
 
     /// Updates the audio session with new call settings.
-    /// - Parameter settings: The new `CallSettings` to apply.
+    ///
+    /// - Parameter ownCapabilities: The new set of `OwnCapability` to apply.
     func didUpdateOwnCapabilities(
         _ ownCapabilities: Set<OwnCapability>
     ) async throws {
@@ -142,6 +148,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     // MARK: - CallSettings
 
     /// Updates the audio session with new call settings.
+    ///
     /// - Parameter settings: The new `CallSettings` to apply.
     func didUpdateCallSettings(
         _ settings: CallSettings
@@ -155,6 +162,9 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     // MARK: - Policy
 
+    /// Updates the audio session with a new policy.
+    ///
+    /// - Parameter policy: The new `AudioSessionPolicy` to apply.
     func didUpdatePolicy(
         _ policy: AudioSessionPolicy
     ) {
@@ -163,6 +173,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     // MARK: - Recording
 
+    /// Prepares the audio session for recording.
     func prepareForRecording() async throws {
         guard !activeCallSettings.audioOn else {
             return
@@ -179,6 +190,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         )
     }
 
+    /// Requests the record permission from the user.
     func requestRecordPermission() async -> Bool {
         let result = await audioSession.requestRecordPermission()
         log.debug(
@@ -259,6 +271,15 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
+    /// Updates the audio session configuration based on the provided call
+    /// settings and own capabilities.
+    ///
+    /// - Parameters:
+    ///   - callSettings: The current call settings.
+    ///   - ownCapabilities: The set of the user's own audio capabilities.
+    ///   - file: The file where this method is called.
+    ///   - functionName: The name of the function where this method is called.
+    ///   - line: The line number where this method is called.
     private func didUpdate(
         callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>,
@@ -312,7 +333,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             }
 
             do {
-                workaroundForCategoryBeingSetToSoloAmbientIfRequired()
                 try await audioSession.setCategory(
                     configuration.category,
                     mode: configuration.mode,
@@ -337,6 +357,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
+    /// Defers execution until recording is stopped.
     private func deferExecutionUntilRecordingIsStopped() async {
         do {
             _ = try await $isRecording
@@ -351,14 +372,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             )
         }
     }
-
-    private func workaroundForCategoryBeingSetToSoloAmbientIfRequired() {
-        guard !hasBeenConfigured else {
-            return
-        }
-        _ = activeCallSettings.audioSessionConfiguration
-        hasBeenConfigured = true
-    }
 }
 
 /// A key for dependency injection of an `AudioSessionProtocol` instance
@@ -368,8 +381,8 @@ extension StreamAudioSession: InjectionKey {
 }
 
 extension InjectedValues {
-    /// The active call's audio session. The value is being set on `StreamAudioSession`
-    /// `init` / `deinit`
+    /// The active call's audio session. The value is being set on
+    /// `StreamAudioSession` `init` / `deinit`
     var activeCallAudioSession: StreamAudioSession? {
         get {
             Self[StreamAudioSession.self]
