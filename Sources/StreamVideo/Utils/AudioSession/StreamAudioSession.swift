@@ -167,8 +167,12 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// - Parameter policy: The new `AudioSessionPolicy` to apply.
     func didUpdatePolicy(
         _ policy: AudioSessionPolicy
-    ) {
+    ) async throws {
         self.policy = policy
+        try await didUpdate(
+            callSettings: activeCallSettings,
+            ownCapabilities: ownCapabilities
+        )
     }
 
     // MARK: - Recording
