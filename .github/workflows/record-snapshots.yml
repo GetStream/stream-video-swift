@@ -9,7 +9,7 @@ on:
         required: false
         default: true
       remove_and_record_snapshots_swiftui:
-        description: 'Remove existing SwiftUI snapshots before recording the new ones?'
+        description: 'Reset all the SwiftUI snapshots on CI?'
         type: boolean
         required: false
         default: false
@@ -19,7 +19,7 @@ on:
         required: false
         default: false
       remove_and_record_snapshots_uikit:
-        description: 'Remove existing UIKit snapshots before recording the new ones?'
+        description: 'Reset all the UIKit snapshots on CI?'
         type: boolean
         required: false
         default: false

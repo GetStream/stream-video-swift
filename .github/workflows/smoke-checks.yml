@@ -9,22 +9,22 @@ on:
   workflow_dispatch:
     inputs:
       record_snapshots_swiftui:
-        description: 'Soft-record SwiftUI snapshots on CI?'
+        description: 'Record missing SwiftUI snapshots on CI?'
         type: boolean
         required: false
         default: false
       remove_and_record_snapshots_swiftui:
-        description: 'Hard-record SwiftUI snapshots on CI?'
+        description: 'Reset all the SwiftUI snapshots on CI?'
         type: boolean
         required: false
         default: false
       record_snapshots_uikit:
-        description: 'Soft-record UIKit snapshots on CI?'
+        description: 'Record missing UIKit snapshots on CI?'
         type: boolean
         required: false
         default: false
       remove_and_record_snapshots_uikit:
-        description: 'Hard-record UIKit snapshots on CI?'
+        description: 'Reset all the UIKit snapshots on CI?'
         type: boolean
         required: false
         default: false
