@@ -7,6 +7,7 @@ import SwiftUI
 
 public struct CallTopView: View {
             
+    @Injected(\.streamVideo) var streamVideo
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     
@@ -30,7 +31,7 @@ public struct CallTopView: View {
                             .accessibility(identifier: "viewMenu")
                     }
 
-                    if viewModel.call?.state.ownCapabilities.contains(.sendVideo) == true {
+                    if call?.state.ownCapabilities.contains(.sendVideo) == true {
                         ToggleCameraIconView(viewModel: viewModel)
                     }
 
@@ -68,6 +69,15 @@ public struct CallTopView: View {
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
+    }
+
+    private var call: Call? {
+        switch viewModel.callingState {
+        case .incoming, .outgoing:
+            return streamVideo.state.ringingCall
+        default:
+            return viewModel.call
+        }
     }
 }
 
