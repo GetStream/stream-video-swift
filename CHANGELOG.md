@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The `OutgoingCallView` provided by the default `ViewFactory` implementation won't show the current user in the ringing member bubbles [#660](https://github.com/GetStream/stream-video-swift/pull/660)
 
 ### 🔄 Changed
-- The provided `CallControls` component will now respect user's capabilities in order to show/hide the video/audio buttons. [#661](https://github.com/GetStream/stream-video-swift/pull/661)
+- The provided `CallControls` and `CallTopView` component will now respect user's capabilities in order to show/hide the video, audio and toggleCamerat buttons. [#661](https://github.com/GetStream/stream-video-swift/pull/661) [#666](https://github.com/GetStream/stream-video-swift/pull/666)
 
 # [1.16.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.16.0)
 _January 31, 2025_
