@@ -1337,6 +1337,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     // MARK: - AudioSession
 
+    /// Updates the current audio session policy for the call.
+    ///
+    /// - Parameter policy: A conforming `AudioSessionPolicy` that defines
+    ///   the audio session configuration to be applied.
+    /// - Throws: An error if the update fails.
     public func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
         try await callController.updateAudioSessionPolicy(policy)
     }
