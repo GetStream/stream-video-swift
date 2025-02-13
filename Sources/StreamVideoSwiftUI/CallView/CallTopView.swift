@@ -30,7 +30,9 @@ public struct CallTopView: View {
                             .accessibility(identifier: "viewMenu")
                     }
 
-                    ToggleCameraIconView(viewModel: viewModel)
+                    if viewModel.call?.state.ownCapabilities.contains(.sendVideo) == true {
+                        ToggleCameraIconView(viewModel: viewModel)
+                    }
 
                     Spacer()
                 }
