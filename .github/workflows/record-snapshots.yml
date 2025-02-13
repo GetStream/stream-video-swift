@@ -8,18 +8,8 @@ on:
         type: boolean
         required: false
         default: true
-      remove_and_record_snapshots_swiftui:
-        description: 'Reset all the SwiftUI snapshots on CI?'
-        type: boolean
-        required: false
-        default: false
       record_snapshots_uikit:
         description: 'UIKit snapshots'
-        type: boolean
-        required: false
-        default: false
-      remove_and_record_snapshots_uikit:
-        description: 'Reset all the UIKit snapshots on CI?'
         type: boolean
         required: false
         default: false
@@ -33,9 +23,7 @@ jobs:
     - run: |
         gh workflow run smoke-checks.yml --ref "${GITHUB_REF#refs/heads/}" \
           -f record_snapshots_swiftui=${{ github.event.inputs.record_snapshots_swiftui }} \
-          -f remove_and_record_snapshots_swiftui=${{ github.event.inputs.remove_and_record_snapshots_swiftui }} \
-          -f record_snapshots_uikit=${{ github.event.inputs.record_snapshots_uikit }} \
-          -f remove_and_record_snapshots_uikit=${{ github.event.inputs.remove_and_record_snapshots_uikit }}
+          -f record_snapshots_uikit=${{ github.event.inputs.record_snapshots_uikit }}
       timeout-minutes: 5
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
