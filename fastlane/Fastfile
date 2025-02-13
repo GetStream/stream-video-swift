@@ -257,7 +257,6 @@ lane :test_swiftui do |options|
     source: :swiftui,
     device: options[:device],
     record: options[:record],
-    remove_and_record: options[:remove_and_record],
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing]
   )
@@ -270,7 +269,6 @@ lane :test_uikit do |options|
     source: :uikit,
     device: options[:device],
     record: options[:record],
-    remove_and_record: options[:remove_and_record],
     skip_build: options[:skip_build],
     build_for_testing: options[:build_for_testing]
   )
@@ -279,10 +277,8 @@ end
 private_lane :test_ui do |options|
   next unless is_check_required(sources: sources_matrix[options[:source]], force_check: @force_check)
 
-  soft_record_mode = options[:record].to_s == 'true'
-  hard_record_mode = options[:remove_and_record].to_s == 'true'
-  record_mode = soft_record_mode || hard_record_mode
-  remove_snapshots(scheme: options[:scheme]) if hard_record_mode
+  record_mode = options[:record].to_s == 'true'
+  remove_snapshots(scheme: options[:scheme]) if record_mode
 
   update_testplan_on_ci(path: "#{options[:scheme]}Tests/#{options[:scheme]}.xctestplan")
 
