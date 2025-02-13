@@ -370,17 +370,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                             return
                         }
 
-                        context
-                            .coordinator?
-                            .stateAdapter
-                            .audioSession
-                            .didUpdateCallSettings(callSettings)
-
                         try await publisher.didUpdateCallSettings(callSettings)
-                        log.debug("Publisher and AudioSession callSettings updated.", subsystems: .webRTC)
+                        log.debug("Publisher callSettings updated.", subsystems: .webRTC)
                     } catch {
                         log.warning(
-                            "Will disconnect because failed to update callSettings on Publisher or AudioSession.[Error:\(error)]",
+                            "Will disconnect because failed to update callSettings on Publisher.[Error:\(error)]",
                             subsystems: .webRTC
                         )
                         transitionDisconnectOrError(error)

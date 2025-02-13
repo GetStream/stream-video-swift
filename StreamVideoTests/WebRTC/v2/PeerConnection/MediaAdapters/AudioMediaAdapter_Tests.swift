@@ -14,7 +14,7 @@ final class AudioMediaAdapter_Tests: XCTestCase {
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockMediaAdapter: MockLocalMediaAdapter! = .init()
-    private lazy var audioSession: StreamAudioSessionAdapter! = .init()
+    private lazy var audioSession: StreamAudioSession! = .init()
     private lazy var subject: AudioMediaAdapter! = .init(
         sessionID: sessionId,
         peerConnection: mockPeerConnection,

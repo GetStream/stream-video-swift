@@ -6,201 +6,164 @@
 import StreamWebRTC
 import XCTest
 
-final class StreamRTCAudioSession_Tests: XCTestCase {
+import AVFoundation
+import Combine
+@testable import StreamVideo
+import StreamWebRTC
+import XCTest
 
-    // MARK: - Lazy Properties
+final class StreamRTCAudioSessionTests: XCTestCase {
 
-    private var rtcAudioSession: RTCAudioSession! = .sharedInstance()
-    private lazy var subject: StreamRTCAudioSession! = StreamRTCAudioSession()
+    private lazy var subject: StreamRTCAudioSession! = .init()
+    private lazy var rtcAudioSession: RTCAudioSession! = .sharedInstance()
+    private var cancellables: Set<AnyCancellable>! = []
 
-    // MARK: - Lifecycle
-
-    override func tearDown() {
+    override func tearDown() async throws {
+        cancellables = nil
         subject = nil
         rtcAudioSession = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
-    // MARK: - isActive
+    // MARK: - Initialization
 
-    func test_isActive_returnsCorrectState() throws {
-        // Given
-        XCTAssertEqual(subject.isActive, rtcAudioSession.isActive)
-
-        // When
-        rtcAudioSession.lockForConfiguration()
-        try rtcAudioSession.setActive(true)
-        rtcAudioSession.unlockForConfiguration()
-
-        // Then
-        XCTAssertTrue(rtcAudioSession.isActive)
-        XCTAssertEqual(subject.isActive, rtcAudioSession.isActive)
-    }
-
-    // MARK: - currentRoute
-
-    func test_currentRoute_returnsCorrectRoute() {
-        XCTAssertEqual(subject.currentRoute.inputs.map(\.portType), rtcAudioSession.currentRoute.inputs.map(\.portType))
-        XCTAssertEqual(subject.currentRoute.outputs.map(\.portType), rtcAudioSession.currentRoute.outputs.map(\.portType))
-    }
-
-    // MARK: - category
-
-    func test_category_returnsCorrectCategory() throws {
-        rtcAudioSession.lockForConfiguration()
-        try rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord)
-        rtcAudioSession.unlockForConfiguration()
-
-        // Then
-        XCTAssertEqual(subject.category, rtcAudioSession.category)
-    }
-
-    // MARK: - isUsingSpeakerOutput
-
-    func test_isUsingSpeakerOutput_returnsCorrectValue() throws {
-        // Given
-        rtcAudioSession.lockForConfiguration()
-        try rtcAudioSession.overrideOutputAudioPort(.speaker)
-        rtcAudioSession.unlockForConfiguration()
-
-        // When
-        let isUsingSpeakerOutput = subject.isUsingSpeakerOutput
-
-        // Then
-        XCTAssertTrue(isUsingSpeakerOutput)
-    }
-
-    // MARK: - useManualAudio
-
-    func test_useManualAudio_setAndGet() {
-        // When
-        subject.useManualAudio = true
-
-        // Then
-        XCTAssertTrue(rtcAudioSession.useManualAudio)
-        XCTAssertEqual(subject.useManualAudio, rtcAudioSession.useManualAudio)
-    }
-
-    // MARK: - isAudioEnabled
-
-    func test_isAudioEnabled_setAndGet() {
-        // When
-        subject.isAudioEnabled = true
-
-        // Then
-        XCTAssertTrue(rtcAudioSession.isAudioEnabled)
-        XCTAssertEqual(subject.isAudioEnabled, rtcAudioSession.isAudioEnabled)
-    }
-
-    // MARK: - addDelegate
-
-    func test_addDelegate() throws {
-        final class MockRTCAudioSessionDelegate: NSObject, RTCAudioSessionDelegate {
-            private(set) var didSetActiveWasCalled: Bool = false
-            func audioSession(_ audioSession: RTCAudioSession, didSetActive active: Bool) { didSetActiveWasCalled = true }
-        }
-
-        // Given
-        let delegate = MockRTCAudioSessionDelegate()
-        subject.add(delegate)
-
-        // When
-        rtcAudioSession.lockForConfiguration()
-        try rtcAudioSession.setActive(true)
-        rtcAudioSession.unlockForConfiguration()
-
-        // Then
-        XCTAssertTrue(delegate.didSetActiveWasCalled)
-    }
-
-    // MARK: - setMode
-
-    func test_setMode_modeUpdatedOnAudioSession() throws {
-        // Given
-        rtcAudioSession.lockForConfiguration()
-        try subject.setMode(AVAudioSession.Mode.videoChat.rawValue)
-        rtcAudioSession.unlockForConfiguration()
-
-        // Then
-        XCTAssertEqual(rtcAudioSession.mode, AVAudioSession.Mode.videoChat.rawValue)
+    func test_init_setsInitialState() {
+        XCTAssertEqual(subject.state.category.rawValue, rtcAudioSession.category)
+        XCTAssertEqual(subject.state.mode.rawValue, rtcAudioSession.mode)
+        XCTAssertEqual(subject.state.options, rtcAudioSession.categoryOptions)
+        XCTAssertEqual(subject.state.overrideOutputPort, .none)
     }
 
     // MARK: - setCategory
 
-    func test_setCategory_categoryUpdatedOnAudioSession() throws {
-        // Given
-        rtcAudioSession.lockForConfiguration()
-        try subject.setCategory(
-            AVAudioSession.Category.playAndRecord.rawValue,
-            with: [.allowBluetooth]
-        )
-        rtcAudioSession.unlockForConfiguration()
+    func test_setCategory_whenNoChangesNeeded_thenDoesNotUpdateState() async throws {
+        let initialState = subject.state
 
-        // Then
-        XCTAssertEqual(
-            rtcAudioSession.category,
-            AVAudioSession.Category.playAndRecord.rawValue
+        try await subject.setCategory(
+            initialState.category,
+            mode: initialState.mode,
+            with: initialState.options
         )
-        XCTAssertEqual(
-            rtcAudioSession.categoryOptions,
-            [.allowBluetooth]
-        )
+
+        XCTAssertEqual(subject.state, initialState)
     }
 
-    // MARK: - setActive
+    func test_setCategory_whenCategoryChanges_thenUpdatesState() async throws {
+        let newCategory: AVAudioSession.Category = .playback
+        let initialState = subject.state
 
-    func test_setActive_isActiveUpdatedOnAudioSession() throws {
-        // Given
-        rtcAudioSession.lockForConfiguration()
-        try subject.setActive(true)
-        rtcAudioSession.unlockForConfiguration()
+        try await subject.setCategory(
+            newCategory,
+            mode: initialState.mode,
+            with: initialState.options
+        )
 
-        // Then
-        XCTAssertTrue(rtcAudioSession.isActive)
+        XCTAssertEqual(subject.state.category, newCategory)
+        XCTAssertEqual(subject.state.mode, initialState.mode)
+        XCTAssertEqual(subject.state.options, initialState.options)
     }
 
-    // MARK: - setConfiguration
+    func test_setCategory_whenModeChanges_thenUpdatesState() async throws {
+        let newMode: AVAudioSession.Mode = .videoChat
+        let initialState = subject.state
 
-    func test_setConfiguration_configurationUpdatedOnAudioSession() throws {
-        // Given
-        rtcAudioSession.lockForConfiguration()
-        let configuration = RTCAudioSessionConfiguration()
-        configuration.category = AVAudioSession.Category.playAndRecord.rawValue
-        configuration.categoryOptions = [.allowBluetooth]
-        configuration.mode = AVAudioSession.Mode.videoChat.rawValue
-        try subject.setConfiguration(configuration)
-        rtcAudioSession.unlockForConfiguration()
+        try await subject.setCategory(
+            initialState.category,
+            mode: newMode,
+            with: initialState.options
+        )
 
-        // Then
-        XCTAssertEqual(rtcAudioSession.mode, AVAudioSession.Mode.videoChat.rawValue)
-        XCTAssertEqual(
-            rtcAudioSession.category,
-            AVAudioSession.Category.playAndRecord.rawValue
-        )
-        XCTAssertEqual(
-            rtcAudioSession.categoryOptions,
-            [.allowBluetooth]
-        )
+        XCTAssertEqual(subject.state.category, initialState.category)
+        XCTAssertEqual(subject.state.mode, newMode)
+        XCTAssertEqual(subject.state.options, initialState.options)
     }
 
-    // MARK: - updateConfiguration
+    func test_setCategory_whenOptionsChange_thenUpdatesState() async throws {
+        let newOptions: AVAudioSession.CategoryOptions = .mixWithOthers
+        let initialState = subject.state
 
-    func test_updateConfiguration_executesBlockOnQueue() {
-        // Given
-        let expectation = self.expectation(description: "Configuration updated")
+        try await subject.setCategory(
+            initialState.category,
+            mode: initialState.mode,
+            with: newOptions
+        )
 
-        // When
-        subject.updateConfiguration(
-            functionName: #function,
-            file: #file,
-            line: #line
-        ) { session in
-            try session.setMode(AVAudioSession.Mode.videoChat.rawValue)
-            expectation.fulfill()
-        }
+        XCTAssertEqual(subject.state.category, initialState.category)
+        XCTAssertEqual(subject.state.mode, initialState.mode)
+        XCTAssertEqual(subject.state.options, newOptions)
+    }
 
-        wait(for: [expectation], timeout: defaultTimeout)
+    func test_setCategory_thenUpdatesWebRTCConfiguration() async throws {
+        let newOptions: AVAudioSession.CategoryOptions = .mixWithOthers
 
-        XCTAssertEqual(rtcAudioSession.mode, AVAudioSession.Mode.videoChat.rawValue)
+        try await subject.setCategory(
+            .soloAmbient,
+            mode: .default,
+            with: newOptions
+        )
+
+        let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
+        XCTAssertEqual(subject.state.category.rawValue, webRTCConfiguration.category)
+        XCTAssertEqual(subject.state.mode.rawValue, webRTCConfiguration.mode)
+        XCTAssertEqual(subject.state.options, webRTCConfiguration.categoryOptions)
+    }
+
+    // MARK: - overrideOutputAudioPort
+
+    func test_overrideOutputAudioPort_whenCategoryIsNotPlayAndRecord_thenDoesNotUpdateState() async throws {
+        try await subject.setCategory(.playback, mode: .default, with: [])
+        let initialState = subject.state
+
+        try await subject.overrideOutputAudioPort(.speaker)
+
+        XCTAssertEqual(subject.state, initialState)
+    }
+
+    func test_overrideOutputAudioPort_whenPortIsSameAsCurrent_thenDoesNotUpdateState() async throws {
+        try await subject.setCategory(.playAndRecord, mode: .default, with: [])
+        try await subject.overrideOutputAudioPort(.speaker)
+        let initialState = subject.state
+
+        try await subject.overrideOutputAudioPort(.speaker)
+
+        XCTAssertEqual(subject.state, initialState)
+    }
+
+    func test_overrideOutputAudioPort_whenValidChange_thenUpdatesState() async throws {
+        try await subject.setCategory(.playAndRecord, mode: .default, with: [])
+
+        try await subject.overrideOutputAudioPort(.speaker)
+
+        XCTAssertEqual(subject.state.overrideOutputPort, .speaker)
+    }
+
+    // MARK: - Properties
+
+    func test_isActive_returnsSourceValue() {
+        XCTAssertEqual(subject.isActive, rtcAudioSession.isActive)
+    }
+
+    func test_currentRoute_returnsSourceValue() {
+        XCTAssertEqual(subject.currentRoute, rtcAudioSession.currentRoute)
+    }
+
+    func test_category_returnsStateCategory() {
+        XCTAssertEqual(subject.category, subject.state.category)
+    }
+
+    func test_useManualAudio_whenSet_updatesSourceValue() {
+        subject.useManualAudio = true
+        XCTAssertTrue(rtcAudioSession.useManualAudio)
+
+        subject.useManualAudio = false
+        XCTAssertFalse(rtcAudioSession.useManualAudio)
+    }
+
+    func test_isAudioEnabled_whenSet_updatesSourceValue() {
+        subject.isAudioEnabled = true
+        XCTAssertTrue(rtcAudioSession.isAudioEnabled)
+
+        subject.isAudioEnabled = false
+        XCTAssertFalse(rtcAudioSession.isAudioEnabled)
     }
 }

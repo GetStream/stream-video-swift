@@ -42,7 +42,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     let peerConnectionFactory: PeerConnectionFactory
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
-    let audioSession: StreamAudioSessionAdapter = .init()
+    let audioSession: StreamAudioSession = .init()
 
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
@@ -118,7 +118,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
 
-        audioSession.delegate = self
+        Task {
+            await configureAudioSession()
+        }
+    }
+
+    deinit {
+        audioSession.dismantle()
     }
 
     /// Sets the session ID.
@@ -485,6 +491,34 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         previousParticipantOperation = newTask
     }
 
+    /// Assigns media tracks to participants based on their media type.
+    /// - Parameter participants: The storage containing participant information.
+    /// - Returns: An updated participants storage with assigned tracks.
+    func assignTracks(
+        on participants: ParticipantsStorage
+    ) -> ParticipantsStorage {
+        /// Reduces the participants to a new storage with updated tracks.
+        participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
+            var newParticipant = entry
+                .value
+                /// Updates the participant with a video track if available.
+                .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
+                /// Updates the participant with a screensharing track if available.
+                .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
+
+            /// For participants other than the local one, we check if the incomingVideoQualitySettings
+            /// provide additional limits.
+            if
+                newParticipant.sessionId != sessionID,
+                incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId)
+            {
+                newParticipant = newParticipant.withUpdated(track: nil)
+            }
+
+            partialResult[entry.key] = newParticipant
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Handles track events when they are added or removed from peer connections.
@@ -530,44 +564,42 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         )
     }
 
-    /// Assigns media tracks to participants based on their media type.
-    /// - Parameter participants: The storage containing participant information.
-    /// - Returns: An updated participants storage with assigned tracks.
-    func assignTracks(
-        on participants: ParticipantsStorage
-    ) -> ParticipantsStorage {
-        /// Reduces the participants to a new storage with updated tracks.
-        participants.reduce(into: ParticipantsStorage()) { partialResult, entry in
-            var newParticipant = entry
-                .value
-                /// Updates the participant with a video track if available.
-                .withUpdated(track: track(for: entry.value, of: .video) as? RTCVideoTrack)
-                /// Updates the participant with a screensharing track if available.
-                .withUpdated(screensharingTrack: track(for: entry.value, of: .screenshare) as? RTCVideoTrack)
+    private func configureAudioSession() {
+        audioSession.delegate = self
 
-            /// For participants other than the local one, we check if the incomingVideoQualitySettings
-            /// provide additional limits.
-            if
-                newParticipant.sessionId != sessionID,
-                incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId)
-            {
-                newParticipant = newParticipant.withUpdated(track: nil)
+        $callSettings
+            .removeDuplicates()
+            .sinkTask { [weak audioSession] in
+                do {
+                    try await audioSession?.didUpdateCallSettings($0)
+                } catch {
+                    log.error(error)
+                }
             }
+            .store(in: disposableBag)
 
-            partialResult[entry.key] = newParticipant
-        }
+        $ownCapabilities
+            .removeDuplicates()
+            .sinkTask { [weak audioSession] in
+                do {
+                    try await audioSession?.didUpdateOwnCapabilities($0)
+                } catch {
+                    log.error(error)
+                }
+            }
+            .store(in: disposableBag)
     }
 
     // MARK: - AudioSessionDelegate
 
     nonisolated func audioSessionAdapterDidUpdateCallSettings(
-        _ adapter: StreamAudioSessionAdapter,
+        _ adapter: StreamAudioSession,
         callSettings: CallSettings
     ) {
         Task {
             await self.set(callSettings: callSettings)
             log.debug(
-                "AudioSession updated call settings: \(callSettings)",
+                "AudioSession delegated updated call settings: \(callSettings)",
                 subsystems: .audioSession
             )
         }

@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- You can now configure the policy used by SDK's AudioSession. `DefaultAudioSessionPolicy` is meant to be used for active participants in a call (1:1, group calls) and `OwnCapabilitiesAudioSessionPolicy` was designed to be used from call participants who don't actively participate in the call, but they may do in the future (e.g. Livestream viewers, Twitter Space listener etc)
+
 ### 🐞 Fixed
 - When a call is being created from another device than the one starting the call, if you don't provide any members, the SDK will get the information from the backend [#660](https://github.com/GetStream/stream-video-swift/pull/660)
 - The `OutgoingCallView` provided by the default `ViewFactory` implementation won't show the current user in the ringing member bubbles [#660](https://github.com/GetStream/stream-video-swift/pull/660)

@@ -50,7 +50,7 @@ extension Publisher {
                     }
                 } catch {
                     // Log any unexpected errors during task execution.
-                    LogConfig.logger.error(error)
+                    LogConfig.logger.error(ClientError(with: error))
                 }
             }
 

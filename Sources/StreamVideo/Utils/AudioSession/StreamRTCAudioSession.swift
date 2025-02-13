@@ -3,22 +3,83 @@
 //
 
 import AVFoundation
+import Combine
 import Foundation
 import StreamWebRTC
 
+/// A protocol defining an interface for managing an audio session.
+/// This allows for dependency injection and easier testing.
+protocol AudioSessionProtocol {
+
+    /// A publisher that emits audio session events.
+    var eventPublisher: AnyPublisher<AudioSessionEvent, Never> { get }
+
+    /// A Boolean value indicating whether the audio session is active.
+    var isActive: Bool { get }
+
+    /// The current audio route description for the session.
+    var currentRoute: AVAudioSessionRouteDescription { get }
+
+    var category: AVAudioSession.Category { get }
+
+    /// A Boolean value indicating whether manual audio routing is used.
+    var useManualAudio: Bool { get set }
+
+    /// A Boolean value indicating whether audio is enabled.
+    var isAudioEnabled: Bool { get set }
+
+    /// Configures the audio session category and options.
+    /// - Parameters:
+    ///   - category: The audio category (e.g., `.playAndRecord`).
+    ///   - mode: The audio mode (e.g., `.videoChat`).
+    ///   - categoryOptions: The options for the category (e.g., `.allowBluetooth`).
+    /// - Throws: An error if setting the category fails.
+    func setCategory(
+        _ category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
+        with categoryOptions: AVAudioSession.CategoryOptions
+    ) async throws
+
+    /// Activates or deactivates the audio session.
+    /// - Parameter isActive: Whether to activate the session.
+    /// - Throws: An error if activation fails.
+    func setActive(_ isActive: Bool) async throws
+
+    /// Overrides the audio output port (e.g., to speaker).
+    /// - Parameter port: The output port override.
+    /// - Throws: An error if overriding fails.
+    func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) async throws
+
+    /// Requests permission to record audio from the user.
+    /// - Returns: `true` if permission was granted, otherwise `false`.
+    func requestRecordPermission() async -> Bool
+}
+
 /// A class implementing the `AudioSessionProtocol` that manages the WebRTC
 /// audio session for the application, handling settings and route management.
-final class StreamRTCAudioSession: AudioSessionProtocol {
+final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, ReflectiveStringConvertible {
+
+    struct State: ReflectiveStringConvertible, Equatable {
+        var category: AVAudioSession.Category
+        var mode: AVAudioSession.Mode
+        var options: AVAudioSession.CategoryOptions
+        var overrideOutputPort: AVAudioSession.PortOverride = .none
+    }
+
+    @Published private(set) var state: State
 
     /// A queue for processing audio session operations asynchronously.
-    private let processingQueue = DispatchQueue(
-        label: "io.getstream.audiosession",
-        target: .global(qos: .userInteractive)
-    )
+    private let processingQueue = SerialActorQueue()
 
     /// The shared instance of `RTCAudioSession` used for WebRTC audio
     /// configuration and management.
-    private let source: RTCAudioSession = .sharedInstance()
+    private let source: RTCAudioSession
+    private let sourceDelegate: RTCAudioSessionDelegatePublisher = .init()
+    private let disposableBag = DisposableBag()
+
+    var eventPublisher: AnyPublisher<AudioSessionEvent, Never> {
+        sourceDelegate.publisher
+    }
 
     /// A Boolean value indicating whether the audio session is currently active.
     var isActive: Bool { source.isActive }
@@ -26,16 +87,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
     /// The current audio route description for the session.
     var currentRoute: AVAudioSessionRouteDescription { source.currentRoute }
 
-    /// The audio category of the session, such as `.playAndRecord`.
-    var category: String { source.category }
-
-    /// A Boolean value indicating whether the audio session is using
-    /// the device's speaker.
-    var isUsingSpeakerOutput: Bool { currentRoute.isSpeaker }
-
-    /// A Boolean value indicating whether the audio session is using
-    /// an external output, like Bluetooth or headphones.
-    var isUsingExternalOutput: Bool { currentRoute.isExternal }
+    var category: AVAudioSession.Category { state.category }
 
     /// A Boolean value indicating whether the audio session uses manual
     /// audio routing.
@@ -50,18 +102,20 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
         get { source.isAudioEnabled }
     }
 
-    /// Adds a delegate to receive updates from the audio session.
-    /// - Parameter delegate: A delegate conforming to `RTCAudioSessionDelegate`.
-    func add(_ delegate: RTCAudioSessionDelegate) {
-        source.add(delegate)
+    // MARK: - Lifecycle
+
+    init() {
+        let source = RTCAudioSession.sharedInstance()
+        self.source = source
+        state = .init(
+            category: .init(rawValue: source.category),
+            mode: .init(rawValue: source.mode),
+            options: source.categoryOptions
+        )
+        source.add(sourceDelegate)
     }
 
-    /// Sets the audio mode for the session, such as `.videoChat`.
-    /// - Parameter mode: The audio mode to set.
-    /// - Throws: An error if setting the mode fails.
-    func setMode(_ mode: String) throws {
-        try source.setMode(AVAudioSession.Mode(rawValue: mode))
-    }
+    // MARK: - Configuration
 
     /// Configures the audio category and category options for the session.
     /// - Parameters:
@@ -70,61 +124,86 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
     ///     `.allowBluetooth` and `.defaultToSpeaker`.
     /// - Throws: An error if setting the category fails.
     func setCategory(
-        _ category: String,
+        _ category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
         with categoryOptions: AVAudioSession.CategoryOptions
-    ) throws {
-        try source.setCategory(AVAudioSession.Category(rawValue: category), with: categoryOptions)
+    ) async throws {
+        try await performOperation { [weak self] in
+            guard let self else { return }
+
+            let state = self.state
+            let needsCategoryUpdate = category != state.category
+            let needsModeUpdate = mode != state.mode
+            let needsOptionsUpdate = categoryOptions != state.options
+
+            guard needsCategoryUpdate || needsModeUpdate || needsOptionsUpdate else {
+                return
+            }
+
+            if needsCategoryUpdate || needsOptionsUpdate {
+                if needsModeUpdate {
+                    try source.setCategory(
+                        category,
+                        mode: mode,
+                        options: categoryOptions
+                    )
+                } else {
+                    try source.setCategory(category, with: categoryOptions)
+                }
+            } else if needsModeUpdate {
+                try source.setMode(mode)
+            }
+
+            self.state = .init(
+                category: category,
+                mode: mode,
+                options: categoryOptions,
+                overrideOutputPort: state.overrideOutputPort
+            )
+
+            updateWebRTCConfiguration(with: self.state)
+
+            log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
+        }
     }
 
     /// Activates or deactivates the audio session.
     /// - Parameter isActive: A Boolean indicating whether the session
     ///   should be active.
     /// - Throws: An error if activation or deactivation fails.
-    func setActive(_ isActive: Bool) throws {
-        try source.setActive(isActive)
-    }
+    func setActive(
+        _ isActive: Bool
+    ) async throws {
+        try await performOperation { [weak self] in
+            guard let self else {
+                return
+            }
 
-    /// Sets the audio configuration for the WebRTC session.
-    /// - Parameter configuration: The configuration to apply.
-    /// - Throws: An error if setting the configuration fails.
-    func setConfiguration(_ configuration: RTCAudioSessionConfiguration) throws {
-        try source.setConfiguration(configuration)
+            try source.setActive(isActive)
+        }
     }
 
     /// Overrides the audio output port, such as switching to speaker output.
     /// - Parameter port: The output port to use, such as `.speaker`.
     /// - Throws: An error if overriding the output port fails.
-    func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) throws {
-        try source.overrideOutputAudioPort(port)
-    }
-
-    /// Performs an asynchronous update to the audio session configuration.
-    /// - Parameters:
-    ///   - functionName: The name of the calling function.
-    ///   - file: The source file of the calling function.
-    ///   - line: The line number of the calling function.
-    ///   - block: A closure that performs an audio configuration update.
-    func updateConfiguration(
-        functionName: StaticString,
-        file: StaticString,
-        line: UInt,
-        _ block: @escaping (any AudioSessionProtocol) throws -> Void
-    ) {
-        processingQueue.async { [weak self] in
-            guard let self else { return }
-            source.lockForConfiguration()
-            defer { source.unlockForConfiguration() }
-            do {
-                try block(self)
-            } catch {
-                log.error(
-                    error,
-                    subsystems: .audioSession,
-                    functionName: functionName,
-                    fileName: file,
-                    lineNumber: line
-                )
+    func overrideOutputAudioPort(
+        _ port: AVAudioSession.PortOverride
+    ) async throws {
+        try await performOperation { [weak self] in
+            guard let self else {
+                return
             }
+
+            guard
+                state.category == .playAndRecord,
+                state.overrideOutputPort != port
+            else {
+                return
+            }
+
+            try source.overrideOutputAudioPort(port)
+            state.overrideOutputPort = port
+            log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
         }
     }
 
@@ -137,23 +216,32 @@ final class StreamRTCAudioSession: AudioSessionProtocol {
             }
         }
     }
-}
 
-/// A key for dependency injection of an `AudioSessionProtocol` instance
-/// that represents the active call audio session.
-struct StreamActiveCallAudioSessionKey: InjectionKey {
-    static var currentValue: AudioSessionProtocol?
-}
+    // MARK: - Private Helpers
 
-extension InjectedValues {
-    /// The active call's audio session. The value is being set on `StreamAudioSessionAdapter`
-    /// `init` / `deinit`
-    var activeCallAudioSession: AudioSessionProtocol? {
-        get {
-            Self[StreamActiveCallAudioSessionKey.self]
+    private func performOperation(
+        _ operation: @Sendable @escaping () async throws -> Void
+    ) async throws {
+        try await processingQueue.sync { [weak self] in
+            guard let self else { return }
+            source.lockForConfiguration()
+            defer { source.unlockForConfiguration() }
+            try await operation()
         }
-        set {
-            Self[StreamActiveCallAudioSessionKey.self] = newValue
-        }
+    }
+
+    /// Updates the WebRTC audio session configuration.
+    ///
+    /// - Parameter state: The current state of the audio session.
+    ///
+    /// - Note: This is required to ensure that the WebRTC audio session
+    /// is configured correctly when the AVAudioSession is updated in
+    /// order to avoid unexpected changes to the category.
+    private func updateWebRTCConfiguration(with state: State) {
+        let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
+        webRTCConfiguration.category = state.category.rawValue
+        webRTCConfiguration.mode = state.mode.rawValue
+        webRTCConfiguration.categoryOptions = state.options
+        RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
     }
 }

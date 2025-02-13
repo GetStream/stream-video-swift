@@ -11,6 +11,7 @@ final class StreamAudioRecorderTests: XCTestCase {
 
     private lazy var builder: AVAudioRecorderBuilder! = .init(cachedResult: mockAudioRecorder)
     private lazy var mockAudioSession: MockAudioSession! = .init()
+    private lazy var audioSession: StreamAudioSession! = .init(audioSession: mockAudioSession)
     private lazy var mockActiveCallProvider: MockStreamActiveCallProvider! = .init()
     private var mockAudioRecorder: MockAudioRecorder!
     private lazy var subject: StreamCallAudioRecorder! = .init(audioRecorderBuilder: builder)
@@ -18,7 +19,7 @@ final class StreamAudioRecorderTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
         StreamActiveCallProviderKey.currentValue = mockActiveCallProvider
-        StreamActiveCallAudioSessionKey.currentValue = mockAudioSession
+        _ = audioSession
         mockAudioRecorder = try .init(
             url: URL(string: "test.wav")!,
             settings: AVAudioRecorderBuilder.defaultRecordingSettings
@@ -118,7 +119,7 @@ final class StreamAudioRecorderTests: XCTestCase {
         mockAudioSession.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
         await subject.startRecording()
-        
+
         await setUpHasActiveCall(false)
 
         try await assertRecording(false)
@@ -184,7 +185,7 @@ final class StreamAudioRecorderTests: XCTestCase {
 
 // Mocks for unit testing
 
-private class MockAudioRecorder: AVAudioRecorder {
+private class MockAudioRecorder: AVAudioRecorder, @unchecked Sendable {
     private var _isRecoding = false
     override var isRecording: Bool { _isRecoding }
 
@@ -211,18 +212,5 @@ private class MockStreamActiveCallProvider: StreamActiveCallProviding {
 
     var hasActiveCallPublisher: AnyPublisher<Bool, Never> {
         _activeCallSubject.eraseToAnyPublisher()
-    }
-}
-
-extension XCTestCase {
-
-    func XCTAsyncUnwrap<T>(
-        _ expression: @autoclosure () async throws -> T?,
-        _ message: @autoclosure () -> String = "",
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async throws -> T {
-        let expressionResult = try await expression()
-        return try XCTUnwrap(expressionResult, message(), file: file, line: line)
     }
 }

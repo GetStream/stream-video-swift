@@ -468,6 +468,10 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
+        try await webRTCCoordinator.updateAudioSessionPolicy(policy)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {
