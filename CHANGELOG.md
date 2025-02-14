@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.17.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.17.0)
+_February 14, 2025_
+
 ### ✅ Added
 - You can now configure the policy used by SDK's AudioSession. `DefaultAudioSessionPolicy` is meant to be used for active participants in a call (1:1, group calls) and `OwnCapabilitiesAudioSessionPolicy` was designed to be used from call participants who don't actively participate in the call, but they may do in the future (e.g. Livestream viewers, Twitter Space listener etc)
 
