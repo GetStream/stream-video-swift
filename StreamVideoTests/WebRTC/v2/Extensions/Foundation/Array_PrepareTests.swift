@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class Array_PrepareTests: XCTestCase {
+final class Array_PrepareTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - RTCRtpEncodingParameters
 

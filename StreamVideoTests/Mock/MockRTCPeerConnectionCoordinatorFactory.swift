@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding {
+final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding, @unchecked Sendable {
     var stubbedBuildCoordinatorResult: [PeerConnectionType: MockRTCPeerConnectionCoordinator] = [:]
 
     func buildCoordinator(

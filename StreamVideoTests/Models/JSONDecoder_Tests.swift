@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class JSONDecoder_Tests: XCTestCase {
+final class JSONDecoder_Tests: XCTestCase, @unchecked Sendable {
     private var decoder: JSONDecoder = .default
 
     func test_throwsException_whenDecodingDateFromEmptyString() {

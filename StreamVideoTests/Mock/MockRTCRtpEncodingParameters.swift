@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockRTCRtpEncodingParameters: RTCRtpEncodingParametersProtocol, Mockable {
+final class MockRTCRtpEncodingParameters: RTCRtpEncodingParametersProtocol, Mockable, @unchecked Sendable {
     enum MockFunctionKey: Hashable, CaseIterable { case none }
     enum MockPropertyKey: String, Hashable { case rid, maxBitrateBps, maxFramerate }
     typealias FunctionKey = MockFunctionKey

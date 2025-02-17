@@ -8,7 +8,7 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class StreamAudioSession_Tests: XCTestCase {
+final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var disposableBag: DisposableBag! = .init()
     private lazy var mockAudioSession: MockAudioSession! = .init()

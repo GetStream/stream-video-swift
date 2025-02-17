@@ -489,7 +489,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
 
     private func assertTrackEvent(
         isInverted: Bool = false,
-        filter: @escaping (TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
+        filter: @escaping @Sendable(TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
         operation: @Sendable @escaping (LocalScreenShareMediaAdapter) async throws -> Void,
         validation: @Sendable @escaping (String, TrackType, RTCMediaStreamTrack) -> Void = { _, _, _ in XCTFail() }
     ) async throws {
@@ -619,3 +619,9 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 }
+
+#if compiler(>=6.0)
+extension RTCRtpTransceiver: @retroactive @unchecked Sendable {}
+#else
+extension RTCRtpTransceiver: @unchecked Sendable {}
+#endif

@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class SFUsubject_Tests: XCTestCase {
+final class SFUsubject_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockSFUStack: MockSFUStack! = MockSFUStack()
     private lazy var subject: SFUEventBucket! = SFUEventBucket(sfuAdapter)

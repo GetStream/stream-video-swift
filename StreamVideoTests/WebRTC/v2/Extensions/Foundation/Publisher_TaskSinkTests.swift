@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class PublisherTaskSinkTests: XCTestCase {
+final class PublisherTaskSinkTests: XCTestCase, @unchecked Sendable {
 
     private var disposableBag: DisposableBag! = .init()
 
