@@ -62,8 +62,8 @@ final class Sorting_Tests: XCTestCase {
     func test_pinned_localAndRemote() {
         assertSort(
             [
-                .dummy(pin: PinInfo(isLocal: false, pinnedAt: Date(timeIntervalSince1970: 0))),
-                .dummy(pin: PinInfo(isLocal: true, pinnedAt: Date(timeIntervalSince1970: 0)))
+                .dummy(pin: PinInfo(isLocal: true, pinnedAt: Date(timeIntervalSince1970: 0))),
+                .dummy(pin: PinInfo(isLocal: false, pinnedAt: Date(timeIntervalSince1970: 0)))
             ],
             comparator: pinned,
             expectedTransformer: { [$0[1], $0[0]] }
@@ -79,7 +79,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(isScreenSharing: true),
                 .dummy(isScreenSharing: true)
             ],
-            comparator: screensharing,
+            comparator: combineComparators(speakerLayoutSortPreset),
             expectedTransformer: { [$0[0], $0[1]] }
         )
     }
@@ -91,7 +91,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(isScreenSharing: false),
                 .dummy(isScreenSharing: false)
             ],
-            comparator: screensharing,
+            comparator: combineComparators(speakerLayoutSortPreset),
             expectedTransformer: { [$0[0], $0[1]] }
         )
     }
@@ -103,7 +103,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(isScreenSharing: false),
                 .dummy(isScreenSharing: true)
             ],
-            comparator: screensharing,
+            comparator: combineComparators(speakerLayoutSortPreset),
             expectedTransformer: { [$0[1], $0[0]] }
         )
     }
@@ -155,7 +155,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(isSpeaking: true),
                 .dummy(isSpeaking: true)
             ],
-            comparator: isSpeaking,
+            comparator: speaking,
             expectedTransformer: { [$0[0], $0[1]] }
         )
     }
@@ -167,7 +167,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(isSpeaking: false),
                 .dummy(isSpeaking: false)
             ],
-            comparator: isSpeaking,
+            comparator: speaking,
             expectedTransformer: { [$0[0], $0[1]] }
         )
     }
@@ -179,7 +179,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(isSpeaking: false),
                 .dummy(isSpeaking: true)
             ],
-            comparator: isSpeaking,
+            comparator: speaking,
             expectedTransformer: { [$0[1], $0[0]] }
         )
     }
@@ -295,7 +295,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "AARON")
             ],
             comparator: nameComparator,
-            expectedTransformer: { [$0[2], $0[1], $0[0]] } // Expecting a case-sensitive alphabetical order.
+            expectedTransformer: { [$0[0], $0[1], $0[2]] } // Expecting a case-insensitive alphabetical order.
         )
     }
 
@@ -315,7 +315,7 @@ final class Sorting_Tests: XCTestCase {
 
     /// Test the `roles` comparator with participants having priority roles.
     func test_roles_priorityRoles() {
-        let rolesComparator = roles()
+        let rolesComparator = roles(["admin"])
 
         assertSort(
             [
@@ -324,7 +324,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(roles: ["admin"])
             ],
             comparator: rolesComparator,
-            expectedTransformer: { [$0[2], $0[1], $0[0]] } // Expecting the order: "admin", "host", "speaker".
+            expectedTransformer: { [$0[2], $0[0], $0[1]] }
         )
     }
 
@@ -611,7 +611,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Zane", showTrack: false),
                 .dummy(name: "Aaron", showTrack: true)
             ],
-            comparator: ifInvisible(nameComparator),
+            comparator: ifInvisibleBy(nameComparator),
             expectedTransformer: { [$0[1], $0[0]] } // Since Zane is invisible, sorting by name is applied.
         )
     }
@@ -623,7 +623,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Zane", showTrack: false),
                 .dummy(name: "Aaron", showTrack: false)
             ],
-            comparator: ifInvisible(nameComparator),
+            comparator: ifInvisibleBy(nameComparator),
             expectedTransformer: { [$0[1], $0[0]] } // Since both are invisible, sorting by name is applied.
         )
     }
@@ -635,7 +635,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Zane", showTrack: true),
                 .dummy(name: "Aaron", showTrack: true)
             ],
-            comparator: ifInvisible(nameComparator),
+            comparator: ifInvisibleBy(nameComparator),
             expectedTransformer: { [$0[0], $0[1]] } // Since both are visible, order remains unchanged.
         )
     }
@@ -644,7 +644,7 @@ final class Sorting_Tests: XCTestCase {
 
     /// Test the `defaultComparators` mixed: considering both `pinned` and `ifInvisible` for `publishingVideo`.
     func test_defaultComparators_mixed_pinnedAndInvisibleVideo() {
-        let combined = combineComparators(defaultComparators)
+        let combined = combineComparators(defaultSortPreset)
 
         assertSort(
             [
@@ -659,7 +659,7 @@ final class Sorting_Tests: XCTestCase {
 
     /// Test the `defaultComparators` mixed: considering `screensharing`, `dominantSpeaker`, and `ifInvisible` for `isSpeaking`.
     func test_defaultComparators_mixed_screenshareDominantAndInvisibleSpeaking() {
-        let combined = combineComparators(defaultComparators)
+        let combined = combineComparators(defaultSortPreset)
 
         assertSort(
             [
@@ -674,7 +674,7 @@ final class Sorting_Tests: XCTestCase {
 
     /// Test the `defaultComparators` mixed: considering both `pinned` and `ifInvisible` for `publishingAudio`.
     func test_defaultComparators_mixed_pinnedAndInvisibleAudio() {
-        let combined = combineComparators(defaultComparators)
+        let combined = combineComparators(defaultSortPreset)
 
         assertSort(
             [
@@ -689,7 +689,7 @@ final class Sorting_Tests: XCTestCase {
 
     /// Test the `defaultComparators` mixed: considering `screensharing`, `dominantSpeaker`, `ifInvisible` for `publishingVideo`, and `ifInvisible` for `publishingAudio`.
     func test_defaultComparators_mixed_screenshareDominantInvisibleVideoAndAudio() {
-        let combined = combineComparators(defaultComparators)
+        let combined = combineComparators(defaultSortPreset)
 
         assertSort(
             [
@@ -704,13 +704,13 @@ final class Sorting_Tests: XCTestCase {
 
     func test_defaultComparators_someSpeakingWhileDominantSpeakerIsVisible_orderSetsToShowDominanFirstAndTheOthersSortedBasedOnOtherCriteria(
     ) {
-        let combined = combineComparators(defaultComparators)
+        let combined = combineComparators(defaultSortPreset)
 
         assertSort(
             [
                 .dummy(
                     hasAudio: true,
-                    showTrack: true,
+                    showTrack: false,
                     isSpeaking: true,
                     isDominantSpeaker: false
                 ),
@@ -728,7 +728,7 @@ final class Sorting_Tests: XCTestCase {
                 ),
                 .dummy(
                     hasAudio: true,
-                    showTrack: true,
+                    showTrack: false,
                     isSpeaking: true,
                     isDominantSpeaker: true
                 )
@@ -739,7 +739,7 @@ final class Sorting_Tests: XCTestCase {
     }
 
     func test_defaultComparators_someSpeakingWhileDominantSpeakerIsInisible_orderChanges() {
-        let combined = combineComparators(defaultComparators)
+        let combined = combineComparators(defaultSortPreset)
 
         assertSort(
             [

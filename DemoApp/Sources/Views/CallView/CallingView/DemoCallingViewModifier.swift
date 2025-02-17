@@ -103,7 +103,9 @@ struct DemoCallingViewModifier: ViewModifier {
                 )
                 _ = await Task { @MainActor in
                     viewModel.update(
-                        participantsSortComparators: callType == .livestream ? livestreamComparators : defaultComparators
+                        participantsSortComparators: callType == .livestream
+                            ? livestreamOrAudioRoomSortPreset
+                            : defaultSortPreset
                     )
                     viewModel.joinCall(callType: callType, callId: callId)
                 }.result
