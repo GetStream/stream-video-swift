@@ -1186,7 +1186,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func updateParticipantsSorting(
         with sortComparators: [StreamSortComparator<CallParticipant>]
     ) {
-        state.sortComparators = sortComparators
+        state.sortComparators = combineComparators(sortComparators)
     }
 
     // MARK: - IncomingVideoQualitySettings
