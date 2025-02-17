@@ -43,6 +43,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// call.
     private lazy var closedCaptionsAdapter = ClosedCaptionsAdapter(self)
 
+    @MainActor
     internal init(
         callType: String,
         callId: String,
@@ -71,9 +72,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         /// If we received a non-nil initial callSettings, we updated them here.
         if let callSettings {
-            Task { @MainActor [weak self] in
-                self?.state.update(callSettings: callSettings)
-            }
+            state.update(callSettings: callSettings)
         }
 
         _ = closedCaptionsAdapter
@@ -89,6 +88,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         subscribeToClosedCaptionsSettingsChanges()
     }
 
+    @MainActor
     internal convenience init(
         from response: CallStateResponseFields,
         coordinatorClient: DefaultAPI,
@@ -100,9 +100,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             coordinatorClient: coordinatorClient,
             callController: callController
         )
-        executeOnMain { [weak self] in
-            self?.state.update(from: response)
-        }
+        state.update(from: response)
     }
 
     deinit {
