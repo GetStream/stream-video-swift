@@ -215,7 +215,9 @@ struct SimpleCallingView: View {
 
     private func performCallAction(_ action: CallAction) async {
         viewModel.update(
-            participantsSortComparators: callType == .livestream ? livestreamComparators : defaultComparators
+            participantsSortComparators: callType == .livestream
+                ? livestreamOrAudioRoomSortPreset
+                : defaultSortPreset
         )
         switch action {
         case .lobby:

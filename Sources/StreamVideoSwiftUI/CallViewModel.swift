@@ -171,7 +171,7 @@ open class CallViewModel: ObservableObject {
     private var lastLayoutChange = Date()
     private var enteringCallTask: Task<Void, Never>?
     private var callEventsSubscriptionTask: Task<Void, Never>?
-    private var participantsSortComparators = defaultComparators
+    private var participantsSortComparators = defaultSortPreset
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
 
