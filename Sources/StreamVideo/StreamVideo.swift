@@ -218,6 +218,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     ///  - callSettings: the initial CallSettings to use. If `nil` is provided, the default CallSettings
     ///  will be used.
     /// - Returns: `Call` object.
+    @MainActor
     public func call(
         callType: String,
         callId: String,
@@ -362,6 +363,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
     }
 
+    @MainActor
     internal func queryCalls(
         filters: [String: RawJSON]?,
         sort: [SortParamRequest]?,
@@ -696,9 +698,12 @@ extension StreamVideo: WSEventsSubscriber {
         for eventHandler in eventHandlers {
             eventHandler.handler(event)
         }
-        checkRingEvent(event)
+        Task { @MainActor [weak self] in
+            self?.checkRingEvent(event)
+        }
     }
-    
+
+    @MainActor
     private func checkRingEvent(_ event: WrappedEvent) {
         if case let .typeCallRingEvent(ringEvent) = event.unwrap() {
             let call = call(

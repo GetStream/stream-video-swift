@@ -574,6 +574,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         return provider
     }
 
+    @MainActor
     private func buildCallUpdate(
         cid: String,
         localizedCallerName: String,
