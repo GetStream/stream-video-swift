@@ -12,7 +12,7 @@ import IOKit
 
 extension SystemEnvironment {
     static let xStreamClientHeader: String = {
-        "stream-video-swift-client-v\(version)|app=\(appName)|app_version=\(appVersion)|os=\(os) \(osVersion)|device_model=\(model)|device_screen_ratio=\(scale)"
+        "stream-video-swift-v\(version)|app=\(appName)|app_version=\(appVersion)|os=\(os) \(osVersion)|device_model=\(model)"
     }()
 
     static let clientDetails: Stream_Video_Sfu_Models_ClientDetails = {
@@ -80,14 +80,6 @@ extension SystemEnvironment {
         return "iOS"
         #elseif os(macOS)
         return "MacOS"
-        #endif
-    }
-
-    private static var scale: String {
-        #if os(iOS)
-        return String(format: "%0.2f", UIScreen.main.scale)
-        #elseif os(macOS)
-        return "1.00"
         #endif
     }
 }
