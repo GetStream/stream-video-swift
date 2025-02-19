@@ -6,7 +6,7 @@ import AVFoundation
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockCaptureDeviceProvider: CaptureDeviceProviding, Mockable {
+final class MockCaptureDeviceProvider: CaptureDeviceProviding, Mockable, @unchecked Sendable {
     typealias FunctionKey = MockFunctionKey
     typealias FunctionInputKey = MockFunctionInputKey
     enum MockFunctionKey: Hashable, CaseIterable {

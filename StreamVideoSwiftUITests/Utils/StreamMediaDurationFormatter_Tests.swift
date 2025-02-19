@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class StreamMediaDurationFormatter_Tests: XCTestCase {
+final class StreamMediaDurationFormatter_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var subject: StreamMediaDurationFormatter! = .init()
 

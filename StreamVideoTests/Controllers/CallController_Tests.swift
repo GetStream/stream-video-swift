@@ -8,7 +8,7 @@ import AVFoundation
 
 final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var defaultAPI: DefaultAPI! = DefaultAPI(
         basePath: "example.com",
@@ -517,8 +517,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private func assertTransitionToStage(
         _ id: WebRTCCoordinator.StateMachine.Stage.ID,
-        operation: @escaping () async throws -> Void,
-        handler: @escaping (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        operation: @escaping @Sendable() async throws -> Void,
+        handler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {

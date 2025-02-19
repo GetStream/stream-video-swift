@@ -9,14 +9,13 @@ import StreamSwiftTestHelpers
 import SwiftUI
 import XCTest
 
-final class ParticipantListButton_Tests: StreamVideoUITestCase {
+@MainActor
+final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
-    @MainActor
     private lazy var viewModel: CallViewModel! = .init()
 
-    @MainActor
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
 
         viewModel.startCall(
             callType: .default,
@@ -26,10 +25,9 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase {
         )
     }
 
-    @MainActor
-    override func tearDown() {
+    override func tearDown() async throws {
         viewModel = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - Rendering based on viewModel.callParticipants

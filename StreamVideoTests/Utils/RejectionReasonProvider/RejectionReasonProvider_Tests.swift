@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class StreamRejectionReasonProviderTests: XCTestCase {
+final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockStreamVideo: MockStreamVideo! = MockStreamVideo()
     private lazy var subject: StreamRejectionReasonProvider! = StreamRejectionReasonProvider(mockStreamVideo)
@@ -18,12 +18,12 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
     }
 
     @MainActor
-    func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsBusy_thenReturnsBusyReason() {
+    func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsBusy_thenReturnsBusyReason() async {
         let ringingCall = MockCall(.dummy())
         mockStreamVideo.state.activeCall = MockCall(.dummy())
         mockStreamVideo.state.ringingCall = ringingCall
 
-        let reason = subject.reason(
+        let reason = await subject.reason(
             for: ringingCall.cId,
             ringTimeout: true
         )
@@ -33,12 +33,12 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
 
     @MainActor
     func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsRejectingOutgoingCall_thenReturnsTimeoutReason(
-    ) {
+    ) async {
         let ringingCall = MockCall(.dummy())
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = mockStreamVideo.user
 
-        let reason = subject.reason(
+        let reason = await subject.reason(
             for: ringingCall.cId,
             ringTimeout: true
         )
@@ -48,12 +48,12 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
 
     @MainActor
     func test_rejectionReason_givenRingingCallWithMatchingCidAndNoRingTimeout_whenUserIsRejectingOutgoingCall_thenReturnsCancelReason(
-    ) {
+    ) async {
         let ringingCall = MockCall(.dummy())
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = mockStreamVideo.user
 
-        let reason = subject.reason(
+        let reason = await subject.reason(
             for: ringingCall.cId,
             ringTimeout: false
         )
@@ -63,12 +63,12 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
 
     @MainActor
     func test_rejectionReason_givenRingingCallWithMatchingCidAndNoRingTimeout_whenUserIsNotBusyAndNotRejectingOutgoingCall_thenReturnsDeclineReason(
-    ) {
+    ) async {
         let ringingCall = MockCall(.dummy())
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = .dummy()
 
-        let reason = subject.reason(
+        let reason = await subject.reason(
             for: ringingCall.cId,
             ringTimeout: false
         )
@@ -77,12 +77,12 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
     }
 
     @MainActor
-    func test_rejectionReason_givenNoRingingCallMatchingCid_thenReturnsNil() {
+    func test_rejectionReason_givenNoRingingCallMatchingCid_thenReturnsNil() async {
         let ringingCall = MockCall(.dummy())
         mockStreamVideo.state.ringingCall = ringingCall
         ringingCall.state.createdBy = .dummy()
 
-        let reason = subject.reason(
+        let reason = await subject.reason(
             for: .unique,
             ringTimeout: false
         )
@@ -91,8 +91,8 @@ final class StreamRejectionReasonProviderTests: XCTestCase {
     }
 
     @MainActor
-    func test_rejectionReason_givenNoRingingCall_thenReturnsNil() {
-        let reason = subject.reason(
+    func test_rejectionReason_givenNoRingingCall_thenReturnsNil() async {
+        let reason = await subject.reason(
             for: .unique,
             ringTimeout: false
         )

@@ -7,7 +7,7 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
@@ -237,8 +237,8 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
     }
 
     private func assertResultAfterTrigger(
-        trigger: @escaping () async -> Void,
-        validationHandler: @escaping (XCTestExpectation) async -> Void,
+        trigger: @escaping @Sendable() async -> Void,
+        validationHandler: @escaping @Sendable(XCTestExpectation) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -265,8 +265,8 @@ final class WebRTCCoordinatorStateMachine_FastReconnectingStageTests: XCTestCase
 
     private func assertTransitionAfterTrigger(
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID? = nil,
-        trigger: @escaping () async -> Void,
-        validationHandler: @escaping (WebRTCCoordinator.StateMachine.Stage) async -> Void,
+        trigger: @escaping @Sendable() async -> Void,
+        validationHandler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {

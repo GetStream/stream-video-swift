@@ -5,10 +5,13 @@
 import AVFoundation
 import CoreImage
 import os.log
+import StreamVideo
 import UIKit
 
 @available(iOS 14.0, *)
 class Camera: NSObject, @unchecked Sendable {
+    @Injected(\.orientationAdapter) private var orientationAdapter
+
     private let captureSession = AVCaptureSession()
     private var isCaptureSessionConfigured = false
     private var deviceInput: AVCaptureDeviceInput?
@@ -265,7 +268,7 @@ class Camera: NSObject, @unchecked Sendable {
     }
 
     private var deviceOrientation: UIDeviceOrientation {
-        UIScreen.main.orientation
+        orientationAdapter.orientation.deviceOrientation
     }
     
     private func videoOrientationFor(_ deviceOrientation: UIDeviceOrientation) -> AVCaptureVideoOrientation? {

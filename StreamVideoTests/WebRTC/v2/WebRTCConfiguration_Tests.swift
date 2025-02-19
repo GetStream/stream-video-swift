@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCConfigurationTests: XCTestCase {
+final class WebRTCConfigurationTests: XCTestCase, @unchecked Sendable {
 
     func test_timeout_shouldReturnProductionTimeouts() {
         let timeout = WebRTCConfiguration.Timeout.production

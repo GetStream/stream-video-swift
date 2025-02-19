@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class StreamVideoSfuModelsPublishOption_ConvenienceTests: XCTestCase {
+final class StreamVideoSfuModelsPublishOption_ConvenienceTests: XCTestCase, @unchecked Sendable {
 
     func test_initWithAudioPublishOptions() {
         let audioOptions = PublishOptions.AudioPublishOptions(

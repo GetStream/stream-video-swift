@@ -7,7 +7,7 @@ import Foundation
 import StreamVideo
 
 /// A pool for managing reusable `VideoRenderer` instances.
-final class VideoRendererPool {
+final class VideoRendererPool: @unchecked Sendable {
     /// The underlying pool of `VideoRenderer` instances managed by this pool.
     private let pool: ReusePool<VideoRenderer>
     /// A cancellable object to observe call end notifications for releasing all renderers.
@@ -16,6 +16,7 @@ final class VideoRendererPool {
     /// Initializes the `VideoRendererPool` with a specified initial capacity.
     ///
     /// - Parameter initialCapacity: The initial capacity of the pool (default is 0).
+    @MainActor
     init(initialCapacity: Int = 0) {
         // Initialize the pool with a capacity and a factory closure to create `VideoRenderer` instances
         pool = ReusePool(initialCapacity: initialCapacity) {
@@ -23,16 +24,17 @@ final class VideoRendererPool {
         }
 
         // Observe call end notifications to release all renderers when a call ends
-        callEndedCancellable = NotificationCenter.default.publisher(for: Notification.Name(CallNotification.callEnded))
-            .sink { [weak self] _ in
-                self?.pool.releaseAll()
-            }
+        callEndedCancellable = NotificationCenter
+            .default
+            .publisher(for: Notification.Name(CallNotification.callEnded))
+            .sink { [weak self] _ in self?.pool.releaseAll() }
     }
 
     /// Acquires a `VideoRenderer` from the pool with the specified size.
     ///
     /// - Parameter size: The desired size for the acquired `VideoRenderer`.
     /// - Returns: A `VideoRenderer` instance from the pool.
+    @MainActor
     func acquireRenderer(size: CGSize) -> VideoRenderer {
         let renderer = pool.acquire()
         renderer.frame.size = size // Set the size of the renderer
@@ -47,7 +49,9 @@ final class VideoRendererPool {
     }
 }
 
-extension VideoRendererPool: InjectionKey {
+/// - Note: I have no other way of satisfying the compiler here.
+extension VideoRendererPool: @preconcurrency InjectionKey {
+    @MainActor
     static var currentValue: VideoRendererPool = .init()
 }
 

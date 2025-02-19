@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class Publisher_NextTests: XCTestCase {
+final class Publisher_NextTests: XCTestCase, @unchecked Sendable {
 
     func testNextValueWithoutSkipping() async throws {
         let expectedValue = 42

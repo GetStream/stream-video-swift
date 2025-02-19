@@ -7,7 +7,7 @@ import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class StreamAudioRecorderTests: XCTestCase {
+final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
 
     private lazy var builder: AVAudioRecorderBuilder! = .init(cachedResult: mockAudioRecorder)
     private lazy var mockAudioSession: MockAudioSession! = .init()

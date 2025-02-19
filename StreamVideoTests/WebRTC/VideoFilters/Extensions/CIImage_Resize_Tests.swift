@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CIImage_Resize_Tests: XCTestCase {
+final class CIImage_Resize_Tests: XCTestCase, @unchecked Sendable {
 
     func testResizeWithAspectRatio() {
         let originalImage = makeImage(of: CGSize(width: 100, height: 50))

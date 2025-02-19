@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class RecordingView_Tests: StreamVideoUITestCase {
+final class RecordingView_Tests: StreamVideoUITestCase, @unchecked Sendable {
     
     func test_recordingView_snapshot() throws {
         let view = RecordingView().background(.green)

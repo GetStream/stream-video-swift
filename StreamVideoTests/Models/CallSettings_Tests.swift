@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CallSettings_Tests: XCTestCase {
+final class CallSettings_Tests: XCTestCase, @unchecked Sendable {
 
     func test_callSettings_shouldPublish() {
         // Given

@@ -3,13 +3,13 @@
 //
 
 import SnapshotTesting
-import StreamSwiftTestHelpers
+@preconcurrency import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class LivestreamPlayer_Tests: StreamVideoTestCase {
-    
+final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
+
     private let callId = "test"
     private let callType = "livestream"
 

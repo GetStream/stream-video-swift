@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class InternetConnection_Tests: XCTestCase {
+final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
     var monitor: InternetConnectionMonitor_Mock!
     var internetConnection: InternetConnection!
 
