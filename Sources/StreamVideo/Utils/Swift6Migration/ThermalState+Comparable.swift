@@ -4,7 +4,7 @@
 
 import Foundation
 
-#if swift(>=6.0)
+#if compiler(>=6.0)
 extension ProcessInfo.ThermalState: @retroactive Comparable {
     public static func < (
         lhs: ProcessInfo.ThermalState,

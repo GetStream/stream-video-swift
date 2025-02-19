@@ -4,7 +4,7 @@
 
 import Foundation
 
-#if swift(>=6.0)
+#if compiler(>=6.0)
 extension String: @retroactive CodingKey {
     public var stringValue: String { self }
     public init?(stringValue: String) { self.init(stringLiteral: stringValue) }

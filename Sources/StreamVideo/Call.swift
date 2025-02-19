@@ -15,7 +15,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     private lazy var stateMachine: StreamCallStateMachine = .init(self)
 
-    @MainActor public internal(set) var state = CallState()
+    @MainActor
+    public internal(set) var state = CallState()
 
     /// The call id.
     public let callId: String
@@ -43,7 +44,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// call.
     private lazy var closedCaptionsAdapter = ClosedCaptionsAdapter(self)
 
-    @MainActor
     internal init(
         callType: String,
         callId: String,
@@ -69,10 +69,34 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             initialSpeakerStatus: callSettings?.speakerOn == false ? .disabled : .enabled,
             initialAudioOutputStatus: callSettings?.audioOutputOn == false ? .disabled : .enabled
         )
+    }
 
+    internal convenience init(
+        from response: CallStateResponseFields,
+        coordinatorClient: DefaultAPI,
+        callController: CallController
+    ) {
+        self.init(
+            callType: response.call.type,
+            callId: response.call.id,
+            coordinatorClient: coordinatorClient,
+            callController: callController
+        )
+        executeOnMain { [weak self] in
+            self?.state.update(from: response)
+        }
+    }
+
+    deinit {
+        cancellables.removeAll()
+    }
+
+    private func configure(callSettings: CallSettings?) {
         /// If we received a non-nil initial callSettings, we updated them here.
         if let callSettings {
-            state.update(callSettings: callSettings)
+            Task { @MainActor [weak self] in
+                self?.state.update(callSettings: callSettings)
+            }
         }
 
         _ = closedCaptionsAdapter
@@ -86,25 +110,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         subscribeToNoiseCancellationSettingsChanges()
         subscribeToTranscriptionSettingsChanges()
         subscribeToClosedCaptionsSettingsChanges()
-    }
-
-    @MainActor
-    internal convenience init(
-        from response: CallStateResponseFields,
-        coordinatorClient: DefaultAPI,
-        callController: CallController
-    ) {
-        self.init(
-            callType: response.call.type,
-            callId: response.call.id,
-            coordinatorClient: coordinatorClient,
-            callController: callController
-        )
-        state.update(from: response)
-    }
-
-    deinit {
-        cancellables.removeAll()
     }
 
     /// Joins the current call.
@@ -271,7 +276,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             limits: limits,
             transcription: transcription
         )
-        
+
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,
@@ -751,7 +756,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func stopLive() async throws -> StopLiveResponse {
         try await stopLive(request: .init())
     }
-    
+
     public func stopLive(request: StopLiveRequest) async throws -> StopLiveResponse {
         try await coordinatorClient.stopLive(
             type: callType,
@@ -802,7 +807,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func stopHLS() async throws -> StopHLSBroadcastingResponse {
         try await coordinatorClient.stopHLSBroadcasting(type: callType, id: callId)
     }
-    
+
     /// Starts RTMP broadcasting of the call.
     /// - Parameter request: The request to start RTMP broadcasting.
     /// - Returns: `StartRTMPBroadcastsResponse`.
@@ -817,7 +822,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             startRTMPBroadcastsRequest: request
         )
     }
-    
+
     /// Stops RTMP broadcasting of the call.
     /// - Parameter name: The name of the RTMP broadcast.
     /// - Returns: `StopRTMPBroadcastsResponse`.
@@ -1173,9 +1178,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             reason: reason
         )
     }
-    
+
     // MARK: - Sorting
-    
+
     /// Updates the sorting of call participants with the provided sort comparators.
     ///
     /// - Parameters:

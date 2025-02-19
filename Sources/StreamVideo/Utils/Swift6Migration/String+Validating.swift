@@ -6,7 +6,7 @@ import Foundation
 
 extension String {
 
-    #if swift(>=6.0)
+    #if compiler(>=6.0)
     init?(validatingUTF8 cString: UnsafePointer<CChar>) {
         self.init(validatingCString: cString)
     }
