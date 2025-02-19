@@ -44,6 +44,17 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
             return isLeft ? .up : .down
         }
     }
+
+    #if canImport(UIKit)
+    public var deviceOrientation: UIDeviceOrientation {
+        switch self {
+        case let .portrait(isUpsideDown):
+            return isUpsideDown ? UIDeviceOrientation.portraitUpsideDown : .portrait
+        case let .landscape(isLeft):
+            return isLeft ? UIDeviceOrientation.landscapeLeft : .landscapeRight
+        }
+    }
+    #endif
 }
 
 /// An observable object that adapts to device orientation changes.
