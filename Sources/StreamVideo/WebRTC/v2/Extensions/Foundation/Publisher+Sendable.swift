@@ -4,4 +4,4 @@
 
 import Combine
 
-extension Published.Publisher: @unchecked Sendable {}
+extension Published.Publisher: @unchecked @retroactive Sendable {}

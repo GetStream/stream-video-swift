@@ -99,7 +99,7 @@ extension JSONEncodable where Self: Encodable {
     }
 }
 
-extension String: CodingKey {
+extension String: @retroactive CodingKey {
 
     public var stringValue: String {
         self

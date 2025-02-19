@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-struct VideoCaptureSession {
+struct VideoCaptureSession: Sendable {
     var position: AVCaptureDevice.Position
 
     var device: CaptureDeviceProtocol?

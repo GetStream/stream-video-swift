@@ -15,8 +15,8 @@ public protocol InjectionKey {
 /// Provides access to injected dependencies.
 public struct InjectedValues {
     /// This is only used as an accessor to the computed properties within extensions of `InjectedValues`.
-    private static var current = InjectedValues()
-    
+    nonisolated(unsafe) private static var current = InjectedValues()
+
     /// A static subscript for updating the `currentValue` of `InjectionKey` instances.
     public static subscript<K>(key: K.Type) -> K.Value where K: InjectionKey {
         get { key.currentValue }
@@ -42,3 +42,6 @@ public struct Injected<T> {
         self.keyPath = keyPath
     }
 }
+
+extension Injected: Sendable where T: Sendable {}
+extension WritableKeyPath: @unchecked @retroactive Sendable {}

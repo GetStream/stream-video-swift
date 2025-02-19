@@ -4,7 +4,7 @@
 
 import AVFoundation
 
-extension AVAudioSession.RouteChangeReason: CustomStringConvertible {
+extension AVAudioSession.RouteChangeReason: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .unknown:

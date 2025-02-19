@@ -7,25 +7,29 @@ import Foundation
 import UIKit
 #endif
 
-final class ScreenPropertiesAdapter {
+final class ScreenPropertiesAdapter: @unchecked Sendable {
 
-    let preferredFramesPerSecond: Int
-    let refreshRate: TimeInterval
+    private(set) var preferredFramesPerSecond: Int = 0
+    private(set) var refreshRate: TimeInterval = 0
+    private(set) var scale: CGFloat = 0
 
     init() {
-        let maximumFramesPerSecond: Int
-        #if canImport(UIKit)
-        maximumFramesPerSecond = max(30, UIScreen.main.maximumFramesPerSecond)
-        #else
-        maximumFramesPerSecond = 30
-        #endif
-        preferredFramesPerSecond = maximumFramesPerSecond
-        refreshRate = 1.0 / Double(maximumFramesPerSecond)
+        Task { @MainActor in
+            let maximumFramesPerSecond: Int
+            #if canImport(UIKit)
+            maximumFramesPerSecond = max(30, UIScreen.main.maximumFramesPerSecond)
+            #else
+            maximumFramesPerSecond = 30
+            #endif
+            preferredFramesPerSecond = maximumFramesPerSecond
+            refreshRate = 1.0 / Double(maximumFramesPerSecond)
+            scale = UIScreen.main.scale
+        }
     }
 }
 
 extension ScreenPropertiesAdapter: InjectionKey {
-    static var currentValue: ScreenPropertiesAdapter = .init()
+    nonisolated(unsafe) static var currentValue: ScreenPropertiesAdapter = .init()
 }
 
 extension InjectedValues {

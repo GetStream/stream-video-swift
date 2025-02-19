@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// Extends `RTCRtpTransceiverDirection` to conform to the `CustomStringConvertible` protocol.
-extension RTCRtpTransceiverDirection: CustomStringConvertible {
+extension RTCRtpTransceiverDirection: @retroactive CustomStringConvertible {
     /// A textual representation of the RTP transceiver direction.
     ///
     /// This property provides a human-readable string for each possible direction of an RTCRtpTransceiver.

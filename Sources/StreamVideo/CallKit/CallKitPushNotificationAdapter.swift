@@ -6,7 +6,7 @@ import Foundation
 import PushKit
 
 /// Handles push notifications for CallKit integration.
-open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject {
+open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject, @unchecked Sendable {
 
     /// Represents the keys that the Payload dictionary
     public enum PayloadKey: String {
@@ -19,7 +19,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     }
 
     /// Represents the content of a VoIP push notification.
-    public struct Content {
+    public struct Content: Sendable {
         var cid: String
         var localizedCallerName: String
         var callerId: String
@@ -91,13 +91,13 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     }
 
     /// Delegate method called when the device receives a VoIP push notification.
-    @MainActor
-    open func pushRegistry(
+    nonisolated open func pushRegistry(
         _ registry: PKPushRegistry,
         didReceiveIncomingPushWith payload: PKPushPayload,
         for type: PKPushType,
         completion: @escaping () -> Void
     ) {
+        defer { completion() }
         guard type == .voIP else { return }
         
         let content = decodePayload(payload)
@@ -107,18 +107,21 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
 
-        callKitService.reportIncomingCall(
-            content.cid,
-            localizedCallerName: content.localizedCallerName,
-            callerId: content.callerId,
-            hasVideo: content.hasVideo,
-            completion: { error in
-                if let error {
-                    log.error(error)
-                }
-                completion()
+        DispatchQueue.main.async { [weak self] in
+            MainActor.assumeIsolated { [weak self] in
+                self?.callKitService.reportIncomingCall(
+                    content.cid,
+                    localizedCallerName: content.localizedCallerName,
+                    callerId: content.callerId,
+                    hasVideo: content.hasVideo,
+                    completion: { error in
+                        if let error {
+                            log.error(error)
+                        }
+                    }
+                )
             }
-        )
+        }
     }
 
     /// Decodes push notification Payload to a type that the CallKit implementation can use.
@@ -175,7 +178,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
 extension CallKitPushNotificationAdapter: InjectionKey {
     /// Provides the current instance of `CallKitPushNotificationAdapter`.
-    public static var currentValue: CallKitPushNotificationAdapter = .init()
+    nonisolated(unsafe) public static var currentValue: CallKitPushNotificationAdapter = .init()
 }
 
 extension InjectedValues {

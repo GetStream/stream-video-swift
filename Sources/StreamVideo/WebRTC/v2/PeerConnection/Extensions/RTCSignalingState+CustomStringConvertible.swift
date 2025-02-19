@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-extension RTCSignalingState: CustomStringConvertible {
+extension RTCSignalingState: @retroactive CustomStringConvertible {
     /// A textual representation of the signaling state.
     ///
     /// - Returns: A string describing the signaling state:

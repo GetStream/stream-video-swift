@@ -31,7 +31,6 @@ public protocol ThermalStateObserving: ObservableObject {
 /// and a publisher for tracking state changes over time. It also offers a derived scaling factor to help adapt app behavior
 /// or features based on the current thermal conditions.
 final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
-    static let shared = ThermalStateObserver()
 
     /// Published property to observe the thermal state
     @Published private(set) var state: ProcessInfo.ThermalState {
@@ -64,7 +63,7 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
     private var notificationCenterCancellable: AnyCancellable?
     private var thermalStateProvider: () -> ProcessInfo.ThermalState
 
-    private convenience init() {
+    fileprivate convenience init() {
         self.init { ProcessInfo.processInfo.thermalState }
     }
 
@@ -104,7 +103,7 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
     }
 }
 
-extension ProcessInfo.ThermalState: Comparable {
+extension ProcessInfo.ThermalState: @retroactive Comparable {
     public static func < (
         lhs: ProcessInfo.ThermalState,
         rhs: ProcessInfo.ThermalState
@@ -115,7 +114,7 @@ extension ProcessInfo.ThermalState: Comparable {
 
 /// Provides the default value of the `Appearance` class.
 enum ThermalStateObserverKey: InjectionKey {
-    static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared
+    nonisolated(unsafe) static var currentValue: any ThermalStateObserving = ThermalStateObserver()
 }
 
 extension InjectedValues {

@@ -24,7 +24,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         qos: .userInitiated
     )
     private(set) var onTokenUpdate: UserTokenUpdater?
-    
+
     init(
         urlSession: URLSession,
         tokenProvider: UserTokenProvider? = nil
@@ -53,7 +53,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         }
     }
     
-    func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater) {
+    func setTokenUpdater(_ tokenUpdater: @escaping @Sendable UserTokenUpdater) {
         updateQueue.async { [weak self] in
             self?.onTokenUpdate = tokenUpdater
         }
