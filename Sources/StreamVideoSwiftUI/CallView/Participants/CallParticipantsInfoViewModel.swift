@@ -6,8 +6,8 @@ import StreamVideo
 import SwiftUI
 
 @MainActor
-class CallParticipantsInfoViewModel: ObservableObject {
-    
+final class CallParticipantsInfoViewModel: ObservableObject {
+
     @Injected(\.streamVideo) var streamVideo
     
     @Published var inviteParticipantsShown = false
@@ -17,7 +17,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
         title: "Mute user",
         requiredCapability: .muteUsers,
         iconName: "speaker.slash",
-        action: muteAudio(for:),
+        action: { [weak self] in self?.muteAudio(for: $0) },
         confirmationPopup: nil,
         isDestructive: false
     )
@@ -27,7 +27,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
         title: "Disable video",
         requiredCapability: .muteUsers,
         iconName: "video.slash",
-        action: muteVideo(for:),
+        action: { [weak self] in self?.muteVideo(for: $0) },
         confirmationPopup: nil,
         isDestructive: false
     )
@@ -37,7 +37,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
         title: "Unblock user",
         requiredCapability: .blockUsers,
         iconName: "person.badge.plus",
-        action: unblock(userId:),
+        action: { [weak self] in self?.unblock(userId: $0) },
         confirmationPopup: nil,
         isDestructive: false
     )
@@ -47,7 +47,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
         title: "Block user",
         requiredCapability: .blockUsers,
         iconName: "person.badge.minus",
-        action: block(userId:),
+        action: { [weak self] in self?.block(userId: $0) },
         confirmationPopup: nil,
         isDestructive: false
     )
@@ -85,7 +85,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
             return []
         }
     }
-    
+
     private func muteAudio(for userId: String) {
         executeMute(userId: userId, audio: true, video: false)
     }
