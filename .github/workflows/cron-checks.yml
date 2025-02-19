@@ -217,7 +217,7 @@ jobs:
 
   build-xcode15:
     name: Build SDKs (Xcode 15)
-    runs-on: macos-13
+    runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
     env:
       XCODE_VERSION: "15.3"
@@ -247,7 +247,7 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-13
+    runs-on: macos-14
     env:
       XCODE_VERSION: "15.3"
     steps:
