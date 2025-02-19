@@ -8,8 +8,7 @@ import Foundation
 import StreamVideo
 import SwiftUI
 
-@MainActor
-final class ReactionsAdapter: ObservableObject {
+final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
 
     var streamVideo: StreamVideo? {
         didSet { didUpdate(streamVideo) }
@@ -34,8 +33,6 @@ final class ReactionsAdapter: ObservableObject {
     ]
 
     @Published var activeReactions: [String: [Reaction]] = [:]
-
-    // MARK: - Lifecycle
 
     // MARK: - Actions
 
@@ -215,7 +212,7 @@ final class ReactionsAdapter: ObservableObject {
 }
 
 extension ReactionsAdapter: InjectionKey {
-    static var currentValue: ReactionsAdapter = .init()
+    nonisolated(unsafe) static var currentValue: ReactionsAdapter = .init()
 }
 
 extension InjectedValues {

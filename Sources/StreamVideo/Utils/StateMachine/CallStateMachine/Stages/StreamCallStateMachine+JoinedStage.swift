@@ -26,7 +26,7 @@ extension StreamCallStateMachine.Stage {
 extension StreamCallStateMachine.Stage {
 
     /// A class representing the joined stage in the `StreamCallStateMachine`.
-    final class JoinedStage: StreamCallStateMachine.Stage {
+    final class JoinedStage: StreamCallStateMachine.Stage, @unchecked Sendable {
         let response: JoinCallResponse
 
         /// Initializes a new joined stage with the provided call and response.

@@ -644,7 +644,3 @@ extension InjectedValues {
         set { Self[CallKitService.self] = newValue }
     }
 }
-
-extension CXAnswerCallAction: @unchecked @retroactive Sendable {}
-extension CXSetHeldCallAction: @unchecked @retroactive Sendable {}
-extension CXSetMutedCallAction: @unchecked @retroactive Sendable {}

@@ -5,6 +5,6 @@
 import Foundation
 import StreamVideo
 
-extension Call: Identifiable {
+extension Call: @retroactive Identifiable {
     public var id: String { cId }
 }

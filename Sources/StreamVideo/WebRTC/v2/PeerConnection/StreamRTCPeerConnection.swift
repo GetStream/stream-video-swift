@@ -218,6 +218,3 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         transceiversMap[trackType]?.append(transceiver)
     }
 }
-
-extension RTCSessionDescription: @unchecked @retroactive Sendable {}
-extension RTCStatisticsReport: @unchecked @retroactive Sendable {}
