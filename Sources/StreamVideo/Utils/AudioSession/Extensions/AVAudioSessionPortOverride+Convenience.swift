@@ -4,7 +4,7 @@
 
 import AVFoundation
 
-extension AVAudioSession.PortOverride: @retroactive CustomStringConvertible {
+extension AVAudioSession.PortOverride {
     /// Returns a string representing the port override value.
     public var description: String {
         switch self {

@@ -18,7 +18,7 @@ struct VideoCaptureSession: Sendable {
 }
 
 /// A class that provides and manages the active screen sharing session.
-final class VideoCaptureSessionProvider {
+final class VideoCaptureSessionProvider: @unchecked Sendable {
 
     /// The currently active screen sharing session, if any.
     ///

@@ -18,7 +18,7 @@ struct ScreenShareSession {
 }
 
 /// A class that provides and manages the active screen sharing session.
-final class ScreenShareSessionProvider {
+final class ScreenShareSessionProvider: @unchecked Sendable {
 
     /// The currently active screen sharing session, if any.
     ///

@@ -6,7 +6,7 @@ import AVFoundation
 
 // MARK: - AVAudioSession.Mode
 
-extension AVAudioSession.Mode: @retroactive CustomStringConvertible {
+extension AVAudioSession.Mode {
     /// Returns the raw string value of the mode.
     public var description: String {
         rawValue

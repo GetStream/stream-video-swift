@@ -96,15 +96,15 @@ open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable
         #if canImport(UIKit)
         Task { @MainActor in
             UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+            // Subscribe to orientation change notifications on UIKit platforms.
+            notificationCancellable = notificationCenter
+                .publisher(for: UIDevice.orientationDidChangeNotification)
+                .receive(on: DispatchQueue.main)
+                .sinkTask { @MainActor [weak self] _ in
+                    guard let self = self else { return }
+                    self.orientation = await provider() // Update orientation based on the provider.
+                }
         }
-        // Subscribe to orientation change notifications on UIKit platforms.
-        notificationCancellable = notificationCenter
-            .publisher(for: UIDevice.orientationDidChangeNotification)
-            .receive(on: DispatchQueue.main)
-            .sinkTask { @MainActor [weak self] _ in
-                guard let self = self else { return }
-                self.orientation = await provider() // Update orientation based on the provider.
-            }
         #endif
     }
 

@@ -2,7 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-@preconcurrency import AVFoundation
+import AVFoundation
 import Combine
 import Foundation
 import StreamWebRTC

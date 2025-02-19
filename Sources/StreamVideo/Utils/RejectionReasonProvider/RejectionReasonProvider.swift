@@ -23,7 +23,7 @@ public protocol RejectionReasonProviding: Sendable {
 }
 
 /// A provider that determines the rejection reason for a call based on its state.
-final class StreamRejectionReasonProvider: RejectionReasonProviding {
+final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked Sendable {
 
     /// The stream video associated with this provider.
     nonisolated(unsafe) private weak var streamVideo: StreamVideo?

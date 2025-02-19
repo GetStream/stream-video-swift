@@ -24,5 +24,4 @@ protocol CaptureDeviceProtocol: Sendable {
 }
 
 /// Extend `AVCaptureDevice` to conform to `CaptureDeviceProtocol`.
-extension AVCaptureDevice: @retroactive @unchecked Sendable {}
 extension AVCaptureDevice: CaptureDeviceProtocol {}

@@ -17,7 +17,7 @@ protocol ConnectionRecoveryHandler: ConnectionStateDelegate, Sendable {}
 /// We remember `lastReceivedEventDate` when state becomes `connecting` to catch the last event date
 /// before the `HealthCheck` override the `lastReceivedEventDate` with the recent date.
 ///
-final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
+final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler, @unchecked Sendable {
     // MARK: - Properties
     
     private let webSocketClient: WebSocketClient
@@ -92,22 +92,26 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
 
 private extension DefaultConnectionRecoveryHandler {
     func subscribeOnNotifications() {
-        backgroundTaskScheduler?.startListeningForAppStateUpdates(
-            onEnteringBackground: { [weak self] in self?.appDidEnterBackground() },
-            onEnteringForeground: { [weak self] in self?.appDidBecomeActive() }
-        )
-        
-        internetConnection.notificationCenter.addObserver(
-            self,
-            selector: #selector(internetConnectionAvailabilityDidChange(_:)),
-            name: .internetConnectionAvailabilityDidChange,
-            object: nil
-        )
+        Task { @MainActor in
+            backgroundTaskScheduler?.startListeningForAppStateUpdates(
+                onEnteringBackground: { [weak self] in self?.appDidEnterBackground() },
+                onEnteringForeground: { [weak self] in self?.appDidBecomeActive() }
+            )
+
+            internetConnection.notificationCenter.addObserver(
+                self,
+                selector: #selector(internetConnectionAvailabilityDidChange(_:)),
+                name: .internetConnectionAvailabilityDidChange,
+                object: nil
+            )
+        }
     }
     
     func unsubscribeFromNotifications() {
-        backgroundTaskScheduler?.stopListeningForAppStateUpdates()
-        
+        Task { @MainActor in
+            backgroundTaskScheduler?.stopListeningForAppStateUpdates()
+        }
+
         internetConnection.notificationCenter.removeObserver(
             self,
             name: .internetConnectionStatusDidChange,
@@ -120,11 +124,13 @@ private extension DefaultConnectionRecoveryHandler {
 
 extension DefaultConnectionRecoveryHandler {
     private func appDidBecomeActive() {
-        log.debug("App -> ✅", subsystems: .webSocket)
-        
-        backgroundTaskScheduler?.endTask()
-        
-        reconnectIfNeeded()
+        Task { @MainActor in
+            log.debug("App -> ✅", subsystems: .webSocket)
+
+            backgroundTaskScheduler?.endTask()
+
+            reconnectIfNeeded()
+        }
     }
     
     private func appDidEnterBackground() {
@@ -143,17 +149,19 @@ extension DefaultConnectionRecoveryHandler {
         
         guard let scheduler = backgroundTaskScheduler else { return }
                 
-        let succeed = scheduler.beginTask { [weak self] in
-            log.debug("Background task -> ❌", subsystems: .webSocket)
-            
-            self?.disconnectIfNeeded()
-        }
-        
-        if succeed {
-            log.debug("Background task -> ✅", subsystems: .webSocket)
-        } else {
-            // Can't initiate a background task, close the connection
-            disconnectIfNeeded()
+        Task { @MainActor in
+            let succeed = scheduler.beginTask { [weak self] in
+                log.debug("Background task -> ❌", subsystems: .webSocket)
+
+                self?.disconnectIfNeeded()
+            }
+
+            if succeed {
+                log.debug("Background task -> ✅", subsystems: .webSocket)
+            } else {
+                // Can't initiate a background task, close the connection
+                disconnectIfNeeded()
+            }
         }
     }
     

@@ -232,7 +232,7 @@ struct DemoTranscriptionAndClosedCaptionsButtonView: View {
     }
 }
 
-extension TranscriptionSettings.Mode: @retroactive CustomStringConvertible {
+extension TranscriptionSettings.Mode: CustomStringConvertible {
     public var description: String {
         switch self {
         case .autoOn:
@@ -247,7 +247,7 @@ extension TranscriptionSettings.Mode: @retroactive CustomStringConvertible {
     }
 }
 
-extension TranscriptionSettings.ClosedCaptionMode: @retroactive CustomStringConvertible {
+extension TranscriptionSettings.ClosedCaptionMode: CustomStringConvertible {
     public var description: String {
         switch self {
         case .autoOn:
@@ -262,7 +262,7 @@ extension TranscriptionSettings.ClosedCaptionMode: @retroactive CustomStringConv
     }
 }
 
-extension TranscriptionSettings.Language: @retroactive CustomStringConvertible {
+extension TranscriptionSettings.Language: CustomStringConvertible {
     public var description: String {
         switch self {
         case .ar: return "Arabic"
