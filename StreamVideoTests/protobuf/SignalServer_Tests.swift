@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class SignalServer_Tests: XCTestCase {
+final class SignalServer_Tests: XCTestCase, @unchecked Sendable {
     
     override func setUp() {
         super.setUp()

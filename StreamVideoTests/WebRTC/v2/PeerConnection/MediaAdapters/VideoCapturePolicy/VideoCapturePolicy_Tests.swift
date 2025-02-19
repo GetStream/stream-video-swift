@@ -7,7 +7,7 @@ import AVFoundation
 import StreamWebRTC
 import XCTest
 
-final class VideoCapturePolicy_Tests: XCTestCase {
+final class VideoCapturePolicy_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var videoCapturer: MockStreamVideoCapturer! = .init()

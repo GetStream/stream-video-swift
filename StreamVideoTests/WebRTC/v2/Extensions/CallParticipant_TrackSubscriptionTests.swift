@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class CallParticipant_TrackSubscriptionTests: XCTestCase {
+final class CallParticipant_TrackSubscriptionTests: XCTestCase, @unchecked Sendable {
 
     func test_trackSubscriptionDetails_givenParticipantHasVideoAndNotDisabled_whenVideoAllowed_thenAddsVideoTrackDetails() {
         // Given

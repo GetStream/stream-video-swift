@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-class ControllerTestCase: StreamVideoTestCase {
+class ControllerTestCase: StreamVideoTestCase, @unchecked Sendable {
 
     let user = User(id: "test")
     let callId = "123"

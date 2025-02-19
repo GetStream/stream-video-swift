@@ -7,7 +7,7 @@ import Foundation
 import StreamWebRTC
 import XCTest
 
-final class CallStatsReporting_Tests: XCTestCase {
+final class CallStatsReporting_Tests: XCTestCase, @unchecked Sendable {
 
     func test_callStatsReport_jsonString() throws {
         // Given

@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class Batch_Tests: XCTestCase {
+final class Batch_Tests: XCTestCase, @unchecked Sendable {
     var time: VirtualTime { VirtualTimeTimer.time }
 
     override func setUp() {
@@ -22,7 +22,7 @@ final class Batch_Tests: XCTestCase {
 
     func test_append() {
         // Create batcher for test events and keep track of handler calls
-        var handlerCalls = [[TestEvent]]()
+        nonisolated(unsafe) var handlerCalls = [[TestEvent]]()
         let batcher = Batcher<TestEvent>(period: 10, timerType: VirtualTimeTimer.self) { events, _ in
             handlerCalls.append(events)
         }
@@ -70,8 +70,8 @@ final class Batch_Tests: XCTestCase {
 
     func test_processImmidiately() {
         // Create batcher with long period and keep track of handler calls
-        var handlerCalls = [[TestEvent]]()
-        var handlerCompletion: (() -> Void)?
+        nonisolated(unsafe) var handlerCalls = [[TestEvent]]()
+        nonisolated(unsafe) var handlerCompletion: (() -> Void)?
         let batcher = Batcher<TestEvent>(period: 20, timerType: VirtualTimeTimer.self) { events, completion in
             handlerCalls.append(events)
             handlerCompletion = completion

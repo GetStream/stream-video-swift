@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebSocketClient_Tests: XCTestCase {
+final class WebSocketClient_Tests: XCTestCase, @unchecked Sendable {
     // The longest time WebSocket waits to reconnect.
     let maxReconnectTimeout: VirtualTime.Seconds = 25
 

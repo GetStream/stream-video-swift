@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class DefaultRetryStrategyTests: XCTestCase {
+final class DefaultRetryStrategyTests: XCTestCase, @unchecked Sendable {
     private var subject: DefaultRetryStrategy! = .init()
 
     override func tearDown() {

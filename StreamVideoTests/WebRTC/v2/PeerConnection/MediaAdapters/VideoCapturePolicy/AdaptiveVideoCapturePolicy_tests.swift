@@ -7,7 +7,7 @@ import AVFoundation
 import StreamWebRTC
 import XCTest
 
-final class AdaptiveVideoCapturePolicy_Tests: XCTestCase {
+final class AdaptiveVideoCapturePolicy_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockCapturer: MockStreamVideoCapturer! = .init()
     private lazy var mockThermalStateObserver: MockThermalStateObserver! = .init()

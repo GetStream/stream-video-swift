@@ -110,7 +110,7 @@ final class StreamVideoCaptureHandler_Tests: XCTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
-        var timesOrientationRequest = 0
+        nonisolated(unsafe) var timesOrientationRequest = 0
         let orientationAdapter = StreamDeviceOrientationAdapter() {
             timesOrientationRequest += 1
             return deviceOrientation

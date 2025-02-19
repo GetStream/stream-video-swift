@@ -6,7 +6,7 @@
 import XCTest
 
 @MainActor
-final class CallsController_Tests: ControllerTestCase {
+final class CallsController_Tests: ControllerTestCase, @unchecked Sendable {
     
     let mockResponseBuilder = MockResponseBuilder()
 
@@ -50,7 +50,7 @@ final class CallsController_Tests: ControllerTestCase {
         try await callsController.loadNextCalls()
         XCTAssert(callsController.calls[0].state.backstage == false)
         let updatedCallId = "default:123"
-        var call = mockResponseBuilder.makeCallResponse(cid: updatedCallId)
+        let call = mockResponseBuilder.makeCallResponse(cid: updatedCallId)
         call.backstage = true
         let callUpdatedEvent = CallUpdatedEvent(
             call: call,
@@ -75,7 +75,7 @@ final class CallsController_Tests: ControllerTestCase {
         streamVideo?.state.connection = .disconnected()
         try await waitForCallEvent()
         streamVideo?.state.connection = .connected
-        try await fulfillment { self.httpClient.requestCounter == 2 }
+        await fulfillment { self.httpClient.requestCounter == 2 }
     }
     
     func test_callsController_noWatchingCalls() async throws {

@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class SerialActor_Tests: XCTestCase {
+final class SerialActor_Tests: XCTestCase, @unchecked Sendable {
     
     func testSerialExecution() async throws {
         let actor = SerialActor()

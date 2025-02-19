@@ -7,7 +7,7 @@ import Combine
 import XCTest
 
 @MainActor
-final class ClosedCaptionsAdapterTests: XCTestCase {
+final class ClosedCaptionsAdapterTests: XCTestCase, @unchecked Sendable {
     private static var videoConfig: VideoConfig! = .dummy()
 
     private var mockedStreamVideo: MockStreamVideo! = MockStreamVideo(
@@ -17,14 +17,18 @@ final class ClosedCaptionsAdapterTests: XCTestCase {
     private lazy var subject: ClosedCaptionsAdapter! = .init(call)
 
     override func tearDown() {
-        mockedStreamVideo = nil
-        call = nil
-        subject = nil
+        Task { @MainActor in
+            mockedStreamVideo = nil
+            call = nil
+            subject = nil
+        }
         super.tearDown()
     }
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        Task { @MainActor in
+            Self.videoConfig = nil
+        }
         super.tearDown()
     }
 

@@ -6,7 +6,7 @@ import PushKit
 @testable import StreamVideo
 import XCTest
 
-final class CallKitPushNotificationAdapterTests: XCTestCase {
+final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable {
 
     private lazy var callKitService: MockCallKitService! = .init()
     private lazy var subject: CallKitPushNotificationAdapter! = .init()

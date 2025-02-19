@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class BroadcastObserver_Tests: StreamVideoTestCase {
+final class BroadcastObserver_Tests: StreamVideoTestCase, @unchecked Sendable {
     
     let notificationCenter: CFNotificationCenter = CFNotificationCenterGetDarwinNotifyCenter()
 

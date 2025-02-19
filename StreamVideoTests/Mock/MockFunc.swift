@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class MockFunc<In, Out> {
+public final class MockFunc<In, Out>: @unchecked Sendable {
     public var calls: [In] = []
     public var result: (In) -> Out = { _ in fatalError() }
 

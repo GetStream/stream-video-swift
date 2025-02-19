@@ -78,7 +78,7 @@ final class MockRTCPeerConnectionCoordinator:
             case .close:
                 return ()
             case let .setVideoFilter(videoFilter):
-                return videoFilter
+                return videoFilter!
             case .ensureSetUpHasBeenCompleted:
                 return ()
             case let .setUp(settings, ownCapabilities):

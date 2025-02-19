@@ -11,7 +11,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     /// Class variable that will be used by all test cases in the file. This ensure that only one
     /// PeerConnectionFactory will be created during tests, ensuring that WebRTC deallocation will
     /// only happen once all tests cases in the file ran.
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
@@ -576,8 +576,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
     private func assertTransitionToStage(
         _ id: WebRTCCoordinator.StateMachine.Stage.ID,
-        operation: @escaping () async throws -> Void,
-        handler: @escaping (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        operation: @escaping @Sendable() async throws -> Void,
+        handler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {

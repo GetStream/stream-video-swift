@@ -8,7 +8,7 @@ import Combine
 
 final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
@@ -556,7 +556,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             peerType: .publisher,
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
-        let subject = PassthroughSubject<Void, Never>()
+        nonisolated(unsafe) let subject = PassthroughSubject<Void, Never>()
         mockPublisher?.stub(for: \.disconnectedPublisher, with: subject.eraseToAnyPublisher())
         mockCoordinatorStack
             .rtcPeerConnectionCoordinatorFactory
@@ -584,7 +584,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             peerType: .subscriber,
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
-        let subject = PassthroughSubject<Void, Never>()
+        nonisolated(unsafe) let subject = PassthroughSubject<Void, Never>()
         mockSubscriber?.stub(for: \.disconnectedPublisher, with: subject.eraseToAnyPublisher())
         mockCoordinatorStack
             .rtcPeerConnectionCoordinatorFactory
@@ -635,7 +635,6 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await stateAdapter.set(sfuAdapter: sfuAdapter)
-        let sessionId = await stateAdapter.sessionID
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
@@ -720,8 +719,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     private func assertTransitionAfterTrigger(
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID? = nil,
-        trigger: @escaping () async -> Void,
-        validationHandler: @escaping (WebRTCCoordinator.StateMachine.Stage) async -> Void,
+        trigger: @escaping @Sendable() async -> Void,
+        validationHandler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -776,8 +775,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     private func assertResultAfterTrigger(
-        trigger: @escaping () async -> Void,
-        validationHandler: @escaping (XCTestExpectation) async -> Void,
+        trigger: @escaping @Sendable() async -> Void,
+        validationHandler: @escaping @Sendable(XCTestExpectation) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {

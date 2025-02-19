@@ -25,7 +25,7 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
     private lazy var mockStack: MockWebRTCCoordinatorStack! = .init(videoConfig: Self.videoConfig)
     private var stateAdapter: WebRTCStateAdapter { mockStack.coordinator.stateAdapter }
     private var subject: WebRTCCoordinator { mockStack.coordinator }

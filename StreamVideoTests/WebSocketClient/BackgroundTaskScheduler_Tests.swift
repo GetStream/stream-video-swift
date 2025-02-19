@@ -6,7 +6,8 @@
 import XCTest
 
 #if os(iOS)
-final class IOSBackgroundTaskScheduler_Tests: XCTestCase {
+@MainActor
+final class IOSBackgroundTaskScheduler_Tests: XCTestCase, @unchecked Sendable {
     func test_notifications_foreground() {
         // Given
         let scheduler = IOSBackgroundTaskScheduler()
@@ -45,7 +46,7 @@ final class IOSBackgroundTaskScheduler_Tests: XCTestCase {
 
     func test_whenSchedulerIsDeallocated_backgroundTaskIsEnded() {
         // Create mock scheduler type and catch `endTask` invokation
-        class MockScheduler: IOSBackgroundTaskScheduler {
+        final class MockScheduler: IOSBackgroundTaskScheduler, @unchecked Sendable {
             let endTaskClosure: () -> Void
 
             init(endTaskClosure: @escaping () -> Void) {

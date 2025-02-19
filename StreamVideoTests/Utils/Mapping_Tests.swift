@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class Mapping_Tests: XCTestCase {
+final class Mapping_Tests: XCTestCase, @unchecked Sendable {
 
     func test_userResponse_toUser() {
         // Given

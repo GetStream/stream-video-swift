@@ -647,7 +647,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             }
         }
 
-        guard case let .reportCall(uuid, dateEnded, reason) = callProvider.invocations.last else {
+        guard case let .reportCall(_, _, reason) = callProvider.invocations.last else {
             XCTFail(file: file, line: line)
             return
         }

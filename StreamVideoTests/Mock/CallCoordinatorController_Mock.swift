@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 
-class CallCoordinatorController_Mock: CallCoordinatorController {
+class CallCoordinatorController_Mock: CallCoordinatorController, @unchecked Sendable {
     
     var error: Error?
     
