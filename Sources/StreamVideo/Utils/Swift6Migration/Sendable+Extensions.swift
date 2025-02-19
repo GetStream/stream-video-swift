@@ -9,7 +9,7 @@ import CoreImage
 import Foundation
 import StreamWebRTC
 
-#if swift(>=6.0)
+#if compiler(>=6.0)
 extension AnyCancellable: @retroactive @unchecked Sendable {}
 extension AVCaptureDevice: @retroactive @unchecked Sendable {}
 extension AVCapturePhotoOutput: @retroactive @unchecked Sendable {}
