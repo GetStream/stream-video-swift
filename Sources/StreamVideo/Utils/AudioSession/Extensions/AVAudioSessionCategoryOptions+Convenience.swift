@@ -4,7 +4,7 @@
 
 import AVFoundation
 
-extension AVAudioSession.CategoryOptions: @retroactive CustomStringConvertible {
+extension AVAudioSession.CategoryOptions {
     /// Provides a description of the `CategoryOptions` set, listing each option
     /// contained within. This allows for easy logging and debugging of audio
     /// session configurations.

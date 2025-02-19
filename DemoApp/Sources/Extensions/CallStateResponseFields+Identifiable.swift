@@ -5,7 +5,7 @@
 import Foundation
 import StreamVideo
 
-extension CallStateResponseFields: @retroactive Identifiable {
+extension CallStateResponseFields: Identifiable {
     public var id: String {
         call.cid
     }

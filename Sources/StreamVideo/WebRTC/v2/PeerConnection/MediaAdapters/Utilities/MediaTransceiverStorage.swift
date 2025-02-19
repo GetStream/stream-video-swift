@@ -11,7 +11,7 @@ import StreamWebRTC
 /// transceivers associated with a specific track type (e.g., audio or video).
 /// It uses a nested `Key` structure to hash and identify items, ensuring
 /// safe access and modifications across multiple threads.
-final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringConvertible {
+final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringConvertible, @unchecked Sendable {
 
     /// The type of track (e.g., audio, video, screen share) that this storage manages.
     private let trackType: TrackType

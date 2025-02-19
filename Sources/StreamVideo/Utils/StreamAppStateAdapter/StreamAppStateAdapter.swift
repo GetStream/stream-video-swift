@@ -32,22 +32,24 @@ public final class StreamAppStateAdapter: ObservableObject, @unchecked Sendable 
     /// Sets up observers for app state changes.
     private func setUp() {
         #if canImport(UIKit)
-        /// Observes app state changes to update the `state` property.
-        notificationCenter
-            .publisher(for: UIApplication.willEnterForegroundNotification)
-            .map { _ in State.foreground }
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.state, onWeak: self)
-            .store(in: disposableBag)
+        Task { @MainActor in
+            /// Observes app state changes to update the `state` property.
+            notificationCenter
+                .publisher(for: UIApplication.willEnterForegroundNotification)
+                .map { _ in State.foreground }
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.state, onWeak: self)
+                .store(in: disposableBag)
 
-        notificationCenter
-            .publisher(for: UIApplication.didEnterBackgroundNotification)
-            .map { _ in State.background }
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.state, onWeak: self)
-            .store(in: disposableBag)
+            notificationCenter
+                .publisher(for: UIApplication.didEnterBackgroundNotification)
+                .map { _ in State.background }
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.state, onWeak: self)
+                .store(in: disposableBag)
 
-        log.debug("\(type(of: self)) now observes application lifecycle.")
+            log.debug("\(type(of: self)) now observes application lifecycle.")
+        }
         #endif
     }
 }

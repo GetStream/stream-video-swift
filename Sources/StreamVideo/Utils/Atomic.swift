@@ -23,7 +23,7 @@ import Foundation
 /// itself from multiple threads can cause a crash.
 
 @propertyWrapper
-final class Atomic<T> {
+final class Atomic<T>: @unchecked Sendable {
     enum Mode {
         case unfair
         case recursive
@@ -61,5 +61,3 @@ final class Atomic<T> {
     /// - Parameter changes: a block with changes. It should return a new value.
     func callAsFunction(_ changes: (_ value: T) -> T) { mutate(changes) }
 }
-
-extension Atomic: Sendable where T: Sendable {}

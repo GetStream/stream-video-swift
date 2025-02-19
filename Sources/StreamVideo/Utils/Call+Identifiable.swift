@@ -3,8 +3,7 @@
 //
 
 import Foundation
-import StreamVideo
 
-extension Call: @retroactive Identifiable {
+extension Call: Identifiable {
     public var id: String { cId }
 }
