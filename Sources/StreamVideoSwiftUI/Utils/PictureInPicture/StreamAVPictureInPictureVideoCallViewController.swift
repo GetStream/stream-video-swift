@@ -11,6 +11,7 @@ import StreamWebRTC
 protocol StreamAVPictureInPictureViewControlling: AnyObject {
     
     /// The closure to call whenever the picture-in-picture window size changes.
+    @MainActor
     var onSizeUpdate: (@Sendable(CGSize) -> Void)? { get set }
 
     /// The track that will be rendered on picture-in-picture window.

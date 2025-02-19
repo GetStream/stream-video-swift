@@ -34,6 +34,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     }
 
     /// A closure called when the picture-in-picture view's size changes.
+    @MainActor
     public var onSizeUpdate: (@Sendable(CGSize) -> Void)? {
         didSet {
             contentViewController?.onSizeUpdate = onSizeUpdate // Updates the onSizeUpdate closure of the content view controller

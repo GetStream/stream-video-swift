@@ -33,9 +33,11 @@ final class StreamPictureInPictureAdapter: @unchecked Sendable {
     /// The closure to call whenever the picture-in-picture rendering window changes size.
     var onSizeUpdate: ((CGSize, CallParticipant) -> Void)? {
         didSet {
-            pictureInPictureController?.onSizeUpdate = { [weak self] size in
-                if let activeParticipant = self?.activeParticipant {
-                    self?.onSizeUpdate?(size, activeParticipant)
+            Task { @MainActor in
+                pictureInPictureController?.onSizeUpdate = { [weak self] size in
+                    if let activeParticipant = self?.activeParticipant {
+                        self?.onSizeUpdate?(size, activeParticipant)
+                    }
                 }
             }
         }
