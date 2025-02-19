@@ -20,7 +20,7 @@ final class ThermalStateObserverTests: XCTestCase, @unchecked Sendable {
     // MARK: - init
 
     func test_init_stateHasBeenCorrectlySetUp() {
-        XCTAssertEqual(ThermalStateObserverKey.currentValue.state, ProcessInfo.processInfo.thermalState)
+        XCTAssertEqual(ThermalStateObserver().state, ProcessInfo.processInfo.thermalState)
     }
 
     // MARK: - notificationObserver
