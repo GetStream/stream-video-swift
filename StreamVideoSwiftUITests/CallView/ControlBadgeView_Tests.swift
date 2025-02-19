@@ -10,7 +10,7 @@ import SwiftUI
 import XCTest
 
 @MainActor
-final class ControlBadgeView_Tests: StreamVideoUITestCase {
+final class ControlBadgeView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     func test_controlBadgeView_valueIsLessThanZero_viewWasConfiguredCorrectly() throws {
         assertSubject { makeSubject(-10) }

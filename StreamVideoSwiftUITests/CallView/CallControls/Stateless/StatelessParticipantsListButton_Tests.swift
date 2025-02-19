@@ -8,7 +8,7 @@ import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase {
+final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     // MARK: - Appearance
 

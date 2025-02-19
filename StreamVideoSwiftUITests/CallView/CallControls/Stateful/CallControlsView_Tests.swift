@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class CallControlsView_Tests: StreamVideoUITestCase {
+final class CallControlsView_Tests: StreamVideoUITestCase, @unchecked Sendable {
     
     func test_callControlsView_withoutCapabilities_snapshot() throws {
         let view = CallControlsView(viewModel: CallViewModel())

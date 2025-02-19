@@ -9,15 +9,15 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class JoiningCallView_Tests: StreamVideoUITestCase {
-    
+final class JoiningCallView_Tests: StreamVideoUITestCase, @unchecked Sendable {
+
     private lazy var viewModel: CallViewModel! = .init()
     private lazy var factory: DefaultViewFactory! = DefaultViewFactory.shared
 
-    override func tearDown() {
+    override func tearDown() async throws {
         viewModel = nil
         factory = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     func test_joiningCallView_snapshot() throws {
