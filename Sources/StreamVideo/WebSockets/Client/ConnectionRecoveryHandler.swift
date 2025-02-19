@@ -108,7 +108,7 @@ private extension DefaultConnectionRecoveryHandler {
     }
     
     func unsubscribeFromNotifications() {
-        Task { @MainActor in
+        Task { @MainActor [backgroundTaskScheduler] in
             backgroundTaskScheduler?.stopListeningForAppStateUpdates()
         }
 

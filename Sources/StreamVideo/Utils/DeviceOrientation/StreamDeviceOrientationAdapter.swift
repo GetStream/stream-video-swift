@@ -104,6 +104,8 @@ open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable
                     guard let self = self else { return }
                     self.orientation = await provider() // Update orientation based on the provider.
                 }
+
+            self.orientation = await provider()
         }
         #endif
     }

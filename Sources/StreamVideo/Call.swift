@@ -69,6 +69,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             initialSpeakerStatus: callSettings?.speakerOn == false ? .disabled : .enabled,
             initialAudioOutputStatus: callSettings?.audioOutputOn == false ? .disabled : .enabled
         )
+
+        configure(callSettings: callSettings)
     }
 
     internal convenience init(
