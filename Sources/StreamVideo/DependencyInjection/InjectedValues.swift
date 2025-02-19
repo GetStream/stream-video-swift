@@ -44,4 +44,3 @@ public struct Injected<T> {
 }
 
 extension Injected: Sendable where T: Sendable {}
-extension WritableKeyPath: @unchecked @retroactive Sendable {}

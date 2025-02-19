@@ -121,5 +121,3 @@ extension StreamStatisticsReportProtocol {
         }
     }
 }
-
-extension KeyPath: @unchecked @retroactive Sendable {}

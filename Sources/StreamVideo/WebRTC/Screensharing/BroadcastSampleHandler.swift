@@ -136,8 +136,3 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler, @unchecked Sendable
         )
     }
 }
-
-// MARK: - Extensions
-
-/// Extension to make `CMSampleBuffer` conform to `Sendable` without checked effects.
-extension CMSampleBuffer: @unchecked @retroactive Sendable {}

@@ -244,7 +244,7 @@ struct SimpleCallingView: View {
     }
 }
 
-extension URL: Identifiable {
+extension URL: @retroactive Identifiable {
     public var id: ObjectIdentifier {
         .init(absoluteString as NSString)
     }
