@@ -35,7 +35,7 @@ struct EventHandler {
     var cancel: () -> Void
 }
 
-func executeOnMain(_ task: @escaping @MainActor() -> Void) {
+func executeOnMain(_ task: @Sendable @escaping @MainActor() -> Void) {
     Task {
         await task()
     }

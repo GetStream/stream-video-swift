@@ -81,4 +81,4 @@ extension Task {
     ) { disposableBag.insert(.init(cancel), with: key) }
 }
 
-extension AnyCancellable: @unchecked Sendable {}
+extension AnyCancellable: @unchecked @retroactive Sendable {}

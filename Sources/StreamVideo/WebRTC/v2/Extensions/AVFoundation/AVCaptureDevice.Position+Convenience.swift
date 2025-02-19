@@ -4,7 +4,7 @@
 
 import AVFoundation
 
-extension AVCaptureDevice.Position: CustomStringConvertible {
+extension AVCaptureDevice.Position: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .unspecified:

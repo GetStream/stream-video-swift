@@ -4,7 +4,6 @@
 
 import Combine
 import Foundation
-import StreamVideo
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -54,7 +53,7 @@ public final class StreamAppStateAdapter: ObservableObject, @unchecked Sendable 
 }
 
 extension StreamAppStateAdapter: InjectionKey {
-    public static var currentValue: StreamAppStateAdapter = .init()
+    nonisolated(unsafe) public static var currentValue: StreamAppStateAdapter = .init()
 }
 
 extension InjectedValues {

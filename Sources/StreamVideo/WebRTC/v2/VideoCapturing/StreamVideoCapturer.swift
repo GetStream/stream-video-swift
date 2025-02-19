@@ -369,3 +369,6 @@ actor StreamVideoCapturer: StreamVideoCapturing {
 private func customString(for object: AnyObject) -> String {
     "\(type(of: object))(\(Unmanaged.passUnretained(object).toOpaque()))"
 }
+
+extension AVCapturePhotoOutput: @unchecked @retroactive Sendable {}
+extension AVCaptureVideoDataOutput: @unchecked @retroactive Sendable {}

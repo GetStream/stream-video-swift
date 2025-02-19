@@ -69,7 +69,7 @@ extension SystemEnvironment {
 
     private static var osVersion: String {
         #if os(iOS)
-        return UIDevice.current.systemVersion
+        return CurrentDevice.currentValue.systemVersion
         #elseif os(macOS)
         return ProcessInfo.processInfo.operatingSystemVersionString
         #endif
@@ -85,7 +85,7 @@ extension SystemEnvironment {
 
     private static var scale: String {
         #if os(iOS)
-        return String(format: "%0.2f", UIScreen.main.scale)
+        return String(format: "%0.2f", ScreenPropertiesAdapter.currentValue.scale)
         #elseif os(macOS)
         return "1.00"
         #endif

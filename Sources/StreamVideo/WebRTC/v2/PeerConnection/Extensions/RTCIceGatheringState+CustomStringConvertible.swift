@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// Extension to make RTCIceGatheringState conform to CustomStringConvertible.
-extension RTCIceGatheringState: CustomStringConvertible {
+extension RTCIceGatheringState: @retroactive CustomStringConvertible {
 
     /// A textual representation of the ICE gathering state.
     public var description: String {

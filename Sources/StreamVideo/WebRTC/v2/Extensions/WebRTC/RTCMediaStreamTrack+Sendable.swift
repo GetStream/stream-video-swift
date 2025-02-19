@@ -4,4 +4,4 @@
 
 import StreamWebRTC
 
-extension RTCMediaStreamTrack: @unchecked Sendable {}
+extension RTCMediaStreamTrack: @unchecked @retroactive Sendable {}

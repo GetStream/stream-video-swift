@@ -9,4 +9,4 @@ import StreamWebRTC
 /// - Note: The @unchecked attribute indicates that the conformance to Sendable
 ///         is not automatically checked by the compiler. Ensure thread safety
 ///         when using this type across concurrency domains.
-extension RTCIceCandidate: @unchecked Sendable {}
+extension RTCIceCandidate: @unchecked @retroactive Sendable {}

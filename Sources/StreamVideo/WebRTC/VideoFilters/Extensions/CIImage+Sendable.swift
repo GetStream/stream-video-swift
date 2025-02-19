@@ -5,4 +5,4 @@
 import CoreImage
 import Foundation
 
-extension CIImage: @unchecked Sendable {}
+extension CIImage: @unchecked @retroactive Sendable {}

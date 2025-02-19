@@ -6,7 +6,7 @@ import Foundation
 
 public struct FetchingLocationError: Error {}
 
-public enum RecordingState {
+public enum RecordingState: Sendable {
     case noRecording
     case requested
     case recording

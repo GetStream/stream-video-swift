@@ -42,7 +42,7 @@ final class StreamLocaleProvider: LocaleProviding {
 
 enum LocaleProvidingKey: InjectionKey {
     /// The current value of the `StreamLocaleProvider` used for dependency injection.
-    static var currentValue: LocaleProviding = StreamLocaleProvider()
+    nonisolated(unsafe) static var currentValue: LocaleProviding = StreamLocaleProvider()
 }
 
 /// Extension of `InjectedValues` to provide access to the `StreamLocaleProvider`.

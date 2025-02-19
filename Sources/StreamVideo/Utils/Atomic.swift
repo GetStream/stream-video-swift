@@ -39,7 +39,7 @@ final class Atomic<T> {
     }
 
     private let queue: LockQueuing
-    private var _value: T
+    nonisolated(unsafe) private var _value: T
 
     var wrappedValue: T {
         get { queue.sync { _value } }
@@ -61,3 +61,5 @@ final class Atomic<T> {
     /// - Parameter changes: a block with changes. It should return a new value.
     func callAsFunction(_ changes: (_ value: T) -> T) { mutate(changes) }
 }
+
+extension Atomic: Sendable where T: Sendable {}

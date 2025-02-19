@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-extension RTCSdpType: CustomStringConvertible {
+extension RTCSdpType: @retroactive CustomStringConvertible {
     /// A textual representation of the SDP type.
     ///
     /// - Returns: A string describing the SDP type:

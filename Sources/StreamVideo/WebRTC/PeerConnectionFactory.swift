@@ -211,7 +211,7 @@ final class PeerConnectionFactory: @unchecked Sendable {
 }
 
 /// A thread-safe storage class for managing PeerConnectionFactory instances.
-final class PeerConnectionFactoryStorage {
+final class PeerConnectionFactoryStorage: @unchecked Sendable {
     /// Shared singleton instance of PeerConnectionFactoryStorage.
     static let shared = PeerConnectionFactoryStorage()
     

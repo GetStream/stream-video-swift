@@ -45,16 +45,16 @@ func executeTask<Output>(
     }
 }
 
-struct RetryPolicy {
+struct RetryPolicy: Sendable {
     let maxRetries: Int
-    let delay: (Int) -> TimeInterval
-    var runPrecondition: () async -> Bool = { true }
+    let delay: @Sendable(Int) -> TimeInterval
+    var runPrecondition: @Sendable() async -> Bool = { true }
 }
 
 extension RetryPolicy {
     static let fastAndSimple = RetryPolicy(maxRetries: 3) { quickDelay(retries: $0) }
-    
-    static func fastCheckValue(_ condition: @escaping () -> Bool) -> RetryPolicy {
+
+    static func fastCheckValue(_ condition: @Sendable @escaping () -> Bool) -> RetryPolicy {
         RetryPolicy(
             maxRetries: 3,
             delay: { quickDelay(retries: $0) },
@@ -62,7 +62,7 @@ extension RetryPolicy {
         )
     }
     
-    static func neverGonnaGiveYouUp(_ condition: @escaping () async -> Bool) -> RetryPolicy {
+    static func neverGonnaGiveYouUp(_ condition: @Sendable @escaping () async -> Bool) -> RetryPolicy {
         RetryPolicy(
             maxRetries: 30,
             delay: { delay(retries: $0) },

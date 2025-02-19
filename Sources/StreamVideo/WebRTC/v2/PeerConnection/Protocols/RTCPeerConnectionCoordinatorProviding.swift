@@ -9,7 +9,7 @@ import StreamWebRTC
 /// The `RTCPeerConnectionCoordinatorProviding` protocol is designed to abstract the creation of
 /// `RTCPeerConnectionCoordinator` objects. This allows for flexibility in how these coordinators
 /// are instantiated and configured, which can be particularly useful for dependency injection and testing.
-protocol RTCPeerConnectionCoordinatorProviding {
+protocol RTCPeerConnectionCoordinatorProviding: Sendable {
 
     /// Builds and returns an RTCPeerConnectionCoordinator with the specified parameters.
     /// - Parameters:
