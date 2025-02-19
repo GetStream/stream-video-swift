@@ -8,7 +8,7 @@ import StreamSwiftTestHelpers
 @testable import StreamVideoUIKit
 import XCTest
 
-final class CallViewController_Tests: StreamVideoUITestCase {
+final class CallViewController_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     @MainActor
     func test_callViewController_outgoingSnapshot() {
