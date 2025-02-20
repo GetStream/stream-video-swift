@@ -23,7 +23,7 @@ import Foundation
 /// itself from multiple threads can cause a crash.
 
 @propertyWrapper
-final class Atomic<T> {
+final class Atomic<T>: @unchecked Sendable {
     enum Mode {
         case unfair
         case recursive
@@ -39,7 +39,7 @@ final class Atomic<T> {
     }
 
     private let queue: LockQueuing
-    private var _value: T
+    nonisolated(unsafe) private var _value: T
 
     var wrappedValue: T {
         get { queue.sync { _value } }

@@ -7,7 +7,7 @@ import Foundation
 
 /// Extension to `Publisher` providing utility methods for handling asynchronous
 /// tasks and managing their lifecycle using `Combine`.
-extension Publisher {
+extension Publisher where Output: Sendable {
     /// Creates a task to handle the publisher's output asynchronously, with
     /// optional management of its lifecycle.
     ///
@@ -29,11 +29,11 @@ extension Publisher {
     public func sinkTask(
         storeIn disposableBag: DisposableBag? = nil,
         identifier: String? = nil,
-        receiveCompletion: @escaping ((Subscribers.Completion<Failure>) -> Void) = { _ in },
-        receiveValue: @escaping ((Output) async throws -> Void)
+        receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
+        receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
         // Subscribe to the publisher's events and process the received input.
-        sink(receiveCompletion: receiveCompletion) { [weak disposableBag] input in
+        sink(receiveCompletion: receiveCompletion) { @Sendable [weak disposableBag] input in
             // Create a new task to handle the received value.
             let task = Task {
                 do {
@@ -78,8 +78,8 @@ extension Publisher {
     ///   - Task cancellation and errors are handled similarly to `sinkTask(storeIn:identifier:receiveCompletion:receiveValue:)`.
     public func sinkTask(
         queue: SerialActorQueue,
-        receiveCompletion: @escaping ((Subscribers.Completion<Failure>) -> Void) = { _ in },
-        receiveValue: @escaping ((Output) async throws -> Void)
+        receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
+        receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
         // Subscribe to the publisher's events and process the received input.
         sink(receiveCompletion: receiveCompletion) { [weak queue] input in

@@ -69,7 +69,7 @@ extension SystemEnvironment {
 
     private static var osVersion: String {
         #if os(iOS)
-        return UIDevice.current.systemVersion
+        return CurrentDevice.currentValue.systemVersion
         #elseif os(macOS)
         return ProcessInfo.processInfo.operatingSystemVersionString
         #endif

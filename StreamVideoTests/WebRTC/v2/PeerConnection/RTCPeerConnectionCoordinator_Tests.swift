@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
+final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var sessionId: String! = .unique
     private lazy var peerType: PeerConnectionType! = .publisher
@@ -104,7 +104,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
     // MARK: - createOffer(constraints:)
 
     func test_createOffer_peerConnectionWasCalled() async throws {
-        try await subject.createOffer()
+        _ = try await subject.createOffer()
 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.offer) == 1
@@ -114,7 +114,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
     // MARK: - createAnswer(constraints:)
 
     func test_createAnswer_peerConnectionWasCalled() async throws {
-        try await subject.createAnswer()
+        _ = try await subject.createAnswer()
 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.answer) == 1
@@ -231,7 +231,6 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         _ = subject
 
         let offer = "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
-        let expectedOffer = "useinbandfec=1;usedtx=1;\r\n00:11 opus/;\r\n12:13: red/48000/2"
         mockPeerConnection.stub(
             for: .offer,
             with: RTCSessionDescription(type: .offer, sdp: offer)
@@ -485,7 +484,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase {
         ownCapabilities: [OwnCapability] = [],
         setUpDelay: TimeInterval = 0,
         shouldFail: Bool = false,
-        _ operation: @escaping () async throws -> Void
+        _ operation: @escaping @Sendable() async throws -> Void
     ) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {

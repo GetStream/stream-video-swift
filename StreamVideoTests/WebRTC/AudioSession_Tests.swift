@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class AudioSession_Tests: XCTestCase {
+final class AudioSession_Tests: XCTestCase, @unchecked Sendable {
 
 //    private lazy var subject: StreamAudioSessionAdapter! = StreamAudioSessionAdapter()
 //    private lazy var rtcAudioSession: RTCAudioSession! = .sharedInstance()

@@ -130,7 +130,7 @@ extension VideoCapturePolicy {
 extension VideoCapturePolicy: InjectionKey {
 
     /// The current video capture policy used for dependency injection.
-    public static var currentValue: VideoCapturePolicy = .adaptive
+    nonisolated(unsafe) public static var currentValue: VideoCapturePolicy = .adaptive
 }
 
 extension InjectedValues {

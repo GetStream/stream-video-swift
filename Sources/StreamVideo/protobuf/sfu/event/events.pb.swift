@@ -2098,7 +2098,7 @@ extension Stream_Video_Sfu_Event_TrackPublished: SwiftProtobuf.Message, SwiftPro
     4: .same(proto: "participant"),
   ]
 
-  fileprivate class _StorageClass {
+    fileprivate class _StorageClass: @unchecked Sendable {
     var _userID: String = String()
     var _sessionID: String = String()
     var _type: Stream_Video_Sfu_Models_TrackType = .unspecified
@@ -2191,7 +2191,7 @@ extension Stream_Video_Sfu_Event_TrackUnpublished: SwiftProtobuf.Message, SwiftP
     5: .same(proto: "participant"),
   ]
 
-  fileprivate class _StorageClass {
+    fileprivate class _StorageClass: @unchecked Sendable {
     var _userID: String = String()
     var _sessionID: String = String()
     var _type: Stream_Video_Sfu_Models_TrackType = .unspecified
@@ -2296,7 +2296,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     10: .standard(proto: "preferred_subscribe_options"),
   ]
 
-  fileprivate class _StorageClass {
+fileprivate class _StorageClass: @unchecked Sendable {
     var _token: String = String()
     var _sessionID: String = String()
     var _subscriberSdp: String = String()

@@ -6,7 +6,7 @@ import PushKit
 @testable import StreamVideo
 import XCTest
 
-final class CallKitPushNotificationAdapterTests: XCTestCase {
+final class CallKitPushNotificationAdapterTests: XCTestCase, @unchecked Sendable {
 
     private lazy var callKitService: MockCallKitService! = .init()
     private lazy var subject: CallKitPushNotificationAdapter! = .init()
@@ -93,8 +93,8 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     // MARK: - pushRegistry(_:didReceiveIncomingPushWith:for:completion:)
 
     @MainActor
-    func test_pushRegistryDidReceiveIncomingPush_typeIsVoIP_reportIncomingCallWasCalledAsExpected() {
-        assertDidReceivePushNotification(
+    func test_pushRegistryDidReceiveIncomingPush_typeIsVoIP_reportIncomingCallWasCalledAsExpected() async {
+        await assertDidReceivePushNotification(
             .init(
                 cid: "123",
                 localizedCallerName: "TestUser",
@@ -105,8 +105,9 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     }
 
     @MainActor
-    func test_pushRegistryDidReceiveIncomingPush_typeIsVoIPWithDisplayNameAndCallerName_reportIncomingCallWasCalledAsExpected() {
-        assertDidReceivePushNotification(
+    func test_pushRegistryDidReceiveIncomingPush_typeIsVoIPWithDisplayNameAndCallerName_reportIncomingCallWasCalledAsExpected(
+    ) async {
+        await assertDidReceivePushNotification(
             .init(
                 cid: "123",
                 localizedCallerName: "TestUser",
@@ -118,8 +119,8 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     }
 
     @MainActor
-    func test_pushRegistryDidReceiveIncomingPush_typeIsNotVoIP_reportIncomingCallWasNotCalled() {
-        assertDidReceivePushNotification(contentType: .fileProvider)
+    func test_pushRegistryDidReceiveIncomingPush_typeIsNotVoIP_reportIncomingCallWasNotCalled() async {
+        await assertDidReceivePushNotification(contentType: .fileProvider)
     }
 
     // MARK: - Private helpers
@@ -131,7 +132,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
         displayName: String = "",
         file: StaticString = #file,
         line: UInt = #line
-    ) {
+    ) async {
         let pushPayload = MockPKPushPayload()
         pushPayload.stubType = contentType
         var payload: [String: Any] = content.map { [
@@ -151,13 +152,20 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
         pushPayload.stubDictionaryPayload = payload
 
         let completionWasCalledExpectation = expectation(description: "Completion was called.")
-        completionWasCalledExpectation.isInverted = content == nil
         subject.pushRegistry(
             subject.registry,
             didReceiveIncomingPushWith: pushPayload,
             for: pushPayload.type,
             completion: { completionWasCalledExpectation.fulfill() }
         )
+
+        await fulfillment(of: [completionWasCalledExpectation])
+
+        guard contentType == .voIP else {
+            return
+        }
+
+        await fulfillment { self.callKitService.reportIncomingCallWasCalled != nil }
 
         if let content {
             XCTAssertEqual(
@@ -192,8 +200,6 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
                 line: line
             )
         }
-
-        wait(for: [completionWasCalledExpectation], timeout: defaultTimeout)
     }
 }
 

@@ -140,16 +140,7 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// - Returns: An RTCStatisticsReport containing the connection statistics.
     /// - Throws: An error if retrieving statistics fails.
     func statistics() async throws -> RTCStatisticsReport? {
-        try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard let self else {
-                return continuation.resume(throwing: ClientError.Unexpected())
-            }
-            Task { @MainActor in
-                source.statistics { report in
-                    continuation.resume(returning: report)
-                }
-            }
-        }
+        await source.statistics()
     }
 
     // MARK: - Forwarding API

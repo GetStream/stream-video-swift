@@ -6,7 +6,7 @@ import Foundation
 import OSLog
 import StreamVideo
 
-final class OSLogDestination: BaseLogDestination {
+final class OSLogDestination: BaseLogDestination, @unchecked Sendable {
 
     private let loggers: [String: os.Logger] = LogSubsystem
         .allCases

@@ -24,7 +24,7 @@ extension StreamCallStateMachine.Stage {
 extension StreamCallStateMachine.Stage {
 
     /// A class representing the rejected stage in the `StreamCallStateMachine`.
-    final class RejectedStage: StreamCallStateMachine.Stage {
+    final class RejectedStage: StreamCallStateMachine.Stage, @unchecked Sendable {
         let response: RejectCallResponse
 
         /// Initializes a new rejected stage with the provided call and response.

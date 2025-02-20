@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class IncomingVideoQualitySettings_Tests: XCTestCase {
+final class IncomingVideoQualitySettings_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - contains
 

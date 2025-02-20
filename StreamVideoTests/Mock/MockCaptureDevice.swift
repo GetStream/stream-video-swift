@@ -6,7 +6,7 @@ import AVFoundation
 import CoreMedia
 @testable import StreamVideo
 
-final class MockCaptureDevice: CaptureDeviceProtocol, Mockable {
+final class MockCaptureDevice: CaptureDeviceProtocol, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

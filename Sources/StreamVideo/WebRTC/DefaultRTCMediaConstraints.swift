@@ -7,12 +7,12 @@ import StreamWebRTC
 
 extension RTCMediaConstraints {
     
-    static let defaultConstraints = RTCMediaConstraints(
+    nonisolated(unsafe) static let defaultConstraints = RTCMediaConstraints(
         mandatoryConstraints: nil,
         optionalConstraints: ["DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue]
     )
     
-    static let iceRestartConstraints = RTCMediaConstraints(
+    nonisolated(unsafe) static let iceRestartConstraints = RTCMediaConstraints(
         mandatoryConstraints: [kRTCMediaConstraintsIceRestart: kRTCMediaConstraintsValueTrue],
         optionalConstraints: ["DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue]
     )

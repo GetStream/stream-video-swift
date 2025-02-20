@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class TaskTimeoutTests: XCTestCase {
+final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
 
     func testSuccessfulOperationWithinTimeout() async throws {
         let expectation = XCTestExpectation(description: "Operation completed successfully")

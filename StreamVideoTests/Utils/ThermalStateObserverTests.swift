@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class ThermalStateObserverTests: XCTestCase {
+final class ThermalStateObserverTests: XCTestCase, @unchecked Sendable {
 
     private var stubThermalState: ProcessInfo.ThermalState = .nominal
     private lazy var subject: ThermalStateObserver! = .init { self.stubThermalState }
@@ -20,11 +20,7 @@ final class ThermalStateObserverTests: XCTestCase {
     // MARK: - init
 
     func test_init_stateHasBeenCorrectlySetUp() {
-        XCTAssertEqual(ThermalStateObserver.shared.state, ProcessInfo.processInfo.thermalState)
-    }
-    
-    func test_injectedValueWasSetCorrectly() {
-        XCTAssertTrue(InjectedValues[\.thermalStateObserver] === ThermalStateObserver.shared)
+        XCTAssertEqual(ThermalStateObserver().state, ProcessInfo.processInfo.thermalState)
     }
 
     // MARK: - notificationObserver

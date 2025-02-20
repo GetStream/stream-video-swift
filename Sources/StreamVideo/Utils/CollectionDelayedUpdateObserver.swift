@@ -7,7 +7,7 @@ import Foundation
 
 /// A class that observes a collection and delays updates based on its size.
 /// It uses either debounce or throttle mechanisms to manage update frequency.
-final class CollectionDelayedUpdateObserver<Value: Collection> {
+final class CollectionDelayedUpdateObserver<Value: Collection>: @unchecked Sendable {
     /// Represents different time intervals for delaying updates.
     enum Interval {
         /// No delay.

@@ -6,7 +6,7 @@ import CoreMedia
 @testable import StreamVideo
 import XCTest
 
-final class StreamVideoSfuModelsPublishOption_VideoLayersTests: XCTestCase {
+final class StreamVideoSfuModelsPublishOption_VideoLayersTests: XCTestCase, @unchecked Sendable {
 
     func test_videoLayers_withThreeSpatialLayers() {
         var publishOption = Stream_Video_Sfu_Models_PublishOption()

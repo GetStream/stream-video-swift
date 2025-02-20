@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 
-class MockResponseBuilder {
+class MockResponseBuilder: @unchecked Sendable {
     
     func makeJoinCallResponse(cid: String, recording: Bool = false) -> JoinCallResponse {
         JoinCallResponse(

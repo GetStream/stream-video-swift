@@ -14,7 +14,7 @@ public typealias StreamSortComparator<Value> = (Value, Value) -> ComparisonResul
 /// - `ifInvisible(isSpeaking)`: Sorts participants based on whether they are speaking, but only if they are not visible.
 /// - `ifInvisible(publishingVideo)`: Sorts participants based on their video status, but only if they are not visible.
 /// - `ifInvisible(publishingAudio)`: Sorts participants based on their audio status, but only if they are not visible.
-public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
+nonisolated(unsafe) public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
     pinned,
     screensharing,
     combineComparators([
@@ -32,7 +32,7 @@ public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
 /// - `publishingVideo`: Sorts participants based on their video status, but only if they are not visible.
 /// - `publishingAudio`: Sorts participants based on their audio status, but only if they are not visible.
 /// - `roles`: Sorts participants based on their assigned roles.
-public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
+nonisolated(unsafe) public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
     ifInvisible(
         combineComparators([
             dominantSpeaker,
@@ -172,21 +172,23 @@ public func conditional<T>(_ predicate: @escaping (T, T) -> Bool)
 }
 
 /// A specific conditional comparator for CallParticipant that checks if either participant's track is not visible.
-public let ifInvisible = conditional { (lhs: CallParticipant, rhs: CallParticipant) -> Bool in
+nonisolated(unsafe) public let ifInvisible = conditional { (lhs: CallParticipant, rhs: CallParticipant) -> Bool in
     !lhs.showTrack || !rhs.showTrack
 }
 
 // MARK: Instance
 
 /// Comparator which sorts participants by the fact that they are the dominant speaker or not.
-public var dominantSpeaker: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.isDominantSpeaker) }
+nonisolated(unsafe) public var dominantSpeaker: StreamSortComparator<CallParticipant> = {
+    comparison($0, $1, keyPath: \.isDominantSpeaker)
+}
 
 /// Comparator which sorts participants by the fact that they are speaking or not.
-public var isSpeaking: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.isSpeaking) }
+nonisolated(unsafe) public var isSpeaking: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.isSpeaking) }
 
 /// Comparator which prioritizes participants who are pinned.
 /// - Note: Remote pins have higher priority than local.
-public var pinned: StreamSortComparator<CallParticipant> = { a, b in
+nonisolated(unsafe) public var pinned: StreamSortComparator<CallParticipant> = { a, b in
     switch (a.pin, b.pin) {
     case (nil, _?): return .orderedDescending
     case (_?, nil): return .orderedAscending
@@ -199,19 +201,22 @@ public var pinned: StreamSortComparator<CallParticipant> = { a, b in
 }
 
 /// Comparator which sorts participants by screen sharing status.
-public var screensharing: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.isScreensharing) }
+nonisolated(unsafe) public var screensharing: StreamSortComparator<CallParticipant> = {
+    comparison($0, $1, keyPath: \.isScreensharing)
+}
 
 /// Comparator which sorts participants by video status.
-public var publishingVideo: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.hasVideo) }
+nonisolated(unsafe) public var publishingVideo: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.hasVideo) }
 
 /// Comparator which sorts participants by audio status.
-public var publishingAudio: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.hasAudio) }
+nonisolated(unsafe) public var publishingAudio: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.hasAudio) }
 
 /// Comparator which sorts participants by name.
-public var name: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.name) }
+nonisolated(unsafe) public var name: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.name) }
 
 /// A comparator creator which will set up a comparator which prioritizes participants who have a specific role.
-public func roles(_ priorityRoles: [String] = ["admin", "host", "speaker"]) -> StreamSortComparator<CallParticipant> {
+nonisolated(unsafe) public func roles(_ priorityRoles: [String] = ["admin", "host", "speaker"])
+    -> StreamSortComparator<CallParticipant> {
     { (p1, p2) in
         if p1.roles == p2.roles { return .orderedSame }
         for role in priorityRoles {
@@ -227,10 +232,10 @@ public func roles(_ priorityRoles: [String] = ["admin", "host", "speaker"]) -> S
 }
 
 /// Comparator for sorting `CallParticipant` objects based on their `id` property
-public var id: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.id) }
+nonisolated(unsafe) public var id: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.id) }
 
 /// Comparator for sorting `CallParticipant` objects based on their `userId` property
-public var userId: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.userId) }
+nonisolated(unsafe) public var userId: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.userId) }
 
 /// Comparator for sorting `CallParticipant` objects based on the date and time (`joinedAt`) they joined the call
-public var joinedAt: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.joinedAt) }
+nonisolated(unsafe) public var joinedAt: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.joinedAt) }

@@ -6,7 +6,7 @@
 @preconcurrency import XCTest
 
 @MainActor
-final class Call_Tests: StreamVideoTestCase {
+final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     let callType = "default"
     let callId = "123"
@@ -207,7 +207,7 @@ final class Call_Tests: StreamVideoTestCase {
             cid: callCid
         )
         call?.state.members = [Member(user: .init(id: userId), updatedAt: Date())]
-        var member = mockResponseBuilder.makeMemberResponse(id: userId)
+        let member = mockResponseBuilder.makeMemberResponse(id: userId)
         member.user.name = "newname"
         let event = CallMemberUpdatedEvent(
             call: callResponse,
@@ -321,7 +321,7 @@ final class Call_Tests: StreamVideoTestCase {
 
         await call?.setIncomingVideoQualitySettings(incomingVideoQualitySettings)
 
-        await fulfillment {
+        await fulfilmentInMainActor {
             call?.state.incomingVideoQualitySettings == incomingVideoQualitySettings
         }
     }
@@ -435,7 +435,7 @@ final class Call_Tests: StreamVideoTestCase {
             .typeCallRecordingStartedEvent(
                 CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
             )
-        ) { call in await fulfillment { call.state.recordingState == .recording } }
+        ) { call in await fulfilmentInMainActor { call.state.recordingState == .recording } }
     }
 
     func test_coordinatorEventReceived_startedRecordingForAnotherCall_doesNotUpdateState() async throws {
@@ -576,12 +576,12 @@ final class Call_Tests: StreamVideoTestCase {
     }
 }
 
-private struct UpdateStateStep {
+private struct UpdateStateStep: Sendable {
     var event: VideoEvent
     var onEventUpdate: Bool
-    var validation: (Call) -> Bool
+    var validation: @Sendable(Call) -> Bool
 
-    init<V: Equatable>(
+    init<V: Equatable & Sendable>(
         event: VideoEvent,
         keyPath: KeyPath<Call, V>,
         onEventUpdate: Bool = false,
@@ -589,6 +589,6 @@ private struct UpdateStateStep {
     ) {
         self.event = event
         self.onEventUpdate = onEventUpdate
-        validation = { $0[keyPath: keyPath] == expected }
+        validation = { @Sendable in $0[keyPath: keyPath] == expected }
     }
 }

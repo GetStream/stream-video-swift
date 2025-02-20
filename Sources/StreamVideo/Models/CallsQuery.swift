@@ -59,7 +59,7 @@ public enum CallSortDirection: Int {
 }
 
 /// Defines the field to sort calls by.
-public struct CallSortField: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
+public struct CallSortField: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral, Sendable {
     public let rawValue: String
 
     public init(rawValue: String) {

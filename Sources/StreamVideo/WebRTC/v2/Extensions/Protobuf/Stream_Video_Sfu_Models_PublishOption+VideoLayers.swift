@@ -44,7 +44,7 @@ extension Stream_Video_Sfu_Models_PublishOption {
         var scaleDownFactor: Int = 1
 
         // Array to hold the generated video layers.
-        var qualities: [VideoLayer.Quality] = [.full, .half, .quarter]
+        let qualities: [VideoLayer.Quality] = [.full, .half, .quarter]
         var videoLayers: [VideoLayer] = []
         for quality in qualities {
             // Calculate dimensions and bitrate for the current quality level.

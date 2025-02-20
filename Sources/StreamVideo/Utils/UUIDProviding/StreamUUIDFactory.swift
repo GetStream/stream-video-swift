@@ -13,7 +13,7 @@ public protocol UUIDProviding {
 /// A key used for dependency injection of UUID providers.
 public enum UUIDProviderKey: InjectionKey {
     /// The current value of UUID provider, defaulted to `StreamUUIDFactory`.
-    public static var currentValue: UUIDProviding = StreamUUIDFactory()
+    nonisolated(unsafe) public static var currentValue: UUIDProviding = StreamUUIDFactory()
 }
 
 extension InjectedValues {

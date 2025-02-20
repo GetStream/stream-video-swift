@@ -11,17 +11,17 @@ extension CMVideoDimensions {
     /// Represents full quality video dimensions (1280x720).
     ///
     /// Used for video layers with ``VideoLayer.Quality.full``.
-    public static var full = CMVideoDimensions(.full)
+    public static let full = CMVideoDimensions(.full)
 
     /// Represents half quality video dimensions (640x480).
     ///
     /// Used for video layers with ``VideoLayer.Quality.half``.
-    public static var half = CMVideoDimensions(.half)
+    public static let half = CMVideoDimensions(.half)
 
     /// Represents quarter quality video dimensions (480x360).
     ///
     /// Used for video layers with ``VideoLayer.Quality.quarter``.
-    public static var quarter = CMVideoDimensions(.quarter)
+    public static let quarter = CMVideoDimensions(.quarter)
 
     /// The total area of the video dimensions, calculated as `width * height`.
     ///

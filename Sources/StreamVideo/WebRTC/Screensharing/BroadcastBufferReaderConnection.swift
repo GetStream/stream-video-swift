@@ -5,7 +5,7 @@
 import Darwin
 import Foundation
 
-final class BroadcastBufferReaderConnection: BroadcastBufferConnection {
+final class BroadcastBufferReaderConnection: BroadcastBufferConnection, @unchecked Sendable {
     private let streamDelegate: StreamDelegate
     
     private let filePath: String

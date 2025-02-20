@@ -5,7 +5,7 @@
 import Foundation
 
 enum BroadcastBufferReaderKey: InjectionKey {
-    static var currentValue: BroadcastBufferReader = .init()
+    nonisolated(unsafe) static var currentValue: BroadcastBufferReader = .init()
 }
 
 extension InjectedValues {

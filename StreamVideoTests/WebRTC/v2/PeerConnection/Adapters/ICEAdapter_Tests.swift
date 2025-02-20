@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 @preconcurrency import XCTest
 
-final class ICEAdapterTests: XCTestCase {
+final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
 
     private lazy var sessionId: String! = .unique
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()

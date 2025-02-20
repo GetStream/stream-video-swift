@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class StreamVideo_Tests: StreamVideoTestCase {
+final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private lazy var callId: String! = String(String.unique.prefix(10))
     private lazy var callType: String! = .default
