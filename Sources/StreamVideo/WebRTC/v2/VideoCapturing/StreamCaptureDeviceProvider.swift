@@ -58,7 +58,7 @@ final class StreamCaptureDeviceProvider: CaptureDeviceProviding {
 
 /// A key for injecting a CaptureDeviceProviding instance.
 enum CaptureDeviceProviderKey: InjectionKey {
-    static var currentValue: CaptureDeviceProviding = StreamCaptureDeviceProvider()
+    nonisolated(unsafe) static var currentValue: CaptureDeviceProviding = StreamCaptureDeviceProvider()
 }
 
 /// An extension to manage injected values.

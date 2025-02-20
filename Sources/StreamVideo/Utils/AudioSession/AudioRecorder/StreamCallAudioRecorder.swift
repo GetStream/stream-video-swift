@@ -240,7 +240,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
 /// Provides the default value of the `StreamCallAudioRecorder` class.
 struct StreamCallAudioRecorderKey: InjectionKey {
-    static var currentValue: StreamCallAudioRecorder = StreamCallAudioRecorder(
+    nonisolated(unsafe) static var currentValue: StreamCallAudioRecorder = StreamCallAudioRecorder(
         filename: "recording.wav"
     )
 }

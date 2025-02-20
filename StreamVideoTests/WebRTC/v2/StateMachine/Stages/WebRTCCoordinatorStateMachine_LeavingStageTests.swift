@@ -7,7 +7,7 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
@@ -125,7 +125,7 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,
         subject: WebRTCCoordinator.StateMachine.Stage,
-        validator: @escaping (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        validator: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {

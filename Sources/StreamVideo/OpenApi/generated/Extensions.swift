@@ -98,22 +98,3 @@ extension JSONEncodable where Self: Encodable {
         return data.encodeToJSON()
     }
 }
-
-extension String: CodingKey {
-
-    public var stringValue: String {
-        self
-    }
-
-    public init?(stringValue: String) {
-        self.init(stringLiteral: stringValue)
-    }
-
-    public var intValue: Int? {
-        nil
-    }
-
-    public init?(intValue: Int) {
-        nil
-    }
-}

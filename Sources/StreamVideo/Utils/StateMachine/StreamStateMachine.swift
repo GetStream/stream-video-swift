@@ -48,7 +48,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
             transitioningFromStage.didTransitionAway()
 
             log.debug(
-                "Transition \(String(describing: currentStage.description)) → \(newStage.description)",
+                "Transition \(currentStage.description) → \(newStage.description)",
                 subsystems: logSubsystem
             )
             publisher.send(nextStage)
@@ -70,7 +70,7 @@ extension ClientError {
         ///   - from: The stage from which the transition was attempted.
         ///   - to: The stage to which the transition was attempted.
         init(from: any StreamStateMachineStage, to: any StreamStateMachineStage) {
-            message = "Cannot transition from \(String(describing: from.description)) → \(to.description)"
+            message = "Cannot transition from \(from.description) → \(to.description)"
         }
     }
 }

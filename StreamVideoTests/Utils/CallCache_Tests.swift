@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CallCacheTests: StreamVideoTestCase {
+final class CallCacheTests: StreamVideoTestCase, @unchecked Sendable {
 
     private lazy var callId: String! = .unique
     private lazy var callType: String! = "test"

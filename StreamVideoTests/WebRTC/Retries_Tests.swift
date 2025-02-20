@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class Retries_Tests: XCTestCase {
+final class Retries_Tests: XCTestCase, @unchecked Sendable {
     
     private var dummyRequest: URLRequest! = URLRequest(url: URL(string: "https://test.com")!)
     private var dummyData: Data! = Data()
@@ -71,7 +71,7 @@ final class Retries_Tests: XCTestCase {
     func test_executeTask_runPrecondition() async throws {
         // Given
         let httpClient = HTTPClient_Mock()
-        let condition = { self.dummyState == "dummy" }
+        let condition = { @Sendable in self.dummyState == "dummy" }
         httpClient.errors = [dummyError]
         httpClient.dataResponses = [dummyData]
         
@@ -88,7 +88,7 @@ final class Retries_Tests: XCTestCase {
     func test_executeTask_failedPrecondition() async throws {
         // Given
         let httpClient = HTTPClient_Mock()
-        let condition = { self.dummyState == "dummy" }
+        let condition = { @Sendable in self.dummyState == "dummy" }
         httpClient.errors = [dummyError]
         httpClient.dataResponses = [dummyData]
         
@@ -110,8 +110,8 @@ final class Retries_Tests: XCTestCase {
         let httpClient = HTTPClient_Mock()
         httpClient.errors = [dummyError, dummyError, dummyError, dummyError]
         httpClient.dataResponses = [dummyData]
-        let condition = { self.dummyState == "dummy" }
-        
+        let condition = { @Sendable in self.dummyState == "dummy" }
+
         // When
         let result = try await executeTask(
             retryPolicy: .neverGonnaGiveYouUp(condition),
@@ -138,8 +138,8 @@ final class Retries_Tests: XCTestCase {
         )
         httpClient.errors = [apiError, dummyError, dummyError, dummyError]
         httpClient.dataResponses = [dummyData]
-        let condition = { self.dummyState == "dummy" }
-        
+        let condition = { @Sendable in self.dummyState == "dummy" }
+
         // When
         do {
             _ = try await executeTask(retryPolicy: .fastCheckValue(condition), task: {

@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class RTCConfiguration_Tests: XCTestCase {
+final class RTCConfiguration_Tests: XCTestCase, @unchecked Sendable {
 
     func test_rtcConfiguration_default() {
         // Given

@@ -123,8 +123,8 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         } catch {
             // Log error and rethrow
             log.error(
-                "URLSessionTransport: \(String(describing: request.url.absoluteString))\n"
-                    + "Headers:\n\(String(describing: request.headers))\n"
+                "URLSessionTransport: \(request.url.absoluteString)\n"
+                    + "Headers:\n\(request.headers)\n"
                     + "Query items:\n\(request.queryParams)",
                 subsystems: .httpRequests, error: error
             )

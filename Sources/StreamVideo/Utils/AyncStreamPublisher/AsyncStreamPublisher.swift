@@ -49,7 +49,8 @@ struct AsyncStreamPublisher<Element>: Publisher {
     }
 }
 
-private final class AsyncStreamSubscription<S: Subscriber, Element>: Subscription where S.Input == Element, S.Failure == Never {
+private final class AsyncStreamSubscription<S: Subscriber, Element>: Subscription, @unchecked Sendable where S.Input == Element,
+    S.Failure == Never {
     private var subscriber: S?
     private let asyncStream: AsyncStream<Element>
     private var task: Task<Void, Never>?
