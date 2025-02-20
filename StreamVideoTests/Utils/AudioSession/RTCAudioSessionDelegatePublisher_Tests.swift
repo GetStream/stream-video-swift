@@ -8,14 +8,17 @@ import Combine
 import StreamWebRTC
 import XCTest
 
-final class RTCAudioSessionDelegatePublisherTests: XCTestCase {
+@MainActor
+final class RTCAudioSessionDelegatePublisherTests: XCTestCase, @unchecked Sendable {
     private var session: RTCAudioSession! = .sharedInstance()
     private var disposableBag: DisposableBag! = .init()
     private var subject: RTCAudioSessionDelegatePublisher! = .init()
 
     override func tearDown() {
-        subject = nil
-        disposableBag.removeAll()
+        Task { @MainActor in
+            subject = nil
+            disposableBag.removeAll()
+        }
         super.tearDown()
     }
 
@@ -223,13 +226,13 @@ final class RTCAudioSessionDelegatePublisherTests: XCTestCase {
 
     // MARK: - Private helpers
 
+    @MainActor
     private func assertAudioSessionEvent(
         _ action: @autoclosure () -> Void,
         validator: @escaping (AudioSessionEvent) -> Void
     ) {
         let expectation = self.expectation(description: "AudioSession event received.")
-        let session = RTCAudioSession.sharedInstance()
-        let canPlayOrRecord = true
+        _ = RTCAudioSession.sharedInstance()
 
         subject
             .publisher

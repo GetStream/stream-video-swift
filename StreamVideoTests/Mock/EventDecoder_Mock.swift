@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class EventDecoder_Mock: AnyEventDecoder {
+final class EventDecoder_Mock: AnyEventDecoder, @unchecked Sendable {
     var decode_calledWithData: Data?
     var decodedEvent: Result<WrappedEvent, Error>!
 

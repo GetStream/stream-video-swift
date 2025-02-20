@@ -8,7 +8,7 @@ import StreamWebRTC
 
 final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var mockService: MockSignalServer! = .init()
     private lazy var mockWebSocket: MockWebSocketClient! = .init(webSocketClientType: .sfu)
@@ -566,7 +566,6 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_handleChangePublishOptions_givenEvent_whenPublished_thenUpdatesPublishOptions() async throws {
         try await stateAdapter.configurePeerConnections()
-        let publisher = await stateAdapter.publisher
 
         let participantA = CallParticipant.dummy()
         let participantB = CallParticipant.dummy()

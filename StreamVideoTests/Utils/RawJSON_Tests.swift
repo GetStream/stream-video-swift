@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class RawJSON_Tests: XCTestCase {
+final class RawJSON_Tests: XCTestCase, @unchecked Sendable {
     func test_valueEncoding() throws {
         struct test {
             var value: RawJSON

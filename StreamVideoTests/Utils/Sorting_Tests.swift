@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class Sorting_Tests: XCTestCase {
+final class Sorting_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - pinned
 
@@ -790,4 +790,4 @@ final class Sorting_Tests: XCTestCase {
 }
 
 /// This is required as XCTestCase has a `name` property that collides with our `name` comparator
-private let nameComparator = name
+private nonisolated(unsafe) let nameComparator = name

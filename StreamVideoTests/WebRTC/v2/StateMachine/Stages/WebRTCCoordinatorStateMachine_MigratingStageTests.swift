@@ -7,7 +7,7 @@ import XCTest
 
 final class WebRTCCoordinatorStateMachine_MigratingStageTests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var allOtherStages: [WebRTCCoordinator.StateMachine.Stage]! = WebRTCCoordinator
         .StateMachine
@@ -76,9 +76,6 @@ final class WebRTCCoordinatorStateMachine_MigratingStageTests: XCTestCase, @unch
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
         try await mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
-        let publisher = await mockCoordinatorStack.coordinator.stateAdapter.publisher
-        let subscriber = await mockCoordinatorStack.coordinator.stateAdapter.subscriber
-        let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
 
         try await assertTransition(
             from: .disconnected,
@@ -172,7 +169,7 @@ final class WebRTCCoordinatorStateMachine_MigratingStageTests: XCTestCase, @unch
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,
         subject: WebRTCCoordinator.StateMachine.Stage,
-        validator: @escaping (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        validator: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {

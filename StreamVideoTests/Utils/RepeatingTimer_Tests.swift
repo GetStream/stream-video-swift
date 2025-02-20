@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class RepeatingTimer_Tests: XCTestCase {
+final class RepeatingTimer_Tests: XCTestCase, @unchecked Sendable {
     func test_state_isThreadSafe() {
         DispatchQueue.concurrentPerform(iterations: 10000) { _ in
             let repeatingTimer: RepeatingTimerControl? = DefaultTimer.scheduleRepeating(

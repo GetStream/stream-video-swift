@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class CallKitRegionBasedAvailabilityPolicy_Tests: XCTestCase {
+final class CallKitRegionBasedAvailabilityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockLocaleProvider: MockLocaleProvider! = .init()
     private lazy var subject: CallKitRegionBasedAvailabilityPolicy! = .init()

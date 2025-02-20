@@ -5,9 +5,9 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCAuthenticator_Tests: XCTestCase {
+final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig
