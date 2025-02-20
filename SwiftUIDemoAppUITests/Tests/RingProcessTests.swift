@@ -10,7 +10,6 @@ final class RingProcessTests: StreamTestCase {
         linkToScenario(withId: 1787)
         
         let participants = 0
-        let user = 1
 
         WHEN("user opens connecting screen") {
             userRobot
@@ -28,7 +27,6 @@ final class RingProcessTests: StreamTestCase {
         linkToScenario(withId: 1788)
         
         let participants = 1
-        let user = 1
         
         WHEN("user calls to participant") {
             userRobot
@@ -47,7 +45,6 @@ final class RingProcessTests: StreamTestCase {
         linkToScenario(withId: 1789)
         
         let participants = 2
-        let user = 1
         
         WHEN("user calls to participant") {
             userRobot
@@ -66,7 +63,6 @@ final class RingProcessTests: StreamTestCase {
         linkToScenario(withId: 3350)
         
         let participants = 4
-        let user = 1
         
         WHEN("user calls to participant") {
             userRobot
