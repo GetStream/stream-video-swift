@@ -107,20 +107,18 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
 
-        DispatchQueue.main.async { [weak self] in
-            MainActor.assumeIsolated { [weak self] in
-                self?.callKitService.reportIncomingCall(
-                    content.cid,
-                    localizedCallerName: content.localizedCallerName,
-                    callerId: content.callerId,
-                    hasVideo: content.hasVideo,
-                    completion: { error in
-                        if let error {
-                            log.error(error)
-                        }
+        Task { @MainActor [weak self] in
+            self?.callKitService.reportIncomingCall(
+                content.cid,
+                localizedCallerName: content.localizedCallerName,
+                callerId: content.callerId,
+                hasVideo: content.hasVideo,
+                completion: { error in
+                    if let error {
+                        log.error(error)
                     }
-                )
-            }
+                }
+            )
         }
     }
 

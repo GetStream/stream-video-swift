@@ -87,9 +87,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
             }
             prev = response.prev
             next = response.next
-            let calls = await Task { @MainActor in
-                response.calls.map { call(from: $0) }
-            }.value
+            let calls = response.calls.map { call(from: $0) }
             if shouldRefresh {
                 self.calls = calls
             } else {
@@ -153,27 +151,25 @@ public class CallsController: ObservableObject, @unchecked Sendable {
             }
         }
         if case let .typeCallCreatedEvent(callCreated) = event {
+            let call = streamVideo.call(
+                callType: callCreated.call.type,
+                callId: callCreated.call.id
+            )
             executeOnMain { [weak self] in
-                let call = self?.streamVideo.call(
-                    callType: callCreated.call.type,
-                    callId: callCreated.call.id
-                )
-
-                guard let call else { return }
-
                 call.state.update(from: callCreated)
                 self?.calls.insert(call, at: 0)
             }
         }
     }
 
-    @MainActor
     private func call(from callResponse: CallStateResponseFields) -> Call {
         let call = streamVideo.call(
             callType: callResponse.call.type,
             callId: callResponse.call.id
         )
-        call.state.update(from: callResponse)
+        executeOnMain {
+            call.state.update(from: callResponse)
+        }
         return call
     }
     

@@ -38,7 +38,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             }
 
             if ringingCall != nil {
-                Task { @MainActor in ringingCall = nil }
+                Task { @MainActor in
+                    ringingCall = nil
+                }
             }
         }
 
@@ -226,7 +228,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     ///  - callSettings: the initial CallSettings to use. If `nil` is provided, the default CallSettings
     ///  will be used.
     /// - Returns: `Call` object.
-    @MainActor
     public func call(
         callType: String,
         callId: String,
@@ -711,7 +712,6 @@ extension StreamVideo: WSEventsSubscriber {
         }
     }
 
-    @MainActor
     private func checkRingEvent(_ event: WrappedEvent) {
         if case let .typeCallRingEvent(ringEvent) = event.unwrap() {
             let call = call(
