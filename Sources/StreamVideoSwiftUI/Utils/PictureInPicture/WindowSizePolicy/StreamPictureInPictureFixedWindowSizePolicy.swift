@@ -5,7 +5,7 @@
 import Foundation
 
 /// A fixed window size policy for Picture-in-Picture (PiP) views.
-final class StreamPictureInPictureFixedWindowSizePolicy: PictureInPictureWindowSizePolicy {
+final class StreamPictureInPictureFixedWindowSizePolicy: PictureInPictureWindowSizePolicy, @unchecked Sendable {
 
     /// The current size of the track to be displayed in the PiP window. This is not used in this policy.
     var trackSize: CGSize = .zero
@@ -13,8 +13,10 @@ final class StreamPictureInPictureFixedWindowSizePolicy: PictureInPictureWindowS
     /// The controller that manages the PiP view.
     weak var controller: (any StreamAVPictureInPictureViewControlling)? {
         didSet {
-            // Set the preferred content size of the controller to the fixed size.
-            controller?.preferredContentSize = fixedSize
+            Task { @MainActor in
+                // Set the preferred content size of the controller to the fixed size.
+                controller?.preferredContentSize = fixedSize
+            }
         }
     }
 

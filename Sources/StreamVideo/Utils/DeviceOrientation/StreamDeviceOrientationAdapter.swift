@@ -7,6 +7,7 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 #endif
+import AVFoundation
 
 /// An enumeration representing device orientations: portrait or landscape.
 public enum StreamDeviceOrientation: Equatable, Sendable {
@@ -42,6 +43,26 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
         /// Handle known landscape orientations
         case let .landscape(isLeft):
             return isLeft ? .up : .down
+        }
+    }
+
+    #if canImport(UIKit)
+    public var deviceOrientation: UIDeviceOrientation {
+        switch self {
+        case let .portrait(isUpsideDown):
+            return isUpsideDown ? .portraitUpsideDown : .portrait
+        case let .landscape(isLeft):
+            return isLeft ? .landscapeLeft : .landscapeRight
+        }
+    }
+    #endif
+
+    public var captureVideoOrientation: AVCaptureVideoOrientation {
+        switch self {
+        case let .portrait(isUpsideDown):
+            return isUpsideDown ? .portraitUpsideDown : .portrait
+        case let .landscape(isLeft):
+            return isLeft ? .landscapeLeft : .landscapeRight
         }
     }
 }

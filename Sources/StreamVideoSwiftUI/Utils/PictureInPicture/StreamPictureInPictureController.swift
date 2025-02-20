@@ -12,13 +12,14 @@ import UIKit
 #endif
 
 /// A controller class for picture-in-picture whenever that is possible.
-final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
+final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate, @unchecked Sendable {
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     // MARK: - Properties
 
     /// The RTCVideoTrack for which the picture-in-picture session is created.
+    @MainActor
     public var track: RTCVideoTrack? {
         didSet {
             didUpdate(track) // Called when the `track` property changes
@@ -33,7 +34,8 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     }
 
     /// A closure called when the picture-in-picture view's size changes.
-    public var onSizeUpdate: ((CGSize) -> Void)? {
+    @MainActor
+    public var onSizeUpdate: (@Sendable(CGSize) -> Void)? {
         didSet {
             contentViewController?.onSizeUpdate = onSizeUpdate // Updates the onSizeUpdate closure of the content view controller
         }
@@ -77,18 +79,22 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
             return nil
         }
 
-        let contentViewController: StreamAVPictureInPictureViewControlling? = {
-            if #available(iOS 15.0, *) {
-                return StreamAVPictureInPictureVideoCallViewController()
-            } else {
-                return nil
-            }
-        }()
-        self.contentViewController = contentViewController
         self.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
+
         super.init()
 
-        subscribeToApplicationStateNotifications()
+        Task { @MainActor in
+            let contentViewController: StreamAVPictureInPictureViewControlling? = {
+                if #available(iOS 15.0, *) {
+                    return StreamAVPictureInPictureVideoCallViewController()
+                } else {
+                    return nil
+                }
+            }()
+            self.contentViewController = contentViewController
+
+            subscribeToApplicationStateNotifications()
+        }
     }
 
     // MARK: - AVPictureInPictureControllerDelegate
@@ -103,36 +109,47 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     public func pictureInPictureControllerWillStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Will start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        Task { @MainActor in
+            log.debug("Will start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        }
     }
 
     public func pictureInPictureControllerDidStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Did start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        Task { @MainActor in
+            log.debug("Did start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        }
     }
 
     public func pictureInPictureController(
         _ pictureInPictureController: AVPictureInPictureController,
         failedToStartPictureInPictureWithError error: Error
     ) {
-        log.error("Failed for trackId:\(track?.trackId ?? "na/a") with error:\(error)", subsystems: .pictureInPicture)
+        Task { @MainActor in
+            log.error("Failed for trackId:\(track?.trackId ?? "na/a") with error:\(error)", subsystems: .pictureInPicture)
+        }
     }
 
     public func pictureInPictureControllerWillStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Will stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        Task { @MainActor in
+            log.debug("Will stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        }
     }
 
     public func pictureInPictureControllerDidStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        log.debug("Did stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        Task { @MainActor in
+            log.debug("Did stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
+        }
     }
 
     // MARK: - Private helpers
 
+    @MainActor
     private func didUpdate(_ track: RTCVideoTrack?) {
         contentViewController?.track = track
         trackStateAdapter.activeTrack = track

@@ -22,7 +22,7 @@ public class Utils {
 
 /// Provides the default value of the `Utils` class.
 public enum UtilsKey: InjectionKey {
-    public static var currentValue: Utils = .init()
+    public nonisolated(unsafe) static var currentValue: Utils = .init()
 }
 
 extension InjectedValues {

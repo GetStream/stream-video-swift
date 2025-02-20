@@ -5,7 +5,7 @@
 import Foundation
 
 /// An adaptive window size policy for Picture-in-Picture (PiP) views.
-final class StreamPictureInPictureAdaptiveWindowSizePolicy: PictureInPictureWindowSizePolicy {
+final class StreamPictureInPictureAdaptiveWindowSizePolicy: PictureInPictureWindowSizePolicy, @unchecked Sendable {
 
     /// The current size of the track to be displayed in the PiP window.
     var trackSize: CGSize = .zero {
@@ -14,7 +14,9 @@ final class StreamPictureInPictureAdaptiveWindowSizePolicy: PictureInPictureWind
             guard trackSize != oldValue, trackSize != .zero else {
                 return
             }
-            controller?.preferredContentSize = trackSize
+            Task { @MainActor in
+                controller?.preferredContentSize = trackSize
+            }
         }
     }
 
