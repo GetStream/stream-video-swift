@@ -8,7 +8,7 @@ import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class StatelessAudioOutputIconView_Tests: StreamVideoUITestCase {
+final class StatelessAudioOutputIconView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     // MARK: - Appearance
 

@@ -10,12 +10,13 @@ import SwiftUI
 import XCTest
 
 @MainActor
-final class CallDurationView_Tests: StreamVideoUITestCase {
+final class CallDurationView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     private lazy var viewModel: CallViewModel! = .init()
 
-    override func setUp() {
-        super.setUp()
+    @MainActor
+    override func setUp() async throws {
+        try await super.setUp()
 
         viewModel.startCall(
             callType: .default,
@@ -25,9 +26,9 @@ final class CallDurationView_Tests: StreamVideoUITestCase {
         )
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         viewModel = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - Rendering based on viewModel.call.state.duration

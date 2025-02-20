@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class CallEventsHandler_Tests: XCTestCase {
+final class CallEventsHandler_Tests: XCTestCase, @unchecked Sendable {
     
     private let callEventsHandler = CallEventsHandler()
     private let mockResponseBuilder = MockResponseBuilder()
