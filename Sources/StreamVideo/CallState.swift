@@ -144,7 +144,7 @@ public class CallState: ObservableObject {
     ///            disconnection due to network issues occurs.
     @Published public internal(set) var disconnectionError: Error?
     
-    var sortComparators = defaultComparators {
+    var sortComparators = defaultSortPreset {
         didSet {
             Task { @MainActor in
                 didUpdate(participants)
@@ -524,5 +524,16 @@ public class CallState: ObservableObject {
         if duration != self.duration {
             self.duration = duration
         }
+    }
+}
+
+public extension Array where Element == CallParticipant {
+    /// Returns a sorted array based on the provided comparators.
+    ///
+    /// - Parameter comparators: A list of `StreamSortComparator` to be applied in order.
+    /// - Returns: A sorted array of `CallParticipant`.
+    func sorted(by comparators: StreamSortComparator<CallParticipant>...) -> [CallParticipant] {
+        let combinedComparator = combineComparators(comparators)
+        return sorted { combinedComparator($0, $1) == .orderedAscending }
     }
 }
