@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 
-final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable {
+final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked Sendable {
     // MARK: - Mockable
 
     typealias FunctionKey = MockFunctionKey

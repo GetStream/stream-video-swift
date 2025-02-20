@@ -470,7 +470,7 @@ open class CallViewModel: ObservableObject {
     ) {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
-            let rejectionReason = streamVideo
+            let rejectionReason = await streamVideo
                 .rejectionReasonProvider
                 .reason(for: call.cId, ringTimeout: false)
             log.debug(
@@ -688,7 +688,7 @@ open class CallViewModel: ObservableObject {
 
         Task {
             do {
-                let rejectionReason = streamVideo
+                let rejectionReason = await streamVideo
                     .rejectionReasonProvider
                     .reason(for: call.cId, ringTimeout: ringTimeout)
                 log.debug(

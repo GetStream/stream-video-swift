@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable {
+final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

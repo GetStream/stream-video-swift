@@ -10,7 +10,7 @@ import XCTest
 import StreamWebRTC
 import XCTest
 
-final class StreamVideoSfuModelsCodec_ConvenienceTests: XCTestCase {
+final class StreamVideoSfuModelsCodec_ConvenienceTests: XCTestCase, @unchecked Sendable {
 
     func test_initWithRTCRtpCodecCapability_withAllValues() {
         let codecCapability = MockRTCRtpCodecCapability()

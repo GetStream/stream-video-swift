@@ -8,7 +8,7 @@ import StreamWebRTC
 
 final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
@@ -786,6 +786,16 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 }
 
+#if compiler(>=6.0)
+extension OwnCapability: @retroactive Comparable {
+    public static func < (
+        lhs: OwnCapability,
+        rhs: OwnCapability
+    ) -> Bool {
+        lhs.rawValue <= rhs.rawValue
+    }
+}
+#else
 extension OwnCapability: Comparable {
     public static func < (
         lhs: OwnCapability,
@@ -794,3 +804,4 @@ extension OwnCapability: Comparable {
         lhs.rawValue <= rhs.rawValue
     }
 }
+#endif

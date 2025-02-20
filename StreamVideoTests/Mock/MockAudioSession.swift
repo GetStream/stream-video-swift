@@ -7,7 +7,7 @@ import Combine
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockAudioSession: AudioSessionProtocol, Mockable {
+final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

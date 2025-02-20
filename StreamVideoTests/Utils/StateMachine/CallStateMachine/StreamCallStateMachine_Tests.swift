@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class StreamCallStateMachineTests: StreamVideoTestCase {
+final class StreamCallStateMachineTests: StreamVideoTestCase, @unchecked Sendable {
 
     private lazy var mockCall: Call! = .dummy(callId: .unique)
     private lazy var subject: StreamCallStateMachine! = .init(mockCall)
@@ -58,7 +58,6 @@ final class StreamCallStateMachineTests: StreamVideoTestCase {
 //
     func testNextStageShouldBe() async throws {
         // Given
-        let expectation = XCTestExpectation(description: "Next stage retrieved")
         let response = AcceptCallResponse(duration: "123")
 
         // When

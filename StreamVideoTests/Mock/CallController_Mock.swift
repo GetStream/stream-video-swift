@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-class CallController_Mock: CallController {
+class CallController_Mock: CallController, @unchecked Sendable {
 
     let mockResponseBuilder = MockResponseBuilder()
 
@@ -110,7 +110,7 @@ extension User {
 }
 
 extension Call {
-    static func dummy(
+    nonisolated(unsafe) static func dummy(
         callType: String = .default,
         callId: String = .unique,
         coordinatorClient: DefaultAPI = .dummy(),

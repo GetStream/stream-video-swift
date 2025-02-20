@@ -338,7 +338,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         Task { @MainActor in
             log
                 .debug(
-                    "Answering VoIP incoming call with callId:\(callToJoinEntry.call.callId) callType:\(callToJoinEntry.call.callType) callerId:\(String(describing: callToJoinEntry.createdBy?.id))."
+                    "Answering VoIP incoming call with callId:\(callToJoinEntry.call.callId) callType:\(callToJoinEntry.call.callType) callerId:\(callToJoinEntry.createdBy?.id)."
                 )
 
             do {
@@ -391,6 +391,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             action.fail()
             return
         }
+        let actionCallUUID = action.callUUID
 
         Task {
             log.debug(
@@ -398,11 +399,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 Ending VoIP call with
                 callId:\(stackEntry.call.callId)
                 callType:\(stackEntry.call.callType)
-                callerId:\(String(describing: stackEntry.createdBy?.id))
+                callerId:\(stackEntry.createdBy?.id)
                 """
             )
             do {
-                let rejectionReason = streamVideo?
+                let rejectionReason = await streamVideo?
                     .rejectionReasonProvider
                     .reason(
                         for: stackEntry.call.cId,
@@ -422,9 +423,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             if currentCallWasEnded {
                 stackEntry.call.leave()
             }
-            set(nil, for: action.callUUID)
-            action.fulfill()
+            set(nil, for: actionCallUUID)
         }
+
+        action.fulfill()
     }
 
     open func provider(
@@ -574,6 +576,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         return provider
     }
 
+    @MainActor
     private func buildCallUpdate(
         cid: String,
         localizedCallerName: String,
@@ -631,7 +634,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
 extension CallKitService: InjectionKey {
     /// Provides the current instance of `CallKitService`.
-    public static var currentValue: CallKitService = .init()
+    nonisolated(unsafe) public static var currentValue: CallKitService = .init()
 }
 
 extension InjectedValues {
@@ -641,7 +644,3 @@ extension InjectedValues {
         set { Self[CallKitService.self] = newValue }
     }
 }
-
-extension CXAnswerCallAction: @unchecked Sendable {}
-extension CXSetHeldCallAction: @unchecked Sendable {}
-extension CXSetMutedCallAction: @unchecked Sendable {}

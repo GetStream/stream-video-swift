@@ -8,12 +8,12 @@ import StreamWebRTC
 extension AVAudioSession.CategoryOptions {
 
     /// Category options for play and record.
-    static var playAndRecord: AVAudioSession.CategoryOptions = [
+    static let playAndRecord: AVAudioSession.CategoryOptions = [
         .allowBluetooth,
         .allowBluetoothA2DP,
         .allowAirPlay
     ]
 
     /// Category options for playback.
-    static var playback: AVAudioSession.CategoryOptions = []
+    static let playback: AVAudioSession.CategoryOptions = []
 }

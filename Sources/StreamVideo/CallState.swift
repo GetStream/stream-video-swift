@@ -154,7 +154,12 @@ public class CallState: ObservableObject {
     
     private var localCallSettingsUpdate = false
     private var durationTimer: Foundation.Timer?
-    
+
+    /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
+    /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`
+    /// properties, will publish changes on the main thread.
+    nonisolated init() {}
+
     internal func updateState(from event: VideoEvent) {
         switch event {
         case let .typeBlockedUserEvent(event):

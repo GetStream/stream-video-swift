@@ -5,4 +5,4 @@
 import ReplayKit
 import StreamVideo
 
-class SampleHandler: BroadcastSampleHandler {}
+class SampleHandler: BroadcastSampleHandler, @unchecked Sendable {}

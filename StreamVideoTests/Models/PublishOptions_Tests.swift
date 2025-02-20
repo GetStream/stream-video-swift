@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class VideoPublishOptionsTests: XCTestCase {
+final class VideoPublishOptionsTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - buildLayers
 

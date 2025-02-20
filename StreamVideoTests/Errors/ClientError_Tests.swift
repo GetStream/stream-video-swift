@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class ClientError_Tests: XCTestCase {
+final class ClientError_Tests: XCTestCase, @unchecked Sendable {
     func test_isInvalidTokenError_whenUnderlayingErrorIsInvalidToken_returnsTrue() {
         // Create error code withing `ErrorPayload.tokenInvalidErrorCodes` range
         let error = ErrorPayload(

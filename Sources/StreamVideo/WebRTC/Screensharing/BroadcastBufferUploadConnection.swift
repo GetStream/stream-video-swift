@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-class BroadcastBufferUploadConnection: BroadcastBufferConnection {
+class BroadcastBufferUploadConnection: BroadcastBufferConnection, @unchecked Sendable {
     var onOpen: (() -> Void)?
     var onClose: ((Error?) -> Void)?
     var hasSpaceAvailable: (() -> Void)?

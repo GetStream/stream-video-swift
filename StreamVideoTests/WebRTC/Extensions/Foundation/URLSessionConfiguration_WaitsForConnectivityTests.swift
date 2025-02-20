@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class URLSessionConfigurationTests: XCTestCase {
+final class URLSessionConfigurationTests: XCTestCase, @unchecked Sendable {
 
     func testToggleWaitsForConnectivityEnabled() {
         let config = URLSessionConfiguration.default

@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class ComparableClampedTests: XCTestCase {
+final class ComparableClampedTests: XCTestCase, @unchecked Sendable {
 
     func test_clamped_withinBounds_returnsSameValue() {
         let value = 15

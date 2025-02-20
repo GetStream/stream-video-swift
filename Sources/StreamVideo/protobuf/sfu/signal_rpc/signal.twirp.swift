@@ -67,7 +67,7 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         var urlRequest = try makeRequest(for: path)
         urlRequest.httpBody = requestData
         let responseData = try await httpClient.execute(request: urlRequest)
-        let response = try Response.init(serializedData: responseData)
+        let response = try Response.init(serializedBytes: responseData)
         if response.hasError {
             if response.error.shouldRetry && retries < httpConfig.maxRetries {
                 let delay = httpConfig.retryStrategy.getDelayAfterTheFailure()

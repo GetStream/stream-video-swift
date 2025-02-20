@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-struct VideoCaptureSession {
+struct VideoCaptureSession: Sendable {
     var position: AVCaptureDevice.Position
 
     var device: CaptureDeviceProtocol?
@@ -18,7 +18,7 @@ struct VideoCaptureSession {
 }
 
 /// A class that provides and manages the active screen sharing session.
-final class VideoCaptureSessionProvider {
+final class VideoCaptureSessionProvider: @unchecked Sendable {
 
     /// The currently active screen sharing session, if any.
     ///

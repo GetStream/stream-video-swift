@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebSocketConnectionState_Tests: XCTestCase {
+final class WebSocketConnectionState_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Server error
 
     func test_disconnectionSource_serverError() {

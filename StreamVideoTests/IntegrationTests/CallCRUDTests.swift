@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CallCRUDTest: IntegrationTest {
+final class CallCRUDTest: IntegrationTest, @unchecked Sendable {
     
     let user1 = "thierry"
     let user2 = "tommaso"
@@ -189,7 +189,7 @@ final class CallCRUDTest: IntegrationTest {
                 ]
             )
 
-        await fulfillment {
+        await fulfilmentInMainActor {
             if let member = call.state.members.first {
                 return member.id == self.user1
                     && member.customData[membersGroup]?.numberValue == membersCount
@@ -200,8 +200,8 @@ final class CallCRUDTest: IntegrationTest {
 
         try await call.removeMembers(ids: [user1])
         
-        await fulfillment { call.state.members.isEmpty }
-        
+        await fulfilmentInMainActor { call.state.members.isEmpty }
+
         try await call.addMembers(
             members: [
                 .init(
@@ -211,7 +211,7 @@ final class CallCRUDTest: IntegrationTest {
             ]
         )
         
-        await fulfillment {
+        await fulfilmentInMainActor {
             if let member = call.state.members.first {
                 return member.id == self.user1
                     && member.customData[roleKey]?.stringValue == roleValue
@@ -228,7 +228,7 @@ final class CallCRUDTest: IntegrationTest {
         let call2 = client.call(callType: call1.callType, callId: call1.callId)
         _ = try await call2.get(membersLimit: 1)
         
-        await fulfillment { call1.state.members.count == 1 }
+        await fulfilmentInMainActor { call1.state.members.count == 1 }
 
         var membersResponse = try await call2.queryMembers()
         XCTAssertEqual(1, membersResponse.members.count)
@@ -244,7 +244,7 @@ final class CallCRUDTest: IntegrationTest {
         
         // add to call2 so we can test that the other call object is updated via WS events
         try await call2.addMembers(ids: [user2])
-        await fulfillment { call1.state.members.count == 2 }
+        await fulfilmentInMainActor { call1.state.members.count == 2 }
 
         membersResponse = try await call2.queryMembers(filters: [userIdKey: .string(user2)])
         XCTAssertEqual(1, membersResponse.members.count)
@@ -257,7 +257,7 @@ final class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(1, membersResponse.members.count)
         XCTAssertEqual(user1, membersResponse.members.first?.userId)
         
-        await fulfillment {
+        await fulfilmentInMainActor {
             call2.state.members.count == 2
                 && call2.state.members.first?.id == self.user2
         }
@@ -283,8 +283,8 @@ final class CallCRUDTest: IntegrationTest {
         let updateResponse = try await call.update(custom: [colorKey: blue])
         XCTAssertEqual(updateResponse.call.custom[colorKey], blue)
         
-        await fulfillment { fetchedCall.state.custom[colorKey] == blue }
-        
+        await fulfilmentInMainActor { fetchedCall.state.custom[colorKey] == blue }
+
         let (secondTry, _) = try await client.queryCalls(
             filters: [
                 CallSortField.endedAt.rawValue: .nil,
@@ -305,7 +305,7 @@ final class CallCRUDTest: IntegrationTest {
         )
         XCTAssertEqual(0, thirdTry.count)
         
-        await fulfillment { fetchedCall.state.endedAt != nil }
+        await fulfilmentInMainActor { fetchedCall.state.endedAt != nil }
     }
     
     func test_sendReaction() async throws {

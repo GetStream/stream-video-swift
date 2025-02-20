@@ -8,7 +8,7 @@ import StreamWebRTC
 
 final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig
@@ -480,17 +480,6 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     func test_buildPreferredPublishOptions_withMultipleCodecs() async throws {
         let publisherSdp =
             "v=0\r\no=- 46117317 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=rtpmap:96 opus/48000/2\r\na=rtpmap:97 VP8/90000\r\na=rtpmap:98 H264/90000"
-        let publishOptions = [
-            Stream_Video_Sfu_Models_PublishOption.with {
-                $0.codec.name = "opus"
-            },
-            Stream_Video_Sfu_Models_PublishOption.with {
-                $0.codec.name = "VP8"
-            },
-            Stream_Video_Sfu_Models_PublishOption.with {
-                $0.codec.name = "H264"
-            }
-        ]
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
