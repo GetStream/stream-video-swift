@@ -63,7 +63,7 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
     private var notificationCenterCancellable: AnyCancellable?
     private var thermalStateProvider: () -> ProcessInfo.ThermalState
 
-    fileprivate convenience init() {
+    convenience init() {
         self.init { ProcessInfo.processInfo.thermalState }
     }
 

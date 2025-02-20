@@ -372,7 +372,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
     }
 
-    @MainActor
     internal func queryCalls(
         filters: [String: RawJSON]?,
         sort: [SortParamRequest]?,
