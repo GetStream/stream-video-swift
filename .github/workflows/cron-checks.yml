@@ -171,7 +171,7 @@ jobs:
         version: ${{ matrix.ios }}
         device: ${{ matrix.device }}
     - name: Run LLC Tests (Debug)
-      run: bundle exec fastlane test device:"${{ matrix.device }} (${{ matrix.ios }})"
+      run: bundle exec fastlane test device:"${{ matrix.device }} (${{ matrix.ios }})" cron:true
       timeout-minutes: 60
     - uses: 8398a7/action-slack@v3
       with:
