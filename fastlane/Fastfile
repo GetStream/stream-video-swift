@@ -22,7 +22,7 @@ is_localhost = !is_ci
 @force_check = false
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
-swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
+swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests", "Scripts/SwiftPublicInterfaceValidator"]
 
 before_all do |lane|
   if is_ci

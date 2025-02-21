@@ -5,6 +5,7 @@ included:
   - DemoAppUIKit
   - StreamVideoTests
   - StreamVideoUIKitTests
+  - Scripts/SwiftPublicInterfaceValidator
 excluded:
   - Tests/SwiftLintFrameworkTests/Resources
   - Sources/StreamVideo/Generated
