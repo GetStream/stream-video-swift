@@ -6,14 +6,11 @@ import Foundation
 
 final class Storage: Decodable {
 
-    private let ignoreCache: Bool
     private let queue: UnfairQueue = .init()
     private var keys: [URL] = []
     private var storage: [URL: [PublicInterfaceEntry]] = [:]
 
-    init(ignoreCache: Bool = false) {
-        self.ignoreCache = ignoreCache
-    }
+    init() {}
 
     convenience init(from decoder: any Decoder) throws { self.init() }
 
