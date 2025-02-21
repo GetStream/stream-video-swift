@@ -19,7 +19,7 @@ source_packages_path = 'spm_cache'
 gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
-@force_check = true
+@force_check = false
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
 swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
@@ -696,22 +696,25 @@ lane :copyright do
 end
 
 lane :validate_public_interface do
-  next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
+  # next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
 
-  analyser = '/tmp/interface-analyser'
-  sh('wget -P /tmp https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0/interface-analyser')
+  analyser = 'interface-analyser'
+  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0/interface-analyser")
+  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0/interface-analyser_interface-analyser.bundle.zip")
+  sh("unzip interface-analyser_interface-analyser.bundle.zip")
   sh("chmod +x #{analyser}")
+  sh("chmod +x interface-analyser_interface-analyser.bundle/diff.sh")
 
-  sh("#{analyser} analysis ../Sources/ /tmp/public_interface_current.resolved")
+  sh("./#{analyser} analysis ../Sources/ ../public_interface_current.resolved")
 
   target_branch = current_branch.include?('release/') ? 'main' : 'develop'
   sh("git fetch origin #{target_branch}")
   sh("git checkout #{target_branch}")
-  sh("#{analyser} analysis ../Sources/ /tmp/public_interface_previous.resolved")
+  sh("./#{analyser} analysis ../Sources/ ../public_interface_previous.resolved")
 
   # Run diff
-  report_path = '/tmp/report.md'
-  sh("#{analyser} diff /tmp/public_interface_current.resolved /tmp/public_interface_previous.resolved #{report_path}")
+  report_path = '../report.md'
+  sh("./#{analyser} diff ../public_interface_current.resolved ../public_interface_previous.resolved #{report_path}")
 
   # Check if report.md exists and is non-zero in size
   diff =
