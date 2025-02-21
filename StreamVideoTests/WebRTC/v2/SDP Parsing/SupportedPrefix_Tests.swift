@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class SupportedPrefix_Tests: XCTestCase {
+final class SupportedPrefix_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - SupportedPrefix Cases
 

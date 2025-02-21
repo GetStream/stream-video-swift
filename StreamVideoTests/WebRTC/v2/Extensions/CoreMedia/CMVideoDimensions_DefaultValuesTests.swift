@@ -7,7 +7,7 @@ import CoreMedia
 @testable import StreamVideo
 import XCTest
 
-final class CMVideoDimensionsDefaultValuesTests: XCTestCase {
+final class CMVideoDimensionsDefaultValuesTests: XCTestCase, @unchecked Sendable {
 
     func test_areaCalculation() {
         let dimensions = CMVideoDimensions(width: 1920, height: 1080)

@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockRTCRtpCodecCapability: NSObject, RTCRtpCodecCapabilityProtocol, Mockable {
+final class MockRTCRtpCodecCapability: NSObject, RTCRtpCodecCapabilityProtocol, Mockable, @unchecked Sendable {
     enum MockFunctionKey: Hashable, CaseIterable { case none }
     enum MockPropertyKey: String, Hashable { case name, fmtp, clockRate, preferredPayloadType }
     typealias FunctionKey = MockFunctionKey

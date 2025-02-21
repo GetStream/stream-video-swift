@@ -5,7 +5,7 @@
 import Foundation
 import StreamVideo
 
-final class MockCallKitService: CallKitService {
+final class MockCallKitService: CallKitService, @unchecked Sendable {
     private(set) var reportIncomingCallWasCalled: (
         cid: String,
         callerName: String,

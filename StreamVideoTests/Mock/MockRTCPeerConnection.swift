@@ -7,7 +7,7 @@ import Foundation
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable {
+final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

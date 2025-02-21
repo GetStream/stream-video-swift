@@ -5,7 +5,7 @@
 import ReplayKit
 
 /// Handler that can be used in broadcast upload extension to support screensharing from the background.
-open class BroadcastSampleHandler: RPBroadcastSampleHandler {
+open class BroadcastSampleHandler: RPBroadcastSampleHandler, @unchecked Sendable {
 
     /// Represents the client connection for uploading broadcast buffers.
     private var clientConnection: BroadcastBufferUploadConnection?
@@ -136,8 +136,3 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
         )
     }
 }
-
-// MARK: - Extensions
-
-/// Extension to make `CMSampleBuffer` conform to `Sendable` without checked effects.
-extension CMSampleBuffer: @unchecked Sendable {}

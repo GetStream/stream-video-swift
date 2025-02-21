@@ -5,7 +5,7 @@
 import Combine
 @testable import StreamVideo
 
-final class MockThermalStateObserver: ThermalStateObserving, Mockable {
+final class MockThermalStateObserver: ThermalStateObserving, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

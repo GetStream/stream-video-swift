@@ -21,7 +21,7 @@ extension StreamVideo: StreamActiveCallProviding {
 
 /// Provides the default value of the `StreamActiveCallProviding` class.
 struct StreamActiveCallProviderKey: InjectionKey {
-    static var currentValue: StreamActiveCallProviding?
+    nonisolated(unsafe) static var currentValue: StreamActiveCallProviding?
 }
 
 extension InjectedValues {

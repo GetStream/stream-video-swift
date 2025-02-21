@@ -208,7 +208,7 @@ struct AppUserView: View {
     var overrideUserName: String? = nil
 
     var body: some View {
-        if let imageURL = user.imageURL {
+        if user.imageURL != nil {
             DemoAppViewFactory
                 .shared
                 .makeUserAvatar(user, with: .init(size: size))

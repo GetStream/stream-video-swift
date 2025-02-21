@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 
 /// Represents a participant in the call.
 public struct CallParticipant: Identifiable, Sendable, Hashable {
@@ -463,48 +463,5 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             audioLevels: audioLevels,
             pin: pin
         )
-    }
-}
-
-extension Stream_Video_Sfu_Models_Participant {
-    func toCallParticipant(
-        showTrack: Bool = true,
-        pin: PinInfo? = nil
-    ) -> CallParticipant {
-        CallParticipant(
-            id: sessionID,
-            userId: userID,
-            roles: roles,
-            name: name,
-            profileImageURL: URL(string: image),
-            trackLookupPrefix: trackLookupPrefix,
-            hasVideo: publishedTracks.contains(where: { $0 == .video }),
-            hasAudio: publishedTracks.contains(where: { $0 == .audio }),
-            isScreenSharing: publishedTracks.contains(where: { $0 == .screenShare }),
-            showTrack: showTrack,
-            isSpeaking: isSpeaking,
-            isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionID,
-            connectionQuality: connectionQuality.mapped,
-            joinedAt: joinedAt.date,
-            audioLevel: audioLevel,
-            audioLevels: [audioLevel],
-            pin: pin
-        )
-    }
-}
-
-/// Provides info whether the user is pinned.
-public struct PinInfo: Sendable, Hashable {
-    /// Determines if it's a local or a remote pin.
-    public let isLocal: Bool
-    /// The date of pinning.
-    public let pinnedAt: Date
-}
-
-extension CGSize: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(width)
-        hasher.combine(height)
     }
 }

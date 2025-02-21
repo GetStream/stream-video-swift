@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-class BroadcastBufferConnection: NSObject {
+class BroadcastBufferConnection: NSObject, @unchecked Sendable {
     
     var inputStream: InputStream?
     var outputStream: OutputStream?

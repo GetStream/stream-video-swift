@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable {
+final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

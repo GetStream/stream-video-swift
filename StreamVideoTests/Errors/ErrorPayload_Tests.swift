@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class ErrorPayload_Tests: XCTestCase {
+final class ErrorPayload_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Invalid token
 
     func test_isInvalidTokenError_whenCodeIsInsideInvalidTokenRange_returnsTrue() {

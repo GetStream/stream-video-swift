@@ -262,7 +262,7 @@ extension TranscriptionSettings.ClosedCaptionMode: CustomStringConvertible {
     }
 }
 
-extension TranscriptionSettings.Language: CustomStringConvertible, CaseIterable {
+extension TranscriptionSettings.Language: CustomStringConvertible {
     public var description: String {
         switch self {
         case .ar: return "Arabic"

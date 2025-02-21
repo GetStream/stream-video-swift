@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebSocketPingController_Tests: XCTestCase {
+final class WebSocketPingController_Tests: XCTestCase, @unchecked Sendable {
     var time: VirtualTime!
     var pingController: WebSocketPingController!
     private var delegate: WebSocketPingController_Delegate!

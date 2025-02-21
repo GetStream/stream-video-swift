@@ -26,7 +26,7 @@ extension Notification {
 ///
 /// Basically, it's a wrapper over legacy monitor based on `Reachability` (iOS 11 only)
 /// and default monitor based on `Network`.`NWPathMonitor` (iOS 12+).
-class InternetConnection {
+class InternetConnection: @unchecked Sendable {
     /// The current Internet connection status.
     @Published private(set) var status: InternetConnection.Status {
         didSet {
@@ -152,7 +152,7 @@ extension InternetConnection.Status {
 extension InternetConnection {
     /// The default Internet connection monitor for iOS 12+.
     /// It uses Apple Network API.
-    class Monitor: InternetConnectionMonitor {
+    class Monitor: InternetConnectionMonitor, @unchecked Sendable {
         private var monitor: NWPathMonitor?
         private let queue = DispatchQueue(label: "io.getstream.internet-monitor")
 
@@ -235,7 +235,10 @@ extension InternetConnection: InjectionKey {
     ///
     /// This property provides a default implementation of the
     /// `InternetConnection` with a default monitor.
-    static var currentValue: InternetConnectionProtocol = InternetConnection(monitor: InternetConnection.Monitor())
+    nonisolated(unsafe) static var currentValue: InternetConnectionProtocol = InternetConnection(
+        monitor: InternetConnection
+            .Monitor()
+    )
 }
 
 extension InjectedValues {

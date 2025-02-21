@@ -5,7 +5,7 @@
 import Foundation
 @testable import StreamVideo
 
-final class MockWebSocketEngine: WebSocketEngine, Mockable {
+final class MockWebSocketEngine: WebSocketEngine, Mockable, @unchecked Sendable {
     typealias FunctionKey = MockFunctionKey
 
     enum MockFunctionKey: Hashable, CaseIterable {

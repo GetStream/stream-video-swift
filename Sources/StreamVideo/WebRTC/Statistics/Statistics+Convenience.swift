@@ -9,7 +9,7 @@ import StreamWebRTC
 @dynamicMemberLookup
 struct StreamRTCStatistics {
     /// A structure providing a type-safe way to access values from RTCStatistics' values dictionary.
-    @objcMembers final class CodingKeys: NSObject {
+    @objcMembers final class CodingKeys: NSObject, @unchecked Sendable {
         var trackIdentifier: String = ""
         var codecId: String = ""
         var mimeType: String = ""

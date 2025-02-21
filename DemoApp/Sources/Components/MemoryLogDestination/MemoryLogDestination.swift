@@ -5,7 +5,7 @@
 import Foundation
 import StreamVideo
 
-final class MemoryLogDestination: BaseLogDestination {
+final class MemoryLogDestination: BaseLogDestination, @unchecked Sendable {
 
     override func process(logDetails: LogDetails) {
         LogQueue.insert(logDetails)

@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class StreamVideoSfuModelsVideoLayer_ConvenienceTests: XCTestCase {
+final class StreamVideoSfuModelsVideoLayer_ConvenienceTests: XCTestCase, @unchecked Sendable {
 
     func test_initWithVideoLayer() {
         let videoLayer = VideoLayer(

@@ -26,11 +26,11 @@ extension UserResponse {
 }
 
 extension ClientError {
-    public class UnsupportedEventType: ClientError {
+    public class UnsupportedEventType: ClientError, @unchecked Sendable {
         override public var localizedDescription: String { "The incoming event type is not supported. Ignoring." }
     }
     
-    public class EventDecoding: ClientError {
+    public class EventDecoding: ClientError, @unchecked Sendable {
         override init(_ message: String, _ file: StaticString = #fileID, _ line: UInt = #line) {
             super.init(message, file, line)
         }

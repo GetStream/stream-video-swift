@@ -6,7 +6,7 @@ import AVFoundation
 
 // MARK: - AVAudioSession.Category
 
-extension AVAudioSession.Category: CustomStringConvertible {
+extension AVAudioSession.Category {
     /// Returns the raw string value of the category.
     public var description: String {
         rawValue

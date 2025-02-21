@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 
 /// A struct representing a call stats report.
 public struct CallStatsReport: Sendable {

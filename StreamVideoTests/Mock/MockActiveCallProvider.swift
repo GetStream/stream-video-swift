@@ -5,7 +5,7 @@
 import Combine
 @testable import StreamVideo
 
-final class MockActiveCallProvider: StreamActiveCallProviding {
+final class MockActiveCallProvider: StreamActiveCallProviding, @unchecked Sendable {
     let subject: PassthroughSubject<Bool, Never> = .init()
     var hasActiveCallPublisher: AnyPublisher<Bool, Never> { subject.eraseToAnyPublisher() }
 

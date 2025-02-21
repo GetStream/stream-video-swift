@@ -5,7 +5,7 @@
 import Foundation
 @testable import StreamVideo
 
-final class MockCall: Call, Mockable {
+final class MockCall: Call, Mockable, @unchecked Sendable {
 
     typealias FunctionKey = MockCallFunctionKey
 

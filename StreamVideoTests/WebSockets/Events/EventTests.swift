@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class EventTests: XCTestCase {
+final class EventTests: XCTestCase, @unchecked Sendable {
 
     private lazy var customVideoEvent: CustomVideoEvent! = CustomVideoEvent(
         callCid: "123",

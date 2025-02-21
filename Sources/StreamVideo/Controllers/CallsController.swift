@@ -161,7 +161,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
             }
         }
     }
-    
+
     private func call(from callResponse: CallStateResponseFields) -> Call {
         let call = streamVideo.call(
             callType: callResponse.call.type,

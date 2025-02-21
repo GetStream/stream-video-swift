@@ -80,5 +80,3 @@ extension Task {
         key: String = UUID().uuidString
     ) { disposableBag.insert(.init(cancel), with: key) }
 }
-
-extension AnyCancellable: @unchecked Sendable {}

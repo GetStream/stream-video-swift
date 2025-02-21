@@ -183,7 +183,7 @@ actor ICEAdapter: @unchecked Sendable {
             await withTaskGroup(of: Void.self) { [weak self] group in
                 guard let self else { return }
                 for candidate in await trickledCandidates {
-                    group.addTask { @MainActor [weak self] in
+                    group.addTask { [weak self] in
                         guard let self else { return }
                         do {
                             try Task.checkCancellation()

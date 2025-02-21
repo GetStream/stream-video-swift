@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class WebRTCCoordinator_StateMachineTests: XCTestCase {
+final class WebRTCCoordinator_StateMachineTests: XCTestCase, @unchecked Sendable {
 
     private lazy var subject: WebRTCCoordinator.StateMachine! = .init(.init())
 

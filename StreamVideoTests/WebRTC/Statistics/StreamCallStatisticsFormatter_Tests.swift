@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class StreamCallStatisticsFormatter_Tests: XCTestCase {
+final class StreamCallStatisticsFormatter_Tests: XCTestCase, @unchecked Sendable {
 
     private var subject: StreamCallStatisticsFormatter!
 

@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 
-final class MockWebSocketClientFactory: WebSocketClientProviding, Mockable {
+final class MockWebSocketClientFactory: WebSocketClientProviding, Mockable, @unchecked Sendable {
 
     // MARK: - Mockable
 

@@ -5,7 +5,7 @@
 import CallKit
 import Foundation
 
-final class MockCXCallController: CXCallController {
+final class MockCXCallController: CXCallController, @unchecked Sendable {
     private(set) var requestWasCalledWith: (CXTransaction, (Error?) -> Void)?
 
     func reset() { requestWasCalledWith = nil }

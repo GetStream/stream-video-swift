@@ -110,16 +110,16 @@ final class LastParticipantAutoLeavePolicyTests: XCTestCase, @unchecked Sendable
         }
 
         mockActiveCall(activeCall)
-        await fulfillment(file: file, line: line) { self.mockStreamVideo.state.activeCall?.cId == activeCall.cId }
+        await fulfilmentInMainActor(file: file, line: line) { self.mockStreamVideo.state.activeCall?.cId == activeCall.cId }
 
         mockSessionAcceptedBy(acceptedBy, on: activeCall)
-        await fulfillment(file: file, line: line) { activeCall.state.session?.acceptedBy.count == acceptedBy }
+        await fulfilmentInMainActor(file: file, line: line) { activeCall.state.session?.acceptedBy.count == acceptedBy }
 
         mockParticipantsJoined(maxParticipantsCount, on: activeCall)
-        await fulfillment(file: file, line: line) { activeCall.state.participantsMap.count == maxParticipantsCount }
+        await fulfilmentInMainActor(file: file, line: line) { activeCall.state.participantsMap.count == maxParticipantsCount }
 
         mockParticipantsJoined(currentParticipantsCount, on: activeCall)
-        await fulfillment(file: file, line: line) { activeCall.state.participantsMap.count == currentParticipantsCount }
+        await fulfilmentInMainActor(file: file, line: line) { activeCall.state.participantsMap.count == currentParticipantsCount }
 
         await safeFulfillment(
             of: [triggerExpectation],

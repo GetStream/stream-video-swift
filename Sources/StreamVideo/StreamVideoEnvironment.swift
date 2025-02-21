@@ -5,8 +5,8 @@
 import Foundation
 
 extension StreamVideo {
-    struct Environment {
-        var webSocketClientBuilder: (
+    struct Environment: Sendable {
+        var webSocketClientBuilder: @Sendable(
             _ eventNotificationCenter: EventNotificationCenter,
             _ url: URL
         ) -> WebSocketClient = {
@@ -25,7 +25,7 @@ extension StreamVideo {
             return webSocketClient
         }
         
-        var callControllerBuilder: (
+        var callControllerBuilder: @Sendable(
             _ defaultAPI: DefaultAPI,
             _ user: User,
             _ callId: String,
@@ -45,7 +45,7 @@ extension StreamVideo {
             )
         }
         
-        var apiTransportBuilder: (
+        var apiTransportBuilder: @Sendable(
             _ tokenProvider: @escaping UserTokenProvider
         ) -> DefaultAPITransport = {
             URLSessionTransport(
@@ -54,35 +54,35 @@ extension StreamVideo {
             )
         }
         
-        var connectionRecoveryHandlerBuilder: (
+        var connectionRecoveryHandlerBuilder: @Sendable(
             _ webSocketClient: WebSocketClient,
             _ eventNotificationCenter: EventNotificationCenter
         ) -> ConnectionRecoveryHandler = {
-            DefaultConnectionRecoveryHandler(
+            let backgroundTaskSchedulerBuilder: BackgroundTaskScheduler? = {
+                if Bundle.main.isAppExtension {
+                    // No background task scheduler exists for app extensions.
+                    return nil
+                } else {
+                    #if os(iOS)
+                    return IOSBackgroundTaskScheduler()
+                    #else
+                    // No need for background schedulers on macOS, app continues running when inactive.
+                    return nil
+                    #endif
+                }
+            }()
+
+            return DefaultConnectionRecoveryHandler(
                 webSocketClient: $0,
                 eventNotificationCenter: $1,
-                backgroundTaskScheduler: backgroundTaskSchedulerBuilder(),
+                backgroundTaskScheduler: backgroundTaskSchedulerBuilder,
                 internetConnection: InternetConnection(monitor: InternetConnection.Monitor()),
                 reconnectionStrategy: DefaultRetryStrategy(),
                 reconnectionTimerType: DefaultTimer.self,
                 keepConnectionAliveInBackground: true
             )
         }
-        
-        private static var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
-            if Bundle.main.isAppExtension {
-                // No background task scheduler exists for app extensions.
-                return nil
-            } else {
-                #if os(iOS)
-                return IOSBackgroundTaskScheduler()
-                #else
-                // No need for background schedulers on macOS, app continues running when inactive.
-                return nil
-                #endif
-            }
-        }
-        
+
         internal static func makeURLSession() -> URLSession {
             let config = URLSessionConfiguration.default
             config.requestCachePolicy = .reloadIgnoringLocalCacheData

@@ -54,7 +54,7 @@ enum Stream_Video_Sfu_Models_PeerType: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_PeerType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_PeerType] = [
+  static let allCases: [Stream_Video_Sfu_Models_PeerType] = [
     .publisherUnspecified,
     .subscriber,
   ]
@@ -100,7 +100,7 @@ enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_ConnectionQuality: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_ConnectionQuality] = [
+  static let allCases: [Stream_Video_Sfu_Models_ConnectionQuality] = [
     .unspecified,
     .poor,
     .good,
@@ -148,7 +148,7 @@ enum Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_VideoQuality: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_VideoQuality] = [
+  static let allCases: [Stream_Video_Sfu_Models_VideoQuality] = [
     .lowUnspecified,
     .mid,
     .high,
@@ -199,7 +199,7 @@ enum Stream_Video_Sfu_Models_TrackType: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_TrackType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_TrackType] = [
+  static let allCases: [Stream_Video_Sfu_Models_TrackType] = [
     .unspecified,
     .audio,
     .video,
@@ -296,7 +296,7 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_ErrorCode] = [
+  static let allCases: [Stream_Video_Sfu_Models_ErrorCode] = [
     .unspecified,
     .publishTrackNotFound,
     .publishTracksMismatch,
@@ -378,7 +378,7 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_SdkType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_SdkType] = [
+  static let allCases: [Stream_Video_Sfu_Models_SdkType] = [
     .unspecified,
     .react,
     .angular,
@@ -446,7 +446,7 @@ enum Stream_Video_Sfu_Models_TrackUnpublishReason: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_TrackUnpublishReason: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_TrackUnpublishReason] = [
+  static let allCases: [Stream_Video_Sfu_Models_TrackUnpublishReason] = [
     .unspecified,
     .userMuted,
     .permissionRevoked,
@@ -493,7 +493,7 @@ enum Stream_Video_Sfu_Models_GoAwayReason: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_GoAwayReason: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_GoAwayReason] = [
+  static let allCases: [Stream_Video_Sfu_Models_GoAwayReason] = [
     .unspecified,
     .shuttingDown,
     .rebalance,
@@ -544,7 +544,7 @@ enum Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_CallEndedReason: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_CallEndedReason] = [
+  static let allCases: [Stream_Video_Sfu_Models_CallEndedReason] = [
     .unspecified,
     .ended,
     .liveEnded,
@@ -607,7 +607,7 @@ enum Stream_Video_Sfu_Models_WebsocketReconnectStrategy: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_WebsocketReconnectStrategy] = [
+  static let allCases: [Stream_Video_Sfu_Models_WebsocketReconnectStrategy] = [
     .unspecified,
     .disconnect,
     .fast,
@@ -670,7 +670,7 @@ enum Stream_Video_Sfu_Models_AndroidThermalState: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_AndroidThermalState: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_AndroidThermalState] = [
+  static let allCases: [Stream_Video_Sfu_Models_AndroidThermalState] = [
     .unspecified,
     .none,
     .light,
@@ -727,7 +727,7 @@ enum Stream_Video_Sfu_Models_AppleThermalState: SwiftProtobuf.Enum {
 
 extension Stream_Video_Sfu_Models_AppleThermalState: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Stream_Video_Sfu_Models_AppleThermalState] = [
+  static let allCases: [Stream_Video_Sfu_Models_AppleThermalState] = [
     .unspecified,
     .nominal,
     .fair,

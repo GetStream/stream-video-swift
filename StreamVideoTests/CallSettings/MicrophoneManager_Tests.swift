@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class MicrophoneManager_Tests: XCTestCase {
+final class MicrophoneManager_Tests: XCTestCase, @unchecked Sendable {
 
     func test_microphoneManager_toggle() async throws {
         try await assertStatus(

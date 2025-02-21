@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import StreamWebRTC
 
-final class MockWebRTCCoordinatorStack {
+final class MockWebRTCCoordinatorStack: @unchecked Sendable {
 
     let user: User
     let apiKey: String
