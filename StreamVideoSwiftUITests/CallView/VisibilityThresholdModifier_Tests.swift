@@ -9,13 +9,14 @@ import StreamSwiftTestHelpers
 import SwiftUI
 import XCTest
 
-final class VisibilityThresholdModifier_Tests: XCTestCase {
+@MainActor
+final class VisibilityThresholdModifier_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var bounds: CGRect! = CGRect(x: 0, y: 0, width: 100, height: 100)
 
-    override func tearDown() {
+    override func tearDown() async throws {
         bounds = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     func test_visibilityFullyInsideBounds() {
@@ -92,6 +93,7 @@ final class VisibilityThresholdModifier_Tests: XCTestCase {
 
     // MARK: - Private Helpers
 
+    @MainActor
     private func assertVisibilityCalculations(
         in bounds: CGRect,
         threshold: CGFloat,

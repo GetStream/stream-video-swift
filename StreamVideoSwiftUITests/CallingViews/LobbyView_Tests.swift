@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class LobbyView_Tests: StreamVideoUITestCase {
+final class LobbyView_Tests: StreamVideoUITestCase, @unchecked Sendable {
     
     func test_lobbyView_snapshot() throws {
         for count in 0...2 {

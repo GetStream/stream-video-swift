@@ -6,8 +6,9 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class StreamPictureInPictureVideoRenderer_Tests: XCTestCase {
+final class StreamPictureInPictureVideoRenderer_Tests: XCTestCase, @unchecked Sendable {
 
+    @MainActor
     func test_didUpdateTrackSize_windowSizePolicyWasUpdated() {
         let spyPolicy = StreamTestSpyPictureInPictureWindowSizePolicy()
         let subject = StreamPictureInPictureVideoRenderer(windowSizePolicy: spyPolicy)

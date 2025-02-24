@@ -6,8 +6,9 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import StreamWebRTC
 
+@MainActor
 final class MockStreamAVPictureInPictureViewControlling: StreamAVPictureInPictureViewControlling {
-    var onSizeUpdate: ((CGSize) -> Void)?
+    var onSizeUpdate: (@Sendable(CGSize) -> Void)?
     var track: RTCVideoTrack?
     var preferredContentSize: CGSize = .zero
     var displayLayer: CALayer = .init()

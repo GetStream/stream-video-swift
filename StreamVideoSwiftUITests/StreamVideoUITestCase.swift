@@ -7,7 +7,7 @@ import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
-class StreamVideoUITestCase: XCTestCase {
+class StreamVideoUITestCase: XCTestCase, @unchecked Sendable {
     
     var streamVideoUI: StreamVideoUI?
     let httpClient: HTTPClient = HTTPClient_Mock()

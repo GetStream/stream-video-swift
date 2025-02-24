@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class StreamPictureInPictureAdaptiveWindowSizePolicy_Tests: XCTestCase {
+final class StreamPictureInPictureAdaptiveWindowSizePolicy_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var targetSize: CGSize! = .init(width: 100, height: 280)
     private lazy var subject: StreamPictureInPictureAdaptiveWindowSizePolicy! = .init()
@@ -19,6 +19,7 @@ final class StreamPictureInPictureAdaptiveWindowSizePolicy_Tests: XCTestCase {
 
     // MARK: - didSetTrackSize
 
+    @MainActor
     func test_didSetTrackSize_setsPreferredContentSizeOnController() {
         let controller = MockStreamAVPictureInPictureViewControlling()
         subject.controller = controller

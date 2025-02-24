@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class ReusePoolTests: XCTestCase {
+final class ReusePoolTests: XCTestCase, @unchecked Sendable {
 
     // Define a sample reusable object for testing
     private final class TestObject: Hashable {
