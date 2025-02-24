@@ -6,7 +6,7 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class AudioValuePercentageNormaliser_Tests: XCTestCase {
+final class AudioValuePercentageNormaliser_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var subject: AudioValuePercentageNormaliser! = .init()
 

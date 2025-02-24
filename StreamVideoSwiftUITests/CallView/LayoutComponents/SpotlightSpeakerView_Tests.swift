@@ -10,7 +10,7 @@ import StreamVideo
 import XCTest
 
 @MainActor
-final class SpotlightSpeakerView_Tests: StreamVideoUITestCase {
+final class SpotlightSpeakerView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     private lazy var subject: SpotlightSpeakerView! = SpotlightSpeakerView(
         viewFactory: TestViewFactory(),
@@ -24,9 +24,9 @@ final class SpotlightSpeakerView_Tests: StreamVideoUITestCase {
         availableFrame: .init(origin: .zero, size: .init(width: 200, height: 300))
     )
 
-    override func tearDown() {
+    override func tearDown() async throws {
         subject = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - viewId
