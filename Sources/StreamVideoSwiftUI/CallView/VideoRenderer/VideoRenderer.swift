@@ -9,7 +9,7 @@ import StreamWebRTC
 import SwiftUI
 
 /// A custom video renderer based on RTCMTLVideoView for rendering RTCVideoTrack objects.
-public class VideoRenderer: RTCMTLVideoView {
+public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
 
@@ -17,15 +17,15 @@ public class VideoRenderer: RTCMTLVideoView {
     private let _superviewSubject: PassthroughSubject<UIView?, Never> = .init()
     private let _frameSubject: PassthroughSubject<CGRect, Never> = .init()
 
-    var windowPublisher: AnyPublisher<UIWindow?, Never> { _windowSubject.eraseToAnyPublisher() }
-    var superviewPublisher: AnyPublisher<UIView?, Never> { _superviewSubject.eraseToAnyPublisher() }
-    var framePublisher: AnyPublisher<CGRect, Never> { _frameSubject.eraseToAnyPublisher() }
+    nonisolated(unsafe) var windowPublisher: AnyPublisher<UIWindow?, Never> { _windowSubject.eraseToAnyPublisher() }
+    nonisolated(unsafe) var superviewPublisher: AnyPublisher<UIView?, Never> { _superviewSubject.eraseToAnyPublisher() }
+    nonisolated(unsafe) var framePublisher: AnyPublisher<CGRect, Never> { _frameSubject.eraseToAnyPublisher() }
 
     /// DispatchQueue for synchronizing access to the video track.
     let queue = DispatchQueue(label: "video-track")
 
     /// The associated RTCVideoTrack being rendered.
-    weak var track: RTCVideoTrack?
+    nonisolated(unsafe) weak var track: RTCVideoTrack?
 
     var participant: CallParticipant?
 
@@ -48,7 +48,7 @@ public class VideoRenderer: RTCMTLVideoView {
     var trackId: String? { track?.trackId }
 
     /// The size of the renderer's view.
-    private var viewSize: CGSize?
+    private nonisolated(unsafe) var viewSize: CGSize?
 
     /// Required initializer (unavailable for use with Interface Builder).
     @available(*, unavailable)
@@ -130,7 +130,7 @@ extension VideoRenderer {
     ///   - onTrackSizeUpdate: A closure to be called when the track size is updated.
     public func handleViewRendering(
         for participant: CallParticipant,
-        onTrackSizeUpdate: @escaping (CGSize, CallParticipant) -> Void
+        onTrackSizeUpdate: @escaping @Sendable(CGSize, CallParticipant) -> Void
     ) {
         if let track = participant.track {
             log.info(

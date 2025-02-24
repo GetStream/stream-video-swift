@@ -7,7 +7,7 @@ import Foundation
 import StreamVideo
 import SwiftUI
 
-private final class CallEndedViewModifierViewModel: ObservableObject {
+private final class CallEndedViewModifierViewModel: ObservableObject, @unchecked Sendable {
 
     @Injected(\.streamVideo) private var streamVideo
 

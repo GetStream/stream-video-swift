@@ -3,13 +3,13 @@
 //
 
 import SnapshotTesting
-import StreamSwiftTestHelpers
+@preconcurrency import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
 @MainActor
-final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
-    
+final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase, @unchecked Sendable {
+
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
     
     func test_fullscreen_participantWithAudio_snapshot() throws {
