@@ -107,19 +107,17 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
 
-        Task { @MainActor [weak self] in
-            self?.callKitService.reportIncomingCall(
-                content.cid,
-                localizedCallerName: content.localizedCallerName,
-                callerId: content.callerId,
-                hasVideo: content.hasVideo,
-                completion: { error in
-                    if let error {
-                        log.error(error)
-                    }
+        callKitService.reportIncomingCall(
+            content.cid,
+            localizedCallerName: content.localizedCallerName,
+            callerId: content.callerId,
+            hasVideo: content.hasVideo,
+            completion: { error in
+                if let error {
+                    log.error(error)
                 }
-            )
-        }
+            }
+        )
     }
 
     /// Decodes push notification Payload to a type that the CallKit implementation can use.
