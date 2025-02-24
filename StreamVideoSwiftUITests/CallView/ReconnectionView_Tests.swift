@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class ReconnectionView_Tests: StreamVideoUITestCase {
+final class ReconnectionView_Tests: StreamVideoUITestCase, @unchecked Sendable {
     
     func test_reconnectionView_snapshot() throws {
         let view = ReconnectionView(viewModel: CallViewModel(), viewFactory: TestViewFactory())
