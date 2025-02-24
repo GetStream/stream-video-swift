@@ -15,14 +15,14 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
 
     /// A coordinator class that manages snapshot triggering and handling within the
     /// `SnapshotViewContainer`.
-    final class SnapshotViewContainerCoordinator {
+    final class SnapshotViewContainerCoordinator: @unchecked Sendable {
         private var trigger: SnapshotTriggering
-        private let snapshotHandler: (UIImage) -> Void
+        private let snapshotHandler: @Sendable(UIImage) -> Void
         private var cancellable: AnyCancellable?
 
         /// Weak reference to the contained `UIView`.
-        weak var content: UIViewType? {
-            didSet { captureSnapshot() }
+        nonisolated(unsafe) weak var content: UIViewType? {
+            didSet { Task { @MainActor in captureSnapshot() } }
         }
 
         /// Initializes a new `SnapshotViewContainerCoordinator` with the provided trigger and
@@ -31,20 +31,21 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
         ///   - trigger: The `SnapshotTriggering` object responsible for triggering snapshot
         ///   events.
         ///   - snapshotHandler: A closure that handles the captured `UIImage` from snapshots.
-        init(trigger: SnapshotTriggering, snapshotHandler: @escaping (UIImage) -> Void) {
+        init(trigger: SnapshotTriggering, snapshotHandler: @escaping @Sendable(UIImage) -> Void) {
             self.trigger = trigger
             self.snapshotHandler = snapshotHandler
 
             // Set up publisher to capture snapshots based on trigger events
             cancellable = trigger.publisher
                 .removeDuplicates()
-                .sink { [weak self] triggered in
+                .sinkTask { @MainActor [weak self] triggered in
                     guard triggered == true else { return }
                     self?.captureSnapshot()
                 }
         }
 
         /// Captures a snapshot of the current content if trigger is true.
+        @MainActor
         private func captureSnapshot() {
             defer { trigger.binding.wrappedValue = false }
             guard let content = content, trigger.binding.wrappedValue == true else { return }
@@ -53,7 +54,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
     }
 
     private let trigger: SnapshotTriggering
-    private let snapshotHandler: (UIImage) -> Void
+    private let snapshotHandler: @Sendable(UIImage) -> Void
     let contentProvider: () -> Content
 
     /// Initializes a new `SnapshotViewContainer` with the specified trigger, snapshot handler, and
@@ -65,7 +66,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
     ///   encapsulated in a UIKit view.
     init(
         trigger: SnapshotTriggering,
-        snapshotHandler: @escaping (UIImage) -> Void,
+        snapshotHandler: @escaping @Sendable(UIImage) -> Void,
         @ViewBuilder contentProvider: @escaping () -> Content
     ) {
         self.trigger = trigger
@@ -95,7 +96,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
 struct SnapshotViewModifier: ViewModifier {
 
     var trigger: SnapshotTriggering
-    var snapshotHandler: (UIImage) -> Void
+    var snapshotHandler: @Sendable(UIImage) -> Void
 
     /// Applies the `SnapshotViewContainer` with the specified trigger and snapshot handler to the
     /// provided content.
@@ -134,7 +135,7 @@ extension View {
     @ViewBuilder
     public func snapshot(
         trigger: SnapshotTriggering,
-        snapshotHandler: @escaping (UIImage) -> Void
+        snapshotHandler: @escaping @Sendable(UIImage) -> Void
     ) -> some View {
         modifier(
             SnapshotViewModifier(

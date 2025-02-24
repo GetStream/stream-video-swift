@@ -8,8 +8,9 @@ import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class CallingGroupView_Tests: StreamVideoUITestCase {
-    
+@MainActor
+final class CallingGroupView_Tests: StreamVideoUITestCase, @unchecked Sendable {
+
     func test_callingGroupView_isCalling_snapshot() throws {
         for count in spotlightParticipants {
             let users = UserFactory.get(count)

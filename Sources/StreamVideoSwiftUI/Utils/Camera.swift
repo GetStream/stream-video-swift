@@ -5,10 +5,13 @@
 import AVFoundation
 import CoreImage
 import os.log
+import StreamVideo
 import UIKit
 
 @available(iOS 14.0, *)
 class Camera: NSObject, @unchecked Sendable {
+    @Injected(\.orientationAdapter) private var orientationAdapter
+
     private let captureSession = AVCaptureSession()
     private var isCaptureSessionConfigured = false
     private var deviceInput: AVCaptureDeviceInput?
@@ -68,7 +71,7 @@ class Camera: NSObject, @unchecked Sendable {
     private var captureDevice: AVCaptureDevice? {
         didSet {
             guard let captureDevice = captureDevice else { return }
-            logger.debug("Using capture device: \(captureDevice.localizedName)")
+            log.debug("Using capture device: \(captureDevice.localizedName)")
             sessionQueue.async {
                 self.updateSessionForCaptureDevice(captureDevice)
             }
@@ -130,7 +133,7 @@ class Camera: NSObject, @unchecked Sendable {
             let captureDevice = captureDevice,
             let deviceInput = try? AVCaptureDeviceInput(device: captureDevice)
         else {
-            logger.error("Failed to obtain video input.")
+            log.error("Failed to obtain video input.")
             return
         }
 
@@ -140,12 +143,12 @@ class Camera: NSObject, @unchecked Sendable {
         videoOutput.setSampleBufferDelegate(self, queue: frameProcessingQueue)
 
         guard captureSession.canAddInput(deviceInput) else {
-            logger.error("Unable to add device input to capture session.")
+            log.error("Unable to add device input to capture session.")
             return
         }
 
         guard captureSession.canAddOutput(videoOutput) else {
-            logger.error("Unable to add video output to capture session.")
+            log.error("Unable to add video output to capture session.")
             return
         }
         
@@ -165,19 +168,19 @@ class Camera: NSObject, @unchecked Sendable {
     private func checkAuthorization() async -> Bool {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            logger.debug("Camera access authorized.")
+            log.debug("Camera access authorized.")
             return true
         case .notDetermined:
-            logger.debug("Camera access not determined.")
+            log.debug("Camera access not determined.")
             sessionQueue.suspend()
             let status = await AVCaptureDevice.requestAccess(for: .video)
             sessionQueue.resume()
             return status
         case .denied:
-            logger.debug("Camera access denied.")
+            log.debug("Camera access denied.")
             return false
         case .restricted:
-            logger.debug("Camera library access restricted.")
+            log.debug("Camera library access restricted.")
             return false
         @unknown default:
             return false
@@ -189,7 +192,7 @@ class Camera: NSObject, @unchecked Sendable {
         do {
             return try AVCaptureDeviceInput(device: validDevice)
         } catch {
-            logger.error("Error getting capture device input: \(error.localizedDescription)")
+            log.error("Error getting capture device input: \(error.localizedDescription)")
             return nil
         }
     }
@@ -226,7 +229,7 @@ class Camera: NSObject, @unchecked Sendable {
     func start() async {
         let authorized = await checkAuthorization()
         guard authorized else {
-            logger.error("Camera access was not authorized.")
+            log.error("Camera access was not authorized.")
             return
         }
         
@@ -263,20 +266,6 @@ class Camera: NSObject, @unchecked Sendable {
             captureDevice = AVCaptureDevice.default(for: .video)
         }
     }
-
-    private var deviceOrientation: UIDeviceOrientation {
-        UIScreen.main.orientation
-    }
-    
-    private func videoOrientationFor(_ deviceOrientation: UIDeviceOrientation) -> AVCaptureVideoOrientation? {
-        switch deviceOrientation {
-        case .portrait: return AVCaptureVideoOrientation.portrait
-        case .portraitUpsideDown: return AVCaptureVideoOrientation.portraitUpsideDown
-        case .landscapeLeft: return AVCaptureVideoOrientation.landscapeRight
-        case .landscapeRight: return AVCaptureVideoOrientation.landscapeLeft
-        default: return nil
-        }
-    }
 }
 
 @available(iOS 14.0, *)
@@ -288,35 +277,12 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
         from connection: AVCaptureConnection
     ) {
         guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
-        
-        if
-            connection.isVideoOrientationSupported,
-            let videoOrientation = videoOrientationFor(deviceOrientation),
-            connection.videoOrientation != videoOrientation {
-            connection.videoOrientation = videoOrientation
+
+        let currentOrientation = orientationAdapter.orientation.captureVideoOrientation
+        if connection.isVideoOrientationSupported, connection.videoOrientation != currentOrientation {
+            connection.videoOrientation = currentOrientation
         }
 
         addToPreviewStream?(CIImage(cvPixelBuffer: pixelBuffer))
     }
 }
-
-private extension UIScreen {
-
-    var orientation: UIDeviceOrientation {
-        let point = coordinateSpace.convert(CGPoint.zero, to: fixedCoordinateSpace)
-        if point == CGPoint.zero {
-            return .portrait
-        } else if point.x != 0 && point.y != 0 {
-            return .portraitUpsideDown
-        } else if point.x == 0 && point.y != 0 {
-            return .landscapeRight // .landscapeLeft
-        } else if point.x != 0 && point.y == 0 {
-            return .landscapeLeft // .landscapeRight
-        } else {
-            return .unknown
-        }
-    }
-}
-
-@available(iOS 14.0, *)
-private let logger = Logger(subsystem: "com.apple.swiftplaygroundscontent.capturingphotos", category: "Camera")

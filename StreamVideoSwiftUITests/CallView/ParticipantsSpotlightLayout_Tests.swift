@@ -3,12 +3,12 @@
 //
 
 import SnapshotTesting
-import StreamSwiftTestHelpers
+@preconcurrency import StreamSwiftTestHelpers
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
-    
+final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase, @unchecked Sendable {
+
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
     
     @MainActor

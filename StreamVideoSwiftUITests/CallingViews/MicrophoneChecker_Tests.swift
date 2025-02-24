@@ -9,7 +9,7 @@ import StreamVideo
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class MicrophoneChecker_Tests: XCTestCase {
+final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
     private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = MockStreamCallAudioRecorder(filename: "test.wav")
@@ -59,7 +59,7 @@ final class MicrophoneChecker_Tests: XCTestCase {
     }
 }
 
-private final class MockStreamCallAudioRecorder: StreamCallAudioRecorder {
+private final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sendable {
 
     private(set) var startRecordingWasCalled = false
     private(set) var stopRecordingWasCalled = false

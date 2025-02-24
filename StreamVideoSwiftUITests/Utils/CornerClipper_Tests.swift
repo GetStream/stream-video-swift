@@ -8,58 +8,70 @@ import StreamSwiftTestHelpers
 import SwiftUI
 import XCTest
 
-final class CornerClipper_Tests: StreamVideoUITestCase {
+final class CornerClipper_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     // MARK: - Single Corner
 
+    @MainActor
     func test_cornerClipper_cornerRadiusTopLeft() {
         assertCornerRadius(corners: [.topLeft])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusTopRight() {
         assertCornerRadius(corners: [.topRight])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusBottomLeft() {
         assertCornerRadius(corners: [.bottomLeft])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusBottomRight() {
         assertCornerRadius(corners: [.bottomRight])
     }
 
     // MARK: - Double Corner
 
+    @MainActor
     func test_cornerClipper_cornerRadiusTop() {
         assertCornerRadius(corners: [.topLeft, .topRight])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusBottom() {
         assertCornerRadius(corners: [.bottomLeft, .bottomRight])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusLeading() {
         assertCornerRadius(corners: [.topLeft, .bottomLeft])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusTrailing() {
         assertCornerRadius(corners: [.topRight, .bottomRight])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusLeadingDiagonal() {
         assertCornerRadius(corners: [.topLeft, .bottomRight])
     }
 
+    @MainActor
     func test_cornerClipper_cornerRadiusTrailingDiagonal() {
         assertCornerRadius(corners: [.topRight, .bottomLeft])
     }
 
     // MARK: - All Corners
 
+    @MainActor
     func test_cornerClipper_allCorners() {
         assertCornerRadius(corners: [.topLeft, .topRight, .bottomLeft, .bottomRight])
     }
 
+    @MainActor
     private func assertCornerRadius(
         _ radius: CGFloat = 24,
         corners: UIRectCorner,

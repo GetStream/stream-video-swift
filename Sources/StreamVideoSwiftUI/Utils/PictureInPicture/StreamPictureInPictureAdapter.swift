@@ -10,7 +10,7 @@ import UIKit
 /// This class encapsulates the logic for managing picture-in-picture functionality during a video call. It tracks
 /// changes in the call, updates related to call participants, and changes in the source view for Picture in
 /// Picture display.
-final class StreamPictureInPictureAdapter {
+final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
     /// The active call.
     var call: Call? {
@@ -33,18 +33,20 @@ final class StreamPictureInPictureAdapter {
     /// The closure to call whenever the picture-in-picture rendering window changes size.
     var onSizeUpdate: ((CGSize, CallParticipant) -> Void)? {
         didSet {
-            pictureInPictureController?.onSizeUpdate = { [weak self] size in
-                if let activeParticipant = self?.activeParticipant {
-                    self?.onSizeUpdate?(size, activeParticipant)
+            Task { @MainActor in
+                pictureInPictureController?.onSizeUpdate = { [weak self] size in
+                    if let activeParticipant = self?.activeParticipant {
+                        self?.onSizeUpdate?(size, activeParticipant)
+                    }
                 }
             }
         }
     }
 
     /// The participant to use in order to access the track to render on picture-in-picture.
-    private var activeParticipant: CallParticipant?
+    private nonisolated(unsafe) var activeParticipant: CallParticipant?
 
-    private var participantUpdatesCancellable: AnyCancellable?
+    private nonisolated(unsafe) var participantUpdatesCancellable: AnyCancellable?
 
     /// The actual picture-in-picture controller.
     private lazy var pictureInPictureController = StreamPictureInPictureController()
@@ -60,30 +62,33 @@ final class StreamPictureInPictureAdapter {
 
         guard let call = call else { return }
 
-        participantUpdatesCancellable = call
-            .state
-            .$participants
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.didUpdate($0) }
+        Task { @MainActor in
+            participantUpdatesCancellable = call
+                .state
+                .$participants
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in self?.didUpdate($0) }
+        }
     }
 
     /// Whenever participants change we update our internal state in order to always have the correct track
     /// on picture-in-picture.
-    @MainActor
     private func didUpdate(_ participants: [CallParticipant]) {
-        let sessionId = call?.state.sessionId
-        let otherParticipants = participants.filter { $0.sessionId != sessionId }
+        Task { @MainActor in
+            let sessionId = call?.state.sessionId
+            let otherParticipants = participants.filter { $0.sessionId != sessionId }
 
-        if let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false,
-           let track = session.track {
-            pictureInPictureController?.track = track
-            activeParticipant = nil
-        } else if let participant = otherParticipants.first(where: { $0.track != nil }), let track = participant.track {
-            pictureInPictureController?.track = track
-            activeParticipant = participant
-        } else if let localParticipant = call?.state.localParticipant, let track = localParticipant.track {
-            pictureInPictureController?.track = track
-            activeParticipant = localParticipant
+            if let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false,
+               let track = session.track {
+                pictureInPictureController?.track = track
+                activeParticipant = nil
+            } else if let participant = otherParticipants.first(where: { $0.track != nil }), let track = participant.track {
+                pictureInPictureController?.track = track
+                activeParticipant = participant
+            } else if let localParticipant = call?.state.localParticipant, let track = localParticipant.track {
+                pictureInPictureController?.track = track
+                activeParticipant = localParticipant
+            }
         }
     }
 
@@ -94,7 +99,7 @@ final class StreamPictureInPictureAdapter {
 
 /// Provides the default value of the `StreamPictureInPictureAdapter` class.
 enum StreamPictureInPictureAdapterKey: InjectionKey {
-    static var currentValue: StreamPictureInPictureAdapter = .init()
+    nonisolated(unsafe) static var currentValue: StreamPictureInPictureAdapter = .init()
 }
 
 extension InjectedValues {

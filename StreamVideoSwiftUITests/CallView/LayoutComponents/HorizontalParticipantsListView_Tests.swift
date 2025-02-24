@@ -9,7 +9,7 @@ import StreamVideo
 import XCTest
 
 @MainActor
-final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase {
+final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     func test_layout_participantsWithAudio_withoutAllInfo_viewWasConfiguredCorrectly() {
         assertLayout(participantsCount: 10, withAudio: true, showAllInfo: false)

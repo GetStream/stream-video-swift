@@ -6,9 +6,10 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class StreamPictureInPictureVideoRenderer_Tests: XCTestCase {
+final class StreamPictureInPictureVideoRenderer_Tests: XCTestCase, @unchecked Sendable {
 
-    func test_didUpdateTrackSize_windowSizePolicyWasUpdated() {
+    @MainActor
+    func test_didUpdateTrackSize_windowSizePolicyWasUpdated() async {
         let spyPolicy = StreamTestSpyPictureInPictureWindowSizePolicy()
         let subject = StreamPictureInPictureVideoRenderer(windowSizePolicy: spyPolicy)
         let targetSize = CGSize(width: 100, height: 150)
@@ -17,7 +18,9 @@ final class StreamPictureInPictureVideoRenderer_Tests: XCTestCase {
 
         subject.setSize(targetSize)
 
-        XCTAssertEqual(targetSize, spyPolicy.trackSize)
+        await fulfilmentInMainActor {
+            targetSize == spyPolicy.trackSize
+        }
     }
 }
 

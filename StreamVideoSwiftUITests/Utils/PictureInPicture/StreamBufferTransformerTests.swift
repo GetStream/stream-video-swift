@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import StreamWebRTC
 import XCTest
 
-final class StreamBufferTransformerTests: XCTestCase {
+final class StreamBufferTransformerTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - transform(_: RTCI420Buffer, targetSize: CGSize)
 
