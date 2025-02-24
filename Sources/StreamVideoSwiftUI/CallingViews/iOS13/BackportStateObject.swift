@@ -5,9 +5,15 @@
 import Combine
 import SwiftUI
 
+#if compiler(>=6.0)
+public protocol BackportDynamicProperty: @preconcurrency DynamicProperty {}
+#else
+public protocol BackportDynamicProperty: DynamicProperty {}
+#endif
+
 /// A property wrapper type that instantiates an observable object.
 @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
-public struct BackportStateObject<ObjectType: ObservableObject & Sendable>: @preconcurrency DynamicProperty
+public struct BackportStateObject<ObjectType: ObservableObject & Sendable>: BackportDynamicProperty
     where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
     /// Wrapper that helps with initialising without actually having an ObservableObject yet

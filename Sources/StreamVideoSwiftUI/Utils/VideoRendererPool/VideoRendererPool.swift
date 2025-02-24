@@ -49,8 +49,14 @@ final class VideoRendererPool: @unchecked Sendable {
     }
 }
 
+#if compiler(>=6.0)
+protocol BackportInjectionKey: @preconcurrency InjectionKey {}
+#else
+protocol BackportInjectionKey: InjectionKey {}
+#endif
+
 /// - Note: I have no other way of satisfying the compiler here.
-extension VideoRendererPool: @preconcurrency InjectionKey {
+extension VideoRendererPool: BackportInjectionKey {
     @MainActor
     static var currentValue: VideoRendererPool = .init()
 }
