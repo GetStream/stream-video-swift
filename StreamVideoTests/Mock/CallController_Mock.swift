@@ -110,7 +110,7 @@ extension User {
 }
 
 extension Call {
-    nonisolated(unsafe) static func dummy(
+    static func dummy(
         callType: String = .default,
         callId: String = .unique,
         coordinatorClient: DefaultAPI = .dummy(),

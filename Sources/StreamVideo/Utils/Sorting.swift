@@ -215,7 +215,7 @@ nonisolated(unsafe) public var publishingAudio: StreamSortComparator<CallPartici
 nonisolated(unsafe) public var name: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.name) }
 
 /// A comparator creator which will set up a comparator which prioritizes participants who have a specific role.
-nonisolated(unsafe) public func roles(_ priorityRoles: [String] = ["admin", "host", "speaker"])
+public func roles(_ priorityRoles: [String] = ["admin", "host", "speaker"])
     -> StreamSortComparator<CallParticipant> {
     { (p1, p2) in
         if p1.roles == p2.roles { return .orderedSame }
