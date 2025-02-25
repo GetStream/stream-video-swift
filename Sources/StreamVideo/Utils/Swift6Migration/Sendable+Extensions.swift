@@ -20,7 +20,6 @@ extension CXAnswerCallAction: @retroactive @unchecked Sendable {}
 extension CXSetHeldCallAction: @retroactive @unchecked Sendable {}
 extension CXSetMutedCallAction: @retroactive @unchecked Sendable {}
 extension KeyPath: @retroactive @unchecked Sendable {}
-extension Notification: @retroactive @unchecked Sendable {}
 extension RTCIceCandidate: @retroactive @unchecked Sendable {}
 extension RTCMediaStreamTrack: @retroactive @unchecked Sendable {}
 extension RTCSessionDescription: @retroactive @unchecked Sendable {}

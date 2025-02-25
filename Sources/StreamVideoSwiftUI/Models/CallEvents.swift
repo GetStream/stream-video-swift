@@ -23,8 +23,6 @@ public enum CallEvent: Sendable {
     case sessionStarted(CallSessionResponse)
 }
 
-extension CallSessionResponse: @unchecked Sendable {}
-
 public enum CallEventAction: Sendable {
     case accept
     case reject

@@ -50,10 +50,17 @@ final class VideoRendererPool: @unchecked Sendable {
 }
 
 /// - Note: I have no other way of satisfying the compiler here.
+#if compiler(>=6.0)
 extension VideoRendererPool: @preconcurrency InjectionKey {
     @MainActor
     static var currentValue: VideoRendererPool = .init()
 }
+#else
+extension VideoRendererPool: InjectionKey {
+    @MainActor
+    static var currentValue: VideoRendererPool = .init()
+}
+#endif
 
 extension InjectedValues {
     var videoRendererPool: VideoRendererPool {

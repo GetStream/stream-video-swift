@@ -137,6 +137,7 @@ extension VideoRendererView {
         // MARK: Private API
 
         /// Sets up observation for the renderer's window and superview.
+        @MainActor
         private func setupRendererObservation() {
             renderer
                 .windowPublisher
