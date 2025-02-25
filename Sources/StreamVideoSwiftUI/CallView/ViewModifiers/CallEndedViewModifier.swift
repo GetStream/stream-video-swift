@@ -215,6 +215,7 @@ extension View {
     ///  validation rules for presentation. The modifier will inject the last available call when calling.
     ///  - content: A viewBuilder that returns the modal's content. The viewModifier
     /// will provide a dismiss closure that can be called from the content to close the modal.
+    @MainActor
     @ViewBuilder
     public func onCallEnded(
         presentationValidator: @escaping (Call?) -> Bool = { _ in true },

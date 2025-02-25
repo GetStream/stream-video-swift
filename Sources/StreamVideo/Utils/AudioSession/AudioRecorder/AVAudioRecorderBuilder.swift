@@ -62,5 +62,3 @@ actor AVAudioRecorderBuilder {
         self.cachedResult = audioRecorder
     }
 }
-
-extension AVAudioRecorder: @unchecked Sendable {}

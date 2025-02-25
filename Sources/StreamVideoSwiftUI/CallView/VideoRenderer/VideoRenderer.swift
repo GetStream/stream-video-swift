@@ -17,9 +17,9 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
     private let _superviewSubject: PassthroughSubject<UIView?, Never> = .init()
     private let _frameSubject: PassthroughSubject<CGRect, Never> = .init()
 
-    nonisolated(unsafe) var windowPublisher: AnyPublisher<UIWindow?, Never> { _windowSubject.eraseToAnyPublisher() }
-    nonisolated(unsafe) var superviewPublisher: AnyPublisher<UIView?, Never> { _superviewSubject.eraseToAnyPublisher() }
-    nonisolated(unsafe) var framePublisher: AnyPublisher<CGRect, Never> { _frameSubject.eraseToAnyPublisher() }
+    var windowPublisher: AnyPublisher<UIWindow?, Never> { _windowSubject.eraseToAnyPublisher() }
+    var superviewPublisher: AnyPublisher<UIView?, Never> { _superviewSubject.eraseToAnyPublisher() }
+    var framePublisher: AnyPublisher<CGRect, Never> { _frameSubject.eraseToAnyPublisher() }
 
     /// DispatchQueue for synchronizing access to the video track.
     let queue = DispatchQueue(label: "video-track")

@@ -67,7 +67,7 @@ final class StreamYUVToARGBConversion {
          /// Computed property to provide a pointer to the relevant conversion matrix.
          ///
          /// - Returns: A pointer to the selected color conversion matrix.
-         nonisolated(unsafe) var value: UnsafePointer<vImage_YpCbCrToARGBMatrix> {
+         var value: UnsafePointer<vImage_YpCbCrToARGBMatrix> {
             switch self {
             case .YpCbCrToARGBMatrix_ITU_R_601_4: return kvImage_YpCbCrToARGBMatrix_ITU_R_601_4
             case .YpCbCrToARGBMatrix_ITU_R_709_2: return kvImage_YpCbCrToARGBMatrix_ITU_R_709_2

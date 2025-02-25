@@ -98,7 +98,7 @@ final class DemoAppViewFactory: ViewFactory {
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
             .snapshot(trigger: snapshotTrigger) { [weak viewModel] snapshot in
-                Task { @MainActor in
+                Task { @MainActor [weak viewModel] in
                     viewModel?.sendSnapshot(snapshot)
                 }
             }

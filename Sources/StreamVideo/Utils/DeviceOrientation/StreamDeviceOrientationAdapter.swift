@@ -120,8 +120,9 @@ open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable
             // Subscribe to orientation change notifications on UIKit platforms.
             notificationCancellable = notificationCenter
                 .publisher(for: UIDevice.orientationDidChangeNotification)
+                .map { _ in }
                 .receive(on: DispatchQueue.main)
-                .sinkTask { @MainActor [weak self] _ in
+                .sinkTask { @MainActor [weak self] in
                     guard let self = self else { return }
                     self.orientation = await provider() // Update orientation based on the provider.
                 }

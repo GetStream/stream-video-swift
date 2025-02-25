@@ -124,8 +124,6 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     }
 }
 
-extension Image: @unchecked Sendable {}
-
 private extension CIImage {
     var image: Image? {
         let ciContext = CIContext()
