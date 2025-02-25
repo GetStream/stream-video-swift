@@ -111,6 +111,7 @@ extension NSLayoutConstraint {
     }
 }
 
+@MainActor
 public enum LayoutAnchorName {
     case bottom
     case centerX
