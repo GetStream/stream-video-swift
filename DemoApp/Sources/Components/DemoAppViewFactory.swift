@@ -97,7 +97,11 @@ final class DemoAppViewFactory: ViewFactory {
                 availableFrame: availableFrame,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
-            .snapshot(trigger: snapshotTrigger) { [weak viewModel] in viewModel?.sendSnapshot($0) }
+            .snapshot(trigger: snapshotTrigger) { [weak viewModel] snapshot in
+                Task { @MainActor in
+                    viewModel?.sendSnapshot(snapshot)
+                }
+            }
             .overlay(
                 VStack {
                     Spacer()
