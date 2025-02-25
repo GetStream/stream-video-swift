@@ -125,7 +125,7 @@ struct DebugMenu: View {
     var body: some View {
         Menu {
             makeMenu(
-                for: [.demo, .pronto, .prontoStaging],
+                for: [.demo, .pronto, .prontoStaging, .prontoFrankfurtC2],
                 currentValue: baseURL,
                 additionalItems: { customEnvironmentView },
                 label: "Environment"
