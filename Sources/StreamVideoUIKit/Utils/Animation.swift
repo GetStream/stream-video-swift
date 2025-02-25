@@ -4,6 +4,7 @@
 
 import UIKit
 
+@MainActor
 public func Animate(
     duration: TimeInterval = 0.25,
     delay: TimeInterval = 0,
@@ -19,6 +20,7 @@ public func Animate(
     )
 }
 
+@MainActor
 func Animate(
     duration: TimeInterval = 0.25,
     delay: TimeInterval = 0,
