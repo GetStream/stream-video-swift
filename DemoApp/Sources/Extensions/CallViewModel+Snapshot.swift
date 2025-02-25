@@ -64,5 +64,3 @@ extension CallViewModel {
         return newImage
     }
 }
-
-extension SendEventResponse: @unchecked Sendable {}

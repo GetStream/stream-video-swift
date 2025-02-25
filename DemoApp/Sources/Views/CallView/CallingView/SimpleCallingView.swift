@@ -244,9 +244,3 @@ struct SimpleCallingView: View {
         }
     }
 }
-
-extension URL: Identifiable {
-    public var id: ObjectIdentifier {
-        .init(absoluteString as NSString)
-    }
-}
