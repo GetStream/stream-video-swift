@@ -7,7 +7,7 @@ import SwiftUI
 
 /// A property wrapper type that instantiates an observable object.
 @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
-public struct BackportStateObject<ObjectType: ObservableObject & Sendable>: DynamicProperty
+public final class BackportStateObject<ObjectType: ObservableObject & Sendable>: DynamicProperty, @unchecked Sendable
     where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
     /// Wrapper that helps with initialising without actually having an ObservableObject yet
@@ -41,10 +41,12 @@ public struct BackportStateObject<ObjectType: ObservableObject & Sendable>: Dyna
         self.thunk = thunk
     }
 
-    nonisolated public mutating func update() {
-        // Not sure what this does but we'll just forward it
-        _state.update()
-        _observedObject.update()
+    nonisolated public func update() {
+        Task { @MainActor in
+            // Not sure what this does but we'll just forward it
+            _state.update()
+            _observedObject.update()
+        }
     }
 }
 
