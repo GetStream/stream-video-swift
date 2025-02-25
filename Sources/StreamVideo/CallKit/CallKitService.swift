@@ -111,7 +111,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ///   - callerId: The caller's identifier.
     ///   - hasVideo: Indicator if call is video or audio.
     ///   - completion: A closure to be called upon completion.
-    @MainActor
     open func reportIncomingCall(
         _ cid: String,
         localizedCallerName: String,
@@ -157,7 +156,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         Task {
             do {
                 if streamVideo.state.connection != .connected {
-                    let result = await Task { @MainActor in
+                    let result = await Task {
                         try await streamVideo.connect()
                     }.result
 
@@ -170,7 +169,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 }
 
                 if streamVideo.state.ringingCall?.cId != callEntry.call.cId {
-                    Task { @MainActor in
+                    Task {
                         streamVideo.state.ringingCall = callEntry.call
                     }
                 }
@@ -576,7 +575,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         return provider
     }
 
-    @MainActor
     private func buildCallUpdate(
         cid: String,
         localizedCallerName: String,
