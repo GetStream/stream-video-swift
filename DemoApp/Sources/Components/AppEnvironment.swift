@@ -40,6 +40,7 @@ extension AppEnvironment {
         case staging
         case demo
         case legacy
+        case prontoFrankfurtC2
         case custom(baseURL: BaseURL, apiKey: String, token: String)
 
         var url: URL {
@@ -48,7 +49,7 @@ extension AppEnvironment {
                 URL(string: "https://pronto.getstream.io")!
             case .prontoStaging:
                 URL(string: "https://pronto-staging.getstream.io")!
-            case .staging:
+            case .staging, .prontoFrankfurtC2:
                 URL(string: "https://staging.getstream.io")!
             case .demo:
                 URL(string: "https://getstream.io")!
@@ -65,6 +66,8 @@ extension AppEnvironment {
                 return "Pronto"
             case .prontoStaging:
                 return "Pronto Staging"
+            case .prontoFrankfurtC2:
+                return "Pronto Staging C2"
             case .staging:
                 return "Staging"
             case .legacy:
