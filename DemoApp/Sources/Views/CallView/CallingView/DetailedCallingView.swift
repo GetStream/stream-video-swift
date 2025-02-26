@@ -152,7 +152,8 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                                 callType: .default,
                                 callId: text,
                                 members: members,
-                                ring: callFlow == .ringEvents
+                                ring: callFlow == .ringEvents,
+                                video: viewModel.callSettings.videoOn
                             )
                         }
                     }

@@ -238,7 +238,8 @@ struct SimpleCallingView: View {
                 callId: callId,
                 members: [],
                 ring: false,
-                maxDuration: AppEnvironment.callExpiration.duration
+                maxDuration: AppEnvironment.callExpiration.duration,
+                video: viewModel.callSettings.videoOn
             )
         }
     }
