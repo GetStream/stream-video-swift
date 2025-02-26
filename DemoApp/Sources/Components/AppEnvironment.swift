@@ -47,9 +47,9 @@ extension AppEnvironment {
             switch self {
             case .pronto:
                 URL(string: "https://pronto.getstream.io")!
-            case .prontoStaging, .prontoFrankfurtC2:
+            case .prontoStaging:
                 URL(string: "https://pronto-staging.getstream.io")!
-            case .staging:
+            case .staging, .prontoFrankfurtC2:
                 URL(string: "https://staging.getstream.io")!
             case .demo:
                 URL(string: "https://getstream.io")!

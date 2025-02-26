@@ -30,6 +30,9 @@ struct DebugMenu: View {
             case .prontoStaging:
                 AppState.shared.pushNotificationConfiguration = .default
                 AppEnvironment.baseURL = .prontoStaging
+            case .prontoFrankfurtC2:
+                AppState.shared.pushNotificationConfiguration = .default
+                AppEnvironment.baseURL = .prontoFrankfurtC2
             case let .custom(baseURL, apiKey, token):
                 AppState.shared.apiKey = apiKey
                 AppEnvironment.baseURL = .custom(baseURL: baseURL, apiKey: apiKey, token: token)
