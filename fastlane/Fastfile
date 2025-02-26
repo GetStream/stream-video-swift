@@ -696,8 +696,6 @@ lane :copyright do
 end
 
 lane :validate_public_interface do
-  # next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
-
   analyser = 'interface-analyser'
   sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0/interface-analyser")
   sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0/interface-analyser_interface-analyser.bundle.zip")
@@ -712,8 +710,12 @@ lane :validate_public_interface do
   sh("git checkout #{target_branch}")
   sh("./#{analyser} analysis ../Sources/ ../public_interface_previous.resolved")
 
+  # Generate unique filename using the GitHub run ID
+  timestamp = Time.now.strftime('%Y%m%d-%H%M%S')
+  report_filename = "public_interface_diff_#{ENV['GITHUB_RUN_ID'] || timestamp}.md"
+  report_path = "../#{report_filename}"
+
   # Run diff
-  report_path = '../report.md'
   sh("./#{analyser} diff ../public_interface_current.resolved ../public_interface_previous.resolved #{report_path}")
 
   # Check if report.md exists and is non-zero in size
@@ -724,15 +726,27 @@ lane :validate_public_interface do
       'No changes have been made to the public interface'
     end
 
-  # Generate markdown table for the PR comment
-  table_header = '## Public Interface'
-  markdown_table = "#{table_header}\n#{diff}"
+  # Upload to GitHub Actions artifacts
+  if is_ci && ENV['GITHUB_ACTIONS']
+    sh("mkdir -p artifacts && mv #{report_path} artifacts/")
+    sh("gh run upload-artifact --name public-interface-diff --path artifacts/#{report_filename}")
+    report_url = "https://github.com/#{ENV['GITHUB_REPOSITORY']}/actions/runs/#{ENV['GITHUB_RUN_ID']}#artifacts"
+  else
+    report_url = nil
+  end
 
-  # Print table to console
-  FastlaneCore::PrintTable.print_values(title: table_header, config: { changes: diff })
+  # Format PR comment using a markdown code block for better readability
+  header = "## Public Interface Changes"
+  formatted_diff = "```\n#{diff}\n```" # Wrap content in a markdown code block
+  report_link = report_url ? "\n[View full report](#{report_url})" : ""
+
+  markdown_comment = "#{header}\n#{report_link}\n\n#{formatted_diff}#{report_link}"
+
+  # Print output in GitHub Actions logs for visibility
+  puts markdown_comment
 
   # Post PR comment if running in CI
-  pr_comment(text: markdown_table, edit_last_comment_with_text: table_header) if is_ci
+  pr_comment(text: markdown_comment, edit_last_comment_with_text: header) if is_ci
 end
 
 lane :show_frameworks_sizes do |options|
