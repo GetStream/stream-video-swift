@@ -10,7 +10,6 @@ public let ifInvisibleBy = conditional { (a: CallParticipant, b: CallParticipant
     a.showTrack == false || b.showTrack == false
 }
 
-@available(*, deprecated, renamed: "ifInvisibleBy")
 public let ifInvisible = ifInvisibleBy
 
 /// The default sorting preset.
@@ -30,7 +29,6 @@ public let defaultSortPreset = [
     // ifInvisibleBy(name),
 ]
 
-@available(*, deprecated, renamed: "defaultSortPreset")
 public let defaultComparators = defaultSortPreset
 
 /// The sorting preset for speaker layout.
@@ -50,7 +48,6 @@ public let speakerLayoutSortPreset = [
     // ifInvisibleBy(name),
 ]
 
-@available(*, deprecated, renamed: "speakerLayoutSortPreset")
 public let screensharing = speakerLayoutSortPreset
 
 /// The sorting preset for layouts that don't render all participants but instead, render them in pages.

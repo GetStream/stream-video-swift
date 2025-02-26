@@ -18,7 +18,6 @@ public let speaking: StreamSortComparator<CallParticipant> = { a, b in
     return .orderedSame
 }
 
-@available(*, deprecated, renamed: "speaking")
 public let isSpeaking = speaking
 
 /// A comparator which sorts participants by screen sharing status.
