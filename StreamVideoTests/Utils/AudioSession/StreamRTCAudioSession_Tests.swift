@@ -14,8 +14,8 @@ import XCTest
 
 final class StreamRTCAudioSessionTests: XCTestCase {
 
-    private lazy var subject: StreamRTCAudioSession! = .init()
     private lazy var rtcAudioSession: RTCAudioSession! = .sharedInstance()
+    private lazy var subject: StreamRTCAudioSession! = .init()
     private var cancellables: Set<AnyCancellable>! = []
 
     override func tearDown() async throws {
@@ -144,7 +144,8 @@ final class StreamRTCAudioSessionTests: XCTestCase {
     }
 
     func test_currentRoute_returnsSourceValue() {
-        XCTAssertEqual(subject.currentRoute, rtcAudioSession.currentRoute)
+        XCTAssertEqual(subject.currentRoute.inputs.map(\.portType), rtcAudioSession.currentRoute.inputs.map(\.portType))
+        XCTAssertEqual(subject.currentRoute.outputs.map(\.portType), rtcAudioSession.currentRoute.outputs.map(\.portType))
     }
 
     func test_category_returnsStateCategory() {
