@@ -25,8 +25,8 @@ public let defaultSortPreset = [
                 publishingAudio
             ]
         )
-    )
-    // ifInvisibleBy(name),
+    ),
+    ifInvisibleBy(userId)
 ]
 
 public let defaultComparators = defaultSortPreset
@@ -44,8 +44,8 @@ public let speakerLayoutSortPreset = [
                 publishingAudio
             ]
         )
-    )
-    // ifInvisibleBy(name),
+    ),
+    ifInvisibleBy(userId)
 ]
 
 public let screensharing = speakerLayoutSortPreset
@@ -62,8 +62,8 @@ public let paginatedLayoutSortPreset = [
                 publishingAudio
             ]
         )
-    )
-    // ifInvisibleOrUnknownBy(name),
+    ),
+    ifInvisibleBy(userId)
 ]
 
 /// The sorting preset for livestreams and audio rooms.

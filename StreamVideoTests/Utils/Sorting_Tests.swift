@@ -76,8 +76,8 @@ final class Sorting_Tests: XCTestCase {
     func test_screenSharing_allSharing() {
         assertSort(
             [
-                .dummy(isScreenSharing: true),
-                .dummy(isScreenSharing: true)
+                .dummy(userId: "A", isScreenSharing: true),
+                .dummy(userId: "B", isScreenSharing: true)
             ],
             comparator: combineComparators(speakerLayoutSortPreset),
             expectedTransformer: { [$0[0], $0[1]] }
@@ -88,8 +88,8 @@ final class Sorting_Tests: XCTestCase {
     func test_screenSharing_noSharing() {
         assertSort(
             [
-                .dummy(isScreenSharing: false),
-                .dummy(isScreenSharing: false)
+                .dummy(userId: "A", isScreenSharing: false),
+                .dummy(userId: "B", isScreenSharing: false)
             ],
             comparator: combineComparators(speakerLayoutSortPreset),
             expectedTransformer: { [$0[0], $0[1]] }
@@ -709,24 +709,28 @@ final class Sorting_Tests: XCTestCase {
         assertSort(
             [
                 .dummy(
+                    userId: "A",
                     hasAudio: true,
                     showTrack: false,
                     isSpeaking: true,
                     isDominantSpeaker: false
                 ),
                 .dummy(
+                    userId: "B",
                     hasAudio: true,
                     showTrack: true,
                     isSpeaking: true,
                     isDominantSpeaker: false
                 ),
                 .dummy(
+                    userId: "C",
                     hasAudio: true,
                     showTrack: true,
                     isSpeaking: true,
                     isDominantSpeaker: false
                 ),
                 .dummy(
+                    userId: "D",
                     hasAudio: true,
                     showTrack: false,
                     isSpeaking: true,
