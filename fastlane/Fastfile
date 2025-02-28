@@ -699,7 +699,7 @@ lane :validate_public_interface do
   next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
 
   analyser = 'interface-analyser'
-  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0.5/interface-analyser")
+  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/v1.0.7/interface-analyser")
   sh("chmod +x #{analyser}")
 
   sh("./#{analyser} analysis ../Sources/ ../public_interface_current.json")
