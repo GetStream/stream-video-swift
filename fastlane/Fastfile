@@ -696,43 +696,37 @@ lane :copyright do
 end
 
 lane :validate_public_interface do
-  # next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
+  next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
 
   analyser = 'interface-analyser'
-  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0/interface-analyser")
-  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0/interface-analyser_interface-analyser.bundle.zip")
-  sh("unzip interface-analyser_interface-analyser.bundle.zip")
+  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0.5/interface-analyser")
   sh("chmod +x #{analyser}")
-  sh("chmod +x interface-analyser_interface-analyser.bundle/diff.sh")
 
-  sh("./#{analyser} analysis ../Sources/ ../public_interface_current.resolved")
+  sh("./#{analyser} analysis ../Sources/ ../public_interface_current.json")
 
   target_branch = current_branch.include?('release/') ? 'main' : 'develop'
   sh("git fetch origin #{target_branch}")
   sh("git checkout #{target_branch}")
-  sh("./#{analyser} analysis ../Sources/ ../public_interface_previous.resolved")
+  sh("./#{analyser} analysis ../Sources/ ../public_interface_previous.json")
 
   # Run diff
   report_path = '../report.md'
-  sh("./#{analyser} diff ../public_interface_current.resolved ../public_interface_previous.resolved #{report_path}")
+  sh("./#{analyser} diff ../public_interface_current.json ../public_interface_previous.json #{report_path}")
 
   # Check if report.md exists and is non-zero in size
   diff =
     if File.exist?(report_path) && File.size(report_path) > 0
       File.read(report_path).strip
     else
-      'No changes have been made to the public interface'
+      '🚀 No changes affecting the public interface.'
     end
 
   # Generate markdown table for the PR comment
-  table_header = '## Public Interface'
-  markdown_table = "#{table_header}\n#{diff}"
-
-  # Print table to console
-  FastlaneCore::PrintTable.print_values(title: table_header, config: { changes: diff })
+  header = '## Public Interface'
+  content = "#{header}\n#{diff}"
 
   # Post PR comment if running in CI
-  pr_comment(text: markdown_table, edit_last_comment_with_text: table_header) if is_ci
+  pr_comment(text: content, edit_last_comment_with_text: header) if is_ci
 end
 
 lane :show_frameworks_sizes do |options|

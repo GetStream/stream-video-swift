@@ -144,7 +144,7 @@ public class CallState: ObservableObject {
     ///            disconnection due to network issues occurs.
     @Published public internal(set) var disconnectionError: Error?
     
-    var sortComparators = defaultComparators {
+    var sortComparators = defaultSortPreset {
         didSet {
             Task { @MainActor in
                 didUpdate(participants)
