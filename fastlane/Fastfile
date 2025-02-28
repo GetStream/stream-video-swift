@@ -699,7 +699,7 @@ lane :validate_public_interface do
   next unless is_check_required(sources: sources_matrix[:public_interface], force_check: @force_check)
 
   analyser = 'interface-analyser'
-  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0.4/interface-analyser")
+  sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/1.0.5/interface-analyser")
   sh("chmod +x #{analyser}")
 
   sh("./#{analyser} analysis ../Sources/ ../public_interface_current.json")
@@ -718,15 +718,12 @@ lane :validate_public_interface do
     if File.exist?(report_path) && File.size(report_path) > 0
       File.read(report_path).strip
     else
-      'No changes have been made to the public interface'
+      '🚀 No changes affecting the public interface.'
     end
 
   # Generate markdown table for the PR comment
   header = '## Public Interface'
   content = "#{header}\n#{diff}"
-
-  # Print table to console
-  FastlaneCore::PrintTable.print_values(title: header, config: { changes: diff })
 
   # Post PR comment if running in CI
   pr_comment(text: content, edit_last_comment_with_text: header) if is_ci
