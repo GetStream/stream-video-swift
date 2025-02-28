@@ -152,8 +152,8 @@ jobs:
       with:
         fetch-depth: 100
     - uses: ./.github/actions/bootstrap
-    # - name: Public Interface Validation
-    #   run: bundle exec fastlane validate_public_interface
+    - name: Public Interface Validation
+      run: bundle exec fastlane validate_public_interface
     - name: Run Danger
       run: bundle exec danger
     - name: Run Fastlane Linting
