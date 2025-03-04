@@ -23,7 +23,7 @@ env:
 
 jobs:
   deploy:
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
