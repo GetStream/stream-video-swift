@@ -13,29 +13,6 @@ import Intents
 
 @MainActor
 fileprivate func content() {
-    container {
-        @Injected(\.callKitAdapter) var callKitAdapter
-
-        callKitAdapter.availabilityPolicy = .always
-    }
-
-    container {
-        @Injected(\.callKitAdapter) var callKitAdapter
-
-        callKitAdapter.availabilityPolicy = .regionBased
-    }
-
-    container {
-        struct MyCustomAvailabilityPolicy: CallKitAvailabilityPolicyProtocol {
-            var isAvailable: Bool {
-                // Example: Enable CallKit only for premium users
-                return UserManager.currentUser?.isPremium == true
-            }
-        }
-
-        @Injected(\.callKitAdapter) var callKitAdapter
-        callKitAdapter.availabilityPolicy = .custom(MyCustomAvailabilityPolicy())
-    }
 
     container {
         @Injected(\.callKitAdapter) var callKitAdapter
@@ -80,23 +57,15 @@ fileprivate func content() {
 
     container {
         struct MyCustomView: View {
-            @Injected(\.streamVideo) var streamVideo
             @Injected(\.callKitAdapter) var callKitAdapter
-            @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
-
+            @Injected(\.sounds) var sounds
             var body: some View {
-                Button {
-                    let deviceToken = callKitPushNotificationAdapter.deviceToken
-                    if !deviceToken.isEmpty {
-                        Task {
-                            // Unregister the device token
-                            try await streamVideo.deleteDevice(id: deviceToken)
-                        }
-                    }
-                    // Perform any other logout operations
-                    callKitAdapter.streamVideo = nil
-                } label: {
-                    Text("Logout")
+                EmptyView() // Your content goes here.
+                .onAppear {
+                    // Here we register for incomingCalls and provide
+                    // a logo as we did on the previous example
+                    // Provide the ringtone to use when a CallKit call is ringing
+                    callKitAdapter.ringtoneSound = sounds.incomingCallSound
                 }
             }
         }
@@ -123,6 +92,68 @@ fileprivate func content() {
                 }
             }
         }
+    }
+
+    asyncContainer {
+        let call = streamVideo.call(callType: "default", callId: UUID().uuidString)
+        let result = try await call.create(
+            memberIds: memberIds,
+            custom: ["display_name": .string("My awesome group")],
+            ring: true
+        )
+    }
+
+    container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+        callKitAdapter.callSettings = CallSettings(audioOn: true, videoOn: false)
+    }
+
+    container {
+        struct MyCustomView: View {
+            @Injected(\.streamVideo) var streamVideo
+            @Injected(\.callKitAdapter) var callKitAdapter
+            @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
+
+            var body: some View {
+                Button {
+                    let deviceToken = callKitPushNotificationAdapter.deviceToken
+                    if !deviceToken.isEmpty {
+                        Task {
+                            // Unregister the device token
+                            try await streamVideo.deleteDevice(id: deviceToken)
+                        }
+                    }
+                    // Perform any other logout operations
+                    callKitAdapter.streamVideo = nil
+                } label: {
+                    Text("Logout")
+                }
+            }
+        }
+    }
+
+    container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+
+        callKitAdapter.availabilityPolicy = .always
+    }
+
+    container {
+        @Injected(\.callKitAdapter) var callKitAdapter
+
+        callKitAdapter.availabilityPolicy = .regionBased
+    }
+
+    container {
+        struct MyCustomAvailabilityPolicy: CallKitAvailabilityPolicyProtocol {
+            var isAvailable: Bool {
+                // Example: Enable CallKit only for premium users
+                return UserManager.currentUser?.isPremium == true
+            }
+        }
+
+        @Injected(\.callKitAdapter) var callKitAdapter
+        callKitAdapter.availabilityPolicy = .custom(MyCustomAvailabilityPolicy())
     }
 
     container {
