@@ -65,98 +65,61 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @ViewBuilder
     private var sharePromptView: some View {
-        if isSharePromptVisible {
-            VStack {
-                Spacer()
+        VStack {
+            Spacer()
 
-                Group {
-                    VStack(spacing: 16) {
+            Group {
+                VStack(spacing: 16) {
+                    Button {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            isSharePromptVisible.toggle()
+                        }
+                    } label: {
                         HStack {
                             Text("Your Meeting is live!")
 
                             Spacer()
 
-                            Button {
-                                isSharePromptVisible = false
-                            } label: {
-                                Text(Image(systemName: "xmark"))
-                            }
+                            Text(
+                                Image(
+                                    systemName: isSharePromptVisible ? "chevron.down" : "chevron.up"
+                                )
+                            )
                         }
                         .foregroundColor(appearance.colors.text)
                         .font(appearance.fonts.title3.bold())
-
-                        Button {
-                            isInviteViewVisible = true
-                        } label: {
-                            HStack {
-                                Label(
-                                    title: { Text("Add Others") },
-                                    icon: { Image(systemName: "person.fill.badge.plus") }
-                                )
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal)
-                        }
-                        .frame(height: 40)
-                        .buttonStyle(.plain)
-                        .foregroundColor(appearance.colors.text)
-                        .background(appearance.colors.accentBlue)
-                        .clipShape(Capsule())
-                        .frame(maxWidth: .infinity)
-
-                        Text("Or share this call ID with the others you want in the meeting")
-                            .font(.body)
-                            .foregroundColor(Color(appearance.colors.textLowEmphasis))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        if !callId.isEmpty {
-                            HStack {
-                                Text("Call ID:")
-                                    .foregroundColor(Color(appearance.colors.textLowEmphasis))
-
-                                Button {
-                                    UIPasteboard.general.string = callLink
-                                } label: {
-                                    HStack {
-
-                                        Text("\(callId)")
-                                            .foregroundColor(appearance.colors.onlineIndicatorColor)
-                                            .lineLimit(1)
-                                            .minimumScaleFactor(0.5)
-
-                                        Text(Image(systemName: "doc.on.clipboard"))
-                                            .foregroundColor(Color(appearance.colors.textLowEmphasis))
-
-                                        Spacer()
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            .font(.body)
-                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                }
-                .background(Color(appearance.colors.participantBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .sheet(isPresented: $isInviteViewVisible) {
-                    NavigationView {
-                        InviteParticipantsView(
-                            inviteParticipantsShown: $isInviteViewVisible,
-                            currentParticipants: viewModel.participants,
-                            call: viewModel.call
-                        )
+
+                    if isSharePromptVisible {
+                        Group {
+                            inviterOthersView
+                            if !callId.isEmpty {
+                                copyLinkView
+                                qrCodeView
+                            }
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
-                    .navigationViewStyle(.stack)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
             }
-            .presentsMoreControls(viewModel: viewModel)
-            .alignedToReadableContentGuide()
-            .padding(.bottom)
-        } else {
-            EmptyView()
+            .background(Color(appearance.colors.participantBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .sheet(isPresented: $isInviteViewVisible) {
+                NavigationView {
+                    InviteParticipantsView(
+                        inviteParticipantsShown: $isInviteViewVisible,
+                        currentParticipants: viewModel.participants,
+                        call: viewModel.call
+                    )
+                }
+                .navigationViewStyle(.stack)
+            }
         }
+        .presentsMoreControls(viewModel: viewModel)
+        .alignedToReadableContentGuide()
+        .padding(.bottom)
     }
 
     private var callLink: String {
@@ -172,5 +135,89 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     private var callId: String {
         viewModel.call?.callId ?? ""
+    }
+
+    @ViewBuilder
+    private var inviterOthersView: some View {
+        VStack {
+            Text("Or share this call ID with the others you want in the meeting")
+                .font(.body)
+                .foregroundColor(Color(appearance.colors.textLowEmphasis))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button {
+                isInviteViewVisible = true
+            } label: {
+                HStack {
+                    Label(
+                        title: { Text("Add Others") },
+                        icon: { Image(systemName: "person.fill.badge.plus") }
+                    )
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal)
+            }
+            .frame(height: 40)
+            .buttonStyle(.plain)
+            .foregroundColor(appearance.colors.text)
+            .background(appearance.colors.accentBlue)
+            .clipShape(Capsule())
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    @ViewBuilder
+    private var copyLinkView: some View {
+        VStack {
+            Text("Share the link")
+                .font(appearance.fonts.title3)
+                .foregroundColor(appearance.colors.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text("Click the button below to copy the call link:")
+                .multilineTextAlignment(.leading)
+                .font(appearance.fonts.body)
+                .foregroundColor(Color(appearance.colors.textLowEmphasis))
+
+            Button {
+                UIPasteboard.general.string = callLink
+            } label: {
+                HStack {
+                    Label(
+                        title: { Text("Copy invite link") },
+                        icon: { Image(systemName: "doc.on.clipboard") }
+                    )
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal)
+            }
+            .frame(height: 40)
+            .buttonStyle(.plain)
+            .foregroundColor(appearance.colors.text)
+            .background(appearance.colors.accentBlue)
+            .clipShape(Capsule())
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    @ViewBuilder
+    private var qrCodeView: some View {
+        VStack {
+            Text("Test on mobile")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .font(appearance.fonts.title3)
+                .foregroundColor(appearance.colors.text)
+
+            HStack {
+                Text("To test on a mobile device, scan the QR Code:")
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity)
+                    .font(appearance.fonts.body)
+                    .foregroundColor(Color(appearance.colors.textLowEmphasis))
+
+                QRCodeView(text: callLink)
+                    .frame(width: 100, height: 100, alignment: .center)
+            }
+        }
     }
 }
