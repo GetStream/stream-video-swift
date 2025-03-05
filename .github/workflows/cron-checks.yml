@@ -46,10 +46,10 @@ jobs:
             os: macos-15
             device: "iPhone 16 Pro"
             setup_runtime: false
-          - ios: 17.2
-            xcode: 15.3
-            os: macos-14
-            device: "iPhone 14 Pro"
+          - ios: 17.5
+            xcode: 15.4
+            os: macos-15
+            device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
             xcode: 15.3
@@ -129,10 +129,10 @@ jobs:
             os: macos-15
             device: "iPhone 16 Pro"
             setup_runtime: false
-          - ios: 17.4
+          - ios: 17.5
             xcode: 15.4
-            os: macos-14
-            device: "iPhone 14 Pro"
+            os: macos-15
+            device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
             xcode: 15.3
