@@ -24,7 +24,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         qos: .userInitiated
     )
     private(set) var onTokenUpdate: UserTokenUpdater?
-    
+
     init(
         urlSession: URLSession,
         tokenProvider: UserTokenProvider? = nil

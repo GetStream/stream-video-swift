@@ -4,7 +4,7 @@
 
 import Foundation
 
-class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
+final class URLSessionWebSocketEngine: NSObject, WebSocketEngine, @unchecked Sendable {
     private weak var task: URLSessionWebSocketTask? {
         didSet {
             oldValue?.cancel()
@@ -31,6 +31,10 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         super.init()
     }
 
+    deinit {
+        disconnect()
+    }
+
     func connect() {
         urlSessionDelegateHandler = makeURLSessionDelegateHandler()
 
@@ -41,7 +45,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         )
 
         log.debug(
-            "Making Websocket upgrade request: \(String(describing: request.url?.absoluteString))\n"
+            "Making Websocket upgrade request: \(request.url?.absoluteString)\n"
                 + "Headers:\n\(String(describing: request.allHTTPHeaderFields))\n"
                 + "Query items:\n\(request.queryItems.prettyPrinted)",
             subsystems: .webSocket
@@ -86,6 +90,8 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
     func sendPing() {
         task?.sendPing { _ in }
     }
+
+    // MARK: - Private Helpers
 
     private func send(data: Data) {
         let message: URLSessionWebSocketTask.Message = .data(data)
@@ -135,13 +141,11 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
     private func makeURLSessionDelegateHandler() -> URLSessionDelegateHandler {
         let urlSessionDelegateHandler = URLSessionDelegateHandler()
         urlSessionDelegateHandler.onOpen = { [weak self] _ in
-            self?.callbackQueue.async {
-                self?.delegate?.webSocketDidConnect()
-            }
+            self?.performDelegateOperation { $0?.webSocketDidConnect() }
         }
 
         urlSessionDelegateHandler.onClose = { [weak self] closeCode, reason in
-            var error: WebSocketEngineError?
+            let error: WebSocketEngineError?
 
             if let reasonData = reason, let reasonString = String(data: reasonData, encoding: .utf8) {
                 error = WebSocketEngineError(
@@ -150,11 +154,11 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                     engineError: nil
                 )
                 log.error("WebSocket onClose", subsystems: .webSocket, error: error)
+            } else {
+                error = nil
             }
 
-            self?.callbackQueue.async { [weak self] in
-                self?.delegate?.webSocketDidDisconnect(error: error)
-            }
+            self?.performDelegateOperation { $0?.webSocketDidDisconnect(error: error) }
         }
 
         urlSessionDelegateHandler.onCompletion = { [weak self] error in
@@ -174,12 +178,16 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         return urlSessionDelegateHandler
     }
 
-    deinit {
-        disconnect()
+    private func performDelegateOperation(
+        _ operation: @Sendable @escaping (WebSocketEngineDelegate?) -> Void
+    ) {
+        callbackQueue.async { [weak delegate] in
+            operation(delegate)
+        }
     }
 }
 
-class URLSessionDelegateHandler: NSObject, URLSessionDataDelegate, URLSessionWebSocketDelegate {
+final class URLSessionDelegateHandler: NSObject, URLSessionDataDelegate, URLSessionWebSocketDelegate, @unchecked Sendable {
     var onOpen: ((_ protocol: String?) -> Void)?
     var onClose: ((_ code: URLSessionWebSocketTask.CloseCode, _ reason: Data?) -> Void)?
     var onCompletion: ((Error?) -> Void)?

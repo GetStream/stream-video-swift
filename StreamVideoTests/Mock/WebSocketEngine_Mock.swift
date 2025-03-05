@@ -5,7 +5,7 @@
 import Foundation
 @testable import StreamVideo
 
-final class WebSocketEngine_Mock: WebSocketEngine {
+final class WebSocketEngine_Mock: WebSocketEngine, @unchecked Sendable {
 
     var request: URLRequest
     var sessionConfiguration: URLSessionConfiguration

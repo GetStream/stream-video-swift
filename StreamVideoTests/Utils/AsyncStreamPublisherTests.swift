@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import XCTest
 
-final class AsyncStreamPublisherTests: XCTestCase {
+final class AsyncStreamPublisherTests: XCTestCase, @unchecked Sendable {
     func test_publishesElementsFromAsyncStream() {
         let expectation = XCTestExpectation(description: "Publisher emits all values")
         let asyncStream = AsyncStream<Int> { continuation in

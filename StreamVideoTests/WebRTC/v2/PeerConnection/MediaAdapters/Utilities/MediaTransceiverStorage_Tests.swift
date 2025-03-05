@@ -6,7 +6,7 @@
 import StreamWebRTC
 import XCTest
 
-final class MediaTransceiverStorage_Tests: XCTestCase {
+final class MediaTransceiverStorage_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var factory: PeerConnectionFactory! = .mock()
     private lazy var trackA: RTCMediaStreamTrack! = factory.mockVideoTrack(forScreenShare: false)

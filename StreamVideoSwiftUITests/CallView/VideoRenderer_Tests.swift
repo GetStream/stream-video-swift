@@ -9,20 +9,20 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class VideoRenderer_Tests: XCTestCase {
+final class VideoRenderer_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var thermalStateSubject: PassthroughSubject<ProcessInfo.ThermalState, Never>! = .init()
     private lazy var mockThermalStateObserver: MockThermalStateObserver! = .init()
     private lazy var maximumFramesPerSecond: Int! = UIScreen.main.maximumFramesPerSecond
     private lazy var subject: VideoRenderer! = .init(frame: .zero)
 
-    override func tearDown() {
+    override func tearDown() async throws {
         InjectedValues[\.thermalStateObserver] = ThermalStateObserver { .nominal }
         thermalStateSubject = nil
         mockThermalStateObserver = nil
         maximumFramesPerSecond = nil
         subject = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - preferredFramesPerSecond
@@ -70,8 +70,8 @@ final class VideoRenderer_Tests: XCTestCase {
         _ = subject
         thermalStateSubject.send(thermalState)
 
-        await fulfillment(file: file, line: line) {
-            [subject] in subject?.preferredFramesPerSecond == Int(expected)
+        await fulfilmentInMainActor { [subject] in
+            subject?.preferredFramesPerSecond == Int(expected)
         }
     }
 }

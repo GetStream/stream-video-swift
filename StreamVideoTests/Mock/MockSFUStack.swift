@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 
-struct MockSFUStack {
+struct MockSFUStack: @unchecked Sendable {
     var webSocket: MockWebSocketClient
     let webSocketFactory: MockWebSocketClientFactory
     let service: MockSignalServer

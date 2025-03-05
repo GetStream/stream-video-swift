@@ -3,13 +3,13 @@
 //
 
 import SnapshotTesting
-import StreamSwiftTestHelpers
+@preconcurrency import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class ScreenSharingView_Tests: StreamVideoUITestCase {
-    
+final class ScreenSharingView_Tests: StreamVideoUITestCase, @unchecked Sendable {
+
     @MainActor
     func test_screenSharingView_snapshot() async throws {
         let viewModel = MockCallViewModel()

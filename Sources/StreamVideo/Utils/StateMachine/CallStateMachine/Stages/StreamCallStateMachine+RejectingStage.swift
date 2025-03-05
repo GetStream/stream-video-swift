@@ -21,7 +21,7 @@ extension StreamCallStateMachine.Stage {
 extension StreamCallStateMachine.Stage {
 
     /// A class representing the rejecting stage in the `StreamCallStateMachine`.
-    final class RejectingStage: StreamCallStateMachine.Stage {
+    final class RejectingStage: StreamCallStateMachine.Stage, @unchecked Sendable {
         @Injected(\.callCache) private var callCache
 
         let actionBlock: () async throws -> RejectCallResponse

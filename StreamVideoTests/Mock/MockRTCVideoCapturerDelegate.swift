@@ -4,7 +4,7 @@
 
 import StreamWebRTC
 
-final class MockRTCVideoCapturerDelegate: NSObject, RTCVideoCapturerDelegate {
+final class MockRTCVideoCapturerDelegate: NSObject, RTCVideoCapturerDelegate, @unchecked Sendable {
     private(set) var didCaptureWasCalledWith: (capturer: RTCVideoCapturer, frame: RTCVideoFrame)?
 
     func capturer(

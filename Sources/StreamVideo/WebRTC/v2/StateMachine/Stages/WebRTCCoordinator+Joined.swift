@@ -440,13 +440,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
 
-                    do {
-                        try await updateSubscriptions()
-                        /// Force a participant update to ensure the UI reflects the new policy.
-                        await stateAdapter.enqueue { $0 }
-                    } catch {
-                        transitionDisconnectOrError(error)
-                    }
+                    await updateSubscriptions()
+                    /// Force a participant update to ensure the UI reflects the new policy.
+                    await stateAdapter.enqueue { $0 }
                 }
                 .store(in: disposableBag)
         }

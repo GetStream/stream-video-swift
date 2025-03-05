@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-class CallController_Mock: CallController {
+class CallController_Mock: CallController, @unchecked Sendable {
 
     let mockResponseBuilder = MockResponseBuilder()
 

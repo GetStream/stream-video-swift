@@ -6,15 +6,15 @@ import Foundation
 @testable import StreamVideo
 import protocol StreamVideo.Timer
 
-final class EventBatcher_Mock: EventBatcher {
+final class EventBatcher_Mock: EventBatcher, @unchecked Sendable {
     var currentBatch: [WrappedEvent] = []
 
-    let handler: (_ batch: [WrappedEvent], _ completion: @escaping () -> Void) -> Void
+    let handler: @Sendable(_ batch: [WrappedEvent], _ completion: @escaping @Sendable() -> Void) -> Void
 
     init(
         period: TimeInterval = 0,
         timerType: Timer.Type = DefaultTimer.self,
-        handler: @escaping (_ batch: [WrappedEvent], _ completion: @escaping () -> Void) -> Void
+        handler: @escaping @Sendable(_ batch: [WrappedEvent], _ completion: @escaping @Sendable() -> Void) -> Void
     ) {
         self.handler = handler
     }

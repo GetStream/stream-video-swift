@@ -14,7 +14,7 @@ import Foundation
 ///
 /// This filter is available on iOS 15.0 and later.
 @available(iOS 15.0, *)
-public final class BlurBackgroundVideoFilter: VideoFilter {
+public final class BlurBackgroundVideoFilter: VideoFilter, @unchecked Sendable {
 
     private let backgroundImageFilterProcessor = BackgroundImageFilterProcessor()
 

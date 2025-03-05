@@ -35,6 +35,7 @@ struct ParticipantEventsNotificationViewModifier: ViewModifier {
 extension View {
 
     /// A viewModifier that displays a notification when a participant event(join or left) occurs.
+    @MainActor
     @ViewBuilder
     public func presentParticipantEventsNotification(
         viewModel: CallViewModel

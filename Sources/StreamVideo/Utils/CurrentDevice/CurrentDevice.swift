@@ -22,7 +22,7 @@ import UIKit
 ///     // Configure layouts for phone
 /// }
 /// ```
-final class CurrentDevice: Sendable {
+final class CurrentDevice: @unchecked Sendable {
 
     /// An enumeration describing the type of device. Each case can guide UI
     /// or behavior adjustments. For example, `.phone` might use a phone layout.
@@ -44,34 +44,38 @@ final class CurrentDevice: Sendable {
     }
 
     /// The identified `DeviceType` for the current environment.
-    let deviceType: DeviceType
+    private(set) var deviceType: DeviceType = .unspecified
+    private(set) var systemVersion: String = "-"
 
     /// Creates a `CurrentDevice` by inspecting the user interface idiom.
     /// - Important: On platforms where UIKit is unavailable, the type defaults
     ///   to `.mac` (AppKit) or `.unspecified`.
 
     private init() {
-        #if canImport(UIKit)
-        deviceType = switch UIDevice.current.userInterfaceIdiom {
-        case .unspecified: .unspecified
-        case .phone: .phone
-        case .pad: .pad
-        case .tv: .tv
-        case .carPlay: .carPlay
-        case .mac: .mac
-        case .vision: .vision
-        @unknown default: .unspecified
+        Task { @MainActor in
+            self.systemVersion = UIDevice.current.systemVersion
+            #if canImport(UIKit)
+            self.deviceType = switch UIDevice.current.userInterfaceIdiom {
+            case .unspecified: .unspecified
+            case .phone: .phone
+            case .pad: .pad
+            case .tv: .tv
+            case .carPlay: .carPlay
+            case .mac: .mac
+            case .vision: .vision
+            @unknown default: .unspecified
+            }
+            #elseif canImport(AppKit)
+            deviceType = .mac
+            #else
+            deviceType = .unspecified
+            #endif
         }
-        #elseif canImport(AppKit)
-        deviceType = .mac
-        #else
-        deviceType = .unspecified
-        #endif
     }
 }
 
 extension CurrentDevice: InjectionKey {
-    static var currentValue: CurrentDevice = .init()
+    nonisolated(unsafe) static var currentValue: CurrentDevice = .init()
 }
 
 extension InjectedValues {

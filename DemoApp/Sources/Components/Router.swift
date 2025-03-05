@@ -239,7 +239,7 @@ final class Router: ObservableObject {
         }
     }
 
-    private func refreshToken(
+    private nonisolated func refreshToken(
         for userId: String,
         _ completionHandler: @escaping (Result<UserToken, Error>) -> Void
     ) {

@@ -6,7 +6,7 @@ import Combine
 @testable import StreamVideo
 import StreamWebRTC
 
-struct MockRTCPeerConnectionCoordinatorStack {
+struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
 
     let sessionId: String
     let peerConnection: MockRTCPeerConnection

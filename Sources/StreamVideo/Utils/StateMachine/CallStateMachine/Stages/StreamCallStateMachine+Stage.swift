@@ -6,7 +6,7 @@ import Foundation
 
 extension StreamCallStateMachine {
     /// A class representing a stage in the `StreamCallStateMachine`.
-    class Stage: StreamStateMachineStage {
+    class Stage: StreamStateMachineStage, @unchecked Sendable {
 
         /// Enumeration of possible stage identifiers.
         enum ID: Hashable, CaseIterable {

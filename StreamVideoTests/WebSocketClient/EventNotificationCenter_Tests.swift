@@ -6,7 +6,7 @@ import CoreData
 @testable import StreamVideo
 import XCTest
 
-final class EventNotificationCenter_Tests: XCTestCase {
+final class EventNotificationCenter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_init_worksCorrectly() {
         // Create middlewares
@@ -97,7 +97,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let events = [TestEvent(), TestEvent(), TestEvent(), TestEvent()]
 
         // Feed events that should be posted and catch the completion
-        var completionCalled = false
+        nonisolated(unsafe) var completionCalled = false
         center.process(events.map { .internalEvent($0) }, postNotifications: true) {
             completionCalled = true
         }
@@ -120,7 +120,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let events = [TestEvent(), TestEvent(), TestEvent(), TestEvent()]
 
         // Feed events that should not be posted and catch the completion
-        var completionCalled = false
+        nonisolated(unsafe) var completionCalled = false
         center.process(events.map { .internalEvent($0) }, postNotifications: false) {
             completionCalled = true
         }
@@ -145,7 +145,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let testEvent = TestEvent()
 
         // Setup event observer
-        var observerTriggered = false
+        nonisolated(unsafe) var observerTriggered = false
 
         let observer = center.addObserver(
             forName: .NewEventReceived,

@@ -38,7 +38,7 @@ extension Event {
 }
 
 /// An internal object that we use to wrap the kind of events that are handled by WS: SFU and coordinator events
-internal enum WrappedEvent: Event {
+internal enum WrappedEvent: Event, Sendable {
     case internalEvent(Event)
     case coordinatorEvent(VideoEvent)
     case sfuEvent(Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload)

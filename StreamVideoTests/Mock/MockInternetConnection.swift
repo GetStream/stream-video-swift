@@ -5,7 +5,7 @@
 import Combine
 @testable import StreamVideo
 
-final class MockInternetConnection: InternetConnectionProtocol {
+final class MockInternetConnection: InternetConnectionProtocol, @unchecked Sendable {
 
     let subject: CurrentValueSubject<InternetConnection.Status, Never> = .init(.available(.great))
 

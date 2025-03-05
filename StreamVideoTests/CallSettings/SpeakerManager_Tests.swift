@@ -100,12 +100,12 @@ final class SpeakerManager_Tests: XCTestCase, @unchecked Sendable {
         _ = streamVideo
         let call = Call.dummy()
         await wait(for: 0.5)
-        await fulfillment { call.speaker.status == .enabled && call.speaker.status == .enabled }
+        await fulfilmentInMainActor { call.speaker.status == .enabled && call.speaker.status == .enabled }
         call.state.update(callSettings: .init(speakerOn: false, audioOutputOn: false))
-        await fulfillment { call.speaker.status == .disabled && call.speaker.status == .disabled }
+        await fulfilmentInMainActor { call.speaker.status == .disabled && call.speaker.status == .disabled }
 
         try await call.speaker.toggleSpeakerPhone()
 
-        await fulfillment { call.speaker.status == .enabled }
+        await fulfilmentInMainActor { call.speaker.status == .enabled }
     }
 }

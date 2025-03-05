@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
+final class MicrophoneCheckView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     func test_microphoneCheckView_withAudioLevels_snapshot() throws {
         for count in 0...5 {

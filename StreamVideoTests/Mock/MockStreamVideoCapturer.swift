@@ -48,7 +48,7 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
             case let .setCameraPosition(position):
                 return position
             case let .setVideoFilter(videoFilter):
-                return videoFilter
+                return videoFilter!
             case let .updateCaptureQuality(dimensions):
                 return dimensions
             case let .focus(point):
