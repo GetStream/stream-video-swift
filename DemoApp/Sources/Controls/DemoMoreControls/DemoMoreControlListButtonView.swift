@@ -7,7 +7,7 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
-struct DemoMoreControlListButtonView: View {
+struct DemoMoreControlListButtonView<Icon: View>: View {
 
     @Injected(\.colors) var colors
 
@@ -15,7 +15,7 @@ struct DemoMoreControlListButtonView: View {
     var action: () -> Void
     var label: String
     var disabled: Bool = false
-    var icon: () -> Image
+    var icon: () -> Icon
 
     var body: some View {
         Button {
