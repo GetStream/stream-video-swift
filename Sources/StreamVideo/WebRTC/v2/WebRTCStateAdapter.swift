@@ -513,6 +513,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId)
             {
                 newParticipant = newParticipant.withUpdated(track: nil)
+            } else {
+                if newParticipant.track?.isEnabled == false {
+                    /// Specifically activate any track we have other than the current user
+                    newParticipant.track?.isEnabled = true
+                }
             }
 
             partialResult[entry.key] = newParticipant
