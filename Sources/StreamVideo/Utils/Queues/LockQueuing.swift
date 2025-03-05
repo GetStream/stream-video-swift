@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Types conforming to `LockQueuing` provide thread-safe access to resources
 /// by executing blocks of code within a lock, ensuring mutual exclusion.
-protocol LockQueuing {
+protocol LockQueuing: Sendable {
 
     /// Executes a block within a lock, ensuring exclusive access.
     ///

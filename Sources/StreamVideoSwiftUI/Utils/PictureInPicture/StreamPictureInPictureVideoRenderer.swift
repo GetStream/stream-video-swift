@@ -120,47 +120,51 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     // MARK: - Rendering lifecycle
 
     /// This method is being called from WebRTC and asks the container to set its size to the track's size.
-    func setSize(_ size: CGSize) {
-        trackSize = size
+    nonisolated func setSize(_ size: CGSize) {
+        Task { @MainActor in
+            trackSize = size
+        }
     }
 
-    func renderFrame(_ frame: RTCVideoFrame?) {
-        guard let frame = frame else {
-            return
-        }
+    nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
+        Task { @MainActor in
+            guard let frame = frame else {
+                return
+            }
 
-        // Update the trackSize and re-calculate rendering properties if the size
-        // has changed.
-        trackSize = .init(width: Int(frame.width), height: Int(frame.height))
+            // Update the trackSize and re-calculate rendering properties if the size
+            // has changed.
+            trackSize = .init(width: Int(frame.width), height: Int(frame.height))
 
-        logMessage(
-            .debug,
-            message: "→ Received frame with trackSize:\(trackSize)"
-        )
-
-        defer {
-            handleFrameSkippingIfRequired()
-        }
-
-        guard shouldRenderFrame else {
-            logMessage(.debug, message: "→ Skipping frame.")
-            return
-        }
-
-        if
-            let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(frame, targetSize: contentSize)?
-            .buffer as? StreamRTCYUVBuffer,
-            let sampleBuffer = yuvBuffer.sampleBuffer {
             logMessage(
                 .debug,
-                message: "➕ Buffer for trackId:\(track?.trackId ?? "n/a") added."
+                message: "→ Received frame with trackSize:\(trackSize)"
             )
-            bufferPublisher.send(sampleBuffer)
-        } else {
-            logMessage(
-                .warning,
-                message: "Failed to convert \(type(of: frame.buffer)) CMSampleBuffer."
-            )
+
+            defer {
+                handleFrameSkippingIfRequired()
+            }
+
+            guard shouldRenderFrame else {
+                logMessage(.debug, message: "→ Skipping frame.")
+                return
+            }
+
+            if
+                let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(frame, targetSize: contentSize)?
+                .buffer as? StreamRTCYUVBuffer,
+                let sampleBuffer = yuvBuffer.sampleBuffer {
+                logMessage(
+                    .debug,
+                    message: "➕ Buffer for trackId:\(track?.trackId ?? "n/a") added."
+                )
+                bufferPublisher.send(sampleBuffer)
+            } else {
+                logMessage(
+                    .warning,
+                    message: "Failed to convert \(type(of: frame.buffer)) CMSampleBuffer."
+                )
+            }
         }
     }
 

@@ -82,12 +82,14 @@ public struct HideKeyboardOnTapGesture: ViewModifier {
 
 /// Resigns first responder and hides the keyboard.
 public func resignFirstResponder() {
-    UIApplication.shared.sendAction(
-        #selector(UIResponder.resignFirstResponder),
-        to: nil,
-        from: nil,
-        for: nil
-    )
+    Task { @MainActor in
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
 }
 
 public let getStreamFirstResponderNotification = "io.getstream.inputView.becomeFirstResponder"

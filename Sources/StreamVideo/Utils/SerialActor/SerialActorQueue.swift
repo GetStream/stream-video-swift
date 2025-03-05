@@ -9,7 +9,7 @@ import Foundation
 /// `SerialActorQueue` ensures that tasks submitted to it are executed one at
 /// a time, in the order they are received. This is particularly useful for
 /// managing shared resources or maintaining a predictable task execution order.
-public final class SerialActorQueue {
+public final class SerialActorQueue: Sendable {
 
     /// The internal serial actor responsible for task execution.
     /// This actor ensures tasks are run serially.

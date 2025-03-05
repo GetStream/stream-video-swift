@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class IntDefaultValuesTests: XCTestCase {
+final class IntDefaultValuesTests: XCTestCase, @unchecked Sendable {
 
     func test_defaultFrameRate() {
         XCTAssertEqual(Int.defaultFrameRate, 30)

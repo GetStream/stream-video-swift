@@ -6,7 +6,7 @@ import CoreGraphics
 @testable import StreamVideo
 import XCTest
 
-final class CGSizeAdaptTests: XCTestCase {
+final class CGSizeAdaptTests: XCTestCase, @unchecked Sendable {
 
     func test_adjustedToFit_withZeroSize_returnsMinimumSafeSize() {
         let size = CGSize(width: 0, height: 0)

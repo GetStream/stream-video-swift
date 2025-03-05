@@ -100,7 +100,7 @@ public struct VideoRendererView: UIViewRepresentable {
 /// Extension for `VideoRendererView` to define the `Coordinator` class.
 extension VideoRendererView {
     /// A class to coordinate the `VideoRendererView` and manage its lifecycle.
-    public final class Coordinator {
+    public final class Coordinator: @unchecked Sendable {
         /// Injected dependency for accessing the video renderer pool.
         @Injected(\.videoRendererPool) private var videoRendererPool
 
@@ -110,14 +110,16 @@ extension VideoRendererView {
         private let disposableBag = DisposableBag()
 
         /// The video renderer managed by this coordinator.
-        fileprivate private(set) lazy var renderer: VideoRenderer = videoRendererPool
-            .acquireRenderer(size: .zero)
+        fileprivate let renderer: VideoRenderer
 
         /// Initializes a new instance of the coordinator.
         /// - Parameter handleRendering: A closure to handle the rendering of the video.
+        @MainActor
         init(handleRendering: ((VideoRenderer) -> Void)?) {
             self.handleRendering = handleRendering
-            _ = renderer
+            renderer = VideoRendererPool
+                .currentValue
+                .acquireRenderer(size: .zero)
             setupRendererObservation()
         }
 
@@ -135,6 +137,7 @@ extension VideoRendererView {
         // MARK: Private API
 
         /// Sets up observation for the renderer's window and superview.
+        @MainActor
         private func setupRendererObservation() {
             renderer
                 .windowPublisher

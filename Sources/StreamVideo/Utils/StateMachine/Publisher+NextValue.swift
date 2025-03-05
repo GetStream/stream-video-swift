@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-extension Publisher {
+extension Publisher where Output: Sendable {
 
     /// Retrieves the next value from the publisher after optionally skipping the initial values.
     ///

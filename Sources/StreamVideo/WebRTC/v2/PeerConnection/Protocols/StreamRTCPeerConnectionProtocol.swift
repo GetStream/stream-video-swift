@@ -6,7 +6,7 @@ import Combine
 import StreamWebRTC
 
 /// Protocol defining the interface for a WebRTC peer connection with Stream-specific functionality.
-protocol StreamRTCPeerConnectionProtocol: AnyObject {
+protocol StreamRTCPeerConnectionProtocol: AnyObject, Sendable {
     /// The remote session description of the peer connection.
     var remoteDescription: RTCSessionDescription? { get }
 

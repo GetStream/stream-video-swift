@@ -7,11 +7,11 @@ import SwiftUI
 
 /// A property wrapper type that instantiates an observable object.
 @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
-public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
+public final class BackportStateObject<ObjectType: ObservableObject & Sendable>: DynamicProperty, @unchecked Sendable
     where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
     
     /// Wrapper that helps with initialising without actually having an ObservableObject yet
-    private class ObservedObjectWrapper: ObservableObject {
+    private class ObservedObjectWrapper: ObservableObject, @unchecked Sendable {
         @PublishedObject var wrappedObject: ObjectType? = nil
         init() {}
     }
@@ -40,11 +40,13 @@ public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
     public init(wrappedValue thunk: @autoclosure @escaping () -> ObjectType) {
         self.thunk = thunk
     }
-    
-    public mutating func update() {
-        // Not sure what this does but we'll just forward it
-        _state.update()
-        _observedObject.update()
+
+    nonisolated public func update() {
+        Task { @MainActor in
+            // Not sure what this does but we'll just forward it
+            _state.update()
+            _observedObject.update()
+        }
     }
 }
 
@@ -53,7 +55,8 @@ public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
 @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
 public struct PublishedObject<Value> {
 
-    public init(wrappedValue: Value) where Value: ObservableObject, Value.ObjectWillChangePublisher == ObservableObjectPublisher {
+    public init(wrappedValue: Value) where Value: ObservableObject & Sendable,
+        Value.ObjectWillChangePublisher == ObservableObjectPublisher {
         self.wrappedValue = wrappedValue
         cancellable = nil
         _startListening = { futureSelf, wrappedValue in
@@ -70,7 +73,7 @@ public struct PublishedObject<Value> {
         startListening(to: wrappedValue)
     }
     
-    public init<V>(wrappedValue: V?) where V? == Value, V: ObservableObject,
+    public init<V>(wrappedValue: V?) where V? == Value, V: ObservableObject & Sendable,
         V.ObjectWillChangePublisher == ObservableObjectPublisher {
         self.wrappedValue = wrappedValue
         cancellable = nil
@@ -93,7 +96,7 @@ public struct PublishedObject<Value> {
         didSet { startListening(to: wrappedValue) }
     }
     
-    public static subscript<EnclosingSelf: ObservableObject>(
+    public static subscript<EnclosingSelf: ObservableObject & Sendable>(
         _enclosingInstance observed: EnclosingSelf,
         wrapped wrappedKeyPath: ReferenceWritableKeyPath<EnclosingSelf, Value>,
         storage storageKeyPath: ReferenceWritableKeyPath<EnclosingSelf, PublishedObject>
@@ -108,7 +111,7 @@ public struct PublishedObject<Value> {
         }
     }
     
-    public static subscript<EnclosingSelf: ObservableObject>(
+    public static subscript<EnclosingSelf: ObservableObject & Sendable>(
         _enclosingInstance observed: EnclosingSelf,
         projected wrappedKeyPath: KeyPath<EnclosingSelf, Publisher>,
         storage storageKeyPath: ReferenceWritableKeyPath<EnclosingSelf, PublishedObject>
@@ -124,11 +127,12 @@ public struct PublishedObject<Value> {
         init() {}
     }
     
-    private func setParent<Parent: ObservableObject>(_ parentObject: Parent)
+    private func setParent<Parent: ObservableObject & Sendable>(_ parentObject: Parent)
         where Parent.ObjectWillChangePublisher == ObservableObjectPublisher {
         guard parent.objectWillChange == nil else { return }
         parent.objectWillChange = { [weak parentObject] in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+            Task { @MainActor [weak parentObject] in
+                try? await Task.sleep(nanoseconds: 10_000_000)
                 parentObject?.objectWillChange.send()
             }
         }

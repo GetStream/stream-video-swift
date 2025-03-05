@@ -7,9 +7,9 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-class IntegrationTest: XCTestCase {
+class IntegrationTest: XCTestCase, @unchecked Sendable {
 
-    private static var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private var apiKey: String! = ""
     private var userId: String! = "thierry"

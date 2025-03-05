@@ -5,7 +5,7 @@
 import Foundation
 import StreamVideo
 
-final class MockCallKitPushNotificationAdapter: CallKitPushNotificationAdapter {
+final class MockCallKitPushNotificationAdapter: CallKitPushNotificationAdapter, @unchecked Sendable {
     private(set) var registerWasCalled = false
     private(set) var unregisterWasCalled = false
 

@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import StreamWebRTC
 
-private var _pc: RTCPeerConnection?
+private nonisolated(unsafe) var _pc: RTCPeerConnection?
 
 extension PeerConnectionFactory {
     static func mock(

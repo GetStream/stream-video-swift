@@ -393,7 +393,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 /// A key for dependency injection of an `AudioSessionProtocol` instance
 /// that represents the active call audio session.
 extension StreamAudioSession: InjectionKey {
-    static var currentValue: StreamAudioSession?
+    nonisolated(unsafe) static var currentValue: StreamAudioSession?
 }
 
 extension InjectedValues {

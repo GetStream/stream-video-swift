@@ -5,7 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
-final class CameraManager_Tests: XCTestCase {
+final class CameraManager_Tests: XCTestCase, @unchecked Sendable {
 
     func test_cameraManager_toggle() async throws {
         // Given

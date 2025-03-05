@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class IncomingCallView_Tests: StreamVideoUITestCase {
+final class IncomingCallView_Tests: StreamVideoUITestCase, @unchecked Sendable {
     
     func test_incomingCallView_snapshot() throws {
         for count in spotlightParticipants {

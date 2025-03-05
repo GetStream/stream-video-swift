@@ -50,35 +50,35 @@ public struct CallIconStyle {
 }
 
 extension CallIconStyle {
-    public static let primary = CallIconStyle(
+    public nonisolated(unsafe) static let primary = CallIconStyle(
         backgroundColor: .white,
         foregroundColor: .black,
         opacity: 1
     )
 
-    public static let secondary = CallIconStyle(
+    public nonisolated(unsafe) static let secondary = CallIconStyle(
         backgroundColor: Color(InjectedValues[\.colors].participantBackground),
         foregroundColor: .white,
         opacity: 1
     )
 
-    public static let secondaryActive = CallIconStyle(
+    public nonisolated(unsafe) static let secondaryActive = CallIconStyle(
         backgroundColor: InjectedValues[\.colors].activeSecondaryCallControl,
         foregroundColor: .white,
         opacity: 1
     )
 
-    public static let transparent = CallIconStyle(
+    public nonisolated(unsafe) static let transparent = CallIconStyle(
         backgroundColor: Color(InjectedValues[\.colors].participantBackground),
         foregroundColor: .white,
         opacity: 1
     )
-    public static let disabled = CallIconStyle(
+    public nonisolated(unsafe) static let disabled = CallIconStyle(
         backgroundColor: InjectedValues[\.colors].inactiveCallControl,
         foregroundColor: .white,
         opacity: 1
     )
-    public static let destructive = CallIconStyle(
+    public nonisolated(unsafe) static let destructive = CallIconStyle(
         backgroundColor: InjectedValues[\.colors].inactiveCallControl,
         foregroundColor: .white,
         opacity: 1

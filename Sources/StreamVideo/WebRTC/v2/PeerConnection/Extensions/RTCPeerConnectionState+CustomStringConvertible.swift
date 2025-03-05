@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// Extends `RTCPeerConnectionState` to conform to the `CustomStringConvertible` protocol.
-extension RTCPeerConnectionState: CustomStringConvertible {
+extension RTCPeerConnectionState {
     /// A textual representation of the peer connection state.
     ///
     /// This property provides a human-readable string for each possible state of an RTCPeerConnection.

@@ -11,17 +11,21 @@ import StreamWebRTC
 protocol StreamAVPictureInPictureViewControlling: AnyObject {
     
     /// The closure to call whenever the picture-in-picture window size changes.
-    var onSizeUpdate: ((CGSize) -> Void)? { get set }
+    @MainActor
+    var onSizeUpdate: (@Sendable(CGSize) -> Void)? { get set }
 
     /// The track that will be rendered on picture-in-picture window.
+    @MainActor
     var track: RTCVideoTrack? { get set }
 
     /// The preferred size for the picture-in-picture window.
     /// - Important: This should **always** be greater to ``CGSize.zero``. If not, iOS throws
     /// a cryptic error with content `PGPegasus code:-1003`
+    @MainActor
     var preferredContentSize: CGSize { get set }
 
     /// The layer that renders the incoming frames from WebRTC.
+    @MainActor
     var displayLayer: CALayer { get }
 }
 
@@ -32,13 +36,15 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
     private let contentView: StreamPictureInPictureVideoRenderer =
         .init(windowSizePolicy: StreamPictureInPictureAdaptiveWindowSizePolicy())
 
-    var onSizeUpdate: ((CGSize) -> Void)?
+    nonisolated(unsafe) var onSizeUpdate: (@Sendable(CGSize) -> Void)?
 
+    @MainActor
     var track: RTCVideoTrack? {
         get { contentView.track }
         set { contentView.track = newValue }
     }
 
+    @MainActor
     var displayLayer: CALayer { contentView.displayLayer }
 
     // MARK: - Lifecycle

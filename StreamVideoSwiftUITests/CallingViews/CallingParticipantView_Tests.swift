@@ -9,7 +9,7 @@ import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
-final class CallingParticipantView_Tests: StreamVideoUITestCase {
+final class CallingParticipantView_Tests: StreamVideoUITestCase, @unchecked Sendable {
     
     func test_callingParticipantView_snapshot() throws {
         let view = CallingParticipantView(

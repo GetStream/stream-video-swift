@@ -3,7 +3,7 @@
 //
 
 import SnapshotTesting
-import StreamSwiftTestHelpers
+@preconcurrency import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 @preconcurrency import XCTest
@@ -12,7 +12,9 @@ import StreamSwiftTestHelpers
 final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     private var mockedOrientation: StreamDeviceOrientation! = .portrait(isUpsideDown: false)
-    private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init { self.mockedOrientation }
+    private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init {
+        await self.mockedOrientation
+    }
 
     private lazy var callController: CallController_Mock! = CallController_Mock(
         defaultAPI: DefaultAPI(
@@ -37,11 +39,11 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Send
         InjectedValues[\.orientationAdapter] = orientationAdapter
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         mockedOrientation = nil
         orientationAdapter = nil
         callController = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)

@@ -9,8 +9,8 @@ extension APIError: Error {}
 extension Stream_Video_Sfu_Models_Error: Error, ReflectiveStringConvertible {}
 
 /// A Client error.
-public class ClientError: Error, ReflectiveStringConvertible {
-    public struct Location: Equatable {
+public class ClientError: Error, ReflectiveStringConvertible, @unchecked Sendable {
+    public struct Location: Equatable, Sendable {
         public let file: String
         public let line: Int
     }
@@ -18,8 +18,8 @@ public class ClientError: Error, ReflectiveStringConvertible {
     /// The file and line number which emitted the error.
     public let location: Location?
     
-    private var message: String?
-    
+    private let message: String?
+
     /// An underlying error.
     public let underlyingError: Error?
     
@@ -42,6 +42,7 @@ public class ClientError: Error, ReflectiveStringConvertible {
     ///   - line: a line source of an error.
     public init(with error: Error? = nil, _ file: StaticString = #fileID, _ line: UInt = #line) {
         underlyingError = error
+        message = error?.localizedDescription ?? nil
         location = .init(file: "\(file)", line: Int(line))
         if let aErr = error as? APIError {
             apiError = aErr
@@ -65,22 +66,22 @@ public class ClientError: Error, ReflectiveStringConvertible {
 
 extension ClientError {
     /// An unexpected error.
-    public class Unexpected: ClientError {}
-    
+    public final class Unexpected: ClientError, @unchecked Sendable {}
+
     /// An unknown error.
-    public class Unknown: ClientError {}
-    
+    public final class Unknown: ClientError, @unchecked Sendable {}
+
     /// Networking error.
-    public class NetworkError: ClientError {}
+    public final class NetworkError: ClientError, @unchecked Sendable {}
 
     /// Represents a network-related error indicating that the network is unavailable.
-    public class NetworkNotAvailable: ClientError {}
+    public final class NetworkNotAvailable: ClientError, @unchecked Sendable {}
 
     /// Permissions error.
-    public class MissingPermissions: ClientError {}
-    
+    public final class MissingPermissions: ClientError, @unchecked Sendable {}
+
     /// Invalid url error.
-    public class InvalidURL: ClientError {}
+    public final class InvalidURL: ClientError, @unchecked Sendable {}
 }
 
 // This should probably live only in the test target since it's not "true" equatable

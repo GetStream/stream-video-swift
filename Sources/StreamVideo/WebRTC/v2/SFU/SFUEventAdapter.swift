@@ -5,7 +5,7 @@
 import Foundation
 
 /// A class that adapts SFU (Selective Forwarding Unit) events to the application's state.
-final class SFUEventAdapter {
+final class SFUEventAdapter: @unchecked Sendable {
 
     /// The SFU adapter instance. Observes events when set.
     var sfuAdapter: SFUAdapter { didSet { observeEvents() } }

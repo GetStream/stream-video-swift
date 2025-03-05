@@ -77,7 +77,7 @@ struct DefaultTimer: Timer {
     }
 }
 
-private class RepeatingTimer: RepeatingTimerControl {
+private class RepeatingTimer: RepeatingTimerControl, @unchecked Sendable {
     private enum State {
         case suspended
         case resumed
