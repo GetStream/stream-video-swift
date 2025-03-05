@@ -14,6 +14,7 @@ struct AppControlsWithChat: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.chatViewModel) var chatViewModel
+    @Injected(\.currentDevice) var currentDevice
 
     private var canOpenChat: Bool
 
@@ -32,7 +33,7 @@ struct AppControlsWithChat: View {
             MoreControlsIconView(viewModel: viewModel)
 
             #if !targetEnvironment(simulator)
-            if !ProcessInfo.processInfo.isiOSAppOnMac {
+            if !ProcessInfo.processInfo.isiOSAppOnMac, currentDevice.deviceType == .pad {
                 BroadcastIconView(
                     viewModel: viewModel,
                     preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
