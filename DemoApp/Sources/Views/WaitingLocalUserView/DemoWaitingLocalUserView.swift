@@ -211,7 +211,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             HStack {
                 Text("To test on a mobile device, scan the QR Code:")
                     .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .font(appearance.fonts.body)
                     .foregroundColor(Color(appearance.colors.textLowEmphasis))
 
