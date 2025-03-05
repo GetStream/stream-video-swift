@@ -28,9 +28,6 @@ public struct CallDurationView: View {
             if duration > 0, let formattedDuration = formatter.format(duration) {
                 HStack(spacing: 4) {
                     iconView
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12)
                         .foregroundColor(foregroundColor)
 
                     TimeView(formattedDuration)
@@ -56,10 +53,16 @@ public struct CallDurationView: View {
             : colors.onlineIndicatorColor
     }
 
-    private var iconView: Image {
-        viewModel.recordingState == .recording
-            ? images.recordIcon
-            : images.secureCallIcon
+    @ViewBuilder
+    private var iconView: some View {
+        if viewModel.recordingState == .recording {
+            images.recordIcon
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 12)
+        } else {
+            EmptyView()
+        }
     }
 
     private var accessibilityIdentifier: String {

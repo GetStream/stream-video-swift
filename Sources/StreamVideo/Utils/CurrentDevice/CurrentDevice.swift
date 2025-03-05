@@ -22,11 +22,11 @@ import UIKit
 ///     // Configure layouts for phone
 /// }
 /// ```
-final class CurrentDevice: @unchecked Sendable {
+public final class CurrentDevice: @unchecked Sendable {
 
     /// An enumeration describing the type of device. Each case can guide UI
     /// or behavior adjustments. For example, `.phone` might use a phone layout.
-    enum DeviceType {
+    public enum DeviceType: Sendable {
         /// The type was not determined or is unknown.
         case unspecified
         /// The current device is an iPhone or iPod touch.
@@ -44,8 +44,8 @@ final class CurrentDevice: @unchecked Sendable {
     }
 
     /// The identified `DeviceType` for the current environment.
-    private(set) var deviceType: DeviceType = .unspecified
-    private(set) var systemVersion: String = "-"
+    public private(set) var deviceType: DeviceType = .unspecified
+    public private(set) var systemVersion: String = "-"
 
     /// Creates a `CurrentDevice` by inspecting the user interface idiom.
     /// - Important: On platforms where UIKit is unavailable, the type defaults
@@ -75,11 +75,14 @@ final class CurrentDevice: @unchecked Sendable {
 }
 
 extension CurrentDevice: InjectionKey {
-    nonisolated(unsafe) static var currentValue: CurrentDevice = .init()
+    public nonisolated(unsafe) static var currentValue: CurrentDevice = .init()
 }
 
 extension InjectedValues {
     /// Retrieves the shared `CurrentDevice` instance. This can be used to query
     /// the device type at runtime.
-    var currentDevice: CurrentDevice { Self[CurrentDevice.self] }
+    public var currentDevice: CurrentDevice {
+        get { Self[CurrentDevice.self] }
+        set { _ = newValue }
+    }
 }

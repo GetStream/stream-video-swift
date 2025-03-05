@@ -208,6 +208,8 @@
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
+		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
+		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */; };
 		4051A2732D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
 		4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
@@ -1685,6 +1687,7 @@
 		4049CE812BBBF74C003D07D2 /* LegacyAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAsyncImage.swift; sourceTree = "<group>"; };
 		4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAsyncImage.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
+		405687AD2D78A0E700093B98 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sendable+Extensions.swift"; sourceTree = "<group>"; };
 		4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Conformances.swift"; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
@@ -4728,6 +4731,7 @@
 		40F445FC2A9E2B3A004BE3DA /* WaitingLocalUserView */ = {
 			isa = PBXGroup;
 			children = (
+				405687AD2D78A0E700093B98 /* QRCodeView.swift */,
 				40F445FD2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift */,
 			);
 			path = WaitingLocalUserView;
@@ -6768,6 +6772,7 @@
 				402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */,
 				40CB9FA72B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
+				405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */,
 				40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */,
 				40F445D22A9E2033004BE3DA /* ReactionsAdapter.swift in Sources */,
 				84FFB06A2A8D1380005BA275 /* DemoCallTopView.swift in Sources */,
@@ -6798,6 +6803,7 @@
 				40AB353E2B738C1300E465CC /* OSLogDestination.swift in Sources */,
 				40AB35482B738C4C00E465CC /* DragIndicatorViewModifier.swift in Sources */,
 				40AB355C2B738C7700E465CC /* DemoCallsViewModel.swift in Sources */,
+				405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */,
 				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,
 				40AB354A2B738C5100E465CC /* ThermalStateViewModifier.swift in Sources */,
 				406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */,
