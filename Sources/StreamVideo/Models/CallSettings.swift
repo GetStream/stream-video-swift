@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 
 /// Represents the settings for a call.
 public final class CallSettings: ObservableObject, Sendable, Equatable, ReflectiveStringConvertible {
@@ -16,7 +17,7 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
     public let audioOutputOn: Bool
     /// The camera position for the current user.
     public let cameraPosition: CameraPosition
-
+    
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
@@ -28,13 +29,23 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
         self.speakerOn = speakerOn
         self.audioOutputOn = audioOutputOn
         self.cameraPosition = cameraPosition
-        #if targetEnvironment(simulator)
-        self.videoOn = InjectedValues[\.simulatorStreamFile] != nil ? videoOn : false
-        #else
-        self.videoOn = videoOn
-        #endif
+        if Bundle.containsCameraUsageDescription {
+            #if targetEnvironment(simulator)
+            self.videoOn = InjectedValues[\.simulatorStreamFile] != nil ? videoOn : false
+            #else
+            self.videoOn = videoOn
+            #endif
+        } else {
+            if videoOn {
+                log
+                    .warning(
+                        "Stream's dashboard configuration includes video capturing but the application doesn't provide a camera usage description. Video will not be available in order to prevent the app crashing. Please make sure to add the camera usage description as described in Apple's documentation https://developer.apple.com/documentation/BundleResources/Information-Property-List/NSCameraUsageDescription"
+                    )
+            }
+            self.videoOn = false
+        }
     }
-
+    
     public static func == (lhs: CallSettings, rhs: CallSettings) -> Bool {
         lhs.audioOn == rhs.audioOn &&
             lhs.videoOn == rhs.videoOn &&
@@ -42,7 +53,7 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
             lhs.audioOutputOn == rhs.audioOutputOn &&
             lhs.cameraPosition == rhs.cameraPosition
     }
-
+    
     public var shouldPublish: Bool {
         audioOn || videoOn
     }
@@ -52,14 +63,14 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
 public enum CameraPosition: Sendable, Equatable {
     case front
     case back
-
+    
     public func next() -> CameraPosition {
         self == .front ? .back : .front
     }
 }
 
 extension CallSettingsResponse {
-
+    
     public var toCallSettings: CallSettings {
         CallSettings(
             audioOn: audio.micDefaultOn,
@@ -81,7 +92,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-
+    
     func withUpdatedAudioState(_ audioOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
@@ -91,7 +102,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-
+    
     func withUpdatedVideoState(_ videoOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
@@ -101,7 +112,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-
+    
     func withUpdatedSpeakerState(_ speakerOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
@@ -111,7 +122,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-
+    
     func withUpdatedAudioOutputState(_ audioOutputOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,

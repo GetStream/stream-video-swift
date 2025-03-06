@@ -158,7 +158,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
         callSettings = settings
 
-        guard ownCapabilities.contains(.sendVideo) else {
+        guard ownCapabilities.contains(.sendVideo), settings.videoOn else {
             try await videoCaptureSessionProvider.activeSession?.capturer.stopCapture()
             videoCaptureSessionProvider.activeSession = nil
             log.debug("Active video capture session stopped because user has no capabilities for video.")
@@ -193,6 +193,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             }
 
             backgroundMuteAdapter.didUpdateCallSettings(settings)
+            
+            try await configureActiveVideoCaptureSession(
+                position: settings.cameraPosition == .back ? .back : .front,
+                track: primaryTrack
+            )
 
             if isMuted, primaryTrack.isEnabled {
                 unpublish()
