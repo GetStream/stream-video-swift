@@ -126,9 +126,19 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_setUp_hasVideoCapabilityCameraPositionIsFront_configuresVideoCaptureSessionCorrectly() async throws {
+    func test_setUp_hasVideoCapabilityCameraPositionIsFrontVideoIsOf_videoCaptureSessionIsNil() async throws {
         try await subject.setUp(
             with: .init(videoOn: false, cameraPosition: .front),
+            ownCapabilities: [.sendVideo]
+        )
+
+        XCTAssertEqual(mockCapturerFactory.timesCalled(.buildCameraCapturer), 0)
+        XCTAssertNil(videoCaptureSessionProvider.activeSession)
+    }
+
+    func test_setUp_hasVideoCapabilityCameraPositionIsFrontVideoIsOn_configuresVideoCaptureSessionCorrectly() async throws {
+        try await subject.setUp(
+            with: .init(videoOn: true, cameraPosition: .front),
             ownCapabilities: [.sendVideo]
         )
 
@@ -138,9 +148,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(videoCaptureSessionProvider.activeSession?.position, .front)
     }
 
-    func test_setUp_hasVideoCapabilityCameraPositionIsBack_configuresVideoCaptureSessionCorrectly() async throws {
+    func test_setUp_hasVideoCapabilityCameraPositionIsBackVideoIsOn_configuresVideoCaptureSessionCorrectly() async throws {
         try await subject.setUp(
-            with: .init(videoOn: false, cameraPosition: .back),
+            with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
 
@@ -467,7 +477,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             with: .init(videoOn: true, cameraPosition: .back),
             ownCapabilities: [.sendVideo]
         )
-        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        try await subject.didUpdateCallSettings(.init(videoOn: true, cameraPosition: .back))
         await fulfillment { self.videoCaptureSessionProvider.activeSession?.position == .back }
 
         try await subject.didUpdateCameraPosition(.front)
