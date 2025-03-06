@@ -252,14 +252,46 @@ struct CallSettingsOverrideBarView: View {
     var videoOn: Binding<Bool>
 
     var body: some View {
-        HStack {
-            Toggle(isOn: audioOn) {
-                Text("Microphone on")
-            }
+        ScrollView(.horizontal) {
+            HStack {
+                PillButtonView(audioOn) {
+                    Text("🎙️ Microphone \(audioOn.wrappedValue ? "on" : "off")")
+                }
 
-            Toggle(isOn: videoOn) {
-                Text("Camera on")
+                PillButtonView(videoOn) {
+                    Text("📹 Camera \(videoOn.wrappedValue ? "on" : "off")")
+                }
             }
+            .padding(.leading)
         }
+    }
+}
+
+struct PillButtonView<Label: View>: View {
+
+    @Injected(\.appearance) private var appearance
+
+    var value: Binding<Bool>
+    var label: () -> Label
+
+    init(
+        _ value: Binding<Bool>,
+        @ViewBuilder label: @escaping () -> Label
+    ) {
+        self.value = value
+        self.label = label
+    }
+
+    var body: some View {
+        Button {
+            value.wrappedValue.toggle()
+        } label: {
+            label()
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+        .background(value.wrappedValue ? appearance.colors.accentGreen : appearance.colors.accentRed)
+        .clipShape(Capsule())
     }
 }
