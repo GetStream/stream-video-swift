@@ -92,7 +92,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
                     if isSharePromptVisible {
                         Group {
-                            inviterOthersView
+                            inviteOthersView
                             if !callId.isEmpty {
                                 copyLinkView
                                 qrCodeView
@@ -138,13 +138,8 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     }
 
     @ViewBuilder
-    private var inviterOthersView: some View {
+    private var inviteOthersView: some View {
         VStack {
-            Text("Or share this call ID with the others you want in the meeting")
-                .font(.body)
-                .foregroundColor(Color(appearance.colors.textLowEmphasis))
-                .frame(maxWidth: .infinity, alignment: .leading)
-
             Button {
                 isInviteViewVisible = true
             } label: {
@@ -169,22 +164,15 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     @ViewBuilder
     private var copyLinkView: some View {
         VStack {
-            Text("Share the link")
-                .font(appearance.fonts.title3)
-                .foregroundColor(appearance.colors.text)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Text("Click the button below to copy the call link:")
-                .multilineTextAlignment(.leading)
-                .font(appearance.fonts.body)
-                .foregroundColor(Color(appearance.colors.textLowEmphasis))
-
             Button {
                 UIPasteboard.general.string = callLink
             } label: {
                 HStack {
                     Label(
-                        title: { Text("Copy invite link") },
+                        title: {
+                            Text("Call id: \(Text(callId).font(appearance.fonts.caption1).fontWeight(.medium))").lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        },
                         icon: { Image(systemName: "doc.on.clipboard") }
                     )
                 }
@@ -194,8 +182,8 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             .frame(height: 40)
             .buttonStyle(.plain)
             .foregroundColor(appearance.colors.text)
-            .background(appearance.colors.accentBlue)
             .clipShape(Capsule())
+            .overlay(Capsule().stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
             .frame(maxWidth: .infinity)
         }
     }
@@ -203,21 +191,21 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     @ViewBuilder
     private var qrCodeView: some View {
         VStack {
-            Text("Test on mobile")
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .font(appearance.fonts.title3)
-                .foregroundColor(appearance.colors.text)
-
-            HStack {
-                Text("To test on a mobile device, scan the QR Code:")
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .font(appearance.fonts.body)
-                    .foregroundColor(Color(appearance.colors.textLowEmphasis))
-
+            Group {
                 QRCodeView(text: callLink)
                     .frame(width: 100, height: 100, alignment: .center)
+                    .padding()
             }
+            .frame(maxWidth: .infinity)
+            .background(Color.black)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+
+            Text("Scan the QR code to join from another device.")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .font(appearance.fonts.body)
+                .foregroundColor(appearance.colors.text)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
         }
     }
 }
