@@ -29,6 +29,7 @@ public final class MicrophoneChecker: ObservableObject {
 
     deinit {
         updateMetersCancellable?.cancel()
+        updateMetersCancellable = nil
     }
 
     /// Checks if there are audible values available.

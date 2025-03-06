@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - Support for Swift 6 [#684](https://github.com/GetStream/stream-video-swift/pull/684)
 
+### 🐞 Fixed
+- Fix a race condition caused in the MicrophoneChecker. [#700](https://github.com/GetStream/stream-video-swift/pull/700)
+
 # [1.17.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.17.0)
 _February 14, 2025_
 
