@@ -12,7 +12,7 @@ import UIKit
 class Camera: NSObject, @unchecked Sendable {
     @Injected(\.orientationAdapter) private var orientationAdapter
 
-    private let captureSession = AVCaptureSession()
+    private lazy var captureSession = AVCaptureSession()
     private var isCaptureSessionConfigured = false
     private var deviceInput: AVCaptureDeviceInput?
     private var photoOutput: AVCapturePhotoOutput?
@@ -36,17 +36,17 @@ class Camera: NSObject, @unchecked Sendable {
             position: .unspecified
         ).devices
     }
-    
+
     private var frontCaptureDevices: [AVCaptureDevice] {
         allCaptureDevices
             .filter { $0.position == .front }
     }
-    
+
     private var backCaptureDevices: [AVCaptureDevice] {
         allCaptureDevices
             .filter { $0.position == .back }
     }
-    
+
     private var captureDevices: [AVCaptureDevice] {
         var devices = [AVCaptureDevice]()
         #if os(macOS) || (os(iOS) && targetEnvironment(macCatalyst))
@@ -61,13 +61,13 @@ class Camera: NSObject, @unchecked Sendable {
         #endif
         return devices
     }
-    
+
     private var availableCaptureDevices: [AVCaptureDevice] {
         captureDevices
             .filter { $0.isConnected }
             .filter { !$0.isSuspended }
     }
-    
+
     private var captureDevice: AVCaptureDevice? {
         didSet {
             guard let captureDevice = captureDevice else { return }
@@ -77,7 +77,11 @@ class Camera: NSObject, @unchecked Sendable {
             }
         }
     }
-    
+
+    private var canRequestCameraAccess: Bool {
+        CallSettings(videoOn: true).videoOn
+    }
+
     var isRunning: Bool {
         captureSession.isRunning
     }
@@ -114,12 +118,18 @@ class Camera: NSObject, @unchecked Sendable {
     
     private func initialize() {
         sessionQueue = DispatchQueue(label: "session queue")
-        
+
+        guard canRequestCameraAccess else {
+            return
+        }
         captureDevice = availableCaptureDevices.first ?? AVCaptureDevice.default(for: .video)
     }
     
     private func configureCaptureSession(completionHandler: (_ success: Bool) -> Void) {
-        
+        guard canRequestCameraAccess else {
+            completionHandler(false)
+            return
+        }
         var success = false
         
         captureSession.beginConfiguration()
@@ -227,6 +237,9 @@ class Camera: NSObject, @unchecked Sendable {
     }
     
     func start() async {
+        guard canRequestCameraAccess else {
+            return
+        }
         let authorized = await checkAuthorization()
         guard authorized else {
             log.error("Camera access was not authorized.")
@@ -251,6 +264,9 @@ class Camera: NSObject, @unchecked Sendable {
     }
     
     func stop() {
+        guard canRequestCameraAccess else {
+            return
+        }
         if captureSession.isRunning {
             sessionQueue.async {
                 self.captureSession.stopRunning()
@@ -259,6 +275,9 @@ class Camera: NSObject, @unchecked Sendable {
     }
     
     func switchCaptureDevice() {
+        guard canRequestCameraAccess else {
+            return
+        }
         if let captureDevice = captureDevice, let index = availableCaptureDevices.firstIndex(of: captureDevice) {
             let nextIndex = (index + 1) % availableCaptureDevices.count
             self.captureDevice = availableCaptureDevices[nextIndex]
