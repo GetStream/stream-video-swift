@@ -16,10 +16,13 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
     public let audioOutputOn: Bool
     /// The camera position for the current user.
     public let cameraPosition: CameraPosition
+    /// Whether the video is enabled for the current user.
+    public let videoEnabled: Bool
 
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
+        videoEnabled: Bool = true,
         speakerOn: Bool = true,
         audioOutputOn: Bool = true,
         cameraPosition: CameraPosition = .front
@@ -27,6 +30,7 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
         self.audioOn = audioOn
         self.speakerOn = speakerOn
         self.audioOutputOn = audioOutputOn
+        self.videoEnabled = videoEnabled
         self.cameraPosition = cameraPosition
         #if targetEnvironment(simulator)
         self.videoOn = InjectedValues[\.simulatorStreamFile] != nil ? videoOn : false
@@ -40,7 +44,8 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
             lhs.videoOn == rhs.videoOn &&
             lhs.speakerOn == rhs.speakerOn &&
             lhs.audioOutputOn == rhs.audioOutputOn &&
-            lhs.cameraPosition == rhs.cameraPosition
+            lhs.cameraPosition == rhs.cameraPosition &&
+            lhs.videoEnabled == rhs.videoEnabled
     }
 
     public var shouldPublish: Bool {

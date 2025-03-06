@@ -158,7 +158,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
         callSettings = settings
 
-        guard ownCapabilities.contains(.sendVideo) else {
+        guard ownCapabilities.contains(.sendVideo), settings.videoEnabled == true else {
             try await videoCaptureSessionProvider.activeSession?.capturer.stopCapture()
             videoCaptureSessionProvider.activeSession = nil
             log.debug("Active video capture session stopped because user has no capabilities for video.")
