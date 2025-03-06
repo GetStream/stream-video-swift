@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 
 /// Represents the settings for a call.
 public final class CallSettings: ObservableObject, Sendable, Equatable, ReflectiveStringConvertible {
