@@ -20,7 +20,7 @@ Pod::Spec.new do |spec|
   spec.source_files = ["Sources/#{spec.name}/**/*.swift"]
   spec.exclude_files = ["Sources/#{spec.name}/**/*_Tests.swift", "Sources/#{spec.name}/**/*_Mock.swift"]
 
-  spec.dependency('SwiftProtobuf', '~> 1.18.0')
+  spec.dependency('SwiftProtobuf', '~> 1.18')
   spec.vendored_frameworks = 'Frameworks/StreamWebRTC.xcframework'
 
   spec.prepare_command = <<-CMD
