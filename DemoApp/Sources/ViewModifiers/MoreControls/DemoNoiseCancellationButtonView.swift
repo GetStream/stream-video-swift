@@ -57,6 +57,9 @@ struct DemoNoiseCancellationButtonView: View {
                     isNoiseCancellationAvailable = false
                 }
             }
+            .onReceive(streamVideo.videoConfig.noiseCancellationFilter?.$isActive) {
+                isActive = $0
+            }
         }
     }
 }
