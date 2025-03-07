@@ -59,8 +59,13 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
                 return
             }
 
+            // In order to successfully activate noiseCancellation we require
+            // to do `Call.startNoiseCancellation`. We depend on the `StreamVideo.state.activeCall`
+            // to fetch the call. If the value hasn't been set yet, we are going
+            // to wait for up to 2 seconds in order to allow other operations to
+            // complete. If we get a Call then we proceed the activation flow
+            // other wise we log a warning and stop.
             var call = streamVideo.state.activeCall
-
             if call == nil {
                 call = try await streamVideo
                     .state
@@ -70,6 +75,9 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
             }
 
             guard let activeCall = call else {
+                _ = await Task { @MainActor in
+                    self.isActive = false
+                }.result
                 self.activationTask = nil
                 log.warning("AudioFilter:\(id) cannot be activated. No activeCall found.")
                 return
