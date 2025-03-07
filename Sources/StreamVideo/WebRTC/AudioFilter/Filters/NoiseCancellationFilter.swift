@@ -66,7 +66,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
                     .state
                     .$activeCall
                     .filter { $0 != nil }
-                    .nextValue(dropFirst: 0)
+                    .nextValue(timeout: 2)
             }
 
             guard let activeCall = call else {
@@ -78,7 +78,9 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
             do {
                 try await activeCall.startNoiseCancellation()
                 self.initializeClosure(sampleRate, channels)
-                self.isActive = true
+                _ = await Task { @MainActor in
+                    self.isActive = true
+                }.result
                 self.activationTask = nil
                 log.debug("AudioFilter:\(id) is now active 🟢.")
             } catch {
