@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// A concrete implementation of `AudioFilter` that applies noise cancellation effects.
-public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
+public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, ObservableObject {
 
     public typealias InitializeClosure = (Int, Int) -> Void
     public typealias ProcessClosure = (Int, Int, Int, UnsafeMutablePointer<Float>) -> Void
@@ -14,7 +14,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
 
     @Injected(\.streamVideo) private var streamVideo
 
-    private var isActive: Bool = false
+    @Published public private(set) var isActive: Bool = false
     private var activationTask: Task<Void, Error>?
 
     private let name: String
@@ -54,21 +54,45 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
 
         let id = self.id
         // Asynchronously activate noise cancellation for the active call.
-        activationTask = Task { @MainActor [weak self] in
-            guard let activeCall = self?.streamVideo.state.activeCall else {
-                self?.activationTask = nil
+        activationTask = Task { [weak self] in
+            guard let self else {
+                return
+            }
+
+            // In order to successfully activate noiseCancellation we require
+            // to do `Call.startNoiseCancellation`. We depend on the `StreamVideo.state.activeCall`
+            // to fetch the call. If the value hasn't been set yet, we are going
+            // to wait for up to 2 seconds in order to allow other operations to
+            // complete. If we get a Call then we proceed the activation flow
+            // other wise we log a warning and stop.
+            var call = streamVideo.state.activeCall
+            if call == nil {
+                call = try await streamVideo
+                    .state
+                    .$activeCall
+                    .filter { $0 != nil }
+                    .nextValue(timeout: 2)
+            }
+
+            guard let activeCall = call else {
+                _ = await Task { @MainActor in
+                    self.isActive = false
+                }.result
+                self.activationTask = nil
                 log.warning("AudioFilter:\(id) cannot be activated. No activeCall found.")
                 return
             }
 
             do {
                 try await activeCall.startNoiseCancellation()
-                self?.initializeClosure(sampleRate, channels)
-                self?.isActive = true
-                self?.activationTask = nil
+                self.initializeClosure(sampleRate, channels)
+                _ = await Task { @MainActor in
+                    self.isActive = true
+                }.result
+                self.activationTask = nil
                 log.debug("AudioFilter:\(id) is now active 🟢.")
             } catch {
-                self?.activationTask = nil
+                self.activationTask = nil
                 log.debug("AudioFilter:\(id) failed to activate with error:\(error)")
             }
         }
