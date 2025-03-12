@@ -23,6 +23,8 @@ extension StreamCallStateMachine {
         /// The identifier for the current stage.
         let id: ID
 
+        let container: String = "Call"
+
         /// A weak reference to the associated `Call` object.
         weak var call: Call?
 

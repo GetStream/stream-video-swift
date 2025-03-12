@@ -51,6 +51,8 @@ extension WebRTCCoordinator.StateMachine {
         /// The identifier for the current stage.
         let id: ID
 
+        let container: String = "WebRTC"
+
         /// The context for the current stage.
         var context: Context
 

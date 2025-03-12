@@ -12,6 +12,8 @@ public protocol StreamStateMachineStage: CustomStringConvertible {
     typealias Transition = (Self) throws -> Void
     /// The unique identifier of the stage.
     var id: ID { get }
+
+    var container: String { get }
     /// The transition function that handles the transition logic.
     var transition: Transition? { get set }
 
@@ -29,5 +31,5 @@ public protocol StreamStateMachineStage: CustomStringConvertible {
 /// An extension to provide a default description for stages.
 extension StreamStateMachineStage {
     /// A textual representation of the stage, combining the type and identifier.
-    public var description: String { "\(type(of: self)):\(id)" }
+    public var description: String { "\(container):\(type(of: self)):\(id)" }
 }
