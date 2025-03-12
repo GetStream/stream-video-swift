@@ -81,7 +81,9 @@ open class CallViewModel: ObservableObject {
     public var error: Error? {
         didSet {
             errorAlertShown = error != nil
-            if let error {
+            if let error = error as? APIError {
+                toast = Toast(style: .error, message: error.message)
+            } else if let error {
                 toast = Toast(style: .error, message: error.localizedDescription)
             } else {
                 toast = nil
