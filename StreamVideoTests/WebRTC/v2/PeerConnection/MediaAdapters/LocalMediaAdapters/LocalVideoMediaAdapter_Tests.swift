@@ -100,30 +100,15 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_setUp_hasVideoCapabilityVideoIsOff_addsTrack() async throws {
+    func test_setUp_hasVideoCapabilityVideoIsOff_doesNotAddTrack() async throws {
         try await assertTrackEvent(
-            filter: {
-                switch $0 {
-                case let .added(id, trackType, track):
-                    return (id, trackType, track)
-                default:
-                    return nil
-                }
-            },
-            operation: { subject in
-                try await subject.setUp(
-                    with: .init(videoOn: false),
-                    ownCapabilities: [.sendVideo]
-                )
-            }
-        ) { [sessionId] id, trackType, track in
-            XCTAssertEqual(id, sessionId)
-            XCTAssertEqual(trackType, .video)
-            XCTAssertTrue(track is RTCVideoTrack)
+            isInverted: true
+        ) { subject in
+            try await subject.setUp(
+                with: .init(videoOn: false),
+                ownCapabilities: [.sendVideo]
+            )
         }
-
-        XCTAssertNotNil(subject.primaryTrack)
-        XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
     func test_setUp_hasVideoCapabilityCameraPositionIsFrontVideoIsOf_videoCaptureSessionIsNil() async throws {
@@ -216,6 +201,28 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(request.muteStates[0].muted)
     }
 
+    func test_didUpdateCallSettings_isEnabledFalseCallSettingsTrueTrackNotAdded_trackWasAdded() async throws {
+        try await subject.setUp(
+            with: .init(videoOn: false),
+            ownCapabilities: [.sendVideo]
+        )
+
+        try await assertTrackEvent {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.didUpdateCallSettings(.init(videoOn: true))
+        } validation: { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .video)
+            XCTAssertTrue(track is RTCVideoTrack)
+        }
+    }
+
     func test_didUpdateCallSettings_isEnabledTrueCallSettingsFalse_SFUWasCalled() async throws {
         try await subject.setUp(
             with: .init(videoOn: true),
@@ -231,6 +238,41 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .video)
         XCTAssertTrue(request.muteStates[0].muted)
+    }
+
+    func test_didUpdateCallSettings_isEnabledTrueCallSettingsFalseAndThenCallSettingsTrue_trackWasNotAddedAgain() async throws {
+        try await assertTrackEvent {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.setUp(
+                with: .init(videoOn: true),
+                ownCapabilities: [.sendVideo]
+            )
+        } validation: { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .video)
+            XCTAssertTrue(track is RTCVideoTrack)
+        }
+        try await subject.didUpdateCallSettings(.init(videoOn: false))
+        await fulfillment { self.subject.primaryTrack.isEnabled == false }
+
+        try await assertTrackEvent(isInverted: true) {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.didUpdateCallSettings(.init(videoOn: true))
+        }
+
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
     }
 
     // MARK: - didUpdatePublishOptions
@@ -742,7 +784,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask { [weak self] in
-                await self?.fulfillment(of: [eventReceivedExpectation], timeout: defaultTimeout)
+                await self?.fulfillment(of: [eventReceivedExpectation], timeout: isInverted ? 1 : defaultTimeout)
             }
 
             try await group.waitForAll()

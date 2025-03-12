@@ -559,9 +559,17 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             .sorted()
             .joined(separator: ",")
         /// Logs the count and names of participants with video tracks.
-        log.debug(
-            "\(participants.count) participants updated. \(participantsWithVideoTracks) have video tracks."
-        )
+        if participantsWithVideoTracks.isEmpty {
+            log.debug(
+                "\(participants.count) participants updated. None of the participants have video.",
+                subsystems: .webRTC
+            )
+        } else {
+            log.debug(
+                "\(participants.count) participants updated. \(participantsWithVideoTracks) have video tracks.",
+                subsystems: .webRTC
+            )
+        }
     }
 
     private func configureAudioSession() {

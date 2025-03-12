@@ -49,6 +49,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A publisher that emits events related to audio tracks.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    private var hasRegisteredPrimaryTrack: Bool = false
+
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
     /// - Parameters:
@@ -109,14 +111,12 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
+        guard ownCapabilities.contains(.sendAudio), settings.audioOn else {
+            return
+        }
+
         // Notify that the primary audio track has been added.
-        subject.send(
-            .added(
-                id: sessionID,
-                trackType: .audio,
-                track: primaryTrack
-            )
-        )
+        registerPrimaryTrackIfPossible(settings)
     }
 
     /// Starts publishing the local audio track.
@@ -124,15 +124,20 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// This enables the primary track and creates additional transceivers based
     /// on the current publish options. It also starts the audio recorder.
     func publish() {
-        Task { @MainActor in
-            guard !primaryTrack.isEnabled else { return }
+        processingQueue.async { @MainActor [weak self] in
+            guard
+                let self,
+                !primaryTrack.isEnabled
+            else {
+                return
+            }
 
             primaryTrack.isEnabled = true
 
             publishOptions.forEach {
-                addTransceiverIfRequired(
+                self.addTransceiverIfRequired(
                     for: $0,
-                    with: primaryTrack.clone(from: peerConnectionFactory)
+                    with: self.primaryTrack.clone(from: self.peerConnectionFactory)
                 )
             }
 
@@ -165,7 +170,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// This disables the primary track and all associated transceivers.
     func unpublish() {
-        Task { @MainActor [weak self] in
+        processingQueue.async { [weak self] in
             guard let self, primaryTrack.isEnabled else { return }
 
             primaryTrack.isEnabled = false
@@ -192,6 +197,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ) async throws {
         processingQueue.async { [weak self] in
             guard let self else { return }
+            registerPrimaryTrackIfPossible(settings)
+
             guard lastUpdatedCallSettings != settings.audio else { return }
             
             let isMuted = !settings.audioOn
@@ -342,5 +349,20 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+    }
+
+    private func registerPrimaryTrackIfPossible(_ callSettings: CallSettings) {
+        guard !hasRegisteredPrimaryTrack, callSettings.audioOn else {
+            return
+        }
+
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .audio,
+                track: primaryTrack
+            )
+        )
+        hasRegisteredPrimaryTrack = true
     }
 }

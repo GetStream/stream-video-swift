@@ -49,10 +49,9 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     }
 
     @State private var text: String
+    @State private var callType: String
     @State private var callAction: CallAction = .startCall
     @State private var callFlow: CallFlow = .joinImmediately
-    @State private var overrideMicrophoneOn: Bool
-    @State private var overrideCameraOn: Bool
 
     @State var selectedParticipants = [User]()
     @State var incomingCallInfo: IncomingCall?
@@ -75,9 +74,17 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     ) {
         self.viewFactory = viewFactory
         _text = .init(initialValue: callId)
+        _callType = .init(initialValue: {
+            guard
+                !AppState.shared.deeplinkInfo.callId.isEmpty,
+                !AppState.shared.deeplinkInfo.callType.isEmpty
+            else {
+                return AppEnvironment.preferredCallType ?? .default
+            }
+
+            return AppState.shared.deeplinkInfo.callType
+        }())
         self.viewModel = viewModel
-        overrideMicrophoneOn = viewModel.callSettings.audioOn
-        overrideCameraOn = viewModel.callSettings.videoOn
     }
 
     var body: some View {
@@ -122,11 +129,6 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
 
-            CallSettingsOverrideBarView(
-                audioOn: .init(get: { viewModel.callSettings.audioOn }, set: { _ in viewModel.toggleMicrophoneEnabled() }),
-                videoOn: .init(get: { viewModel.callSettings.videoOn }, set: { _ in viewModel.toggleCameraEnabled() })
-            )
-
             if callAction == .startCall {
                 participantsListView
                     .accessibility(identifier: "participantList")
@@ -148,23 +150,17 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                 Task {
                     await setPreferredVideoCodec(for: text)
                     if callAction == .joinCall {
-                        if viewModel.callSettings.audioOn != overrideMicrophoneOn {
-                            viewModel.toggleMicrophoneEnabled()
-                        }
-                        if viewModel.callSettings.videoOn != overrideCameraOn {
-                            viewModel.toggleCameraEnabled()
-                        }
-                        viewModel.joinCall(callType: .default, callId: text)
+                        viewModel.joinCall(callType: callType, callId: text)
                     } else {
                         if callFlow == .lobby {
                             viewModel.enterLobby(
-                                callType: .default,
+                                callType: callType,
                                 callId: text,
                                 members: members
                             )
                         } else {
                             viewModel.startCall(
-                                callType: .default,
+                                callType: callType,
                                 callId: text,
                                 members: members,
                                 ring: callFlow == .ringEvents,
@@ -239,59 +235,9 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     }
 
     private func setPreferredVideoCodec(for callId: String) async {
-        let call = streamVideo.call(callType: .default, callId: callId)
+        let call = streamVideo.call(callType: callType, callId: callId)
         await call.updatePublishOptions(
             preferredVideoCodec: AppEnvironment.preferredVideoCodec.videoCodec
         )
-    }
-}
-
-struct CallSettingsOverrideBarView: View {
-
-    var audioOn: Binding<Bool>
-    var videoOn: Binding<Bool>
-
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack {
-                PillButtonView(audioOn) {
-                    Text("🎙️ Microphone \(audioOn.wrappedValue ? "on" : "off")")
-                }
-
-                PillButtonView(videoOn) {
-                    Text("📹 Camera \(videoOn.wrappedValue ? "on" : "off")")
-                }
-            }
-            .padding(.leading)
-        }
-    }
-}
-
-struct PillButtonView<Label: View>: View {
-
-    @Injected(\.appearance) private var appearance
-
-    var value: Binding<Bool>
-    var label: () -> Label
-
-    init(
-        _ value: Binding<Bool>,
-        @ViewBuilder label: @escaping () -> Label
-    ) {
-        self.value = value
-        self.label = label
-    }
-
-    var body: some View {
-        Button {
-            value.wrappedValue.toggle()
-        } label: {
-            label()
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal)
-        .padding(.vertical, 4)
-        .background(value.wrappedValue ? appearance.colors.accentGreen : appearance.colors.accentRed)
-        .clipShape(Capsule())
     }
 }

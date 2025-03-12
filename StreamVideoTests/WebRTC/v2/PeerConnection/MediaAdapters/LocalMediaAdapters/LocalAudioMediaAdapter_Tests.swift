@@ -71,26 +71,14 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
-    func test_setUp_hasAudioCapabilityAudioIsOff_addsTrack() async throws {
+    func test_setUp_hasAudioCapabilityAudioIsOff_doesNotAddTrack() async throws {
         try await assertTrackEvent(
-            filter: {
-                switch $0 {
-                case let .added(id, trackType, track):
-                    return (id, trackType, track)
-                default:
-                    return nil
-                }
-            },
-            operation: { subject in
-                try await subject.setUp(
-                    with: .init(audioOn: false),
-                    ownCapabilities: [.sendAudio]
-                )
-            }
-        ) { [sessionId] id, trackType, track in
-            XCTAssertEqual(id, sessionId)
-            XCTAssertEqual(trackType, .audio)
-            XCTAssertTrue(track is RTCAudioTrack)
+            isInverted: true
+        ) { subject in
+            try await subject.setUp(
+                with: .init(audioOn: false),
+                ownCapabilities: [.sendAudio]
+            )
         }
 
         XCTAssertNotNil(subject.primaryTrack)
@@ -137,6 +125,28 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertFalse(request.muteStates[0].muted)
     }
 
+    func test_didUpdateCallSettings_isEnabledFalseCallSettingsTrue_trackWasAdded() async throws {
+        try await subject.setUp(
+            with: .init(audioOn: false),
+            ownCapabilities: [.sendAudio]
+        )
+
+        try await assertTrackEvent {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.didUpdateCallSettings(.init(audioOn: true))
+        } validation: { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .audio)
+            XCTAssertTrue(track is RTCAudioTrack)
+        }
+    }
+
     func test_didUpdateCallSettings_isEnabledTrueCallSettingsFalse_SFUWasCalled() async throws {
         try await subject.setUp(
             with: .init(audioOn: true),
@@ -152,6 +162,41 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.muteStates.count, 1)
         XCTAssertEqual(request.muteStates[0].trackType, .audio)
         XCTAssertTrue(request.muteStates[0].muted)
+    }
+
+    func test_didUpdateCallSettings_isEnabledTrueCallSettingsFalseAndThenCallSettingsTrue_trackWasNotAddedAgain() async throws {
+        try await assertTrackEvent {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.setUp(
+                with: .init(audioOn: true),
+                ownCapabilities: [.sendAudio]
+            )
+        } validation: { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .audio)
+            XCTAssertTrue(track is RTCAudioTrack)
+        }
+        try await subject.didUpdateCallSettings(.init(audioOn: false))
+        await fulfillment { self.subject.primaryTrack.isEnabled == false }
+
+        try await assertTrackEvent(isInverted: true) {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.didUpdateCallSettings(.init(audioOn: true))
+        }
+
+        await fulfillment { self.subject.primaryTrack.isEnabled == true }
     }
 
     // MARK: - didUpdatePublishOptions
@@ -407,7 +452,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             group.addTask { [weak self] in
                 await self?.fulfillment(
                     of: [eventReceivedExpectation],
-                    timeout: defaultTimeout
+                    timeout: isInverted ? 1 : defaultTimeout
                 )
             }
 

@@ -115,3 +115,6 @@ Dependencies/
 
 # Local file with test credentials
 Credentials.xcconfig
+
+# Cursor/VS Code Settings
+.vscode/settings.json
