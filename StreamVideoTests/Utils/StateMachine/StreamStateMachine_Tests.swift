@@ -56,9 +56,8 @@ final class StreamStateMachineTests: XCTestCase, @unchecked Sendable {
     // MARK: - Mocks
 
     private final class MockStage: StreamStateMachineStage {
-
         var id: String
-        let container: String
+        var container: String
         var description: String
         var allowedTransitions: [MockStage]
 

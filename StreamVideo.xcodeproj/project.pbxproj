@@ -38,6 +38,8 @@
 		401338782BF248B9007318BD /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401338772BF248B9007318BD /* MockStreamVideo.swift */; };
 		4013387A2BF248CC007318BD /* MockCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401338792BF248CC007318BD /* MockCall.swift */; };
 		4013387C2BF248E9007318BD /* Mockable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013387B2BF248E9007318BD /* Mockable.swift */; };
+		4013A8ED2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013A8EC2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift */; };
+		4013A8EF2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013A8EE2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift */; };
 		401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */; };
 		401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */; };
 		401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480352A5447C50029166A /* LocalParticipantViewModifier.swift */; };
@@ -208,11 +210,11 @@
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
-		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
-		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */; };
 		4051A2732D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
 		4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
+		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
+		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		406128812CF32FEF007F5CDC /* SDPLineVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */; };
 		406128832CF33000007F5CDC /* SDPParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128822CF33000007F5CDC /* SDPParser.swift */; };
@@ -1571,6 +1573,8 @@
 		401338772BF248B9007318BD /* MockStreamVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamVideo.swift; sourceTree = "<group>"; };
 		401338792BF248CC007318BD /* MockCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCall.swift; sourceTree = "<group>"; };
 		4013387B2BF248E9007318BD /* Mockable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mockable.swift; sourceTree = "<group>"; };
+		4013A8EC2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebRTCCoordinator+Blocked.swift"; sourceTree = "<group>"; };
+		4013A8EE2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_BlockedStageTests.swift; sourceTree = "<group>"; };
 		4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser.swift; sourceTree = "<group>"; };
 		401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser_Tests.swift; sourceTree = "<group>"; };
 		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };
@@ -1687,9 +1691,9 @@
 		4049CE812BBBF74C003D07D2 /* LegacyAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAsyncImage.swift; sourceTree = "<group>"; };
 		4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAsyncImage.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
-		405687AD2D78A0E700093B98 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sendable+Extensions.swift"; sourceTree = "<group>"; };
 		4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Conformances.swift"; sourceTree = "<group>"; };
+		405687AD2D78A0E700093B98 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineVisitor.swift; sourceTree = "<group>"; };
 		406128822CF33000007F5CDC /* SDPParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPParser.swift; sourceTree = "<group>"; };
@@ -3601,6 +3605,7 @@
 				40AF6A402C9356B700BA2935 /* WebRTCCoordinatorStateMachine_MigratingStageTests.swift */,
 				40AF6A422C93585B00BA2935 /* WebRTCCoordinatorStateMachine_MigratedStageTests.swift */,
 				40AF6A442C935D1900BA2935 /* WebRTCCoordinatorStateMachine_LeavingStageTests.swift */,
+				4013A8EE2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift */,
 				40AF6A482C935EB600BA2935 /* WebRTCCoordinatorStateMachine_CleanUpStageTests.swift */,
 				40AF6A4A2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift */,
 				40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */,
@@ -4237,6 +4242,7 @@
 				40BBC4E72C63A64E002AEF92 /* WebRTCCoordinator+Migrating.swift */,
 				40BBC4E92C63A665002AEF92 /* WebRTCCoordinator+Migrated.swift */,
 				40BBC4DB2C63A4C8002AEF92 /* WebRTCCoordinator+Leaving.swift */,
+				4013A8EC2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift */,
 				40BBC4DD2C63A507002AEF92 /* WebRTCCoordinator+CleanUp.swift */,
 				40BBC4DF2C63A564002AEF92 /* WebRTCCoordinator+Disconnected.swift */,
 				40BBC4CB2C639053002AEF92 /* WebRTCCoordinator+Error.swift */,
@@ -6921,6 +6927,7 @@
 				40382F2E2C88B87D00C2D00F /* ReflectiveStringConvertible.swift in Sources */,
 				40BBC48F2C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift in Sources */,
 				40FF825F2D63532C0029AA80 /* Participants.swift in Sources */,
+				4013A8ED2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift in Sources */,
 				40034C2C2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
 				402D0E882D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift in Sources */,
@@ -7582,6 +7589,7 @@
 				40B48C4C2D14F721002C4EAB /* RTPMapVisitorTests.swift in Sources */,
 				40B48C152D14C93B002C4EAB /* CGSize_AdaptTests.swift in Sources */,
 				40382F3D2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */,
+				4013A8EF2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift in Sources */,
 				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
 				40F0173E2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift in Sources */,

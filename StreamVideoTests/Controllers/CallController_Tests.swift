@@ -513,6 +513,35 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(publishOptions.video.first?.bitrate, 1000)
     }
 
+    // MARK: - blockedEventReceived
+
+    func test_blockedEventReceived_forCurrentUserInTheCurrentCall_transitionsToBlocked() async throws {
+        let call = streamVideo.call(callType: .default, callId: .unique)
+        subject.call = call
+        await wait(for: 1)
+        try mockWebRTCCoordinatorFactory
+            .mockCoordinatorStack
+            .coordinator
+            .stateMachine
+            .transition(MockTestOnlyStage())
+
+        await assertTransitionToStage(.blocked) {
+            call.onEvent(
+                .coordinatorEvent(
+                    .typeBlockedUserEvent(
+                        .init(
+                            callCid: call.cId,
+                            createdAt: .distantPast,
+                            user: .dummy(
+                                id: self.user.id
+                            )
+                        )
+                    )
+                )
+            )
+        } handler: { _ in }
+    }
+
     // MARK: - Private helpers
 
     private func assertTransitionToStage(
@@ -639,5 +668,17 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 .stateAdapter
                 .participants.count == 1
         }
+    }
+}
+
+final class MockTestOnlyStage: WebRTCCoordinator.StateMachine.Stage, @unchecked Sendable {
+    convenience init() {
+        self.init(id: .testOnly, context: .init())
+    }
+
+    override func transition(
+        from previousStage: WebRTCCoordinator.StateMachine.Stage
+    ) -> Self? {
+        self
     }
 }
