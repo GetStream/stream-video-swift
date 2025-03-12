@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🐞 Fixed
 - Fix an issue that was stopping NoiseCancellation from being activated [#705](https://github.com/GetStream/stream-video-swift/pull/705)
 - Fix an issue where SetPublisher request was firing when nothing was published [#706](https://github.com/GetStream/stream-video-swift/pull/706)
+- The VideoRendererView for the localParticipant, will flip **only** the front camera feed, not the back one [#708](https://github.com/GetStream/stream-video-swift/pull/708)
 
 # [1.18.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.18.0)
 _March 06, 2025_
