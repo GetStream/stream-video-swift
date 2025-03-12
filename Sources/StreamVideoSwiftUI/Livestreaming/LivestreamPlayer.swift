@@ -75,6 +75,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
+        viewModel.call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
 
     public var body: some View {
@@ -88,7 +89,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             } else {
                 ZStack {
                     GeometryReader { reader in
-                        if let participant = state.participants.first {
+                        if let participant = state.participants.first(where: { $0.track != nil }) {
                             VideoCallParticipantView(
                                 viewFactory: viewFactory,
                                 participant: participant,

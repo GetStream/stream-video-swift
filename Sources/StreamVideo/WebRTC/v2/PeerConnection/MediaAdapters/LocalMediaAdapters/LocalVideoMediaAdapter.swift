@@ -67,6 +67,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     private let processingQueue = SerialActorQueue()
     private let backgroundMuteAdapter: ApplicationLifecycleVideoMuteAdapter
+    private var hasRegisteredPrimaryTrack: Bool = false
 
     /// Initializes a new instance of the `LocalVideoMediaAdapter`.
     ///
@@ -148,14 +149,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        subject.send(
-            .added(
-                id: sessionID,
-                trackType: .video,
-                track: primaryTrack
-            )
-        )
-
         callSettings = settings
 
         guard ownCapabilities.contains(.sendVideo), settings.videoOn else {
@@ -164,6 +157,8 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             log.debug("Active video capture session stopped because user has no capabilities for video.")
             return
         }
+
+        registerPrimaryTrackIfPossible(settings)
 
         try await configureActiveVideoCaptureSession(
             position: settings.cameraPosition == .back ? .back : .front,
@@ -180,6 +175,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         processingQueue.async { [weak self] in
             guard let self else { return }
             callSettings = settings
+            registerPrimaryTrackIfPossible(settings)
 
             let isMuted = !settings.videoOn
             let isLocalMuted = primaryTrack.isEnabled == false
@@ -193,7 +189,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             }
 
             backgroundMuteAdapter.didUpdateCallSettings(settings)
-            
+
             try await configureActiveVideoCaptureSession(
                 position: settings.cameraPosition == .back ? .back : .front,
                 track: primaryTrack
@@ -792,5 +788,20 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             return
         }
         transceiverStorage.set(transceiver, track: track, for: options)
+    }
+
+    private func registerPrimaryTrackIfPossible(_ callSettings: CallSettings) {
+        guard !hasRegisteredPrimaryTrack, callSettings.videoOn else {
+            return
+        }
+
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .video,
+                track: primaryTrack
+            )
+        )
+        hasRegisteredPrimaryTrack = true
     }
 }

@@ -58,6 +58,7 @@ final class StreamStateMachineTests: XCTestCase, @unchecked Sendable {
     private final class MockStage: StreamStateMachineStage {
 
         var id: String
+        let container: String
         var description: String
         var allowedTransitions: [MockStage]
 
@@ -65,8 +66,14 @@ final class StreamStateMachineTests: XCTestCase, @unchecked Sendable {
         var transition: ((MockStage) throws -> Void)?
         private(set) var didTransitionAwayWasCalled = false
 
-        init(id: String, description: String, allowedTransitions: [MockStage] = []) {
+        init(
+            id: String,
+            container: String = .unique,
+            description: String,
+            allowedTransitions: [MockStage] = []
+        ) {
             self.id = id
+            self.container = container
             self.description = description
             self.allowedTransitions = allowedTransitions
         }
