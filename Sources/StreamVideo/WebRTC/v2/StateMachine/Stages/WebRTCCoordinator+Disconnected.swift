@@ -86,13 +86,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
             case .disconnected:
                 execute()
                 return self
-            case .fastReconnecting:
+            case .fastReconnecting, .fastReconnected:
                 execute()
                 return self
             case .rejoining:
                 execute()
                 return self
-            case .migrated:
+            case .migrated, .migrating:
                 execute()
                 return self
             default:

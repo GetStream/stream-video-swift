@@ -138,7 +138,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             let stage = currentStage as! StreamCallStateMachine.Stage.JoinedStage
             return stage.response
         default:
-            try stateMachine.transition(
+            stateMachine.transition(
                 .joining(
                     self,
                     actionBlock: { [weak self] in
@@ -343,7 +343,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             let stage = currentStage as! StreamCallStateMachine.Stage.AcceptedStage
             return stage.response
         default:
-            try stateMachine.transition(.accepting(self, actionBlock: { [coordinatorClient, callType, callId] in
+            stateMachine.transition(.accepting(self, actionBlock: { [coordinatorClient, callType, callId] in
                 try await coordinatorClient.acceptCall(type: callType, id: callId)
             }))
         }
@@ -371,7 +371,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             let stage = currentStage as! StreamCallStateMachine.Stage.RejectedStage
             return stage.response
         default:
-            try stateMachine.transition(.rejecting(self, actionBlock: { [coordinatorClient, callType, callId, streamVideo, cId] in
+            stateMachine.transition(.rejecting(self, actionBlock: { [coordinatorClient, callType, callId, streamVideo, cId] in
                 let response = try await coordinatorClient.rejectCall(
                     type: callType,
                     id: callId,
@@ -522,7 +522,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         eventHandlers.removeAll()
         callController.leave()
         closedCaptionsAdapter.stop()
-        try? stateMachine.transition(.idle(self))
+        stateMachine.transition(.idle(self))
         /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
         /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
         /// client.
@@ -1394,14 +1394,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     @MainActor
     internal func transitionDueToError(_ error: Error) {
-        do {
-            if stateMachine.currentStage.id == .joined {
-                state.disconnectionError = error
-            }
-            try stateMachine.transition(.error(self, error: error))
-        } catch {
-            log.error(error)
+        if stateMachine.currentStage.id == .joined {
+            state.disconnectionError = error
         }
+        stateMachine.transition(.error(self, error: error))
     }
 
     // MARK: - private

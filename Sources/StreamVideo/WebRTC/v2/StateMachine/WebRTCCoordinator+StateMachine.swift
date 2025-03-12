@@ -27,8 +27,8 @@ extension WebRTCCoordinator {
         ///
         /// - Parameter nextStage: The next stage to transition to.
         /// - Throws: An error if the transition is invalid.
-        func transition(_ nextStage: Stage) throws {
-            try stateMachine.transition(to: nextStage)
+        func transition(_ nextStage: Stage) {
+            stateMachine.transition(to: nextStage)
         }
     }
 }
