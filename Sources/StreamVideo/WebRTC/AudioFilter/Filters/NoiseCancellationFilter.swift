@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamWebRTC
 
@@ -12,8 +13,6 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     public typealias ProcessClosure = (Int, Int, Int, UnsafeMutablePointer<Float>) -> Void
     public typealias ReleaseClosure = () -> Void
 
-    @Injected(\.streamVideo) private var streamVideo
-
     @Published public private(set) var isActive: Bool = false
     private var activationTask: Task<Void, Error>?
 
@@ -21,6 +20,15 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     private let initializeClosure: (Int, Int) -> Void
     private let processClosure: (Int, Int, Int, UnsafeMutablePointer<Float>) -> Void
     private let releaseClosure: () -> Void
+    private var activeCallCancellable: AnyCancellable?
+    private let serialQueue = SerialActorQueue()
+    private weak var activeCall: Call? {
+        didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) }
+    }
+
+    var streamVideo: StreamVideo? {
+        didSet { didUpdate(streamVideo) }
+    }
 
     /// Initializes a new instance of `NoiseCancellationFilter`.
     /// - Parameters:
@@ -50,54 +58,12 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     ///   - sampleRate: The sample rate in Hz.
     ///   - channels: The number of audio channels.
     public func initialize(sampleRate: Int, channels: Int) {
-        guard activationTask == nil, !isActive else { return }
-
-        let id = self.id
-        // Asynchronously activate noise cancellation for the active call.
-        activationTask = Task { [weak self] in
-            guard let self else {
-                return
-            }
-
-            // In order to successfully activate noiseCancellation we require
-            // to do `Call.startNoiseCancellation`. We depend on the `StreamVideo.state.activeCall`
-            // to fetch the call. If the value hasn't been set yet, we are going
-            // to wait for up to 2 seconds in order to allow other operations to
-            // complete. If we get a Call then we proceed the activation flow
-            // other wise we log a warning and stop.
-            var call = streamVideo.state.activeCall
-            if call == nil {
-                call = try await streamVideo
-                    .state
-                    .$activeCall
-                    .filter { $0 != nil }
-                    .nextValue(timeout: 2)
-            }
-
-            guard let activeCall = call else {
-                _ = await Task { @MainActor in
-                    self.isActive = false
-                }.result
-                self.activationTask = nil
-                log.warning("AudioFilter:\(id) cannot be activated. No activeCall found.")
-                return
-            }
-
-            do {
-                try await activeCall.startNoiseCancellation()
-                self.initializeClosure(sampleRate, channels)
-                _ = await Task { @MainActor in
-                    self.isActive = true
-                }.result
-                self.activationTask = nil
-                log.debug("AudioFilter:\(id) is now active 🟢.")
-            } catch {
-                self.activationTask = nil
-                log.debug("AudioFilter:\(id) failed to activate with error:\(error)")
-            }
+        serialQueue.async { [weak self] in
+            guard let self, !isActive else { return }
+            self.initializeClosure(sampleRate, channels)
+            self.isActive = true
+            log.debug("AudioFilter:\(id) initialize sampleRate:\(sampleRate) channels:\(channels).")
         }
-
-        log.debug("AudioFilter:\(id) initialize sampleRate:\(sampleRate) channels:\(channels).")
     }
 
     /// Applies noise cancellation processing to the audio buffer.
@@ -117,19 +83,62 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
 
     /// Releases the filter by stopping noise cancellation for the active call.
     public func release() {
-        Task { @MainActor in
-            do {
-                guard let activeCall = streamVideo.state.activeCall else {
-                    return
+        serialQueue.async { [weak self] in
+            guard let self, let activeCall = self.activeCall else {
+                return
+            }
+            await stopNoiseCancellation(for: activeCall)
+            log.debug("AudioFilter:\(id) release.")
+        }
+    }
+
+    // MARK: - Private helpers
+
+    private func didUpdate(_ streamVideo: StreamVideo?) {
+        activeCallCancellable?.cancel()
+        activeCall = nil
+
+        guard let streamVideo else {
+            return
+        }
+
+        activeCallCancellable = streamVideo
+            .state
+            .$activeCall
+            .assign(to: \.activeCall, onWeak: self)
+    }
+
+    private func didUpdateActiveCall(_ call: Call?, oldValue: Call?) {
+        serialQueue.async { [weak self] in
+            guard let self else { return }
+
+            if let call, isActive {
+                do {
+                    try await call.startNoiseCancellation()
+                    log.debug("AudioFilter:\(id) is now active 🟢.")
+                } catch {
+                    release()
+                    log.debug("AudioFilter:\(id) failed to activate with error:\(error)")
                 }
-                try await activeCall.stopNoiseCancellation()
-            } catch {
-                log.error(error)
+            } else if call == nil, isActive {
+                await stopNoiseCancellation(for: oldValue)
             }
         }
-        activationTask = nil
+    }
+
+    private func stopNoiseCancellation(for call: Call?) async {
         isActive = false
         releaseClosure() // Invoke the release closure.
-        log.debug("AudioFilter:\(id) release.")
+        log.debug("AudioFilter:\(id) is now inactive 🔴.")
+        
+        guard let call else {
+            return
+        }
+
+        do {
+            try await call.stopNoiseCancellation()
+        } catch {
+            log.error(error)
+        }
     }
 }
