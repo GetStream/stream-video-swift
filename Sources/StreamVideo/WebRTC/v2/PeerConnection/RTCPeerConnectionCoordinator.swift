@@ -36,6 +36,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let subsystem: LogSubsystem
     private let disposableBag: DisposableBag = .init()
     private let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection.serial.offer.queue")
+    private let debouncedIntervalInMilliseconds = 250 // The interval used to debounce the SetPublisher requests.
 
     /// `SetPublisher` and `HandleSubscriberOffer` are expected from the SFU to be sent/handled
     /// in a serial manner. The processing queues below ensure that the respective tasks are being executed
@@ -206,6 +207,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             peerConnection
                 .publisher(eventType: StreamRTCPeerConnection.ShouldNegotiateEvent.self)
                 .log(.debug) { _ in "Publisher will negotiate" }
+                .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
                 .receive(on: dispatchQueue)
                 .map { _ in () }
                 .sinkTask(queue: setPublisherProcessingQueue) { [weak self] in await self?.negotiate() }
