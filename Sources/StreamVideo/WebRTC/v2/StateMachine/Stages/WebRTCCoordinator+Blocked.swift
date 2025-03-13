@@ -62,7 +62,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 guard let self else { return }
                 do {
                     guard
-                        let coordinator = context.coordinator
+                        context.coordinator != nil
                     else {
                         throw ClientError("WebRCTAdapter instance not available.")
                     }
