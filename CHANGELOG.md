@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - Better handling for blocked users [#707](https://github.com/GetStream/stream-video-swift/pull/707)
 
+### ✅ Added
+- Expose publicly the `StreamPictureInPictureAdapter` so it can be used outside of the `CallViewModel` [#711](https://github.com/GetStream/stream-video-swift/pull/711) 
+
 # [1.18.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.18.0)
 _March 06, 2025_
 
