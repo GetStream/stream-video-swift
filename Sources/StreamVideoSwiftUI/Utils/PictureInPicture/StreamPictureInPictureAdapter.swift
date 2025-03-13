@@ -63,10 +63,8 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
         onSizeUpdate = nil
 
         guard let call = call else { return }
-        onSizeUpdate = {
-            [weak call] trackSize,
-                participant in
-            Task {
+        onSizeUpdate = { [weak call] trackSize, participant in
+            Task { @MainActor
                 log.debug(
                     "Updating track size for participant \(participant.name) to \(trackSize)",
                     subsystems: .pictureInPicture
