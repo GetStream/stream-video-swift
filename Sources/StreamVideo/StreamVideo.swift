@@ -159,6 +159,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         // calls and activate/deactivate the AudioSession.
         StreamActiveCallProviderKey.currentValue = self
 
+        // Update the streamVideo instance on the noiseCancellationFilter
+        // to allow it to observe the activeCall state.
+        videoConfig.noiseCancellationFilter?.streamVideo = self
+
         // Clear up the call cache to avoid stale call objects.
         callCache.removeAll()
 

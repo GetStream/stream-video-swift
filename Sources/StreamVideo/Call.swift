@@ -527,6 +527,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
         /// client.
         callCache.remove(for: cId)
+
+        // Reset the activeAudioFilter
+        setAudioFilter(nil)
+
         Task { @MainActor in
             if streamVideo.state.ringingCall?.cId == cId {
                 streamVideo.state.ringingCall = nil

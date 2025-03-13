@@ -389,9 +389,14 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
         @ViewBuilder _ content: () -> some View
     ) -> some View {
         if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
-            content()
-                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                .onReceive(call?.state.$callSettings) { self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
+            Group {
+                if isUsingFrontCameraForLocalUser {
+                    content()
+                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                } else {
+                    content()
+                }
+            }.onReceive(call?.state.$callSettings) { self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
         } else {
             content()
         }
