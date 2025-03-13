@@ -138,3 +138,5 @@ extension ClosedRange where Bound == Int {
 struct APIErrorContainer: Codable {
     let error: APIError
 }
+
+extension APIError: Error {}
