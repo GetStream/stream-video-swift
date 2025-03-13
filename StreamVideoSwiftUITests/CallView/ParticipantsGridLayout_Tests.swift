@@ -13,7 +13,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Send
 
     private var mockedOrientation: StreamDeviceOrientation! = .portrait(isUpsideDown: false)
     private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init {
-        await self.mockedOrientation
+        self.mockedOrientation
     }
 
     private lazy var callController: CallController_Mock! = CallController_Mock(
