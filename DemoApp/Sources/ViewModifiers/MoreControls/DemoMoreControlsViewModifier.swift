@@ -133,14 +133,54 @@ struct DemoMoreControlsViewModifier: ViewModifier {
     }
 }
 
+import ReplayKit
+
 struct DemoBroadcastMoreControlsListButtonView: View {
     @Injected(\.appearance) private var appearance
+
+    @State private var selection: ScreensharingType = .inApp
 
     @ObservedObject var viewModel: CallViewModel
     let preferredExtension: String
     @StateObject private var broadcastObserver = BroadcastObserver()
 
     var body: some View {
+        HStack {
+            inAppScreenshareButtonView
+
+            broadcastButtonView
+        }
+    }
+
+    @ViewBuilder
+    private var inAppScreenshareButtonView: some View {
+        DemoMoreControlListButtonView(
+            action: {
+                if !isCurrentUserScreenSharing {
+                    viewModel.startScreensharing(type: .inApp)
+                    selection = .inApp
+                } else {
+                    viewModel.stopScreensharing()
+                }
+            },
+            label: selection == .inApp && isCurrentUserScreenSharing
+                ? "Stop Screensharing"
+                : "Screenshare",
+            disabled: isInAppDisabled
+        ) {
+            Image(systemName: "record.circle")
+                .foregroundColor(
+                    isCurrentUserScreenSharing && selection == .inApp
+                        ? appearance.colors.accentRed
+                        : appearance.colors.text
+                )
+        }
+        .disabled(isInAppDisabled)
+        .opacity(isInAppDisabled ? 0.75 : 1)
+    }
+
+    @ViewBuilder
+    private var broadcastButtonView: some View {
         ZStack {
             BroadcastPickerView(
                 preferredExtension: preferredExtension,
@@ -149,13 +189,14 @@ struct DemoBroadcastMoreControlsListButtonView: View {
             .opacity(0.1)
             DemoMoreControlListButtonView(
                 action: { /* No-op */ },
-                label: viewModel.call?.state.isCurrentUserScreensharing == true
-                    ? "Stop Screensharing"
-                    : "Screenshare"
+                label: selection == .broadcast && isCurrentUserScreenSharing
+                    ? "Stop Broadcasting"
+                    : "Broadcast",
+                disabled: isBroadcastDisabled
             ) {
                 Image(systemName: "record.circle")
                     .foregroundColor(
-                        viewModel.call?.state.isCurrentUserScreensharing == true
+                        isCurrentUserScreenSharing && selection == .broadcast
                             ? appearance.colors.accentRed
                             : appearance.colors.text
                     )
@@ -165,16 +206,20 @@ struct DemoBroadcastMoreControlsListButtonView: View {
         .contentShape(Rectangle())
         .onChange(of: broadcastObserver.broadcastState, perform: { newValue in
             if newValue == .started {
+                selection = .broadcast
                 viewModel.startScreensharing(type: .broadcast)
             } else if newValue == .finished {
                 viewModel.stopScreensharing()
                 broadcastObserver.broadcastState = .notStarted
             }
         })
-        .disabled(isDisabled)
-        .onAppear {
-            broadcastObserver.observe()
-        }
+        .disabled(isBroadcastDisabled)
+        .onAppear { broadcastObserver.observe() }
+        .opacity(isBroadcastDisabled ? 0.75 : 1)
+    }
+
+    private var isCurrentUserScreenSharing: Bool {
+        viewModel.call?.state.isCurrentUserScreensharing == true
     }
 
     private var isDisabled: Bool {
@@ -182,5 +227,13 @@ struct DemoBroadcastMoreControlsListButtonView: View {
             return false
         }
         return viewModel.call?.state.isCurrentUserScreensharing == false
+    }
+
+    private var isInAppDisabled: Bool {
+        isDisabled || (isCurrentUserScreenSharing && selection != .inApp)
+    }
+
+    private var isBroadcastDisabled: Bool {
+        isDisabled || (isCurrentUserScreenSharing && selection != .broadcast)
     }
 }

@@ -6,20 +6,47 @@ import Foundation
 import ReplayKit
 import StreamWebRTC
 
-final class ScreenShareCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
+final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandler, RPScreenRecorderDelegate, @unchecked Sendable {
 
-    private let recorder: RPScreenRecorder
+    @Atomic private var isRecording: Bool = false
     private var activeSession: Session?
+    private let recorder: RPScreenRecorder
 
     private struct Session {
         var videoCapturer: RTCVideoCapturer
         var videoCapturerDelegate: RTCVideoCapturerDelegate
     }
 
-    init(
-        recorder: RPScreenRecorder = .shared()
-    ) {
+    init(recorder: RPScreenRecorder = .shared()) {
         self.recorder = recorder
+        super.init()
+        recorder.delegate = self
+    }
+
+    // MARK: - RPScreenRecorderDelegate
+
+    func screenRecorderDidChangeAvailability(_ screenRecorder: RPScreenRecorder) {
+        log.debug(
+            "\(type(of: self)) availability changed to isAvailable:\(screenRecorder.isAvailable).",
+            subsystems: .videoCapturer
+        )
+    }
+
+    func screenRecorder(
+        _ screenRecorder: RPScreenRecorder,
+        didStopRecordingWith previewViewController: RPPreviewViewController?,
+        error: (any Error)?
+    ) {
+        if let error {
+            log.error(error, subsystems: .videoCapturer)
+            Task { [weak self] in
+                do {
+                    try await self?.stop()
+                } catch {
+                    log.error(error, subsystems: .videoCapturer)
+                }
+            }
+        }
     }
 
     // MARK: - StreamVideoCapturerActionHandler
@@ -32,7 +59,6 @@ final class ScreenShareCaptureHandler: StreamVideoCapturerActionHandler, @unchec
                 videoCapturerDelegate: videoCapturerDelegate
             )
         case .stopCapture:
-            activeSession = nil
             try await stop()
         default:
             break
@@ -45,45 +71,42 @@ final class ScreenShareCaptureHandler: StreamVideoCapturerActionHandler, @unchec
         videoCapturer: RTCVideoCapturer,
         videoCapturerDelegate: RTCVideoCapturerDelegate
     ) async throws {
-        guard !recorder.isRecording else {
-            log.debug(
-                "\(type(of: self)) performed no action as recording is in progress.",
-                subsystems: .videoCapturer
-            )
+
+        guard recorder.isAvailable else {
+            throw ClientError("\(type(of: self)) isn't available for recording.")
+        }
+
+        guard !isRecording else {
             return
         }
 
-        // We disable the microphone as we don't support .screenshareAudio tracks
+        // We disable the microphone as we don't support .screenShareAudio tracks
         recorder.isMicrophoneEnabled = false
+        recorder.isCameraEnabled = false
 
-        try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard
-                let recorder = self?.recorder
-            else {
-                continuation.resume()
-                return
-            }
-
-            self?.activeSession = .init(
-                videoCapturer: videoCapturer,
-                videoCapturerDelegate: videoCapturerDelegate
-            )
-
-            recorder.startCapture { [weak self] sampleBuffer, sampleBufferType, error in
+        try await recorder.startCapture { [weak self] sampleBuffer, sampleBufferType, error in
+            if let error {
+                log.error(error, subsystems: .videoCapturer)
+            } else {
                 self?.didReceive(
                     sampleBuffer: sampleBuffer,
                     sampleBufferType: sampleBufferType,
                     error: error
                 )
-            } completionHandler: { error in
-                if let error {
-                    self?.activeSession = nil
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
             }
         }
+
+        activeSession = .init(
+            videoCapturer: videoCapturer,
+            videoCapturerDelegate: videoCapturerDelegate
+        )
+
+        isRecording = true
+
+        log.debug(
+            "\(type(of: self)) started capturing.",
+            subsystems: .videoCapturer
+        )
     }
 
     private func didReceive(
@@ -150,22 +173,33 @@ final class ScreenShareCaptureHandler: StreamVideoCapturerActionHandler, @unchec
     }
 
     private func stop() async throws {
+        guard
+            isRecording == true
+        else {
+            return
+        }
+
+        try await recorder.stopCapture()
+        activeSession = nil
+        isRecording = false
+    }
+}
+
+extension RPScreenRecorder {
+
+    fileprivate func stopCapture() async throws {
         try await withCheckedThrowingContinuation { [weak self] continuation in
-            guard
-                let recorder = self?.recorder,
-                recorder.isRecording
-            else {
-                continuation.resume()
+            guard let self else {
+                continuation.resume(throwing: ClientError())
                 return
             }
-
-            recorder.stopCapture { error in
+            self.stopCapture { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
                     continuation.resume()
                 }
             }
-        }
+        } as Void
     }
 }

@@ -509,6 +509,7 @@ open class CallViewModel: ObservableObject {
     public func startScreensharing(type: ScreensharingType) {
         Task {
             do {
+                await disablePictureInPictureIfRequired(type)
                 try await call?.startScreensharing(type: type)
             } catch {
                 log.error(error)
@@ -626,7 +627,7 @@ open class CallViewModel: ObservableObject {
                 let settings = localCallSettingsChange ? callSettings : nil
 
                 call.updateParticipantsSorting(with: participantsSortComparators)
-                
+
                 try await call.join(
                     create: true,
                     options: options,
@@ -882,6 +883,22 @@ open class CallViewModel: ObservableObject {
         )
 
         tracksToBeActivated.forEach { $0.track?.isEnabled = true }
+    }
+
+    private func disablePictureInPictureIfRequired(_ type: ScreensharingType) async {
+        guard type == .inApp, isPictureInPictureEnabled else {
+            return
+        }
+
+        _ = await Task { @MainActor in
+            pictureInPictureAdapter.call = nil
+            pictureInPictureAdapter.sourceView = nil
+            isPictureInPictureEnabled = false
+        }.result
+
+        log.warning(
+            "InApp screenSharing and Picture-in-Picture are mutually exclusive features. In order to allow the inApp screenSharing operation to go through, we automatically disabled the Picture-in-Picture feature. We recommend transition to a different method to share your screen in your app (e.g. broadcast). You can find more information here: https://getstream.io/video/docs/ios/advanced/screensharing/#broadcasting"
+        )
     }
 }
 
