@@ -362,6 +362,8 @@
 		40986C3C2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C3B2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift */; };
 		40986C3E2CD1148F00510F88 /* AudioSession_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */; };
 		409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
+		409D2A522D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
+		409D2A532D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */; };
 		40A0E9642B88DE830089E8D3 /* SerialActor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */; };
@@ -1813,6 +1815,7 @@
 		40986C3B2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCRtpTransceiverInit_Tests.swift; sourceTree = "<group>"; };
 		40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSession_Tests.swift; sourceTree = "<group>"; };
 		409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+PredicateFulfillment.swift"; sourceTree = "<group>"; };
+		409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBroadcastMoreControlsListButtonView.swift; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
 		40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIInterfaceOrientation+CGOrientation.swift"; sourceTree = "<group>"; };
 		40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor_Tests.swift; sourceTree = "<group>"; };
@@ -3771,6 +3774,7 @@
 		409146032B68FF4B007F3C17 /* DemoMoreControls */ = {
 			isa = PBXGroup;
 			children = (
+				409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */,
 				409146042B68FF4B007F3C17 /* DemoMoreControlListButtonView.swift */,
 				409146052B68FF4B007F3C17 /* DemoReactionButton.swift */,
 				40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */,
@@ -6734,6 +6738,7 @@
 				40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */,
 				404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */,
 				842D8BDA2865B37800801910 /* DemoApp.swift in Sources */,
+				409D2A522D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */,
 				40F445FE2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift in Sources */,
 				401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */,
 				409146072B68FF4B007F3C17 /* DemoMoreControlListButtonView.swift in Sources */,
@@ -6885,6 +6890,7 @@
 				40AB35622B738C8100E465CC /* CustomCallView.swift in Sources */,
 				40AB35452B738C4100E465CC /* DemoMoreControlListButtonView.swift in Sources */,
 				40B713692A275F1400D1FE67 /* AppState.swift in Sources */,
+				409D2A532D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */,
 				40AB353C2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */,
 				40AB355E2B738C7900E465CC /* DemoCallTopView.swift in Sources */,
 				406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */,
