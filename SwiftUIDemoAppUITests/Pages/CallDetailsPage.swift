@@ -26,6 +26,6 @@ enum CallDetailsPage {
     }
     static var participants: XCUIElementQuery { participantList.buttons }
     static var connectionErrorAlert: XCUIElement {
-        app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'StreamVideo.APIError'")).firstMatch
+        app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'failed with error'")).firstMatch
     }
 }
