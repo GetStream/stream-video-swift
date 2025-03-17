@@ -885,6 +885,22 @@ open class CallViewModel: ObservableObject {
         tracksToBeActivated.forEach { $0.track?.isEnabled = true }
     }
 
+    /// Disables Picture-in-Picture mode when in-app screen sharing is initiated.
+    ///
+    /// This method ensures compatibility between screen sharing and Picture-in-Picture features
+    /// by automatically disabling PiP when in-app screen sharing is started.
+    ///
+    /// - Parameter type: The type of screen sharing being initiated (in-app or broadcast).
+    ///
+    /// - Important: In-app screen sharing and Picture-in-Picture are mutually exclusive features.
+    /// When using in-app screen sharing, PiP will be automatically disabled to prevent conflicts.
+    /// Consider using broadcast screen sharing if you need to maintain PiP functionality.
+    ///
+    /// - Note: This method only takes action when:
+    ///   - The screen sharing type is `.inApp`
+    ///   - Picture-in-Picture is currently enabled
+    ///
+    /// For more information, see [Screen Sharing Documentation](https://getstream.io/video/docs/ios/advanced/screensharing/#broadcasting)
     private func disablePictureInPictureIfRequired(_ type: ScreensharingType) async {
         guard type == .inApp, isPictureInPictureEnabled else {
             return
