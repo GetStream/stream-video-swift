@@ -13,6 +13,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case get
         case accept
         case join
+        case updateTrackSize
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -24,10 +25,15 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             callSettings: CallSettings?
         )
 
+        case updateTrackSize(trackSize: CGSize, participant: CallParticipant)
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings):
                 return (create, options, ring, notify, callSettings)
+
+            case let .updateTrackSize(trackSize, participant):
+                return (trackSize, participant)
             }
         }
     }
@@ -106,5 +112,14 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
                 callSettings: callSettings
             )
         }
+    }
+
+    override func updateTrackSize(
+        _ trackSize: CGSize,
+        for participant: CallParticipant
+    ) async {
+        stubbedFunctionInput[.updateTrackSize]?.append(
+            .updateTrackSize(trackSize: trackSize, participant: participant)
+        )
     }
 }

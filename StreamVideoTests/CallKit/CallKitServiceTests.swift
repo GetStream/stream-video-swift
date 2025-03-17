@@ -347,6 +347,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         switch input {
         case let .join(_, _, _, _, callSettings):
             XCTAssertEqual(callSettings, customCallSettings)
+        case .updateTrackSize:
+            XCTFail()
         }
     }
 
@@ -409,6 +411,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         switch input {
         case let .join(_, _, _, _, callSettings):
             XCTAssertEqual(callSettings, customCallSettings)
+        case .updateTrackSize:
+            XCTFail()
         }
         XCTAssertEqual(call.microphone.status, .enabled)
 

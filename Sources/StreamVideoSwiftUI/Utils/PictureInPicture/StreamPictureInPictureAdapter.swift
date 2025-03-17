@@ -10,10 +10,10 @@ import UIKit
 /// This class encapsulates the logic for managing picture-in-picture functionality during a video call. It tracks
 /// changes in the call, updates related to call participants, and changes in the source view for Picture in
 /// Picture display.
-final class StreamPictureInPictureAdapter: @unchecked Sendable {
+public final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
     /// The active call.
-    var call: Call? {
+    public var call: Call? {
         didSet {
             Task { @MainActor [weak self] in
                 guard let self else { return }
@@ -23,7 +23,7 @@ final class StreamPictureInPictureAdapter: @unchecked Sendable {
     }
 
     /// The sourceView that will be used as an anchor/trigger for picture-in-picture (as required by AVKit).
-    var sourceView: UIView? {
+    public var sourceView: UIView? {
         didSet {
             guard sourceView !== oldValue else { return }
             didUpdate(sourceView)
@@ -31,7 +31,8 @@ final class StreamPictureInPictureAdapter: @unchecked Sendable {
     }
 
     /// The closure to call whenever the picture-in-picture rendering window changes size.
-    var onSizeUpdate: ((CGSize, CallParticipant) -> Void)? {
+    /// The closure gets assigned every time the call is being set.
+    var onSizeUpdate: (@Sendable(CGSize, CallParticipant) -> Void)? {
         didSet {
             Task { @MainActor in
                 pictureInPictureController?.onSizeUpdate = { [weak self] size in
@@ -59,8 +60,18 @@ final class StreamPictureInPictureAdapter: @unchecked Sendable {
         participantUpdatesCancellable?.cancel()
         activeParticipant = nil
         pictureInPictureController?.track = nil
+        onSizeUpdate = nil
 
         guard let call = call else { return }
+        onSizeUpdate = { [weak call] trackSize, participant in
+            Task { [weak call] in
+                log.debug(
+                    "Updating track size for participant \(participant.name) to \(trackSize)",
+                    subsystems: .pictureInPicture
+                )
+                await call?.updateTrackSize(trackSize, for: participant)
+            }
+        }
 
         Task { @MainActor in
             participantUpdatesCancellable = call
@@ -94,6 +105,16 @@ final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
     private func didUpdate(_ sourceView: UIView?) {
         pictureInPictureController?.sourceView = sourceView
+        if call == nil {
+            log.warning(
+                """
+                PictureInPicture adapter has received a sourceView but the required
+                call is nil. Please ensure that you provide a call instance in order
+                to activate correctly Picture-in-Picture.
+                """,
+                subsystems: .pictureInPicture
+            )
+        }
     }
 }
 
@@ -104,7 +125,7 @@ enum StreamPictureInPictureAdapterKey: InjectionKey {
 
 extension InjectedValues {
     /// Provides access to the `StreamPictureInPictureAdapter` class to the views and view models.
-    var pictureInPictureAdapter: StreamPictureInPictureAdapter {
+    public var pictureInPictureAdapter: StreamPictureInPictureAdapter {
         get {
             Self[StreamPictureInPictureAdapterKey.self]
         }

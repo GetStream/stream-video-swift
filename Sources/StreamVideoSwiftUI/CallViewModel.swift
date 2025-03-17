@@ -221,9 +221,6 @@ open class CallViewModel: ObservableObject {
 
         subscribeToCallEvents()
         subscribeToApplicationLifecycleEvents()
-        pictureInPictureAdapter.onSizeUpdate = { [weak self] in
-            self?.updateTrackSize($0, for: $1)
-        }
         
         // As we are setting the value on init, the `didSet` won't trigger, thus
         // we are firing it manually.
