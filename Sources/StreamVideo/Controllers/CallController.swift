@@ -30,7 +30,10 @@ class CallController: @unchecked Sendable {
     }
 
     weak var call: Call? {
-        didSet { subscribeToParticipantsCountUpdatesEvent(call) }
+        didSet {
+            subscribeToParticipantsCountUpdatesEvent(call)
+            subscribeToCurrentUserBlockedState(call)
+        }
     }
 
     private let user: User
@@ -45,6 +48,7 @@ class CallController: @unchecked Sendable {
     private var cachedLocation: String?
     private var currentSFU: String?
     private var participantsCountUpdatesTask: Task<Void, Never>?
+    private var currentUserBlockedTask: Task<Void, Never>?
 
     private let joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Never>(nil)
     private var joinCallResponseFetchObserver: AnyCancellable?
@@ -132,7 +136,7 @@ class CallController: @unchecked Sendable {
         )
         guard
             let response = try await joinCallResponseSubject
-            .nextValue(dropFirst: 1, timeout: 15)
+            .nextValue(dropFirst: 1, timeout: WebRTCConfiguration.timeout.join)
         else {
             await webRTCCoordinator.cleanUp()
             throw ClientError("Unable to connect to call callId:\(callId).")
@@ -623,6 +627,39 @@ class CallController: @unchecked Sendable {
                     }
                 }
             }
+        }
+    }
+
+    private func subscribeToCurrentUserBlockedState(_ call: Call?) {
+        disposableBag.remove("current-user-blocked")
+        guard let call else { return }
+        let currentUser = user
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+
+            call
+                .state
+                .$blockedUserIds
+                .filter { $0.contains(currentUser.id) }
+                .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
+                .sinkTask { [weak self] _ in
+                    guard let self else { return }
+                    do {
+                        try self
+                            .webRTCCoordinator
+                            .stateMachine
+                            .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
+                    } catch {
+                        log.error(
+                            "Unable to handle event that blocked current user.",
+                            subsystems: .webRTC,
+                            error: error
+                        )
+                    }
+                }
+                .store(in: disposableBag, key: "current-user-blocked")
         }
     }
 

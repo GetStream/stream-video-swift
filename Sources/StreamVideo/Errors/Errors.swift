@@ -4,8 +4,6 @@
 
 import Foundation
 
-extension APIError: Error {}
-
 extension Stream_Video_Sfu_Models_Error: Error, ReflectiveStringConvertible {}
 
 /// A Client error.
@@ -26,10 +24,11 @@ public class ClientError: Error, ReflectiveStringConvertible, @unchecked Sendabl
     public let apiError: APIError?
     
     var errorDescription: String? {
-        if apiError != nil {
-            return apiError.map(String.init(describing:))
+        if let apiError {
+            return apiError.message
+        } else {
+            return underlyingError.map(String.init(describing:))
         }
-        return underlyingError.map(String.init(describing:))
     }
     
     /// Retrieve the localized description for this error.
@@ -139,3 +138,5 @@ extension ClosedRange where Bound == Int {
 struct APIErrorContainer: Codable {
     let error: APIError
 }
+
+extension APIError: Error {}
