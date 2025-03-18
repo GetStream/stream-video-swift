@@ -1179,6 +1179,33 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertFalse(trackC.isEnabled)
     }
 
+    // MARK: - startScreensharing
+
+    @MainActor
+    func test_startScreensharing_broadcast_pictureInPictureRemainsActive() async {
+        let subject = CallViewModel()
+        subject.isPictureInPictureEnabled = true
+
+        subject.startScreensharing(type: .broadcast)
+
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        XCTAssertTrue(subject.isPictureInPictureEnabled)
+    }
+
+    @MainActor
+    func test_startScreensharing_inApp_pictureInPictureGetsDisabled() async {
+        let subject = CallViewModel()
+        subject.isPictureInPictureEnabled = true
+
+        subject.startScreensharing(type: .inApp)
+
+        await fulfilmentInMainActor {
+            subject.isPictureInPictureEnabled == false
+        }
+    }
+
+    // MARK: - Private helpers
+
     private struct ParticipantsScenario {
         var callParticipantsCount: Int
         var participantsLayout: ParticipantsLayout
@@ -1253,8 +1280,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         XCTAssertEqual(callViewModel.participants.count, expectedCount, file: file, line: line)
     }
-
-    // MARK: - private
     
     @MainActor
     private func callViewModelWithRingingCall(participants: [Member]) async -> CallViewModel {

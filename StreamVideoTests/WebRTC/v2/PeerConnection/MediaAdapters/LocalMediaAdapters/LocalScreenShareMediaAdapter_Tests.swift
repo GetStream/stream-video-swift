@@ -230,6 +230,19 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertEqual(capturer.timesCalled(.stopCapture), 0)
     }
 
+    func test_beginScreenSharing_startsCapturing() async throws {
+        let screensharingType = ScreensharingType.inApp
+        let capturer = MockStreamVideoCapturer()
+        mockCapturerFactory.stub(for: .buildScreenCapturer, with: capturer)
+
+        try await subject.beginScreenSharing(
+            of: screensharingType,
+            ownCapabilities: [.screenshare]
+        )
+
+        await fulfillment { capturer.timesCalled(.startCapture) == 1 }
+    }
+
     func test_beginScreenSharing_withCapability_updateMuteStateOnSFU() async throws {
         try await subject.beginScreenSharing(
             of: .inApp,
@@ -411,20 +424,6 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertTrue(subject.primaryTrack.isEnabled)
         XCTAssertTrue(mockTransceiver.sender.track?.isEnabled ?? false)
         XCTAssertEqual(mockPeerConnection.timesCalled(.addTransceiver), 1)
-    }
-
-    func test_publish_disabledLocalTrack_startsCapturing() async throws {
-        let capturer = MockStreamVideoCapturer()
-        mockCapturerFactory.stub(for: .buildScreenCapturer, with: capturer)
-        screenShareSessionProvider.activeSession = .init(
-            localTrack: subject.primaryTrack,
-            screenSharingType: .inApp,
-            capturer: capturer
-        )
-
-        subject.publish()
-
-        await fulfillment { capturer.timesCalled(.startCapture) == 1 }
     }
 
     // MARK: - unpublish

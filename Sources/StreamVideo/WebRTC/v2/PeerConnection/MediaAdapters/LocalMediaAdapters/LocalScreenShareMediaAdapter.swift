@@ -145,42 +145,37 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
                 return
             }
 
-            do {
-                try await startScreenShareCapturingSession()
-                primaryTrack.isEnabled = true
+            primaryTrack.isEnabled = true
 
-                publishOptions.forEach {
-                    self.addTransceiverIfRequired(
-                        for: $0,
-                        with: self.primaryTrack.clone(from: self.peerConnectionFactory),
-                        screenSharingType: activeSession.screenSharingType
-                    )
+            publishOptions.forEach {
+                self.addTransceiverIfRequired(
+                    for: $0,
+                    with: self.primaryTrack.clone(from: self.peerConnectionFactory),
+                    screenSharingType: activeSession.screenSharingType
+                )
+            }
+
+            let activePublishOptions = Set(self.publishOptions)
+
+            transceiverStorage
+                .forEach {
+                    if activePublishOptions.contains($0.key) {
+                        $0.value.track.isEnabled = true
+                        $0.value.transceiver.sender.track = $0.value.track
+                    } else {
+                        $0.value.track.isEnabled = false
+                        $0.value.transceiver.sender.track = nil
+                    }
                 }
 
-                let activePublishOptions = Set(self.publishOptions)
-
-                transceiverStorage
-                    .forEach {
-                        if activePublishOptions.contains($0.key) {
-                            $0.value.track.isEnabled = true
-                            $0.value.transceiver.sender.track = $0.value.track
-                        } else {
-                            $0.value.track.isEnabled = false
-                            $0.value.transceiver.sender.track = nil
-                        }
-                    }
-
-                log.debug(
-                    """
-                    Local screenShareTracks are now published
-                        primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                        clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                    """,
-                    subsystems: .webRTC
-                )
-            } catch {
-                log.error(error)
-            }
+            log.debug(
+                """
+                Local screenShareTracks are now published
+                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
+                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+                """,
+                subsystems: .webRTC
+            )
         }
     }
 
@@ -348,6 +343,12 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             screenSharingType: type,
             track: primaryTrack
         )
+
+        try await startScreenShareCapturingSession()
+
+        guard screenShareSessionProvider.activeSession != nil else {
+            return
+        }
 
         try await sfuAdapter.updateTrackMuteState(
             .screenShare,

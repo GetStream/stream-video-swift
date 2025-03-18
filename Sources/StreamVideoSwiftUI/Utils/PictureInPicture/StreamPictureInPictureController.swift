@@ -20,14 +20,14 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
 
     /// The RTCVideoTrack for which the picture-in-picture session is created.
     @MainActor
-    public var track: RTCVideoTrack? {
+    var track: RTCVideoTrack? {
         didSet {
             didUpdate(track) // Called when the `track` property changes
         }
     }
 
     /// The UIView that contains the video content.
-    public var sourceView: UIView? {
+    var sourceView: UIView? {
         didSet {
             didUpdate(sourceView) // Called when the `sourceView` property changes
         }
@@ -35,14 +35,14 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
 
     /// A closure called when the picture-in-picture view's size changes.
     @MainActor
-    public var onSizeUpdate: (@Sendable(CGSize) -> Void)? {
+    var onSizeUpdate: (@Sendable(CGSize) -> Void)? {
         didSet {
             contentViewController?.onSizeUpdate = onSizeUpdate // Updates the onSizeUpdate closure of the content view controller
         }
     }
 
     /// A boolean value indicating whether the picture-in-picture session should start automatically when the app enters background.
-    public var canStartPictureInPictureAutomaticallyFromInline: Bool
+    var canStartPictureInPictureAutomaticallyFromInline: Bool
 
     private var didAppBecomeActiveCancellable: AnyCancellable?
 
@@ -106,7 +106,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         completionHandler(true)
     }
 
-    public func pictureInPictureControllerWillStartPictureInPicture(
+    func pictureInPictureControllerWillStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
         Task { @MainActor in
@@ -114,7 +114,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         }
     }
 
-    public func pictureInPictureControllerDidStartPictureInPicture(
+    func pictureInPictureControllerDidStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
         Task { @MainActor in
@@ -122,7 +122,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         }
     }
 
-    public func pictureInPictureController(
+    func pictureInPictureController(
         _ pictureInPictureController: AVPictureInPictureController,
         failedToStartPictureInPictureWithError error: Error
     ) {
@@ -131,7 +131,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         }
     }
 
-    public func pictureInPictureControllerWillStopPictureInPicture(
+    func pictureInPictureControllerWillStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
         Task { @MainActor in
@@ -139,7 +139,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         }
     }
 
-    public func pictureInPictureControllerDidStopPictureInPicture(
+    func pictureInPictureControllerDidStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
         Task { @MainActor in
@@ -180,6 +180,8 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
             if #available(iOS 15.0, *) {
                 pictureInPictureController?.contentSource = nil
             }
+            pictureInPictureController = nil
+            cancellableBag.removeAll()
         }
     }
 
