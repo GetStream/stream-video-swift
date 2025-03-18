@@ -127,7 +127,9 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     }
 
     private func stopNoiseCancellation(for call: Call?) async {
-        isActive = false
+        Task { @MainActor in
+            isActive = false
+        }
         releaseClosure() // Invoke the release closure.
         log.debug("AudioFilter:\(id) is now inactive 🔴.")
         

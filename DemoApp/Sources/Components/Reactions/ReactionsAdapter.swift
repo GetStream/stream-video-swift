@@ -179,12 +179,14 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
     }
 
     private func register(reaction: Reaction, for userId: String) {
-        if activeReactions[userId] == nil {
-            activeReactions[userId] = []
-        }
+        Task { @MainActor in
+            if activeReactions[userId] == nil {
+                activeReactions[userId] = []
+            }
 
-        if activeReactions[userId]?.first?.id != reaction.id {
-            activeReactions[userId]?.append(reaction)
+            if activeReactions[userId]?.first?.id != reaction.id {
+                activeReactions[userId]?.append(reaction)
+            }
         }
     }
 
