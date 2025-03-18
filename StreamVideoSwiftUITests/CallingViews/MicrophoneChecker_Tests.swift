@@ -95,11 +95,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
         mockAudioRecorder.mockMetersPublisher.send(-10)
         mockAudioRecorder.mockMetersPublisher.send(-50)
 
-        let waitExpectation = expectation(description: "Wait for time interval...")
-        waitExpectation.isInverted = true
-        await safeFulfillment(of: [waitExpectation], timeout: 1)
-
-        XCTAssertEqual(subject.audioLevels, [0.5, 0.8, 0.0])
+        await fulfillment { self.subject.audioLevels == [0.5, 0.8, 0.0] }
     }
 }
 
