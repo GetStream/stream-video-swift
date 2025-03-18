@@ -56,8 +56,9 @@ public final class MicrophoneChecker: ObservableObject {
                 if updateMetersCancellable == nil {
                     updateMetersCancellable = audioRecorder
                         .metersPublisher
-                        .receive(on: DispatchQueue.main)
-                        .sink { [weak self] in self?.didReceiveUpdatedMeters($0) }
+                        .sinkTask(queue: serialQueue) { [weak self] in
+                            self?.didReceiveUpdatedMeters($0)
+                        }
                 }
             }
         } catch {
@@ -97,7 +98,9 @@ public final class MicrophoneChecker: ObservableObject {
         if temp.count > valueLimit {
             temp = Array(temp.dropFirst())
         }
-        audioLevels = temp
+        Task { @MainActor in
+            audioLevels = temp
+        }
     }
 }
 
