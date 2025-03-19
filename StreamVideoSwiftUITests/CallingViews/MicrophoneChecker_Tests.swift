@@ -5,24 +5,29 @@
 import AVFoundation
 import Combine
 import Foundation
-import StreamVideo
+@testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import XCTest
 
 final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
+    private lazy var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
     private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = MockStreamCallAudioRecorder(filename: "test.wav")
 
     override func setUp() {
         super.setUp()
+        _ = mockStreamVideo
         InjectedValues[\.callAudioRecorder] = mockAudioRecorder
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
+        await subject.stopListening()
+        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorderKey.currentValue
         mockAudioRecorder = nil
+        mockStreamVideo = nil
         subject = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - init
@@ -43,19 +48,28 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - audioLevels
 
-    func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async {
+    func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async throws {
+        LogConfig.level = .debug
         await subject.startListening()
 
-        mockAudioRecorder.mockMetersPublisher.send(-100)
-        mockAudioRecorder.mockMetersPublisher.send(-25)
-        mockAudioRecorder.mockMetersPublisher.send(-10)
-        mockAudioRecorder.mockMetersPublisher.send(-50)
+        let inputs = [
+            -100,
+             -25,
+             -10,
+             -50
+        ]
 
-        let waitExpectation = expectation(description: "Wait for time interval...")
-        waitExpectation.isInverted = true
-        await safeFulfillment(of: [waitExpectation], timeout: 1)
+        for value in inputs {
+            mockAudioRecorder.mockMetersPublisher.send(Float(value))
+            try? await Task.sleep(nanoseconds: 100_000)
+        }
 
-        XCTAssertEqual(subject.audioLevels, [0.5, 0.8, 0.0])
+        let values = try await subject
+            .$audioLevels
+            .filter { $0 == [0.5, 0.8, 0.0] }
+            .nextValue(timeout: defaultTimeout)
+
+        XCTAssertEqual(values, [0.5, 0.8, 0.0])
     }
 }
 

@@ -56,8 +56,9 @@ public final class MicrophoneChecker: ObservableObject {
                 if updateMetersCancellable == nil {
                     updateMetersCancellable = audioRecorder
                         .metersPublisher
-                        .receive(on: DispatchQueue.main)
-                        .sink { [weak self] in self?.didReceiveUpdatedMeters($0) }
+                        .sinkTask(queue: serialQueue) { @MainActor [weak self] in
+                            self?.didReceiveUpdatedMeters($0)
+                        }
                 }
             }
         } catch {
@@ -76,12 +77,12 @@ public final class MicrophoneChecker: ObservableObject {
                     await audioRecorder.stopRecording()
                     updateMetersCancellable?.cancel()
                     updateMetersCancellable = nil
-                    Task { @MainActor [weak self] in
+                    _ = await Task { @MainActor [weak self] in
                         guard let self else {
                             return
                         }
                         audioLevels = [Float](repeating: 0.0, count: valueLimit)
-                    }
+                    }.result
                 }
         } catch {
             log.error(error)
@@ -93,6 +94,7 @@ public final class MicrophoneChecker: ObservableObject {
     private func didReceiveUpdatedMeters(_ decibel: Float) {
         let normalisedAudioLevel = audioNormaliser.normalise(decibel)
         var temp = audioLevels
+        log.debug("Current audio levels: \(temp) newValue: \(decibel)")
         temp.append(normalisedAudioLevel)
         if temp.count > valueLimit {
             temp = Array(temp.dropFirst())
