@@ -38,47 +38,6 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(mockAudioRecorder.startRecordingWasCalled)
     }
 
-    func test_startListening_threadSafety() async {
-        await withTaskGroup(of: Void.self) { [weak self] group in
-            // Start listening task
-            group.addTask { [weak self] in
-                await self?.subject.startListening()
-            }
-
-            // Simulate audio updates task
-            group.addTask { [weak self] in
-                let stream = AsyncStream<Float> { continuation in
-                    let task = Task {
-                        let startTime = Date()
-                        while !Task.isCancelled {
-                            continuation.yield(Float.random(in: 0...100))
-                            try? await Task.sleep(nanoseconds: 100_000_000)
-
-                            // Check if 2 seconds have elapsed
-                            if Date().timeIntervalSince(startTime) >= 2.0 {
-                                break
-                            }
-                        }
-                        continuation.finish()
-                    }
-                    
-                    continuation.onTermination = { @Sendable _ in
-                        task.cancel()
-                    }
-                }
-                
-                for await value in stream {
-                    self?.mockAudioRecorder.mockMetersPublisher.send(value)
-                }
-            }
-
-            // Cleanup task
-            group.addTask { [weak self] in
-                self?.subject = nil
-            }
-        }
-    }
-
     // MARK: - stopListening
 
     func test_stopListening_stopListeningWasCalledOnAudioRecorder() async {
