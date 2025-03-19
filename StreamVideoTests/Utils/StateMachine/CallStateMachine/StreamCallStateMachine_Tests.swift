@@ -32,7 +32,7 @@ final class StreamCallStateMachineTests: StreamVideoTestCase, @unchecked Sendabl
         XCTAssertEqual(subject.currentStage.id, .idle)
 
         // When
-        XCTAssertNoThrow(try subject.transition(nextState), "Transition should not throw")
+        XCTAssertNoThrow(subject.transition(nextState), "Transition should not throw")
 
         // Then
         XCTAssertEqual(subject.currentStage.call?.callId, mockCall.callId, "Current stage call ID should match mock call ID")
@@ -47,7 +47,7 @@ final class StreamCallStateMachineTests: StreamVideoTestCase, @unchecked Sendabl
         )
 
         // When
-        XCTAssertThrowsError(try subject.transition(nextState), "Transition should throw")
+        XCTAssertNoThrow(subject.transition(nextState), "Transition should not throw")
 
         // Then
         XCTAssertEqual(subject.currentStage.call?.callId, mockCall.callId, "Current stage call ID should match mock call ID")
@@ -61,7 +61,7 @@ final class StreamCallStateMachineTests: StreamVideoTestCase, @unchecked Sendabl
         let response = AcceptCallResponse(duration: "123")
 
         // When
-        try subject.transition(.accepting(mockCall, actionBlock: {
+        subject.transition(.accepting(mockCall, actionBlock: {
             try await Task.sleep(nanoseconds: 500_000_000)
             return response
         }))

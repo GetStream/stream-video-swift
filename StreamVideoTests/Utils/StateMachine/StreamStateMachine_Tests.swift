@@ -35,7 +35,7 @@ final class StreamStateMachineTests: XCTestCase, @unchecked Sendable {
         let stateMachine = StreamStateMachine(initialStage: initialState)
 
         // When
-        XCTAssertNoThrow(try stateMachine.transition(to: nextState), "Transition should not throw")
+        XCTAssertNoThrow(stateMachine.transition(to: nextState), "Transition should not throw")
 
         // Then
         XCTAssertEqual(stateMachine.currentStage.id, nextState.id, "Current state should match next state")
@@ -47,10 +47,11 @@ final class StreamStateMachineTests: XCTestCase, @unchecked Sendable {
         let nextState = MockStage(id: "Next", description: "Next State", allowedTransitions: [])
         let stateMachine = StreamStateMachine(initialStage: initialState)
 
-        // When, Then
-        XCTAssertThrowsError(try stateMachine.transition(to: nextState), "Transition should throw") { error in
-            XCTAssertTrue(error is ClientError.InvalidStateMachineTransition, "Error should be of type ClientError")
-        }
+        // When
+        XCTAssertNoThrow(stateMachine.transition(to: nextState), "Transition should not throw")
+
+        // Then
+        XCTAssertEqual(stateMachine.currentStage.id, initialState.id)
     }
 
     // MARK: - Mocks

@@ -519,7 +519,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = streamVideo.call(callType: .default, callId: .unique)
         subject.call = call
         await wait(for: 1)
-        try mockWebRTCCoordinatorFactory
+        mockWebRTCCoordinatorFactory
             .mockCoordinatorStack
             .coordinator
             .stateMachine
