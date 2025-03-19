@@ -22,8 +22,10 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         .joined,
         .disconnected,
         .fastReconnecting,
+        .fastReconnected,
         .rejoining,
-        .migrated
+        .migrated,
+        .migrating
     ]
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .disconnected(.init())
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(

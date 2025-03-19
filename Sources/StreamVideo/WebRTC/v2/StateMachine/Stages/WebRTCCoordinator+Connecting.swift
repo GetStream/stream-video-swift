@@ -91,7 +91,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             case .rejoining:
                 if ring || notify || options != nil {
                     log.assert(ring == false, "Ring cannot be true when rejoining.")
-                    log.assert(notify == false, "Notfiy cannot be true when rejoining.")
+                    log.assert(notify == false, "Notify cannot be true when rejoining.")
                     log.assert(options == nil, "CreateCallOptions cannot be non-nil when rejoining.")
                 }
                 execute(

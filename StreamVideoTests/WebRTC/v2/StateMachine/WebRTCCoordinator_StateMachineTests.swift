@@ -34,7 +34,7 @@ final class WebRTCCoordinator_StateMachineTests: XCTestCase, @unchecked Sendable
         XCTAssertEqual(subject.currentStage.id, .idle)
 
         // When
-        XCTAssertNoThrow(try subject.transition(nextState), "Transition should not throw")
+        XCTAssertNoThrow(subject.transition(nextState), "Transition should not throw")
 
         // Then
         XCTAssertEqual(subject.currentStage.id, .connecting)
@@ -46,7 +46,7 @@ final class WebRTCCoordinator_StateMachineTests: XCTestCase, @unchecked Sendable
         XCTAssertEqual(subject.currentStage.id, .idle)
 
         // When
-        XCTAssertThrowsError(try subject.transition(nextState), "Transition should throw")
+        XCTAssertNoThrow(subject.transition(nextState), "Transition should throw")
 
         // Then
         XCTAssertEqual(subject.currentStage.id, .idle)

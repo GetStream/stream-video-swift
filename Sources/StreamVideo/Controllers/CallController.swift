@@ -646,18 +646,10 @@ class CallController: @unchecked Sendable {
                 .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
                 .sinkTask { [weak self] _ in
                     guard let self else { return }
-                    do {
-                        try self
-                            .webRTCCoordinator
-                            .stateMachine
-                            .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
-                    } catch {
-                        log.error(
-                            "Unable to handle event that blocked current user.",
-                            subsystems: .webRTC,
-                            error: error
-                        )
-                    }
+                    self
+                        .webRTCCoordinator
+                        .stateMachine
+                        .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
                 }
                 .store(in: disposableBag, key: "current-user-blocked")
         }

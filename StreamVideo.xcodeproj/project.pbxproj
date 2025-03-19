@@ -38,11 +38,11 @@
 		401338782BF248B9007318BD /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401338772BF248B9007318BD /* MockStreamVideo.swift */; };
 		4013387A2BF248CC007318BD /* MockCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401338792BF248CC007318BD /* MockCall.swift */; };
 		4013387C2BF248E9007318BD /* Mockable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013387B2BF248E9007318BD /* Mockable.swift */; };
+		4013A8ED2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013A8EC2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift */; };
+		4013A8EF2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013A8EE2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift */; };
 		4013A8F32D82D99D00F81C15 /* StreamPictureInPictureAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013A8F02D82D93900F81C15 /* StreamPictureInPictureAdapterTests.swift */; };
 		4013A8F42D82DA8500F81C15 /* MockCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401338792BF248CC007318BD /* MockCall.swift */; };
 		4013A8F52D82DAB300F81C15 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401338772BF248B9007318BD /* MockStreamVideo.swift */; };
-		4013A8ED2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013A8EC2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift */; };
-		4013A8EF2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013A8EE2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift */; };
 		401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */; };
 		401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */; };
 		401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480352A5447C50029166A /* LocalParticipantViewModifier.swift */; };
@@ -1578,9 +1578,9 @@
 		401338772BF248B9007318BD /* MockStreamVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamVideo.swift; sourceTree = "<group>"; };
 		401338792BF248CC007318BD /* MockCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCall.swift; sourceTree = "<group>"; };
 		4013387B2BF248E9007318BD /* Mockable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mockable.swift; sourceTree = "<group>"; };
-		4013A8F02D82D93900F81C15 /* StreamPictureInPictureAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapterTests.swift; sourceTree = "<group>"; };
 		4013A8EC2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebRTCCoordinator+Blocked.swift"; sourceTree = "<group>"; };
 		4013A8EE2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_BlockedStageTests.swift; sourceTree = "<group>"; };
+		4013A8F02D82D93900F81C15 /* StreamPictureInPictureAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapterTests.swift; sourceTree = "<group>"; };
 		4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser.swift; sourceTree = "<group>"; };
 		401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser_Tests.swift; sourceTree = "<group>"; };
 		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };

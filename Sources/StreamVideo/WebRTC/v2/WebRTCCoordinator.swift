@@ -98,7 +98,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         notify: Bool
     ) async throws {
         await stateAdapter.set(initialCallSettings: callSettings)
-        try stateMachine.transition(
+        stateMachine.transition(
             .connecting(
                 stateMachine.currentStage.context,
                 create: create,
@@ -116,13 +116,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     /// Leaves the call and transitions the state machine to the `leaving` stage.
     func leave() {
-        do {
-            try stateMachine.transition(
-                .leaving(stateMachine.currentStage.context)
-            )
-        } catch {
-            log.error(error, subsystems: .webRTC)
-        }
+        stateMachine.transition(
+            .leaving(stateMachine.currentStage.context)
+        )
     }
 
     // MARK: - Media
@@ -458,13 +454,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
                     disconnectedSince: .init(),
                     deadline: stateMachine.currentStage.context.fastReconnectDeadlineSeconds
                 )
-                do {
-                    try stateMachine.transition(
-                        .disconnected(stateMachine.currentStage.context)
-                    )
-                } catch {
-                    log.error(error, subsystems: .webRTC)
-                }
+                stateMachine.transition(
+                    .disconnected(stateMachine.currentStage.context)
+                )
             }
             .store(in: disposableBag)
 
@@ -474,13 +466,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .sink { [weak self] _ in
                 guard let self else { return }
                 stateMachine.currentStage.context.reconnectionStrategy = .rejoin
-                do {
-                    try stateMachine.transition(
-                        .disconnected(stateMachine.currentStage.context)
-                    )
-                } catch {
-                    log.error(error, subsystems: .webRTC)
-                }
+                stateMachine.transition(
+                    .disconnected(stateMachine.currentStage.context)
+                )
             }
             .store(in: disposableBag)
 
@@ -490,13 +478,9 @@ final class WebRTCCoordinator: @unchecked Sendable {
             .sink { [weak self] _ in
                 guard let self else { return }
                 stateMachine.currentStage.context.reconnectionStrategy = .migrate
-                do {
-                    try stateMachine.transition(
-                        .disconnected(stateMachine.currentStage.context)
-                    )
-                } catch {
-                    log.error(error, subsystems: .webRTC)
-                }
+                stateMachine.transition(
+                    .disconnected(stateMachine.currentStage.context)
+                )
             }
             .store(in: disposableBag)
     }

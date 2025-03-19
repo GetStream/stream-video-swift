@@ -29,6 +29,9 @@ struct DemoCallTopView: View {
                 }
 
                 ToggleCameraIconView(viewModel: viewModel)
+                if AppEnvironment.configuration == .debug {
+                    LogsViewerButtonView()
+                }
 
                 Spacer()
             }
@@ -176,5 +179,25 @@ private struct ShadowModifier: ViewModifier {
         content
             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 12)
             .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+    }
+}
+
+private struct LogsViewerButtonView: View {
+    @State private var isPresented = false
+
+    var body: some View {
+        Button {
+            isPresented.toggle()
+        } label: {
+            CallIconView(
+                icon: Image(systemName: "ladybug.fill"),
+                size: 44,
+                iconStyle: .secondary
+            )
+        }.sheet(isPresented: $isPresented) {
+            NavigationView {
+                MemoryLogViewer()
+            }
+        }
     }
 }

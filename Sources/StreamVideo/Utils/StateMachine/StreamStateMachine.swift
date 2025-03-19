@@ -30,10 +30,10 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
     ///
     /// - Parameter nextStage: The next stage to transition to.
     /// - Throws: An error if the transition is not allowed.
-    public func transition(to nextStage: StageType) throws {
-        try queue.sync {
+    public func transition(to nextStage: StageType) {
+        queue.sync {
             var nextStage = nextStage
-            nextStage.transition = { [weak self] in try self?.transition(to: $0) }
+            nextStage.transition = { [weak self] in self?.transition(to: $0) }
 
             let transitioningFromStage = currentStage
             transitioningFromStage.willTransitionAway()
@@ -42,7 +42,9 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
                 let newStage = nextStage.transition(from: currentStage),
                 newStage.id.hashValue != currentStage.id.hashValue
             else {
-                throw ClientError.InvalidStateMachineTransition(from: currentStage, to: nextStage)
+                let error = ClientError.InvalidStateMachineTransition(from: currentStage, to: nextStage)
+                log.warning(error)
+                return
             }
 
             transitioningFromStage.didTransitionAway()

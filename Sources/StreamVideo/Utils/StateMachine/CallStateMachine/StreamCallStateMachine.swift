@@ -27,8 +27,8 @@ final class StreamCallStateMachine {
     ///
     /// - Parameter nextStage: The next stage to transition to.
     /// - Throws: An error if the transition is invalid.
-    func transition(_ nextStage: Stage) throws {
-        try stateMachine.transition(to: nextStage)
+    func transition(_ nextStage: Stage) {
+        stateMachine.transition(to: nextStage)
     }
 
     /// Waits for the next stage of the specified type after optionally skipping initial stages.
