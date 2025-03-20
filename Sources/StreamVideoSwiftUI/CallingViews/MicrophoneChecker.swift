@@ -94,7 +94,6 @@ public final class MicrophoneChecker: ObservableObject {
     private func didReceiveUpdatedMeters(_ decibel: Float) {
         let normalisedAudioLevel = audioNormaliser.normalise(decibel)
         var temp = audioLevels
-        log.debug("Current audio levels: \(temp) newValue: \(decibel)")
         temp.append(normalisedAudioLevel)
         if temp.count > valueLimit {
             temp = Array(temp.dropFirst())
