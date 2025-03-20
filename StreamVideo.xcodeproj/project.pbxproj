@@ -50,6 +50,9 @@
 		40149DCC2B7E814300473176 /* AVAudioRecorderBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DCB2B7E814300473176 /* AVAudioRecorderBuilder.swift */; };
 		40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DCD2B7E837A00473176 /* StreamCallAudioRecorder.swift */; };
 		40149DD02B7E839500473176 /* AVAudioSession+RequestRecordPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DCF2B7E839500473176 /* AVAudioSession+RequestRecordPermission.swift */; };
+		4014F1032D8C2EBC004E7EFD /* Gleap in Frameworks */ = {isa = PBXBuildFile; productRef = 4014F1022D8C2EBC004E7EFD /* Gleap */; };
+		4014F1062D8C2F07004E7EFD /* GleapAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014F1052D8C2F07004E7EFD /* GleapAdapter.swift */; };
+		4014F1072D8C2F07004E7EFD /* GleapAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014F1052D8C2F07004E7EFD /* GleapAdapter.swift */; };
 		401A0F032AB1C1B600BE2DBD /* ThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */; };
 		401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */; };
 		401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A72A9DF7B400534ED1 /* EffectsLibrary */; };
@@ -1588,6 +1591,7 @@
 		40149DCB2B7E814300473176 /* AVAudioRecorderBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioRecorderBuilder.swift; sourceTree = "<group>"; };
 		40149DCD2B7E837A00473176 /* StreamCallAudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder.swift; sourceTree = "<group>"; };
 		40149DCF2B7E839500473176 /* AVAudioSession+RequestRecordPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSession+RequestRecordPermission.swift"; sourceTree = "<group>"; };
+		4014F1052D8C2F07004E7EFD /* GleapAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GleapAdapter.swift; sourceTree = "<group>"; };
 		401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserver.swift; sourceTree = "<group>"; };
 		401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatAdapter.swift; sourceTree = "<group>"; };
 		401A64B02A9DF83200534ED1 /* TokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenResponse.swift; sourceTree = "<group>"; };
@@ -2730,6 +2734,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4014F1032D8C2EBC004E7EFD /* Gleap in Frameworks */,
 				844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */,
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 				401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */,
@@ -2914,6 +2919,14 @@
 				4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */,
 			);
 			path = AudioRecorder;
+			sourceTree = "<group>";
+		};
+		4014F1042D8C2EFE004E7EFD /* Gleap */ = {
+			isa = PBXGroup;
+			children = (
+				4014F1052D8C2F07004E7EFD /* GleapAdapter.swift */,
+			);
+			path = Gleap;
 			sourceTree = "<group>";
 		};
 		401A64A92A9DF7E600534ED1 /* Chat */ = {
@@ -3186,6 +3199,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4014F1042D8C2EFE004E7EFD /* Gleap */,
 				845C098F2C0E0B6B00F725B3 /* SessionTimer */,
 				403EFC9D2BDBFDEE0057C248 /* Feedback */,
 				40CB9FA52B7FB1B2006BED93 /* Snapshot */,
@@ -6241,6 +6255,7 @@
 				844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */,
 				82EB8F582B0277E70038B5A2 /* StreamWebRTC */,
 				40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */,
+				4014F1022D8C2EBC004E7EFD /* Gleap */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* StreamVideoCallApp-Debug.app */;
@@ -6493,6 +6508,7 @@
 				844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				82EB8F552B0277730038B5A2 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */,
 				40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */,
+				4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -6706,6 +6722,7 @@
 				4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */,
 				40F445B42A9E01B2004BE3DA /* AuthenticationProvider.swift in Sources */,
 				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
+				4014F1062D8C2F07004E7EFD /* GleapAdapter.swift in Sources */,
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
 				845C09912C0E0B7600F725B3 /* SessionTimer.swift in Sources */,
 				401C1EE72D48F20F00304609 /* DemoClosedCaptionsView.swift in Sources */,
@@ -6850,6 +6867,7 @@
 				406A8E9E2AA1D7E9001F598A /* URL+Convenience.swift in Sources */,
 				40AB353F2B738C1500E465CC /* CodeScanner.swift in Sources */,
 				40382F252C889EB200C2D00F /* View+PresentDemoMoreMenu.swift in Sources */,
+				4014F1072D8C2F07004E7EFD /* GleapAdapter.swift in Sources */,
 				406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */,
 				406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */,
 				40AB35602B738C7D00E465CC /* ReactionIcon.swift in Sources */,
@@ -9514,6 +9532,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GleapSDK/Gleap-iOS-SDK";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 14.2.4;
+			};
+		};
 		401A64A32A9DF79E00534ED1 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-chat-swiftui";
@@ -9589,6 +9615,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4014F1022D8C2EBC004E7EFD /* Gleap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */;
+			productName = Gleap;
+		};
 		401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 401A64A32A9DF79E00534ED1 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;

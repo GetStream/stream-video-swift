@@ -14,6 +14,35 @@ enum LogQueue {
         get { queue.maxCount }
         set { queue.maxCount = newValue }
     }
+
+    static func createLogFile() throws -> URL {
+        let temporaryDirectoryURL = FileManager.default.temporaryDirectory
+        let fileName = "stream_video_logs_\(Date().timeIntervalSince1970).txt"
+        let fileURL = temporaryDirectoryURL.appendingPathComponent(fileName)
+
+        // Delete any existing temporary file first
+        deleteTemporaryLogFile(at: fileURL)
+
+        // Add all logs to the content
+        let logs = LogQueue.queue.elements
+        let logContent = """
+        Stream Video Logs - Generated: \(Date())
+        \(logs.reversed().map { "\($0.level) - [\($0.fileName):\($0.lineNumber):\($0.functionName)] \($0.message)" }
+            .joined(separator: "\n"))
+        """
+
+        try logContent.write(to: fileURL, atomically: true, encoding: .utf8)
+        return fileURL
+    }
+
+    static func deleteTemporaryLogFile(at path: URL) {
+        do {
+            try FileManager.default.removeItem(at: path)
+            print("Temporary log file deleted successfully")
+        } catch {
+            print("Error deleting temporary log file: \(error)")
+        }
+    }
 }
 
 final class Queue<T>: ObservableObject {
