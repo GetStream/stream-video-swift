@@ -5,16 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🐞 Fixed
-- Fix an issue that was stopping NoiseCancellation from being activated [#705](https://github.com/GetStream/stream-video-swift/pull/705)
-- Fix an issue where SetPublisher request was firing when nothing was published [#706](https://github.com/GetStream/stream-video-swift/pull/706)
-- The VideoRendererView for the localParticipant, will flip **only** the front camera feed, not the back one [#708](https://github.com/GetStream/stream-video-swift/pull/708)
-- Attempt to fix a race condition caused in the MicrophoneChecker. [#718](https://github.com/GetStream/stream-video-swift/pull/718)
-
-### ✅ Added
-- Better handling for blocked users [#707](https://github.com/GetStream/stream-video-swift/pull/707)
-
-### ✅ Added
-- Expose publicly the `StreamPictureInPictureAdapter` so it can be used outside of the `CallViewModel` [#711](https://github.com/GetStream/stream-video-swift/pull/711) 
+- Fix an issue that was keeping the Picture-in-Picture active while the app was in the foreground [#723](https://github.com/GetStream/stream-video-swift/pull/723)
 
 # [1.18.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.18.0)
 _March 06, 2025_
