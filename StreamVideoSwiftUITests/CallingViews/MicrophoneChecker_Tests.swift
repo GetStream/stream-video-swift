@@ -54,9 +54,9 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
         let inputs = [
             -100,
-             -25,
-             -10,
-             -50
+            -25,
+            -10,
+            -50
         ]
 
         for value in inputs {
