@@ -307,7 +307,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 0)
     }
 
-    func test_negotiate_subjectIsPublisher_multipleRequestsExecuteSerially_callSetPublisherOnSFUWithCorrectOfferEveryTime(
+    func test_negotiate_subjectIsPublisher_multipleRequestsExecuteSerially_callSetPublisherOnSFUWithCorrectOfferOnlyOnce(
     ) async throws {
         _ = subject
         let offerA = RTCSessionDescription(
@@ -341,7 +341,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
 
         await fulfillment { [mockPeerConnection] in
-            mockPeerConnection?.timesCalled(.setLocalDescription) == 2
+            mockPeerConnection?.timesCalled(.setLocalDescription) == 1
         }
 
         XCTAssertEqual(
