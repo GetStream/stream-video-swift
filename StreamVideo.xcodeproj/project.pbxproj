@@ -564,6 +564,7 @@
 		40C4DF532C1C60A80035DBC2 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689172C64DDC70054528A /* Publisher+TaskSink.swift */; };
+		40C708D62D8D729500D3501F /* Gleap in Frameworks */ = {isa = PBXBuildFile; productRef = 40C708D52D8D729500D3501F /* Gleap */; };
 		40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */; };
 		40C75BB82CB4045100C167C3 /* MockThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */; };
 		40C75BB92CB40D8700C167C3 /* Mockable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013387B2BF248E9007318BD /* Mockable.swift */; };
@@ -2761,6 +2762,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40C708D62D8D729500D3501F /* Gleap in Frameworks */,
 				406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */,
 				82E1C14F2AEA7DD50076D7BE /* GDPerformanceView-Swift in Frameworks */,
 				40F0178A2BC014EC00E89FD1 /* Sentry in Frameworks */,
@@ -6302,6 +6304,7 @@
 				82EB8F5A2B0277EC0038B5A2 /* StreamWebRTC */,
 				40AB35682B738D3D00E465CC /* EffectsLibrary */,
 				40F017892BC014EC00E89FD1 /* Sentry */,
+				40C708D52D8D729500D3501F /* Gleap */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -9654,6 +9657,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */;
 			productName = StreamVideoNoiseCancellation;
+		};
+		40C708D52D8D729500D3501F /* Gleap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */;
+			productName = Gleap;
 		};
 		40F017892BC014EC00E89FD1 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
