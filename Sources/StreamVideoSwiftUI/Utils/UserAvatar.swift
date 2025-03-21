@@ -38,9 +38,15 @@ public struct UserAvatar<Failback: View>: View {
     
     /// The content and behavior of the `UserAvatar` view.
     public var body: some View {
-        StreamLazyImage(imageURL: imageURL, placeholder: failbackProvider)
-            .frame(width: size, height: size)
-            .clipShape(Circle())
+        if size > 0 {
+            StreamLazyImage(imageURL: imageURL, placeholder: failbackProvider)
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+        } else {
+            StreamLazyImage(imageURL: imageURL, placeholder: failbackProvider)
+                .padding()
+                .clipShape(Circle())
+        }
     }
 }
 
