@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.19.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.0)
+_March 20, 2025_
+
 ### 🐞 Fixed
 - Fix an issue that was stopping NoiseCancellation from being activated [#705](https://github.com/GetStream/stream-video-swift/pull/705)
 - Fix an issue where SetPublisher request was firing when nothing was published [#706](https://github.com/GetStream/stream-video-swift/pull/706)
