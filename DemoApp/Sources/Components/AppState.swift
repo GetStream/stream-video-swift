@@ -12,6 +12,7 @@ final class AppState: ObservableObject {
     
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
     @Injected(\.callKitAdapter) private var callKitAdapter
+    @Injected(\.gleap) private var gleap
 
     // MARK: - Properties
 
@@ -117,6 +118,9 @@ final class AppState: ObservableObject {
             do {
                 loading = true
                 try await streamVideo?.connect()
+                if let currentUser = self.currentUser {
+                    gleap.login(currentUser)
+                }
                 loading = false
             } catch {
                 loading = false
@@ -145,6 +149,7 @@ final class AppState: ObservableObject {
         unsecureRepository.removeCurrentUser()
         streamVideo = nil
         userState = .notLoggedIn
+        gleap.logout()
     }
 
     func dispatchLogout() {

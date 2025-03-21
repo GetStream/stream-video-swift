@@ -64,6 +64,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                             VStack {
                                 Divider()
 
+                                DemoMoreLogsAndGleapButtonView()
+
                                 DemoBroadcastMoreControlsListButtonView(
                                     viewModel: viewModel,
                                     preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
@@ -130,5 +132,49 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                     )
                 }
             }
+    }
+}
+
+private struct DemoMoreLogsAndGleapButtonView: View {
+
+    @Injected(\.gleap) private var gleap
+    @Injected(\.appearance) private var appearance
+
+    @State private var areLogsPresented = false
+    @State private var activeLogsTask: Task<Void, Error>?
+
+    var body: some View {
+        HStack {
+            gleapButtonView
+            logsViewButtonView
+        }
+    }
+
+    private var gleapButtonView: some View {
+        DemoMoreControlListButtonView(
+            action: {
+                activeLogsTask?.cancel()
+                activeLogsTask = Task { @MainActor in
+                    let logURL = try LogQueue.createLogFile()
+                    gleap.showBugReport(with: logURL)
+                }
+            },
+            label: "Report a bug"
+        ) {
+            Image(systemName: "ladybug.fill")
+        }
+    }
+
+    private var logsViewButtonView: some View {
+        DemoMoreControlListButtonView(
+            action: { areLogsPresented = true },
+            label: "Logs Viewer"
+        ) {
+            Image(systemName: "text.page")
+        }.sheet(isPresented: $areLogsPresented) {
+            NavigationView {
+                MemoryLogViewer()
+            }
+        }
     }
 }
