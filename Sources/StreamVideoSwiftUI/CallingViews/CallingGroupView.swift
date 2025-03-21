@@ -148,16 +148,30 @@ struct CircledTitleView: View {
     var size: CGFloat = .expandedAvatarSize
     
     var body: some View {
-        ZStack {
-            Circle()
-                .foregroundColor(colors.tintColor)
-            Text(title)
-                .foregroundColor(.white)
-                .font(fonts.title)
-                .minimumScaleFactor(0.4)
-                .padding()
+        if size > 0 {
+            ZStack {
+                Circle()
+                    .foregroundColor(colors.tintColor)
+                Text(title)
+                    .foregroundColor(.white)
+                    .font(fonts.title)
+                    .minimumScaleFactor(0.4)
+                    .padding()
+            }
+            .frame(maxWidth: size, maxHeight: size)
+            .modifier(ShadowModifier())
+        } else {
+            ZStack {
+                Circle()
+                    .foregroundColor(colors.tintColor)
+                Text(title)
+                    .foregroundColor(.white)
+                    .font(fonts.title)
+                    .minimumScaleFactor(0.4)
+                    .padding()
+            }
+            .padding()
+            .modifier(ShadowModifier())
         }
-        .frame(maxWidth: size, maxHeight: size)
-        .modifier(ShadowModifier())
     }
 }

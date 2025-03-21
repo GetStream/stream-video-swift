@@ -10,6 +10,8 @@ import StreamWebRTC
 /// A view that can be used to render an instance of `RTCVideoTrack`
 final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
+    @Injected(\.staticVideoSource) private var staticVideoSource
+
     /// The rendering track.
     var track: RTCVideoTrack? {
         didSet {
@@ -47,6 +49,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// The cancellable used to control the bufferPublisher stream.
     private var bufferUpdatesCancellable: AnyCancellable?
+    private var staticFrameGenerationCancellable: AnyCancellable?
 
     /// The view's size.
     /// - Note: We are using this property instead for `frame.size` or `bounds.size` so we can
@@ -185,7 +188,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     private func process(_ buffer: CMSampleBuffer) {
         guard
             bufferUpdatesCancellable != nil,
-            let trackId = track?.trackId,
             buffer.isValid
         else {
             contentView.renderingComponent.flush()
@@ -193,10 +195,9 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             return
         }
 
-        logMessage(
-            .debug,
-            message: "⚙️ Processing buffer for trackId:\(trackId)."
-        )
+        let trackId = track?.trackId ?? "-"
+
+        logMessage(.debug, message: "⚙️ Processing buffer for trackId:\(trackId).")
         if #available(iOS 14.0, *) {
             if contentView.renderingComponent.requiresFlushToResumeDecoding == true {
                 contentView.renderingComponent.flush()
@@ -217,13 +218,22 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         for track: RTCVideoTrack?,
         on window: UIWindow?
     ) {
-        guard window != nil, let track else { return }
+        guard window != nil else { return }
+
+        staticFrameGenerationCancellable?.cancel()
+        staticVideoSource.isEnabled = track == nil
+        if let track {
+            track.add(self)
+        } else {
+            staticFrameGenerationCancellable = staticVideoSource
+                .renderingPublisher
+                .sink { [weak self] in self?.renderFrame($0) }
+        }
 
         bufferUpdatesCancellable = bufferPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.process($0) }
 
-        track.add(self)
         logMessage(
             .debug,
             message: "⏳ Frame streaming for Picture-in-Picture started."
