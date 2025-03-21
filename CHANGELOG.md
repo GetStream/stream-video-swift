@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Fix an issue that was keeping the Picture-in-Picture active while the app was in the foreground [#723](https://github.com/GetStream/stream-video-swift/pull/723)
 
 # [1.19.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.0)
 _March 20, 2025_

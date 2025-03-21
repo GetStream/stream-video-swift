@@ -210,19 +210,14 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     }
 
     private func subscribeToApplicationStateNotifications() {
+        // We add a small delay (250ms) on cancelling PiP as if we do it too early it
+        // seems that it has no effect.
+        // Calling `stopPictureInPicture` is a safe operation as it will only
+        // stop it if it is active.
         didAppBecomeActiveCancellable = applicationStateAdapter
             .$state
             .filter { $0 == .foreground }
-            .sink { [weak self] _ in self?.applicationDidBecomeActive() }
-    }
-
-    private func applicationDidBecomeActive() {
-        guard
-            let pictureInPictureController,
-            pictureInPictureController.isPictureInPictureActive == true
-        else {
-            return
-        }
-        pictureInPictureController.stopPictureInPicture()
+            .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+            .sink { [weak self] _ in self?.pictureInPictureController?.stopPictureInPicture() }
     }
 }
