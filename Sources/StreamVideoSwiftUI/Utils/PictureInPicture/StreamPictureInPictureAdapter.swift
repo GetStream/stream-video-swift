@@ -12,6 +12,8 @@ import UIKit
 /// Picture display.
 public final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
+    @Injected(\.staticVideoSource) private var staticVideoSource
+
     /// The active call.
     public var call: Call? {
         didSet {
@@ -36,6 +38,7 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
         didSet {
             Task { @MainActor in
                 pictureInPictureController?.onSizeUpdate = { [weak self] size in
+                    self?.staticVideoSource.contentSize = size
                     if let activeParticipant = self?.activeParticipant {
                         self?.onSizeUpdate?(size, activeParticipant)
                     }
@@ -89,16 +92,62 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
             let sessionId = call?.state.sessionId
             let otherParticipants = participants.filter { $0.sessionId != sessionId }
 
-            if let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false,
-               let track = session.track {
+            if
+                let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false,
+                let track = session.track {
                 pictureInPictureController?.track = track
+                staticVideoSource.participant = nil
                 activeParticipant = nil
-            } else if let participant = otherParticipants.first(where: { $0.track != nil }), let track = participant.track {
+
+                log.debug(
+                    "Active participant:\(session.participant.name) with screensharing will be used.",
+                    subsystems: .pictureInPicture
+                )
+            } else if
+                let participant = otherParticipants.first(where: { $0.hasVideo && $0.track != nil }),
+                let track = participant.track {
                 pictureInPictureController?.track = track
+                staticVideoSource.participant = nil
                 activeParticipant = participant
-            } else if let localParticipant = call?.state.localParticipant, let track = localParticipant.track {
+
+                log.debug(
+                    "Active participant:\(participant.name) will be used.",
+                    subsystems: .pictureInPicture
+                )
+
+            } else if
+                let participant = call?.state.dominantSpeaker {
+                pictureInPictureController?.track = nil
+                staticVideoSource.participant = participant
+                activeParticipant = participant
+
+                log.debug(
+                    "Dominant speaker participant:\(participant.name) will be used.",
+                    subsystems: .pictureInPicture
+                )
+
+            } else if
+                let localParticipant = call?.state.localParticipant,
+                localParticipant.hasVideo,
+                let track = localParticipant.track {
                 pictureInPictureController?.track = track
+                staticVideoSource.participant = nil
                 activeParticipant = localParticipant
+
+                log.debug(
+                    "Local participant:\(localParticipant.name) will be used.",
+                    subsystems: .pictureInPicture
+                )
+
+            } else {
+                pictureInPictureController?.track = nil
+                staticVideoSource.participant = otherParticipants.first
+                activeParticipant = otherParticipants.first
+
+                log.debug(
+                    "No active participant found. Will use the first participant:\(otherParticipants.first?.name ?? "n/a") in the list.",
+                    subsystems: .pictureInPicture
+                )
             }
         }
     }

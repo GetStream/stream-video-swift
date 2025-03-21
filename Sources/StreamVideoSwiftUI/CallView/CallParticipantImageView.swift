@@ -48,3 +48,27 @@ public struct CallParticipantImageView<Factory: ViewFactory>: View {
         )
     }
 }
+
+public struct PictureInPictureParticipantImageView: View {
+
+    @Injected(\.colors) var colors
+
+    var imageURL: URL?
+    var content: AnyView
+
+    public init(
+        imageURL: URL? = nil,
+        @ViewBuilder contentProvider: () -> some View
+    ) {
+        self.imageURL = imageURL
+        content = AnyView(contentProvider())
+    }
+
+    public var body: some View {
+        StreamLazyImage(imageURL: imageURL) {
+            Color(colors.participantBackground)
+        }
+        .blur(radius: 8)
+        .overlay(content)
+    }
+}

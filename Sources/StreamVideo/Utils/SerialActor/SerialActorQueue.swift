@@ -18,6 +18,12 @@ public final class SerialActorQueue: Sendable {
     /// Initializes a new `SerialActorQueue` instance.
     public init() {}
 
+    private let disposableBag = DisposableBag()
+
+    public func cancelAll() {
+        disposableBag.removeAll()
+    }
+
     /// Submits an asynchronous task to be executed serially.
     ///
     /// - Parameters:
@@ -46,7 +52,7 @@ public final class SerialActorQueue: Sendable {
                     lineNumber: line
                 )
             }
-        }
+        }.store(in: disposableBag)
     }
 
     /// Submits an asynchronous task to be executed serially and waits for it to complete.
