@@ -376,7 +376,7 @@ private_lane :remove_swiftui_core_module_shadow do |options|
   Dir.glob("#{options[:output_directory]}/**/*.swiftinterface").each do |file|
     if File.file?(file)
       UI.important("Removing the SwiftUICore module's shadow at: #{file}...")
-      File.write(file, File.read(file).gsub(/SwiftUICore.View/, 'View'))
+      File.write(file, File.read(file).gsub('SwiftUICore.', ''))
     end
   end
 end
