@@ -191,16 +191,18 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
     }
 
     private func unregister(reaction: Reaction, for userId: String) {
-        var found = false
-        let userReactions = activeReactions[userId]?.filter { item in
-            if !found, reaction.id == item.id {
-                found = true
-                return false
-            } else {
-                return true
+        Task { @MainActor in
+            var found = false
+            let userReactions = activeReactions[userId]?.filter { item in
+                if !found, reaction.id == item.id {
+                    found = true
+                    return false
+                } else {
+                    return true
+                }
             }
+            activeReactions[userId] = userReactions
         }
-        activeReactions[userId] = userReactions
     }
 
     private func handleCallEnded() {
