@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.19.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.1)
+_March 25, 2025_
+
 ### 🐞 Fixed
 - Fix an issue that was keeping the Picture-in-Picture active while the app was in the foreground [#723](https://github.com/GetStream/stream-video-swift/pull/723)
 - Update WebRTC to resolve a crash on HangUp [#727](https://github.com/GetStream/stream-video-swift/pull/727)
