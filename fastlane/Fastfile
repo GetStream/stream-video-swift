@@ -184,6 +184,7 @@ private_lane :upload_beta do |options|
     xcode_project: xcode_project,
     sdk_target: 'StreamVideo',
     app_target: options[:app_target],
+    app_version: get_sdk_version_from_environment,
     app_identifier: options[:app_identifier],
     configuration: configuration,
     extensions: ['CallIntent', 'ScreenSharing']
