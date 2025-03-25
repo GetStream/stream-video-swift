@@ -278,8 +278,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testMicrophoneIcon() {
+    func testMicrophoneIcon() throws {
         linkToScenario(withId: 1777)
+        
+        throw XCTSkip("DemoApp/Gleap related issue. Fix is coming soon.")
         
         GIVEN("user starts a call") {
             userRobot
