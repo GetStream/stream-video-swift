@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Fix an issue that was keeping the Picture-in-Picture active while the app was in the foreground [#723](https://github.com/GetStream/stream-video-swift/pull/723)
+- Update WebRTC to resolve a crash on HangUp [#727](https://github.com/GetStream/stream-video-swift/pull/727)
 
 # [1.19.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.0)
 _March 20, 2025_
@@ -20,7 +21,7 @@ _March 20, 2025_
 - Better handling for blocked users [#707](https://github.com/GetStream/stream-video-swift/pull/707)
 
 ### ✅ Added
-- Expose publicly the `StreamPictureInPictureAdapter` so it can be used outside of the `CallViewModel` [#711](https://github.com/GetStream/stream-video-swift/pull/711) 
+- Expose publicly the `StreamPictureInPictureAdapter` so it can be used outside of the `CallViewModel` [#711](https://github.com/GetStream/stream-video-swift/pull/711)
 
 # [1.18.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.18.0)
 _March 06, 2025_
@@ -212,7 +213,7 @@ _May 01, 2024_
 _March 19, 2024_
 
 ### 🐞 Fixed
-- CallView positioning when placed inside a UIKit container. [#329](https://github.com/GetStream/stream-video-swift/pull/329) 
+- CallView positioning when placed inside a UIKit container. [#329](https://github.com/GetStream/stream-video-swift/pull/329)
 
 # [0.5.2](https://github.com/GetStream/stream-video-swift/releases/tag/0.5.2)
 _March 15, 2024_
