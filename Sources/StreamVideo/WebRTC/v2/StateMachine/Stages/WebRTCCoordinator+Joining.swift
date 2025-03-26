@@ -351,6 +351,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .callState
                 .participants
                 .map { $0.toCallParticipant() }
+                /// We remove the existing user (if we are rejoiinig) in order to avoid showing a stale
+                /// video tile in the Call.
+                .filter { $0.sessionId != context.isRejoiningFromSessionID }
                 .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
 
             await coordinator
