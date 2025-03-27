@@ -445,7 +445,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                     call: .dummy(
                         cid: cid,
                         id: callId,
-                        type: .default,
+                        type: .default
                     ),
                     callCid: cid,
                     user: .dummy(id: user.id)
@@ -472,7 +472,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                     call: .dummy(
                         cid: cid,
                         id: callId,
-                        type: .default,
+                        type: .default
                     ),
                     callCid: cid
                 )
