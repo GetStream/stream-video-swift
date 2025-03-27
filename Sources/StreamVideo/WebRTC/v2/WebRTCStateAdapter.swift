@@ -323,6 +323,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func cleanUpForReconnection() async {
         set(
             participants: participants
+                /// We remove the existing user in order to avoid showing a stale video tile
+                /// in the Call.
+                .filter { $0.key != sessionID }
                 .reduce(into: ParticipantsStorage()) { $0[$1.key] = $1.value.withUpdated(track: nil) }
         )
 
