@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.19.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.2)
+_March 27, 2025_
+
 ### 🐞 Fixed
 - SPM dependency for SwiftProtobuf was outdated and sometimes Xcode couldn't fetch the latest required version. [#730](https://github.com/GetStream/stream-video-swift/pull/730)
 
