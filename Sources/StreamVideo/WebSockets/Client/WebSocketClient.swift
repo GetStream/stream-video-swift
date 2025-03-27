@@ -266,7 +266,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
             onConnected?()
         }
 
-        // We send the healthcheck to the the eventSubject so that observers
+        // We send the healthcheck to the eventSubject so that observers
         // (e.g. SFUEventAdapter) get updated.
         eventSubject.send(healthcheck)
         eventNotificationCenter.process(healthcheck, postNotification: false) { [weak self] in
