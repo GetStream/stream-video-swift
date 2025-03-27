@@ -475,7 +475,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let ownCapabilities = Set([OwnCapability.blockUsers])
         let pins = [PinInfo(isLocal: true, pinnedAt: .init())]
         let userId = String.unique
-        let participants = [userId: CallParticipant.dummy(id: userId)]
+        let currentParticipant = await CallParticipant.dummy(id: subject.sessionID)
+        let participants = [
+            userId: CallParticipant.dummy(id: userId),
+            currentParticipant.sessionId: currentParticipant
+        ]
         try await prepare(
             sfuStack: sfuStack,
             ownCapabilities: ownCapabilities,
