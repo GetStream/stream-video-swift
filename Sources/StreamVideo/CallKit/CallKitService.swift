@@ -203,13 +203,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
-    /// Handles the event when a call is accepted.
+    /// Handles the event when a call is accepted from the same user on another device.
     ///
     /// - Parameter response: The call accepted event.
     open func callAccepted(_ response: CallAcceptedEvent) {
         /// The call was accepted somewhere else (e.g the incoming call on the same device or another
         /// device). No action is required.
         guard
+            response.user.id == streamVideo?.user.id,
             let newCallEntry = callEntry(for: response.callCid),
             newCallEntry.callUUID != active // Ensure that the new call isn't the currently active one.
         else {
@@ -226,7 +227,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callCache.remove(for: newCallEntry.call.cId)
     }
 
-    /// Handles the event when a call is rejected.
+    /// Handles the event when a call is rejected from the same user on another device or if the creator
+    /// of the call declined it.
     ///
     /// - Parameter response: The call rejected event.
     open func callRejected(_ response: CallRejectedEvent) {
