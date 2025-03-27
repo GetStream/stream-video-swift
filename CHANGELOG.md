@@ -4,13 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- During a reconnection/migration the current user will not be appearing twice any more. [#731](https://github.com/GetStream/stream-video-swift/pull/731)
 
 # [1.19.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.2)
 _March 27, 2025_
 
 ### 🐞 Fixed
-- During a reconnection/migration the current user will not be appearing twice any more. [#731](https://github.com/GetStream/stream-video-swift/pull/731)
+- SPM dependency for SwiftProtobuf was outdated and sometimes Xcode couldn't fetch the latest required version. [#730](https://github.com/GetStream/stream-video-swift/pull/730)
 
 # [1.19.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.1)
 _March 25, 2025_
