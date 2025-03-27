@@ -279,7 +279,7 @@ final class WebSocketClient_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Event handling tests
 
-    func test_whenHealthCheckEventComes_itGetProcessedSilentlyWithoutBatching() throws {
+    func test_whenCoordinatorHealthCheckEventComes_itGetProcessedSilentlyWithoutBatching() throws {
         // Connect the web-socket client
         webSocketClient.connect()
 
@@ -310,6 +310,33 @@ final class WebSocketClient_Tests: XCTestCase, @unchecked Sendable {
 
         // Assert health check events was not posted
         XCTAssertFalse(postNotification)
+    }
+
+    func test_whenSFUHealthCheckEventComes_itGetProcessedSilentlyWithoutBatching() {
+        let receiptExpectation = expectation(description: "HealthCheck event received")
+        let cancellable = webSocketClient
+            .eventSubject
+            .filter { $0.name.contains("healthCheck") }
+            .sink { _ in receiptExpectation.fulfill() }
+
+        // Connect the web-socket client
+        webSocketClient.connect()
+
+        // Wait for engine to be called
+        AssertAsync.willBeEqual(engine!.connect_calledCount, 1)
+
+        // Simulate engine established connection
+        engine!.simulateConnectionSuccess()
+
+        // Wait for the connection state to be propagated to web-socket client
+        AssertAsync.willBeEqual(webSocketClient.connectionState, .authenticating)
+
+        // Simulate received health check event
+        decoder.decodedEvent = .success(.sfuEvent(.healthCheckResponse(.init())))
+        engine!.simulateMessageReceived()
+
+        wait(for: [receiptExpectation], timeout: defaultTimeout)
+        cancellable.cancel()
     }
 
     func test_whenNonHealthCheckEventComes_getsBatchedAndPostedAfterProcessing() throws {

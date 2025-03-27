@@ -81,94 +81,15 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     public var body: some View {
         ZStack {
             if viewModel.errorShown {
-                Text(L10n.Call.Livestream.error)
+                errorView
             } else if viewModel.loading {
-                ProgressView()
+                loadingView
             } else if state.backstage {
-                Text(L10n.Call.Livestream.notStarted)
+                notStartedView
             } else {
-                ZStack {
-                    GeometryReader { reader in
-                        if let participant = state.participants.first(where: { $0.track != nil }) {
-                            VideoCallParticipantView(
-                                viewFactory: viewFactory,
-                                participant: participant,
-                                availableFrame: reader.frame(in: .global),
-                                contentMode: .scaleAspectFit,
-                                customData: [:],
-                                call: viewModel.call
-                            )
-                            .onTapGesture {
-                                viewModel.update(controlsShown: true)
-                            }
-                            .overlay(
-                                viewModel.controlsShown ? LivestreamPlayPauseButton(
-                                    viewModel: viewModel
-                                ) {
-                                    participant.track?.isEnabled =
-                                        !viewModel.streamPaused
-                                    if !viewModel.streamPaused {
-                                        viewModel.update(controlsShown: false)
-                                    }
-                                } : nil
-                            )
-                        }
-                    }
-
-                    if viewModel.controlsShown || !viewModel.fullScreen {
-                        VStack {
-                            Spacer()
-                            HStack(spacing: 8) {
-                                LiveIndicator()
-                                if viewModel.showParticipantCount {
-                                    LivestreamParticipantsView(
-                                        participantsCount:
-                                        Int(
-                                            viewModel.call.state
-                                                .participantCount
-                                        )
-                                    )
-                                }
-                                Spacer()
-                                LivestreamButton(
-                                    imageName: !viewModel.muted
-                                        ? "speaker.wave.2.fill"
-                                        : "speaker.slash.fill"
-                                ) {
-                                    viewModel.toggleAudioOutput()
-                                }
-                                LivestreamButton(imageName: "viewfinder") {
-                                    viewModel.update(
-                                        fullScreen:
-                                        !viewModel.fullScreen
-                                    )
-                                }
-                                if showsLeaveCallButton {
-                                    LivestreamButton(
-                                        imageName: "phone.down.fill"
-                                    ) {
-                                        viewModel.leaveLivestream()
-                                    }
-                                }
-                            }
-                            .padding()
-                            .background(
-                                colors.livestreamBackground
-                                    .edgesIgnoringSafeArea(.all)
-                            )
-                            .foregroundColor(colors.livestreamCallControlsColor)
-                            .overlay(
-                                LivestreamDurationView(
-                                    duration: viewModel.duration(from: state)
-                                )
-                            )
-                        }
-                    }
-                }
-                .onChange(of: viewModel.fullScreen) { newValue in
-                    onFullScreenStateChange?(newValue)
-                }
+                videoRenderer
             }
+            livestreamControls
         }
         .onChange(of: state.participants, perform: { newValue in
             if viewModel.muted && newValue.first?.track != nil {
@@ -189,6 +110,107 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 break
             case .auto:
                 viewModel.leaveLivestream()
+            }
+        }
+    }
+
+    // MARK: - Private
+
+    @ViewBuilder
+    private var errorView: some View {
+        Color(colors.callBackground).ignoresSafeArea()
+        Text(L10n.Call.Livestream.error)
+    }
+
+    @ViewBuilder
+    private var loadingView: some View {
+        Color(colors.callBackground).ignoresSafeArea()
+        ProgressView()
+    }
+
+    @ViewBuilder
+    private var notStartedView: some View {
+        Color(colors.callBackground).ignoresSafeArea()
+        Text(L10n.Call.Livestream.notStarted)
+    }
+
+    @ViewBuilder
+    private var videoRenderer: some View {
+        GeometryReader { reader in
+            if let participant = state.participants.first(where: { $0.track != nil }) {
+                VideoCallParticipantView(
+                    viewFactory: viewFactory,
+                    participant: participant,
+                    availableFrame: reader.frame(in: .global),
+                    contentMode: .scaleAspectFit,
+                    customData: [:],
+                    call: viewModel.call
+                )
+                .onTapGesture {
+                    viewModel.update(controlsShown: true)
+                }
+                .overlay(
+                    viewModel.controlsShown ? LivestreamPlayPauseButton(
+                        viewModel: viewModel
+                    ) {
+                        participant.track?.isEnabled =
+                            !viewModel.streamPaused
+                        if !viewModel.streamPaused {
+                            viewModel.update(controlsShown: false)
+                        }
+                    } : nil
+                )
+            }
+        }
+        .onChange(of: viewModel.fullScreen) { onFullScreenStateChange?($0) }
+    }
+
+    @ViewBuilder
+    private var livestreamControls: some View {
+        if viewModel.controlsShown || !viewModel.fullScreen {
+            VStack {
+                Spacer()
+                HStack(spacing: 8) {
+                    LiveIndicator()
+                    if viewModel.showParticipantCount {
+                        LivestreamParticipantsView(
+                            participantsCount:
+                            Int(state.participantCount)
+                        )
+                    }
+                    Spacer()
+                    LivestreamButton(
+                        imageName: !viewModel.muted
+                            ? "speaker.wave.2.fill"
+                            : "speaker.slash.fill"
+                    ) {
+                        viewModel.toggleAudioOutput()
+                    }
+                    LivestreamButton(imageName: "viewfinder") {
+                        viewModel.update(
+                            fullScreen:
+                            !viewModel.fullScreen
+                        )
+                    }
+                    if showsLeaveCallButton {
+                        LivestreamButton(
+                            imageName: "phone.down.fill"
+                        ) {
+                            viewModel.leaveLivestream()
+                        }
+                    }
+                }
+                .padding()
+                .background(
+                    colors.livestreamBackground
+                        .edgesIgnoringSafeArea(.all)
+                )
+                .foregroundColor(colors.livestreamCallControlsColor)
+                .overlay(
+                    LivestreamDurationView(
+                        duration: viewModel.duration(from: state)
+                    )
+                )
             }
         }
     }
