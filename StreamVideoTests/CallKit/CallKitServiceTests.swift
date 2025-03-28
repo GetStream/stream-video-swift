@@ -447,6 +447,33 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                         id: callId,
                         type: .default
                     ),
+                    callCid: cid,
+                    user: .dummy(id: user.id)
+                )
+            )
+        }
+    }
+
+    @MainActor
+    func test_callAccepted_fromAnotherUser_expectedTransactionWasRequested() async throws {
+        stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await assertNoAction {
+            subject.callAccepted(
+                .dummy(
+                    call: .dummy(
+                        cid: cid,
+                        id: callId,
+                        type: .default
+                    ),
                     callCid: cid
                 )
             )
@@ -473,6 +500,28 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
                     call: .dummy(id: callId),
                     callCid: cid,
                     user: .dummy(id: user.id)
+                )
+            )
+        }
+    }
+
+    @MainActor
+    func test_callRejected_fromAnotherUser_expectedTransactionWasRequested() async throws {
+        stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await assertNoAction {
+            subject.callRejected(
+                .dummy(
+                    call: .dummy(id: callId),
+                    callCid: cid
                 )
             )
         }
@@ -657,6 +706,20 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
 
         XCTAssertEqual(expectedReason, reason, file: file, line: line)
+    }
+
+    @MainActor
+    private func assertNoAction(
+        actionBlock: @MainActor @Sendable() -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async {
+        callProvider.reset()
+
+        actionBlock()
+
+        await wait(for: 1)
+        XCTAssertTrue(callProvider.invocations.isEmpty, file: file, line: line)
     }
 
     @MainActor
