@@ -668,7 +668,8 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         cancellable.cancel()
     }
 
-    func test_transition_fromConnectedWithRejoinSFUConnected_updatesParticipants() async throws {
+    func test_transition_fromConnectedWithRejoinSFUConnected_updatesParticipantsAndFiltersOutUserWithPreviousSessionId(
+    ) async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.isRejoiningFromSessionID = .unique
         subject.context.reconnectAttempts = 11
@@ -679,9 +680,9 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
 
         var response = Stream_Video_Sfu_Event_JoinResponse()
-        let participantBuilder: () -> Stream_Video_Sfu_Models_Participant = {
+        let participantBuilder: (String?) -> Stream_Video_Sfu_Models_Participant = { sessionId in
             var result = Stream_Video_Sfu_Models_Participant()
-            result.sessionID = .unique
+            result.sessionID = sessionId ?? .unique
             result.userID = .unique
             result.name = .unique
             result.publishedTracks = [.video]
@@ -693,9 +694,10 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             return result
         }
         response.callState.participants = [
-            participantBuilder(),
-            participantBuilder(),
-            participantBuilder()
+            participantBuilder(nil),
+            participantBuilder(nil),
+            participantBuilder(nil),
+            participantBuilder(subject.context.isRejoiningFromSessionID)
         ]
         let cancellable = receiveEvent(
             .sfuEvent(.joinResponse(response)),
