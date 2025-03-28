@@ -1501,10 +1501,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func subscribeToNoiseCancellationSettingsChanges() {
         executeOnMain { [weak self] in
             guard let self else { return }
-            self
-                .state
-                .$settings
-                .map(\.?.audio.noiseCancellation)
+            Publishers
+                .CombineLatest(self.state.$session, self.state.$settings)
+                .filter { $0.0 != nil }
+                .map { $0.1?.audio.noiseCancellation }
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
                 .store(in: cancellables)
@@ -1514,10 +1514,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func subscribeToTranscriptionSettingsChanges() {
         executeOnMain { [weak self] in
             guard let self else { return }
-            self
-                .state
-                .$settings
-                .map(\.?.transcription)
+            Publishers
+                .CombineLatest(self.state.$session, self.state.$settings)
+                .filter { $0.0 != nil }
+                .map { $0.1?.transcription }
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
                 .store(in: cancellables)
@@ -1527,10 +1527,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func subscribeToClosedCaptionsSettingsChanges() {
         executeOnMain { [weak self] in
             guard let self else { return }
-            self
-                .state
-                .$settings
-                .map(\.?.transcription.closedCaptionMode)
+            Publishers
+                .CombineLatest(self.state.$session, self.state.$settings)
+                .filter { $0.0 != nil }
+                .map { $0.1?.transcription.closedCaptionMode }
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
                 .store(in: cancellables)
