@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - CallKit should only handle the CallAccepted events that match the userId of the current user. [#733](https://github.com/GetStream/stream-video-swift/pull/733)
+- During a reconnection/migration the current user will not be appearing twice any more. [#731](https://github.com/GetStream/stream-video-swift/pull/731)
 
 # [1.19.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.19.2)
 _March 27, 2025_
