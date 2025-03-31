@@ -231,17 +231,25 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [x] Manual quality selection (currently it's always automatic)
 - [x] Improve performance on lower end devices
 - [x] AV1 & VP9 support
-- [ ] Closed Captions and multi language support for transcriptions
-- [ ] Codec negotiation
+- [x] Codec negotiation
 
-### After 1.3
+### 1.4.0 milestone - March
+- [x] Closed Captions and multi language support for transcriptions
+- [x] Swift 6 support
+- [x] AI Voice agent support
+- [x] Better audio support for livestreams
 
-- Waiting rooms
-- Audio only call tutorial for each SDK
+### 1.5.0 milestone - June
+- [] Livestreaming support on 1080p @ 60fps
+- [] Distinguish between RTMP and regular tracks
+- [] Waiting rooms
+- [] Improve visibility on join call issues
+
+### After 1.5.0
+
 - Query call session endpoint + better missed calls support
 - SIP
 - Breakout rooms
-- Transcription Summaries
 - Ingress for SRT, RTSP, SDI, NDI, MTS/ MPEG-2 TS, RIST and Zixi
 - Whiteboards
 - RTSP input (via egress, same as RTMP input)
