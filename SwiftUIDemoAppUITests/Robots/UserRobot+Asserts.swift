@@ -28,12 +28,12 @@ extension UserRobot {
     
     @discardableResult
     func assertUserMicrophoneIsEnabled() -> Self {
-        assertToogle(CallPage.microphoneToggle.firstMatch, state: .enable)
+        assertToogle(CallPage.microphoneToggle, state: .enable)
     }
     
     @discardableResult
     func assertUserMicrophoneIsDisabled() -> Self {
-        assertToogle(CallPage.microphoneToggle.firstMatch, state: .disable)
+        assertToogle(CallPage.microphoneToggle, state: .disable)
     }
     
     @discardableResult

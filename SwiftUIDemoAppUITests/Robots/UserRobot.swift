@@ -152,7 +152,7 @@ extension UserRobot {
     
     @discardableResult
     func microphone(_ action: UserControls) -> Self {
-        userControls(toggle: CallPage.microphoneToggle.firstMatch, action: action)
+        userControls(toggle: CallPage.microphoneToggle, action: action)
     }
     
     @discardableResult
@@ -256,9 +256,15 @@ extension UserRobot {
     
     @discardableResult
     private func userControls(toggle: XCUIElement, action: UserControls) -> Self {
-        if action == .disable && toggle.isOn || action == .enable && toggle.isOff {
+        switch (action, toggle.isOn) {
+        case (.disable, true):
             toggle.tap()
+        case (.enable, false):
+            toggle.tap()
+        default:
+            break
         }
+
         return self
     }
 
