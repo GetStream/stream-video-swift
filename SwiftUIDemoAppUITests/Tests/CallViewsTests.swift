@@ -3,6 +3,7 @@
 //
 
 import XCTest
+import StreamVideo
 
 final class CallViewsTests: StreamTestCase {
     
@@ -22,6 +23,7 @@ final class CallViewsTests: StreamTestCase {
     }
     
     func testOneParticipantOnTheCall() throws {
+        LogConfig.level = .debug
         linkToScenario(withId: 1766)
         
         try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
@@ -281,23 +283,21 @@ final class CallViewsTests: StreamTestCase {
     func testMicrophoneIcon() throws {
         linkToScenario(withId: 1777)
         
-        throw XCTSkip("DemoApp/Gleap related issue. Fix is coming soon.")
-        
         GIVEN("user starts a call") {
             userRobot
                 .waitForAutoLogin()
                 .startCall(callId)
         }
-        WHEN("user unmutes themselves") {
+        WHEN("user unmutes themselves - or if already enabled do nothing") {
             userRobot.microphone(.enable)
         }
-        THEN("mic icon updates") {
+        THEN("mic icon updates - should be enabled") {
             userRobot.assertUserMicrophoneIsEnabled()
         }
         WHEN("user mutes themselves") {
             userRobot.microphone(.disable)
         }
-        THEN("mic icon updates") {
+        THEN("mic icon updates - should be disabled") {
             userRobot.assertUserMicrophoneIsDisabled()
         }
     }
