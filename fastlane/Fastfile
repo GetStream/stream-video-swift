@@ -369,6 +369,7 @@ lane :build_xcframeworks do
 
   remove_swiftui_core_module_shadow(output_directory: output_directory)
   remove_stream_video_module_shadow(output_directory: output_directory)
+  remove_concurrency_module_shadow(output_directory: output_directory)
   sh(codesign.join(' ')) # We need to sign all frameworks at once
 end
 
@@ -388,6 +389,15 @@ private_lane :remove_stream_video_module_shadow do |options|
     if File.file?(file)
       UI.important("Removing the StreamVideo module's shadow at: #{file}...")
       File.write(file, File.read(file).gsub('StreamVideo.', ''))
+    end
+  end
+end
+
+private_lane :remove_concurrency_module_shadow do |options|
+  Dir.glob("#{options[:output_directory]}/**/*.swiftinterface").each do |file|
+    if File.file?(file)
+      UI.important("Removing the @_Concurrency.MainActor module's shadow at: #{file}...")
+      File.write(file, File.read(file).gsub('@_Concurrency.MainActor @preconcurrency ', ''))
     end
   end
 end
