@@ -889,7 +889,7 @@
 		840F59912A77FDCB00EF3EB2 /* HLSSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840F598B2A77FDCB00EF3EB2 /* HLSSettingsRequest.swift */; };
 		840F59922A77FDCB00EF3EB2 /* UnpinResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840F598C2A77FDCB00EF3EB2 /* UnpinResponse.swift */; };
 		840F59932A77FDCB00EF3EB2 /* PinResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840F598D2A77FDCB00EF3EB2 /* PinResponse.swift */; };
-		8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */; };
+		8411925E28C5E5D00074EF88 /* RTCConfiguration+Default.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8411925D28C5E5D00074EF88 /* RTCConfiguration+Default.swift */; };
 		8412903629DDD1ED00C70A6D /* UpdateCallMembersRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8412903429DDD1ED00C70A6D /* UpdateCallMembersRequest.swift */; };
 		8412903729DDD1ED00C70A6D /* UpdateCallMembersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8412903529DDD1ED00C70A6D /* UpdateCallMembersResponse.swift */; };
 		8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */; };
@@ -2234,7 +2234,7 @@
 		840F598B2A77FDCB00EF3EB2 /* HLSSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HLSSettingsRequest.swift; sourceTree = "<group>"; };
 		840F598C2A77FDCB00EF3EB2 /* UnpinResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnpinResponse.swift; sourceTree = "<group>"; };
 		840F598D2A77FDCB00EF3EB2 /* PinResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinResponse.swift; sourceTree = "<group>"; };
-		8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRTCConfiguration.swift; sourceTree = "<group>"; };
+		8411925D28C5E5D00074EF88 /* RTCConfiguration+Default.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCConfiguration+Default.swift"; sourceTree = "<group>"; };
 		8412903429DDD1ED00C70A6D /* UpdateCallMembersRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCallMembersRequest.swift; sourceTree = "<group>"; };
 		8412903529DDD1ED00C70A6D /* UpdateCallMembersResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCallMembersResponse.swift; sourceTree = "<group>"; };
 		8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawJSON_Tests.swift; sourceTree = "<group>"; };
@@ -6155,7 +6155,7 @@
 				84FC2C2728AD350100181490 /* WebRTCEvents.swift */,
 				84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */,
 				84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */,
-				8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */,
+				8411925D28C5E5D00074EF88 /* RTCConfiguration+Default.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -7076,7 +7076,7 @@
 				40FB15112BF77D5800D5E580 /* StreamStateMachineStage.swift in Sources */,
 				8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */,
 				84CD12162C73831000056640 /* CallRtmpBroadcastStartedEvent.swift in Sources */,
-				8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */,
+				8411925E28C5E5D00074EF88 /* RTCConfiguration+Default.swift in Sources */,
 				8409465929AF4EEC007AF5BF /* SendReactionResponse.swift in Sources */,
 				8412903729DDD1ED00C70A6D /* UpdateCallMembersResponse.swift in Sources */,
 				8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */,
