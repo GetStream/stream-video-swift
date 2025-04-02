@@ -66,8 +66,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     var trackPublisher: AnyPublisher<TrackEvent, Never> { mediaAdapter.trackPublisher }
     var disconnectedPublisher: AnyPublisher<Void, Never> {
         peerConnection
-            .publisher(eventType: StreamRTCPeerConnection.DidChangeConnectionStateEvent.self)
-            .filter { $0.state == .disconnected }
+            .publisher(eventType: StreamRTCPeerConnection.ICEConnectionChangedEvent.self)
+            .filter { $0.state == .disconnected || $0.state == .failed }
             .map { _ in () }
             .eraseToAnyPublisher()
     }
@@ -169,6 +169,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             peerConnection: peerConnection,
             sfuAdapter: sfuAdapter
         )
+
+        // Start ICERestart events observation
+        observeICERestartEvents()
 
         peerConnection
             .publisher
@@ -452,10 +455,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         await peerConnection.close()
     }
 
-    /// Restarts ICE for the peer connection.
+    /// Restarts the ICE (Interactive Connectivity Establishment) connection for the
+    /// peer connection. This method handles ICE restart differently based on the
+    /// peer type.
     ///
-    /// - Note: For publisher connections, this will trigger a new offer. For subscriber
-    ///         connections, it will directly restart ICE on the peer connection.
+    /// For publisher connections, it triggers a new offer with ICE restart
+    /// constraints, if there are tracks already published. For subscriber connections, it sends an RPC call
+    /// to the SFU to restart the ICE connection.
     func restartICE() {
         log.debug(
             """
@@ -469,10 +475,31 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         )
         switch peerType {
         case .subscriber:
-            peerConnection.restartIce()
+            Task { [weak self] in
+                guard let self else {
+                    return
+                }
+                do {
+                    try await sfuAdapter.restartICE(for: sessionId, peerType: .subscriber)
+                } catch {
+                    log.error(error, subsystems: subsystem)
+                }
+            }
+            .store(in: disposableBag, key: "subscriber-ice-restart")
         case .publisher:
             setPublisherProcessingQueue.async { [weak self] in
-                await self?.negotiate(constraints: .iceRestartConstraints)
+                guard let self else { return }
+
+                let trackInfo = WebRTCJoinRequestFactory()
+                    .buildAnnouncedTracks(self, collectionType: .allAvailable)
+
+                /// We only want to trigger a renegotiation if the user is already publishing any media.
+                /// In any other case we skip.
+                guard !trackInfo.isEmpty else {
+                    return
+                }
+
+                await self.negotiate(constraints: .iceRestartConstraints)
             }
         }
     }
@@ -712,6 +739,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 )
             )
 
+            /// Just before we send the answer, we need to apply all the ICECandidates that the SFU
+            /// has sent us so far.
+            await iceAdapter.drainPendingSFUCandidates()
+
             let answer = try await createAnswer()
             try await setLocalDescription(answer)
 
@@ -793,5 +824,33 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
+    }
+
+    /// Sets up an observer for ICE restart events from the SFU. This method
+    /// subscribes to ICE restart events that match the current peer type
+    /// (publisher or subscriber) and triggers an ICE restart when such events
+    /// are received.
+    ///
+    /// The method filters events based on peer type to ensure that only
+    /// relevant ICE restart requests are processed. When a matching event is
+    /// received, it calls the restartICE() method to renegotiate the
+    /// connection.
+    private func observeICERestartEvents() {
+        let peerType = self.peerType
+        sfuAdapter
+            .publisher(eventType: Stream_Video_Sfu_Event_ICERestart.self)
+            .filter {
+                switch ($0.peerType, peerType) {
+                case (.publisherUnspecified, .publisher):
+                    return true
+                case (.subscriber, .subscriber):
+                    return true
+                default:
+                    return false
+                }
+            }
+            .log(.debug, subsystems: subsystem) { "Processing SFU event of type:\(type(of: $0))" }
+            .sink { [weak self] _ in self?.restartICE() }
+            .store(in: disposableBag)
     }
 }

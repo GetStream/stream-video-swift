@@ -19,8 +19,9 @@ actor ICEAdapter: @unchecked Sendable {
     private let sfuAdapter: SFUAdapter
 
     private var disposableBag: DisposableBag = .init()
-    private var trickledCandidates: [RTCIceCandidate] = []
-    private var untrickledCandidates: [RTCIceCandidate] = []
+
+    private var pendingSFUCandidates: [RTCIceCandidate] = []
+    private var pendingLocalCandidates: [RTCIceCandidate] = []
 
     /// Initializes the ICEAdapter.
     ///
@@ -54,12 +55,81 @@ actor ICEAdapter: @unchecked Sendable {
     /// - Parameter candidate: The ICE candidate to trickle.
     func trickle(_ candidate: RTCIceCandidate) {
         guard case .connected = sfuAdapter.connectionState else {
-            untrickledCandidates.append(candidate)
+            pendingLocalCandidates.append(candidate)
             return
         }
         trickleTask(for: candidate)
             .store(in: disposableBag)
     }
+
+    /// Processes and adds all pending ICE candidates from the SFU to the peer
+    /// connection. This method is called to handle accumulated ICE candidates
+    /// that were received while the peer connection was not ready.
+    ///
+    /// The method processes candidates concurrently using a task group, with
+    /// retry logic for each candidate addition. If a candidate fails to be
+    /// added, the error is logged but the process continues for other
+    /// candidates.
+    ///
+    /// - Note: After processing, the pending candidates array is cleared
+    ///   regardless of success or failure of individual additions.
+    func drainPendingSFUCandidates() async {
+        let candidates = pendingSFUCandidates
+        await withTaskGroup(of: Void.self) { [weak self] group in
+            guard let self else { return }
+            for candidate in candidates {
+                group.addTask { [weak self] in
+                    guard let self else { return }
+                    do {
+                        try Task.checkCancellation()
+                        try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
+                            try Task.checkCancellation()
+                            try await self?.peerConnection.add(candidate)
+                        }
+                    } catch {
+                        log.error(
+                            error,
+                            subsystems: peerType == .publisher
+                                ? .peerConnectionPublisher
+                                : .peerConnectionSubscriber
+                        )
+                    }
+                }
+            }
+        }
+        pendingSFUCandidates = []
+    }
+
+    /// Adds an ICE candidate to the peer connection.
+    ///
+    /// - Parameter candidate: The ICE candidate to add.
+    func add(_ candidate: RTCIceCandidate) {
+        guard
+            peerConnection.remoteDescription != nil
+        else {
+            pendingLocalCandidates.append(candidate)
+            log.debug(
+                """
+                PeerConnection type:\(peerType) doesn't have remoteDescription. Hold candidate for now.
+                Candidate: \(candidate)
+                """,
+                subsystems: .iceAdapter
+            )
+            return
+        }
+
+        log.debug(
+            """
+            PeerConnection type:\(peerType) has remoteDescription. Adding candidate now
+            Candidate: \(candidate)
+            """,
+            subsystems: .iceAdapter
+        )
+        task(for: candidate)
+            .store(in: disposableBag)
+    }
+
+    // MARK: - Private helpers
 
     /// Creates a task to trickle an ICE candidate.
     ///
@@ -95,17 +165,6 @@ actor ICEAdapter: @unchecked Sendable {
                     peerType: peerType == .publisher ? .publisherUnspecified : .subscriber,
                     for: sessionID
                 )
-
-                try Task.checkCancellation()
-
-                log.debug(
-                    """
-                    PeerConnection type:\(peerType) will store trickled candidate for future use.
-                    Candidate: \(candidate)
-                    """,
-                    subsystems: .iceAdapter
-                )
-                trickledCandidates.append(candidate)
             } catch {
                 log.error(
                     error,
@@ -115,35 +174,6 @@ actor ICEAdapter: @unchecked Sendable {
                 )
             }
         }
-    }
-
-    /// Adds an ICE candidate to the peer connection.
-    ///
-    /// - Parameter candidate: The ICE candidate to add.
-    func add(_ candidate: RTCIceCandidate) {
-        trickledCandidates.append(candidate)
-        guard
-            peerConnection.remoteDescription != nil
-        else {
-            log.debug(
-                """
-                PeerConnection type:\(peerType) doesn't have remoteDescription. Hold candidate for now.
-                Candidate: \(candidate)
-                """,
-                subsystems: .iceAdapter
-            )
-            return
-        }
-
-        log.debug(
-            """
-            PeerConnection type:\(peerType) has remoteDescription. Adding candidate now
-            Candidate: \(candidate)
-            """,
-            subsystems: .iceAdapter
-        )
-        task(for: candidate)
-            .store(in: disposableBag)
     }
 
     // MARK: - Private helpers
@@ -156,11 +186,11 @@ actor ICEAdapter: @unchecked Sendable {
     ) {
         do {
             let iceCandidate = try RTCIceCandidate(event)
-            trickledCandidates.append(iceCandidate)
 
             guard
                 peerConnection.remoteDescription != nil
             else {
+                pendingSFUCandidates.append(iceCandidate)
                 return
             }
 
@@ -175,35 +205,6 @@ actor ICEAdapter: @unchecked Sendable {
                     : .peerConnectionSubscriber
             )
         }
-    }
-
-    /// Adds all trickled ICE candidates to the peer connection.
-    private func addTrickledICECandidates() {
-        Task {
-            await withTaskGroup(of: Void.self) { [weak self] group in
-                guard let self else { return }
-                for candidate in await trickledCandidates {
-                    group.addTask { [weak self] in
-                        guard let self else { return }
-                        do {
-                            try Task.checkCancellation()
-                            try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
-                                try Task.checkCancellation()
-                                try await self?.peerConnection.add(candidate)
-                            }
-                        } catch {
-                            log.error(
-                                error,
-                                subsystems: peerType == .publisher
-                                    ? .peerConnectionPublisher
-                                    : .peerConnectionSubscriber
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        .store(in: disposableBag)
     }
 
     /// Creates a task to add an ICE candidate to the peer connection.
@@ -229,6 +230,23 @@ actor ICEAdapter: @unchecked Sendable {
         }
     }
 
+    /// Processes and sends all pending local ICE candidates to the SFU. This method
+    /// is called when the connection state changes to connected, ensuring that any
+    /// candidates generated while disconnected are properly transmitted.
+    ///
+    /// The method iterates through all pending local candidates and creates a
+    /// trickle task for each one. After processing, the pending candidates array
+    /// is cleared.
+    ///
+    /// - Note: This method is typically called as part of the connection state
+    ///   change handling in the configure() method.
+    private func drainPendingLocalCandidates() async {
+        for candidate in pendingLocalCandidates {
+            trickleTask(for: candidate).store(in: disposableBag)
+        }
+        pendingLocalCandidates = []
+    }
+
     /// Configures the ICE adapter, setting up necessary publishers and subscriptions.
     private func configure() async {
         disposableBag.removeAll()
@@ -237,13 +255,7 @@ actor ICEAdapter: @unchecked Sendable {
             .$connectionState
             .removeDuplicates()
             .filter { if case .connected = $0 { true } else { false } }
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in
-                guard let self else { return }
-                for candidate in await untrickledCandidates {
-                    await trickleTask(for: candidate)
-                        .store(in: disposableBag)
-                }
-            }
+            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingLocalCandidates() }
             .store(in: disposableBag)
 
         peerConnection
@@ -252,11 +264,13 @@ actor ICEAdapter: @unchecked Sendable {
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trickle($0.candidate) }
             .store(in: disposableBag)
 
-        peerConnection
-            .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
-            .log(.debug, subsystems: .iceAdapter)
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.addTrickledICECandidates() }
-            .store(in: disposableBag)
+        if peerType == .publisher {
+            peerConnection
+                .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
+                .log(.debug, subsystems: .iceAdapter)
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingSFUCandidates() }
+                .store(in: disposableBag)
+        }
 
         let _peerType = peerType == .publisher
             ? Stream_Video_Sfu_Models_PeerType.publisherUnspecified

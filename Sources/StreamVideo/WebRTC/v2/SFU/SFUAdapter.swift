@@ -343,6 +343,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         thermalState: ProcessInfo.ThermalState? = nil,
         telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil
     ) async throws {
+        statusCheck()
         var statsRequest = Stream_Video_Sfu_Signal_SendStatsRequest()
         statsRequest.sessionID = sessionId
         statsRequest.sdk = "stream-ios"
@@ -427,6 +428,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         tracks: [Stream_Video_Sfu_Models_TrackInfo],
         for sessionId: String
     ) async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
+        statusCheck()
         var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
         request.sdp = sessionDescription
         request.sessionID = sessionId
@@ -507,6 +509,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
+        statusCheck()
         var request = Stream_Video_Sfu_Signal_SendAnswerRequest()
         request.sessionID = sessionId
         request.peerType = peerType
@@ -544,6 +547,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
+        statusCheck()
         log.debug(
             "Will trickle for peerType:\(peerType) on sessionId:\(sessionId)",
             subsystems: .sfu
@@ -558,6 +562,41 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         }
         task.store(in: requestDisposableBag)
         let response = try await task.value
+        signalService.subject.send(response)
+        if response.error.code != .unspecified && !response.error.message.isEmpty {
+            throw response.error
+        }
+    }
+
+    /// Restarts the ICE (Interactive Connectivity Establishment) connection for a
+    /// specific session and peer type. This method is used to renegotiate the
+    /// network connection when connectivity issues are detected.
+    ///
+    /// - Parameters:
+    ///   - sessionId: The unique identifier of the session for which to restart
+    ///     the ICE connection
+    ///   - peerType: The type of peer (e.g., publisher, subscriber) for which to
+    ///     restart the ICE connection
+    ///
+    /// - Throws: An error if the ICE restart request fails or if the response
+    ///   contains an error
+    func restartICE(
+        for sessionId: String,
+        peerType: Stream_Video_Sfu_Models_PeerType
+    ) async throws {
+        var request = Stream_Video_Sfu_Signal_ICERestartRequest()
+        request.sessionID = sessionId
+        request.peerType = peerType
+        let task = Task { [request, signalService] in
+            try await executeTask(retryPolicy: .fastCheckValue { true }) {
+                try Task.checkCancellation()
+                return try await signalService.iceRestart(iCERestartRequest: request)
+            }
+        }
+        log.debug(request, subsystems: .sfu)
+        task.store(in: requestDisposableBag)
+        let response = try await task.value
+        log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error

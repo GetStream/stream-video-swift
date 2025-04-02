@@ -15,8 +15,22 @@ public final class SerialActorQueue: Sendable {
     /// This actor ensures tasks are run serially.
     private let actor = SerialActor()
 
+    /// A disposableBag to keep track of the nested tasks. On deallocation allows us to cancel them
+    /// and stop any execution.
+    private let disposableBag = DisposableBag()
+
     /// Initializes a new `SerialActorQueue` instance.
     public init() {}
+
+    deinit {
+        actor.cancel()
+        disposableBag.removeAll()
+    }
+
+    public func cancelAll() {
+        actor.cancel()
+        disposableBag.removeAll()
+    }
 
     /// Submits an asynchronous task to be executed serially.
     ///
@@ -35,18 +49,22 @@ public final class SerialActorQueue: Sendable {
     ) {
         Task {
             do {
+                try Task.checkCancellation()
                 // Execute the task serially via the actor.
                 try await actor.execute(block)
             } catch {
-                // Log any errors encountered during task execution.
-                log.error(
-                    error,
-                    functionName: functionName,
-                    fileName: file,
-                    lineNumber: line
-                )
+                if error is CancellationError { /* No-op */ }
+                else {
+                    // Log any errors encountered during task execution.
+                    log.error(
+                        error,
+                        functionName: functionName,
+                        fileName: file,
+                        lineNumber: line
+                    )
+                }
             }
-        }
+        }.store(in: disposableBag)
     }
 
     /// Submits an asynchronous task to be executed serially and waits for it to complete.

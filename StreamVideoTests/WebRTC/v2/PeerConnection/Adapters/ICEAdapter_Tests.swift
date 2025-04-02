@@ -52,7 +52,7 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    func test_trickle_disconnected_calledWithCandidate_tricklesToSFU() async throws {
+    func test_trickle_disconnected_calledWithCandidate_doesNotTrickleToSFU() async throws {
         // Given
         mockSFUStack.setConnectionState(to: .disconnected(source: .userInitiated))
 
@@ -115,8 +115,9 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         mockSFUStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
         _ = subject
         await wait(for: 0.5)
-        await subject.trickle(iceCandidate)
-        await fulfillment { self.mockSFUStack.service.iCETrickleWasCalledWithRequest != nil }
+        var candidate = Stream_Video_Sfu_Models_ICETrickle()
+        candidate.iceCandidate = iceCandidate.sdp
+        mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(candidate)))
 
         mockPeerConnection
             .subject

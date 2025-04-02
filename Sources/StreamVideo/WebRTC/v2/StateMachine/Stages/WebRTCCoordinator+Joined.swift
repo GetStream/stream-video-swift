@@ -399,7 +399,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) {
                     """
-                    PeerConnection of type: \($0) was disconnected. Will attempt 
+                    PeerConnection of type: .publisher was disconnected. Will attempt 
                     restarting ICE.
                     """
                 }
@@ -413,7 +413,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) {
                     """
-                    PeerConnection of type: \($0) was disconnected. Will attempt 
+                    PeerConnection of type: .subscriber was disconnected. Will attempt 
                     restarting ICE.
                     """
                 }

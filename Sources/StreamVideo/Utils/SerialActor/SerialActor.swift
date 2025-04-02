@@ -8,6 +8,16 @@ actor SerialActor {
     /// Declare a private variable to store the previous task.
     private var previousTask: Task<Void, Error>?
 
+    deinit {
+        previousTask = nil
+    }
+
+    nonisolated func cancel() {
+        Task {
+            await previousTask?.cancel()
+        }
+    }
+
     /// Executes a block of code asynchronously in a serial manner.
     ///
     /// This method ensures that only one operation runs at a time within this actor.
@@ -24,9 +34,13 @@ actor SerialActor {
         /// Create a new task that runs the provided block of code within a closure.
         /// This closure captures the `previousTask` variable by value.
         let task = Task { [previousTask] in
+            try Task.checkCancellation()
+
             /// Wait for the previous task to finish by awaiting its result.
             /// If the previous task is nil, this line does nothing.
             _ = await previousTask?.result
+
+            try Task.checkCancellation()
 
             /// Execute the provided block of code and re-throw any errors.
             return try await block()
@@ -35,6 +49,8 @@ actor SerialActor {
         /// Update the `previousTask` variable to point to the newly created task.
         previousTask = task
 
+        try Task.checkCancellation()
+        
         /// Wait for the newly created task to finish by awaiting its value.
         /// This will re-throw any errors thrown by the block.
         try await task.value
