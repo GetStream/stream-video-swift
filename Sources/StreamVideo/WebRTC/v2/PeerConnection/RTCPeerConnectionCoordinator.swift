@@ -739,10 +739,6 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 )
             )
 
-            /// Just before we send the answer, we need to apply all the ICECandidates that the SFU
-            /// has sent us so far.
-            await iceAdapter.drainPendingSFUCandidates()
-
             let answer = try await createAnswer()
             try await setLocalDescription(answer)
 

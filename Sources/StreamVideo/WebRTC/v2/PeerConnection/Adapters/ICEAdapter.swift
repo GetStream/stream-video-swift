@@ -62,44 +62,6 @@ actor ICEAdapter: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    /// Processes and adds all pending ICE candidates from the SFU to the peer
-    /// connection. This method is called to handle accumulated ICE candidates
-    /// that were received while the peer connection was not ready.
-    ///
-    /// The method processes candidates concurrently using a task group, with
-    /// retry logic for each candidate addition. If a candidate fails to be
-    /// added, the error is logged but the process continues for other
-    /// candidates.
-    ///
-    /// - Note: After processing, the pending candidates array is cleared
-    ///   regardless of success or failure of individual additions.
-    func drainPendingSFUCandidates() async {
-        let candidates = pendingSFUCandidates
-        await withTaskGroup(of: Void.self) { [weak self] group in
-            guard let self else { return }
-            for candidate in candidates {
-                group.addTask { [weak self] in
-                    guard let self else { return }
-                    do {
-                        try Task.checkCancellation()
-                        try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
-                            try Task.checkCancellation()
-                            try await self?.peerConnection.add(candidate)
-                        }
-                    } catch {
-                        log.error(
-                            error,
-                            subsystems: peerType == .publisher
-                                ? .peerConnectionPublisher
-                                : .peerConnectionSubscriber
-                        )
-                    }
-                }
-            }
-        }
-        pendingSFUCandidates = []
-    }
-
     /// Adds an ICE candidate to the peer connection.
     ///
     /// - Parameter candidate: The ICE candidate to add.
@@ -247,6 +209,44 @@ actor ICEAdapter: @unchecked Sendable {
         pendingLocalCandidates = []
     }
 
+    /// Processes and adds all pending ICE candidates from the SFU to the peer
+    /// connection. This method is called to handle accumulated ICE candidates
+    /// that were received while the peer connection was not ready.
+    ///
+    /// The method processes candidates concurrently using a task group, with
+    /// retry logic for each candidate addition. If a candidate fails to be
+    /// added, the error is logged but the process continues for other
+    /// candidates.
+    ///
+    /// - Note: After processing, the pending candidates array is cleared
+    ///   regardless of success or failure of individual additions.
+    private func drainPendingSFUCandidates() async {
+        let candidates = pendingSFUCandidates
+        await withTaskGroup(of: Void.self) { [weak self] group in
+            guard let self else { return }
+            for candidate in candidates {
+                group.addTask { [weak self] in
+                    guard let self else { return }
+                    do {
+                        try Task.checkCancellation()
+                        try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
+                            try Task.checkCancellation()
+                            try await self?.peerConnection.add(candidate)
+                        }
+                    } catch {
+                        log.error(
+                            error,
+                            subsystems: peerType == .publisher
+                                ? .peerConnectionPublisher
+                                : .peerConnectionSubscriber
+                        )
+                    }
+                }
+            }
+        }
+        pendingSFUCandidates = []
+    }
+
     /// Configures the ICE adapter, setting up necessary publishers and subscriptions.
     private func configure() async {
         disposableBag.removeAll()
@@ -264,17 +264,16 @@ actor ICEAdapter: @unchecked Sendable {
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trickle($0.candidate) }
             .store(in: disposableBag)
 
-        if peerType == .publisher {
-            peerConnection
-                .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
-                .log(.debug, subsystems: .iceAdapter)
-                .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingSFUCandidates() }
-                .store(in: disposableBag)
-        }
+        peerConnection
+            .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
+            .log(.debug, subsystems: .iceAdapter)
+            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingSFUCandidates() }
+            .store(in: disposableBag)
 
         let _peerType = peerType == .publisher
             ? Stream_Video_Sfu_Models_PeerType.publisherUnspecified
             : .subscriber
+
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Models_ICETrickle.self)
             .filter { [_peerType] in $0.peerType == _peerType }
