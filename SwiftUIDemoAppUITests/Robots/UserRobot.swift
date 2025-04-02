@@ -170,7 +170,12 @@ extension UserRobot {
     
     @discardableResult
     func endCall() -> Self {
-        CallPage.hangUpButton.firstMatch.safeTap()
+        let hangUpButton = CallPage.hangUpButton
+        if ProcessInfo().operatingSystemVersion.majorVersion > 15 {
+            hangUpButton.firstMatch.safeTap()
+        } else {
+            hangUpButton.safeTap()
+        }
         return self
     }
     
