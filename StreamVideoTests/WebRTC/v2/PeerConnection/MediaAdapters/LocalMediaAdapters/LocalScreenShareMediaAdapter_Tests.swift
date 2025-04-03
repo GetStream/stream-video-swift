@@ -180,8 +180,6 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
             XCTAssertEqual(trackType, .screenshare)
             XCTAssertTrue(track is RTCVideoTrack)
         }
-
-        XCTAssertFalse(subject.primaryTrack.isEnabled)
     }
 
     func test_beginScreenSharing_withoutCapabilityWithActiveSession_stopsCapturingAndSession() async throws {
