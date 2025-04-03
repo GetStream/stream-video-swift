@@ -18,6 +18,14 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
 
     // MARK: - Properties
 
+    var preferredContentSize: CGSize = .init(width: 640, height: 480) {
+        didSet {
+            Task { @MainActor in
+                contentViewController?.preferredContentSize = preferredContentSize
+            }
+        }
+    }
+
     /// The RTCVideoTrack for which the picture-in-picture session is created.
     @MainActor
     var track: RTCVideoTrack? {

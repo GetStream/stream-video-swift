@@ -89,16 +89,65 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
             let sessionId = call?.state.sessionId
             let otherParticipants = participants.filter { $0.sessionId != sessionId }
 
-            if let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false,
-               let track = session.track {
+            if
+                let session = call?.state.screenSharingSession,
+                call?.state.isCurrentUserScreensharing == false,
+                let track = session.track {
                 pictureInPictureController?.track = track
                 activeParticipant = nil
-            } else if let participant = otherParticipants.first(where: { $0.track != nil }), let track = participant.track {
+
+                log.debug(
+                    "Active participant:\(session.participant.name) with screensharing will be used.",
+                    subsystems: .pictureInPicture
+                )
+            } else if
+                let participant = otherParticipants.first(where: { $0.hasVideo && $0.track != nil }),
+                let track = participant.track {
+                if participant.trackSize != .zero {
+                    pictureInPictureController?.preferredContentSize = participant.trackSize
+                }
                 pictureInPictureController?.track = track
                 activeParticipant = participant
-            } else if let localParticipant = call?.state.localParticipant, let track = localParticipant.track {
+
+                log.debug(
+                    "Active participant:\(participant.name) will be used.",
+                    subsystems: .pictureInPicture
+                )
+
+            } else if
+                let participant = call?.state.dominantSpeaker {
+                if participant.trackSize != .zero {
+                    pictureInPictureController?.preferredContentSize = participant.trackSize
+                }
+                pictureInPictureController?.track = nil
+                activeParticipant = participant
+
+                log.debug(
+                    "Dominant speaker participant:\(participant.name) will be used.",
+                    subsystems: .pictureInPicture
+                )
+
+            } else if
+                let localParticipant = call?.state.localParticipant,
+                localParticipant.hasVideo,
+                let track = localParticipant.track {
+                if localParticipant.trackSize != .zero {
+                    pictureInPictureController?.preferredContentSize = localParticipant.trackSize
+                }
                 pictureInPictureController?.track = track
                 activeParticipant = localParticipant
+
+                log.debug(
+                    "Local participant:\(localParticipant.name) will be used.",
+                    subsystems: .pictureInPicture
+                )
+
+            } else {
+                /// For now we do nothing when we can't find a user to update PiP.
+                log.debug(
+                    "No active participant found. We won't be updating Picture-In-Picture.",
+                    subsystems: .pictureInPicture
+                )
             }
         }
     }
