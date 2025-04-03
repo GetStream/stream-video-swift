@@ -3,11 +3,11 @@
 //
 
 import Foundation
-@preconcurrency import StreamWebRTC
+import StreamWebRTC
 
-public struct ConnectOptions: Sendable {
+public struct ConnectOptions: @unchecked Sendable {
     let rtcConfiguration: RTCConfiguration
-    
+
     public init(iceServers: [ICEServer]) {
         rtcConfiguration = RTCConfiguration.makeConfiguration(with: iceServers)
     }
