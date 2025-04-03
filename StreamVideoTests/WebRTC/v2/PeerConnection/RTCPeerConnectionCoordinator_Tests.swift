@@ -477,6 +477,130 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         )
     }
 
+    // MARK: - restartICE
+
+    // MARK: publisher
+
+    func test_restartICE_subjectIsPublisher_withPublishedTracks_triggersNegotiation() async throws {
+        _ = subject
+        mockLocalMediaAdapterA.stub(for: .trackInfo, with: [Stream_Video_Sfu_Models_TrackInfo()])
+
+        subject.restartICE()
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.offer) == 1
+        }
+
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCMediaConstraints.self,
+                for: .offer
+            )?.first,
+            .iceRestartConstraints
+        )
+    }
+
+    func test_restartICE_subjectIsPublisher_withoutPublishedTracks_doesNotTriggerNegotiation() async throws {
+        _ = subject
+
+        subject.restartICE()
+
+        await wait(for: 1)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
+    }
+
+    // MARK: subscriber
+
+    func test_restartICE_subjectIsSubscriber_callsRestartICEOnSFU() async throws {
+        peerType = .subscriber
+        _ = subject
+
+        subject.restartICE()
+
+        await fulfillment { [mockSFUStack] in
+            mockSFUStack?.service.iceRestartWasCalledWithRequest?.sessionID == self.sessionId
+        }
+
+        XCTAssertEqual(mockSFUStack?.service.iceRestartWasCalledWithRequest?.peerType, .subscriber)
+    }
+
+    // MARK: - restartICE SFU Event
+
+    // MARK: publisher
+
+    func test_restartICE_subjectIsPublisher_withPublishedTracks_whenSFUEventReceived_triggersNegotiation() async throws {
+        _ = subject
+        mockLocalMediaAdapterA.stub(for: .trackInfo, with: [Stream_Video_Sfu_Models_TrackInfo()])
+
+        var payload = Stream_Video_Sfu_Event_ICERestart()
+        payload.peerType = .publisherUnspecified
+        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.offer) == 1
+        }
+
+        XCTAssertEqual(
+            mockPeerConnection.recordedInputPayload(
+                RTCMediaConstraints.self,
+                for: .offer
+            )?.first,
+            .iceRestartConstraints
+        )
+    }
+
+    func test_restartICE_subjectIsPublisher_withoutPublishedTracks_whenSFUEventReceived_doesNotTriggerNegotiation() async throws {
+        _ = subject
+
+        var payload = Stream_Video_Sfu_Event_ICERestart()
+        payload.peerType = .publisherUnspecified
+        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+
+        await wait(for: 1)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
+    }
+
+    func test_restartICE_subjectIsPublisher_withPublishedTracks_whenSFUEventReceivedWithPeerTypeNonPublisher_doesNotTriggerNegotiation(
+    ) async throws {
+        _ = subject
+        mockLocalMediaAdapterA.stub(for: .trackInfo, with: [Stream_Video_Sfu_Models_TrackInfo()])
+
+        var payload = Stream_Video_Sfu_Event_ICERestart()
+        payload.peerType = .subscriber
+        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+
+        await wait(for: 1)
+        XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
+    }
+
+    // MARK: subscriber
+
+    func test_restartICE_subjectIsSubscribers_whenSFUEventReceived_callsRestartICEOnSFU() async throws {
+        peerType = .subscriber
+        _ = subject
+
+        var payload = Stream_Video_Sfu_Event_ICERestart()
+        payload.peerType = .subscriber
+        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+
+        await fulfillment { [mockSFUStack] in
+            mockSFUStack?.service.iceRestartWasCalledWithRequest?.sessionID == self.sessionId
+        }
+    }
+
+    func test_restartICE_subjectIsSubscribers_whenSFUEventReceivedWithPeerTypeNonSubscriber_noCallsRestartICEOnSFUHappen(
+    ) async throws {
+        peerType = .subscriber
+        _ = subject
+
+        var payload = Stream_Video_Sfu_Event_ICERestart()
+        payload.peerType = .publisherUnspecified
+        mockSFUStack.receiveEvent(.sfuEvent(.iceRestart(payload)))
+
+        await wait(for: 1)
+        XCTAssertNil(mockSFUStack?.service.iceRestartWasCalledWithRequest)
+    }
+
     // MARK: - Private helpers
 
     private func simulateConcurrentPeerConnectionSetUp(

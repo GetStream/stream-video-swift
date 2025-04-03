@@ -225,8 +225,10 @@ extension InternetConnection: InternetConnectionProtocol {
     ///
     /// This implementation uses a published property wrapper and erases the
     /// type to `AnyPublisher`.
+    ///
+    /// - Note: The publisher won't publish any duplicates.
     var statusPublisher: AnyPublisher<InternetConnection.Status, Never> {
-        $status.eraseToAnyPublisher()
+        $status.removeDuplicates().eraseToAnyPublisher()
     }
 }
 

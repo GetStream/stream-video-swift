@@ -29,6 +29,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         case updateSubscriptions
         case sendAnswer
         case iCETrickle
+        case iceRestart
     }
 
     var updateMuteStatesWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest?
@@ -39,6 +40,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     private(set) var updateSubscriptionsWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest?
     private(set) var sendAnswerWasCalledWithRequest: Stream_Video_Sfu_Signal_SendAnswerRequest?
     private(set) var iCETrickleWasCalledWithRequest: Stream_Video_Sfu_Models_ICETrickle?
+    private(set) var iceRestartWasCalledWithRequest: Stream_Video_Sfu_Signal_ICERestartRequest?
 
     convenience init() {
         self.init(
@@ -57,6 +59,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         stub(for: .sendAnswer, with: Stream_Video_Sfu_Signal_SendAnswerResponse())
         stub(for: .sendAnswer, with: Stream_Video_Sfu_Signal_SendAnswerResponse())
         stub(for: .iCETrickle, with: Stream_Video_Sfu_Signal_ICETrickleResponse())
+        stub(for: .iceRestart, with: Stream_Video_Sfu_Signal_ICERestartResponse())
     }
 
     override func updateMuteStates(
@@ -113,5 +116,12 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     ) async throws -> Stream_Video_Sfu_Signal_ICETrickleResponse {
         iCETrickleWasCalledWithRequest = iCETrickle
         return stubbedFunction[.iCETrickle] as! Stream_Video_Sfu_Signal_ICETrickleResponse
+    }
+
+    override func iceRestart(
+        iCERestartRequest: Stream_Video_Sfu_Signal_ICERestartRequest
+    ) async throws -> Stream_Video_Sfu_Signal_ICERestartResponse {
+        iceRestartWasCalledWithRequest = iCERestartRequest
+        return stubbedFunction[.iceRestart] as! Stream_Video_Sfu_Signal_ICERestartResponse
     }
 }

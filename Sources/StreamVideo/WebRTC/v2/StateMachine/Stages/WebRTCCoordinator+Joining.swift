@@ -128,7 +128,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     if isFastReconnecting {
                         await coordinator.stateAdapter.publisher?.restartICE()
-                        await coordinator.stateAdapter.subscriber?.restartICE()
                     }
 
                     transitionOrDisconnect(.joined(context))
@@ -271,32 +270,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
             sfuAdapter: SFUAdapter,
             isFastReconnecting: Bool
         ) async throws -> String {
-            let sessionDescription: String
-
-            switch peerConnectionType {
-            case .subscriber:
-                if
-                    isFastReconnecting,
-                    let subscriber = await coordinator.stateAdapter.subscriber {
-                    let offer = try await subscriber.createOffer()
-                    sessionDescription = offer.sdp
-                } else {
-                    sessionDescription = try await RTCTemporaryPeerConnection(
-                        peerConnectionType: .subscriber,
-                        coordinator: coordinator,
-                        sfuAdapter: sfuAdapter
-                    ).createOffer().sdp
-                }
-
-            case .publisher:
-                sessionDescription = try await RTCTemporaryPeerConnection(
-                    peerConnectionType: .publisher,
-                    coordinator: coordinator,
-                    sfuAdapter: sfuAdapter
-                ).createOffer().sdp
-            }
-
-            return sessionDescription
+            try await RTCTemporaryPeerConnection(
+                peerConnectionType: peerConnectionType,
+                coordinator: coordinator,
+                sfuAdapter: sfuAdapter
+            ).createOffer().sdp
         }
 
         /// Performs the join process.
