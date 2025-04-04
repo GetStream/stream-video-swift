@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension StreamCallStateMachine.Stage {
+extension Call.StateMachine.Stage {
 
     /// Creates a joined stage for the provided call with the specified response.
     ///
@@ -13,21 +13,22 @@ extension StreamCallStateMachine.Stage {
     ///   - response: The `JoinCallResponse` object.
     /// - Returns: A `JoinedStage` instance.
     static func joined(
-        _ call: Call?,
+        _ context: Context,
         response: JoinCallResponse
-    ) -> StreamCallStateMachine.Stage {
+    ) -> Call.StateMachine.Stage {
         JoinedStage(
-            call,
-            response: response
+            .init(
+                call: context.call,
+                joinResponse: response
+            )
         )
     }
 }
 
-extension StreamCallStateMachine.Stage {
+extension Call.StateMachine.Stage {
 
     /// A class representing the joined stage in the `StreamCallStateMachine`.
-    final class JoinedStage: StreamCallStateMachine.Stage, @unchecked Sendable {
-        let response: JoinCallResponse
+    final class JoinedStage: Call.StateMachine.Stage, @unchecked Sendable {
 
         /// Initializes a new joined stage with the provided call and response.
         ///
@@ -35,11 +36,9 @@ extension StreamCallStateMachine.Stage {
         ///   - call: The associated `Call` object.
         ///   - response: The `JoinCallResponse` object.
         init(
-            _ call: Call?,
-            response: JoinCallResponse
+            _ context: Context
         ) {
-            self.response = response
-            super.init(id: .joined, call: call)
+            super.init(id: .joined, context: context)
         }
 
         /// Handles the transition from the previous stage to this stage.
@@ -53,7 +52,7 @@ extension StreamCallStateMachine.Stage {
         ///   - From: `JoiningStage`
         ///   - To: `JoinedStage`
         override func transition(
-            from previousStage: StreamCallStateMachine.Stage
+            from previousStage: Call.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
             case .joining:

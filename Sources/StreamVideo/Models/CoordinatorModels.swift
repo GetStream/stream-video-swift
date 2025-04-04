@@ -12,7 +12,7 @@ public enum RecordingState: Sendable {
     case recording
 }
 
-public struct CreateCallOptions: Sendable {
+public struct CreateCallOptions: Sendable, Hashable {
     public var memberIds: [String]?
     public var members: [MemberRequest]?
     public var custom: [String: RawJSON]?

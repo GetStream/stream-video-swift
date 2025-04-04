@@ -9,7 +9,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Creates an error stage for the provided call with the specified error.
     ///
     /// - Parameters:
-    ///   - call: The associated `Call` object.
+    ///   - context: The associated `Context` object.
     ///   - error: The error associated with the stage.
     /// - Returns: An `ErrorStage` instance.
     static func error(
@@ -51,10 +51,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///
         /// - Parameter previousStage: The previous stage.
         /// - Returns: The new stage if the transition is valid, otherwise `nil`.
-        ///
-        /// - Valid Transitions:
-        ///   - From: `JoiningStage`, `AcceptingStage`, `RejectingStage`
-        ///   - To: `IdleStage`
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
