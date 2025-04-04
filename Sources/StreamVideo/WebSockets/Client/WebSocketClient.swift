@@ -56,15 +56,7 @@ class WebSocketClient: @unchecked Sendable {
 
     private let webSocketClientType: WebSocketClientType
 
-    private(set) lazy var pingController: WebSocketPingController = {
-        let pingController = environment.createPingController(
-            environment.timerType,
-            engineQueue,
-            webSocketClientType
-        )
-        pingController.delegate = self
-        return pingController
-    }()
+    let pingController: WebSocketPingController
 
     private func createEngineIfNeeded(for connectURL: URL) -> WebSocketEngine {
         let request = URLRequest(url: connectURL)
@@ -97,6 +89,13 @@ class WebSocketClient: @unchecked Sendable {
         self.connectURL = connectURL
         self.eventNotificationCenter = eventNotificationCenter
         self.requiresAuth = requiresAuth
+        pingController = environment.createPingController(
+            environment.timerType,
+            engineQueue,
+            webSocketClientType
+        )
+        
+        pingController.delegate = self
     }
 
     /// Connects the web connect.
