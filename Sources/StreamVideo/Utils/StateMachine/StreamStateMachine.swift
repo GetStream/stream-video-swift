@@ -30,20 +30,36 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
     ///
     /// - Parameter nextStage: The next stage to transition to.
     /// - Throws: An error if the transition is not allowed.
-    public func transition(to nextStage: StageType) {
+    public func transition(
+        to nextStage: StageType,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
         queue.sync {
             var nextStage = nextStage
-            nextStage.transition = { [weak self] in self?.transition(to: $0) }
+            nextStage.transition = {
+                [weak self] in self?.transition(
+                    to: $0,
+                    file: file,
+                    function: function,
+                    line: line
+                )
+            }
 
             let transitioningFromStage = currentStage
             transitioningFromStage.willTransitionAway()
             
             guard
-                let newStage = nextStage.transition(from: currentStage),
-                newStage.id.hashValue != currentStage.id.hashValue
+                let newStage = nextStage.transition(from: currentStage)
             else {
                 let error = ClientError.InvalidStateMachineTransition(from: currentStage, to: nextStage)
-                log.warning(error)
+                log.warning(
+                    error,
+                    functionName: function,
+                    fileName: file,
+                    lineNumber: line
+                )
                 return
             }
 
@@ -51,7 +67,10 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
 
             log.debug(
                 "Transition \(currentStage.description) → \(newStage.description)",
-                subsystems: logSubsystem
+                subsystems: logSubsystem,
+                functionName: function,
+                fileName: file,
+                lineNumber: line
             )
             publisher.send(nextStage)
         }

@@ -4,29 +4,29 @@
 
 import Foundation
 
-extension StreamCallStateMachine.Stage {
+extension Call.StateMachine.Stage {
 
     /// Creates an error stage for the provided call with the specified error.
     ///
     /// - Parameters:
-    ///   - call: The associated `Call` object.
+    ///   - context: The associated `Context` object.
     ///   - error: The error associated with the stage.
     /// - Returns: An `ErrorStage` instance.
     static func error(
-        _ call: Call?,
+        _ context: Context,
         error: Error
-    ) -> StreamCallStateMachine.Stage {
+    ) -> Call.StateMachine.Stage {
         ErrorStage(
-            call,
+            context,
             error: error
         )
     }
 }
 
-extension StreamCallStateMachine.Stage {
+extension Call.StateMachine.Stage {
 
     /// A class representing the error stage in the `StreamCallStateMachine`.
-    final class ErrorStage: StreamCallStateMachine.Stage, @unchecked Sendable {
+    final class ErrorStage: Call.StateMachine.Stage, @unchecked Sendable {
         let error: Error
 
         /// Initializes a new error stage with the provided call and error.
@@ -35,11 +35,11 @@ extension StreamCallStateMachine.Stage {
         ///   - call: The associated `Call` object.
         ///   - error: The error associated with the stage.
         init(
-            _ call: Call?,
+            _ context: Context,
             error: Error
         ) {
             self.error = error
-            super.init(id: .error, call: call)
+            super.init(id: .error, context: context)
         }
 
         /// Handles the transition from the previous stage to this stage.
@@ -48,27 +48,18 @@ extension StreamCallStateMachine.Stage {
         ///
         /// - Parameter previousStage: The previous stage.
         /// - Returns: The new stage if the transition is valid, otherwise `nil`.
-        ///
-        /// - Valid Transitions:
-        ///   - From: `JoiningStage`, `AcceptingStage`, `RejectingStage`
-        ///   - To: `IdleStage`
         override func transition(
-            from previousStage: StreamCallStateMachine.Stage
+            from previousStage: Call.StateMachine.Stage
         ) -> Self? {
-            switch previousStage.id {
-            case .joining, .accepting, .rejecting:
-                Task { [error] in
-                    do {
-                        try transition?(.idle(call))
-                        log.error(error)
-                    } catch {
-                        log.error(error)
-                    }
+            Task { [error] in
+                do {
+                    log.error(error)
+                    try transition?(.idle(context))
+                } catch let transitionError {
+                    log.error(transitionError)
                 }
-                return self
-            default:
-                return nil
             }
+            return self
         }
     }
 }

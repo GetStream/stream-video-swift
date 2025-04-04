@@ -48,13 +48,13 @@ final class SerialActor_Tests: XCTestCase, @unchecked Sendable {
             }
 
             group.addTask {
+                await self.wait(for: 0.1)
                 self.subject.cancel()
             }
 
             await group.waitForAll()
         }
 
-        await wait(for: 1)
         XCTAssertEqual(counter, 0)
     }
 }
