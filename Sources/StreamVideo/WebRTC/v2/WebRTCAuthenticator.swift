@@ -74,17 +74,16 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             )
         )
 
-        if create {
-            if let callSettings = await coordinator.stateAdapter.initialCallSettings {
-                await coordinator.stateAdapter.set(
-                    callSettings: callSettings
-                )
-            } else {
-                await coordinator.stateAdapter.set(
-                    callSettings: response.call.settings.toCallSettings
-                )
-            }
+        if let callSettings = await coordinator.stateAdapter.initialCallSettings {
+            await coordinator.stateAdapter.set(
+                callSettings: callSettings
+            )
+        } else {
+            await coordinator.stateAdapter.set(
+                callSettings: response.call.settings.toCallSettings
+            )
         }
+
         await coordinator.stateAdapter.set(
             videoOptions: .init(preferredCameraPosition: {
                 switch response.call.settings.video.cameraFacing {

@@ -156,17 +156,22 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(callSettings, expected.call.settings.toCallSettings)
     }
 
-    func test_authenticate_withCreateFalse_shouldNotSetInitialCallSettings() async throws {
-        let create = false
+    func test_authenticate_withCreateFalseAndInitialCallSettings_shouldSetInitialCallSettings() async throws {
+        let create = true
         let ring = true
         let notify = true
         let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: false))))
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
+        let initialCallSettings = CallSettings(
+            audioOn: false,
+            videoOn: true,
+            speakerOn: true
+        )
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(initialCallSettings: .init(audioOn: false, audioOutputOn: false))
+            .set(initialCallSettings: initialCallSettings)
 
         _ = try await subject.authenticate(
             coordinator: mockCoordinatorStack.coordinator,
@@ -181,8 +186,31 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             .coordinator
             .stateAdapter
             .callSettings
-        XCTAssertTrue(callSettings.audioOn)
-        XCTAssertTrue(callSettings.audioOutputOn)
+        XCTAssertEqual(callSettings, initialCallSettings)
+    }
+
+    func test_authenticate_withCreateFalseWithoutInitialCallSettings_shouldSetCallSettingsFromResponse() async throws {
+        let create = false
+        let ring = true
+        let notify = true
+        let options = CreateCallOptions()
+        let expected = JoinCallResponse.dummy(call: .dummy(settings: .dummy(audio: .dummy(micDefaultOn: true))))
+        mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
+
+        _ = try await subject.authenticate(
+            coordinator: mockCoordinatorStack.coordinator,
+            currentSFU: nil,
+            create: create,
+            ring: ring,
+            notify: notify,
+            options: options
+        )
+
+        let callSettings = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .callSettings
+        XCTAssertEqual(callSettings, expected.call.settings.toCallSettings)
     }
 
     func test_authenticate_updatesVideoOptions() async throws {
