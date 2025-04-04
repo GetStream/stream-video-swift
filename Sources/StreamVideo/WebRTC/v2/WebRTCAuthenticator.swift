@@ -74,6 +74,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             )
         )
 
+        /// Always apply either the provided callSettings or the ones from the dashboard.
         if let callSettings = await coordinator.stateAdapter.initialCallSettings {
             await coordinator.stateAdapter.set(
                 callSettings: callSettings
