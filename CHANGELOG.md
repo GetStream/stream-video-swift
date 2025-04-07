@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- Improved the flow of joining a call [#747](https://github.com/GetStream/stream-video-swift/pull/747)
+
 
 # [1.20.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.20.0)
 _April 07, 2025_
