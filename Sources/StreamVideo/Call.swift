@@ -48,6 +48,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public let camera: CameraManager
     /// Provides access to the speaker.
     public let speaker: SpeakerManager
+    /// Provides access to device's proximity
+    private lazy var proximity: ProximityManager = .init(self)
 
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
@@ -1232,7 +1234,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Sets the disconnection timeout for a user who has temporarily lost connection.
     ///
     /// This method defines the duration a user, who has already joined the call, can remain
-    /// in a disconnected state due to temporary internet issues. If the user’s connection
+    /// in a disconnected state due to temporary internet issues. If the user's connection
     /// remains disrupted beyond the specified timeout period, they will be dropped from the call.
     /// This timeout helps ensure that users with unstable connections do not stay in the call
     /// indefinitely if they cannot reconnect.
@@ -1365,6 +1367,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the update fails.
     public func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
         try await callController.updateAudioSessionPolicy(policy)
+    }
+
+    /// Adds a proximity policy to manage device proximity behavior during the call.
+    /// Only supported on phone devices.
+    /// - Parameter policy: Policy to add for managing proximity behavior
+    /// - Throws: ClientError if the call is not in a valid state
+    public func addProximityPolicy(_ policy: any ProximityPolicy) throws {
+        try proximity.add(policy)
+    }
+
+    /// Removes a previously added proximity policy from the call.
+    /// - Parameter policy: Policy to remove
+    public func removeProximityPolicy(_ policy: any ProximityPolicy) {
+        proximity.remove(policy)
     }
 
     // MARK: - Internal
