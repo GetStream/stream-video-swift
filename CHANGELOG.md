@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+
+# [1.20.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.20.0)
+_April 07, 2025_
+
+### 🔄 Changed
 - Updated WebRTC version to 125.6422.066 [#748](https://github.com/GetStream/stream-video-swift/pull/748)
 
 ### 🐞 Fixed
