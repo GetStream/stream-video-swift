@@ -46,6 +46,16 @@ public final class CurrentDevice: @unchecked Sendable {
     /// The identified `DeviceType` for the current environment.
     public private(set) var deviceType: DeviceType = .unspecified
     public private(set) var systemVersion: String = "-"
+    #if canImport(UIKit)
+    @MainActor
+    var isProximityMonitoringEnabled: Bool {
+        get { UIDevice.current.isProximityMonitoringEnabled }
+        set { UIDevice.current.isProximityMonitoringEnabled = newValue }
+    }
+    #else
+    @MainActor@MainActor
+    var isProximityMonitoringEnabled: Bool = false
+    #endif
 
     /// Creates a `CurrentDevice` by inspecting the user interface idiom.
     /// - Important: On platforms where UIKit is unavailable, the type defaults

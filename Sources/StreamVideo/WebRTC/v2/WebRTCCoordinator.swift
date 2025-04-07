@@ -432,6 +432,24 @@ final class WebRTCCoordinator: @unchecked Sendable {
         try await stateAdapter.audioSession.didUpdatePolicy(policy)
     }
 
+    func addAudioSessionCapability(_ capability: AudioSessionCapability) {
+        if var _capability = capability as? _AudioSessionCapability {
+            _capability.audioSession = stateAdapter.audioSession
+            _capability.actionDispatcher = { [weak self] in
+                await self?.stateAdapter.set(callSettings: $0)
+            }
+        }
+        stateAdapter.audioSession.addCapability(capability)
+    }
+
+    func removeAudioSessionCapability(_ capability: AudioSessionCapability) {
+        if var _capability = capability as? _AudioSessionCapability {
+            _capability.audioSession = nil
+            _capability.actionDispatcher = nil
+        }
+        stateAdapter.audioSession.removeCapability(capability)
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.

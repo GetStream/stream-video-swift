@@ -1355,6 +1355,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await callController.updateAudioSessionPolicy(policy)
     }
 
+    public func addAudioSessionCapability(_ capability: AudioSessionCapability) {
+        callController.addAudioSessionCapability(capability)
+    }
+
+    public func removeAudioSessionCapability(_ capability: AudioSessionCapability) {
+        callController.removeAudioSessionCapability(capability)
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {

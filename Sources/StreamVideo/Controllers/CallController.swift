@@ -476,6 +476,14 @@ class CallController: @unchecked Sendable {
         try await webRTCCoordinator.updateAudioSessionPolicy(policy)
     }
 
+    func addAudioSessionCapability(_ capability: AudioSessionCapability) {
+        webRTCCoordinator.addAudioSessionCapability(capability)
+    }
+
+    func removeAudioSessionCapability(_ capability: AudioSessionCapability) {
+        webRTCCoordinator.removeAudioSessionCapability(capability)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {

@@ -34,6 +34,10 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
         self.viewModel = viewModel
         _snapshotViewModel = .init(wrappedValue: .init(viewModel))
         _sessionTimer = .init(wrappedValue: .init(call: viewModel.call, alertInterval: 60))
+
+        if CurrentDevice.currentValue.deviceType == .phone {
+            viewModel.call?.addAudioSessionCapability(ProximityOutputAudioSessionCapability())
+        }
     }
 
     var body: some View {

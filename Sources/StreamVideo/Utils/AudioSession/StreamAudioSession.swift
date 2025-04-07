@@ -38,6 +38,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// The policy defining audio session behavior.
     @Atomic private(set) var policy: AudioSessionPolicy
 
+    @Atomic private var capabilities: [ObjectIdentifier: AudioSessionCapability] = [:]
+
     /// Published property to track the audio session category.
     @Published private(set) var category: AVAudioSession.Category
 
@@ -176,6 +178,14 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             callSettings: activeCallSettings,
             ownCapabilities: ownCapabilities
         )
+    }
+
+    func addCapability(_ capability: AudioSessionCapability) {
+        capabilities[capability.identifier] = capability
+    }
+
+    func removeCapability(_ capability: AudioSessionCapability) {
+        capabilities[capability.identifier] = nil
     }
 
     // MARK: - Recording
