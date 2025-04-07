@@ -340,35 +340,6 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    // MARK: joinResponse
-
-    func test_handleJoinResponse_givenEvent_whenPublished_thenUpdatesParticipantsAndPins() async throws {
-        var event = Stream_Video_Sfu_Event_JoinResponse()
-        event.callState = .init()
-        event.callState.participants = [
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy()),
-            .init(.dummy(id: "recording-egress")),
-            .init(.dummy())
-        ]
-        try await assert(
-            event,
-            wrappedEvent: .sfuEvent(.joinResponse(event)),
-            initialState: [:]
-        ) { participants in
-            participants.count == 11
-                && participants.filter { !$0.value.showTrack }.count == 1
-        }
-    }
-
     // MARK: healthCheckResponse
 
     func test_handleHealthCheckResponse_givenEvent_whenPublished_thenUpdatesParticipantCounts() async throws {

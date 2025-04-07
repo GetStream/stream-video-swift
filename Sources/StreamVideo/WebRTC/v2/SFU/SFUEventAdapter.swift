@@ -94,14 +94,6 @@ final class SFUEventAdapter: @unchecked Sendable {
             .store(in: disposableBag)
 
         sfuAdapter
-            .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
-            .log(.debug, subsystems: .sfu) {
-                "Processing SFU event of type:\($0.name) with participants:\($0.callState.participants.map(\.name).joined(separator: ","))."
-            }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleJoinResponse($0) }
-            .store(in: disposableBag)
-
-        sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_HealthCheckResponse.self)
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) with anonymous:\($0.participantCount.anonymous) total:\($0.participantCount.total)."
@@ -300,40 +292,6 @@ final class SFUEventAdapter: @unchecked Sendable {
                     .withUpdated(dominantSpeaker: event.sessionID == entry.key)
             }
         }
-    }
-
-    /// Handles a JoinResponse event.
-    ///
-    /// - Parameter event: The JoinResponse event to handle.
-    private func handleJoinResponse(
-        _ event: Stream_Video_Sfu_Event_JoinResponse
-    ) async {
-        let participants = event
-            .callState
-            .participants
-            .filter { $0.userID != recordingUserId }
-
-        // For more than threshold participants, the activation of track is on
-        // view appearance.
-        let pins = event
-            .callState
-            .pins
-            .map(\.sessionID)
-
-        var callParticipants: [String: CallParticipant] = [:]
-        for (index, participant) in participants.enumerated() {
-            let pin: PinInfo? = pins.contains(participant.sessionID)
-                ? PinInfo(isLocal: false, pinnedAt: .init())
-                : nil
-
-            let callParticipant = participant.toCallParticipant(
-                showTrack: index < participantsThreshold,
-                pin: pin
-            )
-            callParticipants[callParticipant.sessionId] = callParticipant
-        }
-
-        await stateAdapter.enqueue { [callParticipants] _ in callParticipants }
     }
 
     /// Handles a HealthCheckResponse event and updates the `participantCount` and the

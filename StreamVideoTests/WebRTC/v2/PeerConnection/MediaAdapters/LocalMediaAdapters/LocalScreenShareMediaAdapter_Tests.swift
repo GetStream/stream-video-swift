@@ -61,42 +61,6 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertTrue(subject.primaryTrack.source === track.source)
     }
 
-    // MARK: - setUp(with:ownCapabilities:)
-
-    func test_setUp_addTrack() async throws {
-        try await assertTrackEvent {
-            switch $0 {
-            case let .added(id, trackType, track):
-                return (id, trackType, track)
-            default:
-                return nil
-            }
-        } operation: { subject in
-            try await subject.setUp(
-                with: .init(videoOn: true),
-                ownCapabilities: [.sendVideo]
-            )
-        } validation: { [sessionId] id, trackType, track in
-            XCTAssertEqual(id, sessionId)
-            XCTAssertEqual(trackType, .screenshare)
-            XCTAssertTrue(track is RTCVideoTrack)
-        }
-
-        XCTAssertFalse(subject.primaryTrack.isEnabled)
-    }
-
-    // MARK: - didUpdateCallSettings(_:)
-
-    func test_didUpdateCallSettings_noOperation() async throws {
-        try await subject.setUp(
-            with: .init(videoOn: true),
-            ownCapabilities: [.screenshare]
-        )
-        try await subject.didUpdateCallSettings(.init(videoOn: true))
-
-        XCTAssertFalse(subject.primaryTrack.isEnabled)
-    }
-
     // MARK: - didUpdatePublishOptions
 
     func test_didUpdatePublishOptions_primaryTrackIsNotEnabled_nothingHappens() async throws {
@@ -197,6 +161,26 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
     }
 
     // MARK: - beginScreenSharing(of:ownCapabilities:)
+
+    func test_beginScreenSharing_addTrack() async throws {
+        try await assertTrackEvent {
+            switch $0 {
+            case let .added(id, trackType, track):
+                return (id, trackType, track)
+            default:
+                return nil
+            }
+        } operation: { subject in
+            try await subject.beginScreenSharing(
+                of: .inApp,
+                ownCapabilities: [.screenshare]
+            )
+        } validation: { [sessionId] id, trackType, track in
+            XCTAssertEqual(id, sessionId)
+            XCTAssertEqual(trackType, .screenshare)
+            XCTAssertTrue(track is RTCVideoTrack)
+        }
+    }
 
     func test_beginScreenSharing_withoutCapabilityWithActiveSession_stopsCapturingAndSession() async throws {
         try await assertStopCapturing {

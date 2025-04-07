@@ -26,6 +26,7 @@
 		40073B7F2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */; };
 		40073B882C458250006A2867 /* VideoRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B872C458250006A2867 /* VideoRendererView.swift */; };
 		40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B892C458259006A2867 /* LocalVideoView.swift */; };
+		400C9FC42D9D0BDA00DB26DC /* SerialActorQueue_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400C9FC32D9D0BDA00DB26DC /* SerialActorQueue_Tests.swift */; };
 		400C9FCD2D9D648100DB26DC /* RTCConfiguration_DefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400C9FCC2D9D648100DB26DC /* RTCConfiguration_DefaultsTests.swift */; };
 		400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */; };
 		400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */; };
@@ -1572,6 +1573,7 @@
 		40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift; sourceTree = "<group>"; };
 		40073B872C458250006A2867 /* VideoRendererView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRendererView.swift; sourceTree = "<group>"; };
 		40073B892C458259006A2867 /* LocalVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVideoView.swift; sourceTree = "<group>"; };
+		400C9FC32D9D0BDA00DB26DC /* SerialActorQueue_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActorQueue_Tests.swift; sourceTree = "<group>"; };
 		400C9FCC2D9D648100DB26DC /* RTCConfiguration_DefaultsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCConfiguration_DefaultsTests.swift; sourceTree = "<group>"; };
 		400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserverTests.swift; sourceTree = "<group>"; };
 		400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioFilterCapturePostProcessingModule.swift; sourceTree = "<group>"; };
@@ -2898,6 +2900,15 @@
 				40073B892C458259006A2867 /* LocalVideoView.swift */,
 			);
 			path = VideoRenderer;
+			sourceTree = "<group>";
+		};
+		400C9FC22D9D0BC900DB26DC /* SerialActor */ = {
+			isa = PBXGroup;
+			children = (
+				40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */,
+				400C9FC32D9D0BDA00DB26DC /* SerialActorQueue_Tests.swift */,
+			);
+			path = SerialActor;
 			sourceTree = "<group>";
 		};
 		401480332A5423C70029166A /* Utils */ = {
@@ -5086,6 +5097,7 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				400C9FC22D9D0BC900DB26DC /* SerialActor */,
 				401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */,
 				401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */,
 				401C1EED2D493BE700304609 /* AsyncStreamPublisherTests.swift */,
@@ -5103,7 +5115,6 @@
 				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
 				84D6E5392B3AD10000D0056C /* RepeatingTimer_Tests.swift */,
 				4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */,
-				40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */,
 				403FB1482BFDF3950047A696 /* CallCache_Tests.swift */,
 			);
 			path = Utils;
@@ -7543,6 +7554,7 @@
 				40B48C302D14D308002C4EAB /* MockRTCRtpEncodingParameters.swift in Sources */,
 				40F017572BBEF07B00E89FD1 /* GeofenceSettings+Dummy.swift in Sources */,
 				40C9E4532C9888C100802B28 /* WebRTCMigrationStatusObserver_Tests.swift in Sources */,
+				400C9FC42D9D0BDA00DB26DC /* SerialActorQueue_Tests.swift in Sources */,
 				40DE867D2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift in Sources */,
 				40483CBA2C9B1E6600B4FCA8 /* MockWebRTCCoordinatorFactory.swift in Sources */,
 				845E31062A7121D6004DC470 /* BroadcastObserver_Tests.swift in Sources */,

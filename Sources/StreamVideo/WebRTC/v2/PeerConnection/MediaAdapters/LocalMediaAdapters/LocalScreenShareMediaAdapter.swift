@@ -49,6 +49,10 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// A publisher that emits events related to the screen sharing track.
     let subject: PassthroughSubject<TrackEvent, Never>
 
+    /// We only want to register (send our primary track to the subject) only when we are about to publish
+    /// for the first time. The property help us keep track of that.
+    private var hasRegisteredPrimaryTrack: Bool = false
+
     /// Initializes a new instance of the LocalScreenShareMediaAdapter.
     ///
     /// - Parameters:
@@ -122,13 +126,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        subject.send(
-            .added(
-                id: sessionID,
-                trackType: .screenshare,
-                track: primaryTrack
-            )
-        )
+        /* No-op */
     }
 
     /// Publishes the local screen sharing track to the peer connection.
@@ -350,6 +348,8 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             return
         }
 
+        registerPrimaryTrackIfPossible()
+        
         try await sfuAdapter.updateTrackMuteState(
             .screenShare,
             isMuted: false,
@@ -516,5 +516,21 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
             """,
             subsystems: .webRTC
         )
+    }
+
+    /// We only want to register the primaryTrack only when we are about to publish for the first time.
+    private func registerPrimaryTrackIfPossible() {
+        guard !hasRegisteredPrimaryTrack else {
+            return
+        }
+
+        subject.send(
+            .added(
+                id: sessionID,
+                trackType: .screenshare,
+                track: primaryTrack
+            )
+        )
+        hasRegisteredPrimaryTrack = true
     }
 }

@@ -935,7 +935,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             let publisher = await $0.context.coordinator?.stateAdapter.publisher
             let subscriber = await $0.context.coordinator?.stateAdapter.subscriber
             XCTAssertEqual((publisher as? MockRTCPeerConnectionCoordinator)?.timesCalled(.restartICE), 1)
-            XCTAssertEqual((subscriber as? MockRTCPeerConnectionCoordinator)?.timesCalled(.restartICE), 1)
+            XCTAssertEqual((subscriber as? MockRTCPeerConnectionCoordinator)?.timesCalled(.restartICE), 0)
             XCTAssertEqual(mockCoordinatorStack?.webRTCAuthenticator.timesCalled(.waitForConnect), 1)
         }
         cancellable.cancel()
