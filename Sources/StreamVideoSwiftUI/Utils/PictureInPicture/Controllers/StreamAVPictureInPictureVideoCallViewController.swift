@@ -3,60 +3,53 @@
 //
 
 import AVKit
+import Combine
 import Foundation
 import StreamVideo
 import StreamWebRTC
 
 /// Describes an object that can be used to present picture-in-picture content.
 protocol StreamAVPictureInPictureViewControlling: AnyObject {
-    
-    /// The closure to call whenever the picture-in-picture window size changes.
-    @MainActor
-    var onSizeUpdate: (@Sendable(CGSize) -> Void)? { get set }
-
-    /// The track that will be rendered on picture-in-picture window.
-    @MainActor
-    var track: RTCVideoTrack? { get set }
 
     /// The preferred size for the picture-in-picture window.
     /// - Important: This should **always** be greater to ``CGSize.zero``. If not, iOS throws
     /// a cryptic error with content `PGPegasus code:-1003`
     @MainActor
-    var preferredContentSize: CGSize { get set }
-
-    /// The layer that renders the incoming frames from WebRTC.
-    @MainActor
-    var displayLayer: CALayer { get }
+    init(dataPipeline: PictureInPictureDataPipeline)
 }
 
 @available(iOS 15.0, *)
 final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController,
     StreamAVPictureInPictureViewControlling {
 
-    private let contentView: StreamPictureInPictureVideoRenderer =
-        .init(windowSizePolicy: StreamPictureInPictureAdaptiveWindowSizePolicy())
-
-    nonisolated(unsafe) var onSizeUpdate: (@Sendable(CGSize) -> Void)?
-
-    @MainActor
-    var track: RTCVideoTrack? {
-        get { contentView.track }
-        set { contentView.track = newValue }
-    }
-
-    @MainActor
-    var displayLayer: CALayer { contentView.displayLayer }
+    private let contentView: StreamPictureInPictureVideoRenderer
+    private let dataPipeline: PictureInPictureDataPipeline
+    private var preferredContentSizeCancellable: AnyCancellable?
 
     // MARK: - Lifecycle
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    /// Initializes a new instance and sets the `preferredContentSize` to `Self.defaultPreferredContentSize`
-    /// value.
-    required init() {
+    @MainActor
+    required init(dataPipeline: PictureInPictureDataPipeline) {
+        contentView = .init(dataPipeline: dataPipeline)
+        self.dataPipeline = dataPipeline
         super.init(nibName: nil, bundle: nil)
-        contentView.pictureInPictureWindowSizePolicy.controller = self
+        preferredContentSizeCancellable = dataPipeline
+            .sizeEventPublisher
+            .compactMap {
+                switch $0 {
+                case let .setPreferredSize(size) where size != .zero:
+                    return size
+                default:
+                    return nil
+                }
+            }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.preferredContentSize, onWeak: self)
+
+        preferredContentSize = .init(width: 640, height: 480)
     }
 
     override func viewDidLoad() {
@@ -67,7 +60,7 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         contentView.bounds = view.bounds
-        onSizeUpdate?(contentView.bounds.size)
+        dataPipeline.contentSizeUpdated(contentView.bounds.size)
     }
 
     // MARK: - Private helpers
