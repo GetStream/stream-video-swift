@@ -16,7 +16,7 @@ final class StreamPictureInPictureContentAdapter: @unchecked Sendable {
                 dataPipeline.send(.none)
             } else if newValue, let call {
                 subscribeToDataPipeline()
-                subscribeToParticipantsUpdates(on: call)
+                subscribeToCallUpdates(on: call)
                 log.debug("Picture-in-Picture content broadcasting started.", subsystems: .pictureInPicture)
             } else {
                 /* No-op */
@@ -33,7 +33,9 @@ final class StreamPictureInPictureContentAdapter: @unchecked Sendable {
     private let disposableBag: DisposableBag = .init()
     private lazy var contentProviders: [StreamPictureInPictureContentProvider] = [
         StreamPictureInPictureParticipantContentProvider(dataPipeline: dataPipeline),
-        StreamPictureInPictureScreenSharingContentProvider(dataPipeline: dataPipeline)
+        StreamPictureInPictureScreenSharingContentProvider(dataPipeline: dataPipeline),
+        StreamPictureInPictureStaticContentProvider(dataPipeline: dataPipeline),
+        StreamPictureInPictureReconnectingContentProvider(dataPipeline: dataPipeline)
     ]
 
     init(dataPipeline: PictureInPictureDataPipeline) {
@@ -69,9 +71,14 @@ final class StreamPictureInPictureContentAdapter: @unchecked Sendable {
             dataPipeline.send(.participant(participant, track: track))
         } else if
             let participant = otherParticipants.first(where: { $0.isDominantSpeaker }) {
-            dataPipeline.send(.static(participant))
+            if participant.hasVideo, let track = participant.track {
+                dataPipeline.send(.participant(participant, track: track))
+            } else {
+                dataPipeline.send(.static(participant))
+            }
         } else if
             let localParticipant = call.state.localParticipant,
+            localParticipant.hasVideo,
             let track = localParticipant.track {
             dataPipeline.send(.participant(localParticipant, track: track))
         } else if let participant = participants.first {
@@ -91,7 +98,7 @@ final class StreamPictureInPictureContentAdapter: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    private func subscribeToParticipantsUpdates(on call: Call) {
+    private func subscribeToCallUpdates(on call: Call) {
         Task { @MainActor in
             call
                 .state
@@ -99,6 +106,15 @@ final class StreamPictureInPictureContentAdapter: @unchecked Sendable {
                 .receive(on: DispatchQueue.main)
                 .removeDuplicates()
                 .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
+                .store(in: disposableBag)
+
+            call
+                .state
+                .$reconnectionStatus
+                .filter { $0 != .connected }
+                .removeDuplicates()
+                .sink { [weak self] _ in self?.dataPipeline.send(.reconnecting) }
+                .store(in: disposableBag)
         }
         .store(in: disposableBag)
     }

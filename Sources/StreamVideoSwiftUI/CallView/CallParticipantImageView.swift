@@ -48,3 +48,50 @@ public struct CallParticipantImageView<Factory: ViewFactory>: View {
         )
     }
 }
+
+struct GenericCallParticipantImageView: View {
+
+    @Injected(\.colors) var colors
+
+    var userAvatarProvider: (String, String, URL?, CGFloat) -> AnyView
+    var id: String
+    var name: String
+    var imageURL: URL?
+    var size: CGFloat
+
+    init<Factory: ViewFactory>(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        id: String,
+        name: String,
+        imageURL: URL? = nil,
+        size: CGFloat
+    ) {
+        userAvatarProvider = { [viewFactory] id, name, imageURL, size in
+            AnyView(
+                viewFactory.makeUserAvatar(
+                    .init(id: id, name: name, imageURL: imageURL),
+                    with: .init(size: size) {
+                        AnyView(
+                            CircledTitleView(
+                                title: name.isEmpty ? id : String(name.uppercased().first!),
+                                size: size
+                            )
+                        )
+                    }
+                )
+            )
+        }
+        self.id = id
+        self.name = name
+        self.imageURL = imageURL
+        self.size = size
+    }
+
+    var body: some View {
+        StreamLazyImage(imageURL: imageURL) {
+            Color(colors.participantBackground)
+        }
+        .blur(radius: 8)
+        .overlay(userAvatarProvider(id, name, imageURL, size))
+    }
+}

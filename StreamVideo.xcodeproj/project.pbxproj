@@ -363,6 +363,10 @@
 		40914C982B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */; };
 		40914C9A2B56A85B00F6A13E /* StreamBufferTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */; };
 		40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */; };
+		40916E4C2DA5B3C20061D860 /* StreamPictureInPictureStaticFrameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40916E4B2DA5B3C20061D860 /* StreamPictureInPictureStaticFrameProvider.swift */; };
+		40916E4E2DA5B3E60061D860 /* StreamPictureInPictureViewFactoryKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40916E4D2DA5B3E60061D860 /* StreamPictureInPictureViewFactoryKey.swift */; };
+		40916E502DA5B48A0061D860 /* StreamPictureInPictureReconnectingContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40916E4F2DA5B48A0061D860 /* StreamPictureInPictureReconnectingContentProvider.swift */; };
+		40916E522DA5B4D80061D860 /* ReconnectingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40916E512DA5B4D80061D860 /* ReconnectingView.swift */; };
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
@@ -1827,6 +1831,10 @@
 		40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureTrackStateAdapterTests.swift; sourceTree = "<group>"; };
 		40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBufferTransformer.swift; sourceTree = "<group>"; };
 		40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBufferTransformerTests.swift; sourceTree = "<group>"; };
+		40916E4B2DA5B3C20061D860 /* StreamPictureInPictureStaticFrameProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureStaticFrameProvider.swift; sourceTree = "<group>"; };
+		40916E4D2DA5B3E60061D860 /* StreamPictureInPictureViewFactoryKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureViewFactoryKey.swift; sourceTree = "<group>"; };
+		40916E4F2DA5B48A0061D860 /* StreamPictureInPictureReconnectingContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureReconnectingContentProvider.swift; sourceTree = "<group>"; };
+		40916E512DA5B4D80061D860 /* ReconnectingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectingView.swift; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
@@ -2934,6 +2942,8 @@
 		400B23E42DA52D5700429226 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				40916E4D2DA5B3E60061D860 /* StreamPictureInPictureViewFactoryKey.swift */,
+				40916E4B2DA5B3C20061D860 /* StreamPictureInPictureStaticFrameProvider.swift */,
 				400B23FC2DA560E600429226 /* StreamPictureInPictureFrameProcessor.swift */,
 				400B23E52DA535E800429226 /* StreamPictureInPictureDelegateProxy.swift */,
 				40A941772B4DC576006D6965 /* StreamPictureInPictureTrackStateAdapter.swift */,
@@ -2971,6 +2981,7 @@
 				400B23F92DA55B1500429226 /* StreamPictureInPictureParticipantContentProvider.swift */,
 				400B23FE2DA56F4A00429226 /* StreamPictureInPictureScreenSharingContentProvider.swift */,
 				403AF2C42DA577DE001B6EBE /* StreamPictureInPictureStaticContentProvider.swift */,
+				40916E4F2DA5B48A0061D860 /* StreamPictureInPictureReconnectingContentProvider.swift */,
 			);
 			path = ContentProviders;
 			sourceTree = "<group>";
@@ -5276,6 +5287,7 @@
 				848A73C129269E7D0089AA6E /* CornerDraggableView.swift */,
 				84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */,
 				843B707429C270C300AB0573 /* ReconnectionView.swift */,
+				40916E512DA5B4D80061D860 /* ReconnectingView.swift */,
 				847D001F29C8AB1E00DD0A50 /* RecordingView.swift */,
 				846E4AFC29D1DDE8003733AB /* LayoutMenuView.swift */,
 				846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */,
@@ -7835,6 +7847,8 @@
 				843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */,
 				40AA2EDE2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift in Sources */,
 				401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */,
+				40916E4E2DA5B3E60061D860 /* StreamPictureInPictureViewFactoryKey.swift in Sources */,
+				40916E522DA5B4D80061D860 /* ReconnectingView.swift in Sources */,
 				8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */,
 				403AF2C52DA577DE001B6EBE /* StreamPictureInPictureStaticContentProvider.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
@@ -7876,6 +7890,7 @@
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
+				40916E502DA5B48A0061D860 /* StreamPictureInPictureReconnectingContentProvider.swift in Sources */,
 				40245F3A2BE26F7200FCF075 /* StatelessAudioOutputIconView.swift in Sources */,
 				8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */,
 				846E4AFD29D1DDE8003733AB /* LayoutMenuView.swift in Sources */,
@@ -7941,6 +7956,7 @@
 				40E110472B5A9DF4007DF492 /* CallDurationView.swift in Sources */,
 				40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */,
 				846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */,
+				40916E4C2DA5B3C20061D860 /* StreamPictureInPictureStaticFrameProvider.swift in Sources */,
 				40F18B8C2BEBAC4C00ADF76E /* CallEndedViewModifier.swift in Sources */,
 				4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */,
 				40E110492B5A9F03007DF492 /* Formatters.swift in Sources */,
@@ -9679,8 +9695,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 125.6422.066;
+				branch = main;
+				kind = branch;
 			};
 		};
 		8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {

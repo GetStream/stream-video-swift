@@ -8,40 +8,28 @@ import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
-final class StreamPictureInPictureStaticContentProvider: NSObject, StreamPictureInPictureContentProvider,
-    @unchecked Sendable {
+final class StreamPictureInPictureStaticContentProvider: NSObject, StreamPictureInPictureContentProvider, @unchecked Sendable {
+
+    @Injected(\.pictureInPictureViewFactory) private var pictureInPictureViewFactory
 
     private struct State {
         var participant: CallParticipant
     }
 
     private let dataPipeline: PictureInPictureDataPipeline
-    private let frameGenerator: StaticFrameProvider
     private let serialQueue = SerialActorQueue()
 
     private var state: State?
     private var contentSizeCancellable: AnyCancellable?
 
+    private lazy var frameGenerator = buildFrameGenerator()
+
     weak var call: Call?
 
     init(dataPipeline: PictureInPictureDataPipeline) {
         self.dataPipeline = dataPipeline
-        self.frameGenerator = .init(dataPipeline: dataPipeline) {
-            await .build(size: $0) { Color.red }
-        }
-
-        contentSizeCancellable = dataPipeline
-            .sizeEventPublisher
-            .compactMap {
-                switch $0 {
-                case .contentSizeUpdated(let size):
-                    return size
-                default:
-                    return nil
-                }
-            }
-            .assign(to: \.contentSize, on: frameGenerator)
-
+        super.init()
+        _ = frameGenerator
     }
 
     // MARK: - StreamPictureInPictureContentProvider
@@ -59,6 +47,10 @@ final class StreamPictureInPictureStaticContentProvider: NSObject, StreamPicture
                         participant: participant
                     )
                     frameGenerator.isActive = true
+                    log.debug(
+                        "Static frame generator is now active for participant:\(participant.name).",
+                        subsystems: .pictureInPicture
+                    )
                 } else {
                     /* No-op */
                 }
@@ -68,55 +60,49 @@ final class StreamPictureInPictureStaticContentProvider: NSObject, StreamPicture
             }
         }
     }
-}
 
-private final class StaticFrameProvider: @unchecked Sendable {
+    // MARK: - Private Helpers
 
-    var contentSize: CGSize = .zero {
-        didSet { cachedFrameAccessQueue.sync { cache = nil } }
-    }
-
-    var isActive: Bool = false {
-        willSet {
-            if newValue, generationCancellable == nil {
-                generationCancellable = Timer
-                    .publish(every: interval, on: .main, in: .default)
-                    .autoconnect()
-                    .sinkTask { @MainActor [weak self] _ in await self?.generateFrame() }
-            } else if !newValue {
-                generationCancellable?.cancel()
+    private func buildFrameGenerator() -> StreamPictureInPictureStaticFrameProvider {
+        let result = StreamPictureInPictureStaticFrameProvider(dataPipeline: dataPipeline) { [weak self] size in
+            await .build(size: size) { [weak self] in
+                if let self, let state = self.state {
+                    if #available(iOS 14.0, *) {
+                        GenericCallParticipantImageView(
+                            viewFactory: pictureInPictureViewFactory,
+                            id: state.participant.id,
+                            name: state.participant.name,
+                            imageURL: state.participant.profileImageURL ?? state.participant.user.imageURL,
+                            size: size.width / 4
+                        )
+                        .ignoresSafeArea()
+                    } else {
+                        GenericCallParticipantImageView(
+                            viewFactory: pictureInPictureViewFactory,
+                            id: state.participant.id,
+                            name: state.participant.name,
+                            imageURL: state.participant.profileImageURL ?? state.participant.user.imageURL,
+                            size: size.width / 4
+                        )
+                    }
+                } else {
+                    EmptyView()
+                }
             }
         }
-    }
 
-    private let interval: TimeInterval
-    private let provider: (CGSize) async -> CVPixelBuffer?
-    private let dataPipeline: PictureInPictureDataPipeline
-
-    private let cachedFrameAccessQueue = UnfairQueue()
-    private var cache: CVPixelBuffer?
-    private var generationCancellable: AnyCancellable?
-
-    init(
-        fps: Int = 15,
-        dataPipeline: PictureInPictureDataPipeline,
-        provider: @escaping (CGSize) async -> CVPixelBuffer?
-    ) {
-        self.interval = 1 / 15
-        self.dataPipeline = dataPipeline
-        self.provider = provider
-    }
-
-    private func generateFrame() async {
-        if let cache = cachedFrameAccessQueue.sync({ cache })?.sampleBuffer {
-            dataPipeline.send(cache)
-        } else {
-            if let frame = await provider(contentSize)?.sampleBuffer {
-//                cachedFrameAccessQueue.sync { cache = frame }
-                dataPipeline.send(frame)
-            } else {
-                log.warning("⚠️ Failed to generate static frame.", subsystems: .pictureInPicture)
+        contentSizeCancellable = dataPipeline
+            .sizeEventPublisher
+            .compactMap {
+                switch $0 {
+                case let .contentSizeUpdated(size):
+                    return size
+                default:
+                    return nil
+                }
             }
-        }
+            .assign(to: \.contentSize, on: result)
+
+        return result
     }
 }

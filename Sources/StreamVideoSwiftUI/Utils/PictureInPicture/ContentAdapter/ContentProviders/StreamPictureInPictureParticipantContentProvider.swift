@@ -65,7 +65,9 @@ final class StreamPictureInPictureParticipantContentProvider: NSObject, StreamPi
                     /* No-op */
                 }
             default:
+                state?.sizeCancellable.cancel()
                 state?.track.remove(self)
+                frameProcessor.reset()
                 state = nil
             }
         }

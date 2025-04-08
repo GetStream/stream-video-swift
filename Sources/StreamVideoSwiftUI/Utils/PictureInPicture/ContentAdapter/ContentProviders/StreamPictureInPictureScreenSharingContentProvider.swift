@@ -54,6 +54,7 @@ final class StreamPictureInPictureScreenSharingContentProvider: NSObject, Stream
             default:
                 state?.track.remove(self)
                 state = nil
+                frameProcessor.reset()
             }
         }
     }
