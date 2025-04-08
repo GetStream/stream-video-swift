@@ -181,6 +181,8 @@
 		4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0CB2D0241120078159E /* AudioCodec.swift */; };
 		4039F0CF2D024DDF0078159E /* MediaTransceiverStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4039F0CE2D024DDF0078159E /* MediaTransceiverStorage.swift */; };
 		403A4FED2D66105400ECD46A /* String+Validating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403A4FEC2D66105400ECD46A /* String+Validating.swift */; };
+		403AF2C52DA577DE001B6EBE /* StreamPictureInPictureStaticContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403AF2C42DA577DE001B6EBE /* StreamPictureInPictureStaticContentProvider.swift */; };
+		403AF2C92DA578F6001B6EBE /* CVPixelBuffer+CMSampleBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403AF2C82DA578F6001B6EBE /* CVPixelBuffer+CMSampleBuffer.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
 		403CA9B22CC7BAD6001A88C2 /* VideoLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403CA9B12CC7BAD6001A88C2 /* VideoLayer.swift */; };
@@ -1680,6 +1682,8 @@
 		4039F0CB2D0241120078159E /* AudioCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCodec.swift; sourceTree = "<group>"; };
 		4039F0CE2D024DDF0078159E /* MediaTransceiverStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTransceiverStorage.swift; sourceTree = "<group>"; };
 		403A4FEC2D66105400ECD46A /* String+Validating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Validating.swift"; sourceTree = "<group>"; };
+		403AF2C42DA577DE001B6EBE /* StreamPictureInPictureStaticContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureStaticContentProvider.swift; sourceTree = "<group>"; };
+		403AF2C82DA578F6001B6EBE /* CVPixelBuffer+CMSampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+CMSampleBuffer.swift"; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
 		403CA9B12CC7BAD6001A88C2 /* VideoLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLayer.swift; sourceTree = "<group>"; };
@@ -2946,6 +2950,7 @@
 			isa = PBXGroup;
 			children = (
 				400B23EA2DA53DAD00429226 /* AnyPublisher+Retroactive.swift */,
+				403AF2C82DA578F6001B6EBE /* CVPixelBuffer+CMSampleBuffer.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -2965,6 +2970,7 @@
 				400B23F62DA5480F00429226 /* StreamPictureInPictureContentProvider.swift */,
 				400B23F92DA55B1500429226 /* StreamPictureInPictureParticipantContentProvider.swift */,
 				400B23FE2DA56F4A00429226 /* StreamPictureInPictureScreenSharingContentProvider.swift */,
+				403AF2C42DA577DE001B6EBE /* StreamPictureInPictureStaticContentProvider.swift */,
 			);
 			path = ContentProviders;
 			sourceTree = "<group>";
@@ -7830,6 +7836,7 @@
 				40AA2EDE2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift in Sources */,
 				401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */,
 				8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */,
+				403AF2C52DA577DE001B6EBE /* StreamPictureInPictureStaticContentProvider.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
 				400B23FA2DA55B1500429226 /* StreamPictureInPictureParticipantContentProvider.swift in Sources */,
 				401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */,
@@ -7841,6 +7848,7 @@
 				84D425082AA61E9900473150 /* LivestreamPlayer.swift in Sources */,
 				40A941762B4D9F16006D6965 /* StreamPictureInPictureView.swift in Sources */,
 				848A73C229269E7D0089AA6E /* CornerDraggableView.swift in Sources */,
+				403AF2C92DA578F6001B6EBE /* CVPixelBuffer+CMSampleBuffer.swift in Sources */,
 				84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */,
 				400B23F72DA5480F00429226 /* StreamPictureInPictureContentProvider.swift in Sources */,
 				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,
@@ -9671,8 +9679,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc";
 			requirement = {
-				kind = exactVersion;
-				version = 1.0.0;
+				kind = upToNextMajorVersion;
+				minimumVersion = 125.6422.066;
 			};
 		};
 		8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
