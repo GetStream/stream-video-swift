@@ -52,12 +52,6 @@ jobs:
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    - uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: LLC Test Data
-        path: |
-          ~/Library/Logs/scan
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
@@ -109,9 +103,7 @@ jobs:
       if: failure()
       with:
         name: SwiftUI Test Data
-        path: |
-          ~/Library/Logs/scan
-          fastlane/test_output/snapshots
+        path: fastlane/test_output/snapshots
 
   test-uikit-debug:
     name: Test UIKit (Debug)
@@ -137,9 +129,7 @@ jobs:
       if: failure()
       with:
         name: UIKit Test Data
-        path: |
-          ~/Library/Logs/scan
-          fastlane/test_output/snapshots
+        path: fastlane/test_output/snapshots
 
   automated-code-review:
     name: Automated Code Review
@@ -307,7 +297,6 @@ jobs:
       with:
         name: E2E Test Data ${{ matrix.batch }}
         path: |
-          ~/Library/Logs/scan
           fastlane/recordings
           fastlane/*.log
           fastlane/test_output/report.junit
