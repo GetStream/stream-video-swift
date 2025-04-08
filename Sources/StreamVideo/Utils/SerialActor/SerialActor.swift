@@ -7,15 +7,15 @@ import Foundation
 actor SerialActor {
     /// Declare a private variable to store the previous task.
     private var previousTask: Task<Void, Error>?
+    private let disposableBag = DisposableBag()
 
     deinit {
+        disposableBag.removeAll()
         previousTask = nil
     }
 
     nonisolated func cancel() {
-        Task {
-            await previousTask?.cancel()
-        }
+        disposableBag.removeAll()
     }
 
     /// Executes a block of code asynchronously in a serial manner.
@@ -44,11 +44,13 @@ actor SerialActor {
             /// Execute the provided block of code and re-throw any errors.
             return try await block()
         }
+        task.store(in: disposableBag)
 
         /// Create a void task that we can store for synchronization
         let voidTask = Task<Void, Error> {
             _ = try await task.value
         }
+        voidTask.store(in: disposableBag)
 
         /// Update the `previousTask` variable to point to the void task.
         previousTask = voidTask
