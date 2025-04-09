@@ -60,15 +60,12 @@ final class StreamPictureInPictureContentAdapter: @unchecked Sendable {
         }
         let sessionId = call.state.sessionId
         let otherParticipants = participants.filter { $0.sessionId != sessionId }
+
         if
             let session = call.state.screenSharingSession,
             call.state.isCurrentUserScreensharing == false,
             let track = session.track {
             dataPipeline.send(.screenSharing(session.participant, track: track))
-        } else if
-            let participant = otherParticipants.first(where: { $0.hasVideo && $0.track != nil }),
-            let track = participant.track {
-            dataPipeline.send(.participant(participant, track: track))
         } else if
             let participant = otherParticipants.first(where: { $0.isDominantSpeaker }) {
             if participant.hasVideo, let track = participant.track {
@@ -76,6 +73,10 @@ final class StreamPictureInPictureContentAdapter: @unchecked Sendable {
             } else {
                 dataPipeline.send(.static(participant))
             }
+        } else if
+            let participant = otherParticipants.first(where: { $0.hasVideo && $0.track != nil }),
+            let track = participant.track {
+            dataPipeline.send(.participant(participant, track: track))
         } else if
             let localParticipant = call.state.localParticipant,
             localParticipant.hasVideo,
