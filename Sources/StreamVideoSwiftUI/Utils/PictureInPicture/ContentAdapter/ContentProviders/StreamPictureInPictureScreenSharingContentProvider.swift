@@ -40,7 +40,6 @@ final class StreamPictureInPictureScreenSharingContentProvider: NSObject, Stream
             case let .screenSharing(participant, track):
                 if state?.track.trackId != track.trackId {
                     state?.track.remove(self)
-                    try? await Task.sleep(nanoseconds: 250 * 1_000_000)
                     track.add(self)
                     frameProcessor.reset()
 

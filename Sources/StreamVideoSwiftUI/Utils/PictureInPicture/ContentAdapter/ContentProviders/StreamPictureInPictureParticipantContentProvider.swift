@@ -42,7 +42,6 @@ final class StreamPictureInPictureParticipantContentProvider: NSObject, StreamPi
                 if state?.track.trackId != track.trackId {
                     state?.sizeCancellable.cancel()
                     state?.track.remove(self)
-                    try? await Task.sleep(nanoseconds: 250 * 1_000_000)
                     track.add(self)
                     frameProcessor.reset()
                     let cancellable = dataPipeline
