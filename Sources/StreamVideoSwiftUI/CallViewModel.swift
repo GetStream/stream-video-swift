@@ -74,6 +74,9 @@ open class CallViewModel: ObservableObject {
     @Published public var callingState: CallingState = .idle {
         didSet {
             handleRingingEvents()
+            if callingState == .idle {
+                prepareForReuse()
+            }
         }
     }
 
@@ -150,6 +153,8 @@ open class CallViewModel: ObservableObject {
 
     /// A flag controlling whether picture-in-picture should be enabled for the call. Default value is `true`.
     @Published public var isPictureInPictureEnabled = true
+
+    public var persistCallSettingsAcrossCalls: Bool = true
 
     /// Returns the local participant of the call.
     public var localParticipant: CallParticipant? {
@@ -231,6 +236,12 @@ open class CallViewModel: ObservableObject {
     deinit {
         enteringCallTask?.cancel()
         callEventsSubscriptionTask?.cancel()
+    }
+
+    private func prepareForReuse() {
+        if !persistCallSettingsAcrossCalls {
+            localCallSettingsChange = false
+        }
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
