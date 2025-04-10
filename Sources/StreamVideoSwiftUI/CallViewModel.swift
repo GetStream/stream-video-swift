@@ -72,9 +72,7 @@ open class CallViewModel: ObservableObject {
 
     /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
-        didSet {
-            handleRingingEvents()
-        }
+        didSet { handleRingingEvents() }
     }
 
     /// Optional, has a value if there was an error. You can use it to display more detailed error messages to the users.
@@ -175,7 +173,10 @@ open class CallViewModel: ObservableObject {
     private var callEventsSubscriptionTask: Task<Void, Never>?
     private var participantsSortComparators = defaultSortPreset
     private let callEventsHandler = CallEventsHandler()
-    private var localCallSettingsChange = false
+
+    /// The variable is `true` if CallSettings have been set on the CallViewModel instance (directly or indirectly).
+    /// The variable will be reset to `false` when `leaveCall` will be invoked.
+    private(set) var localCallSettingsChange = false
 
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
@@ -587,6 +588,11 @@ open class CallViewModel: ObservableObject {
         isMinimized = false
         localVideoPrimary = false
         Task { await audioRecorder.stopRecording() }
+        
+        // Reset the CallSettings so that the next Call will be joined
+        // with either new overrides or the values provided from the API.
+        callSettings = .init()
+        localCallSettingsChange = false
     }
 
     private func enterCall(
