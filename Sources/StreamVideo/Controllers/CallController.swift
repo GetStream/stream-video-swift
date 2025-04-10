@@ -576,6 +576,8 @@ class CallController: @unchecked Sendable {
     ) {
         switch stage.id {
         case .idle:
+            participantsCountUpdatesTask?.cancel()
+            participantsCountUpdatesTask = nil
             call?.update(reconnectionStatus: .disconnected)
         case .rejoining:
             call?.update(reconnectionStatus: .reconnecting)
@@ -604,13 +606,14 @@ class CallController: @unchecked Sendable {
         participantsCountUpdatesTask?.cancel()
         participantsCountUpdatesTask = nil
 
-        guard let call else { return }
-
-        participantsCountUpdatesTask = Task {
+        participantsCountUpdatesTask = Task { [weak call] in
+            guard let stream = call?.subscribe(for: CallSessionParticipantCountsUpdatedEvent.self) else {
+                return
+            }
             let anonymousUserRoleKey = "anonymous"
-            for await event in call.subscribe(for: CallSessionParticipantCountsUpdatedEvent.self) {
-                Task { @MainActor in
-                    call.state.participantCount = event
+            for await event in stream {
+                Task { @MainActor [weak call] in
+                    call?.state.participantCount = event
                         .participantsCountByRole
                         .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
                         .values
@@ -619,11 +622,11 @@ class CallController: @unchecked Sendable {
 
                     // TODO: Workaround. To be removed
                     if event.anonymousParticipantCount > 0 {
-                        call.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+                        call?.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
                     } else if let anonymousCount = event.participantsCountByRole[anonymousUserRoleKey] {
-                        call.state.anonymousParticipantCount = UInt32(anonymousCount)
+                        call?.state.anonymousParticipantCount = UInt32(anonymousCount)
                     } else {
-                        call.state.anonymousParticipantCount = 0
+                        call?.state.anonymousParticipantCount = 0
                     }
                 }
             }
