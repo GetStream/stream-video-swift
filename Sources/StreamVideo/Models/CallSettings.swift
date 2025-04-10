@@ -17,13 +17,35 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
     public let audioOutputOn: Bool
     /// The camera position for the current user.
     public let cameraPosition: CameraPosition
-    
+
+    public convenience init(
+        _ response: CallSettingsResponse,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        self.init(
+            audioOn: response.audio.micDefaultOn,
+            videoOn: response.video.cameraDefaultOn,
+            speakerOn: response.video.cameraDefaultOn ? true : response.audio.speakerDefaultOn ? true : response.audio
+                .defaultDevice == .speaker,
+            audioOutputOn: response.audio.speakerDefaultOn,
+            cameraPosition: response.video.cameraFacing == .back ? .back : .front,
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
         speakerOn: Bool = true,
         audioOutputOn: Bool = true,
-        cameraPosition: CameraPosition = .front
+        cameraPosition: CameraPosition = .front,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
     ) {
         self.audioOn = audioOn
         self.speakerOn = speakerOn
@@ -44,8 +66,15 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
             }
             self.videoOn = false
         }
+
+        log.debug(
+            "CallSettings created.",
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
     }
-    
+
     public static func == (lhs: CallSettings, rhs: CallSettings) -> Bool {
         lhs.audioOn == rhs.audioOn &&
             lhs.videoOn == rhs.videoOn &&
@@ -69,67 +98,94 @@ public enum CameraPosition: Sendable, Equatable {
     }
 }
 
-extension CallSettingsResponse {
-    
-    public var toCallSettings: CallSettings {
-        CallSettings(
-            audioOn: audio.micDefaultOn,
-            videoOn: video.cameraDefaultOn,
-            speakerOn: video.cameraDefaultOn ? true : audio.defaultDevice == .speaker,
-            audioOutputOn: audio.speakerDefaultOn,
-            cameraPosition: video.cameraFacing == .back ? .back : .front
-        )
-    }
-}
-
 public extension CallSettings {
-    func withUpdatedCameraPosition(_ cameraPosition: CameraPosition) -> CallSettings {
+    func withUpdatedCameraPosition(
+        _ cameraPosition: CameraPosition,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
             videoOn: videoOn,
             speakerOn: speakerOn,
             audioOutputOn: audioOutputOn,
-            cameraPosition: cameraPosition
+            cameraPosition: cameraPosition,
+            file: file,
+            function: function,
+            line: line
         )
     }
     
-    func withUpdatedAudioState(_ audioOn: Bool) -> CallSettings {
+    func withUpdatedAudioState(
+        _ audioOn: Bool,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
             videoOn: videoOn,
             speakerOn: speakerOn,
             audioOutputOn: audioOutputOn,
-            cameraPosition: cameraPosition
+            cameraPosition: cameraPosition,
+            file: file,
+            function: function,
+            line: line
         )
     }
     
-    func withUpdatedVideoState(_ videoOn: Bool) -> CallSettings {
+    func withUpdatedVideoState(
+        _ videoOn: Bool,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
             videoOn: videoOn,
             speakerOn: speakerOn,
             audioOutputOn: audioOutputOn,
-            cameraPosition: cameraPosition
+            cameraPosition: cameraPosition,
+            file: file,
+            function: function,
+            line: line
         )
     }
     
-    func withUpdatedSpeakerState(_ speakerOn: Bool) -> CallSettings {
+    func withUpdatedSpeakerState(
+        _ speakerOn: Bool,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
             videoOn: videoOn,
             speakerOn: speakerOn,
             audioOutputOn: audioOutputOn,
-            cameraPosition: cameraPosition
+            cameraPosition: cameraPosition,
+            file: file,
+            function: function,
+            line: line
         )
     }
     
-    func withUpdatedAudioOutputState(_ audioOutputOn: Bool) -> CallSettings {
+    func withUpdatedAudioOutputState(
+        _ audioOutputOn: Bool,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
             videoOn: videoOn,
             speakerOn: speakerOn,
             audioOutputOn: audioOutputOn,
-            cameraPosition: cameraPosition
+            cameraPosition: cameraPosition,
+            file: file,
+            function: function,
+            line: line
         )
     }
 }

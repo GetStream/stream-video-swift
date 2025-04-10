@@ -47,7 +47,7 @@ class CallController: @unchecked Sendable {
     private var reconnectionDate: Date?
     private var cachedLocation: String?
     private var currentSFU: String?
-    private var participantsCountUpdatesTask: Task<Void, Never>?
+    private var participantsCountUpdatesCancellable: AnyCancellable?
     private var currentUserBlockedTask: Task<Void, Never>?
 
     private let joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Never>(nil)
@@ -576,6 +576,8 @@ class CallController: @unchecked Sendable {
     ) {
         switch stage.id {
         case .idle:
+            participantsCountUpdatesCancellable?.cancel()
+            participantsCountUpdatesCancellable = nil
             call?.update(reconnectionStatus: .disconnected)
         case .rejoining:
             call?.update(reconnectionStatus: .reconnecting)
@@ -584,8 +586,8 @@ class CallController: @unchecked Sendable {
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
-            participantsCountUpdatesTask?.cancel()
-            participantsCountUpdatesTask = nil
+            participantsCountUpdatesCancellable?.cancel()
+            participantsCountUpdatesCancellable = nil
 
             call?.update(reconnectionStatus: .connected)
         case .error:
@@ -601,33 +603,33 @@ class CallController: @unchecked Sendable {
     }
 
     private func subscribeToParticipantsCountUpdatesEvent(_ call: Call?) {
-        participantsCountUpdatesTask?.cancel()
-        participantsCountUpdatesTask = nil
+        participantsCountUpdatesCancellable?.cancel()
+        participantsCountUpdatesCancellable = nil
 
-        guard let call else { return }
+        guard let call else {
+            return
+        }
 
-        participantsCountUpdatesTask = Task {
-            let anonymousUserRoleKey = "anonymous"
-            for await event in call.subscribe(for: CallSessionParticipantCountsUpdatedEvent.self) {
-                Task { @MainActor in
-                    call.state.participantCount = event
-                        .participantsCountByRole
-                        .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
-                        .values
-                        .map(UInt32.init)
-                        .reduce(0) { $0 + $1 }
+        let anonymousUserRoleKey = "anonymous"
+        participantsCountUpdatesCancellable = call
+            .eventPublisher(for: CallSessionParticipantCountsUpdatedEvent.self)
+            .sinkTask { @MainActor [weak call] event in
+                call?.state.participantCount = event
+                    .participantsCountByRole
+                    .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
+                    .values
+                    .map(UInt32.init)
+                    .reduce(0) { $0 + $1 }
 
-                    // TODO: Workaround. To be removed
-                    if event.anonymousParticipantCount > 0 {
-                        call.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
-                    } else if let anonymousCount = event.participantsCountByRole[anonymousUserRoleKey] {
-                        call.state.anonymousParticipantCount = UInt32(anonymousCount)
-                    } else {
-                        call.state.anonymousParticipantCount = 0
-                    }
+                // TODO: Workaround. To be removed
+                if event.anonymousParticipantCount > 0 {
+                    call?.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+                } else if let anonymousCount = event.participantsCountByRole[anonymousUserRoleKey] {
+                    call?.state.anonymousParticipantCount = UInt32(anonymousCount)
+                } else {
+                    call?.state.anonymousParticipantCount = 0
                 }
             }
-        }
     }
 
     private func subscribeToCurrentUserBlockedState(_ call: Call?) {

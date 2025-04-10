@@ -96,8 +96,8 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
         call
             .state
             .$callSettings
+            .map { SpeakerSettings($0) }
             .removeDuplicates()
-            .map { (speakerOn: $0.speakerOn, audioOutputOn: $0.audioOutputOn) }
             .log(.debug) { "\(typeOfSelf) callSettings updated speakerOn:\($0.speakerOn) audioOutputOn:\($0.audioOutputOn)." }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
@@ -105,5 +105,15 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
                 self?.audioOutputStatus = $0.audioOutputOn ? .enabled : .disabled
             }
             .store(in: disposableBag, key: observationKey)
+    }
+
+    private struct SpeakerSettings: Hashable {
+        var speakerOn: Bool
+        var audioOutputOn: Bool
+
+        init(_ callSettings: CallSettings) {
+            speakerOn = callSettings.speakerOn
+            audioOutputOn = callSettings.audioOutputOn
+        }
     }
 }
