@@ -22,19 +22,6 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
     
     public var body: some View {
         WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
-            .overlay(
-                VStack {
-                    Text(L10n.Call.Current.reconnecting)
-                        .applyCallingStyle()
-                        .padding()
-                        .accessibility(identifier: "reconnectingMessage")
-                    CallingIndicator()
-                }
-                .padding()
-                .background(
-                    Color(colors.callBackground).opacity(0.7).edgesIgnoringSafeArea(.all)
-                )
-                .cornerRadius(16)
-            )
+            .overlay(ReconnectingView())
     }
 }
