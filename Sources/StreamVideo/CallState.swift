@@ -394,7 +394,7 @@ public class CallState: ObservableObject {
         ingress = Ingress(rtmp: rtmp)
         
         if !localCallSettingsUpdate {
-            callSettings = response.settings.toCallSettings
+            callSettings = .init(response.settings)
         }
     }
     

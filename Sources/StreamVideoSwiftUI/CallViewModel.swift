@@ -20,6 +20,7 @@ open class CallViewModel: ObservableObject {
     @Published public private(set) var call: Call? {
         didSet {
             guard call?.cId != oldValue?.cId else { return }
+            log.debug("CallViewModel call cID changed \(oldValue?.cId ?? "-") → \(call?.cId ?? "-")")
             pictureInPictureAdapter.call = call
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
@@ -72,7 +73,13 @@ open class CallViewModel: ObservableObject {
 
     /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
-        didSet { handleRingingEvents() }
+        didSet {
+            guard callingState != oldValue else {
+                return
+            }
+            log.debug("CallingState was updated \(oldValue) → \(callingState)")
+            handleRingingEvents()
+        }
     }
 
     /// Optional, has a value if there was an error. You can use it to display more detailed error messages to the users.
@@ -222,7 +229,7 @@ open class CallViewModel: ObservableObject {
 
         subscribeToCallEvents()
         subscribeToApplicationLifecycleEvents()
-        
+
         // As we are setting the value on init, the `didSet` won't trigger, thus
         // we are firing it manually.
         // For any subsequent changes, `didSet` will trigger as expected.
@@ -424,7 +431,7 @@ open class CallViewModel: ObservableObject {
                 do {
                     let call = streamVideo.call(callType: callType, callId: callId)
                     let info = try await call.get()
-                    self.callSettings = info.call.settings.toCallSettings
+                    self.callSettings = .init(info.call.settings)
                 } catch {
                     log.error(error)
                 }
@@ -547,10 +554,10 @@ open class CallViewModel: ObservableObject {
     }
 
     public func setActiveCall(_ call: Call?) {
-        if let call {
+        if let call, (callingState != .inCall || self.call?.cId != call.cId) {
             callingState = .inCall
             self.call = call
-        } else {
+        } else if call == nil, callingState != .idle {
             callingState = .idle
             self.call = nil
         }
@@ -584,11 +591,13 @@ open class CallViewModel: ObservableObject {
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
-        callingState = .idle
+        if callingState != .idle {
+            callingState = .idle
+        }
         isMinimized = false
         localVideoPrimary = false
         Task { await audioRecorder.stopRecording() }
-        
+
         // Reset the CallSettings so that the next Call will be joined
         // with either new overrides or the values provided from the API.
         callSettings = .init()
@@ -658,8 +667,7 @@ open class CallViewModel: ObservableObject {
             self.call = nil
             return
         }
-        self.call = call
-        updateCallStateIfNeeded()
+        setActiveCall(call)
         log.debug("Started call")
     }
 
@@ -828,11 +836,11 @@ open class CallViewModel: ObservableObject {
             return
         }
         guard call != nil || !callParticipants.isEmpty else { return }
-        if callingState != .reconnecting {
+        if callingState != .reconnecting, callingState != .inCall {
             callingState = .inCall
         } else {
             let shouldGoInCall = callParticipants.count > 1
-            if shouldGoInCall {
+            if shouldGoInCall, callingState != .inCall {
                 callingState = .inCall
             }
         }
@@ -925,7 +933,7 @@ open class CallViewModel: ObservableObject {
 }
 
 /// The state of the call.
-public enum CallingState: Equatable {
+public enum CallingState: Equatable, CustomStringConvertible {
     /// Call is not started (idle state).
     case idle
     /// The user is in a waiting room.
@@ -940,6 +948,25 @@ public enum CallingState: Equatable {
     case inCall
     /// The user is trying to reconnect to a call.
     case reconnecting
+
+    public var description: String {
+        switch self {
+        case .idle:
+            return ".idle"
+        case let .lobby(lobbyInfo):
+            return ".lobby(type:\(lobbyInfo.callType), id:\(lobbyInfo.callId))"
+        case let .incoming(incomingCall):
+            return ".incoming(type:\(incomingCall.type), id:\(incomingCall.id))"
+        case .outgoing:
+            return ".outgoing"
+        case .joining:
+            return ".joining"
+        case .inCall:
+            return ".inCall"
+        case .reconnecting:
+            return ".reconnecting"
+        }
+    }
 }
 
 public struct LobbyInfo: Equatable {

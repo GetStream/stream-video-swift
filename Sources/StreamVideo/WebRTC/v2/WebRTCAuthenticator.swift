@@ -81,7 +81,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             )
         } else {
             await coordinator.stateAdapter.set(
-                callSettings: response.call.settings.toCallSettings
+                callSettings: .init(response.call.settings)
             )
         }
 

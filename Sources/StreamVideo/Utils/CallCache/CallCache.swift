@@ -29,6 +29,7 @@ final class CallCache {
                 log.debug("Will create and cache call:\(cId)")
                 let call = factory()
                 storage[cId] = call
+                log.debug("CallCache count:\(storage.count).")
                 return call
             }
         }
@@ -42,6 +43,7 @@ final class CallCache {
         log.debug("Will remove call:\(cId)")
         queue.sync {
             storage[cId] = nil
+            log.debug("CallCache count:\(storage.count).")
         }
     }
 
@@ -49,6 +51,7 @@ final class CallCache {
         queue.sync {
             log.debug("Will remove \(storage.count) calls.")
             storage.removeAll()
+            log.debug("CallCache count:\(storage.count).")
         }
     }
 }
