@@ -54,6 +54,10 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @State var showParticipantCount: Bool
     
+    @State var timer: Timer?
+    
+    @State var countdown: TimeInterval = 0
+    
     @State var livestreamState: LivestreamState = .backstage
     
     private let formatter: DateComponentsFormatter = {
@@ -96,6 +100,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
 
     public var body: some View {
         ZStack {
+            Color(colors.callBackground).ignoresSafeArea()
+
             if livestreamState == .error {
                 errorView
             } else if livestreamState == .joining {
@@ -114,6 +120,18 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         })
         .onChange(of: call.state.backstage) { _ in
             livestreamState = call.state.backstage ? .backstage : .live
+            if let startsAt = state.startsAt, livestreamState == .backstage && timer == nil {
+                timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                    countdown = startsAt.timeIntervalSinceNow
+                    if countdown <= 0 {
+                        stopTimer()
+                        countdown = 0
+                    }
+                }
+            }
+            if livestreamState == .live {
+                stopTimer()
+            }
         }
         .onChange(of: controlsShown) { _ in
             if controlsShown {
@@ -168,27 +186,61 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             }
         }
     }
+    
+    func formatTimeInterval(_ interval: TimeInterval) -> String {
+        let totalSeconds = Int(interval)
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%d:%02d", minutes, seconds)
+        }
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
 
     // MARK: - Private
 
     @ViewBuilder
     private var errorView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
         Text(L10n.Call.Livestream.error)
             .foregroundColor(colors.textInverted)
     }
 
     @ViewBuilder
     private var loadingView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
         ProgressView()
     }
 
     @ViewBuilder
     private var notStartedView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
-        Text(L10n.Call.Livestream.notStarted)
-            .foregroundColor(colors.textInverted)
+        VStack(spacing: 16) {
+            if countdown > 0 {
+                Text(L10n.Call.Livestream.countdown)
+                Text(formatTimeInterval(countdown))
+                    .font(.title.monospacedDigit())
+                    .bold()
+            } else {
+                Text(L10n.Call.Livestream.notStarted)
+                    .multilineTextAlignment(.center)
+            }
+            if let session = state.session {
+                let waitingCount = session.participants.count
+                if waitingCount > 0 {
+                    Text("\(waitingCount) \(L10n.Call.Livestream.earlyParticipants)")
+                        .font(.subheadline)
+                        .foregroundColor(Color(colors.textLowEmphasis))
+                }
+            }
+        }
+        .foregroundColor(colors.textInverted)
+        .padding()
     }
 
     @ViewBuilder
