@@ -820,6 +820,9 @@ struct Stream_Video_Sfu_Event_ReconnectDetails {
   /// only set in case of rejoin
   var previousSessionID: String = String()
 
+  /// the reconnect reason
+  var reason: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -2430,6 +2433,7 @@ extension Stream_Video_Sfu_Event_ReconnectDetails: SwiftProtobuf.Message, SwiftP
     5: .standard(proto: "reconnect_attempt"),
     6: .standard(proto: "from_sfu_id"),
     7: .standard(proto: "previous_session_id"),
+    8: .same(proto: "reason"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2444,6 +2448,7 @@ extension Stream_Video_Sfu_Event_ReconnectDetails: SwiftProtobuf.Message, SwiftP
       case 5: try { try decoder.decodeSingularUInt32Field(value: &self.reconnectAttempt) }()
       case 6: try { try decoder.decodeSingularStringField(value: &self.fromSfuID) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.previousSessionID) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.reason) }()
       default: break
       }
     }
@@ -2468,6 +2473,9 @@ extension Stream_Video_Sfu_Event_ReconnectDetails: SwiftProtobuf.Message, SwiftP
     if !self.previousSessionID.isEmpty {
       try visitor.visitSingularStringField(value: self.previousSessionID, fieldNumber: 7)
     }
+    if !self.reason.isEmpty {
+      try visitor.visitSingularStringField(value: self.reason, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2478,6 +2486,7 @@ extension Stream_Video_Sfu_Event_ReconnectDetails: SwiftProtobuf.Message, SwiftP
     if lhs.reconnectAttempt != rhs.reconnectAttempt {return false}
     if lhs.fromSfuID != rhs.fromSfuID {return false}
     if lhs.previousSessionID != rhs.previousSessionID {return false}
+    if lhs.reason != rhs.reason {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
