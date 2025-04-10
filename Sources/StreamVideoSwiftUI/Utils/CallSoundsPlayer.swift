@@ -33,9 +33,8 @@ open class CallSoundsPlayer {
     
     // MARK: - private
     
-    private func playSound(_ soundFileName: String) {
-        let bundle: Bundle = sounds.bundle
-        guard let soundURL = bundle.url(forResource: soundFileName, withExtension: nil) else {
+    private func playSound(_ resource: Resource) {
+        guard let soundURL = resource.url else {
             log.warning("There's no sound available")
             return
         }
