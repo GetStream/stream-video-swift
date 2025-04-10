@@ -473,7 +473,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         await safeFulfillment(of: [executionExpectation], timeout: defaultTimeout)
 
-        XCTAssertEqual(mockCallController.timesJoinWasCalled, 1)
+        XCTAssertEqual(mockCallController.timesCalled(.join), 1)
     }
     
     func test_call_customSorting() async throws {

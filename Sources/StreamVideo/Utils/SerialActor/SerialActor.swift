@@ -7,15 +7,15 @@ import Foundation
 actor SerialActor {
     /// Declare a private variable to store the previous task.
     private var previousTask: Task<Void, Error>?
+    private let disposableBag = DisposableBag()
 
     deinit {
+        disposableBag.removeAll()
         previousTask = nil
     }
 
     nonisolated func cancel() {
-        Task {
-            await previousTask?.cancel()
-        }
+        disposableBag.removeAll()
     }
 
     /// Executes a block of code asynchronously in a serial manner.
@@ -26,16 +26,15 @@ actor SerialActor {
     /// - Parameters:
     ///   - block: A block of code to execute asynchronously. The block is declared as
     ///     `Sendable`, meaning it can be safely sent across threads, and `escaping`,
-    ///     meaning it can be executed asynchronously. The block must return `Void`
-    ///     (no value) and can throw errors.
+    ///     meaning it can be executed asynchronously. The block can return any value
+    ///     and can throw errors.
     ///
     /// - Throws: Any error thrown by the provided block.
-    func execute(_ block: @Sendable @escaping () async throws -> Void) async throws {
+    /// - Returns: The value returned by the provided block.
+    func execute<T: Sendable>(_ block: @Sendable @escaping () async throws -> T) async throws -> T {
         /// Create a new task that runs the provided block of code within a closure.
         /// This closure captures the `previousTask` variable by value.
-        let task = Task { [previousTask] in
-            try Task.checkCancellation()
-
+        let task = Task<T, Error> { [previousTask] in
             /// Wait for the previous task to finish by awaiting its result.
             /// If the previous task is nil, this line does nothing.
             _ = await previousTask?.result
@@ -45,14 +44,21 @@ actor SerialActor {
             /// Execute the provided block of code and re-throw any errors.
             return try await block()
         }
+        task.store(in: disposableBag)
 
-        /// Update the `previousTask` variable to point to the newly created task.
-        previousTask = task
+        /// Create a void task that we can store for synchronization
+        let voidTask = Task<Void, Error> {
+            _ = try await task.value
+        }
+        voidTask.store(in: disposableBag)
+
+        /// Update the `previousTask` variable to point to the void task.
+        previousTask = voidTask
 
         try Task.checkCancellation()
         
         /// Wait for the newly created task to finish by awaiting its value.
         /// This will re-throw any errors thrown by the block.
-        try await task.value
+        return try await task.value
     }
 }

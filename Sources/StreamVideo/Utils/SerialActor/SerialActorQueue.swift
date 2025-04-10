@@ -71,12 +71,13 @@ public final class SerialActorQueue: Sendable {
     ///
     /// - Parameter block: The task to execute. This block must be asynchronous and throwable.
     /// - Throws: Rethrows any error encountered during the execution of the task.
+    /// - Returns: The value returned by the provided block.
     ///
     /// Use this method when you need to wait for the completion of the submitted task
     /// and handle its results or errors immediately.
-    public func sync(
-        _ block: @Sendable @escaping () async throws -> Void
-    ) async throws {
+    public func sync<T: Sendable>(
+        _ block: @Sendable @escaping () async throws -> T
+    ) async throws -> T {
         // Execute the task serially and wait for its completion.
         try await actor.execute(block)
     }

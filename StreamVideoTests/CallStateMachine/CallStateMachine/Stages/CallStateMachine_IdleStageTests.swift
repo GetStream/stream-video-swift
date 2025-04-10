@@ -8,11 +8,11 @@ import XCTest
 final class StreamCallStateMachineStageIdleStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private lazy var call: Call! = .dummy()
-    private lazy var allOtherStages: [StreamCallStateMachine.Stage]! = StreamCallStateMachine.Stage.ID
+    private lazy var allOtherStages: [Call.StateMachine.Stage]! = Call.StateMachine.Stage.ID
         .allCases
         .filter { $0 != subject.id }
-        .map { StreamCallStateMachine.Stage(id: $0, call: call) }
-    private lazy var subject: StreamCallStateMachine.Stage! = .idle(call)
+        .map { Call.StateMachine.Stage(id: $0, context: .init(call: call)) }
+    private lazy var subject: Call.StateMachine.Stage! = .idle(.init(call: call))
 
     override func tearDown() {
         call = nil
@@ -25,7 +25,7 @@ final class StreamCallStateMachineStageIdleStage_Tests: StreamVideoTestCase, @un
 
     func testInitialization() {
         XCTAssertEqual(subject.id, .idle)
-        XCTAssertTrue(subject.call === call)
+        XCTAssertTrue(subject.context.call === call)
     }
 
     // MARK: - Test Transition

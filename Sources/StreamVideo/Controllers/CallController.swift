@@ -42,7 +42,6 @@ class CallController: @unchecked Sendable {
     private let apiKey: String
     private let defaultAPI: DefaultAPI
     private let videoConfig: VideoConfig
-    private let sfuReconnectionTime: CGFloat
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
     private var reconnectionDate: Date?
     private var cachedLocation: String?
@@ -50,7 +49,7 @@ class CallController: @unchecked Sendable {
     private var participantsCountUpdatesTask: Task<Void, Never>?
     private var currentUserBlockedTask: Task<Void, Never>?
 
-    private let joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Never>(nil)
+    private var joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Error>(nil)
     private var joinCallResponseFetchObserver: AnyCancellable?
     private var webRTCClientSessionIDObserver: AnyCancellable?
     private var webRTCClientStateObserver: AnyCancellable?
@@ -74,7 +73,6 @@ class CallController: @unchecked Sendable {
         self.callType = callType
         self.apiKey = apiKey
         self.videoConfig = videoConfig
-        sfuReconnectionTime = 30
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
         self.webRTCCoordinatorFactory = webRTCCoordinatorFactory
@@ -99,13 +97,6 @@ class CallController: @unchecked Sendable {
         joinCallResponseFetchObserver = joinCallResponseSubject
             .compactMap { $0 }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didFetch($0) }
-
-        webRTCClientStateObserver = webRTCCoordinator
-            .stateMachine
-            .publisher
-            .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
     }
 
     /// Joins a call with the provided information.
@@ -127,6 +118,8 @@ class CallController: @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
+        joinCallResponseSubject = .init(nil)
+
         try await webRTCCoordinator.connect(
             create: create,
             callSettings: callSettings,
@@ -134,6 +127,7 @@ class CallController: @unchecked Sendable {
             ring: ring,
             notify: notify
         )
+        
         guard
             let response = try await joinCallResponseSubject
             .nextValue(dropFirst: 1, timeout: WebRTCConfiguration.timeout.join)
@@ -472,8 +466,33 @@ class CallController: @unchecked Sendable {
         )
     }
 
+    /// Updates the audio session policy for the WebRTC coordinator.
+    ///
+    /// This function configures how the audio session behaves during calls,
+    /// such as mixing with other audio or interrupting other audio sources.
+    ///
+    /// - Parameter policy: The audio session policy to apply
+    /// - Throws: An error if the policy update fails
     func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
         try await webRTCCoordinator.updateAudioSessionPolicy(policy)
+    }
+
+    /// Sets up observation of WebRTC state changes.
+    ///
+    /// This function establishes a subscription to the WebRTC coordinator's
+    /// state machine to monitor connection status changes. The observer
+    /// will be notified on the main queue when the WebRTC state changes.
+    func observeWebRTCStateUpdated() {
+        guard webRTCClientStateObserver == nil else {
+            return
+        }
+        
+        webRTCClientStateObserver = webRTCCoordinator
+            .stateMachine
+            .publisher
+            .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
     }
 
     // MARK: - private
@@ -507,39 +526,44 @@ class CallController: @unchecked Sendable {
         notify: Bool,
         options: CreateCallOptions?
     ) async throws -> JoinCallResponse {
-        let location = try await getLocation()
-        var membersRequest = [MemberRequest]()
-        options?.memberIds?.forEach {
-            membersRequest.append(.init(userId: $0))
+        do {
+            let location = try await getLocation()
+            var membersRequest = [MemberRequest]()
+            options?.memberIds?.forEach {
+                membersRequest.append(.init(userId: $0))
+            }
+            options?.members?.forEach {
+                membersRequest.append($0)
+            }
+            let callRequest = CallRequest(
+                custom: options?.custom,
+                members: membersRequest,
+                settingsOverride: options?.settings,
+                startsAt: options?.startsAt,
+                team: options?.team
+            )
+            let joinCall = JoinCallRequest(
+                create: create,
+                data: callRequest,
+                location: location,
+                migratingFrom: migratingFrom,
+                notify: notify,
+                ring: ring
+            )
+            let response = try await defaultAPI.joinCall(
+                type: callType,
+                id: callId,
+                joinCallRequest: joinCall
+            )
+            
+            // We allow the CallController to manage its state.
+            joinCallResponseSubject.send(response)
+            
+            return response
+        } catch {
+            joinCallResponseSubject.send(completion: .failure(error))
+            throw error
         }
-        options?.members?.forEach {
-            membersRequest.append($0)
-        }
-        let callRequest = CallRequest(
-            custom: options?.custom,
-            members: membersRequest,
-            settingsOverride: options?.settings,
-            startsAt: options?.startsAt,
-            team: options?.team
-        )
-        let joinCall = JoinCallRequest(
-            create: create,
-            data: callRequest,
-            location: location,
-            migratingFrom: migratingFrom,
-            notify: notify,
-            ring: ring
-        )
-        let response = try await defaultAPI.joinCall(
-            type: callType,
-            id: callId,
-            joinCallRequest: joinCall
-        )
-
-        // We allow the CallController to manage its state.
-        joinCallResponseSubject.send(response)
-
-        return response
     }
 
     private func prefetchLocation() {
@@ -581,6 +605,8 @@ class CallController: @unchecked Sendable {
             call?.update(reconnectionStatus: .reconnecting)
         case .migrating:
             call?.update(reconnectionStatus: .migrating)
+        case .leaving:
+            call?.leave()
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.

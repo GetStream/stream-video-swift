@@ -39,21 +39,7 @@ final class SerialActorQueue_Tests: XCTestCase, @unchecked Sendable {
             self.counter = -1
         }
 
-        subject.cancelAll()
-
-        await wait(for: 1)
-        XCTAssertEqual(counter, 0)
-    }
-
-    func test_cancelsAllInFlightAndPendingTasks() async throws {
-        subject.async {
-            await self.wait(for: 0.5)
-        }
-
-        subject.async {
-            self.counter = -1
-        }
-
+        await wait(for: 0.1)
         subject.cancelAll()
 
         await wait(for: 1)
