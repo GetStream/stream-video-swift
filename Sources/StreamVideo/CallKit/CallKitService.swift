@@ -403,26 +403,27 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 callerId:\(stackEntry.createdBy?.id)
                 """
             )
-            do {
-                let rejectionReason = await streamVideo?
-                    .rejectionReasonProvider
-                    .reason(
-                        for: stackEntry.call.cId,
-                        ringTimeout: false
-                    )
-                log.debug(
-                    """
-                    Rejecting with reason: \(rejectionReason ?? "nil")
-                    call:\(stackEntry.call.callId)
-                    callType: \(stackEntry.call.callType)
-                    """
-                )
-                try await stackEntry.call.reject(reason: rejectionReason)
-            } catch {
-                log.error(error)
-            }
             if currentCallWasEnded {
                 stackEntry.call.leave()
+            } else {
+                do {
+                    let rejectionReason = await streamVideo?
+                        .rejectionReasonProvider
+                        .reason(
+                            for: stackEntry.call.cId,
+                            ringTimeout: false
+                        )
+                    log.debug(
+                        """
+                        Rejecting with reason: \(rejectionReason ?? "nil")
+                        call:\(stackEntry.call.callId)
+                        callType: \(stackEntry.call.callType)
+                        """
+                    )
+                    try await stackEntry.call.reject(reason: rejectionReason)
+                } catch {
+                    log.error(error)
+                }
             }
             set(nil, for: actionCallUUID)
         }
