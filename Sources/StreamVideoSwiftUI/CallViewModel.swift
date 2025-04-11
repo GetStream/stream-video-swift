@@ -550,7 +550,18 @@ open class CallViewModel: ObservableObject {
         self.participantsLayout = participantsLayout
     }
 
-    public func setActiveCall(_ call: Call?) {
+    public func setActiveCall(
+        _ call: Call?,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        log.debug(
+            "Will setActiveCall to cID:\(call?.cId ?? "-")",
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
         if let call, (callingState != .inCall || self.call?.cId != call.cId) {
             setCallingState(.inCall)
             self.call = call
