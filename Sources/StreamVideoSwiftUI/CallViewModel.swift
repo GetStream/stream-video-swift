@@ -448,7 +448,6 @@ open class CallViewModel: ObservableObject {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
             do {
-                try await call.accept()
                 enterCall(
                     call: call,
                     callType: callType,
@@ -456,8 +455,10 @@ open class CallViewModel: ObservableObject {
                     members: [],
                     customData: customData
                 )
+                try await call.accept()
             } catch {
                 self.error = error
+                enteringCallTask?.cancel()
                 setCallingState(.idle)
                 self.call = nil
             }
