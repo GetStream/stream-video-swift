@@ -643,6 +643,7 @@ open class CallViewModel: ObservableObject {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
+        setCallingState(.inCall)
         enteringCallTask = Task {
             do {
                 log.debug("Starting call")
