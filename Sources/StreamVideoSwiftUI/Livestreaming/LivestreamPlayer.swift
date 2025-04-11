@@ -122,7 +122,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
 
     public var body: some View {
         ZStack {
-            Color(colors.callBackground).ignoresSafeArea()
+            Color(colors.background).ignoresSafeArea()
 
             if livestreamState == .error {
                 errorView
@@ -144,10 +144,12 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             livestreamState = call.state.backstage ? .backstage : .live
             if let startsAt = state.startsAt, livestreamState == .backstage && timer == nil {
                 timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                    countdown = startsAt.timeIntervalSinceNow
-                    if countdown <= 0 {
-                        stopTimer()
-                        countdown = 0
+                    Task { @MainActor in
+                        countdown = startsAt.timeIntervalSinceNow
+                        if countdown <= 0 {
+                            stopTimer()
+                            countdown = 0
+                        }
                     }
                 }
             }
