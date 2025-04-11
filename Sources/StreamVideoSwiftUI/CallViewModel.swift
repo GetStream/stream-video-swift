@@ -795,8 +795,7 @@ open class CallViewModel: ObservableObject {
 
         switch callingState {
         case let .incoming(incomingCall)
-            where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user
-            .id:
+            where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user.id && enteringCallTask == nil:
             /// If the call that was accepted is the incoming call we are presenting, then we reject
             /// and set the activeCall to the current one in order to reset the callingState to
             /// inCall or idle.
@@ -824,7 +823,7 @@ open class CallViewModel: ObservableObject {
         }
 
         switch callingState {
-        case let .incoming(incomingCall) where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type):
+        case let .incoming(incomingCall) where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user.id:
             /// If the call that was rejected is the incoming call we are presenting, then we reject
             /// and set the activeCall to the current one in order to reset the callingState to
             /// inCall or idle.
