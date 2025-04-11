@@ -43,3 +43,5 @@
 "call.livestream.not-started" = "Livestream is not started. Please come back later.";
 "call.livestream.live" = "Live";
 "call.livestream.error" = "Error joining the livestream. Please try again later.";
+"call.livestream.countdown" = "Livestream will start in:";
+"call.livestream.early-participants" = "participants have joined early";

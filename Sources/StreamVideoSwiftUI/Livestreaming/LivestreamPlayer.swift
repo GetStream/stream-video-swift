@@ -38,10 +38,29 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     var onFullScreenStateChange: ((Bool) -> Void)?
 
     /// The state object representing the call's current state.
-    @StateObject var state: CallState
-
-    /// The view model managing the livestream's behavior and state.
-    @StateObject var viewModel: LivestreamPlayerViewModel
+    @ObservedObject var state: CallState
+    
+    @State var call: Call
+    
+    @State var muted: Bool = false
+    
+    @State var mutedOnJoin = false
+    
+    @State var controlsShown = false
+    
+    @State var streamPaused = false
+    
+    @State var fullScreen = false
+    
+    @State var showParticipantCount: Bool
+    
+    @State var timer: Timer?
+    
+    @State var countdown: TimeInterval
+    
+    @State var livestreamState: LivestreamState
+    
+    let livestreamHelper = LivestreamPlayerHelper()
 
     /// Initializes a `LivestreamPlayer` with the specified parameters.
     ///
@@ -64,44 +83,93 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
-        let viewModel = LivestreamPlayerViewModel(
-            type: type,
-            id: id,
-            muted: muted,
-            showParticipantCount: showParticipantCount
-        )
-        _viewModel = StateObject(wrappedValue: viewModel)
-        _state = StateObject(wrappedValue: viewModel.call.state)
+        let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
+        self.call = call
+        livestreamState = call.state.backstage ? .backstage : .live
+        countdown = 0
+        self.muted = muted
+        self.showParticipantCount = showParticipantCount
+        _state = ObservedObject(wrappedValue: call.state)
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
-        viewModel.call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
+        call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
+    }
+    
+    internal init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        call: Call,
+        countdown: TimeInterval = 0,
+        livestreamState: LivestreamState? = nil,
+        muted: Bool = false,
+        showParticipantCount: Bool = true,
+        joinPolicy: JoinPolicy = .auto,
+        showsLeaveCallButton: Bool = false,
+        onFullScreenStateChange: ((Bool) -> Void)? = nil
+    ) {
+        self.viewFactory = viewFactory
+        self.call = call
+        self.countdown = countdown
+        self.livestreamState = livestreamState ?? (call.state.backstage ? .backstage : .live)
+        self.muted = muted
+        self.showParticipantCount = showParticipantCount
+        _state = ObservedObject(wrappedValue: call.state)
+        self.joinPolicy = joinPolicy
+        self.showsLeaveCallButton = showsLeaveCallButton
+        self.onFullScreenStateChange = onFullScreenStateChange
+        call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
 
     public var body: some View {
         ZStack {
-            if viewModel.errorShown {
+            if livestreamState == .error {
                 errorView
-            } else if viewModel.loading {
+            } else if livestreamState == .joining {
                 loadingView
-            } else if state.backstage {
+            } else if livestreamState == .backstage {
                 notStartedView
             } else {
                 videoRenderer
+                livestreamControls
             }
-            livestreamControls
         }
         .onChange(of: state.participants, perform: { newValue in
-            if viewModel.muted && newValue.first?.track != nil {
-                viewModel.muteLivestreamOnJoin()
+            if muted && newValue.first?.track != nil {
+                muteLivestreamOnJoin()
             }
         })
+        .onChange(of: call.state.backstage) { _ in
+            livestreamState = call.state.backstage ? .backstage : .live
+            if let startsAt = state.startsAt, livestreamState == .backstage && timer == nil {
+                timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                    Task { @MainActor in
+                        countdown = startsAt.timeIntervalSinceNow
+                        if countdown <= 0 {
+                            stopTimer()
+                            countdown = 0
+                        }
+                    }
+                }
+            }
+            if livestreamState == .live {
+                stopTimer()
+            }
+        }
+        .onChange(of: controlsShown) { _ in
+            if controlsShown {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    if !self.streamPaused {
+                        self.controlsShown = false
+                    }
+                }
+            }
+        }
         .onAppear {
             switch joinPolicy {
             case .none:
                 break
             case .auto:
-                viewModel.joinLivestream()
+                joinLivestream()
             }
         }
         .onDisappear {
@@ -109,29 +177,80 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             case .none:
                 break
             case .auto:
-                viewModel.leaveLivestream()
+                leaveLivestream()
             }
         }
+    }
+    
+    func toggleAudioOutput() {
+        Task {
+            do {
+                if !muted {
+                    try await call.speaker.disableAudioOutput()
+                } else {
+                    try await call.speaker.enableAudioOutput()
+                }
+                muted.toggle()
+            } catch {
+                log.error(error)
+            }
+        }
+    }
+    
+    func muteLivestreamOnJoin() {
+        guard !mutedOnJoin else { return }
+        Task {
+            do {
+                try await call.speaker.disableAudioOutput()
+                mutedOnJoin = true
+            } catch {
+                log.error(error)
+            }
+        }
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
     }
 
     // MARK: - Private
 
     @ViewBuilder
     private var errorView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
         Text(L10n.Call.Livestream.error)
+            .multilineTextAlignment(.center)
+            .foregroundColor(colors.livestreamText)
     }
 
     @ViewBuilder
     private var loadingView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
         ProgressView()
     }
 
     @ViewBuilder
     private var notStartedView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
-        Text(L10n.Call.Livestream.notStarted)
+        VStack(spacing: 16) {
+            if countdown > 0 {
+                Text(L10n.Call.Livestream.countdown)
+                Text(livestreamHelper.formatTimeInterval(countdown))
+                    .font(.title.monospacedDigit())
+                    .bold()
+            } else {
+                Text(L10n.Call.Livestream.notStarted)
+                    .multilineTextAlignment(.center)
+            }
+            if let session = state.session {
+                let waitingCount = session.participants.count
+                if waitingCount > 0 {
+                    Text("\(waitingCount) \(L10n.Call.Livestream.earlyParticipants)")
+                        .font(.subheadline)
+                        .foregroundColor(Color(colors.textLowEmphasis))
+                }
+            }
+        }
+        .foregroundColor(colors.livestreamText)
+        .padding()
     }
 
     @ViewBuilder
@@ -144,35 +263,34 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     availableFrame: reader.frame(in: .global),
                     contentMode: .scaleAspectFit,
                     customData: [:],
-                    call: viewModel.call
+                    call: call
                 )
                 .onTapGesture {
-                    viewModel.update(controlsShown: true)
+                    controlsShown = true
                 }
                 .overlay(
-                    viewModel.controlsShown ? LivestreamPlayPauseButton(
-                        viewModel: viewModel
+                    controlsShown ? LivestreamPlayPauseButton(
+                        streamPaused: $streamPaused
                     ) {
-                        participant.track?.isEnabled =
-                            !viewModel.streamPaused
-                        if !viewModel.streamPaused {
-                            viewModel.update(controlsShown: false)
+                        participant.track?.isEnabled = !streamPaused
+                        if !streamPaused {
+                            controlsShown = false
                         }
                     } : nil
                 )
             }
         }
-        .onChange(of: viewModel.fullScreen) { onFullScreenStateChange?($0) }
+        .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
     }
 
     @ViewBuilder
     private var livestreamControls: some View {
-        if viewModel.controlsShown || !viewModel.fullScreen {
+        if controlsShown || !fullScreen {
             VStack {
                 Spacer()
                 HStack(spacing: 8) {
                     LiveIndicator()
-                    if viewModel.showParticipantCount {
+                    if showParticipantCount {
                         LivestreamParticipantsView(
                             participantsCount:
                             Int(state.participantCount)
@@ -180,23 +298,20 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     }
                     Spacer()
                     LivestreamButton(
-                        imageName: !viewModel.muted
+                        imageName: !muted
                             ? "speaker.wave.2.fill"
                             : "speaker.slash.fill"
                     ) {
-                        viewModel.toggleAudioOutput()
+                        toggleAudioOutput()
                     }
                     LivestreamButton(imageName: "viewfinder") {
-                        viewModel.update(
-                            fullScreen:
-                            !viewModel.fullScreen
-                        )
+                        fullScreen.toggle()
                     }
                     if showsLeaveCallButton {
                         LivestreamButton(
                             imageName: "phone.down.fill"
                         ) {
-                            viewModel.leaveLivestream()
+                            leaveLivestream()
                         }
                     }
                 }
@@ -208,11 +323,28 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 .foregroundColor(colors.livestreamCallControlsColor)
                 .overlay(
                     LivestreamDurationView(
-                        duration: viewModel.duration(from: state)
+                        duration: livestreamHelper.duration(from: state)
                     )
                 )
             }
         }
+    }
+    
+    func joinLivestream() {
+        Task {
+            do {
+                livestreamState = .joining
+                try await call.join(callSettings: CallSettings(audioOn: false, videoOn: false))
+                livestreamState = call.state.backstage ? .backstage : .live
+            } catch {
+                livestreamState = .error
+                log.error("Error joining livestream")
+            }
+        }
+    }
+    
+    func leaveLivestream() {
+        call.leave()
     }
 }
 
@@ -235,15 +367,15 @@ struct LivestreamPlayPauseButton: View {
     
     @Injected(\.colors) var colors
     
-    @ObservedObject var viewModel: LivestreamPlayerViewModel
+    @Binding var streamPaused: Bool
     var trackUpdate: () -> Void
     
     var body: some View {
         Button {
-            viewModel.update(streamPaused: !viewModel.streamPaused)
+            streamPaused = !streamPaused
             trackUpdate()
         } label: {
-            Image(systemName: viewModel.streamPaused ? "play.fill" : "pause.fill")
+            Image(systemName: streamPaused ? "play.fill" : "pause.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 60)
@@ -311,4 +443,11 @@ struct LivestreamButton: View {
         }
         .padding(.horizontal, 2)
     }
+}
+
+enum LivestreamState {
+    case backstage
+    case live
+    case error
+    case joining
 }
