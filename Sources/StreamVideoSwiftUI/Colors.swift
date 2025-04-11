@@ -34,6 +34,7 @@ public struct Colors {
     public var callControlsBackground = Color(.streamCallControlsBackground)
     public var livestreamBackground = Color(.streamOverlay)
     public var livestreamCallControlsColor = Color(.streamWhiteStatic)
+    public var livestreamText = Color(.streamWhiteStatic)
     public var participantSpeakingHighlightColor = Color(.streamAccentBlue).opacity(0.7)
     public var participantInfoBackgroundColor = Color(.streamOverlayDarkStatic)
     public var callDurationColor: UIColor = .streamWhiteStatic

@@ -56,15 +56,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     
     @State var timer: Timer?
     
-    @State var countdown: TimeInterval = 0
+    @State var countdown: TimeInterval
     
-    @State var livestreamState: LivestreamState = .backstage
+    @State var livestreamState: LivestreamState
     
-    private let formatter: DateComponentsFormatter = {
-        let formatter = DateComponentsFormatter()
-        formatter.unitsStyle = .positional
-        return formatter
-    }()
+    let livestreamHelper = LivestreamPlayerHelper()
 
     /// Initializes a `LivestreamPlayer` with the specified parameters.
     ///
@@ -89,6 +85,32 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.viewFactory = viewFactory
         let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
         self.call = call
+        livestreamState = call.state.backstage ? .backstage : .live
+        countdown = 0
+        self.muted = muted
+        self.showParticipantCount = showParticipantCount
+        _state = ObservedObject(wrappedValue: call.state)
+        self.joinPolicy = joinPolicy
+        self.showsLeaveCallButton = showsLeaveCallButton
+        self.onFullScreenStateChange = onFullScreenStateChange
+        call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
+    }
+    
+    internal init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        call: Call,
+        countdown: TimeInterval = 0,
+        livestreamState: LivestreamState? = nil,
+        muted: Bool = false,
+        showParticipantCount: Bool = true,
+        joinPolicy: JoinPolicy = .auto,
+        showsLeaveCallButton: Bool = false,
+        onFullScreenStateChange: ((Bool) -> Void)? = nil
+    ) {
+        self.viewFactory = viewFactory
+        self.call = call
+        self.countdown = countdown
+        self.livestreamState = livestreamState ?? (call.state.backstage ? .backstage : .live)
         self.muted = muted
         self.showParticipantCount = showParticipantCount
         _state = ObservedObject(wrappedValue: call.state)
@@ -187,19 +209,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         }
     }
     
-    func formatTimeInterval(_ interval: TimeInterval) -> String {
-        let totalSeconds = Int(interval)
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        let seconds = totalSeconds % 60
-
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
-    }
-    
     func stopTimer() {
         timer?.invalidate()
         timer = nil
@@ -210,7 +219,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @ViewBuilder
     private var errorView: some View {
         Text(L10n.Call.Livestream.error)
-            .foregroundColor(colors.textInverted)
+            .multilineTextAlignment(.center)
+            .foregroundColor(colors.livestreamText)
     }
 
     @ViewBuilder
@@ -223,7 +233,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         VStack(spacing: 16) {
             if countdown > 0 {
                 Text(L10n.Call.Livestream.countdown)
-                Text(formatTimeInterval(countdown))
+                Text(livestreamHelper.formatTimeInterval(countdown))
                     .font(.title.monospacedDigit())
                     .bold()
             } else {
@@ -239,7 +249,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 }
             }
         }
-        .foregroundColor(colors.textInverted)
+        .foregroundColor(colors.livestreamText)
         .padding()
     }
 
@@ -313,16 +323,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 .foregroundColor(colors.livestreamCallControlsColor)
                 .overlay(
                     LivestreamDurationView(
-                        duration: duration(from: state)
+                        duration: livestreamHelper.duration(from: state)
                     )
                 )
             }
         }
-    }
-    
-    func duration(from state: CallState) -> String? {
-        guard state.duration > 0 else { return nil }
-        return formatter.string(from: state.duration)
     }
     
     func joinLivestream() {
