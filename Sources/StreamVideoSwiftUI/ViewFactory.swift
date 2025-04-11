@@ -335,7 +335,7 @@ extension ViewFactory {
             }
         }
         let handleCloseLobby = {
-            viewModel.callingState = .idle
+            viewModel.setCallingState(.idle)
         }
         if #available(iOS 14.0, *) {
             return LobbyView(
