@@ -571,13 +571,18 @@ open class CallViewModel: ObservableObject {
     func setCallingState(
         _ newValue: CallingState,
         file: StaticString = #file,
-        function: StaticString = #file,
+        function: StaticString = #function,
         line: UInt = #line
     ) {
         guard callingState != newValue else {
             return
         }
-        log.debug("CallingState will be updated \(callingState) → \(newValue)")
+        log.debug(
+            "CallingState will be updated \(callingState) → \(newValue)",
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
         self.callingState = newValue
     }
 
