@@ -45,10 +45,10 @@ open class CallViewModel: ObservableObject {
                     guard let self else { return }
                     switch reconnectionStatus {
                     case .reconnecting where callingState != .reconnecting:
-                        callingState = .reconnecting
+                        setCallingState(.reconnecting)
                     default:
                         if callingState != .inCall, callingState != .outgoing {
-                            callingState = .inCall
+                            setCallingState(.inCall)
                         }
                     }
                 })
@@ -74,10 +74,7 @@ open class CallViewModel: ObservableObject {
     /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
         didSet {
-            guard callingState != oldValue else {
-                return
-            }
-            log.debug("CallingState was updated \(oldValue) → \(callingState)")
+            log.debug("CallingState didSet triggered \(oldValue) → \(callingState)")
             handleRingingEvents()
         }
     }
@@ -350,7 +347,7 @@ open class CallViewModel: ObservableObject {
         video: Bool? = nil
     ) {
         outgoingCallMembers = members
-        callingState = ring ? .outgoing : .joining
+        setCallingState(ring ? .outgoing : .joining)
         let membersRequest: [MemberRequest]? = members.isEmpty
             ? nil
             : members.map(\.toMemberRequest)
@@ -389,7 +386,7 @@ open class CallViewModel: ObservableObject {
                     startTimer(timeout: timeoutSeconds)
                 } catch {
                     self.error = error
-                    callingState = .idle
+                    setCallingState(.idle)
                     self.call = nil
                 }
             }
@@ -405,7 +402,7 @@ open class CallViewModel: ObservableObject {
         callId: String,
         customData: [String: RawJSON]? = nil
     ) {
-        callingState = .joining
+        setCallingState(.joining)
         enterCall(
             callType: callType,
             callId: callId,
@@ -425,7 +422,7 @@ open class CallViewModel: ObservableObject {
         members: [Member]
     ) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
-        callingState = .lobby(lobbyInfo)
+        setCallingState(.lobby(lobbyInfo))
         if !localCallSettingsChange {
             Task {
                 do {
@@ -461,7 +458,7 @@ open class CallViewModel: ObservableObject {
                 )
             } catch {
                 self.error = error
-                callingState = .idle
+                setCallingState(.idle)
                 self.call = nil
             }
         }
@@ -489,7 +486,7 @@ open class CallViewModel: ObservableObject {
                 """
             )
             _ = try? await call.reject(reason: rejectionReason)
-            self.callingState = .idle
+            setCallingState(.idle)
         }
     }
 
@@ -555,10 +552,10 @@ open class CallViewModel: ObservableObject {
 
     public func setActiveCall(_ call: Call?) {
         if let call, (callingState != .inCall || self.call?.cId != call.cId) {
-            callingState = .inCall
+            setCallingState(.inCall)
             self.call = call
         } else if call == nil, callingState != .idle {
-            callingState = .idle
+            setCallingState(.idle)
             self.call = nil
         }
     }
@@ -570,6 +567,19 @@ open class CallViewModel: ObservableObject {
     }
 
     // MARK: - private
+
+    func setCallingState(
+        _ newValue: CallingState,
+        file: StaticString = #file,
+        function: StaticString = #file,
+        line: UInt = #line
+    ) {
+        guard callingState != newValue else {
+            return
+        }
+        log.debug("CallingState will be updated \(callingState) → \(newValue)")
+        self.callingState = newValue
+    }
 
     /// Leaves the current call.
     private func leaveCall() {
@@ -591,9 +601,7 @@ open class CallViewModel: ObservableObject {
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
-        if callingState != .idle {
-            callingState = .idle
-        }
+        setCallingState(.idle)
         isMinimized = false
         localVideoPrimary = false
         Task { await audioRecorder.stopRecording() }
@@ -654,7 +662,7 @@ open class CallViewModel: ObservableObject {
             } catch {
                 log.error("Error starting a call", error: error)
                 self.error = error
-                callingState = .idle
+                setCallingState(.idle)
                 Task { await audioRecorder.stopRecording() }
                 enteringCallTask = nil
             }
@@ -732,7 +740,7 @@ open class CallViewModel: ObservableObject {
                             let isAppActive = UIApplication.shared.applicationState == .active
                             // TODO: implement holding a call.
                             if callingState == .idle && isAppActive {
-                                callingState = .incoming(incomingCall)
+                                setCallingState(.incoming(incomingCall))
                             }
                         }
                     case .accepted:
@@ -831,17 +839,17 @@ open class CallViewModel: ObservableObject {
     private func updateCallStateIfNeeded() {
         if callingState == .outgoing {
             if !callParticipants.isEmpty {
-                callingState = .inCall
+                setCallingState(.inCall)
             }
             return
         }
         guard call != nil || !callParticipants.isEmpty else { return }
         if callingState != .reconnecting, callingState != .inCall {
-            callingState = .inCall
+            setCallingState(.inCall)
         } else {
             let shouldGoInCall = callParticipants.count > 1
             if shouldGoInCall, callingState != .inCall {
-                callingState = .inCall
+                setCallingState(.inCall)
             }
         }
     }
