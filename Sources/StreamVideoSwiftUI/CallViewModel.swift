@@ -216,6 +216,8 @@ open class CallViewModel: ObservableObject {
     /// `StreamVideo`.
     var isSubscribedToCallEvents: Bool { callEventsSubscriptionTask != nil }
 
+    private var isEnteringCall: Bool = false
+
     public init(
         participantsLayout: ParticipantsLayout = .grid,
         callSettings: CallSettings? = nil
@@ -448,6 +450,7 @@ open class CallViewModel: ObservableObject {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
             do {
+                isEnteringCall = true
                 try await call.accept()
                 enterCall(
                     call: call,
@@ -458,6 +461,7 @@ open class CallViewModel: ObservableObject {
                 )
             } catch {
                 self.error = error
+                isEnteringCall = false
                 setCallingState(.idle)
                 self.call = nil
             }
@@ -676,12 +680,14 @@ open class CallViewModel: ObservableObject {
                 )
                 save(call: call)
                 enteringCallTask = nil
+                isEnteringCall = false
             } catch {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 setCallingState(.idle)
                 Task { await audioRecorder.stopRecording() }
                 enteringCallTask = nil
+                isEnteringCall = false
             }
         }
     }
@@ -796,11 +802,12 @@ open class CallViewModel: ObservableObject {
 
         switch callingState {
         case let .incoming(incomingCall)
-            where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user.id && enteringCallTask == nil:
+            where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user.id && isEnteringCall == false:
             /// If the call that was accepted is the incoming call we are presenting, then we reject
             /// and set the activeCall to the current one in order to reset the callingState to
             /// inCall or idle.
             Task {
+                log.debug("Will reject call as isEnteringCall:\(isEnteringCall) isUserIDSameAsLoggedInUser:\(event.user?.id == streamVideo.user.id)")
                 _ = try? await streamVideo
                     .call(callType: incomingCall.type, callId: incomingCall.id)
                     .reject()
