@@ -122,8 +122,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
 
     public var body: some View {
         ZStack {
-            Color(colors.background).ignoresSafeArea()
-
             if livestreamState == .error {
                 errorView
             } else if livestreamState == .joining {
