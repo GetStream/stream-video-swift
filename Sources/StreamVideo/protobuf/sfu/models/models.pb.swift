@@ -1214,6 +1214,35 @@ struct Stream_Video_Sfu_Models_Browser {
   init() {}
 }
 
+struct Stream_Video_Sfu_Models_RTMPIngress {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Video dimensions and frame rate
+  var width: UInt32 = 0
+
+  var height: UInt32 = 0
+
+  var frameRate: Double = 0
+
+  /// Client info
+  var software: String = String()
+
+  /// e.g. "29.1.3"
+  var version: String = String()
+
+  /// e.g. "x264" or "NVIDIA NVENC"
+  var encoder: String = String()
+
+  /// Connection info
+  var remoteAddr: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Stream_Video_Sfu_Models_Device {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -1374,6 +1403,7 @@ extension Stream_Video_Sfu_Models_ClientDetails: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Sdk: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_OS: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Browser: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_RTMPIngress: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Device: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Call: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallGrants: @unchecked Sendable {}
@@ -2426,6 +2456,74 @@ extension Stream_Video_Sfu_Models_Browser: SwiftProtobuf.Message, SwiftProtobuf.
   static func ==(lhs: Stream_Video_Sfu_Models_Browser, rhs: Stream_Video_Sfu_Models_Browser) -> Bool {
     if lhs.name != rhs.name {return false}
     if lhs.version != rhs.version {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_RTMPIngress: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RTMPIngress"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "width"),
+    2: .same(proto: "height"),
+    3: .standard(proto: "frame_rate"),
+    4: .same(proto: "software"),
+    5: .same(proto: "version"),
+    6: .same(proto: "encoder"),
+    7: .standard(proto: "remote_addr"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.width) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.height) }()
+      case 3: try { try decoder.decodeSingularDoubleField(value: &self.frameRate) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.software) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.version) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.encoder) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.remoteAddr) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.width != 0 {
+      try visitor.visitSingularUInt32Field(value: self.width, fieldNumber: 1)
+    }
+    if self.height != 0 {
+      try visitor.visitSingularUInt32Field(value: self.height, fieldNumber: 2)
+    }
+    if self.frameRate != 0 {
+      try visitor.visitSingularDoubleField(value: self.frameRate, fieldNumber: 3)
+    }
+    if !self.software.isEmpty {
+      try visitor.visitSingularStringField(value: self.software, fieldNumber: 4)
+    }
+    if !self.version.isEmpty {
+      try visitor.visitSingularStringField(value: self.version, fieldNumber: 5)
+    }
+    if !self.encoder.isEmpty {
+      try visitor.visitSingularStringField(value: self.encoder, fieldNumber: 6)
+    }
+    if !self.remoteAddr.isEmpty {
+      try visitor.visitSingularStringField(value: self.remoteAddr, fieldNumber: 7)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_RTMPIngress, rhs: Stream_Video_Sfu_Models_RTMPIngress) -> Bool {
+    if lhs.width != rhs.width {return false}
+    if lhs.height != rhs.height {return false}
+    if lhs.frameRate != rhs.frameRate {return false}
+    if lhs.software != rhs.software {return false}
+    if lhs.version != rhs.version {return false}
+    if lhs.encoder != rhs.encoder {return false}
+    if lhs.remoteAddr != rhs.remoteAddr {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
