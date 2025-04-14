@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- Countdown timer and waiting participants info to the livestream player [#754](https://github.com/GetStream/stream-video-swift/pull/754)
+
 ### 🔄 Changed
 - `CallSettings` won't be propagated between calls when using the `CallViewModel`. [#751](https://github.com/GetStream/stream-video-swift/pull/751)
 
