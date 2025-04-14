@@ -28,6 +28,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callCid(from: callId, callType: callType)
     }
 
+    private let eventSubject: PassthroughSubject<WrappedEvent, Never> = .init()
+    public var eventPublisher: AnyPublisher<VideoEvent, Never> {
+        eventSubject
+            .compactMap {
+                switch $0 {
+                case let .coordinatorEvent(event):
+                    return event
+                default:
+                    return nil
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+
     /// Provides access to the microphone.
     public let microphone: MicrophoneManager
     /// Provides access to the camera.
@@ -37,7 +51,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
-    private var eventHandlers = [EventHandler]()
     private var cancellables = DisposableBag()
 
     /// This adapter is used to manage closed captions for the
@@ -90,6 +103,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     deinit {
+        log.debug("Call cID:\(cId) is deallocating...")
         cancellables.removeAll()
     }
 
@@ -481,45 +495,30 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await callController.stopScreensharing()
     }
 
+    public func eventPublisher<WSEvent: Event>(for event: WSEvent.Type) -> AnyPublisher<WSEvent, Never> {
+        eventPublisher
+            .compactMap { $0.rawValue as? WSEvent }
+            .eraseToAnyPublisher()
+    }
+
     /// Subscribes to video events.
     /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
-        AsyncStream(VideoEvent.self) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard case let .coordinatorEvent(event) = event else {
-                    return
-                }
-                continuation.yield(event)
-            }, cancel: { continuation.finish() })
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventPublisher.eraseAsAsyncStream()
     }
 
     /// Subscribes to a particular web socket event.
     /// - Parameter event: the type of the event you are subscribing to.
     /// - Returns: `AsyncStream` of web socket events from the provided type.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
-        AsyncStream(event) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard case let .coordinatorEvent(event) = event else {
-                    return
-                }
-                if let event = event.rawValue as? WSEvent {
-                    continuation.yield(event)
-                }
-            }, cancel: { continuation.finish() })
-
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventPublisher(for: event).eraseAsAsyncStream()
     }
 
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded, object: self)
-        eventHandlers.forEach { $0.cancel() }
 
         cancellables.removeAll()
-        eventHandlers.removeAll()
         callController.leave()
         closedCaptionsAdapter.stop()
         stateMachine.transition(.idle(self))
@@ -1384,12 +1383,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             self.state.updateState(from: videoEvent)
         }
 
-        // Get a copy of eventHandlers to avoid crashes when `leave` call is being
-        // triggered, during event processing.
-        let eventHandlers = self.eventHandlers
-        for eventHandler in eventHandlers {
-            eventHandler.handler(event)
-        }
+        eventSubject.send(event)
     }
 
     @MainActor

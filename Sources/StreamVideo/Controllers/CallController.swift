@@ -42,13 +42,8 @@ class CallController: @unchecked Sendable {
     private let apiKey: String
     private let defaultAPI: DefaultAPI
     private let videoConfig: VideoConfig
-    private let sfuReconnectionTime: CGFloat
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
-    private var reconnectionDate: Date?
     private var cachedLocation: String?
-    private var currentSFU: String?
-    private var participantsCountUpdatesTask: Task<Void, Never>?
-    private var currentUserBlockedTask: Task<Void, Never>?
 
     private let joinCallResponseSubject = CurrentValueSubject<JoinCallResponse?, Never>(nil)
     private var joinCallResponseFetchObserver: AnyCancellable?
@@ -74,7 +69,6 @@ class CallController: @unchecked Sendable {
         self.callType = callType
         self.apiKey = apiKey
         self.videoConfig = videoConfig
-        sfuReconnectionTime = 30
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
         self.webRTCCoordinatorFactory = webRTCCoordinatorFactory
@@ -562,7 +556,6 @@ class CallController: @unchecked Sendable {
 
     private func didFetch(_ response: JoinCallResponse) async {
         let sessionId = await webRTCCoordinator.stateAdapter.sessionID
-        currentSFU = response.credentials.server.edgeName
         Task { @MainActor [weak self] in
             self?.call?.state.sessionId = sessionId
             self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
@@ -584,8 +577,7 @@ class CallController: @unchecked Sendable {
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
-            participantsCountUpdatesTask?.cancel()
-            participantsCountUpdatesTask = nil
+            disposableBag.remove("subscribeToParticipantsCountUpdatesEvent")
 
             call?.update(reconnectionStatus: .connected)
         case .error:
@@ -601,33 +593,32 @@ class CallController: @unchecked Sendable {
     }
 
     private func subscribeToParticipantsCountUpdatesEvent(_ call: Call?) {
-        participantsCountUpdatesTask?.cancel()
-        participantsCountUpdatesTask = nil
+        disposableBag.remove("subscribeToParticipantsCountUpdatesEvent")
 
         guard let call else { return }
 
-        participantsCountUpdatesTask = Task {
-            let anonymousUserRoleKey = "anonymous"
-            for await event in call.subscribe(for: CallSessionParticipantCountsUpdatedEvent.self) {
-                Task { @MainActor in
-                    call.state.participantCount = event
-                        .participantsCountByRole
-                        .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
-                        .values
-                        .map(UInt32.init)
-                        .reduce(0) { $0 + $1 }
+        let anonymousUserRoleKey = "anonymous"
 
-                    // TODO: Workaround. To be removed
-                    if event.anonymousParticipantCount > 0 {
-                        call.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
-                    } else if let anonymousCount = event.participantsCountByRole[anonymousUserRoleKey] {
-                        call.state.anonymousParticipantCount = UInt32(anonymousCount)
-                    } else {
-                        call.state.anonymousParticipantCount = 0
-                    }
+        call
+            .eventPublisher(for: CallSessionParticipantCountsUpdatedEvent.self)
+            .sinkTask { @MainActor [weak call] event in
+                call?.state.participantCount = event
+                    .participantsCountByRole
+                    .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
+                    .values
+                    .map(UInt32.init)
+                    .reduce(0) { $0 + $1 }
+
+                // TODO: Workaround. To be removed
+                if event.anonymousParticipantCount > 0 {
+                    call?.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+                } else if let anonymousCount = event.participantsCountByRole[anonymousUserRoleKey] {
+                    call?.state.anonymousParticipantCount = UInt32(anonymousCount)
+                } else {
+                    call?.state.anonymousParticipantCount = 0
                 }
             }
-        }
+            .store(in: disposableBag, key: "subscribeToParticipantsCountUpdatesEvent")
     }
 
     private func subscribeToCurrentUserBlockedState(_ call: Call?) {
