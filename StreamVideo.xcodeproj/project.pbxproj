@@ -1039,7 +1039,6 @@
 		844ADA6B2AD4439D00769F6A /* DemoCallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6A2AD4439D00769F6A /* DemoCallsView.swift */; };
 		844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */; };
 		844ECF4F2A33458A0023263C /* Member.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ECF4E2A33458A0023263C /* Member.swift */; };
-		845494B52DA900F000211413 /* LivestreamPlayerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845494B42DA900F000211413 /* LivestreamPlayerHelper.swift */; };
 		8454A3192AAB374B00A012C6 /* CallStatsReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8454A3182AAB374B00A012C6 /* CallStatsReport.swift */; };
 		8454A31D2AAF41E100A012C6 /* Array+SafeSubscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
@@ -2385,7 +2384,6 @@
 		844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallsViewModel.swift; sourceTree = "<group>"; };
 		844ECF4E2A33458A0023263C /* Member.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Member.swift; sourceTree = "<group>"; };
 		84530C6B2A3C4E0700F2678E /* CallState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState.swift; sourceTree = "<group>"; };
-		845494B42DA900F000211413 /* LivestreamPlayerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamPlayerHelper.swift; sourceTree = "<group>"; };
 		8454A3182AAB374B00A012C6 /* CallStatsReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatsReport.swift; sourceTree = "<group>"; };
 		8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+SafeSubscript.swift"; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -5682,7 +5680,6 @@
 			isa = PBXGroup;
 			children = (
 				84D425062AA61E7C00473150 /* LivestreamPlayer.swift */,
-				845494B42DA900F000211413 /* LivestreamPlayerHelper.swift */,
 			);
 			path = Livestreaming;
 			sourceTree = "<group>";
@@ -7798,7 +7795,6 @@
 				844299412942394C0037232A /* VideoView_iOS13.swift in Sources */,
 				846E4AFF29D236EA003733AB /* CallTopView.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
-				845494B52DA900F000211413 /* LivestreamPlayerHelper.swift in Sources */,
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
