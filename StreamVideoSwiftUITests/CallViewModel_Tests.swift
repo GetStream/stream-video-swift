@@ -1204,6 +1204,31 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - leaveCall
+
+    @MainActor
+    func test_leaveCall_resetsCallSettings() async {
+        let subject = CallViewModel()
+
+        subject.toggleMicrophoneEnabled()
+        subject.toggleAudioOutput()
+        await fulfilmentInMainActor {
+            subject.callSettings.audioOn == false && subject.callSettings.audioOutputOn == false
+        }
+        XCTAssertTrue(subject.localCallSettingsChange)
+
+        // When
+        subject.joinCall(callType: callType, callId: callId)
+        await fulfilmentInMainActor { subject.callingState == .inCall }
+
+        subject.hangUp()
+
+        await fulfilmentInMainActor {
+            subject.callSettings.audioOn == true && subject.callSettings.audioOutputOn == true
+        }
+        XCTAssertFalse(subject.localCallSettingsChange)
+    }
+
     // MARK: - Private helpers
 
     private struct ParticipantsScenario {
