@@ -5,7 +5,7 @@
 @testable import StreamVideoSwiftUI
 import XCTest
 
-final class ResourceTests: XCTestCase, @unchecked Sendable {
+final class Resource_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Initialization Tests
     
@@ -81,5 +81,17 @@ final class ResourceTests: XCTestCase, @unchecked Sendable {
         // Then
         XCTAssertEqual(resource.name, "")
         XCTAssertNil(resource.extension)
+    }
+
+    // MARK: - fileName
+
+    func test_fileName_withNameAndExtension() {
+        let resource: Resource = "testResource.m4a"
+        XCTAssertEqual(resource.fileName, "testResource.m4a")
+    }
+
+    func test_fileName_withNameOnly() {
+        let resource: Resource = "testResource"
+        XCTAssertEqual(resource.fileName, "testResource")
     }
 }

@@ -27,6 +27,14 @@ public struct Resource: ExpressibleByStringLiteral {
     /// The file extension of the resource, if any.
     public var `extension`: String?
 
+    public var fileName: String {
+        var components = [name]
+        if let fileExtension = self.extension {
+            components.append(fileExtension)
+        }
+        return components.joined(separator: ".")
+    }
+
     /// Creates a new resource with the specified name and optional extension.
     ///
     /// - Parameters:
