@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### ✅ Added
 - Countdown timer and waiting participants info to the livestream player [#754](https://github.com/GetStream/stream-video-swift/pull/754)
+- EventPublisher for `Call` objects. [#759](https://github.com/GetStream/stream-video-swift/pull/759)
+
+### 🐞 Fixed
+- `CallViewModel.callingState` transition to `.idle` just before moving to `.inCall` after the user has accepted the call. [#759](https://github.com/GetStream/stream-video-swift/pull/759)
 
 ### 🔄 Changed
 - `CallSettings` won't be propagated between calls when using the `CallViewModel`. [#751](https://github.com/GetStream/stream-video-swift/pull/751)
