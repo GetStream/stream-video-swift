@@ -65,7 +65,7 @@ fileprivate func content() {
                     // Here we register for incomingCalls and provide
                     // a logo as we did on the previous example
                     // Provide the ringtone to use when a CallKit call is ringing
-                    callKitAdapter.ringtoneSound = sounds.incomingCallSound
+                    callKitAdapter.ringtoneSound = sounds.incomingCallSound.fileName
                 }
             }
         }

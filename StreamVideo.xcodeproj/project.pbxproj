@@ -207,6 +207,8 @@
 		40429D5F2C779B3D00AC7FFF /* ScreenShareSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40429D5E2C779B3D00AC7FFF /* ScreenShareSession.swift */; };
 		40429D602C779B5A00AC7FFF /* TrackType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BBC4872C623C6E002AEF92 /* TrackType.swift */; };
 		40429D612C779B7000AC7FFF /* SFUSignalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689192C64F74F0054528A /* SFUSignalService.swift */; };
+		4045D9D52DAD35790077A660 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4045D9D42DAD35790077A660 /* Resource.swift */; };
+		4045D9DD2DAD5B110077A660 /* Resource_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4045D9DC2DAD5B110077A660 /* Resource_Tests.swift */; };
 		4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */; };
 		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
@@ -1697,6 +1699,8 @@
 		403FF3F12BA1DC480092CE8A /* YpCbCrPixelRange+Default.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "YpCbCrPixelRange+Default.swift"; sourceTree = "<group>"; };
 		40429D5C2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebRTCMigrationStatusObserver.swift; sourceTree = "<group>"; };
 		40429D5E2C779B3D00AC7FFF /* ScreenShareSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenShareSession.swift; sourceTree = "<group>"; };
+		4045D9D42DAD35790077A660 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
+		4045D9DC2DAD5B110077A660 /* Resource_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource_Tests.swift; sourceTree = "<group>"; };
 		4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenu.swift; sourceTree = "<group>"; };
@@ -2912,6 +2916,7 @@
 		401480332A5423C70029166A /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				4045D9DC2DAD5B110077A660 /* Resource_Tests.swift */,
 				40B48C0E2D14B8F6002C4EAB /* StreamAppStateAdapter */,
 				40914C962B567B6B00F6A13E /* PictureInPicture */,
 				401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */,
@@ -6090,6 +6095,7 @@
 				8434C526289AA2F00001490A /* Images.swift */,
 				84E86D4E2905E731004BA44C /* Utils.swift */,
 				8415D3E2290BC882006E53CB /* Sounds.swift */,
+				4045D9D42DAD35790077A660 /* Resource.swift */,
 				8498796728A15F0300D06F31 /* ViewFactory.swift */,
 				8406266C2A37A27D004B8748 /* CallViewModel.swift */,
 				84D419B728E7155100F574F9 /* CallContainer.swift */,
@@ -7787,6 +7793,7 @@
 				403FF3E72BA1D2D40092CE8A /* StreamPixelBufferRepository.swift in Sources */,
 				84DCA2092A382B16000C3411 /* CallModels.swift in Sources */,
 				8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */,
+				4045D9D52DAD35790077A660 /* Resource.swift in Sources */,
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
 				40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */,
@@ -7985,6 +7992,7 @@
 				40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */,
 				82FF40C42A17C74D00B4D95E /* IncomingCallView_Tests.swift in Sources */,
 				404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */,
+				4045D9DD2DAD5B110077A660 /* Resource_Tests.swift in Sources */,
 				408CE0F82BD95F170052EC3A /* VideoConfig+Dummy.swift in Sources */,
 				829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */,
 				8457BF802A5C18A7000AE567 /* ToastView_Tests.swift in Sources */,
