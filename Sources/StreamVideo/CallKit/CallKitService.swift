@@ -401,6 +401,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 callId:\(stackEntry.call.callId)
                 callType:\(stackEntry.call.callType)
                 callerId:\(stackEntry.createdBy?.id)
+                currentCallWasEnded:\(currentCallWasEnded)
                 """
             )
             if currentCallWasEnded {

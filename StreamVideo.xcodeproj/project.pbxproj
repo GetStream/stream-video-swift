@@ -356,6 +356,8 @@
 		40914C982B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */; };
 		40914C9A2B56A85B00F6A13E /* StreamBufferTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */; };
 		40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */; };
+		40916E782DA94A150061D860 /* Publisher+AsyncStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40916E752DA94A150061D860 /* Publisher+AsyncStream.swift */; };
+		40916E7A2DA94A3A0061D860 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40916E792DA94A3A0061D860 /* Resource.swift */; };
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
@@ -1813,6 +1815,8 @@
 		40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureTrackStateAdapterTests.swift; sourceTree = "<group>"; };
 		40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBufferTransformer.swift; sourceTree = "<group>"; };
 		40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBufferTransformerTests.swift; sourceTree = "<group>"; };
+		40916E752DA94A150061D860 /* Publisher+AsyncStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+AsyncStream.swift"; sourceTree = "<group>"; };
+		40916E792DA94A3A0061D860 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
@@ -3849,6 +3853,22 @@
 			path = PictureInPicture;
 			sourceTree = "<group>";
 		};
+		40916E762DA94A150061D860 /* Combine */ = {
+			isa = PBXGroup;
+			children = (
+				40916E752DA94A150061D860 /* Publisher+AsyncStream.swift */,
+			);
+			path = Combine;
+			sourceTree = "<group>";
+		};
+		40916E772DA94A150061D860 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40916E762DA94A150061D860 /* Combine */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		409386182AA09E3900FF5AF4 /* MemoryLogDestination */ = {
 			isa = PBXGroup;
 			children = (
@@ -5629,6 +5649,7 @@
 				40FB150D2BF77CA200D5E580 /* StateMachine */,
 				40C9E44F2C9880D300802B28 /* Unwrap */,
 				408937892C062B0B000EEB69 /* UUIDProviding */,
+				40916E772DA94A150061D860 /* Extensions */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -6093,6 +6114,7 @@
 				8434C526289AA2F00001490A /* Images.swift */,
 				84E86D4E2905E731004BA44C /* Utils.swift */,
 				8415D3E2290BC882006E53CB /* Sounds.swift */,
+				40916E792DA94A3A0061D860 /* Resource.swift */,
 				8498796728A15F0300D06F31 /* ViewFactory.swift */,
 				8406266C2A37A27D004B8748 /* CallViewModel.swift */,
 				84D419B728E7155100F574F9 /* CallContainer.swift */,
@@ -7061,6 +7083,7 @@
 				40FB8FF82D661E2000F4390A /* String+OpenApiExtensions.swift in Sources */,
 				84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */,
 				40034C312CFE168D00A318B1 /* StreamLocaleProvider.swift in Sources */,
+				40916E782DA94A150061D860 /* Publisher+AsyncStream.swift in Sources */,
 				84D91E9C2C7CB0AA00B163A0 /* CallSessionParticipantCountsUpdatedEvent.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,
@@ -7791,6 +7814,7 @@
 				403FF3E72BA1D2D40092CE8A /* StreamPixelBufferRepository.swift in Sources */,
 				84DCA2092A382B16000C3411 /* CallModels.swift in Sources */,
 				8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */,
+				40916E7A2DA94A3A0061D860 /* Resource.swift in Sources */,
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
 				40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */,
