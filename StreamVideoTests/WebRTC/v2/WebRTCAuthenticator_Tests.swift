@@ -153,7 +153,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             .coordinator
             .stateAdapter
             .callSettings
-        XCTAssertEqual(callSettings, expected.call.settings.toCallSettings)
+        XCTAssertEqual(callSettings, .init(expected.call.settings))
     }
 
     func test_authenticate_withCreateFalseAndInitialCallSettings_shouldSetInitialCallSettings() async throws {
@@ -210,7 +210,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
             .coordinator
             .stateAdapter
             .callSettings
-        XCTAssertEqual(callSettings, expected.call.settings.toCallSettings)
+        XCTAssertEqual(callSettings, .init(expected.call.settings))
     }
 
     func test_authenticate_updatesVideoOptions() async throws {
