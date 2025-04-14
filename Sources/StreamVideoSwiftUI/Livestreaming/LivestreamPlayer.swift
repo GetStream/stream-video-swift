@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
@@ -14,7 +15,7 @@ import SwiftUI
 /// customisation of its behaviour through policies and callback actions.
 @available(iOS 14.0, *)
 public struct LivestreamPlayer<Factory: ViewFactory>: View {
-
+    
     /// Determines the join behavior for the livestream.
     public enum JoinPolicy {
         /// No automatic action; users must manually join the livestream.
@@ -22,27 +23,50 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         /// Automatically joins the livestream on appearance and leave on disappearance.
         case auto
     }
-
+    
     /// Accesses the color palette from the app's dependency injection.
     @Injected(\.colors) var colors
-
+    
+    @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
+    
     var viewFactory: Factory
-
+    
     /// The policy that defines how users join the livestream.
     var joinPolicy: JoinPolicy
-
+    
     /// Indicates whether a button to leave the livestream is shown.
     var showsLeaveCallButton: Bool
-
+    
     /// A callback triggered when the fullscreen state changes.
     var onFullScreenStateChange: ((Bool) -> Void)?
-
+    
     /// The state object representing the call's current state.
-    @StateObject var state: CallState
-
-    /// The view model managing the livestream's behavior and state.
-    @StateObject var viewModel: LivestreamPlayerViewModel
-
+    @ObservedObject var state: CallState
+    
+    @State var call: Call
+    
+    @State var muted: Bool = false
+    
+    @State var mutedOnJoin = false
+    
+    @State var controlsShown = false
+    
+    @State var streamPaused = false
+    
+    @State var fullScreen = false
+    
+    @State var showParticipantCount: Bool
+    
+    @State var timerCancellable: AnyCancellable?
+    
+    @State var countdown: TimeInterval
+    
+    @State var livestreamState: LivestreamState
+    
+    @State var cancellables = DisposableBag()
+    
+    @State var controlsTask: Task<Void, Never>?
+        
     /// Initializes a `LivestreamPlayer` with the specified parameters.
     ///
     /// - Parameters:
@@ -64,44 +88,99 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
-        let viewModel = LivestreamPlayerViewModel(
-            type: type,
-            id: id,
-            muted: muted,
-            showParticipantCount: showParticipantCount
-        )
-        _viewModel = StateObject(wrappedValue: viewModel)
-        _state = StateObject(wrappedValue: viewModel.call.state)
+        let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
+        self.call = call
+        livestreamState = call.state.backstage ? .backstage : .initial
+        countdown = 0
+        self.muted = muted
+        self.showParticipantCount = showParticipantCount
+        _state = ObservedObject(wrappedValue: call.state)
         self.joinPolicy = joinPolicy
         self.showsLeaveCallButton = showsLeaveCallButton
         self.onFullScreenStateChange = onFullScreenStateChange
-        viewModel.call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
+        call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
     }
-
+    
+    internal init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        call: Call,
+        countdown: TimeInterval = 0,
+        livestreamState: LivestreamState? = nil,
+        muted: Bool = false,
+        showParticipantCount: Bool = true,
+        joinPolicy: JoinPolicy = .auto,
+        showsLeaveCallButton: Bool = false,
+        onFullScreenStateChange: ((Bool) -> Void)? = nil
+    ) {
+        self.viewFactory = viewFactory
+        self.call = call
+        self.countdown = countdown
+        self.livestreamState = livestreamState ?? (call.state.backstage ? .backstage : .live)
+        self.muted = muted
+        self.showParticipantCount = showParticipantCount
+        _state = ObservedObject(wrappedValue: call.state)
+        self.joinPolicy = joinPolicy
+        self.showsLeaveCallButton = showsLeaveCallButton
+        self.onFullScreenStateChange = onFullScreenStateChange
+        call.updateParticipantsSorting(with: livestreamOrAudioRoomSortPreset)
+    }
+    
     public var body: some View {
         ZStack {
-            if viewModel.errorShown {
+            if livestreamState == .error {
                 errorView
-            } else if viewModel.loading {
+            } else if livestreamState == .joining {
                 loadingView
-            } else if state.backstage {
+            } else if livestreamState == .backstage {
                 notStartedView
             } else {
                 videoRenderer
+                livestreamControls
             }
-            livestreamControls
         }
         .onChange(of: state.participants, perform: { newValue in
-            if viewModel.muted && newValue.first?.track != nil {
-                viewModel.muteLivestreamOnJoin()
+            if muted && (newValue.first(where: { $0.hasVideo && $0.track != nil }) != nil) {
+                muteLivestreamOnJoin()
             }
         })
+        .onChange(of: call.state.backstage) { _ in
+            livestreamState = call.state.backstage ? .backstage : .live
+            if
+                let startsAt = state.startsAt,
+                livestreamState == .backstage,
+                timerCancellable == nil {
+                timerCancellable = Timer
+                    .publish(every: 1, on: .main, in: .default)
+                    .autoconnect()
+                    .sinkTask { @MainActor _ in
+                        countdown = startsAt.timeIntervalSinceNow
+                        if countdown <= 0 {
+                            stopTimer()
+                            countdown = 0
+                        }
+                    }
+            } else if livestreamState == .live {
+                stopTimer()
+            }
+        }
+        .onChange(of: controlsShown) { _ in
+            if controlsShown {
+                controlsTask?.cancel()
+                controlsTask = Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                    try? Task.checkCancellation()
+                    if !streamPaused {
+                        self.controlsShown = false
+                    }
+                }
+            }
+        }
         .onAppear {
             switch joinPolicy {
             case .none:
                 break
             case .auto:
-                viewModel.joinLivestream()
+                joinLivestream()
             }
         }
         .onDisappear {
@@ -109,31 +188,84 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             case .none:
                 break
             case .auto:
-                viewModel.leaveLivestream()
+                leaveLivestream()
             }
         }
     }
-
+    
+    func toggleAudioOutput() {
+        Task {
+            do {
+                if !muted {
+                    try await call.speaker.disableAudioOutput()
+                } else {
+                    try await call.speaker.enableAudioOutput()
+                }
+                muted.toggle()
+            } catch {
+                log.error(error)
+            }
+        }
+        .store(in: cancellables)
+    }
+    
+    func muteLivestreamOnJoin() {
+        guard !mutedOnJoin else { return }
+        Task {
+            do {
+                try await call.speaker.disableAudioOutput()
+                mutedOnJoin = true
+            } catch {
+                log.error(error)
+            }
+        }
+        .store(in: cancellables)
+    }
+    
+    func stopTimer() {
+        timerCancellable?.cancel()
+        timerCancellable = nil
+    }
+    
     // MARK: - Private
-
+    
     @ViewBuilder
     private var errorView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
         Text(L10n.Call.Livestream.error)
+            .multilineTextAlignment(.center)
+            .foregroundColor(colors.livestreamText)
     }
-
+    
     @ViewBuilder
     private var loadingView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
         ProgressView()
     }
-
+    
     @ViewBuilder
     private var notStartedView: some View {
-        Color(colors.callBackground).ignoresSafeArea()
-        Text(L10n.Call.Livestream.notStarted)
+        VStack(spacing: 16) {
+            if countdown > 0 {
+                Text(L10n.Call.Livestream.countdown)
+                Text(formatter.format(countdown) ?? "")
+                    .font(.title.monospacedDigit())
+                    .bold()
+            } else {
+                Text(L10n.Call.Livestream.notStarted)
+                    .multilineTextAlignment(.center)
+            }
+            if let session = state.session {
+                let waitingCount = session.participants.count
+                if waitingCount > 0 {
+                    Text("\(waitingCount) \(L10n.Call.Livestream.earlyParticipants)")
+                        .font(.subheadline)
+                        .foregroundColor(Color(colors.textLowEmphasis))
+                }
+            }
+        }
+        .foregroundColor(colors.livestreamText)
+        .padding()
     }
-
+    
     @ViewBuilder
     private var videoRenderer: some View {
         GeometryReader { reader in
@@ -144,35 +276,34 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     availableFrame: reader.frame(in: .global),
                     contentMode: .scaleAspectFit,
                     customData: [:],
-                    call: viewModel.call
+                    call: call
                 )
                 .onTapGesture {
-                    viewModel.update(controlsShown: true)
+                    controlsShown = true
                 }
                 .overlay(
-                    viewModel.controlsShown ? LivestreamPlayPauseButton(
-                        viewModel: viewModel
+                    controlsShown ? LivestreamPlayPauseButton(
+                        streamPaused: $streamPaused
                     ) {
-                        participant.track?.isEnabled =
-                            !viewModel.streamPaused
-                        if !viewModel.streamPaused {
-                            viewModel.update(controlsShown: false)
+                        participant.track?.isEnabled = !streamPaused
+                        if !streamPaused {
+                            controlsShown = false
                         }
                     } : nil
                 )
             }
         }
-        .onChange(of: viewModel.fullScreen) { onFullScreenStateChange?($0) }
+        .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
     }
-
+    
     @ViewBuilder
     private var livestreamControls: some View {
-        if viewModel.controlsShown || !viewModel.fullScreen {
+        if controlsShown || !fullScreen {
             VStack {
                 Spacer()
                 HStack(spacing: 8) {
                     LiveIndicator()
-                    if viewModel.showParticipantCount {
+                    if showParticipantCount {
                         LivestreamParticipantsView(
                             participantsCount:
                             Int(state.participantCount)
@@ -180,23 +311,20 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     }
                     Spacer()
                     LivestreamButton(
-                        imageName: !viewModel.muted
+                        imageName: !muted
                             ? "speaker.wave.2.fill"
                             : "speaker.slash.fill"
                     ) {
-                        viewModel.toggleAudioOutput()
+                        toggleAudioOutput()
                     }
                     LivestreamButton(imageName: "viewfinder") {
-                        viewModel.update(
-                            fullScreen:
-                            !viewModel.fullScreen
-                        )
+                        fullScreen.toggle()
                     }
                     if showsLeaveCallButton {
                         LivestreamButton(
                             imageName: "phone.down.fill"
                         ) {
-                            viewModel.leaveLivestream()
+                            leaveLivestream()
                         }
                     }
                 }
@@ -208,11 +336,31 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 .foregroundColor(colors.livestreamCallControlsColor)
                 .overlay(
                     LivestreamDurationView(
-                        duration: viewModel.duration(from: state)
+                        duration: formatter.format(state.duration)
                     )
                 )
             }
         }
+    }
+    
+    func joinLivestream() {
+        Task {
+            do {
+                livestreamState = .joining
+                try await call.join(callSettings: CallSettings(audioOn: false, videoOn: false))
+                livestreamState = call.state.backstage ? .backstage : .live
+            } catch {
+                livestreamState = .error
+                log.error("Error joining livestream")
+            }
+        }
+        .store(in: cancellables)
+    }
+    
+    func leaveLivestream() {
+        call.leave()
+        cancellables.removeAll()
+        livestreamState = .initial
     }
 }
 
@@ -235,15 +383,15 @@ struct LivestreamPlayPauseButton: View {
     
     @Injected(\.colors) var colors
     
-    @ObservedObject var viewModel: LivestreamPlayerViewModel
+    @Binding var streamPaused: Bool
     var trackUpdate: () -> Void
     
     var body: some View {
         Button {
-            viewModel.update(streamPaused: !viewModel.streamPaused)
+            streamPaused = !streamPaused
             trackUpdate()
         } label: {
-            Image(systemName: viewModel.streamPaused ? "play.fill" : "pause.fill")
+            Image(systemName: streamPaused ? "play.fill" : "pause.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 60)
@@ -291,7 +439,7 @@ struct LivestreamDurationView: View {
 struct LivestreamButton: View {
     
     @Injected(\.colors) var colors
-
+    
     private let buttonSize: CGFloat = 32
     
     var imageName: String
@@ -310,5 +458,24 @@ struct LivestreamButton: View {
                 .cornerRadius(8)
         }
         .padding(.horizontal, 2)
+    }
+}
+
+enum LivestreamState {
+    case initial
+    case backstage
+    case live
+    case error
+    case joining
+}
+
+extension LivestreamState {
+    var canJoinCall: Bool {
+        switch self {
+        case .backstage, .error, .initial:
+            return true
+        default:
+            return false
+        }
     }
 }

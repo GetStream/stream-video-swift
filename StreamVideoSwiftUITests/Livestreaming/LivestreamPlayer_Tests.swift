@@ -9,14 +9,16 @@ import SnapshotTesting
 import XCTest
 
 final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
-
+    
     private let callId = "test"
     private let callType = "livestream"
-
+    
     @MainActor
     func test_livestreamPlayer_snapshot() async throws {
         // Given
-        let player = LivestreamPlayer(type: callType, id: callId)
+        let call = streamVideo.call(callType: callType, callId: callId)
+        call.state.backstage = false
+        let player = LivestreamPlayer(call: call, joinPolicy: .none)
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
@@ -26,7 +28,9 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     @MainActor
     func test_livestreamPlayer_snapshotHideParticipantCount() async throws {
         // Given
-        let player = LivestreamPlayer(type: callType, id: callId, showParticipantCount: false)
+        let call = streamVideo.call(callType: callType, callId: callId)
+        call.state.backstage = false
+        let player = LivestreamPlayer(call: call, showParticipantCount: false, joinPolicy: .none)
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
@@ -34,93 +38,53 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
     
     @MainActor
-    func test_livestreamPlayerVM_durationSeconds() {
+    func test_livestreamPlayer_backstageStartsAt() async throws {
         // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
-        let callState = CallState()
-        callState.duration = 5
-        
-        // When
-        let duration = viewModel.duration(from: callState)
+        let countdown: TimeInterval = 120
+        let call = streamVideo.call(callType: callType, callId: callId)
+        call.state.backstage = true
+        call.state.startsAt = Date(timeIntervalSinceNow: countdown)
+        let player = LivestreamPlayer(call: call, countdown: countdown, joinPolicy: .none)
+            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        XCTAssertEqual(duration, "5")
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
     @MainActor
-    func test_livestreamPlayerVM_durationMinutes() {
+    func test_livestreamPlayer_backstageStartsAtWithParticipants() async throws {
         // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
-        let callState = CallState()
-        callState.duration = 65
-        
-        // When
-        let duration = viewModel.duration(from: callState)
+        let countdown: TimeInterval = 120
+        let call = streamVideo.call(callType: callType, callId: callId)
+        call.state.backstage = true
+        call.state.startsAt = Date(timeIntervalSinceNow: countdown)
+        call.state.session = CallSessionResponse.dummy(participants: [.dummy(), .dummy()])
+        let player = LivestreamPlayer(call: call, countdown: countdown, joinPolicy: .none)
+            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        XCTAssertEqual(duration, "1:05")
-    }
-
-    @MainActor
-    func test_livestreamPlayerVM_durationHours() {
-        // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
-        let callState = CallState()
-        callState.duration = 3605
-        
-        // When
-        let duration = viewModel.duration(from: callState)
-        
-        // Then
-        XCTAssertEqual(duration, "1:00:05")
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
     @MainActor
-    func test_livestreamPlayerVM_durationEmpty() {
+    func test_livestreamPlayer_errorState() async throws {
         // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
-        let callState = CallState()
-        
-        // When
-        let duration = viewModel.duration(from: callState)
+        let call = streamVideo.call(callType: callType, callId: callId)
+        let player = LivestreamPlayer(call: call, livestreamState: .error, joinPolicy: .none)
+            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        XCTAssertNil(duration)
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
     @MainActor
-    func test_livestreamPlayerVM_updateFullScreen() {
+    func test_livestreamPlayer_joiningState() async throws {
         // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
-        
-        // When
-        viewModel.update(fullScreen: true)
+        let call = streamVideo.call(callType: callType, callId: callId)
+        let player = LivestreamPlayer(call: call, livestreamState: .joining, joinPolicy: .none)
+            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        XCTAssertEqual(viewModel.fullScreen, true)
-    }
-    
-    @MainActor
-    func test_livestreamPlayerVM_updateControlsShown() {
-        // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
-        
-        // When
-        viewModel.update(controlsShown: false)
-        
-        // Then
-        XCTAssertEqual(viewModel.controlsShown, false)
-    }
-    
-    @MainActor
-    func test_livestreamPlayerVM_pauseStream() {
-        // Given
-        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
-        
-        // When
-        viewModel.update(streamPaused: true)
-        
-        // Then
-        XCTAssertEqual(viewModel.streamPaused, true)
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
 }
