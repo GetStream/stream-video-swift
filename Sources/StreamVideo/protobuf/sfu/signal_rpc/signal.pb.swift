@@ -157,62 +157,102 @@ struct Stream_Video_Sfu_Signal_SendStatsRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var sessionID: String = String()
+  var sessionID: String {
+    get {return _storage._sessionID}
+    set {_uniqueStorage()._sessionID = newValue}
+  }
 
-  var subscriberStats: String = String()
+  var subscriberStats: String {
+    get {return _storage._subscriberStats}
+    set {_uniqueStorage()._subscriberStats = newValue}
+  }
 
-  var publisherStats: String = String()
+  var publisherStats: String {
+    get {return _storage._publisherStats}
+    set {_uniqueStorage()._publisherStats = newValue}
+  }
 
-  var webrtcVersion: String = String()
+  var webrtcVersion: String {
+    get {return _storage._webrtcVersion}
+    set {_uniqueStorage()._webrtcVersion = newValue}
+  }
 
-  var sdk: String = String()
+  var sdk: String {
+    get {return _storage._sdk}
+    set {_uniqueStorage()._sdk = newValue}
+  }
 
-  var sdkVersion: String = String()
+  var sdkVersion: String {
+    get {return _storage._sdkVersion}
+    set {_uniqueStorage()._sdkVersion = newValue}
+  }
 
   var audioDevices: Stream_Video_Sfu_Models_InputDevices {
-    get {return _audioDevices ?? Stream_Video_Sfu_Models_InputDevices()}
-    set {_audioDevices = newValue}
+    get {return _storage._audioDevices ?? Stream_Video_Sfu_Models_InputDevices()}
+    set {_uniqueStorage()._audioDevices = newValue}
   }
   /// Returns true if `audioDevices` has been explicitly set.
-  var hasAudioDevices: Bool {return self._audioDevices != nil}
+  var hasAudioDevices: Bool {return _storage._audioDevices != nil}
   /// Clears the value of `audioDevices`. Subsequent reads from it will return its default value.
-  mutating func clearAudioDevices() {self._audioDevices = nil}
+  mutating func clearAudioDevices() {_uniqueStorage()._audioDevices = nil}
 
   var videoDevices: Stream_Video_Sfu_Models_InputDevices {
-    get {return _videoDevices ?? Stream_Video_Sfu_Models_InputDevices()}
-    set {_videoDevices = newValue}
+    get {return _storage._videoDevices ?? Stream_Video_Sfu_Models_InputDevices()}
+    set {_uniqueStorage()._videoDevices = newValue}
   }
   /// Returns true if `videoDevices` has been explicitly set.
-  var hasVideoDevices: Bool {return self._videoDevices != nil}
+  var hasVideoDevices: Bool {return _storage._videoDevices != nil}
   /// Clears the value of `videoDevices`. Subsequent reads from it will return its default value.
-  mutating func clearVideoDevices() {self._videoDevices = nil}
+  mutating func clearVideoDevices() {_uniqueStorage()._videoDevices = nil}
 
-  var deviceState: Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState? = nil
+  var deviceState: OneOf_DeviceState? {
+    get {return _storage._deviceState}
+    set {_uniqueStorage()._deviceState = newValue}
+  }
 
   var android: Stream_Video_Sfu_Models_AndroidState {
     get {
-      if case .android(let v)? = deviceState {return v}
+      if case .android(let v)? = _storage._deviceState {return v}
       return Stream_Video_Sfu_Models_AndroidState()
     }
-    set {deviceState = .android(newValue)}
+    set {_uniqueStorage()._deviceState = .android(newValue)}
   }
 
   var apple: Stream_Video_Sfu_Models_AppleState {
     get {
-      if case .apple(let v)? = deviceState {return v}
+      if case .apple(let v)? = _storage._deviceState {return v}
       return Stream_Video_Sfu_Models_AppleState()
     }
-    set {deviceState = .apple(newValue)}
+    set {_uniqueStorage()._deviceState = .apple(newValue)}
   }
 
   var telemetry: Stream_Video_Sfu_Signal_Telemetry {
-    get {return _telemetry ?? Stream_Video_Sfu_Signal_Telemetry()}
-    set {_telemetry = newValue}
+    get {return _storage._telemetry ?? Stream_Video_Sfu_Signal_Telemetry()}
+    set {_uniqueStorage()._telemetry = newValue}
   }
   /// Returns true if `telemetry` has been explicitly set.
-  var hasTelemetry: Bool {return self._telemetry != nil}
+  var hasTelemetry: Bool {return _storage._telemetry != nil}
   /// Clears the value of `telemetry`. Subsequent reads from it will return its default value.
-  mutating func clearTelemetry() {self._telemetry = nil}
+  mutating func clearTelemetry() {_uniqueStorage()._telemetry = nil}
+
+  var rtmp: Stream_Video_Sfu_Models_RTMPIngress {
+    get {return _storage._rtmp ?? Stream_Video_Sfu_Models_RTMPIngress()}
+    set {_uniqueStorage()._rtmp = newValue}
+  }
+  /// Returns true if `rtmp` has been explicitly set.
+  var hasRtmp: Bool {return _storage._rtmp != nil}
+  /// Clears the value of `rtmp`. Subsequent reads from it will return its default value.
+  mutating func clearRtmp() {_uniqueStorage()._rtmp = nil}
+
+  var subscriberRtcStats: String {
+    get {return _storage._subscriberRtcStats}
+    set {_uniqueStorage()._subscriberRtcStats = newValue}
+  }
+
+  var publisherRtcStats: String {
+    get {return _storage._publisherRtcStats}
+    set {_uniqueStorage()._publisherRtcStats = newValue}
+  }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -242,9 +282,7 @@ struct Stream_Video_Sfu_Signal_SendStatsRequest {
 
   init() {}
 
-  fileprivate var _audioDevices: Stream_Video_Sfu_Models_InputDevices? = nil
-  fileprivate var _videoDevices: Stream_Video_Sfu_Models_InputDevices? = nil
-  fileprivate var _telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Stream_Video_Sfu_Signal_SendStatsResponse {
@@ -826,111 +864,185 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     9: .same(proto: "android"),
     10: .same(proto: "apple"),
     11: .same(proto: "telemetry"),
+    12: .same(proto: "rtmp"),
+    13: .standard(proto: "subscriber_rtc_stats"),
+    14: .standard(proto: "publisher_rtc_stats"),
   ]
 
+fileprivate class _StorageClass: @unchecked Sendable {
+    var _sessionID: String = String()
+    var _subscriberStats: String = String()
+    var _publisherStats: String = String()
+    var _webrtcVersion: String = String()
+    var _sdk: String = String()
+    var _sdkVersion: String = String()
+    var _audioDevices: Stream_Video_Sfu_Models_InputDevices? = nil
+    var _videoDevices: Stream_Video_Sfu_Models_InputDevices? = nil
+    var _deviceState: Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState?
+    var _telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil
+    var _rtmp: Stream_Video_Sfu_Models_RTMPIngress? = nil
+    var _subscriberRtcStats: String = String()
+    var _publisherRtcStats: String = String()
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _sessionID = source._sessionID
+      _subscriberStats = source._subscriberStats
+      _publisherStats = source._publisherStats
+      _webrtcVersion = source._webrtcVersion
+      _sdk = source._sdk
+      _sdkVersion = source._sdkVersion
+      _audioDevices = source._audioDevices
+      _videoDevices = source._videoDevices
+      _deviceState = source._deviceState
+      _telemetry = source._telemetry
+      _rtmp = source._rtmp
+      _subscriberRtcStats = source._subscriberRtcStats
+      _publisherRtcStats = source._publisherRtcStats
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.subscriberStats) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.publisherStats) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.webrtcVersion) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self.sdk) }()
-      case 6: try { try decoder.decodeSingularStringField(value: &self.sdkVersion) }()
-      case 7: try { try decoder.decodeSingularMessageField(value: &self._audioDevices) }()
-      case 8: try { try decoder.decodeSingularMessageField(value: &self._videoDevices) }()
-      case 9: try {
-        var v: Stream_Video_Sfu_Models_AndroidState?
-        var hadOneofValue = false
-        if let current = self.deviceState {
-          hadOneofValue = true
-          if case .android(let m) = current {v = m}
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularStringField(value: &_storage._sessionID) }()
+        case 2: try { try decoder.decodeSingularStringField(value: &_storage._subscriberStats) }()
+        case 3: try { try decoder.decodeSingularStringField(value: &_storage._publisherStats) }()
+        case 4: try { try decoder.decodeSingularStringField(value: &_storage._webrtcVersion) }()
+        case 5: try { try decoder.decodeSingularStringField(value: &_storage._sdk) }()
+        case 6: try { try decoder.decodeSingularStringField(value: &_storage._sdkVersion) }()
+        case 7: try { try decoder.decodeSingularMessageField(value: &_storage._audioDevices) }()
+        case 8: try { try decoder.decodeSingularMessageField(value: &_storage._videoDevices) }()
+        case 9: try {
+          var v: Stream_Video_Sfu_Models_AndroidState?
+          var hadOneofValue = false
+          if let current = _storage._deviceState {
+            hadOneofValue = true
+            if case .android(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {
+            if hadOneofValue {try decoder.handleConflictingOneOf()}
+            _storage._deviceState = .android(v)
+          }
+        }()
+        case 10: try {
+          var v: Stream_Video_Sfu_Models_AppleState?
+          var hadOneofValue = false
+          if let current = _storage._deviceState {
+            hadOneofValue = true
+            if case .apple(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {
+            if hadOneofValue {try decoder.handleConflictingOneOf()}
+            _storage._deviceState = .apple(v)
+          }
+        }()
+        case 11: try { try decoder.decodeSingularMessageField(value: &_storage._telemetry) }()
+        case 12: try { try decoder.decodeSingularMessageField(value: &_storage._rtmp) }()
+        case 13: try { try decoder.decodeSingularStringField(value: &_storage._subscriberRtcStats) }()
+        case 14: try { try decoder.decodeSingularStringField(value: &_storage._publisherRtcStats) }()
+        default: break
         }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.deviceState = .android(v)
-        }
-      }()
-      case 10: try {
-        var v: Stream_Video_Sfu_Models_AppleState?
-        var hadOneofValue = false
-        if let current = self.deviceState {
-          hadOneofValue = true
-          if case .apple(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.deviceState = .apple(v)
-        }
-      }()
-      case 11: try { try decoder.decodeSingularMessageField(value: &self._telemetry) }()
-      default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    if !self.sessionID.isEmpty {
-      try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 1)
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      if !_storage._sessionID.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._sessionID, fieldNumber: 1)
+      }
+      if !_storage._subscriberStats.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._subscriberStats, fieldNumber: 2)
+      }
+      if !_storage._publisherStats.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._publisherStats, fieldNumber: 3)
+      }
+      if !_storage._webrtcVersion.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._webrtcVersion, fieldNumber: 4)
+      }
+      if !_storage._sdk.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._sdk, fieldNumber: 5)
+      }
+      if !_storage._sdkVersion.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._sdkVersion, fieldNumber: 6)
+      }
+      try { if let v = _storage._audioDevices {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+      } }()
+      try { if let v = _storage._videoDevices {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+      } }()
+      switch _storage._deviceState {
+      case .android?: try {
+        guard case .android(let v)? = _storage._deviceState else { preconditionFailure() }
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
+      }()
+      case .apple?: try {
+        guard case .apple(let v)? = _storage._deviceState else { preconditionFailure() }
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
+      }()
+      case nil: break
+      }
+      try { if let v = _storage._telemetry {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
+      } }()
+      try { if let v = _storage._rtmp {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
+      } }()
+      if !_storage._subscriberRtcStats.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._subscriberRtcStats, fieldNumber: 13)
+      }
+      if !_storage._publisherRtcStats.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._publisherRtcStats, fieldNumber: 14)
+      }
     }
-    if !self.subscriberStats.isEmpty {
-      try visitor.visitSingularStringField(value: self.subscriberStats, fieldNumber: 2)
-    }
-    if !self.publisherStats.isEmpty {
-      try visitor.visitSingularStringField(value: self.publisherStats, fieldNumber: 3)
-    }
-    if !self.webrtcVersion.isEmpty {
-      try visitor.visitSingularStringField(value: self.webrtcVersion, fieldNumber: 4)
-    }
-    if !self.sdk.isEmpty {
-      try visitor.visitSingularStringField(value: self.sdk, fieldNumber: 5)
-    }
-    if !self.sdkVersion.isEmpty {
-      try visitor.visitSingularStringField(value: self.sdkVersion, fieldNumber: 6)
-    }
-    try { if let v = self._audioDevices {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-    } }()
-    try { if let v = self._videoDevices {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
-    } }()
-    switch self.deviceState {
-    case .android?: try {
-      guard case .android(let v)? = self.deviceState else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
-    }()
-    case .apple?: try {
-      guard case .apple(let v)? = self.deviceState else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
-    }()
-    case nil: break
-    }
-    try { if let v = self._telemetry {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
-    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Signal_SendStatsRequest, rhs: Stream_Video_Sfu_Signal_SendStatsRequest) -> Bool {
-    if lhs.sessionID != rhs.sessionID {return false}
-    if lhs.subscriberStats != rhs.subscriberStats {return false}
-    if lhs.publisherStats != rhs.publisherStats {return false}
-    if lhs.webrtcVersion != rhs.webrtcVersion {return false}
-    if lhs.sdk != rhs.sdk {return false}
-    if lhs.sdkVersion != rhs.sdkVersion {return false}
-    if lhs._audioDevices != rhs._audioDevices {return false}
-    if lhs._videoDevices != rhs._videoDevices {return false}
-    if lhs.deviceState != rhs.deviceState {return false}
-    if lhs._telemetry != rhs._telemetry {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._sessionID != rhs_storage._sessionID {return false}
+        if _storage._subscriberStats != rhs_storage._subscriberStats {return false}
+        if _storage._publisherStats != rhs_storage._publisherStats {return false}
+        if _storage._webrtcVersion != rhs_storage._webrtcVersion {return false}
+        if _storage._sdk != rhs_storage._sdk {return false}
+        if _storage._sdkVersion != rhs_storage._sdkVersion {return false}
+        if _storage._audioDevices != rhs_storage._audioDevices {return false}
+        if _storage._videoDevices != rhs_storage._videoDevices {return false}
+        if _storage._deviceState != rhs_storage._deviceState {return false}
+        if _storage._telemetry != rhs_storage._telemetry {return false}
+        if _storage._rtmp != rhs_storage._rtmp {return false}
+        if _storage._subscriberRtcStats != rhs_storage._subscriberRtcStats {return false}
+        if _storage._publisherRtcStats != rhs_storage._publisherRtcStats {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
