@@ -38,7 +38,7 @@ final class StatelessAudioOutputIconView_Tests: StreamVideoUITestCase, @unchecke
 
     @MainActor
     private func makeSubject(
-        _ speakerOn: Bool,
+        _ audioOutputOn: Bool,
         actionHandler: (() -> Void)? = nil,
         file: StaticString = #file,
         line: UInt = #line
@@ -51,13 +51,8 @@ final class StatelessAudioOutputIconView_Tests: StreamVideoUITestCase, @unchecke
             file: file,
             line: line
         )
-        call.state.update(
-            from: .dummy(
-                settings: .dummy(
-                    audio: .dummy(speakerDefaultOn: speakerOn)
-                )
-            )
-        )
+
+        call.state.callSettings = .init(audioOutputOn: audioOutputOn)
 
         return .init(call: call, actionHandler: actionHandler)
     }
