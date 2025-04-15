@@ -8,19 +8,31 @@ import XCTest
 
 final class PublisherAsyncStreamTests: XCTestCase, @unchecked Sendable {
 
+    private final class ReceivedValuesStorage<Element>: @unchecked Sendable {
+        private var values: [Element] = []
+
+        func append(_ element: Element) {
+            values.append(element)
+        }
+
+        var count: Int { values.count }
+
+        var array: [Element] { values }
+    }
+
     func testPublisherToAsyncStream() async {
         // Given
+        let storage = ReceivedValuesStorage<Int>()
         let publisher = PassthroughSubject<Int, Never>()
         let asyncStream = publisher.eraseAsAsyncStream()
         
         // When
         let expectation = XCTestExpectation(description: "Receive values from async stream")
-        var receivedValues: [Int] = []
-        
+
         Task {
             for await value in asyncStream {
-                receivedValues.append(value)
-                if receivedValues.count == 3 {
+                storage.append(value)
+                if storage.count == 3 {
                     expectation.fulfill()
                 }
             }
@@ -32,21 +44,21 @@ final class PublisherAsyncStreamTests: XCTestCase, @unchecked Sendable {
         publisher.send(3)
         
         await fulfillment(of: [expectation], timeout: 1.0)
-        XCTAssertEqual(receivedValues, [1, 2, 3])
+        XCTAssertEqual(storage.array, [1, 2, 3])
     }
     
     func testPublisherToAsyncStreamWithCompletion() async {
         // Given
+        let storage = ReceivedValuesStorage<Int>()
         let publisher = PassthroughSubject<Int, Never>()
         let asyncStream = publisher.eraseAsAsyncStream()
         
         // When
         let expectation = XCTestExpectation(description: "Stream completes")
-        var receivedValues: [Int] = []
         
         Task {
             for await value in asyncStream {
-                receivedValues.append(value)
+                storage.append(value)
             }
             expectation.fulfill()
         }
@@ -57,21 +69,21 @@ final class PublisherAsyncStreamTests: XCTestCase, @unchecked Sendable {
         publisher.send(completion: .finished)
         
         await fulfillment(of: [expectation], timeout: 1.0)
-        XCTAssertEqual(receivedValues, [1, 2])
+        XCTAssertEqual(storage.array, [1, 2])
     }
     
     func testPublisherToAsyncStreamWithCancellation() async {
         // Given
+        let storage = ReceivedValuesStorage<Int>()
         let publisher = PassthroughSubject<Int, Never>()
         let asyncStream = publisher.eraseAsAsyncStream()
         
         // When
         let expectation = XCTestExpectation(description: "Stream is cancelled")
-        var receivedValues: [Int] = []
         
         let task = Task {
             for await value in asyncStream {
-                receivedValues.append(value)
+                storage.append(value)
             }
             expectation.fulfill()
         }
@@ -82,6 +94,6 @@ final class PublisherAsyncStreamTests: XCTestCase, @unchecked Sendable {
         task.cancel()
         
         await fulfillment(of: [expectation], timeout: 1.0)
-        XCTAssertEqual(receivedValues, [1, 2])
+        XCTAssertEqual(storage.array, [1, 2])
     }
 }
