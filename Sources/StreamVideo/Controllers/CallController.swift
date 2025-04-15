@@ -8,6 +8,10 @@ import StreamWebRTC
 
 /// Class that handles a particular call.
 class CallController: @unchecked Sendable {
+    private enum DisposableKey: String {
+        case participantsCountUpdatesEvent
+        case currentUserBlocked
+    }
 
     private lazy var webRTCCoordinator = webRTCCoordinatorFactory.buildCoordinator(
         user: user,
@@ -577,7 +581,7 @@ class CallController: @unchecked Sendable {
         case .joined:
             /// Once connected we should stop listening for CallSessionParticipantCountsUpdatedEvent
             /// updates and only rely on the healthCheck event.
-            disposableBag.remove("subscribeToParticipantsCountUpdatesEvent")
+            disposableBag.remove(DisposableKey.participantsCountUpdatesEvent.rawValue)
 
             call?.update(reconnectionStatus: .connected)
         case .error:
@@ -593,7 +597,7 @@ class CallController: @unchecked Sendable {
     }
 
     private func subscribeToParticipantsCountUpdatesEvent(_ call: Call?) {
-        disposableBag.remove("subscribeToParticipantsCountUpdatesEvent")
+        disposableBag.remove(DisposableKey.participantsCountUpdatesEvent.rawValue)
 
         guard let call else { return }
 
@@ -618,11 +622,11 @@ class CallController: @unchecked Sendable {
                     call?.state.anonymousParticipantCount = 0
                 }
             }
-            .store(in: disposableBag, key: "subscribeToParticipantsCountUpdatesEvent")
+            .store(in: disposableBag, key: DisposableKey.participantsCountUpdatesEvent.rawValue)
     }
 
     private func subscribeToCurrentUserBlockedState(_ call: Call?) {
-        disposableBag.remove("current-user-blocked")
+        disposableBag.remove(DisposableKey.currentUserBlocked.rawValue)
         guard let call else { return }
         let currentUser = user
         Task { @MainActor [weak self] in
@@ -642,7 +646,7 @@ class CallController: @unchecked Sendable {
                         .stateMachine
                         .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
                 }
-                .store(in: disposableBag, key: "current-user-blocked")
+                .store(in: disposableBag, key: DisposableKey.currentUserBlocked.rawValue)
         }
     }
 
