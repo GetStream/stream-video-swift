@@ -24,7 +24,7 @@ public extension Publisher where Output: Sendable {
             )
 
             continuation.onTermination = { @Sendable _ in
-                _ = cancellable
+                cancellable.cancel()
             }
         }
     }
