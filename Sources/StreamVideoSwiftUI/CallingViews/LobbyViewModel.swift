@@ -11,9 +11,8 @@ import SwiftUI
 public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     private let camera: Any
     private var imagesTask: Task<Void, Never>?
-    private var joinEventsTask: Task<Void, Never>?
-    private var leaveEventsTask: Task<Void, Never>?
-    
+    private let disposableBag = DisposableBag()
+
     @Published public var viewfinderImage: Image?
     @Published public var participants = [User]()
     
@@ -71,10 +70,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     }
     
     public func cleanUp() {
-        joinEventsTask?.cancel()
-        joinEventsTask = nil
-        leaveEventsTask?.cancel()
-        leaveEventsTask = nil
+        disposableBag.removeAll()
     }
     
     // MARK: - private
@@ -93,20 +89,25 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     }
     
     private func subscribeForCallJoinUpdates() {
-        joinEventsTask = Task {
-            for await event in call.subscribe(for: CallSessionParticipantJoinedEvent.self) {
-                let user = event.participant.user.toUser
-                withAnimation {
-                    participants.append(user)
+        call
+            .eventPublisher(for: CallSessionParticipantJoinedEvent.self)
+            .map(\.participant.user.toUser)
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] user in
+                withAnimation { [weak self] in
+                    self?.participants.append(user)
                 }
             }
-        }
+            .store(in: disposableBag)
     }
     
     private func subscribeForCallLeaveUpdates() {
-        leaveEventsTask = Task {
-            for await event in call.subscribe(for: CallSessionParticipantLeftEvent.self) {
-                let user = event.participant.user.toUser
+        call
+            .eventPublisher(for: CallSessionParticipantLeftEvent.self)
+            .map(\.participant.user.toUser)
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] user in
+                guard let self else {
+                    return
+                }
                 var indexToRemove: Int?
                 for (index, participant) in participants.enumerated() {
                     if participant.id == user.id {
@@ -114,13 +115,13 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
                         break
                     }
                 }
-                withAnimation {
+                withAnimation { [weak self] in
                     if let indexToRemove {
-                        participants.remove(at: indexToRemove)
+                        self?.participants.remove(at: indexToRemove)
                     }
                 }
             }
-        }
+            .store(in: disposableBag)
     }
 }
 

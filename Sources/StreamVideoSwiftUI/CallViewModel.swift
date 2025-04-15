@@ -44,10 +44,10 @@ open class CallViewModel: ObservableObject {
                     guard let self else { return }
                     switch reconnectionStatus {
                     case .reconnecting where callingState != .reconnecting:
-                        callingState = .reconnecting
+                        setCallingState(.reconnecting)
                     default:
                         if callingState != .inCall, callingState != .outgoing {
-                            callingState = .inCall
+                            setCallingState(.inCall)
                         }
                     }
                 })
@@ -222,7 +222,7 @@ open class CallViewModel: ObservableObject {
 
         subscribeToCallEvents()
         subscribeToApplicationLifecycleEvents()
-        
+
         // As we are setting the value on init, the `didSet` won't trigger, thus
         // we are firing it manually.
         // For any subsequent changes, `didSet` will trigger as expected.
@@ -343,7 +343,7 @@ open class CallViewModel: ObservableObject {
         video: Bool? = nil
     ) {
         outgoingCallMembers = members
-        callingState = ring ? .outgoing : .joining
+        setCallingState(ring ? .outgoing : .joining)
         let membersRequest: [MemberRequest]? = members.isEmpty
             ? nil
             : members.map(\.toMemberRequest)
@@ -382,7 +382,7 @@ open class CallViewModel: ObservableObject {
                     startTimer(timeout: timeoutSeconds)
                 } catch {
                     self.error = error
-                    callingState = .idle
+                    setCallingState(.idle)
                     self.call = nil
                 }
             }
@@ -398,7 +398,7 @@ open class CallViewModel: ObservableObject {
         callId: String,
         customData: [String: RawJSON]? = nil
     ) {
-        callingState = .joining
+        setCallingState(.joining)
         enterCall(
             callType: callType,
             callId: callId,
@@ -418,7 +418,7 @@ open class CallViewModel: ObservableObject {
         members: [Member]
     ) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
-        callingState = .lobby(lobbyInfo)
+        setCallingState(.lobby(lobbyInfo))
         if !localCallSettingsChange {
             Task {
                 do {
@@ -454,7 +454,7 @@ open class CallViewModel: ObservableObject {
                 )
             } catch {
                 self.error = error
-                callingState = .idle
+                setCallingState(.idle)
                 self.call = nil
             }
         }
@@ -482,7 +482,7 @@ open class CallViewModel: ObservableObject {
                 """
             )
             _ = try? await call.reject(reason: rejectionReason)
-            self.callingState = .idle
+            setCallingState(.idle)
         }
     }
 
@@ -546,12 +546,23 @@ open class CallViewModel: ObservableObject {
         self.participantsLayout = participantsLayout
     }
 
-    public func setActiveCall(_ call: Call?) {
-        if let call {
-            callingState = .inCall
+    public func setActiveCall(
+        _ call: Call?,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        log.debug(
+            "Will setActiveCall to cID:\(call?.cId ?? "-")",
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
+        if let call, (callingState != .inCall || self.call?.cId != call.cId) {
+            setCallingState(.inCall)
             self.call = call
-        } else {
-            callingState = .idle
+        } else if call == nil, callingState != .idle {
+            setCallingState(.idle)
             self.call = nil
         }
     }
@@ -563,6 +574,24 @@ open class CallViewModel: ObservableObject {
     }
 
     // MARK: - private
+
+    func setCallingState(
+        _ newValue: CallingState,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        guard callingState != newValue else {
+            return
+        }
+        log.debug(
+            "CallingState will be updated \(callingState) → \(newValue)",
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
+        callingState = newValue
+    }
 
     /// Leaves the current call.
     private func leaveCall() {
@@ -584,11 +613,11 @@ open class CallViewModel: ObservableObject {
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
-        callingState = .idle
+        setCallingState(.idle)
         isMinimized = false
         localVideoPrimary = false
         Task { await audioRecorder.stopRecording() }
-        
+
         // Reset the CallSettings so that the next Call will be joined
         // with either new overrides or the values provided from the API.
         callSettings = .init()
@@ -645,7 +674,7 @@ open class CallViewModel: ObservableObject {
             } catch {
                 log.error("Error starting a call", error: error)
                 self.error = error
-                callingState = .idle
+                setCallingState(.idle)
                 Task { await audioRecorder.stopRecording() }
                 enteringCallTask = nil
             }
@@ -658,8 +687,7 @@ open class CallViewModel: ObservableObject {
             self.call = nil
             return
         }
-        self.call = call
-        updateCallStateIfNeeded()
+        setActiveCall(call)
         log.debug("Started call")
     }
 
@@ -724,7 +752,7 @@ open class CallViewModel: ObservableObject {
                             let isAppActive = UIApplication.shared.applicationState == .active
                             // TODO: implement holding a call.
                             if callingState == .idle && isAppActive {
-                                callingState = .incoming(incomingCall)
+                                setCallingState(.incoming(incomingCall))
                             }
                         }
                     case .accepted:
@@ -764,11 +792,15 @@ open class CallViewModel: ObservableObject {
         switch callingState {
         case let .incoming(incomingCall)
             where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user
-            .id:
+            .id && enteringCallTask == nil:
             /// If the call that was accepted is the incoming call we are presenting, then we reject
             /// and set the activeCall to the current one in order to reset the callingState to
             /// inCall or idle.
             Task {
+                log
+                    .debug(
+                        "Will reject call as isEnteringCall:\(enteringCallTask != nil) isUserIDSameAsLoggedInUser:\(event.user?.id == streamVideo.user.id)"
+                    )
                 _ = try? await streamVideo
                     .call(callType: incomingCall.type, callId: incomingCall.id)
                     .reject()
@@ -823,17 +855,17 @@ open class CallViewModel: ObservableObject {
     private func updateCallStateIfNeeded() {
         if callingState == .outgoing {
             if !callParticipants.isEmpty {
-                callingState = .inCall
+                setCallingState(.inCall)
             }
             return
         }
         guard call != nil || !callParticipants.isEmpty else { return }
-        if callingState != .reconnecting {
-            callingState = .inCall
+        if callingState != .reconnecting, callingState != .inCall {
+            setCallingState(.inCall)
         } else {
             let shouldGoInCall = callParticipants.count > 1
-            if shouldGoInCall {
-                callingState = .inCall
+            if shouldGoInCall, callingState != .inCall {
+                setCallingState(.inCall)
             }
         }
     }
@@ -925,7 +957,7 @@ open class CallViewModel: ObservableObject {
 }
 
 /// The state of the call.
-public enum CallingState: Equatable {
+public enum CallingState: Equatable, CustomStringConvertible {
     /// Call is not started (idle state).
     case idle
     /// The user is in a waiting room.
@@ -940,6 +972,25 @@ public enum CallingState: Equatable {
     case inCall
     /// The user is trying to reconnect to a call.
     case reconnecting
+
+    public var description: String {
+        switch self {
+        case .idle:
+            return ".idle"
+        case let .lobby(lobbyInfo):
+            return ".lobby(type:\(lobbyInfo.callType), id:\(lobbyInfo.callId))"
+        case let .incoming(incomingCall):
+            return ".incoming(type:\(incomingCall.type), id:\(incomingCall.id))"
+        case .outgoing:
+            return ".outgoing"
+        case .joining:
+            return ".joining"
+        case .inCall:
+            return ".inCall"
+        case .reconnecting:
+            return ".reconnecting"
+        }
+    }
 }
 
 public struct LobbyInfo: Equatable {

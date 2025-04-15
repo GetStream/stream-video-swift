@@ -542,6 +542,113 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         } handler: { _ in }
     }
 
+    // MARK: - subscribeToParticipantsCountUpdatesEvent
+
+    @MainActor
+    func test_subscribeToParticipantsCountUpdatesEvent_whenCallIsNil_shouldNotSubscribe() async throws {
+        let call = Call.dummy(callController: subject)
+        subject.call = nil
+        await wait(for: 0.5)
+
+        call.onEvent(
+            .coordinatorEvent(
+                .typeCallSessionParticipantCountsUpdatedEvent(
+                    .init(
+                        anonymousParticipantCount: 10,
+                        callCid: call.cId,
+                        createdAt: .init(),
+                        participantsCountByRole: [:],
+                        sessionId: call.state.sessionId
+                    )
+                )
+            )
+        )
+
+        await wait(for: 0.5)
+        XCTAssertEqual(call.state.participantCount, 0)
+        XCTAssertEqual(call.state.anonymousParticipantCount, 0)
+    }
+
+    @MainActor
+    func test_subscribeToParticipantsCountUpdatesEvent_whenCallIsNotNil_shouldSubscribeAndUpdateParticipantCounts() async throws {
+        let call = Call.dummy(callController: subject)
+        await wait(for: 0.5)
+
+        call.onEvent(
+            .coordinatorEvent(
+                .typeCallSessionParticipantCountsUpdatedEvent(
+                    .init(
+                        anonymousParticipantCount: 5,
+                        callCid: call.cId,
+                        createdAt: .init(),
+                        participantsCountByRole: [
+                            "anonymous": 6,
+                            "user": 5
+                        ],
+                        sessionId: call.state.sessionId
+                    )
+                )
+            )
+        )
+
+        await wait(for: 0.5)
+        XCTAssertEqual(call.state.participantCount, 5)
+        XCTAssertEqual(call.state.anonymousParticipantCount, 5)
+    }
+
+    @MainActor
+    func test_subscribeToParticipantsCountUpdatesEvent_whenAnonymousCountIsZero_shouldUseRoleBasedCount() async throws {
+        let call = Call.dummy(callController: subject)
+        await wait(for: 0.5)
+
+        call.onEvent(
+            .coordinatorEvent(
+                .typeCallSessionParticipantCountsUpdatedEvent(
+                    .init(
+                        anonymousParticipantCount: 0,
+                        callCid: call.cId,
+                        createdAt: .init(),
+                        participantsCountByRole: [
+                            "anonymous": 6,
+                            "user": 5
+                        ],
+                        sessionId: call.state.sessionId
+                    )
+                )
+            )
+        )
+
+        await wait(for: 0.5)
+        XCTAssertEqual(call.state.participantCount, 5)
+        XCTAssertEqual(call.state.anonymousParticipantCount, 6)
+    }
+
+    @MainActor
+    func test_subscribeToParticipantsCountUpdatesEvent_whenNoAnonymousParticipants_shouldSetZeroAnonymousCount() async throws {
+        let call = Call.dummy(callController: subject)
+        await wait(for: 0.5)
+
+        call.onEvent(
+            .coordinatorEvent(
+                .typeCallSessionParticipantCountsUpdatedEvent(
+                    .init(
+                        anonymousParticipantCount: 0,
+                        callCid: call.cId,
+                        createdAt: .init(),
+                        participantsCountByRole: [
+                            "user": 5
+                        ],
+                        sessionId: call.state.sessionId
+                    )
+                )
+            )
+        )
+
+        await wait(for: 0.5)
+        XCTAssertEqual(call.state.participantCount, 5)
+        XCTAssertEqual(call.state.anonymousParticipantCount, 0)
+    }
+
     // MARK: - Private helpers
 
     private func assertTransitionToStage(
