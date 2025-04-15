@@ -8,6 +8,16 @@ import Foundation
 /// Handles the speaker state during a call.
 public final class SpeakerManager: ObservableObject, CallSettingsManager, @unchecked Sendable {
 
+    private struct Settings: Hashable {
+        var speakerOn: Bool
+        var audioOutputOn: Bool
+
+        init(_ callSettings: CallSettings) {
+            speakerOn = callSettings.speakerOn
+            audioOutputOn = callSettings.audioOutputOn
+        }
+    }
+
     @Published public internal(set) var status: CallSettingsStatus
     @Published public internal(set) var audioOutputStatus: CallSettingsStatus
 
@@ -96,8 +106,8 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
         call
             .state
             .$callSettings
+            .map { Settings($0) }
             .removeDuplicates()
-            .map { (speakerOn: $0.speakerOn, audioOutputOn: $0.audioOutputOn) }
             .log(.debug) { "\(typeOfSelf) callSettings updated speakerOn:\($0.speakerOn) audioOutputOn:\($0.audioOutputOn)." }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in

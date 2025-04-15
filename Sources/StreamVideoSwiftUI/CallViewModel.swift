@@ -424,7 +424,7 @@ open class CallViewModel: ObservableObject {
                 do {
                     let call = streamVideo.call(callType: callType, callId: callId)
                     let info = try await call.get()
-                    self.callSettings = info.call.settings.toCallSettings
+                    self.callSettings = .init(info.call.settings)
                 } catch {
                     log.error(error)
                 }

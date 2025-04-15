@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - Sound resources weren't loaded correctly when the SDK was linked via SPM. [#757](https://github.com/GetStream/stream-video-swift/pull/757)
+- Redefined the priorities by which dashboard audio settings will be applied. [#758](https://github.com/GetStream/stream-video-swift/pull/758)
 
 # [1.20.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.20.0)
 _April 07, 2025_

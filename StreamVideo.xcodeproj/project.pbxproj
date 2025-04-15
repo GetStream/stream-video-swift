@@ -209,6 +209,8 @@
 		40429D612C779B7000AC7FFF /* SFUSignalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689192C64F74F0054528A /* SFUSignalService.swift */; };
 		4045D9D52DAD35790077A660 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4045D9D42DAD35790077A660 /* Resource.swift */; };
 		4045D9DD2DAD5B110077A660 /* Resource_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4045D9DC2DAD5B110077A660 /* Resource_Tests.swift */; };
+		4045D9D92DAD4BD50077A660 /* CallSettingsResponse+SettingsPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4045D9D82DAD4BD50077A660 /* CallSettingsResponse+SettingsPriority.swift */; };
+		4045D9DB2DAD57570077A660 /* CallSettingsResponse+SettingsPriorityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4045D9DA2DAD57570077A660 /* CallSettingsResponse+SettingsPriorityTests.swift */; };
 		4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */; };
 		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
@@ -1701,6 +1703,8 @@
 		40429D5E2C779B3D00AC7FFF /* ScreenShareSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenShareSession.swift; sourceTree = "<group>"; };
 		4045D9D42DAD35790077A660 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		4045D9DC2DAD5B110077A660 /* Resource_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource_Tests.swift; sourceTree = "<group>"; };
+		4045D9D82DAD4BD50077A660 /* CallSettingsResponse+SettingsPriority.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallSettingsResponse+SettingsPriority.swift"; sourceTree = "<group>"; };
+		4045D9DA2DAD57570077A660 /* CallSettingsResponse+SettingsPriorityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallSettingsResponse+SettingsPriorityTests.swift"; sourceTree = "<group>"; };
 		4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenu.swift; sourceTree = "<group>"; };
@@ -4305,6 +4309,7 @@
 				40ADB8592D64AFEC00B06AAF /* Stream_Video_Sfu_Models_Participant+CallParticipant.swift */,
 				40DFA88C2CC10FEF003DCE05 /* Stream_Video_Sfu_Models_AppleThermalState+Convenience.swift */,
 				40C2B5BA2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift */,
+				4045D9D82DAD4BD50077A660 /* CallSettingsResponse+SettingsPriority.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -5080,6 +5085,7 @@
 		842747E829EED0AB00E063AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				4045D9DA2DAD57570077A660 /* CallSettingsResponse+SettingsPriorityTests.swift */,
 				4029E9542CB9436F00E1D571 /* IncomingVideoQualitySettings_Tests.swift */,
 				842747EB29EED59000E063AD /* JSONDecoder_Tests.swift */,
 				8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */,
@@ -7027,6 +7033,7 @@
 				84BAD77E2A6BFFB200733156 /* BroadcastSampleHandler.swift in Sources */,
 				40C2B5BB2C2C41DA00EC2C2D /* RejectCallRequest+Reason.swift in Sources */,
 				40C9E4482C94743800802B28 /* Stream_Video_Sfu_Signal_TrackSubscriptionDetails+Convenience.swift in Sources */,
+				4045D9D92DAD4BD50077A660 /* CallSettingsResponse+SettingsPriority.swift in Sources */,
 				40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */,
 				40F1016C2D5A654300C49481 /* DefaultAudioSessionPolicy.swift in Sources */,
 				840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */,
@@ -7522,6 +7529,7 @@
 				40B48C212D14CB1B002C4EAB /* Int_DefaultValuesTests.swift in Sources */,
 				40F017612BBEF15E00E89FD1 /* CallParticipantResponse+Dummy.swift in Sources */,
 				40034C2E2CFE15AC00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift in Sources */,
+				4045D9DB2DAD57570077A660 /* CallSettingsResponse+SettingsPriorityTests.swift in Sources */,
 				406B3C552C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift in Sources */,
 				40C9E4642C99886900802B28 /* WebRTCCoorindator_Tests.swift in Sources */,
 				40F017772BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */,
