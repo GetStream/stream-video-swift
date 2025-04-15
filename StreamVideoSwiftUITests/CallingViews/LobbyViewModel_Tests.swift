@@ -1,14 +1,11 @@
 //
-//  LobbyViewModelTests.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 14/4/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-import XCTest
-@testable import StreamVideo
 import Combine
+@testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import XCTest
 
 @MainActor
 final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
@@ -27,7 +24,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
         let mockCall = MockCall()
         mockCall.stub(
             for: .get,
-            with: GetCallResponse.init(
+            with: GetCallResponse(
                 call: .dummy(),
                 duration: "0",
                 members: [],
@@ -61,7 +58,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
         let mockCall = MockCall()
         mockCall.stub(
             for: .get,
-            with: GetCallResponse.init(
+            with: GetCallResponse(
                 call: .dummy(session: .dummy(participants: [.dummy(user: .dummy(id: "test"))])),
                 duration: "0",
                 members: [],
@@ -86,19 +83,19 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
             )
         )
 
-        await fulfilmentInMainActor { self.subject.participants.count == 0 }
+        await fulfilmentInMainActor { self.subject.participants.isEmpty }
     }
     
     func test_subscribeForCallLeaveUpdates_doesNotRemoveWrongParticipant() async throws {
         let mockCall = MockCall()
         mockCall.stub(
             for: .get,
-            with: GetCallResponse.init(
+            with: GetCallResponse(
                 call: .dummy(
                     session: .dummy(
                         participants: [
                             .dummy(user: .dummy(id: "test1")),
-                            .dummy(user: .dummy(id: "test2")),
+                            .dummy(user: .dummy(id: "test2"))
                         ]
                     )
                 ),
@@ -126,6 +123,6 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
         )
 
         await fulfilmentInMainActor { self.subject.participants.count == 1 }
-        XCTAssertEqual(self.subject.participants.map(\.id), ["test2"])
+        XCTAssertEqual(subject.participants.map(\.id), ["test2"])
     }
 }
