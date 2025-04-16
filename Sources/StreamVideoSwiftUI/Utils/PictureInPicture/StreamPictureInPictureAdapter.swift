@@ -13,22 +13,23 @@ import UIKit
 public final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
     /// The active call instance.
-    public var call: Call? { willSet { store.dispatch(.setCall(newValue)) } }
+    public var call: Call? { willSet { store?.dispatch(.setCall(newValue)) } }
 
     /// The view used as an anchor for Picture-in-Picture display.
-    public var sourceView: UIView? { willSet { store.dispatch(.setSourceView(newValue)) } }
+    public var sourceView: UIView? { willSet { store?.dispatch(.setSourceView(newValue)) } }
 
-    let store: PictureInPictureStore = .init()
+    private(set) var store: PictureInPictureStore?
 
     private let disposableBag = DisposableBag()
     private var pictureInPictureController: Any?
 
-    private lazy var contentProvider: PictureInPictureContentProvider = .init(store: store)
-    private lazy var trackStateAdapter: PictureInPictureTrackStateAdapter = .init(store: store)
+    private var contentProvider: PictureInPictureContentProvider?
+    private var trackStateAdapter: PictureInPictureTrackStateAdapter?
 
     /// Creates a new Picture-in-Picture adapter.
     init() {
         Task { @MainActor in
+            let store = PictureInPictureStore()
             guard
                 #available(iOS 15.0, *),
                 let pictureInPictureController = PictureInPictureController(store: store)
@@ -37,10 +38,11 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
                 return
             }
 
+            self.store = store
             self.pictureInPictureController = pictureInPictureController
 
-            _ = contentProvider
-            _ = trackStateAdapter
+            contentProvider = .init(store: store)
+            trackStateAdapter = .init(store: store)
 
             store
                 .publisher(for: \.content)

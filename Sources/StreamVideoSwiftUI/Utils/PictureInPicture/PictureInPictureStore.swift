@@ -25,6 +25,7 @@ final class PictureInPictureStore: ObservableObject {
         var canStartPictureInPictureAutomaticallyFromInline: Bool
 
         /// The initial state of the Picture-in-Picture window.
+        @MainActor
         static let initial = State(
             isActive: false,
             viewFactory: .init(DefaultViewFactory.shared),
@@ -55,10 +56,15 @@ final class PictureInPictureStore: ObservableObject {
         case setCanStartPictureInPictureAutomaticallyFromInline(Bool)
     }
 
-    private let subject: CurrentValueSubject<State, Never> = .init(.initial)
+    private let subject: CurrentValueSubject<State, Never>
     var state: State { subject.value }
 
     private let processingQueue = UnfairQueue()
+
+    @MainActor
+    init() {
+        subject = .init(.initial)
+    }
 
     /// Dispatches an action to modify the state.
     ///
