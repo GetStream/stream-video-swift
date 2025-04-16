@@ -26,7 +26,7 @@ extension Notification {
 ///
 /// Basically, it's a wrapper over legacy monitor based on `Reachability` (iOS 11 only)
 /// and default monitor based on `Network`.`NWPathMonitor` (iOS 12+).
-class InternetConnection: @unchecked Sendable {
+public final class InternetConnection: @unchecked Sendable {
     /// The current Internet connection status.
     @Published private(set) var status: InternetConnection.Status {
         didSet {
@@ -110,7 +110,7 @@ protocol InternetConnectionMonitor: AnyObject {
 
 extension InternetConnection {
     /// The Internet connectivity status.
-    enum Status: Equatable {
+    public enum Status: Equatable {
         /// Notification of an Internet connection has not begun.
         case unknown
 
@@ -122,7 +122,7 @@ extension InternetConnection {
     }
 
     /// The Internet connectivity status quality.
-    enum Quality: Equatable {
+    public enum Quality: Equatable {
         /// The Internet connection is great (like Wi-Fi).
         case great
 
@@ -138,7 +138,7 @@ extension InternetConnection {
 
 extension InternetConnection.Status {
     /// Returns `true` if the internet connection is available, ignoring the quality of the connection.
-    var isAvailable: Bool {
+    public var isAvailable: Bool {
         if case .available = self {
             return true
         } else {
@@ -212,7 +212,7 @@ extension InternetConnection {
 }
 
 /// A protocol defining the interface for internet connection monitoring.
-protocol InternetConnectionProtocol {
+public protocol InternetConnectionProtocol {
     /// A publisher that emits the current internet connection status.
     ///
     /// This publisher never fails and continuously updates with the latest
@@ -227,7 +227,7 @@ extension InternetConnection: InternetConnectionProtocol {
     /// type to `AnyPublisher`.
     ///
     /// - Note: The publisher won't publish any duplicates.
-    var statusPublisher: AnyPublisher<InternetConnection.Status, Never> {
+    public var statusPublisher: AnyPublisher<InternetConnection.Status, Never> {
         $status.removeDuplicates().eraseToAnyPublisher()
     }
 }
@@ -237,7 +237,7 @@ extension InternetConnection: InjectionKey {
     ///
     /// This property provides a default implementation of the
     /// `InternetConnection` with a default monitor.
-    nonisolated(unsafe) static var currentValue: InternetConnectionProtocol = InternetConnection(
+    nonisolated(unsafe) public static var currentValue: InternetConnectionProtocol = InternetConnection(
         monitor: InternetConnection
             .Monitor()
     )
@@ -248,7 +248,7 @@ extension InjectedValues {
     ///
     /// This property allows for dependency injection using the protocol type,
     /// providing more flexibility in testing and modular design.
-    var internetConnectionObserver: InternetConnectionProtocol {
+    public var internetConnectionObserver: InternetConnectionProtocol {
         get { Self[InternetConnection.self] }
         set { Self[InternetConnection.self] = newValue }
     }

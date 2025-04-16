@@ -10,6 +10,10 @@ import StreamWebRTC
 /// A view that can be used to render an instance of `RTCVideoTrack`
 final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
+    let store: PictureInPictureStore
+
+    var participant: CallParticipant
+
     /// The rendering track.
     var track: RTCVideoTrack? {
         didSet {
@@ -21,13 +25,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             prepareForTrackRendering(oldValue)
         }
     }
-
-    /// The layer that renders the track's frames.
-    var displayLayer: CALayer { contentView.layer }
-
-    /// A policy defining how the Picture in Picture window should be resized in order to better fit
-    /// the rendering frame size.
-    var pictureInPictureWindowSizePolicy: PictureInPictureWindowSizePolicy
 
     /// The publisher which is used to streamline the frames received from the track.
     private let bufferPublisher: PassthroughSubject<CMSampleBuffer, Never> = .init()
@@ -95,8 +92,14 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    init(windowSizePolicy: PictureInPictureWindowSizePolicy) {
-        pictureInPictureWindowSizePolicy = windowSizePolicy
+    init(
+        store: PictureInPictureStore,
+        participant: CallParticipant,
+        track: RTCVideoTrack?
+    ) {
+        self.store = store
+        self.participant = participant
+        self.track = track
         super.init(frame: .zero)
         setUp()
     }
@@ -122,6 +125,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// This method is being called from WebRTC and asks the container to set its size to the track's size.
     nonisolated func setSize(_ size: CGSize) {
         Task { @MainActor in
+//            store.dispatch(.setPreferredContentSize(size))
             trackSize = size
         }
     }
@@ -252,13 +256,13 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
         /// Skipping frames is decided based on how much bigger is the incoming frame's size compared
         /// to PiP window's size.
-        noOfFramesToSkipAfterRendering = requiresFramesSkipping ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) :
-            0
+        noOfFramesToSkipAfterRendering = requiresFramesSkipping
+            ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1)
+            : 0
+
         skippedFrames = 0
 
-        /// We update the provided windowSizePolicy with the size of the track we received, transformed
-        /// to the value that fits.
-        pictureInPictureWindowSizePolicy.trackSize = trackSize
+        store.dispatch(.setPreferredContentSize(trackSize))
 
         logMessage(
             .debug,

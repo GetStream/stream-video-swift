@@ -3,78 +3,51 @@
 //
 
 import AVKit
+import Combine
 import Foundation
 import StreamVideo
 import StreamWebRTC
-
-/// Describes an object that can be used to present picture-in-picture content.
-protocol StreamAVPictureInPictureViewControlling: AnyObject {
-    
-    /// The closure to call whenever the picture-in-picture window size changes.
-    @MainActor
-    var onSizeUpdate: (@Sendable(CGSize) -> Void)? { get set }
-
-    /// The track that will be rendered on picture-in-picture window.
-    @MainActor
-    var track: RTCVideoTrack? { get set }
-
-    /// The preferred size for the picture-in-picture window.
-    /// - Important: This should **always** be greater to ``CGSize.zero``. If not, iOS throws
-    /// a cryptic error with content `PGPegasus code:-1003`
-    @MainActor
-    var preferredContentSize: CGSize { get set }
-
-    /// The layer that renders the incoming frames from WebRTC.
-    @MainActor
-    var displayLayer: CALayer { get }
-}
+import SwiftUI
 
 @available(iOS 15.0, *)
-final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController,
-    StreamAVPictureInPictureViewControlling {
+final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController {
 
-    private let contentView: StreamPictureInPictureVideoRenderer =
-        .init(windowSizePolicy: StreamPictureInPictureAdaptiveWindowSizePolicy())
+    private let store: PictureInPictureStore
+    private let contentView: UIView
 
-    nonisolated(unsafe) var onSizeUpdate: (@Sendable(CGSize) -> Void)?
-
-    @MainActor
-    var track: RTCVideoTrack? {
-        get { contentView.track }
-        set { contentView.track = newValue }
-    }
-
-    @MainActor
-    var displayLayer: CALayer { contentView.displayLayer }
+    private let disposableBag = DisposableBag()
 
     // MARK: - Lifecycle
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    /// Initializes a new instance and sets the `preferredContentSize` to `Self.defaultPreferredContentSize`
-    /// value.
-    required init() {
+    required init(
+        store: PictureInPictureStore
+    ) {
+        self.store = store
+        contentView = UIHostingController(
+            rootView: StreamPictureInPictureContent(store: store)
+        ).view
+
         super.init(nibName: nil, bundle: nil)
-        contentView.pictureInPictureWindowSizePolicy.controller = self
+
+        preferredContentSize = store.state.preferredContentSize
+
+        store
+            .publisher(for: \.preferredContentSize)
+            .removeDuplicates()
+            .filter { $0 != .zero }
+            .receive(on: DispatchQueue.main)
+            .log(.debug, subsystems: .pictureInPicture) { "PreferredContent size will be updated to \($0)." }
+            .assign(to: \.preferredContentSize, onWeak: self)
+            .store(in: disposableBag)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setUp()
-    }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        contentView.bounds = view.bounds
-        onSizeUpdate?(contentView.bounds.size)
-    }
-
-    // MARK: - Private helpers
-
-    private func setUp() {
-        view.subviews.forEach { $0.removeFromSuperview() }
-
+        view.backgroundColor = .clear
         contentView.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(contentView)
@@ -86,5 +59,11 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
         ])
 
         contentView.bounds = view.bounds
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        contentView.bounds = view.bounds
+        store.dispatch(.setContentSize(view.bounds.size))
     }
 }
