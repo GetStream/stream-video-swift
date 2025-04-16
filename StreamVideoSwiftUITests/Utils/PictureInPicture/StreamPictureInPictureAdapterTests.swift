@@ -8,59 +8,28 @@ import Foundation
 import XCTest
 
 @MainActor
+@available(iOS 15.0, *)
 final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable {
 
-    private lazy var mockStreamVideo: MockStreamVideo! = .init()
-    private lazy var mockCall: MockCall! = .init()
     private lazy var subject: StreamPictureInPictureAdapter! = .init()
 
-    override func setUp() async throws {
-        try await super.setUp()
-        _ = mockStreamVideo
+    // MARK: - Call updated
+
+    func test_callUpdated_storeWasUpdated() {
+        let call = MockCall(.dummy())
+
+        subject.call = call
+
+        XCTAssertEqual(subject.store.state.call?.cId, call.cId)
     }
 
-    override func tearDown() async throws {
-        subject = nil
-        try await super.tearDown()
-    }
+    // MARK: - SourceView updated
 
-    // MARK: - setCall
+    func test_sourceViewUpdated_storeWasUpdated() {
+        let view = UIView()
 
-    func test_setCall_updatesTheSetSizeClosure() async {
-        subject.call = mockCall
+        subject.sourceView = view
 
-        await fulfilmentInMainActor {
-            self.subject.onSizeUpdate != nil
-        }
-    }
-
-    // MARK: - setSize
-
-    func test_setSize_updateTrackSizeWasCalledOnCallWithExpectedInput() async throws {
-        let size = CGSize(width: 10, height: 10)
-        let participant = CallParticipant.dummy()
-        let callState = CallState()
-        callState.participants = [participant]
-        mockCall.stub(for: \.state, with: callState)
-        subject.call = mockCall
-
-        await fulfilmentInMainActor {
-            self.subject.onSizeUpdate != nil
-        }
-
-        subject.onSizeUpdate?(size, participant)
-
-        await fulfilmentInMainActor {
-            self.mockCall.timesCalled(.updateTrackSize) == 1
-        }
-        let input = try XCTUnwrap(
-            mockCall
-                .recordedInputPayload(
-                    (CGSize, CallParticipant).self,
-                    for: .updateTrackSize
-                )?.first
-        )
-        XCTAssertEqual(input.0, size)
-        XCTAssertEqual(input.1, participant)
+        XCTAssertTrue(subject.store.state.sourceView === view)
     }
 }
