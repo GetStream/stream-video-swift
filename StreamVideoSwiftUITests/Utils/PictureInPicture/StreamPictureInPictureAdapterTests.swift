@@ -20,7 +20,7 @@ final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable 
 
         subject.call = call
 
-        XCTAssertEqual(subject.store.state.call?.cId, call.cId)
+        XCTAssertEqual(subject.store?.state.call?.cId, call.cId)
     }
 
     // MARK: - SourceView updated
@@ -30,6 +30,6 @@ final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable 
 
         subject.sourceView = view
 
-        XCTAssertTrue(subject.store.state.sourceView === view)
+        XCTAssertTrue(subject.store?.state.sourceView === view)
     }
 }

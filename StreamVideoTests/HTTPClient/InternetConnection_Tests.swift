@@ -37,7 +37,7 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
         monitor.status = .unavailable
 
         // Create new status
-        let newStatus: InternetConnection.Status = .available(.great)
+        let newStatus: InternetConnectionStatus = .available(.great)
 
         // Set up expectations for notifications
         let notificationExpectations = [
@@ -68,7 +68,7 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
         monitor.status = .available(.constrained)
 
         // Create status with another quality
-        let newStatus: InternetConnection.Status = .available(.great)
+        let newStatus: InternetConnectionStatus = .available(.great)
 
         // Set up expectation for a notification
         let notificationExpectation = expectation(
@@ -87,7 +87,7 @@ final class InternetConnection_Tests: XCTestCase, @unchecked Sendable {
         wait(for: [notificationExpectation], timeout: defaultTimeout)
     }
 
-    func test_internetConnection_stopsMonitorWhenDeinited() throws {
+    func test_internetConnection_stopsMonitorWhenDeallocated() throws {
         assert(monitor.isStarted)
 
         internetConnection = nil
