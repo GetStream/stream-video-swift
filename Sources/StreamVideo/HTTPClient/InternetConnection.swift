@@ -17,8 +17,8 @@ extension Notification.Name {
 extension Notification {
     static let internetConnectionStatusUserInfoKey = "internetConnectionStatus"
 
-    var internetConnectionStatus: InternetConnection.Status? {
-        userInfo?[Self.internetConnectionStatusUserInfoKey] as? InternetConnection.Status
+    var internetConnectionStatus: InternetConnectionStatus? {
+        userInfo?[Self.internetConnectionStatusUserInfoKey] as? InternetConnectionStatus
     }
 }
 
@@ -26,9 +26,9 @@ extension Notification {
 ///
 /// Basically, it's a wrapper over legacy monitor based on `Reachability` (iOS 11 only)
 /// and default monitor based on `Network`.`NWPathMonitor` (iOS 12+).
-public final class InternetConnection: @unchecked Sendable {
+final class InternetConnection: @unchecked Sendable {
     /// The current Internet connection status.
-    @Published private(set) var status: InternetConnection.Status {
+    @Published private(set) var status: InternetConnectionStatus {
         didSet {
             guard oldValue != status else { return }
 
@@ -68,13 +68,13 @@ public final class InternetConnection: @unchecked Sendable {
 }
 
 extension InternetConnection: InternetConnectionDelegate {
-    func internetConnectionStatusDidChange(status: Status) {
+    func internetConnectionStatusDidChange(status: InternetConnectionStatus) {
         self.status = status
     }
 }
 
 private extension InternetConnection {
-    func postNotification(_ name: Notification.Name, with status: Status) {
+    func postNotification(_ name: Notification.Name, with status: InternetConnectionStatus) {
         notificationCenter.post(
             name: name,
             object: self,
@@ -89,7 +89,7 @@ private extension InternetConnection {
 protocol InternetConnectionDelegate: AnyObject {
     /// Calls when the Internet connection status did change.
     /// - Parameter status: an Internet connection status.
-    func internetConnectionStatusDidChange(status: InternetConnection.Status)
+    func internetConnectionStatusDidChange(status: InternetConnectionStatus)
 }
 
 /// A protocol for Internet connection monitors.
@@ -98,7 +98,7 @@ protocol InternetConnectionMonitor: AnyObject {
     var delegate: InternetConnectionDelegate? { get set }
 
     /// The current status of Internet connection.
-    var status: InternetConnection.Status { get }
+    var status: InternetConnectionStatus { get }
 
     /// Start Internet connection monitoring.
     func start()
@@ -108,35 +108,33 @@ protocol InternetConnectionMonitor: AnyObject {
 
 // MARK: Internet Connection Subtypes
 
-extension InternetConnection {
-    /// The Internet connectivity status.
-    public enum Status: Equatable {
-        /// Notification of an Internet connection has not begun.
-        case unknown
+/// The Internet connectivity status.
+public enum InternetConnectionStatus: Equatable, Sendable {
+    /// Notification of an Internet connection has not begun.
+    case unknown
 
-        /// The Internet is available with a specific `Quality` level.
-        case available(Quality)
+    /// The Internet is available with a specific `Quality` level.
+    case available(InternetConnectionQuality)
 
-        /// The Internet is unavailable.
-        case unavailable
-    }
-
-    /// The Internet connectivity status quality.
-    public enum Quality: Equatable {
-        /// The Internet connection is great (like Wi-Fi).
-        case great
-
-        /// Internet connection uses an interface that is considered expensive, such as Cellular or a Personal Hotspot.
-        case expensive
-
-        /// Internet connection uses Low Data Mode.
-        /// Recommendations for Low Data Mode: don't autoplay video, music (high-quality) or gifs (big files).
-        /// Supports only by iOS 13+
-        case constrained
-    }
+    /// The Internet is unavailable.
+    case unavailable
 }
 
-extension InternetConnection.Status {
+/// The Internet connectivity status quality.
+public enum InternetConnectionQuality: Equatable, Sendable {
+    /// The Internet connection is great (like Wi-Fi).
+    case great
+
+    /// Internet connection uses an interface that is considered expensive, such as Cellular or a Personal Hotspot.
+    case expensive
+
+    /// Internet connection uses Low Data Mode.
+    /// Recommendations for Low Data Mode: don't autoplay video, music (high-quality) or gifs (big files).
+    /// Supports only by iOS 13+
+    case constrained
+}
+
+extension InternetConnectionStatus {
     /// Returns `true` if the internet connection is available, ignoring the quality of the connection.
     public var isAvailable: Bool {
         if case .available = self {
@@ -158,7 +156,7 @@ extension InternetConnection {
 
         weak var delegate: InternetConnectionDelegate?
 
-        var status: InternetConnection.Status {
+        var status: InternetConnectionStatus {
             if let path = monitor?.currentPath {
                 return status(from: path)
             }
@@ -194,12 +192,12 @@ extension InternetConnection {
             delegate?.internetConnectionStatusDidChange(status: status(from: path))
         }
 
-        private func status(from path: NWPath) -> InternetConnection.Status {
+        private func status(from path: NWPath) -> InternetConnectionStatus {
             guard path.status == .satisfied else {
                 return .unavailable
             }
 
-            let quality: InternetConnection.Quality
+            let quality: InternetConnectionQuality
             quality = path.isConstrained ? .constrained : (path.isExpensive ? .expensive : .great)
 
             return .available(quality)
@@ -217,7 +215,7 @@ public protocol InternetConnectionProtocol {
     ///
     /// This publisher never fails and continuously updates with the latest
     /// connection status.
-    var statusPublisher: AnyPublisher<InternetConnection.Status, Never> { get }
+    var statusPublisher: AnyPublisher<InternetConnectionStatus, Never> { get }
 }
 
 extension InternetConnection: InternetConnectionProtocol {
@@ -227,7 +225,7 @@ extension InternetConnection: InternetConnectionProtocol {
     /// type to `AnyPublisher`.
     ///
     /// - Note: The publisher won't publish any duplicates.
-    public var statusPublisher: AnyPublisher<InternetConnection.Status, Never> {
+    public var statusPublisher: AnyPublisher<InternetConnectionStatus, Never> {
         $status.removeDuplicates().eraseToAnyPublisher()
     }
 }
