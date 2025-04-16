@@ -10,7 +10,7 @@ import StreamWebRTC
 /// StreamPictureInPictureTrackStateAdapter serves as an adapter for managing the state of a video track
 /// used for picture-in-picture functionality. It can enable or disable observers based on its isEnabled property
 /// and ensures that the active track is always enabled when necessary.
-final class StreamPictureInPictureTrackStateAdapter {
+final class StreamPictureInPictureTrackStateAdapter: @unchecked Sendable {
 
     private enum DisposableKey: String { case timePublisher }
 
@@ -19,6 +19,8 @@ final class StreamPictureInPictureTrackStateAdapter {
     private var content: StreamPictureInPictureContentState {
         didSet { didUpdate(content, oldValue: oldValue) }
     }
+
+    private var activeTracksBeforePiP: [RTCVideoTrack] = []
 
     init(store: PictureInPictureStore) {
         self.store = store
@@ -45,17 +47,36 @@ final class StreamPictureInPictureTrackStateAdapter {
         disposableBag.remove(DisposableKey.timePublisher.rawValue)
 
         guard isActive else {
+            activeTracksBeforePiP.forEach { $0.isEnabled = true }
+            activeTracksBeforePiP = []
             log.debug("Track activeState observation is now inactive.", subsystems: .pictureInPicture)
             return
         }
 
-        Timer
-            .publish(every: 0.1, on: .main, in: .default)
-            .autoconnect()
-            .sink { [weak self] _ in self?.checkTracksState() }
-            .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
 
-        log.debug("Track activeState observation is now active.", subsystems: .pictureInPicture)
+            if
+                let activeTracksBeforePiP = store
+                .state
+                .call?
+                .state
+                .participants
+                .filter({ $0.track?.isEnabled == true })
+                .compactMap(\.track) {
+                self.activeTracksBeforePiP = activeTracksBeforePiP
+            }
+
+            Timer
+                .publish(every: 0.1, on: .main, in: .default)
+                .autoconnect()
+                .sink { [weak self] _ in self?.checkTracksState() }
+                .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
+
+            log.debug("Track activeState observation is now active.", subsystems: .pictureInPicture)
+        }
     }
 
     private func didUpdate(
@@ -113,6 +134,10 @@ final class StreamPictureInPictureTrackStateAdapter {
 
     /// This private function checks the state of the active track and enables it if it's not already enabled.
     private func checkTracksState() {
+        guard store.state.isActive else {
+            return
+        }
+        
         switch content {
         case let .participant(_, participant, track) where track != nil && track?.isEnabled == false:
             track?.isEnabled = true
