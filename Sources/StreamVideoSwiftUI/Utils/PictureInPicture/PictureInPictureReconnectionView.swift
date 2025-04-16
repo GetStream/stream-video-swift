@@ -5,6 +5,10 @@
 import StreamVideo
 import SwiftUI
 
+/// Displays a reconnection state in the Picture-in-Picture window.
+///
+/// Shows a reconnection message and loading indicator while attempting to restore
+/// the connection to the video call.
 struct PictureInPictureReconnectionView: View {
 
     @Injected(\.colors) private var colors

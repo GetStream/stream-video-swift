@@ -5,6 +5,9 @@
 import StreamVideo
 import SwiftUI
 
+/// Modifies a view to display participant information in Picture-in-Picture.
+///
+/// Adds participant details, connection quality, and speaking indicators to the view.
 private struct PictureInPictureParticipantModifier: ViewModifier {
 
     var participant: CallParticipant
@@ -12,6 +15,13 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
     var showAllInfo: Bool
     var decorations: Set<VideoCallParticipantDecoration>
 
+    /// Creates a new participant modifier.
+    ///
+    /// - Parameters:
+    ///   - participant: The participant to display
+    ///   - call: The current call instance
+    ///   - showAllInfo: Whether to show additional participant information
+    ///   - decorations: The decorations to apply to the participant view
     init(
         participant: CallParticipant,
         call: Call?,
@@ -58,6 +68,12 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
 
 extension View {
 
+    /// Applies participant-specific modifications to a view.
+    ///
+    /// - Parameters:
+    ///   - participant: The participant to display
+    ///   - call: The current call instance
+    ///   - showAllInfo: Whether to show additional participant information
     @ViewBuilder
     func pictureInPictureParticipant(
         participant: CallParticipant,

@@ -7,21 +7,25 @@ import Foundation
 import StreamVideo
 import StreamWebRTC
 
-/// StreamPictureInPictureTrackStateAdapter serves as an adapter for managing the state of a video track
-/// used for picture-in-picture functionality. It can enable or disable observers based on its isEnabled property
-/// and ensures that the active track is always enabled when necessary.
-final class StreamPictureInPictureTrackStateAdapter: @unchecked Sendable {
+/// Manages video track state for Picture-in-Picture functionality.
+///
+/// Ensures proper track enabling/disabling when Picture-in-Picture is active
+/// and maintains track state consistency.
+final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
 
     private enum DisposableKey: String { case timePublisher }
 
     private let store: PictureInPictureStore
     private let disposableBag = DisposableBag()
-    private var content: StreamPictureInPictureContentState {
+    private var content: PictureInPictureContent {
         didSet { didUpdate(content, oldValue: oldValue) }
     }
 
     private var activeTracksBeforePiP: [RTCVideoTrack] = []
 
+    /// Creates a new track state adapter.
+    ///
+    /// - Parameter store: The store managing Picture-in-Picture state
     init(store: PictureInPictureStore) {
         self.store = store
         content = store.state.content
@@ -41,8 +45,9 @@ final class StreamPictureInPictureTrackStateAdapter: @unchecked Sendable {
 
     // MARK: - Private helpers
 
+    /// Updates track state based on Picture-in-Picture activation.
     ///
-    /// - Parameter isActive: A Boolean value indicating whether the observer should be active.
+    /// - Parameter isActive: Whether Picture-in-Picture is active
     private func didUpdate(_ isActive: Bool) {
         disposableBag.remove(DisposableKey.timePublisher.rawValue)
 
@@ -79,9 +84,10 @@ final class StreamPictureInPictureTrackStateAdapter: @unchecked Sendable {
         }
     }
 
+    /// Updates track state when Picture-in-Picture content changes.
     private func didUpdate(
-        _ content: StreamPictureInPictureContentState,
-        oldValue: StreamPictureInPictureContentState
+        _ content: PictureInPictureContent,
+        oldValue: PictureInPictureContent
     ) {
         guard store.state.isActive else {
             return
@@ -132,7 +138,7 @@ final class StreamPictureInPictureTrackStateAdapter: @unchecked Sendable {
         }
     }
 
-    /// This private function checks the state of the active track and enables it if it's not already enabled.
+    /// Ensures the active track remains enabled while Picture-in-Picture is active.
     private func checkTracksState() {
         guard store.state.isActive else {
             return

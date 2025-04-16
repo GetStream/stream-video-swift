@@ -7,15 +7,15 @@ import Foundation
 import StreamVideo
 import UIKit
 
-/// This class encapsulates the logic for managing picture-in-picture functionality during a video call. It tracks
-/// changes in the call, updates related to call participants, and changes in the source view for Picture in
-/// Picture display.
+/// Manages Picture-in-Picture functionality for video calls.
+///
+/// Coordinates between the call, source view, and Picture-in-Picture system components.
 public final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
-    /// The active call.
+    /// The active call instance.
     public var call: Call? { willSet { store.dispatch(.setCall(newValue)) } }
 
-    /// The sourceView that will be used as an anchor/trigger for picture-in-picture (as required by AVKit).
+    /// The view used as an anchor for Picture-in-Picture display.
     public var sourceView: UIView? { willSet { store.dispatch(.setSourceView(newValue)) } }
 
     private let store: PictureInPictureStore = .init()
@@ -23,13 +23,14 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
     private var pictureInPictureController: Any?
 
     private lazy var contentProvider: PictureInPictureContentProvider = .init(store: store)
-    private lazy var trackStateAdapter: StreamPictureInPictureTrackStateAdapter = .init(store: store)
+    private lazy var trackStateAdapter: PictureInPictureTrackStateAdapter = .init(store: store)
 
+    /// Creates a new Picture-in-Picture adapter.
     init() {
         Task { @MainActor in
             guard
                 #available(iOS 15.0, *),
-                let pictureInPictureController = StreamPictureInPictureController(store: store)
+                let pictureInPictureController = PictureInPictureController(store: store)
             else {
                 log.warning("Not supported.", subsystems: .pictureInPicture)
                 return
@@ -70,13 +71,13 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
     }
 }
 
-/// Provides the default value of the `StreamPictureInPictureAdapter` class.
+/// Provides the default value for the Picture-in-Picture adapter.
 enum StreamPictureInPictureAdapterKey: InjectionKey {
     nonisolated(unsafe) static var currentValue: StreamPictureInPictureAdapter = .init()
 }
 
 extension InjectedValues {
-    /// Provides access to the `StreamPictureInPictureAdapter` class to the views and view models.
+    /// Access point for the Picture-in-Picture adapter in the dependency injection system.
     public var pictureInPictureAdapter: StreamPictureInPictureAdapter {
         get {
             Self[StreamPictureInPictureAdapterKey.self]

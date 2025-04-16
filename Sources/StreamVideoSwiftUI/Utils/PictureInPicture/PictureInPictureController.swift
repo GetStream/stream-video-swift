@@ -11,9 +11,12 @@ import StreamWebRTC
 import UIKit
 #endif
 
-/// A controller class for picture-in-picture whenever that is possible.
+/// Controls the Picture-in-Picture functionality for video calls.
+///
+/// This controller manages the Picture-in-Picture window state and handles transitions
+/// between foreground and background states.
 @available(iOS 15.0, *)
-final class StreamPictureInPictureController: @unchecked Sendable {
+final class PictureInPictureController: @unchecked Sendable {
 
     private enum DisposableKey: String { case isPossible, isActive }
 
@@ -23,32 +26,29 @@ final class StreamPictureInPictureController: @unchecked Sendable {
 
     private let store: PictureInPictureStore
 
-    private let proxyDelegate: StreamPictureInPictureDelegateProxy = .init()
+    private let proxyDelegate: PictureInPictureDelegateProxy = .init()
 
     private var didAppBecomeActiveCancellable: AnyCancellable?
 
     // MARK: - Private Properties
 
-    /// The AVPictureInPictureController object.
+    /// The system Picture-in-Picture controller instance.
     private var pictureInPictureController: AVPictureInPictureController? {
         didSet { didUpdate(pictureInPictureController) }
     }
 
-    /// The StreamAVPictureInPictureViewControlling object that manages the picture-in-picture view.
-    private var contentViewController: StreamAVPictureInPictureVideoCallViewController?
+    /// The view controller managing Picture-in-Picture content.
+    private var contentViewController: PictureInPictureVideoCallViewController?
 
-    /// A set of `AnyCancellable` objects used to manage subscriptions.
+    /// Collection of active subscriptions.
     private var disposableBag = DisposableBag()
 
     // MARK: - Lifecycle
 
-    /// Initializes the controller and creates the content view
+    /// Creates a new Picture-in-Picture controller.
     ///
-    /// - Parameter canStartPictureInPictureAutomaticallyFromInline A boolean value
-    /// indicating whether the picture-in-picture session should start automatically when the app enters
-    /// background.
-    ///
-    /// - Returns `nil` if AVPictureInPictureController is not supported, or the controller otherwise.
+    /// - Parameter store: The store managing Picture-in-Picture state
+    /// - Returns: `nil` if Picture-in-Picture is not supported on the device
     @MainActor
     init?(
         store: PictureInPictureStore
@@ -65,10 +65,7 @@ final class StreamPictureInPictureController: @unchecked Sendable {
             .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
             .store(in: disposableBag)
 
-        // We add a small delay (250ms) on cancelling PiP as if we do it too early it
-        // seems that it has no effect.
-        // Calling `stopPictureInPicture` is a safe operation as it will only
-        // stop it if it is active.
+        // Add delay to prevent premature cancellation
         applicationStateAdapter
             .$state
             .filter { $0 == .foreground }
@@ -77,6 +74,7 @@ final class StreamPictureInPictureController: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
+    /// Updates the Picture-in-Picture controller when the source view changes.
     @MainActor
     private func didUpdate(_ sourceView: UIView?) {
         guard let sourceView else {
@@ -88,7 +86,7 @@ final class StreamPictureInPictureController: @unchecked Sendable {
         }
 
         if contentViewController == nil {
-            let contentViewController = StreamAVPictureInPictureVideoCallViewController(
+            let contentViewController = PictureInPictureVideoCallViewController(
                 store: store
             )
             self.contentViewController = contentViewController
@@ -109,15 +107,17 @@ final class StreamPictureInPictureController: @unchecked Sendable {
         pictureInPictureController?.delegate = proxyDelegate
     }
 
+    /// Updates the content view controller when the view factory changes.
     @MainActor
     private func didUpdate(_ viewFactory: AnyViewFactory) {
-        contentViewController = StreamAVPictureInPictureVideoCallViewController(
+        contentViewController = PictureInPictureVideoCallViewController(
             store: store
         )
 
         didUpdate(store.state.sourceView)
     }
 
+    /// Handles updates to the Picture-in-Picture controller state.
     private func didUpdate(_ pictureInPictureController: AVPictureInPictureController?) {
         if let pictureInPictureController {
             pictureInPictureController

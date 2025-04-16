@@ -7,7 +7,7 @@ import Combine
 
 /// A wrapper around AVPictureInPictureControllerDelegate that publishes all
 /// delegate method calls via a single Combine publisher.
-final class StreamPictureInPictureDelegateProxy: NSObject, AVPictureInPictureControllerDelegate {
+final class PictureInPictureDelegateProxy: NSObject, AVPictureInPictureControllerDelegate {
 
     /// Enum representing each AVPictureInPictureControllerDelegate method call
     /// with its respective associated values.
