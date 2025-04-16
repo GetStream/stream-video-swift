@@ -9,8 +9,12 @@ import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
+/// Manages the view controller for Picture-in-Picture video content.
+///
+/// Handles the layout and display of Picture-in-Picture content within the system's
+/// Picture-in-Picture window.
 @available(iOS 15.0, *)
-final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController {
+final class PictureInPictureVideoCallViewController: AVPictureInPictureVideoCallViewController {
 
     private let store: PictureInPictureStore
     private let contentView: UIView
@@ -22,12 +26,15 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
+    /// Creates a new Picture-in-Picture view controller.
+    ///
+    /// - Parameter store: The store managing Picture-in-Picture state
     required init(
         store: PictureInPictureStore
     ) {
         self.store = store
         contentView = UIHostingController(
-            rootView: StreamPictureInPictureContent(store: store)
+            rootView: PictureInPictureContentView(store: store)
         ).view
 
         super.init(nibName: nil, bundle: nil)
@@ -44,6 +51,7 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
             .store(in: disposableBag)
     }
 
+    /// Sets up the view hierarchy and layout constraints.
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -61,6 +69,7 @@ final class StreamAVPictureInPictureVideoCallViewController: AVPictureInPictureV
         contentView.bounds = view.bounds
     }
 
+    /// Updates the content view bounds and notifies the store of size changes.
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         contentView.bounds = view.bounds

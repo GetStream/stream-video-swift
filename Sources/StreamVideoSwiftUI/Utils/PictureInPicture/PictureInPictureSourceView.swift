@@ -8,7 +8,7 @@ import SwiftUI
 
 /// A view that can be used as the sourceView for picture-in-picture. This is quite useful as PiP can become
 /// very weird if the sourceView isn't in the ViewHierarchy or doesn't have an appropriate size.
-struct StreamPictureInPictureView: UIViewRepresentable {
+struct PictureInPictureSourceView: UIViewRepresentable {
 
     @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
 
@@ -52,7 +52,7 @@ struct PictureInPictureModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(StreamPictureInPictureView(isActive: isActive))
+            .background(PictureInPictureSourceView(isActive: isActive))
     }
 }
 

@@ -5,6 +5,10 @@
 import Combine
 import StreamVideo
 
+/// Manages the content displayed in the Picture-in-Picture window.
+///
+/// This class handles updates to the Picture-in-Picture content based on call state,
+/// participant changes, and connection status.
 final class PictureInPictureContentProvider: @unchecked Sendable {
 
     @Injected(\.internetConnectionObserver) private var internetConnectionObserver
@@ -15,6 +19,9 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
     private var connectionStatusCancellable: AnyCancellable?
     private var internetStatusCancellable: AnyCancellable?
 
+    /// Creates a new content provider for Picture-in-Picture.
+    ///
+    /// - Parameter store: The store managing Picture-in-Picture state
     init(store: PictureInPictureStore) {
         self.store = store
 
@@ -23,6 +30,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
             .sink { [weak self] in self?.didUpdate($0) }
     }
 
+    /// Updates internal state when the current call changes.
     private func didUpdate(_ call: Call?) {
         participantUpdateCancellable?.cancel()
         participantUpdateCancellable = nil
@@ -55,8 +63,9 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
         }
     }
 
-    /// Whenever participants change we update our internal state in order to always have the correct track
-    /// on picture-in-picture.
+    /// Updates Picture-in-Picture content based on participant changes.
+    ///
+    /// Prioritizes screen sharing, dominant speaker, and video-enabled participants.
     private func didUpdate(_ participants: [CallParticipant]) {
         guard let call = store.state.call else {
             return
@@ -97,6 +106,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
         }
     }
 
+    /// Updates the preferred content size for Picture-in-Picture if needed.
     private func updatePreferredContentSizeIfRequired(for participant: CallParticipant) {
         guard !store.state.isActive, participant.trackSize != .zero else {
             return

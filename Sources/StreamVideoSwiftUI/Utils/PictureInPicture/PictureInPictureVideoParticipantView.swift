@@ -8,7 +8,10 @@ import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
-struct StreamPictureInPictureVideoParticipantView: View {
+/// Displays a participant's video in the Picture-in-Picture window.
+///
+/// Shows either the participant's video feed or their profile image if video is not available.
+struct PictureInPictureVideoParticipantView: View {
 
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
@@ -18,6 +21,13 @@ struct StreamPictureInPictureVideoParticipantView: View {
     var participant: CallParticipant
     var track: RTCVideoTrack?
 
+    /// Creates a new participant view.
+    ///
+    /// - Parameters:
+    ///   - store: The store managing Picture-in-Picture state
+    ///   - viewFactory: Factory for creating views
+    ///   - participant: The participant to display
+    ///   - track: The participant's video track
     init(
         store: PictureInPictureStore,
         viewFactory: AnyViewFactory,
@@ -31,7 +41,7 @@ struct StreamPictureInPictureVideoParticipantView: View {
     }
 
     var body: some View {
-        StreamPictureInPictureVideoRendererView(
+        PictureInPictureVideoRendererView(
             store: store,
             participant: participant,
             track: track
@@ -42,8 +52,10 @@ struct StreamPictureInPictureVideoParticipantView: View {
         .pictureInPictureParticipant(participant: participant, call: store.state.call)
     }
 
+    /// Whether the participant's video should be displayed.
     private var showVideo: Bool { participant.shouldDisplayTrack }
 
+    /// The overlay view showing participant information.
     @ViewBuilder
     private var overlayView: some View {
         CallParticipantImageView(

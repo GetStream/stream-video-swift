@@ -8,7 +8,7 @@ import StreamVideo
 import StreamWebRTC
 
 /// A view that can be used to render an instance of `RTCVideoTrack`
-final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
+final class PictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     let store: PictureInPictureStore
 
@@ -40,7 +40,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     }()
 
     /// The transformer used to transform and downsample a RTCVideoFrame's buffer.
-    private var bufferTransformer = StreamBufferTransformer()
+    private var bufferTransformer = PictureInPictureBufferTransformer()
 
     /// The cancellable used to control the bufferPublisher stream.
     private var bufferUpdatesCancellable: AnyCancellable?
