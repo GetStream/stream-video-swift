@@ -33,7 +33,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         store
             .publisher(for: \.isActive)
             .removeDuplicates()
-            .sink { [weak self] in self?.didUpdate($0) }
+            .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
             .store(in: disposableBag)
 
         store
@@ -48,6 +48,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
     /// Updates track state based on Picture-in-Picture activation.
     ///
     /// - Parameter isActive: Whether Picture-in-Picture is active
+    @MainActor
     private func didUpdate(_ isActive: Bool) {
         disposableBag.remove(DisposableKey.timePublisher.rawValue)
 
@@ -58,30 +59,24 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
             return
         }
 
-        Task { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-
-            if
-                let activeTracksBeforePiP = store
-                .state
-                .call?
-                .state
-                .participants
-                .filter({ $0.track?.isEnabled == true })
-                .compactMap(\.track) {
-                self.activeTracksBeforePiP = activeTracksBeforePiP
-            }
-
-            Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
-                .sink { [weak self] _ in self?.checkTracksState() }
-                .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
-
-            log.debug("Track activeState observation is now active.", subsystems: .pictureInPicture)
+        if
+            let activeTracksBeforePiP = store
+            .state
+            .call?
+            .state
+            .participants
+            .filter({ $0.track?.isEnabled == true })
+            .compactMap(\.track) {
+            self.activeTracksBeforePiP = activeTracksBeforePiP
         }
+
+        Timer
+            .publish(every: 0.1, on: .main, in: .default)
+            .autoconnect()
+            .sink { [weak self] _ in self?.checkTracksState() }
+            .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
+
+        log.debug("Track activeState observation is now active.", subsystems: .pictureInPicture)
     }
 
     /// Updates track state when Picture-in-Picture content changes.

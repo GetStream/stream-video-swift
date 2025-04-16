@@ -52,7 +52,9 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
                 .removeDuplicates()
                 .filter { $0 == .reconnecting }
                 .receive(on: DispatchQueue.main)
-                .sink { [weak self] _ in self?.store.dispatch(.setContent(.reconnecting)) }
+                .sink { [weak self] _ in
+                    self?.store.dispatch(.setContent(.reconnecting))
+                }
 
             internetStatusCancellable = internetConnectionObserver
                 .statusPublisher
@@ -82,7 +84,6 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
                 let session = call.state.screenSharingSession,
                 call.state.isCurrentUserScreensharing == false,
                 let track = session.track {
-                updatePreferredContentSizeIfRequired(for: session.participant)
                 store.dispatch(.setContent(.screenSharing(call, session.participant, track)))
             } else if
                 let participant = otherParticipants.first(where: { $0.isDominantSpeaker }) {
@@ -108,7 +109,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
 
     /// Updates the preferred content size for Picture-in-Picture if needed.
     private func updatePreferredContentSizeIfRequired(for participant: CallParticipant) {
-        guard !store.state.isActive, participant.trackSize != .zero else {
+        guard !store.state.isActive, participant.hasVideo, participant.trackSize != .zero else {
             return
         }
         store.dispatch(.setPreferredContentSize(participant.trackSize))

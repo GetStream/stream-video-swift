@@ -18,7 +18,8 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
     /// The view used as an anchor for Picture-in-Picture display.
     public var sourceView: UIView? { willSet { store.dispatch(.setSourceView(newValue)) } }
 
-    private let store: PictureInPictureStore = .init()
+    let store: PictureInPictureStore = .init()
+
     private let disposableBag = DisposableBag()
     private var pictureInPictureController: Any?
 
