@@ -18,9 +18,6 @@
 		40070F392CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40070F382CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */; };
 		40070F3B2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40070F3A2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift */; };
 		40073B6F2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */; };
-		40073B752C456E06006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */; };
-		40073B762C456E0E006A2867 /* StreamPictureInPictureWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */; };
-		40073B772C456E1A006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */; };
 		40073B7A2C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B792C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift */; };
 		40073B7D2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */; };
 		40073B7F2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */; };
@@ -315,6 +312,15 @@
 		406B3C552C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C542C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift */; };
 		406B3C5B2C92CFFD00FC93A1 /* WebRTCCoordinatorStateMachine_JoinedStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C5A2C92CFFD00FC93A1 /* WebRTCCoordinatorStateMachine_JoinedStageTests.swift */; };
 		406B3C5D2C92E37600FC93A1 /* MockInternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C5C2C92E37500FC93A1 /* MockInternetConnection.swift */; };
+		4072A5812DAE81CF00108E8F /* StreamPictureInPictureVideoParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5802DAE81CF00108E8F /* StreamPictureInPictureVideoParticipantView.swift */; };
+		4072A5862DAE821C00108E8F /* StreamPictureInPictureVideoRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5852DAE821C00108E8F /* StreamPictureInPictureVideoRendererView.swift */; };
+		4072A58A2DAE845800108E8F /* StreamPictureInPictureContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5892DAE845800108E8F /* StreamPictureInPictureContent.swift */; };
+		4072A58C2DAE879B00108E8F /* AnyViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A58B2DAE879B00108E8F /* AnyViewFactory.swift */; };
+		4072A58E2DAE8E5E00108E8F /* StreamPictureInPictureScreenSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A58D2DAE8E5E00108E8F /* StreamPictureInPictureScreenSharingView.swift */; };
+		4072A5902DAEADFF00108E8F /* PictureInPictureStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A58F2DAEADFF00108E8F /* PictureInPictureStore.swift */; };
+		4072A5922DAEB41500108E8F /* StreamPictureInPictureDelegateProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5912DAEB41500108E8F /* StreamPictureInPictureDelegateProxy.swift */; };
+		4072A5942DAF992400108E8F /* PictureInPictureParticipantModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5932DAF992400108E8F /* PictureInPictureParticipantModifier.swift */; };
+		4072A5962DAF99E000108E8F /* PictureInPictureContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5952DAF99E000108E8F /* PictureInPictureContentProvider.swift */; };
 		407AF7142B615D3300E9E3E7 /* CallDurationView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407AF7132B615D3300E9E3E7 /* CallDurationView_Tests.swift */; };
 		407AF7162B61602B00E9E3E7 /* ControlBadgeView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407AF7152B61602B00E9E3E7 /* ControlBadgeView_Tests.swift */; };
 		407AF7182B61619900E9E3E7 /* ParticipantListButton_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407AF7172B61619900E9E3E7 /* ParticipantListButton_Tests.swift */; };
@@ -371,6 +377,7 @@
 		40986C3A2CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C392CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift */; };
 		40986C3C2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C3B2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift */; };
 		40986C3E2CD1148F00510F88 /* AudioSession_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */; };
+		409AF6E62DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */; };
 		409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		409D2A522D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
 		409D2A532D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
@@ -1572,10 +1579,7 @@
 		40034C302CFE168D00A318B1 /* StreamLocaleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamLocaleProvider.swift; sourceTree = "<group>"; };
 		40070F382CF0EF2200035FA9 /* Stream_Video_Sfu_Models_Codec+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_Codec+Convenience.swift"; sourceTree = "<group>"; };
 		40070F3A2CF0EF4500035FA9 /* Stream_Video_Sfu_Models_PublishOption+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_PublishOption+Convenience.swift"; sourceTree = "<group>"; };
-		40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureWindowSizePolicy.swift; sourceTree = "<group>"; };
 		40073B6E2C456CB4006A2867 /* StreamPictureInPictureVideoRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureVideoRendererTests.swift; sourceTree = "<group>"; };
-		40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy.swift; sourceTree = "<group>"; };
-		40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdaptiveWindowSizePolicy.swift; sourceTree = "<group>"; };
 		40073B792C456E44006A2867 /* StreamPictureInPictureFixedWindowSizePolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureFixedWindowSizePolicy_Tests.swift; sourceTree = "<group>"; };
 		40073B7C2C456F08006A2867 /* MockStreamAVPictureInPictureViewControlling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamAVPictureInPictureViewControlling.swift; sourceTree = "<group>"; };
 		40073B7E2C456F30006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdaptiveWindowSizePolicy_Tests.swift; sourceTree = "<group>"; };
@@ -1785,6 +1789,15 @@
 		406B3C542C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_JoiningStageTests.swift; sourceTree = "<group>"; };
 		406B3C5A2C92CFFD00FC93A1 /* WebRTCCoordinatorStateMachine_JoinedStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_JoinedStageTests.swift; sourceTree = "<group>"; };
 		406B3C5C2C92E37500FC93A1 /* MockInternetConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInternetConnection.swift; sourceTree = "<group>"; };
+		4072A5802DAE81CF00108E8F /* StreamPictureInPictureVideoParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureVideoParticipantView.swift; sourceTree = "<group>"; };
+		4072A5852DAE821C00108E8F /* StreamPictureInPictureVideoRendererView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureVideoRendererView.swift; sourceTree = "<group>"; };
+		4072A5892DAE845800108E8F /* StreamPictureInPictureContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureContent.swift; sourceTree = "<group>"; };
+		4072A58B2DAE879B00108E8F /* AnyViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyViewFactory.swift; sourceTree = "<group>"; };
+		4072A58D2DAE8E5E00108E8F /* StreamPictureInPictureScreenSharingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureScreenSharingView.swift; sourceTree = "<group>"; };
+		4072A58F2DAEADFF00108E8F /* PictureInPictureStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureStore.swift; sourceTree = "<group>"; };
+		4072A5912DAEB41500108E8F /* StreamPictureInPictureDelegateProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureDelegateProxy.swift; sourceTree = "<group>"; };
+		4072A5932DAF992400108E8F /* PictureInPictureParticipantModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureParticipantModifier.swift; sourceTree = "<group>"; };
+		4072A5952DAF99E000108E8F /* PictureInPictureContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContentProvider.swift; sourceTree = "<group>"; };
 		407AF7132B615D3300E9E3E7 /* CallDurationView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDurationView_Tests.swift; sourceTree = "<group>"; };
 		407AF7152B61602B00E9E3E7 /* ControlBadgeView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView_Tests.swift; sourceTree = "<group>"; };
 		407AF7172B61619900E9E3E7 /* ParticipantListButton_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantListButton_Tests.swift; sourceTree = "<group>"; };
@@ -1836,6 +1849,7 @@
 		40986C392CCB6D2F00510F88 /* RTCRtpEncodingParameters_Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCRtpEncodingParameters_Test.swift; sourceTree = "<group>"; };
 		40986C3B2CCB6E4B00510F88 /* RTCRtpTransceiverInit_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCRtpTransceiverInit_Tests.swift; sourceTree = "<group>"; };
 		40986C3D2CD1148F00510F88 /* AudioSession_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSession_Tests.swift; sourceTree = "<group>"; };
+		409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureReconnectionView.swift; sourceTree = "<group>"; };
 		409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+PredicateFulfillment.swift"; sourceTree = "<group>"; };
 		409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBroadcastMoreControlsListButtonView.swift; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
@@ -2881,16 +2895,6 @@
 			path = LocaleProvider;
 			sourceTree = "<group>";
 		};
-		40073B702C456DE0006A2867 /* WindowSizePolicy */ = {
-			isa = PBXGroup;
-			children = (
-				40073B682C456250006A2867 /* StreamPictureInPictureWindowSizePolicy.swift */,
-				40073B712C456DF6006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift */,
-				40073B732C456DFC006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift */,
-			);
-			path = WindowSizePolicy;
-			sourceTree = "<group>";
-		};
 		40073B782C456E30006A2867 /* WindowSizePolicy */ = {
 			isa = PBXGroup;
 			children = (
@@ -3667,6 +3671,34 @@
 			path = Stages;
 			sourceTree = "<group>";
 		};
+		4072A5822DAE820500108E8F /* Renderer */ = {
+			isa = PBXGroup;
+			children = (
+				40A941732B4D97A1006D6965 /* StreamPictureInPictureVideoRenderer.swift */,
+				4072A5852DAE821C00108E8F /* StreamPictureInPictureVideoRendererView.swift */,
+			);
+			path = Renderer;
+			sourceTree = "<group>";
+		};
+		4072A5872DAE82F300108E8F /* ParticipantView */ = {
+			isa = PBXGroup;
+			children = (
+				4072A5802DAE81CF00108E8F /* StreamPictureInPictureVideoParticipantView.swift */,
+				4072A58D2DAE8E5E00108E8F /* StreamPictureInPictureScreenSharingView.swift */,
+			);
+			path = ParticipantView;
+			sourceTree = "<group>";
+		};
+		4072A5882DAE840D00108E8F /* ContentView */ = {
+			isa = PBXGroup;
+			children = (
+				409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */,
+				4072A5932DAF992400108E8F /* PictureInPictureParticipantModifier.swift */,
+				4072A5892DAE845800108E8F /* StreamPictureInPictureContent.swift */,
+			);
+			path = ContentView;
+			sourceTree = "<group>";
+		};
 		408679F52BD12EFC00D027E0 /* AudioFilter */ = {
 			isa = PBXGroup;
 			children = (
@@ -3953,17 +3985,21 @@
 		40A9416C2B4D958A006D6965 /* PictureInPicture */ = {
 			isa = PBXGroup;
 			children = (
-				40073B702C456DE0006A2867 /* WindowSizePolicy */,
+				4072A5952DAF99E000108E8F /* PictureInPictureContentProvider.swift */,
+				4072A5912DAEB41500108E8F /* StreamPictureInPictureDelegateProxy.swift */,
+				4072A5882DAE840D00108E8F /* ContentView */,
+				4072A5872DAE82F300108E8F /* ParticipantView */,
+				4072A5822DAE820500108E8F /* Renderer */,
 				40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */,
 				40A9416F2B4D96E6006D6965 /* StreamPictureInPictureController.swift */,
 				40A941712B4D9750006D6965 /* StreamAVPictureInPictureVideoCallViewController.swift */,
-				40A941732B4D97A1006D6965 /* StreamPictureInPictureVideoRenderer.swift */,
 				40A941752B4D9F16006D6965 /* StreamPictureInPictureView.swift */,
 				40A941772B4DC576006D6965 /* StreamPictureInPictureTrackStateAdapter.swift */,
 				40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */,
 				403FF3EA2BA1D2F90092CE8A /* StreamRTCYUVBuffer.swift */,
 				403FF3EF2BA1DC230092CE8A /* StreamYUVToARGBConversion.swift */,
 				403FF3F12BA1DC480092CE8A /* YpCbCrPixelRange+Default.swift */,
+				4072A58F2DAEADFF00108E8F /* PictureInPictureStore.swift */,
 			);
 			path = PictureInPicture;
 			sourceTree = "<group>";
@@ -6158,6 +6194,7 @@
 				8415D3E2290BC882006E53CB /* Sounds.swift */,
 				4045D9D42DAD35790077A660 /* Resource.swift */,
 				8498796728A15F0300D06F31 /* ViewFactory.swift */,
+				4072A58B2DAE879B00108E8F /* AnyViewFactory.swift */,
 				8406266C2A37A27D004B8748 /* CallViewModel.swift */,
 				84D419B728E7155100F574F9 /* CallContainer.swift */,
 				8458872828A3F920002A81BF /* CallingViews */,
@@ -7817,15 +7854,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4072A58C2DAE879B00108E8F /* AnyViewFactory.swift in Sources */,
 				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */,
-				40073B752C456E06006A2867 /* StreamPictureInPictureAdaptiveWindowSizePolicy.swift in Sources */,
 				84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */,
+				4072A5922DAEB41500108E8F /* StreamPictureInPictureDelegateProxy.swift in Sources */,
 				40A941742B4D97A1006D6965 /* StreamPictureInPictureVideoRenderer.swift in Sources */,
 				846BA2AD2A9F602C001AD0AF /* SampleBufferVideoCallView.swift in Sources */,
 				842C7EAE28A2773700C2AB7F /* IncomingCallView.swift in Sources */,
 				84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */,
 				408D29A22B6D209700885473 /* SnapshotViewModifier.swift in Sources */,
+				4072A58A2DAE845800108E8F /* StreamPictureInPictureContent.swift in Sources */,
+				4072A5942DAF992400108E8F /* PictureInPictureParticipantModifier.swift in Sources */,
 				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
 				40914C9A2B56A85B00F6A13E /* StreamBufferTransformer.swift in Sources */,
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,
@@ -7887,6 +7927,7 @@
 				401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */,
 				84DC382F29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift in Sources */,
 				846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */,
+				4072A5812DAE81CF00108E8F /* StreamPictureInPictureVideoParticipantView.swift in Sources */,
 				40D1657F2B5FE8AB00C6D951 /* (null) in Sources */,
 				848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */,
 				40245F342BE26BC900FCF075 /* StatelessMicrophoneIconView.swift in Sources */,
@@ -7900,6 +7941,7 @@
 				849EDA8D297AFD840072A12D /* Camera.swift in Sources */,
 				844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */,
 				8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */,
+				4072A5862DAE821C00108E8F /* StreamPictureInPictureVideoRendererView.swift in Sources */,
 				84B57D39297FFF8300E4E709 /* PreJoiningView_iOS13.swift in Sources */,
 				8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* CallingGroupView.swift in Sources */,
@@ -7908,9 +7950,9 @@
 				8458B704290ACF2A00F8E487 /* CallSoundsPlayer.swift in Sources */,
 				849EDA8F297AFE1C0072A12D /* LobbyViewModel.swift in Sources */,
 				8458872728A3F34D002A81BF /* HelperViews.swift in Sources */,
-				40073B772C456E1A006A2867 /* StreamPictureInPictureFixedWindowSizePolicy.swift in Sources */,
 				84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */,
 				840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */,
+				4072A58E2DAE8E5E00108E8F /* StreamPictureInPictureScreenSharingView.swift in Sources */,
 				840626722A37A431004B8748 /* IncomingCall.swift in Sources */,
 				40AA2EDC2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift in Sources */,
 				846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */,
@@ -7929,11 +7971,11 @@
 				4049CE842BBBF8EF003D07D2 /* StreamAsyncImage.swift in Sources */,
 				40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */,
 				40245F322BE269E300FCF075 /* StatelessVideoIconView.swift in Sources */,
+				4072A5962DAF99E000108E8F /* PictureInPictureContentProvider.swift in Sources */,
 				84429933293FA48B0037232A /* ScreenSharingView.swift in Sources */,
 				84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */,
 				40E110472B5A9DF4007DF492 /* CallDurationView.swift in Sources */,
 				40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */,
-				40073B762C456E0E006A2867 /* StreamPictureInPictureWindowSizePolicy.swift in Sources */,
 				846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */,
 				40F18B8C2BEBAC4C00ADF76E /* CallEndedViewModifier.swift in Sources */,
 				4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */,
@@ -7943,9 +7985,11 @@
 				840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */,
 				40A941782B4DC576006D6965 /* StreamPictureInPictureTrackStateAdapter.swift in Sources */,
 				408D29A42B6D251600885473 /* UIView+Snapshot.swift in Sources */,
+				4072A5902DAEADFF00108E8F /* PictureInPictureStore.swift in Sources */,
 				84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */,
 				40073B882C458250006A2867 /* VideoRendererView.swift in Sources */,
 				40A941722B4D9750006D6965 /* StreamAVPictureInPictureVideoCallViewController.swift in Sources */,
+				409AF6E62DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift in Sources */,
 				40A941702B4D96E6006D6965 /* StreamPictureInPictureController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

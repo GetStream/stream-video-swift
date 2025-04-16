@@ -12,58 +12,33 @@ import UIKit
 #endif
 
 /// A controller class for picture-in-picture whenever that is possible.
-final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate, @unchecked Sendable {
+@available(iOS 15.0, *)
+final class StreamPictureInPictureController: @unchecked Sendable {
+
+    private enum DisposableKey: String { case isPossible, isActive }
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     // MARK: - Properties
 
-    /// The RTCVideoTrack for which the picture-in-picture session is created.
-    @MainActor
-    var track: RTCVideoTrack? {
-        didSet {
-            didUpdate(track) // Called when the `track` property changes
-        }
-    }
+    private let store: PictureInPictureStore
 
-    /// The UIView that contains the video content.
-    var sourceView: UIView? {
-        didSet {
-            didUpdate(sourceView) // Called when the `sourceView` property changes
-        }
-    }
-
-    /// A closure called when the picture-in-picture view's size changes.
-    @MainActor
-    var onSizeUpdate: (@Sendable(CGSize) -> Void)? {
-        didSet {
-            contentViewController?.onSizeUpdate = onSizeUpdate // Updates the onSizeUpdate closure of the content view controller
-        }
-    }
-
-    /// A boolean value indicating whether the picture-in-picture session should start automatically when the app enters background.
-    var canStartPictureInPictureAutomaticallyFromInline: Bool
+    private let proxyDelegate: StreamPictureInPictureDelegateProxy = .init()
 
     private var didAppBecomeActiveCancellable: AnyCancellable?
 
     // MARK: - Private Properties
 
     /// The AVPictureInPictureController object.
-    private var pictureInPictureController: AVPictureInPictureController?
+    private var pictureInPictureController: AVPictureInPictureController? {
+        didSet { didUpdate(pictureInPictureController) }
+    }
 
     /// The StreamAVPictureInPictureViewControlling object that manages the picture-in-picture view.
-    private var contentViewController: StreamAVPictureInPictureViewControlling?
+    private var contentViewController: StreamAVPictureInPictureVideoCallViewController?
 
     /// A set of `AnyCancellable` objects used to manage subscriptions.
-    private var cancellableBag: Set<AnyCancellable> = []
-
-    /// A `AnyCancellable` object used to ensure that the active track is enabled while in picture-in-picture
-    /// mode.
-    private var ensureActiveTrackIsEnabledCancellable: AnyCancellable?
-
-    /// A `StreamPictureInPictureTrackStateAdapter` object that manages the state of the
-    /// active track.
-    private let trackStateAdapter: StreamPictureInPictureTrackStateAdapter = .init()
+    private var disposableBag = DisposableBag()
 
     // MARK: - Lifecycle
 
@@ -74,150 +49,96 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     /// background.
     ///
     /// - Returns `nil` if AVPictureInPictureController is not supported, or the controller otherwise.
-    init?(canStartPictureInPictureAutomaticallyFromInline: Bool = true) {
+    @MainActor
+    init?(
+        store: PictureInPictureStore
+    ) {
         guard AVPictureInPictureController.isPictureInPictureSupported() else {
             return nil
         }
 
-        self.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
+        self.store = store
 
-        super.init()
+        store
+            .publisher(for: \.sourceView)
+            .removeDuplicates()
+            .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
+            .store(in: disposableBag)
 
-        Task { @MainActor in
-            let contentViewController: StreamAVPictureInPictureViewControlling? = {
-                if #available(iOS 15.0, *) {
-                    return StreamAVPictureInPictureVideoCallViewController()
-                } else {
-                    return nil
-                }
-            }()
-            self.contentViewController = contentViewController
-
-            subscribeToApplicationStateNotifications()
-        }
-    }
-
-    // MARK: - AVPictureInPictureControllerDelegate
-
-    func pictureInPictureController(
-        _ pictureInPictureController: AVPictureInPictureController,
-        restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void
-    ) {
-        completionHandler(true)
-    }
-
-    func pictureInPictureControllerWillStartPictureInPicture(
-        _ pictureInPictureController: AVPictureInPictureController
-    ) {
-        Task { @MainActor in
-            log.debug("Will start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
-        }
-    }
-
-    func pictureInPictureControllerDidStartPictureInPicture(
-        _ pictureInPictureController: AVPictureInPictureController
-    ) {
-        Task { @MainActor in
-            log.debug("Did start with trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
-        }
-    }
-
-    func pictureInPictureController(
-        _ pictureInPictureController: AVPictureInPictureController,
-        failedToStartPictureInPictureWithError error: Error
-    ) {
-        Task { @MainActor in
-            log.error("Failed for trackId:\(track?.trackId ?? "na/a") with error:\(error)", subsystems: .pictureInPicture)
-        }
-    }
-
-    func pictureInPictureControllerWillStopPictureInPicture(
-        _ pictureInPictureController: AVPictureInPictureController
-    ) {
-        Task { @MainActor in
-            log.debug("Will stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
-        }
-    }
-
-    func pictureInPictureControllerDidStopPictureInPicture(
-        _ pictureInPictureController: AVPictureInPictureController
-    ) {
-        Task { @MainActor in
-            log.debug("Did stop for trackId:\(track?.trackId ?? "n/a")", subsystems: .pictureInPicture)
-        }
-    }
-
-    // MARK: - Private helpers
-
-    @MainActor
-    private func didUpdate(_ track: RTCVideoTrack?) {
-        contentViewController?.track = track
-        trackStateAdapter.activeTrack = track
-    }
-
-    private func didUpdate(_ sourceView: UIView?) {
-        if let sourceView {
-            // If picture-in-picture isn't active, just create a new controller.
-            if pictureInPictureController?.isPictureInPictureActive != true {
-                makePictureInPictureController(with: sourceView)
-
-                pictureInPictureController?
-                    .publisher(for: \.isPictureInPicturePossible)
-                    .removeDuplicates()
-                    .sink { log.debug("isPictureInPicturePossible:\($0)", subsystems: .pictureInPicture) }
-                    .store(in: &cancellableBag)
-
-                pictureInPictureController?
-                    .publisher(for: \.isPictureInPictureActive)
-                    .removeDuplicates()
-                    .sink { [weak self] in self?.didUpdatePictureInPictureActiveState($0) }
-                    .store(in: &cancellableBag)
-            } else {
-                // If picture-in-picture is active, simply update the sourceView.
-                makePictureInPictureController(with: sourceView)
-            }
-        } else {
-            if #available(iOS 15.0, *) {
-                pictureInPictureController?.contentSource = nil
-            }
-            pictureInPictureController = nil
-            cancellableBag.removeAll()
-        }
-    }
-
-    private func makePictureInPictureController(with sourceView: UIView) {
-        if #available(iOS 15.0, *),
-           let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
-            pictureInPictureController = .init(
-                contentSource: .init(
-                    activeVideoCallSourceView: sourceView,
-                    contentViewController: contentViewController
-                )
-            )
-        }
-
-        if #available(iOS 14.2, *) {
-            pictureInPictureController?
-                .canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
-        }
-
-        pictureInPictureController?.delegate = self
-    }
-
-    private func didUpdatePictureInPictureActiveState(_ isActive: Bool) {
-        log.debug("isPictureInPictureActive:\(isActive)", subsystems: .pictureInPicture)
-        trackStateAdapter.isEnabled = isActive
-    }
-
-    private func subscribeToApplicationStateNotifications() {
         // We add a small delay (250ms) on cancelling PiP as if we do it too early it
         // seems that it has no effect.
         // Calling `stopPictureInPicture` is a safe operation as it will only
         // stop it if it is active.
-        didAppBecomeActiveCancellable = applicationStateAdapter
+        applicationStateAdapter
             .$state
             .filter { $0 == .foreground }
             .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
             .sink { [weak self] _ in self?.pictureInPictureController?.stopPictureInPicture() }
+            .store(in: disposableBag)
+    }
+
+    @MainActor
+    private func didUpdate(_ sourceView: UIView?) {
+        guard let sourceView else {
+            pictureInPictureController?.contentSource = nil
+            pictureInPictureController = nil
+            disposableBag.remove(DisposableKey.isPossible.rawValue)
+            disposableBag.remove(DisposableKey.isActive.rawValue)
+            return
+        }
+
+        if contentViewController == nil {
+            let contentViewController = StreamAVPictureInPictureVideoCallViewController(
+                store: store
+            )
+            self.contentViewController = contentViewController
+        }
+
+        guard let contentViewController else {
+            return
+        }
+
+        pictureInPictureController = .init(
+            contentSource: .init(
+                activeVideoCallSourceView: sourceView,
+                contentViewController: contentViewController
+            )
+        )
+        pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = store.state
+            .canStartPictureInPictureAutomaticallyFromInline
+        pictureInPictureController?.delegate = proxyDelegate
+    }
+
+    @MainActor
+    private func didUpdate(_ viewFactory: AnyViewFactory) {
+        contentViewController = StreamAVPictureInPictureVideoCallViewController(
+            store: store
+        )
+
+        didUpdate(store.state.sourceView)
+    }
+
+    private func didUpdate(_ pictureInPictureController: AVPictureInPictureController?) {
+        if let pictureInPictureController {
+            pictureInPictureController
+                .publisher(for: \.isPictureInPicturePossible)
+                .removeDuplicates()
+                .log(.debug, subsystems: .pictureInPicture) { "isPossible:\($0)" }
+                .sink { _ in }
+                .store(in: disposableBag, key: DisposableKey.isPossible.rawValue)
+
+            pictureInPictureController
+                .publisher(for: \.isPictureInPictureActive)
+                .removeDuplicates()
+                .log(.debug, subsystems: .pictureInPicture) { "isActive:\($0)" }
+                .sink { [weak self] in self?.store.dispatch(.setActive($0)) }
+                .store(in: disposableBag, key: DisposableKey.isActive.rawValue)
+
+            log.debug("Controller has been configured.", subsystems: .pictureInPicture)
+        } else {
+            disposableBag.remove(DisposableKey.isPossible.rawValue)
+            disposableBag.remove(DisposableKey.isActive.rawValue)
+            log.debug("Controller has been released.", subsystems: .pictureInPicture)
+        }
     }
 }

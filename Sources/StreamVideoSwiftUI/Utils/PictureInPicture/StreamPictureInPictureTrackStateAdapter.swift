@@ -12,73 +12,122 @@ import StreamWebRTC
 /// and ensures that the active track is always enabled when necessary.
 final class StreamPictureInPictureTrackStateAdapter {
 
-    /// This property represents whether the adapter is enabled or not.
-    var isEnabled: Bool = false {
-        didSet {
-            /// When the 'isEnabled' property changes, this didSet observer is called.
-            /// It checks if the new value is different from the old value, and if so,
-            /// it calls the 'enableObserver' function.
-            guard isEnabled != oldValue else { return }
-            enableObserver(isEnabled)
-        }
+    private enum DisposableKey: String { case timePublisher }
+
+    private let store: PictureInPictureStore
+    private let disposableBag = DisposableBag()
+    private var content: StreamPictureInPictureContentState {
+        didSet { didUpdate(content, oldValue: oldValue) }
     }
 
-    /// This property represents the active RTCVideoTrack.
-    var activeTrack: RTCVideoTrack? {
-        didSet {
-            /// When the 'activeTrack' property changes, this didSet observer is called.
-            /// If the adapter is enabled and the new 'activeTrack' is different from the old one,
-            /// it disables the old track (if it exists).
-            if isEnabled, oldValue?.trackId != activeTrack?.trackId, let oldValue {
-                oldValue.isEnabled = false
-                log.info(
-                    "⚙️ Previously active track:\(oldValue.trackId) for picture-in-picture will be disabled now.",
-                    subsystems: .pictureInPicture
-                )
-            }
-        }
-    }
+    init(store: PictureInPictureStore) {
+        self.store = store
+        content = store.state.content
 
-    deinit {
-        observerCancellable?.cancel()
+        store
+            .publisher(for: \.isActive)
+            .removeDuplicates()
+            .sink { [weak self] in self?.didUpdate($0) }
+            .store(in: disposableBag)
+
+        store
+            .publisher(for: \.content)
+            .removeDuplicates()
+            .assign(to: \.content, onWeak: self)
+            .store(in: disposableBag)
     }
 
     // MARK: - Private helpers
 
-    /// This property holds a reference to the observer cancellable.
-    private var observerCancellable: AnyCancellable?
-
-    /// This private function enables or disables an observer based on the 'isActive' parameter.
     ///
     /// - Parameter isActive: A Boolean value indicating whether the observer should be active.
-    private func enableObserver(_ isActive: Bool) {
-        observerCancellable?.cancel()
-        observerCancellable = nil
-        if isActive {
-            /// If 'isActive' is true, it sets up an observer that checks tracks state periodically.
-            observerCancellable = Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] _ in
-                    self?.checkTracksState()
-                }
-            log.debug("✅ Activated.", subsystems: .pictureInPicture)
-        } else {
-            /// If 'isActive' is false, it cancels the observer.
-            log.debug("❌ Disabled.", subsystems: .pictureInPicture)
+    private func didUpdate(_ isActive: Bool) {
+        disposableBag.remove(DisposableKey.timePublisher.rawValue)
+
+        guard isActive else {
+            log.debug("Track activeState observation is now inactive.", subsystems: .pictureInPicture)
+            return
+        }
+
+        Timer
+            .publish(every: 0.1, on: .main, in: .default)
+            .autoconnect()
+            .sink { [weak self] _ in self?.checkTracksState() }
+            .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
+
+        log.debug("Track activeState observation is now active.", subsystems: .pictureInPicture)
+    }
+
+    private func didUpdate(
+        _ content: StreamPictureInPictureContentState,
+        oldValue: StreamPictureInPictureContentState
+    ) {
+        guard store.state.isActive else {
+            return
+        }
+
+        let currentTrack: RTCVideoTrack? = {
+            switch oldValue {
+            case let .participant(_, _, track):
+                return track
+            case let .screenSharing(_, _, track):
+                return track
+            default:
+                return nil
+            }
+        }()
+
+        let newTrack: RTCVideoTrack? = {
+            switch content {
+            case let .participant(_, _, track):
+                return track
+            case let .screenSharing(_, _, track):
+                return track
+            default:
+                return nil
+            }
+        }()
+
+        guard
+            newTrack?.trackId != currentTrack?.trackId
+        else {
+            return
+        }
+
+        switch oldValue {
+        case let .participant(_, participant, track) where track != nil:
+            track?.isEnabled = false
+            log.debug(
+                "Track activeState observation has disabled the track:\(track?.trackId ?? "-") for participant name:\(participant.name).",
+                subsystems: .pictureInPicture
+            )
+        case let .screenSharing(_, participant, track):
+            log.debug(
+                "Track activeState observation has disabled the screenSharing track:\(track.trackId) for participant name:\(participant.name).",
+                subsystems: .pictureInPicture
+            )
+        default:
+            break
         }
     }
 
     /// This private function checks the state of the active track and enables it if it's not already enabled.
     private func checkTracksState() {
-        let activeTrack = self.activeTrack
-        if let activeTrack, !activeTrack.isEnabled {
-            log.info(
-                "⚙️ Active track:\(activeTrack.trackId) for picture-in-picture will be enabled now.",
+        switch content {
+        case let .participant(_, participant, track) where track != nil && track?.isEnabled == false:
+            track?.isEnabled = true
+            log.debug(
+                "Track activeState observation has enabled the track:\(track?.trackId ?? "-") for participant name:\(participant.name).",
                 subsystems: .pictureInPicture
             )
-            activeTrack.isEnabled = true
+        case let .screenSharing(_, participant, track) where track.isEnabled == false:
+            track.isEnabled = true
+            log.debug(
+                "Track activeState observation has enabled the screenSharing track:\(track.trackId) for participant name:\(participant.name).",
+                subsystems: .pictureInPicture
+            )
+        default:
+            break
         }
     }
 }
