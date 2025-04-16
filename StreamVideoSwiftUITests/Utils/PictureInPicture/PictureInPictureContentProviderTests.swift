@@ -8,17 +8,18 @@ import Combine
 import StreamWebRTC
 import XCTest
 
+@MainActor
 final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendable {
 
     private lazy var store: PictureInPictureStore! = .init()
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var subject: PictureInPictureContentProvider! = .init(store: store)
 
-    override func tearDown() {
+    override func tearDown() async throws {
         store = nil
         mockPeerConnectionFactory = nil
         subject = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - reconnectionStatus
@@ -206,7 +207,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         let expected = CGSize(width: 1, height: 1)
         let participant = CallParticipant.dummy(
             hasVideo: true,
-            trackSize: expected,
+            trackSize: expected
         )
         try await assertPreferredContentSizeUpdate(isActive: false, expected: expected) {
             $0.state.localParticipant = participant
@@ -255,7 +256,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         let expected = CGSize(width: 1, height: 1)
         let participant = CallParticipant.dummy(
             hasVideo: true,
-            trackSize: expected,
+            trackSize: expected
         )
         try await assertPreferredContentSizeUpdate(isActive: true, expected: expected) {
             $0.state.localParticipant = participant
@@ -279,7 +280,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         await ensureSubjectInitialisation()
 
         // Given
-        let call: MockCall = await MockCall(.dummy())
+        let call: MockCall = MockCall(.dummy())
         store.dispatch(.setCall(call))
 
         _ = await Task { @MainActor in
@@ -289,6 +290,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         _ = try await store
             .publisher(for: \.content)
             .filter { validation($0) }
+            .eraseToAnyPublisher()
             .nextValue(timeout: defaultTimeout)
     }
 
@@ -304,7 +306,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
 
         // Given
         store.dispatch(.setActive(isActive))
-        let call: MockCall = await MockCall(.dummy())
+        let call: MockCall =  MockCall(.dummy())
         store.dispatch(.setCall(call))
 
         _ = await Task { @MainActor in
