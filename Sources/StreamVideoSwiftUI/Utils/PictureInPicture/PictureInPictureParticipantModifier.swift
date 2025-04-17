@@ -61,6 +61,7 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
             )
     }
 
+    @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
     }
