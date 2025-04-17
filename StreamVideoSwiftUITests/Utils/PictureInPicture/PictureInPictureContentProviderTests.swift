@@ -306,7 +306,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
 
         // Given
         store.dispatch(.setActive(isActive))
-        let call: MockCall =  MockCall(.dummy())
+        let call: MockCall = MockCall(.dummy())
         store.dispatch(.setCall(call))
 
         _ = await Task { @MainActor in
