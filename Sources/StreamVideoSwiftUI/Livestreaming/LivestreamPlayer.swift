@@ -339,6 +339,14 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                         }
                     } : nil
                 )
+            } else {
+                VStack(alignment: .center) {
+                    Text(L10n.Call.Livestream.hostVideoUnavailable)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(colors.livestreamText)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
             }
         }
         .onChange(of: fullScreen) { onFullScreenStateChange?($0) }

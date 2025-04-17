@@ -47,3 +47,4 @@
 "call.livestream.early-participants" = "participants have joined early";
 "call.livestream.ended" = "The livestream has ended.";
 "call.livestream.recordings" = "Watch the recording:";
+"call.livestream.host-video-unavailable" = "The host's video is not available.";
