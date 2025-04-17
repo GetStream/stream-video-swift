@@ -479,6 +479,7 @@ class CallController: @unchecked Sendable {
     private func handleParticipantsUpdated() {
         webRTCParticipantsObserver = participants?
             .$value
+            .removeDuplicates() // Avoid unnecessary updates when participants haven't changed.
             .sinkTask { @MainActor [weak self] participants in
                 self?.call?.state.participantsMap = participants
             }

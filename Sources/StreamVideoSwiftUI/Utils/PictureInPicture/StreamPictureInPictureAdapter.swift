@@ -31,15 +31,14 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
         Task { @MainActor in
             let store = PictureInPictureStore()
             guard
-                #available(iOS 15.0, *),
-                let pictureInPictureController = PictureInPictureController(store: store)
+                #available(iOS 15.0, *)
             else {
                 log.warning("Not supported.", subsystems: .pictureInPicture)
                 return
             }
 
             self.store = store
-            self.pictureInPictureController = pictureInPictureController
+            self.pictureInPictureController = PictureInPictureController(store: store)
 
             contentProvider = .init(store: store)
             trackStateAdapter = .init(store: store)
