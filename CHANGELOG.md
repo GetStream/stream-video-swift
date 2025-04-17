@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - `CallViewModel.callingState` transition to `.idle` just before moving to `.inCall` after the user has accepted the call. [#759](https://github.com/GetStream/stream-video-swift/pull/759)
+- `AudioSession` mode wasn't configured correctly for audio-only calls. [#762](https://github.com/GetStream/stream-video-swift/pull/762)
 
 ### 🔄 Changed
 - `CallSettings` won't be propagated between calls when using the `CallViewModel`. [#751](https://github.com/GetStream/stream-video-swift/pull/751)
