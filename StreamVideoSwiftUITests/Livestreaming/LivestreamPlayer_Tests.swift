@@ -87,4 +87,24 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase, @unchecked Sendable {
         // Then
         AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
+    
+    @MainActor
+    func test_livestreamPlayer_endedState() async throws {
+        // Given
+        let call = MockCall()
+        let recording = CallRecording(
+            endTime: .now,
+            filename: "test",
+            startTime: .distantFuture,
+            url: "https://test.com"
+        )
+        call.state.endedAt = .now
+        
+        // When
+        let player = LivestreamPlayer(call: call, joinPolicy: .none, recordings: [recording])
+            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
+        
+        // Then
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
+    }
 }
