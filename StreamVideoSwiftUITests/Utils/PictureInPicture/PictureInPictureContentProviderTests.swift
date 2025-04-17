@@ -57,7 +57,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
             screenshareTrack: videoTrack
         )
         try await assertContentUpdate {
-            $0.state.screenSharingSession = .init(track: videoTrack, participant: participant)
+            $0.state.participantsMap = [participant.sessionId: participant]
         } validation: {
             switch $0 {
             case let .screenSharing(_, contentParticipant, track):
