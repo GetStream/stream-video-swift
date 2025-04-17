@@ -26,6 +26,7 @@ public final class AnyViewFactory: ViewFactory {
         [String: RawJSON],
         Call?
     ) -> AnyView
+    #if compiler(>=6.0)
     private let _makeVideoCallParticipantModifier: (
         CallParticipant,
         Call?,
@@ -33,6 +34,7 @@ public final class AnyViewFactory: ViewFactory {
         CGFloat,
         Bool
     ) -> any ViewModifier
+    #endif // any ViewModifier not recognised on Swift version < 6.0
     private let _makeCallView: (CallViewModel) -> AnyView
     private let _makeMinimizedCallView: (CallViewModel) -> AnyView
     private let _makeCallTopView: (CallViewModel) -> AnyView
@@ -40,11 +42,13 @@ public final class AnyViewFactory: ViewFactory {
     private let _makeScreenSharingView: (CallViewModel, ScreenSharingSession, CGRect) -> AnyView
     private let _makeLobbyView: (CallViewModel, LobbyInfo, Binding<CallSettings>) -> AnyView
     private let _makeReconnectionView: (CallViewModel) -> AnyView
+    #if compiler(>=6.0)
     private let _makeLocalParticipantViewModifier: (
         CallParticipant,
         Binding<CallSettings>,
         Call?
     ) -> any ViewModifier
+    #endif // any ViewModifier not recognised on Swift version < 6.0
     private let _makeUserAvatar: (User, UserAvatarViewOptions) -> AnyView
 
     public init<T: ViewFactory>(_ factory: T) {
@@ -69,6 +73,7 @@ public final class AnyViewFactory: ViewFactory {
                     )
             )
         }
+        #if compiler(>=6.0)
         _makeVideoCallParticipantModifier = {
             factory.makeVideoCallParticipantModifier(
                 participant: $0,
@@ -78,6 +83,7 @@ public final class AnyViewFactory: ViewFactory {
                 showAllInfo: $4
             )
         }
+        #endif // any ViewModifier not recognised on Swift version < 6.0
         _makeCallView = { AnyView(factory.makeCallView(viewModel: $0)) }
         _makeMinimizedCallView = { AnyView(factory.makeMinimizedCallView(viewModel: $0)) }
         _makeCallTopView = { AnyView(factory.makeCallTopView(viewModel: $0)) }
@@ -87,9 +93,11 @@ public final class AnyViewFactory: ViewFactory {
         }
         _makeLobbyView = { AnyView(factory.makeLobbyView(viewModel: $0, lobbyInfo: $1, callSettings: $2)) }
         _makeReconnectionView = { AnyView(factory.makeReconnectionView(viewModel: $0)) }
+        #if compiler(>=6.0)
         _makeLocalParticipantViewModifier = {
             factory.makeLocalParticipantViewModifier(localParticipant: $0, callSettings: $1, call: $2)
         }
+        #endif // any ViewModifier not recognised on Swift version < 6.0
         _makeUserAvatar = { AnyView(factory.makeUserAvatar($0, with: $1)) }
     }
 
@@ -132,6 +140,7 @@ public final class AnyViewFactory: ViewFactory {
         _makeVideoParticipantView(participant, id, availableFrame, contentMode, customData, call)
     }
 
+    #if compiler(>=6.0)
     public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
@@ -141,6 +150,7 @@ public final class AnyViewFactory: ViewFactory {
     ) -> any ViewModifier {
         _makeVideoCallParticipantModifier(participant, call, availableFrame, ratio, showAllInfo)
     }
+    #endif // any ViewModifier not recognised on Swift version < 6.0
 
     public func makeCallView(viewModel: CallViewModel) -> some View {
         _makeCallView(viewModel)
@@ -178,6 +188,7 @@ public final class AnyViewFactory: ViewFactory {
         _makeReconnectionView(viewModel)
     }
 
+    #if compiler(>=6.0)
     public func makeLocalParticipantViewModifier(
         localParticipant: CallParticipant,
         callSettings: Binding<CallSettings>,
@@ -185,6 +196,7 @@ public final class AnyViewFactory: ViewFactory {
     ) -> any ViewModifier {
         _makeLocalParticipantViewModifier(localParticipant, callSettings, call)
     }
+    #endif // any ViewModifier not recognised on Swift version < 6.0
 
     public func makeUserAvatar(
         _ user: User,

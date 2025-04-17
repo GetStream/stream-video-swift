@@ -7,7 +7,6 @@ import Foundation
 @testable import StreamVideoSwiftUI
 import XCTest
 
-@MainActor
 @available(iOS 15.0, *)
 final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable {
 
@@ -15,6 +14,7 @@ final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable 
 
     // MARK: - Call updated
 
+    @MainActor
     func test_callUpdated_storeWasUpdated() async {
         let call = MockCall(.dummy())
         _ = subject
@@ -27,6 +27,7 @@ final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable 
 
     // MARK: - SourceView updated
 
+    @MainActor
     func test_sourceViewUpdated_storeWasUpdated() async {
         let view = UIView()
         _ = subject
