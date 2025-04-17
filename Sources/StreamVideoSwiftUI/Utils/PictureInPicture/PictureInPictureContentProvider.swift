@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 import StreamVideo
 
 /// Manages the content displayed in the Picture-in-Picture window.
