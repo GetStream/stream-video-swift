@@ -52,7 +52,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     /// Registers for push notifications.
     open func register() {
         #if targetEnvironment(simulator) && !STREAM_TESTS
-        log.info("CallKit notifications are not supported on simulator.")
+        log.info("CallKit notifications are not supported on simulator.", subsystems: .callKit)
         #else
         registry.delegate = self
         registry.desiredPushTypes = [.voIP]
@@ -62,7 +62,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     /// Unregisters for push notifications.
     open func unregister() {
         #if targetEnvironment(simulator) && !STREAM_TESTS
-        log.info("CallKit notifications are not supported on simulator.")
+        log.info("CallKit notifications are not supported on simulator.", subsystems: .callKit)
         #else
         registry.delegate = nil
         registry.desiredPushTypes = []
@@ -77,7 +77,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         for type: PKPushType
     ) {
         let deviceToken = pushCredentials.token.map { String(format: "%02x", $0) }.joined()
-        log.debug("Device token updated to: \(deviceToken)")
+        log.debug("Device token updated to: \(deviceToken)", subsystems: .callKit)
         self.deviceToken = deviceToken
     }
 
@@ -86,7 +86,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         _ registry: PKPushRegistry,
         didInvalidatePushTokenFor type: PKPushType
     ) {
-        log.debug("Device token invalidated.")
+        log.debug("Device token invalidated.", subsystems: .callKit)
         deviceToken = ""
     }
 
@@ -114,7 +114,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             hasVideo: content.hasVideo,
             completion: { error in
                 if let error {
-                    log.error(error)
+                    log.error(error, subsystems: .callKit)
                 }
             }
         )

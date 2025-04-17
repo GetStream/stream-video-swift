@@ -44,8 +44,8 @@ public final class CurrentDevice: @unchecked Sendable {
     }
 
     /// The identified `DeviceType` for the current environment.
-    public private(set) var deviceType: DeviceType = .unspecified
-    public private(set) var systemVersion: String = "-"
+    public internal(set) var deviceType: DeviceType = .unspecified
+    public internal(set) var systemVersion: String = "-"
 
     /// Creates a `CurrentDevice` by inspecting the user interface idiom.
     /// - Important: On platforms where UIKit is unavailable, the type defaults

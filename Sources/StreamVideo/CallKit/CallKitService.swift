@@ -139,7 +139,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             callerId:\(callerId)
             callerName:\(localizedCallerName)
             hasVideo: \(hasVideo)
-            """
+            """,
+            subsystems: .callKit
         )
 
         guard let streamVideo, let callEntry = callEntry(for: callUUID) else {
@@ -147,7 +148,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 """
                 CallKit operation:reportIncomingCall cannot be fulfilled because 
                 StreamVideo is nil.
-                """
+                """,
+                subsystems: .callKit
             )
             callEnded(cid)
             return
@@ -186,7 +188,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         cid:\(cid) 
                         callerId:\(callerId)
                         callerName:\(localizedCallerName)
-                        """
+                        """,
+                        subsystems: .callKit
                     )
                     callEnded(cid)
                 }
@@ -196,7 +199,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     Failed to report incoming call with 
                     callId:\(callId)
                     callType:\(callType)
-                    """
+                    """,
+                    subsystems: .callKit
                 )
                 callEnded(cid)
             }
@@ -272,7 +276,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     )
                 )
             } catch {
-                log.error(error)
+                log.error(error, subsystems: .callKit)
             }
         }
     }
@@ -299,7 +303,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// all internal call state (disconnecting communication channels, releasing network resources, etc.).
     /// This callback can be treated as a request to end all calls without the need to respond to any actions
     open func providerDidReset(_ provider: CXProvider) {
-        log.debug("CXProvider didReset.")
+        log.debug("CXProvider didReset.", subsystems: .callKit)
         storageAccessQueue.sync {
             for (_, entry) in _storage {
                 entry.call.leave()
@@ -311,14 +315,36 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         _ provider: CXProvider,
         didActivate audioSession: AVAudioSession
     ) {
-        log.debug("AudioSession is now active with router:\(audioSession.currentRoute).")
+        log.debug(
+            """
+            CallKit audioSession was activated:
+                category: \(audioSession.category)
+                mode: \(audioSession.mode)
+                options: \(audioSession.categoryOptions)
+                route: \(audioSession.currentRoute)
+            
+            CallSettings: \(callSettings)
+            """,
+            subsystems: .callKit
+        )
     }
 
     public func provider(
         _ provider: CXProvider,
         didDeactivate audioSession: AVAudioSession
     ) {
-        log.debug("AudioSession is now inactive with router:\(audioSession.currentRoute).")
+        log.debug(
+            """
+            CallKit audioSession was deactivated:
+                category: \(audioSession.category)
+                mode: \(audioSession.mode)
+                options: \(audioSession.categoryOptions)
+                route: \(audioSession.currentRoute)
+            
+            CallSettings: \(callSettings)
+            """,
+            subsystems: .callKit
+        )
     }
 
     open func provider(
@@ -345,7 +371,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             do {
                 try await callToJoinEntry.call.accept()
             } catch {
-                log.error(error)
+                log.error(error, subsystems: .callKit)
             }
 
             do {
@@ -354,7 +380,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             } catch {
                 callToJoinEntry.call.leave()
                 set(nil, for: action.callUUID)
-                log.error(error)
+                log.error(error, subsystems: .callKit)
                 action.fail()
             }
 
@@ -374,6 +400,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     While joining call id:\(callToJoinEntry.call.cId) we failed to mute the microphone.
                     \(callSettings)
                     """,
+                    subsystems: .callKit,
                     error: error
                 )
             }
@@ -401,7 +428,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 callId:\(stackEntry.call.callId)
                 callType:\(stackEntry.call.callType)
                 callerId:\(stackEntry.createdBy?.id)
-                """
+                """,
+                subsystems: .callKit
             )
             if currentCallWasEnded {
                 stackEntry.call.leave()
@@ -418,11 +446,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         Rejecting with reason: \(rejectionReason ?? "nil")
                         call:\(stackEntry.call.callId)
                         callType: \(stackEntry.call.callType)
-                        """
+                        """,
+                        subsystems: .callKit
                     )
                     try await stackEntry.call.reject(reason: rejectionReason)
                 } catch {
-                    log.error(error)
+                    log.error(error, subsystems: .callKit)
                 }
             }
             set(nil, for: actionCallUUID)
@@ -449,6 +478,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             } catch {
                 log.error(
                     "Unable to perform muteCallAction isMuted:\(action.isMuted).",
+                    subsystems: .callKit,
                     error: error
                 )
             }
@@ -474,7 +504,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Returns: A boolean value indicating whether the call was handled.
     open func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
         guard let streamVideo else {
-            log.warning("CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.")
+            log.warning(
+                "CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.",
+                subsystems: .callKit
+            )
             return false
         }
 
@@ -499,7 +532,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         )
         .autoconnect()
         .sink { [weak self] _ in
-            log.debug("Detected ringing timeout, hanging up...")
+            log.debug(
+                "Detected ringing timeout, hanging up...",
+                subsystems: .callKit
+            )
             self?.callEnded(callState.call.cid)
             self?.ringingTimerCancellable = nil
         }
@@ -526,7 +562,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 """
                 CallKit operation:\(#function) cannot be fulfilled because
                 StreamVideo is nil.
-                """
+                """,
+                subsystems: .callKit
             )
             return
         }
@@ -548,7 +585,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
         }
 
-        log.debug("\(type(of: self)) is now subscribed to CallEvent updates.")
+        log.debug(
+            "\(type(of: self)) is now subscribed to CallEvent updates.",
+            subsystems: .callKit
+        )
     }
 
     private func buildProvider(
@@ -602,7 +642,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         update.supportsDTMF = false
 
         if supportsHolding {
-            log.warning("CallKit hold isn't supported.")
+            log.warning(
+                "CallKit hold isn't supported.",
+                subsystems: .callKit
+            )
         } else {
             update.supportsGrouping = false
             update.supportsHolding = false

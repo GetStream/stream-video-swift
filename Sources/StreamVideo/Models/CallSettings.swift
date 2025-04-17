@@ -52,7 +52,12 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
         self.cameraPosition = cameraPosition
         if Bundle.containsCameraUsageDescription {
             #if targetEnvironment(simulator)
-            self.videoOn = InjectedValues[\.simulatorStreamFile] != nil ? videoOn : false
+            // If we are running in tests we want to allow any passed in value.
+            if NSClassFromString("XCTestCase") != nil {
+                self.videoOn = videoOn
+            } else {
+                self.videoOn = InjectedValues[\.simulatorStreamFile] != nil ? videoOn : false
+            }
             #else
             self.videoOn = videoOn
             #endif

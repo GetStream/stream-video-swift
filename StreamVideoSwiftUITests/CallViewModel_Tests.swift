@@ -763,7 +763,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         callViewModel.toggleMicrophoneEnabled()
         
         // Then
-        await fulfilmentInMainActor { callViewModel.callSettings.videoOn == false }
+        await fulfilmentInMainActor { callViewModel.callSettings.audioOn == false }
     }
     
     @MainActor
