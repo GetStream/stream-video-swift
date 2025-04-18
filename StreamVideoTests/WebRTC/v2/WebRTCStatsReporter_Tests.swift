@@ -155,12 +155,3 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
     }
 }
-
-extension XCTestCase {
-
-    func wait(for interval: TimeInterval) async {
-        let waitExpectation = expectation(description: "Waiting for \(interval) seconds...")
-        waitExpectation.isInverted = true
-        await fulfillment(of: [waitExpectation], timeout: interval)
-    }
-}

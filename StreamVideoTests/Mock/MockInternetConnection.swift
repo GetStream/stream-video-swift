@@ -7,9 +7,9 @@ import Combine
 
 final class MockInternetConnection: InternetConnectionProtocol, @unchecked Sendable {
 
-    let subject: CurrentValueSubject<InternetConnection.Status, Never> = .init(.available(.great))
+    let subject: CurrentValueSubject<InternetConnectionStatus, Never> = .init(.available(.great))
 
-    var statusPublisher: AnyPublisher<InternetConnection.Status, Never> {
+    var statusPublisher: AnyPublisher<InternetConnectionStatus, Never> {
         subject.eraseToAnyPublisher()
     }
 }

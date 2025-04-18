@@ -2,29 +2,15 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
-
-/// Mock implementation of `InternetConnection`
-final class InternetConnection_Mock: InternetConnection, @unchecked Sendable {
-    private(set) var monitorMock: InternetConnectionMonitor_Mock!
-    private(set) var init_notificationCenter: NotificationCenter!
-
-    init(
-        monitor: InternetConnectionMonitor_Mock = .init(),
-        notificationCenter: NotificationCenter = .default
-    ) {
-        super.init(notificationCenter: notificationCenter, monitor: monitor)
-        init_notificationCenter = notificationCenter
-        monitorMock = monitor
-    }
-}
 
 /// Mock implementation of `InternetConnectionMonitor`
 final class InternetConnectionMonitor_Mock: InternetConnectionMonitor {
     weak var delegate: InternetConnectionDelegate?
 
-    var status: InternetConnection.Status = .unknown {
+    var status: InternetConnectionStatus = .unknown {
         didSet {
             delegate?.internetConnectionStatusDidChange(status: status)
         }

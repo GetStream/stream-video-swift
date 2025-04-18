@@ -46,7 +46,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
     override var state: CallState {
         get { self[dynamicMember: \.state] }
-        set { _ = newValue }
+        set { stub(for: \.state, with: newValue) }
     }
 
     @MainActor

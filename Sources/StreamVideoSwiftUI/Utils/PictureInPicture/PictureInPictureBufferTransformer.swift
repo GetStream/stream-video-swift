@@ -6,9 +6,9 @@ import Foundation
 import StreamVideo
 import StreamWebRTC
 
-/// `StreamBufferTransformer` is a struct that provides methods for transforming RTCI420Buffer to
+/// `PictureInPictureBufferTransformer` is a struct that provides methods for transforming RTCI420Buffer to
 /// CVPixelBuffer, while performing downsampling when necessary.
-struct StreamBufferTransformer {
+struct PictureInPictureBufferTransformer {
 
     var requiresResize = false
 

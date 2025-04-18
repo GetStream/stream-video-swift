@@ -9,12 +9,12 @@ import StreamSwiftTestHelpers
 import StreamWebRTC
 import XCTest
 
-final class StreamBufferTransformerTests: XCTestCase, @unchecked Sendable {
+final class PictureInPictureBufferTransformerTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - transform(_: RTCI420Buffer, targetSize: CGSize)
 
     func test_RTCI420Buffer_TransformWithNoResizeRequired() throws {
-        var transformer = StreamBufferTransformer()
+        var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = false
         let sourceBuffer = RTCI420Buffer(
             width: 100,
@@ -36,7 +36,7 @@ final class StreamBufferTransformerTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_RTCI420Buffer_TransformWithResizeRequired() throws {
-        var transformer = StreamBufferTransformer()
+        var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = true
         let sourceBuffer = RTCI420Buffer(
             width: 200,
@@ -58,7 +58,7 @@ final class StreamBufferTransformerTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_RTCI420Buffer_ResizeSizeToFitWithinContainer() throws {
-        var transformer = StreamBufferTransformer()
+        var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = true
         let sourceBuffer = RTCI420Buffer(
             width: 450,
@@ -82,7 +82,7 @@ final class StreamBufferTransformerTests: XCTestCase, @unchecked Sendable {
     // MARK: - transform(_: RTCCVPixelBuffer, targetSize: CGSize)
 
     func test_RTCCVPixelBuffer_TransformWithNoResizeRequired() throws {
-        var transformer = StreamBufferTransformer()
+        var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = false
         let sourceBuffer = RTCCVPixelBuffer(
             pixelBuffer: try XCTUnwrap(
@@ -105,7 +105,7 @@ final class StreamBufferTransformerTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_RTCCVPixelBuffer_TransformWithResizeRequired() throws {
-        var transformer = StreamBufferTransformer()
+        var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = true
         let sourceBuffer = RTCCVPixelBuffer(
             pixelBuffer: try XCTUnwrap(
@@ -128,7 +128,7 @@ final class StreamBufferTransformerTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_RTCCVPixelBuffer_ResizeSizeToFitWithinContainer() throws {
-        var transformer = StreamBufferTransformer()
+        var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = true
         let sourceBuffer = RTCCVPixelBuffer(
             pixelBuffer: try XCTUnwrap(
