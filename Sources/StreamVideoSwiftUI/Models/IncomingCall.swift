@@ -18,7 +18,7 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
     public let members: [Member]
     public let timeout: TimeInterval
     public let video: Bool
-    public let customData: [String: RawJSON]
+    public let custom: [String: RawJSON]
 
     public init(
         id: String,
@@ -27,7 +27,7 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
         members: [Member],
         timeout: TimeInterval,
         video: Bool = false,
-        customData: [String: RawJSON] = [:]
+        custom: [String: RawJSON] = [:]
     ) {
         self.id = id
         self.caller = caller
@@ -35,6 +35,6 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
         self.members = members
         self.timeout = timeout
         self.video = video
-        self.customData = customData
+        self.custom = custom
     }
 }

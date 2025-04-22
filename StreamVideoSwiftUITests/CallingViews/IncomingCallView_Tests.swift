@@ -20,8 +20,7 @@ final class IncomingCallView_Tests: StreamVideoUITestCase, @unchecked Sendable {
                 type: callType,
                 members: members,
                 timeout: 15000,
-                video: false,
-                customData: [:]
+                video: false
             )
             let view = IncomingCallView(
                 callInfo: callInfo,
