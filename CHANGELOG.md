@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.21.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.21.0)
+_April 22, 2025_
+
 ### ✅ Added
 - Countdown timer and waiting participants info to the livestream player [#754](https://github.com/GetStream/stream-video-swift/pull/754)
 - EventPublisher for `Call` objects. [#759](https://github.com/GetStream/stream-video-swift/pull/759)
