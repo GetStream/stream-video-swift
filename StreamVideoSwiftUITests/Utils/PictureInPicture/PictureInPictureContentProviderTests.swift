@@ -327,3 +327,6 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         }
     }
 }
+
+extension AnyPublisher: @retroactive @unchecked Sendable {}
+extension Publishers.Filter: @retroactive @unchecked Sendable {}

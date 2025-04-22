@@ -8,15 +8,16 @@ import Combine
 import StreamWebRTC
 import XCTest
 
+@MainActor
 final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
 
     private var subject: PictureInPictureStore! = .init()
     private var disposableBag: DisposableBag! = .init()
 
-    override func tearDown() {
+    override func tearDown() async throws {
         subject = nil
         disposableBag = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     // MARK: - Initial State Tests
