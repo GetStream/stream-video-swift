@@ -60,12 +60,18 @@ internal enum L10n {
       internal static var countdown: String { L10n.tr("Localizable", "call.livestream.countdown") }
       /// participants have joined early
       internal static var earlyParticipants: String { L10n.tr("Localizable", "call.livestream.early-participants") }
+      /// The livestream has ended.
+      internal static var ended: String { L10n.tr("Localizable", "call.livestream.ended") }
       /// Error joining the livestream. Please try again later.
       internal static var error: String { L10n.tr("Localizable", "call.livestream.error") }
+      /// The host's video is not available.
+      internal static var hostVideoUnavailable: String { L10n.tr("Localizable", "call.livestream.host-video-unavailable") }
       /// Live
       internal static var live: String { L10n.tr("Localizable", "call.livestream.live") }
       /// Livestream is not started. Please come back later.
       internal static var notStarted: String { L10n.tr("Localizable", "call.livestream.not-started") }
+      /// Watch the recording:
+      internal static var recordings: String { L10n.tr("Localizable", "call.livestream.recordings") }
     }
     internal enum Outgoing {
       /// Calling

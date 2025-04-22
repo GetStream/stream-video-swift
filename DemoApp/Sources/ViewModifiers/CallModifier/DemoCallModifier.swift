@@ -34,8 +34,7 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
     private func contentView(_ rootView: Content) -> some View {
         if
             let call = viewModel.call,
-            call.callType == .livestream,
-            (call.currentUserHasCapability(.sendAudio) == false) || (call.currentUserHasCapability(.sendVideo) == false) {
+            call.callType == .livestream {
             ZStack {
                 rootView
                 LivestreamPlayer(

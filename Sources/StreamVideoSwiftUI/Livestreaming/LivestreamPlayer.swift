@@ -66,6 +66,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @State var cancellables = DisposableBag()
     
     @State var controlsTask: Task<Void, Never>?
+    
+    @State var recordings: [CallRecording]?
         
     /// Initializes a `LivestreamPlayer` with the specified parameters.
     ///
@@ -90,7 +92,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         self.viewFactory = viewFactory
         let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
         self.call = call
-        livestreamState = call.state.backstage ? .backstage : .initial
+        livestreamState = LivestreamState(call: call)
         countdown = 0
         self.muted = muted
         self.showParticipantCount = showParticipantCount
@@ -110,13 +112,15 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
         showParticipantCount: Bool = true,
         joinPolicy: JoinPolicy = .auto,
         showsLeaveCallButton: Bool = false,
+        recordings: [CallRecording]? = nil,
         onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         self.viewFactory = viewFactory
         self.call = call
         self.countdown = countdown
-        self.livestreamState = livestreamState ?? (call.state.backstage ? .backstage : .live)
+        self.livestreamState = livestreamState ?? LivestreamState(call: call)
         self.muted = muted
+        self.recordings = recordings
         self.showParticipantCount = showParticipantCount
         _state = ObservedObject(wrappedValue: call.state)
         self.joinPolicy = joinPolicy
@@ -133,6 +137,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 loadingView
             } else if livestreamState == .backstage {
                 notStartedView
+            } else if livestreamState == .ended {
+                endedView
             } else {
                 videoRenderer
                 livestreamControls
@@ -144,7 +150,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
             }
         })
         .onChange(of: call.state.backstage) { _ in
-            livestreamState = call.state.backstage ? .backstage : .live
+            livestreamState = LivestreamState(call: call)
             if
                 let startsAt = state.startsAt,
                 livestreamState == .backstage,
@@ -267,6 +273,48 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
     
     @ViewBuilder
+    private var endedView: some View {
+        VStack(spacing: 32) {
+            Text(L10n.Call.Livestream.ended)
+                .multilineTextAlignment(.center)
+                .foregroundColor(colors.livestreamText)
+                .onAppear {
+                    if recordings == nil {
+                        Task {
+                            do {
+                                recordings = try await call.listRecordings()
+                            } catch {
+                                log.error("Error fetching recordings: \(error)")
+                                recordings = []
+                            }
+                        }
+                    }
+                }
+            
+            if let recordings, !recordings.isEmpty {
+                VStack(spacing: 8) {
+                    Text(L10n.Call.Livestream.recordings)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(colors.livestreamText)
+                    
+                    ForEach(recordings, id: \.self) { recording in
+                        Button {
+                            if let url = URL(string: recording.url), UIApplication.shared.canOpenURL(url) {
+                                UIApplication.shared.open(url)
+                            }
+                        } label: {
+                            Text(recording.url)
+                                .font(.subheadline)
+                                .foregroundColor(Color(colors.textLowEmphasis))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
     private var videoRenderer: some View {
         GeometryReader { reader in
             if let participant = state.participants.first(where: { $0.track != nil }) {
@@ -291,6 +339,14 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                         }
                     } : nil
                 )
+            } else {
+                VStack(alignment: .center) {
+                    Text(L10n.Call.Livestream.hostVideoUnavailable)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(colors.livestreamText)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
             }
         }
         .onChange(of: fullScreen) { onFullScreenStateChange?($0) }
@@ -467,6 +523,19 @@ enum LivestreamState {
     case live
     case error
     case joining
+    case ended
+}
+
+extension LivestreamState {
+    @MainActor init(call: Call) {
+        if call.state.backstage == true {
+            self = .backstage
+        } else if call.state.endedAt != nil {
+            self = .ended
+        } else {
+            self = .live
+        }
+    }
 }
 
 extension LivestreamState {

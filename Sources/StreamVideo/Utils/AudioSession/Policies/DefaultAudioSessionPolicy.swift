@@ -23,7 +23,7 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
     ) -> AudioSessionConfiguration {
         .init(
             category: .playAndRecord,
-            mode: callSettings.speakerOn ? .videoChat : .voiceChat,
+            mode: callSettings.videoOn ? .videoChat : .voiceChat,
             options: .playAndRecord,
             overrideOutputAudioPort: callSettings.speakerOn ? .speaker : AVAudioSession.PortOverride.none
         )

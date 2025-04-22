@@ -31,7 +31,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
         .thermalState,
         .audioSession,
         .videoCapturer,
-        .pictureInPicture
+        .pictureInPicture,
+        .callKit
     ]
 
     /// All subsystems within the SDK.
@@ -50,7 +51,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
         .thermalState,
         .audioSession,
         .videoCapturer,
-        .pictureInPicture
+        .pictureInPicture,
+        .callKit
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -84,6 +86,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
     public static let videoCapturer = Self(rawValue: 1 << 13)
     /// The subsystem responsible for PicutreInPicture.
     public static let pictureInPicture = Self(rawValue: 1 << 14)
+    /// The subsystem responsible for PicutreInPicture.
+    public static let callKit = Self(rawValue: 1 << 15)
 
     public var description: String {
         switch rawValue {
@@ -117,6 +121,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
             return "videoCapturer"
         case LogSubsystem.pictureInPicture.rawValue:
             return "picture-in-picture"
+        case LogSubsystem.callKit.rawValue:
+            return "CallKit"
         default:
             return "unknown(rawValue:\(rawValue)"
         }

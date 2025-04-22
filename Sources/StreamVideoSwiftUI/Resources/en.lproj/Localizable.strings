@@ -45,3 +45,6 @@
 "call.livestream.error" = "Error joining the livestream. Please try again later.";
 "call.livestream.countdown" = "Livestream will start in:";
 "call.livestream.early-participants" = "participants have joined early";
+"call.livestream.ended" = "The livestream has ended.";
+"call.livestream.recordings" = "Watch the recording:";
+"call.livestream.host-video-unavailable" = "The host's video is not available.";
