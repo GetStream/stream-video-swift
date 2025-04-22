@@ -27,6 +27,8 @@ extension RTCStatisticsReport: @retroactive @unchecked Sendable {}
 extension WritableKeyPath: @retroactive @unchecked Sendable {}
 extension Published.Publisher: @retroactive @unchecked Sendable {}
 extension RTCVideoFrame: @retroactive @unchecked Sendable {}
+extension AnyPublisher: @retroactive @unchecked Sendable {}
+extension Publishers.Filter: @retroactive @unchecked Sendable {}
 #else
 extension AnyCancellable: @unchecked Sendable {}
 extension AVCaptureDevice: @unchecked Sendable {}
@@ -46,4 +48,6 @@ extension RTCStatisticsReport: @unchecked Sendable {}
 extension WritableKeyPath: @unchecked Sendable {}
 extension Published.Publisher: @unchecked Sendable {}
 extension RTCVideoFrame: @unchecked Sendable {}
+extension AnyPublisher: @unchecked Sendable {}
+extension Publishers.Filter: @unchecked Sendable {}
 #endif

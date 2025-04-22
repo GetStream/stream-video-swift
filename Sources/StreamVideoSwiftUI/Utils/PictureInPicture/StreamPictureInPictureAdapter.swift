@@ -7,124 +7,87 @@ import Foundation
 import StreamVideo
 import UIKit
 
-/// This class encapsulates the logic for managing picture-in-picture functionality during a video call. It tracks
-/// changes in the call, updates related to call participants, and changes in the source view for Picture in
-/// Picture display.
+/// Manages Picture-in-Picture functionality for video calls.
+///
+/// Coordinates between the call, source view, and Picture-in-Picture system components.
 public final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
-    /// The active call.
+    /// The active call instance.
     public var call: Call? {
-        didSet {
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                didUpdate(call)
+        willSet { store?.dispatch(.setCall(newValue)) }
+    }
+
+    /// The view used as an anchor for Picture-in-Picture display.
+    public var sourceView: UIView? { willSet { store?.dispatch(.setSourceView(newValue)) } }
+
+    private(set) var store: PictureInPictureStore?
+
+    private let disposableBag = DisposableBag()
+    private var pictureInPictureController: Any?
+
+    private var contentProvider: PictureInPictureContentProvider?
+    private var trackStateAdapter: PictureInPictureTrackStateAdapter?
+
+    /// Creates a new Picture-in-Picture adapter.
+    init() {
+        Task { @MainActor in
+            let store = PictureInPictureStore()
+            guard
+                #available(iOS 15.0, *)
+            else {
+                log.warning("Not supported.", subsystems: .pictureInPicture)
+                return
             }
-        }
-    }
 
-    /// The sourceView that will be used as an anchor/trigger for picture-in-picture (as required by AVKit).
-    public var sourceView: UIView? {
-        didSet {
-            guard sourceView !== oldValue else { return }
-            didUpdate(sourceView)
-        }
-    }
+            /// If the call was updated before we create our store internally, make sure that we will
+            /// set the Call correctly.
+            if store.state.call?.cId != call?.cId {
+                store.dispatch(.setCall(call))
+            }
 
-    /// The closure to call whenever the picture-in-picture rendering window changes size.
-    /// The closure gets assigned every time the call is being set.
-    var onSizeUpdate: (@Sendable(CGSize, CallParticipant) -> Void)? {
-        didSet {
-            Task { @MainActor in
-                pictureInPictureController?.onSizeUpdate = { [weak self] size in
-                    if let activeParticipant = self?.activeParticipant {
-                        self?.onSizeUpdate?(size, activeParticipant)
-                    }
+            self.store = store
+            self.pictureInPictureController = PictureInPictureController(store: store)
+
+            contentProvider = .init(store: store)
+            trackStateAdapter = .init(store: store)
+
+            store
+                .publisher(for: \.content)
+                .removeDuplicates()
+                .log(.debug, subsystems: .pictureInPicture) { "Content updated: \($0)." }
+                .sink { _ in }
+                .store(in: disposableBag)
+
+            Publishers
+                .CombineLatest(store.publisher(for: \.call), store.publisher(for: \.sourceView))
+                .filter { $0 == nil && $1 != nil }
+                .log(.warning, subsystems: .pictureInPicture) { _, _ in
+                    """
+                    PictureInPicture adapter has received a sourceView but the required
+                    call is nil. Please ensure that you provide a call instance in order
+                    to activate correctly Picture-in-Picture.
+                    """
                 }
-            }
-        }
-    }
+                .sink { _ in }
+                .store(in: disposableBag)
 
-    /// The participant to use in order to access the track to render on picture-in-picture.
-    private nonisolated(unsafe) var activeParticipant: CallParticipant?
-
-    private nonisolated(unsafe) var participantUpdatesCancellable: AnyCancellable?
-
-    /// The actual picture-in-picture controller.
-    private lazy var pictureInPictureController = StreamPictureInPictureController()
-
-    // MARK: - Private Helpers
-
-    /// Whenever the call changes, we reset the participant updates observer.
-    @MainActor
-    private func didUpdate(_ call: Call?) {
-        participantUpdatesCancellable?.cancel()
-        activeParticipant = nil
-        pictureInPictureController?.track = nil
-        onSizeUpdate = nil
-
-        guard let call = call else { return }
-        onSizeUpdate = { [weak call] trackSize, participant in
-            Task { [weak call] in
-                log.debug(
-                    "Updating track size for participant \(participant.name) to \(trackSize)",
-                    subsystems: .pictureInPicture
-                )
-                await call?.updateTrackSize(trackSize, for: participant)
-            }
-        }
-
-        Task { @MainActor in
-            participantUpdatesCancellable = call
-                .state
-                .$participants
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] in self?.didUpdate($0) }
-        }
-    }
-
-    /// Whenever participants change we update our internal state in order to always have the correct track
-    /// on picture-in-picture.
-    private func didUpdate(_ participants: [CallParticipant]) {
-        Task { @MainActor in
-            let sessionId = call?.state.sessionId
-            let otherParticipants = participants.filter { $0.sessionId != sessionId }
-
-            if let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false,
-               let track = session.track {
-                pictureInPictureController?.track = track
-                activeParticipant = nil
-            } else if let participant = otherParticipants.first(where: { $0.track != nil }), let track = participant.track {
-                pictureInPictureController?.track = track
-                activeParticipant = participant
-            } else if let localParticipant = call?.state.localParticipant, let track = localParticipant.track {
-                pictureInPictureController?.track = track
-                activeParticipant = localParticipant
-            }
-        }
-    }
-
-    private func didUpdate(_ sourceView: UIView?) {
-        pictureInPictureController?.sourceView = sourceView
-        if call == nil {
-            log.warning(
-                """
-                PictureInPicture adapter has received a sourceView but the required
-                call is nil. Please ensure that you provide a call instance in order
-                to activate correctly Picture-in-Picture.
-                """,
-                subsystems: .pictureInPicture
-            )
+            store
+                .publisher(for: \.sourceView)
+                .removeDuplicates()
+                .log(.debug, subsystems: .pictureInPicture) { "SourceView updated: \($0?.description ?? "-")." }
+                .sink { _ in }
+                .store(in: disposableBag)
         }
     }
 }
 
-/// Provides the default value of the `StreamPictureInPictureAdapter` class.
+/// Provides the default value for the Picture-in-Picture adapter.
 enum StreamPictureInPictureAdapterKey: InjectionKey {
     nonisolated(unsafe) static var currentValue: StreamPictureInPictureAdapter = .init()
 }
 
 extension InjectedValues {
-    /// Provides access to the `StreamPictureInPictureAdapter` class to the views and view models.
+    /// Access point for the Picture-in-Picture adapter in the dependency injection system.
     public var pictureInPictureAdapter: StreamPictureInPictureAdapter {
         get {
             Self[StreamPictureInPictureAdapterKey.self]
