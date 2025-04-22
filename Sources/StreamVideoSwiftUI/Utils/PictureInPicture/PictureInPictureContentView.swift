@@ -18,7 +18,7 @@ struct PictureInPictureContentView: View {
     private let store: PictureInPictureStore
 
     @State private var state: PictureInPictureContent
-    @State private var viewFactory: AnyViewFactory
+    @State private var viewFactory: PictureInPictureViewFactory
 
     /// Creates a new Picture-in-Picture content view.
     ///
@@ -59,7 +59,6 @@ struct PictureInPictureContentView: View {
         case let .screenSharing(_, participant, track):
             PictureInPictureScreenSharingView(
                 store: store,
-                viewFactory: viewFactory,
                 participant: participant,
                 track: track
             )

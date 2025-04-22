@@ -109,7 +109,7 @@ final class PictureInPictureController: @unchecked Sendable {
 
     /// Updates the content view controller when the view factory changes.
     @MainActor
-    private func didUpdate(_ viewFactory: AnyViewFactory) {
+    private func didUpdate(_ viewFactory: PictureInPictureViewFactory) {
         contentViewController = PictureInPictureVideoCallViewController(
             store: store
         )

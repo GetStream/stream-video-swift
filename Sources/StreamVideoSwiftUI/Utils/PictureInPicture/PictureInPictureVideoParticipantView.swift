@@ -17,7 +17,7 @@ struct PictureInPictureVideoParticipantView: View {
     @Injected(\.streamVideo) var streamVideo
 
     var store: PictureInPictureStore
-    var viewFactory: AnyViewFactory
+    var viewFactory: PictureInPictureViewFactory
     var participant: CallParticipant
     var track: RTCVideoTrack?
 
@@ -30,7 +30,7 @@ struct PictureInPictureVideoParticipantView: View {
     ///   - track: The participant's video track
     init(
         store: PictureInPictureStore,
-        viewFactory: AnyViewFactory,
+        viewFactory: PictureInPictureViewFactory,
         participant: CallParticipant,
         track: RTCVideoTrack?
     ) {
@@ -58,12 +58,8 @@ struct PictureInPictureVideoParticipantView: View {
     /// The overlay view showing participant information.
     @ViewBuilder
     private var overlayView: some View {
-        CallParticipantImageView(
-            viewFactory: viewFactory,
-            id: participant.id,
-            name: participant.name,
-            imageURL: participant.profileImageURL
-        )
-        .opacity(showVideo ? 0 : 1)
+        viewFactory
+            .makeParticipantImageView(participant: participant)
+            .opacity(showVideo ? 0 : 1)
     }
 }

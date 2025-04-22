@@ -18,7 +18,7 @@ final class PictureInPictureStore: ObservableObject {
         var isActive: Bool
         var call: Call?
         var sourceView: UIView?
-        var viewFactory: AnyViewFactory
+        var viewFactory: PictureInPictureViewFactory
         var content: PictureInPictureContent
         var preferredContentSize: CGSize
         var contentSize: CGSize
@@ -45,7 +45,7 @@ final class PictureInPictureStore: ObservableObject {
         /// Sets the source view for Picture-in-Picture.
         case setSourceView(UIView?)
         /// Updates the view factory for creating content.
-        case setViewFactory(AnyViewFactory)
+        case setViewFactory(PictureInPictureViewFactory)
         /// Changes the current content being displayed.
         case setContent(PictureInPictureContent)
         /// Sets the preferred size for Picture-in-Picture content.

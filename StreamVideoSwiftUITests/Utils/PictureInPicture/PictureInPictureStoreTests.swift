@@ -68,7 +68,7 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
     @MainActor
     func test_setViewFactory() {
         // Given
-        let factory = AnyViewFactory(DefaultViewFactory.shared)
+        let factory = PictureInPictureViewFactory(DefaultViewFactory.shared)
 
         // When
         subject.dispatch(.setViewFactory(factory))

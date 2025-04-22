@@ -235,6 +235,7 @@
 		406583922B877A1600B4F979 /* BackgroundImageFilterProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406583912B877A1600B4F979 /* BackgroundImageFilterProcessor.swift */; };
 		406583992B877AB400B4F979 /* CIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406583982B877AB400B4F979 /* CIImage+Resize.swift */; };
 		4065839D2B877B6500B4F979 /* UIDevice+NeuralEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4065839C2B877B6500B4F979 /* UIDevice+NeuralEngine.swift */; };
+		4066B0332DB788A000E92C20 /* PictureInPictureViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4066B0322DB788A000E92C20 /* PictureInPictureViewFactory.swift */; };
 		4067A5D82AE1249400CFDEB1 /* CornerClipper_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4067A5D72AE1249400CFDEB1 /* CornerClipper_Tests.swift */; };
 		4067F3082CDA32FA002E28BD /* StreamAudioSessionAdapterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4067F3072CDA32FA002E28BD /* StreamAudioSessionAdapterDelegate.swift */; };
 		4067F30B2CDA3359002E28BD /* AVAudioSessionRouteDescription+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4067F30A2CDA3359002E28BD /* AVAudioSessionRouteDescription+Convenience.swift */; };
@@ -311,7 +312,6 @@
 		4072A5812DAE81CF00108E8F /* PictureInPictureVideoParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5802DAE81CF00108E8F /* PictureInPictureVideoParticipantView.swift */; };
 		4072A5862DAE821C00108E8F /* PictureInPictureVideoRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5852DAE821C00108E8F /* PictureInPictureVideoRendererView.swift */; };
 		4072A58A2DAE845800108E8F /* PictureInPictureContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5892DAE845800108E8F /* PictureInPictureContentView.swift */; };
-		4072A58C2DAE879B00108E8F /* AnyViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A58B2DAE879B00108E8F /* AnyViewFactory.swift */; };
 		4072A58E2DAE8E5E00108E8F /* PictureInPictureScreenSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A58D2DAE8E5E00108E8F /* PictureInPictureScreenSharingView.swift */; };
 		4072A5902DAEADFF00108E8F /* PictureInPictureStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A58F2DAEADFF00108E8F /* PictureInPictureStore.swift */; };
 		4072A5922DAEB41500108E8F /* PictureInPictureDelegateProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5912DAEB41500108E8F /* PictureInPictureDelegateProxy.swift */; };
@@ -1743,6 +1743,7 @@
 		406583912B877A1600B4F979 /* BackgroundImageFilterProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundImageFilterProcessor.swift; sourceTree = "<group>"; };
 		406583982B877AB400B4F979 /* CIImage+Resize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CIImage+Resize.swift"; sourceTree = "<group>"; };
 		4065839C2B877B6500B4F979 /* UIDevice+NeuralEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+NeuralEngine.swift"; sourceTree = "<group>"; };
+		4066B0322DB788A000E92C20 /* PictureInPictureViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureViewFactory.swift; sourceTree = "<group>"; };
 		4067A5D72AE1249400CFDEB1 /* CornerClipper_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerClipper_Tests.swift; sourceTree = "<group>"; };
 		4067F3072CDA32FA002E28BD /* StreamAudioSessionAdapterDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioSessionAdapterDelegate.swift; sourceTree = "<group>"; };
 		4067F30A2CDA3359002E28BD /* AVAudioSessionRouteDescription+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSessionRouteDescription+Convenience.swift"; sourceTree = "<group>"; };
@@ -1797,7 +1798,6 @@
 		4072A5802DAE81CF00108E8F /* PictureInPictureVideoParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureVideoParticipantView.swift; sourceTree = "<group>"; };
 		4072A5852DAE821C00108E8F /* PictureInPictureVideoRendererView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureVideoRendererView.swift; sourceTree = "<group>"; };
 		4072A5892DAE845800108E8F /* PictureInPictureContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureContentView.swift; sourceTree = "<group>"; };
-		4072A58B2DAE879B00108E8F /* AnyViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyViewFactory.swift; sourceTree = "<group>"; };
 		4072A58D2DAE8E5E00108E8F /* PictureInPictureScreenSharingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureScreenSharingView.swift; sourceTree = "<group>"; };
 		4072A58F2DAEADFF00108E8F /* PictureInPictureStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureStore.swift; sourceTree = "<group>"; };
 		4072A5912DAEB41500108E8F /* PictureInPictureDelegateProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureDelegateProxy.swift; sourceTree = "<group>"; };
@@ -3965,6 +3965,7 @@
 				4072A5932DAF992400108E8F /* PictureInPictureParticipantModifier.swift */,
 				409AF6E52DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift */,
 				4072A58F2DAEADFF00108E8F /* PictureInPictureStore.swift */,
+				4066B0322DB788A000E92C20 /* PictureInPictureViewFactory.swift */,
 				40A941712B4D9750006D6965 /* PictureInPictureVideoCallViewController.swift */,
 				40914C992B56A85B00F6A13E /* PictureInPictureBufferTransformer.swift */,
 				40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */,
@@ -6175,7 +6176,6 @@
 				8415D3E2290BC882006E53CB /* Sounds.swift */,
 				4045D9D42DAD35790077A660 /* Resource.swift */,
 				8498796728A15F0300D06F31 /* ViewFactory.swift */,
-				4072A58B2DAE879B00108E8F /* AnyViewFactory.swift */,
 				8406266C2A37A27D004B8748 /* CallViewModel.swift */,
 				84D419B728E7155100F574F9 /* CallContainer.swift */,
 				8458872828A3F920002A81BF /* CallingViews */,
@@ -7836,7 +7836,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4072A58C2DAE879B00108E8F /* AnyViewFactory.swift in Sources */,
 				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */,
 				84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */,
@@ -7873,6 +7872,7 @@
 				409AF6E82DAFC80200EE7BF6 /* PictureInPictureContent.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				40245F3C2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift in Sources */,
+				4066B0332DB788A000E92C20 /* PictureInPictureViewFactory.swift in Sources */,
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
 				840042CF2A70212D00917B30 /* ScreensharingControls.swift in Sources */,
 				40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */,

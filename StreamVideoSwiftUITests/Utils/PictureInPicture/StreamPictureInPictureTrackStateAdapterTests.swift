@@ -47,7 +47,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
     func test_isActive_transitionFromTrueToFalse_allStoredTracksShouldBecomeEnabled() async throws {
         mockCall.state.participantsMap = [
             participantA.sessionId: participantA,
-            participantB.sessionId: participantB,
+            participantB.sessionId: participantB
         ]
         store.dispatch(.setActive(true))
         await wait(for: 0.5)

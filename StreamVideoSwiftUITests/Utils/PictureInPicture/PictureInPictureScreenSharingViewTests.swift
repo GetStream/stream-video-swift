@@ -28,7 +28,6 @@ final class PictureInPictureScreenSharingViewTests: StreamVideoUITestCase, @unch
     private func makeSubject() -> some View {
         PictureInPictureScreenSharingView(
             store: .init(),
-            viewFactory: .init(DefaultViewFactory.shared),
             participant: .dummy(name: "Get Stream"),
             track: RTCMediaStreamTrack.dummy(kind: .video, peerConnectionFactory: .mock()) as! RTCVideoTrack
         )

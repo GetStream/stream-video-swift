@@ -17,7 +17,6 @@ struct PictureInPictureScreenSharingView: View {
     @Injected(\.streamVideo) var streamVideo
 
     var store: PictureInPictureStore
-    var viewFactory: AnyViewFactory
     var participant: CallParticipant
     var track: RTCVideoTrack
 
@@ -25,17 +24,14 @@ struct PictureInPictureScreenSharingView: View {
     ///
     /// - Parameters:
     ///   - store: The store managing Picture-in-Picture state
-    ///   - viewFactory: Factory for creating views
     ///   - participant: The participant sharing their screen
     ///   - track: The screen sharing video track
     init(
         store: PictureInPictureStore,
-        viewFactory: AnyViewFactory,
         participant: CallParticipant,
         track: RTCVideoTrack
     ) {
         self.store = store
-        self.viewFactory = viewFactory
         self.participant = participant
         self.track = track
     }
