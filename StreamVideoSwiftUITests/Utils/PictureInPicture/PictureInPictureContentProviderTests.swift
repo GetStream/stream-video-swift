@@ -11,15 +11,27 @@ import XCTest
 @MainActor
 final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendable {
 
+    private static nonisolated(unsafe) var videoConfig: VideoConfig! = .dummy()
+
     private lazy var store: PictureInPictureStore! = .init()
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var subject: PictureInPictureContentProvider! = .init(store: store)
+
+    override func setUp() async throws {
+        try await super.setUp()
+        _ = subject
+    }
 
     override func tearDown() async throws {
         store = nil
         mockPeerConnectionFactory = nil
         subject = nil
         try await super.tearDown()
+    }
+
+    override class func tearDown() {
+        Self.videoConfig = nil
+        super.tearDown()
     }
 
     // MARK: - reconnectionStatus
@@ -265,11 +277,6 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
 
     // MARK: - Private Helpers
 
-    private func ensureSubjectInitialisation() async {
-        _ = subject
-        await wait(for: 0.5)
-    }
-
     private func assertContentUpdate(
         _ operation: @MainActor @escaping @Sendable(MockCall) -> Void,
         validation: @escaping (PictureInPictureContent) -> Bool,
@@ -277,10 +284,8 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         function: StaticString = #function,
         line: UInt = #line
     ) async throws {
-        await ensureSubjectInitialisation()
-
         // Given
-        let call: MockCall = MockCall(.dummy())
+        let call: MockCall = MockCall(.dummy(callController: .dummy(videoConfig: Self.videoConfig)))
         store.dispatch(.setCall(call))
 
         _ = await Task { @MainActor in
@@ -302,11 +307,9 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         function: StaticString = #function,
         line: UInt = #line
     ) async throws {
-        await ensureSubjectInitialisation()
-
         // Given
         store.dispatch(.setActive(isActive))
-        let call: MockCall = MockCall(.dummy())
+        let call: MockCall = MockCall(.dummy(callController: .dummy(videoConfig: Self.videoConfig)))
         store.dispatch(.setCall(call))
 
         _ = await Task { @MainActor in

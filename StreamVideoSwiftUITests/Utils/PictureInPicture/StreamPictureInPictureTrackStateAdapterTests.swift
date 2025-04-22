@@ -74,6 +74,19 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         XCTAssertTrue(participantB.track?.isEnabled ?? false)
     }
 
+    func test_content_isActiveTrue_contentIsParticipant_newTrackShouldBeEnabled() async throws {
+        store.dispatch(.setActive(true))
+        participantB.track?.isEnabled = false
+        store.dispatch(.setContent(.participant(mockCall, participantA, participantA.track)))
+
+        await wait(for: 0.5)
+        store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
+
+        await wait(for: 0.5)
+        XCTAssertFalse(participantA.track?.isEnabled ?? true)
+        XCTAssertTrue(participantB.track?.isEnabled ?? false)
+    }
+
     func test_content_isActiveTrue_contentIsParticipant_oldTrackShouldBeDisabled() async throws {
         store.dispatch(.setActive(true))
         store.dispatch(.setContent(.participant(mockCall, participantA, participantA.track)))

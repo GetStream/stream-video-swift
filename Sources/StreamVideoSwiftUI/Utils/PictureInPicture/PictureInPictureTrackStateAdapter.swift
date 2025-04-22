@@ -116,6 +116,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
             return
         }
 
+        newTrack?.isEnabled = true
         switch oldValue {
         case let .participant(_, participant, track) where track != nil:
             track?.isEnabled = false
