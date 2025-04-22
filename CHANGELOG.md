@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - Countdown timer and waiting participants info to the livestream player [#754](https://github.com/GetStream/stream-video-swift/pull/754)
 - EventPublisher for `Call` objects. [#759](https://github.com/GetStream/stream-video-swift/pull/759)
+- You can now access the `custom-data` attached on a Call object you received as incoming. [#766](https://github.com/GetStream/stream-video-swift/pull/766)
 
 ### 🔄 Changed
 - Updated WebRTC version to 125.6422.070 [#760](https://github.com/GetStream/stream-video-swift/pull/760)
