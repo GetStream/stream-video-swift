@@ -13,7 +13,7 @@ import UIKit
 public final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
     /// The active call instance.
-    public var call: Call? { willSet { store?.dispatch(.setCall(newValue)) } }
+    public var call: Call? { willSet { store?.dispatch(.setCall(call)) } }
 
     /// The view used as an anchor for Picture-in-Picture display.
     public var sourceView: UIView? { willSet { store?.dispatch(.setSourceView(newValue)) } }
@@ -69,6 +69,12 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
                 .log(.debug, subsystems: .pictureInPicture) { "SourceView updated: \($0?.description ?? "-")." }
                 .sink { _ in }
                 .store(in: disposableBag)
+
+            /// If the call was updated before we create our store internally, make sure that we will
+            /// set the Call correctly.
+            if store.state.call == nil, let call {
+                store.dispatch(.setCall(call))
+            }
         }
     }
 }
