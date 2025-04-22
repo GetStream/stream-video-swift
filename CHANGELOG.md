@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `CallViewModel.callingState` transition to `.idle` just before moving to `.inCall` after the user has accepted the call. [#759](https://github.com/GetStream/stream-video-swift/pull/759)
 - `AudioSession` mode wasn't configured correctly for audio-only calls. [#762](https://github.com/GetStream/stream-video-swift/pull/762)
 - Updated WebRTC version to 125.6422.070 [#760](https://github.com/GetStream/stream-video-swift/pull/760)
+- Picture-in-Picture improved UI and stability fixes. [#724](https://github.com/GetStream/stream-video-swift/pull/724)
 
 ### 🐞 Fixed
 - Sound resources weren't loaded correctly when the SDK was linked via SPM. [#757](https://github.com/GetStream/stream-video-swift/pull/757)
