@@ -8,69 +8,104 @@ import Foundation
 import StreamWebRTC
 import XCTest
 
-// final class StreamPictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Sendable {
-//
-//    private var factory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule.shared)
-//    private var adapter: PictureInPictureTrackStateAdapter! = .init()
-//
-//    private lazy var trackA: RTCVideoTrack! = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
-//    private lazy var trackB: RTCVideoTrack! = factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
-//
-//    // MARK: - Lifecycle
-//
-//    override func tearDown() {
-//        trackA?.isEnabled = false
-//        trackB?.isEnabled = false
-//        adapter = nil
-//        factory = nil
-//        super.tearDown()
-//    }
-//
-//    // MARK: - enabled
-//
-//    @MainActor
-//    func test_enabled_enablesTheActiveTrack() async throws {
-//        trackA.isEnabled = false
-//        adapter.activeTrack = trackA
-//
-//        adapter.isEnabled = true
-//
-//        await fulfillment { self.trackA.isEnabled == true }
-//    }
-//
-//    @MainActor
-//    func test_enabled_whenTheActiveTrackChanges_disablesTheOldTrack() async throws {
-//        trackA.isEnabled = true
-//        adapter.activeTrack = trackA
-//        trackB.isEnabled = false
-//
-//        adapter.isEnabled = true
-//        adapter.activeTrack = trackB
-//
-//        await fulfillment { self.trackA.isEnabled == false }
-//    }
-//
-//    // MARK: - disabled
-//
-//    @MainActor
-//    func test_disabled_doesNotChangeTheEnableForTheActiveTrack() async throws {
-//        trackA.isEnabled = false
-//        adapter.activeTrack = trackA
-//
-//        adapter.isEnabled = false
-//
-//        await fulfillment { self.trackA.isEnabled == false }
-//    }
-//
-//    @MainActor
-//    func test_disabled_whenTheActiveTrackChanges_doesNotDisableTheOldTrack() async throws {
-//        trackA.isEnabled = true
-//        adapter.activeTrack = trackA
-//        trackB.isEnabled = false
-//        adapter.isEnabled = false
-//
-//        adapter.activeTrack = trackB
-//
-//        await fulfillment { self.trackA.isEnabled == true }
-//    }
-// }
+@MainActor
+final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Sendable {
+
+    private lazy var factory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule.shared)
+    private lazy var store: PictureInPictureStore! = .init()
+    private lazy var mockCall: MockCall! = .init()
+    private lazy var subject: PictureInPictureTrackStateAdapter! = .init(store: store)
+
+    private lazy var participantA: CallParticipant! = CallParticipant.dummy(
+        track: factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+    )
+    private lazy var participantB: CallParticipant! = CallParticipant.dummy(
+        track: factory.makeVideoTrack(source: factory.makeVideoSource(forScreenShare: false))
+    )
+
+    // MARK: - Lifecycle
+
+    override func setUp() async throws {
+        try await super.setUp()
+        _ = subject
+        store.dispatch(.setCall(mockCall))
+    }
+
+    override func tearDown() async throws {
+        participantA.track?.isEnabled = false
+        participantB.track?.isEnabled = false
+        subject = nil
+        factory = nil
+        participantA = nil
+        participantB = nil
+        mockCall = nil
+        try await super.tearDown()
+    }
+
+    // MARK: - didUpdateActive
+
+    func test_isActive_transitionFromTrueToFalse_allStoredTracksShouldBecomeEnabled() async throws {
+        mockCall.state.participantsMap = [
+            participantA.sessionId: participantA,
+            participantB.sessionId: participantB,
+        ]
+        store.dispatch(.setActive(true))
+        await wait(for: 0.5)
+
+        participantA.track?.isEnabled = false
+        participantB.track?.isEnabled = false
+        store.dispatch(.setActive(false))
+
+        await fulfilmentInMainActor {
+            self.participantA.track?.isEnabled == true && self.participantB.track?.isEnabled == true
+        }
+    }
+
+    // MARK: - didUpdateContent
+
+    func test_content_isActiveFalse_noTrackShouldBeDisabled() async throws {
+        store.dispatch(.setContent(.participant(mockCall, participantA, participantA.track)))
+
+        await wait(for: 0.5)
+        store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
+
+        await wait(for: 0.5)
+        XCTAssertTrue(participantA.track?.isEnabled ?? false)
+        XCTAssertTrue(participantB.track?.isEnabled ?? false)
+    }
+
+    func test_content_isActiveTrue_contentIsParticipant_oldTrackShouldBeDisabled() async throws {
+        store.dispatch(.setActive(true))
+        store.dispatch(.setContent(.participant(mockCall, participantA, participantA.track)))
+
+        await wait(for: 0.5)
+        store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
+
+        await wait(for: 0.5)
+        XCTAssertFalse(participantA.track?.isEnabled ?? true)
+        XCTAssertTrue(participantB.track?.isEnabled ?? false)
+    }
+
+    func test_content_isActiveTrue_contentIsScreenSharing_oldTrackShouldBeDisabled() async throws {
+        store.dispatch(.setActive(true))
+        store.dispatch(.setContent(.screenSharing(mockCall, participantA, participantA.track!)))
+
+        await wait(for: 0.5)
+        store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
+
+        await wait(for: 0.5)
+        XCTAssertFalse(participantA.track?.isEnabled ?? true)
+        XCTAssertTrue(participantB.track?.isEnabled ?? false)
+    }
+
+    func test_content_isActiveTrue_contentTrackWasNotChanged_trackShouldRemainEnabled() async throws {
+        store.dispatch(.setActive(true))
+        store.dispatch(.setContent(.screenSharing(mockCall, participantA, participantA.track!)))
+
+        await wait(for: 0.5)
+        store.dispatch(.setContent(.screenSharing(mockCall, participantA, participantA.track!)))
+
+        await wait(for: 0.5)
+        XCTAssertTrue(participantA.track?.isEnabled ?? false)
+    }
+}

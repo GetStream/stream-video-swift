@@ -125,7 +125,6 @@ final class PictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// This method is being called from WebRTC and asks the container to set its size to the track's size.
     nonisolated func setSize(_ size: CGSize) {
         Task { @MainActor in
-//            store.dispatch(.setPreferredContentSize(size))
             trackSize = size
         }
     }

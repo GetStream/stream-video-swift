@@ -124,6 +124,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
                 subsystems: .pictureInPicture
             )
         case let .screenSharing(_, participant, track):
+            track.isEnabled = false
             log.debug(
                 "Track activeState observation has disabled the screenSharing track:\(track.trackId) for participant name:\(participant.name).",
                 subsystems: .pictureInPicture
