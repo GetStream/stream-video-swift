@@ -13,11 +13,13 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
 
     private lazy var callController: MockCallController! = .init()
     private lazy var call: MockCall! = .init(.dummy(callController: callController))
-    private lazy var input: Call.StateMachine.Stage.Context.JoinInput! = .init(
-        create: true,
-        ring: true,
-        notify: true,
-        deliverySubject: .init()
+    private lazy var input: Call.StateMachine.Stage.Context.Input! = .join(
+        .init(
+            create: true,
+            ring: true,
+            notify: true,
+            deliverySubject: .init()
+        )
     )
     private lazy var allOtherStages: [Call.StateMachine.Stage]! = Call.StateMachine.Stage.ID
         .allCases
@@ -80,7 +82,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     func test_execute_inputIsNil_transitionsToError() async {
         subject.transition = { self.transitionedToStage = $0 }
         subject.context.call = call
-        subject.context.joinInput = nil
+        subject.context.input = .none
 
         _ = subject.transition(from: .idle(.init()))
 
@@ -92,14 +94,16 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     func test_execute_withoutRetries_joinCallWasCalledOnCallControllerWithExpectedInput() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: .init(),
-                maxNumberOfRetries: 0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: .init(),
+                    retryPolicy: .init(maxRetries: 0, delay: { _ in 0 })
+                )
             )
         )
 
@@ -112,14 +116,15 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     func test_execute_withoutRetries_callStateCallSettingsUpdatedWithInput() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: .init(),
-                maxNumberOfRetries: 0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: .init()
+                )
             )
         )
 
@@ -129,21 +134,22 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             expectedTransition: .joined
         ) {
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
-            XCTAssertEqual(self.call.state.callSettings, context.joinInput?.callSettings)
+            XCTAssertEqual(self.call.state.callSettings, context.input.join?.callSettings)
         }
     }
 
     func test_execute_withoutRetries_callStateUpdatedWithInput() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: .init(),
-                maxNumberOfRetries: 0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: .init()
+                )
             )
         )
 
@@ -160,14 +166,15 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     func test_execute_withoutRetries_updatesCallSettingsManagers() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: .init(),
-                maxNumberOfRetries: 0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: .init()
+                )
             )
         )
 
@@ -184,14 +191,15 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     func test_execute_withoutRetries_updatesStreamVideoActiveCall() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: .init(),
-                maxNumberOfRetries: 0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: .init()
+                )
             )
         )
 
@@ -216,14 +224,15 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
 
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: deliverySubject,
-                maxNumberOfRetries: 0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: deliverySubject
+                )
             )
         )
 
@@ -243,14 +252,15 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     func test_execute_withoutRetries_beginsObservingWebRTCStateOnCallController() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: .init(),
-                maxNumberOfRetries: 0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: .init()
+                )
             )
         )
 
@@ -267,15 +277,16 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
     func test_execute_withRetries_whenJoinFailsAndThereAreAvailableRetries_transitionsToJoining() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: .init(),
-                maxNumberOfRetries: 2,
-                retryDelayRange: 0...0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: .init(),
+                    retryPolicy: .init(maxRetries: 2, delay: { _ in 0 })
+                )
             )
         )
 
@@ -303,15 +314,16 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
 
         let context = Call.StateMachine.Stage.Context(
             call: call,
-            joinInput: .init(
-                create: true,
-                callSettings: .init(audioOn: false),
-                options: .init(memberIds: [.unique]),
-                ring: true,
-                notify: false,
-                deliverySubject: deliverySubject,
-                maxNumberOfRetries: 2,
-                retryDelayRange: 0...0
+            input: .join(
+                .init(
+                    create: true,
+                    callSettings: .init(audioOn: false),
+                    options: .init(memberIds: [.unique]),
+                    ring: true,
+                    notify: false,
+                    deliverySubject: deliverySubject,
+                    retryPolicy: .init(maxRetries: 2, delay: { _ in 0 })
+                )
             )
         )
 
@@ -342,8 +354,8 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             self.transitionedToStage = $0
             if
                 $0.id == .joining,
-                let joinInput = $0.context.joinInput,
-                joinInput.currentNumberOfRetries < joinInput.maxNumberOfRetries {
+                case let .join(joinInput) = $0.context.input,
+                joinInput.currentNumberOfRetries < joinInput.retryPolicy.maxRetries {
                 $0.transition = self.subject.transition
                 _ = $0.transition(from: self.subject)
             }
@@ -371,10 +383,21 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                 for: .join
             )?[iteration]
         )
-        XCTAssertEqual(context.joinInput?.create, recordedInput.0)
-        XCTAssertEqual(context.joinInput?.callSettings, recordedInput.1)
-        XCTAssertEqual(context.joinInput?.options, recordedInput.2)
-        XCTAssertEqual(context.joinInput?.ring, recordedInput.3)
-        XCTAssertEqual(context.joinInput?.notify, recordedInput.4)
+        XCTAssertEqual(context.input.join?.create, recordedInput.0)
+        XCTAssertEqual(context.input.join?.callSettings, recordedInput.1)
+        XCTAssertEqual(context.input.join?.options, recordedInput.2)
+        XCTAssertEqual(context.input.join?.ring, recordedInput.3)
+        XCTAssertEqual(context.input.join?.notify, recordedInput.4)
+    }
+}
+
+extension Call.StateMachine.Stage.Context.Input {
+    var join: Call.StateMachine.Stage.Context.JoinInput? {
+        switch self {
+        case let .join(input):
+            return input
+        default:
+            return nil
+        }
     }
 }

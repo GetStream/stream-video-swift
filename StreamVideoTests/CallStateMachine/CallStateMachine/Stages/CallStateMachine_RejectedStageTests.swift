@@ -34,7 +34,7 @@ final class CallStateMachineStageRejectedStage_Tests: StreamVideoTestCase, @unch
     func testInitialization() {
         XCTAssertEqual(subject.id, .rejected)
         XCTAssertTrue(subject.context.call === call)
-        XCTAssertEqual(subject.context.rejectResponse, response)
+        XCTAssertEqual(subject.context.output.rejectResponse, response)
     }
 
     // MARK: - Test Transition
@@ -46,6 +46,17 @@ final class CallStateMachineStageRejectedStage_Tests: StreamVideoTestCase, @unch
             } else {
                 XCTAssertNil(subject.transition(from: nextStage), "No error was thrown for \(nextStage.id)")
             }
+        }
+    }
+}
+
+extension Call.StateMachine.Stage.Context.Output {
+    var rejectResponse: RejectCallResponse? {
+        switch self {
+        case let .rejected(output):
+            return output
+        default:
+            return nil
         }
     }
 }

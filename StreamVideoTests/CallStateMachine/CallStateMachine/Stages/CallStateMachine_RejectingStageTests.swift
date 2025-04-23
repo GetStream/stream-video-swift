@@ -24,7 +24,7 @@ final class CallStateMachineStageRejectingStage_Tests: StreamVideoTestCase, @unc
     private lazy var response: RejectCallResponse! = .init(duration: "10")
     private lazy var subject: Call.StateMachine.Stage! = .rejecting(
         call,
-        input: .init(deliverySubject: deliverySubject)
+        input: .rejecting(.init(deliverySubject: deliverySubject))
     )
 
     private var transitionedToStage: Call.StateMachine.Stage?

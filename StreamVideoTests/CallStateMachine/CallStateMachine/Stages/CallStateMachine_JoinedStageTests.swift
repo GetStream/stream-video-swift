@@ -34,7 +34,7 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
     func testInitialization() {
         XCTAssertEqual(subject.id, .joined)
         XCTAssertTrue(subject.context.call === call)
-        XCTAssertEqual(subject.context.joinResponse, response)
+        XCTAssertEqual(subject.context.output.joinResponse, response)
     }
 
     // MARK: - Test Transition
@@ -46,6 +46,17 @@ final class CallStateMachineStageJoinedStage_Tests: StreamVideoTestCase, @unchec
             } else {
                 XCTAssertNil(subject.transition(from: nextStage), "No error was thrown for \(nextStage.id)")
             }
+        }
+    }
+}
+
+extension Call.StateMachine.Stage.Context.Output {
+    var joinResponse: JoinCallResponse? {
+        switch self {
+        case let .joined(output):
+            return output
+        default:
+            return nil
         }
     }
 }

@@ -23,7 +23,7 @@ final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase
     ]
     private lazy var subject: Call.StateMachine.Stage! = .accepting(
         call,
-        input: .init(deliverySubject: deliverySubject)
+        input: .accepting(deliverySubject: deliverySubject)
     )
     private var transitionedToStage: Call.StateMachine.Stage?
 
@@ -107,5 +107,16 @@ final class StreamCallStateMachineStageAcceptingStage_Tests: StreamVideoTestCase
 
         await fulfilmentInMainActor { self.transitionedToStage?.id == .error }
         XCTAssertEqual(mockDefaultAPI.timesCalled(.acceptCall), 1)
+    }
+}
+
+extension Call.StateMachine.Stage.Context.Input {
+    var accepting: PassthroughSubject<AcceptCallResponse, Error>? {
+        switch self {
+        case let .accepting(deliverySubject):
+            return deliverySubject
+        default:
+            return nil
+        }
     }
 }
