@@ -209,12 +209,16 @@ public class CallState: ObservableObject {
         case let .typeCallSessionEndedEvent(event):
             update(from: event.call)
         case let .typeCallSessionParticipantJoinedEvent(event):
-            if session?.participants.contains(event.participant) == false {
+            if let index = session?.participants.firstIndex(where: {
+                $0.userSessionId == event.participant.userSessionId
+            }), index < (session?.participants.count ?? 0) {
+                session?.participants[index] = event.participant
+            } else {
                 session?.participants.append(event.participant)
             }
         case let .typeCallSessionParticipantLeftEvent(event):
             session?.participants.removeAll(where: { participant in
-                participant == event.participant
+                participant.userSessionId == event.participant.userSessionId
             })
         case let .typeCallSessionStartedEvent(event):
             update(from: event.call)
