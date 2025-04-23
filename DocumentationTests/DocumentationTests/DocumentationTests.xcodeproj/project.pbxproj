@@ -81,6 +81,7 @@
 		40FFDCA22B640741004DA7A2 /* 14-livestream-player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */; };
 		40FFDCA42B640772004DA7A2 /* 15-long-press-to-focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */; };
 		40FFDCA62B6408DE004DA7A2 /* 00-ringing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */; };
+		845494D72DB9039000211413 /* 13-livestreaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845494D62DB9038900211413 /* 13-livestreaming.swift */; };
 		84BA15AE2CA2EF420018DC51 /* 07-querying-call-members.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */; };
 		84BA15B02CA2F04F0018DC51 /* 10-custom-events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BA15AF2CA2F04F0018DC51 /* 10-custom-events.swift */; };
 /* End PBXBuildFile section */
@@ -157,6 +158,7 @@
 		40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "14-livestream-player.swift"; sourceTree = "<group>"; };
 		40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "15-long-press-to-focus.swift"; sourceTree = "<group>"; };
 		40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "00-ringing.swift"; sourceTree = "<group>"; };
+		845494D62DB9038900211413 /* 13-livestreaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "13-livestreaming.swift"; sourceTree = "<group>"; };
 		84BA15AD2CA2EF420018DC51 /* 07-querying-call-members.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-querying-call-members.swift"; sourceTree = "<group>"; };
 		84BA15AF2CA2F04F0018DC51 /* 10-custom-events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-custom-events.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -234,6 +236,7 @@
 				84BA15AF2CA2F04F0018DC51 /* 10-custom-events.swift */,
 				40FFDC3C2B63E6EC004DA7A2 /* 11-call-lifecycle.swift */,
 				40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */,
+				845494D62DB9038900211413 /* 13-livestreaming.swift */,
 				40FFDC432B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift */,
 				40FFDC452B63EA54004DA7A2 /* 15-migration-from-dolby.swift */,
 				40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */,
@@ -468,6 +471,7 @@
 				40FFDC512B63EF58004DA7A2 /* 05-call-controls.swift in Sources */,
 				400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */,
 				401C1EF42D494CED00304609 /* 24-closed-captions.swift in Sources */,
+				845494D72DB9039000211413 /* 13-livestreaming.swift in Sources */,
 				40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */,
 				4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */,
 				40FFDC762B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift in Sources */,
