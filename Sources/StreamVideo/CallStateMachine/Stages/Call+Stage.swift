@@ -10,6 +10,20 @@ extension Call.StateMachine {
     class Stage: StreamStateMachineStage, @unchecked Sendable {
 
         struct Context {
+            enum Input {
+                case none
+                case join(JoinInput)
+                case accepting(deliverySubject: PassthroughSubject<AcceptCallResponse, Error>)
+                case rejecting(RejectingInput)
+            }
+
+            enum Output {
+                case none
+                case joined(JoinCallResponse)
+                case accepted(AcceptCallResponse)
+                case rejected(RejectCallResponse)
+            }
+
             struct JoinInput: ReflectiveStringConvertible {
                 var create: Bool
                 var callSettings: CallSettings?
@@ -19,12 +33,7 @@ extension Call.StateMachine {
                 var deliverySubject: PassthroughSubject<JoinCallResponse, Error>
 
                 var currentNumberOfRetries = 0
-                var maxNumberOfRetries = 3
-                var retryDelayRange: ClosedRange<TimeInterval> = 0.25...0.5
-            }
-
-            struct AcceptingInput {
-                var deliverySubject: PassthroughSubject<AcceptCallResponse, Error>
+                var retryPolicy: RetryPolicy = .fastAndSimple
             }
 
             struct RejectingInput {
@@ -33,14 +42,8 @@ extension Call.StateMachine {
             }
 
             weak var call: Call?
-
-            var joinInput: JoinInput? = nil
-            var acceptingInput: AcceptingInput? = nil
-            var rejectingInput: RejectingInput? = nil
-
-            var joinResponse: JoinCallResponse? = nil
-            var acceptResponse: AcceptCallResponse? = nil
-            var rejectResponse: RejectCallResponse? = nil
+            var input: Input = .none
+            var output: Output = .none
         }
 
         /// Possible stage identifiers in the call state machine.

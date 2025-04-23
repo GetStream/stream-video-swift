@@ -17,7 +17,7 @@ extension Call.StateMachine.Stage {
         RejectedStage(
             .init(
                 call: context.call,
-                rejectResponse: response
+                output: .rejected(response)
             )
         )
     }

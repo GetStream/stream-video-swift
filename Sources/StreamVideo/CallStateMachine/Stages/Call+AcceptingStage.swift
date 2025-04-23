@@ -12,10 +12,10 @@ extension Call.StateMachine.Stage {
     /// - Returns: A new `AcceptingStage` instance
     static func accepting(
         _ call: Call,
-        input: Context.AcceptingInput
+        input: Context.Input
     ) -> Call.StateMachine.Stage {
         AcceptingStage(
-            .init(call: call, acceptingInput: input)
+            .init(call: call, input: input)
         )
     }
 }
@@ -66,7 +66,7 @@ extension Call.StateMachine.Stage {
 
                 guard
                     let call = context.call,
-                    let input = context.acceptingInput
+                    case let .accepting(input) = context.input
                 else {
                     transitionErrorOrLog(ClientError("Invalid input to accept call."))
                     return
@@ -80,10 +80,10 @@ extension Call.StateMachine.Stage {
                         id: call.callId
                     )
 
-                    input.deliverySubject.send(response)
+                    input.send(response)
                     transitionOrError(.accepted(context, response: response))
                 } catch {
-                    input.deliverySubject.send(completion: .failure(error))
+                    input.send(completion: .failure(error))
                     transitionErrorOrLog(error)
                 }
             }

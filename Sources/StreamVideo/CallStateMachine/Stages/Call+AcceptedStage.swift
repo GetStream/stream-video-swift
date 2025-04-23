@@ -19,7 +19,7 @@ extension Call.StateMachine.Stage {
         AcceptedStage(
             .init(
                 call: context.call,
-                acceptResponse: response
+                output: .accepted(response)
             )
         )
     }

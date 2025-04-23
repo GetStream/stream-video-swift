@@ -19,7 +19,7 @@ extension Call.StateMachine.Stage {
         JoinedStage(
             .init(
                 call: context.call,
-                joinResponse: response
+                output: .joined(response)
             )
         )
     }

@@ -155,22 +155,28 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
             if
                 currentStage.id == .joined,
-                let joinResponse = currentStage.context.joinResponse {
+                case let .joined(joinResponse) = currentStage.context.output {
                 return joinResponse
-            } else if currentStage.id == .joining, let deliverySubject = currentStage.context.joinInput?.deliverySubject {
-                return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.join)
+            } else if
+                currentStage.id == .joining,
+                case let .join(input) = currentStage.context.input {
+                return try await input
+                    .deliverySubject
+                    .nextValue(timeout: CallConfiguration.timeout.join)
             } else {
                 let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
                 stateMachine.transition(
                     .joining(
                         self,
-                        input: .init(
-                            create: create,
-                            callSettings: callSettings,
-                            options: options,
-                            ring: ring,
-                            notify: notify,
-                            deliverySubject: deliverySubject
+                        input: .join(
+                            .init(
+                                create: create,
+                                callSettings: callSettings,
+                                options: options,
+                                ring: ring,
+                                notify: notify,
+                                deliverySubject: deliverySubject
+                            )
                         )
                     )
                 )
@@ -342,18 +348,18 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         if
             currentStage.id == .accepted,
-            let response = currentStage.context.acceptResponse {
+            case let .accepted(response) = currentStage.context.output {
             return response
         } else if
             currentStage.id == .accepting,
-            let deliverySubject = currentStage.context.acceptingInput?.deliverySubject {
+            case let .accepting(deliverySubject) = currentStage.context.input {
             return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.accept)
         } else {
             let deliverySubject = PassthroughSubject<AcceptCallResponse, Error>()
             stateMachine.transition(
                 .accepting(
                     self,
-                    input: .init(deliverySubject: deliverySubject)
+                    input: .accepting(deliverySubject: deliverySubject)
                 )
             )
             return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.accept)
@@ -371,18 +377,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         if
             currentStage.id == .rejected,
-            let response = currentStage.context.rejectResponse {
+            case let .rejected(response) = currentStage.context.output {
             return response
         } else if
             currentStage.id == .rejecting,
-            let deliverySubject = currentStage.context.rejectingInput?.deliverySubject {
-            return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)
+            case let .rejecting(input) = currentStage.context.input {
+            return try await input
+                .deliverySubject
+                .nextValue(timeout: CallConfiguration.timeout.reject)
         } else {
             let deliverySubject = PassthroughSubject<RejectCallResponse, Error>()
             stateMachine.transition(
                 .rejecting(
                     self,
-                    input: .init(deliverySubject: deliverySubject)
+                    input: .rejecting(.init(deliverySubject: deliverySubject))
                 )
             )
             return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)

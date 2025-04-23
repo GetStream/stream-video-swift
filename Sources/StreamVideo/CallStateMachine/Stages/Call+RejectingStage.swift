@@ -12,12 +12,12 @@ extension Call.StateMachine.Stage {
     /// - Returns: A new `RejectingStage` instance
     static func rejecting(
         _ call: Call,
-        input: Context.RejectingInput
+        input: Context.Input
     ) -> Call.StateMachine.Stage {
         RejectingStage(
             .init(
                 call: call,
-                rejectingInput: input
+                input: input
             )
         )
     }
@@ -72,7 +72,7 @@ extension Call.StateMachine.Stage {
 
                 guard
                     let call = context.call,
-                    let input = context.rejectingInput
+                    case let .rejecting(input) = context.input
                 else {
                     transitionErrorOrLog(ClientError("Invalid input to reject call."))
                     return

@@ -14,12 +14,12 @@ extension Call.StateMachine.Stage {
     /// - Returns: A new `JoiningStage` instance
     static func joining(
         _ call: Call,
-        input: Context.JoinInput
+        input: Context.Input
     ) -> Call.StateMachine.Stage {
         JoiningStage(
             .init(
                 call: call,
-                joinInput: input
+                input: input
             )
         )
     }
@@ -74,7 +74,7 @@ extension Call.StateMachine.Stage {
 
                 guard
                     let call = context.call,
-                    let input = context.joinInput
+                    case let .join(input) = context.input
                 else {
                     transitionErrorOrLog(ClientError("Invalid input to join call."))
                     return
@@ -89,14 +89,14 @@ extension Call.StateMachine.Stage {
                     var input = input
                     input.currentNumberOfRetries += 1
 
-                    if input.currentNumberOfRetries < input.maxNumberOfRetries {
-                        let delay = UInt64(TimeInterval.random(in: input.retryDelayRange) * 1_000_000_000)
+                    if input.currentNumberOfRetries < input.retryPolicy.maxRetries {
+                        let delay = UInt64((input.retryPolicy.delay(input.currentNumberOfRetries)) * 1_000_000_000)
                         log.error(
                             "Joining call id:\(call.callId) type:\(call.callType) failed. Will retry after a delay.",
                             error: error
                         )
                         try? await Task.sleep(nanoseconds: delay)
-                        transitionOrError(.joining(call, input: input))
+                        transitionOrError(.joining(call, input: .join(input)))
                     } else {
                         input.deliverySubject.send(completion: .failure(error))
                         transitionErrorOrLog(error)
