@@ -178,6 +178,8 @@ open class CallViewModel: ObservableObject {
     /// The variable will be reset to `false` when `leaveCall` will be invoked.
     private(set) var localCallSettingsChange = false
 
+    private var hasAcceptedCall = false
+
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
         return updateParticipants.filter {
@@ -444,6 +446,7 @@ open class CallViewModel: ObservableObject {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
             do {
+                hasAcceptedCall = true
                 try await call.accept()
                 enterCall(
                     call: call,
@@ -453,6 +456,7 @@ open class CallViewModel: ObservableObject {
                     customData: customData
                 )
             } catch {
+                hasAcceptedCall = false
                 self.error = error
                 setCallingState(.idle)
                 self.call = nil
@@ -671,7 +675,9 @@ open class CallViewModel: ObservableObject {
                 )
                 save(call: call)
                 enteringCallTask = nil
+                hasAcceptedCall = false
             } catch {
+                hasAcceptedCall = false
                 log.error("Error starting a call", error: error)
                 self.error = error
                 setCallingState(.idle)
@@ -792,7 +798,7 @@ open class CallViewModel: ObservableObject {
         switch callingState {
         case let .incoming(incomingCall)
             where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user
-            .id && enteringCallTask == nil:
+            .id && !hasAcceptedCall:
             /// If the call that was accepted is the incoming call we are presenting, then we reject
             /// and set the activeCall to the current one in order to reset the callingState to
             /// inCall or idle.
