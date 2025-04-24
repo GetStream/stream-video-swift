@@ -37,6 +37,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
         participantUpdateCancellable = nil
 
         guard let call else {
+            store.dispatch(.setContent(.inactive))
             return
         }
 

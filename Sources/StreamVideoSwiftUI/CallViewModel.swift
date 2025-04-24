@@ -614,6 +614,11 @@ open class CallViewModel: ObservableObject {
         recordingUpdates?.cancel()
         recordingUpdates = nil
         call?.leave()
+
+        pictureInPictureAdapter.call = nil
+        pictureInPictureAdapter.sourceView = nil
+        isPictureInPictureEnabled = false
+
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
