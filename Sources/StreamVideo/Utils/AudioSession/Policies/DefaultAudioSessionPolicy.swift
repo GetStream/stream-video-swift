@@ -7,6 +7,8 @@ import AVFoundation
 /// A default implementation of the `AudioSessionPolicy` protocol.
 public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
 
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+
     /// Initializes a new `DefaultAudioSessionPolicy` instance.
     public init() {}
 
@@ -24,7 +26,11 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
         .init(
             category: .playAndRecord,
             mode: callSettings.videoOn ? .videoChat : .voiceChat,
-            options: .playAndRecord,
+            options: .playAndRecord(
+                videoOn: callSettings.videoOn,
+                speakerOn: callSettings.speakerOn,
+                appIsInForeground: applicationStateAdapter.state == .foreground
+            ),
             overrideOutputAudioPort: callSettings.speakerOn ? .speaker : AVAudioSession.PortOverride.none
         )
     }

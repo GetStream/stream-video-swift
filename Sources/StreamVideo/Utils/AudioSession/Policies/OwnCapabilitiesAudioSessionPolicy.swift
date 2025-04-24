@@ -19,6 +19,8 @@ import Foundation
 /// - Otherwise we use `playback` category.
 public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
 
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+
     private let currentDevice = CurrentDevice.currentValue
 
     /// Initializes a new `OwnCapabilitiesAudioSessionPolicy` instance.
@@ -52,11 +54,15 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             : .playback
 
         let mode: AVAudioSession.Mode = category == .playAndRecord
-            ? callSettings.videoOn ? .videoChat : .voiceChat
+            ? callSettings.videoOn && callSettings.speakerOn ? .videoChat : .voiceChat
             : .default
 
         let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
-            ? .playAndRecord
+            ? .playAndRecord(
+                videoOn: callSettings.videoOn,
+                speakerOn: callSettings.speakerOn,
+                appIsInForeground: applicationStateAdapter.state == .foreground
+            )
             : .playback
 
         let overrideOutputAudioPort: AVAudioSession.PortOverride? = category == .playAndRecord

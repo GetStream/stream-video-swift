@@ -11,6 +11,8 @@ import StreamWebRTC
 /// and routing to output devices such as speakers and in-ear speakers.
 final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+
     /// The last applied audio session configuration.
     private var lastUsedConfiguration: AudioSessionConfiguration?
 
@@ -365,7 +367,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 )
             }
 
-            if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
+            if applicationStateAdapter.state == .foreground, let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
                 try await audioSession.overrideOutputAudioPort(overrideOutputAudioPort)
             }
 
