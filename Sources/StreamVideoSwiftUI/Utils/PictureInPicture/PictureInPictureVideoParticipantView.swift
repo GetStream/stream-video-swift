@@ -21,6 +21,8 @@ struct PictureInPictureVideoParticipantView: View {
     var participant: CallParticipant
     var track: RTCVideoTrack?
 
+    @State private var isUsingFrontCameraForLocalUser: Bool = false
+
     /// Creates a new participant view.
     ///
     /// - Parameters:
@@ -41,11 +43,13 @@ struct PictureInPictureVideoParticipantView: View {
     }
 
     var body: some View {
-        PictureInPictureVideoRendererView(
-            store: store,
-            participant: participant,
-            track: track
-        )
+        withCallSettingsObservation {
+            PictureInPictureVideoRendererView(
+                store: store,
+                participant: participant,
+                track: track
+            )
+        }
         .opacity(showVideo ? 1 : 0)
         .streamAccessibility(value: showVideo ? "1" : "0")
         .overlay(overlayView)
@@ -61,5 +65,27 @@ struct PictureInPictureVideoParticipantView: View {
         viewFactory
             .makeParticipantImageView(participant: participant)
             .opacity(showVideo ? 0 : 1)
+    }
+
+    @MainActor
+    @ViewBuilder
+    private func withCallSettingsObservation(
+        @ViewBuilder _ content: () -> some View
+    ) -> some View {
+        if participant.sessionId == streamVideo.state.activeCall?.state.localParticipant?.sessionId {
+            Group {
+                if isUsingFrontCameraForLocalUser {
+                    content()
+                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                } else {
+                    content()
+                }
+            }
+            .onReceive(store.state.call?.state.$callSettings) {
+                self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front
+            }
+        } else {
+            content()
+        }
     }
 }
