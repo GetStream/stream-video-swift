@@ -80,7 +80,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertEqual(configuration.category, .playAndRecord)
-        XCTAssertEqual(configuration.mode, .videoChat)
+        XCTAssertEqual(configuration.mode, .voiceChat)
         XCTAssertEqual(
             configuration.options,
             [

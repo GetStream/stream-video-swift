@@ -906,7 +906,7 @@ open class CallViewModel: ObservableObject {
 
     private func subscribeToApplicationLifecycleEvents() {
         applicationLifecycleUpdates = applicationStateAdapter
-            .$state
+            .statePublisher
             .filter { $0 == .foreground }
             .sink { [weak self] _ in self?.applicationDidBecomeActive() }
     }

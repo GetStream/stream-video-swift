@@ -23,7 +23,7 @@ extension AVAudioSession.CategoryOptions {
         /// - It's required (speakerOn = true)
         /// - The app is foregrounded. The reason is that while in CallKit port overrides are being treated
         /// as hard overrides and stop CallKit Speaker button from allowing the user to toggle it off.
-        if !videoOn, speakerOn, appIsInForeground {
+        if videoOn == false, speakerOn == true, appIsInForeground == true {
             result.insert(.defaultToSpeaker)
         }
 
