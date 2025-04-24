@@ -367,7 +367,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 )
             }
 
-            if applicationStateAdapter.state == .foreground, let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
+            if
+                let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
                 try await audioSession.overrideOutputAudioPort(overrideOutputAudioPort)
             }
 

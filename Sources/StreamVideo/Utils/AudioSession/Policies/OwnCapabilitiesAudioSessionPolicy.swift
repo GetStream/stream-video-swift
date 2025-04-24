@@ -65,7 +65,8 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             )
             : .playback
 
-        let overrideOutputAudioPort: AVAudioSession.PortOverride? = category == .playAndRecord
+        let overrideOutputAudioPort: AVAudioSession.PortOverride? = category == .playAndRecord && applicationStateAdapter
+            .state == .foreground
             ? callSettings.speakerOn == true ? .speaker : AVAudioSession.PortOverride.none
             : nil
 
