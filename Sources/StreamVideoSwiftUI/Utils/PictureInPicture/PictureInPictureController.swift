@@ -70,6 +70,7 @@ final class PictureInPictureController: @unchecked Sendable {
             .$state
             .filter { $0 == .foreground }
             .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.pictureInPictureController?.stopPictureInPicture() }
             .store(in: disposableBag)
     }
