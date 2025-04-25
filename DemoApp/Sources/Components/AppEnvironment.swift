@@ -591,6 +591,35 @@ extension AppEnvironment {
     static var preferredCallType: String?
 }
 
+extension AppEnvironment {
+
+    enum ProximityPolicyDebugConfiguration: Hashable, Debuggable, Sendable, CaseIterable {
+        case speaker, video
+
+        var title: String {
+            switch self {
+            case .speaker:
+                return "Speaker"
+            case .video:
+                return "Video"
+            }
+        }
+
+        var value: ProximityPolicy {
+            switch self {
+            case .speaker:
+                return SpeakerProximityPolicy()
+            case .video:
+                return VideoProximityPolicy()
+            }
+        }
+    }
+
+    static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = {
+        [.speaker, .video]
+    }()
+}
+
 extension String: Debuggable {
     var title: String {
         self

@@ -125,6 +125,10 @@ struct DebugMenu: View {
         didSet { AppEnvironment.audioSessionPolicy = audioSessionPolicy }
     }
 
+    @State private var proximityPolicies = AppEnvironment.proximityPolicies {
+        didSet { AppEnvironment.proximityPolicies = proximityPolicies }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -189,6 +193,18 @@ struct DebugMenu: View {
                 currentValue: audioSessionPolicy,
                 label: "AudioSession policy"
             ) { self.audioSessionPolicy = $0 }
+
+            makeMultipleSelectMenu(
+                for: AppEnvironment.ProximityPolicyDebugConfiguration.allCases,
+                currentValues: proximityPolicies,
+                label: "Proximity policies"
+            ) { item, isSelected in
+                if isSelected {
+                    proximityPolicies = proximityPolicies.filter { item != $0 }
+                } else {
+                    proximityPolicies.insert(item)
+                }
+            }
 
             makeMenu(
                 for: [.default, .lastParticipant],
