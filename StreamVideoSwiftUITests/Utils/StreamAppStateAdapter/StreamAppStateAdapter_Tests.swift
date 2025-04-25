@@ -39,8 +39,8 @@ final class StreamAppStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Private Helpers
 
     @MainActor private func assertApplicationState(
-        initial: StreamAppStateAdapter.State,
-        target: StreamAppStateAdapter.State,
+        initial: ApplicationState,
+        target: ApplicationState,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
