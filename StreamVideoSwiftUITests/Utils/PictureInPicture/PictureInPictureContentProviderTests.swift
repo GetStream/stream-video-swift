@@ -318,7 +318,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
 
         if isActive {
             await wait(for: 0.5)
-            XCTAssertEqual(store.state.preferredContentSize, .init(width: 640, height: 480))
+            await fulfilmentInMainActor { self.store.state.preferredContentSize == .init(width: 640, height: 480) }
         } else {
             _ = try await store
                 .publisher(for: \.preferredContentSize)

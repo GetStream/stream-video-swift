@@ -34,16 +34,16 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Action Tests
 
-    func test_setActive() {
+    func test_setActive() async {
         // When
         subject.dispatch(.setActive(true))
 
         // Then
-        XCTAssertTrue(subject.state.isActive)
+        await fulfilmentInMainActor { self.subject.state.isActive }
     }
 
     @MainActor
-    func test_setCall() {
+    func test_setCall() async {
         // Given
         let call = MockCall(.dummy())
 
@@ -51,11 +51,11 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
         subject.dispatch(.setCall(call))
 
         // Then
-        XCTAssertEqual(subject.state.call?.cId, call.cId)
+        await fulfilmentInMainActor { self.subject.state.call?.cId == call.cId }
     }
 
     @MainActor
-    func test_setSourceView() {
+    func test_setSourceView() async {
         // Given
         let view = UIView()
 
@@ -63,11 +63,11 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
         subject.dispatch(.setSourceView(view))
 
         // Then
-        XCTAssertTrue(subject.state.sourceView === view)
+        await fulfilmentInMainActor { self.subject.state.sourceView === view }
     }
 
     @MainActor
-    func test_setViewFactory() {
+    func test_setViewFactory() async {
         // Given
         let factory = PictureInPictureViewFactory(DefaultViewFactory.shared)
 
@@ -75,11 +75,11 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
         subject.dispatch(.setViewFactory(factory))
 
         // Then
-        XCTAssertTrue(subject.state.viewFactory === factory)
+        await fulfilmentInMainActor { self.subject.state.viewFactory === factory }
     }
 
     @MainActor
-    func test_setContent() {
+    func test_setContent() async {
         // Given
         let call = MockCall(.dummy())
         let participant = CallParticipant.dummy()
@@ -89,10 +89,10 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
         subject.dispatch(.setContent(content))
 
         // Then
-        XCTAssertEqual(subject.state.content, content)
+        await fulfilmentInMainActor { self.subject.state.content == content }
     }
 
-    func test_setPreferredContentSize() {
+    func test_setPreferredContentSize() async {
         // Given
         let size = CGSize(width: 800, height: 600)
 
@@ -100,10 +100,10 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
         subject.dispatch(.setPreferredContentSize(size))
 
         // Then
-        XCTAssertEqual(subject.state.preferredContentSize, size)
+        await fulfilmentInMainActor { self.subject.state.preferredContentSize == size }
     }
 
-    func test_setContentSize() {
+    func test_setContentSize() async {
         // Given
         let size = CGSize(width: 400, height: 300)
 
@@ -111,15 +111,15 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
         subject.dispatch(.setContentSize(size))
 
         // Then
-        XCTAssertEqual(subject.state.contentSize, size)
+        await fulfilmentInMainActor { self.subject.state.contentSize == size }
     }
 
-    func test_setCanStartPictureInPictureAutomaticallyFromInline() {
+    func test_setCanStartPictureInPictureAutomaticallyFromInline() async {
         // When
         subject.dispatch(.setCanStartPictureInPictureAutomaticallyFromInline(false))
 
         // Then
-        XCTAssertFalse(subject.state.canStartPictureInPictureAutomaticallyFromInline)
+        await fulfilmentInMainActor { self.subject.state.canStartPictureInPictureAutomaticallyFromInline == false }
     }
 
     // MARK: - Publisher Tests
@@ -157,7 +157,7 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
-    func test_multipleActions() {
+    func test_multipleActions() async {
         // Given
         let call = MockCall(.dummy())
         let view = UIView()
@@ -170,9 +170,9 @@ final class PictureInPictureStoreTests: XCTestCase, @unchecked Sendable {
         subject.dispatch(.setActive(true))
 
         // Then
-        XCTAssertEqual(subject.state.call?.callId, call.callId)
-        XCTAssertEqual(subject.state.sourceView, view)
-        XCTAssertEqual(subject.state.contentSize, size)
-        XCTAssertTrue(subject.state.isActive)
+        await fulfilmentInMainActor { self.subject.state.call?.callId == call.callId }
+        await fulfilmentInMainActor { self.subject.state.sourceView == view }
+        await fulfilmentInMainActor { self.subject.state.contentSize == size }
+        await fulfilmentInMainActor { self.subject.state.isActive }
     }
 }
