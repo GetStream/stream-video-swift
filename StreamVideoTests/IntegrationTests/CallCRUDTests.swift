@@ -7,8 +7,8 @@ import Foundation
 @testable import StreamVideo
 import XCTest
 
-final class CallCRUDTest: IntegrationTest, @unchecked Sendable {
-    
+final class CallCRUDTests: IntegrationTest, @unchecked Sendable {
+
     let user1 = "thierry"
     let user2 = "tommaso"
     let defaultCallType = "default"
