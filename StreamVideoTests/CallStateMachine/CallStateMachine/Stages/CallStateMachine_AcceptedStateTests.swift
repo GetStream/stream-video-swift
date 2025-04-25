@@ -5,20 +5,20 @@
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class StreamCallStateMachineStageAcceptedStage_Tests: StreamVideoTestCase, @unchecked Sendable {
+final class CallStateMachineStageAcceptedStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private struct TestError: Error {}
 
     private lazy var call: Call! = .dummy()
-    private lazy var allOtherStages: [StreamCallStateMachine.Stage]! = StreamCallStateMachine.Stage.ID
+    private lazy var allOtherStages: [Call.StateMachine.Stage]! = Call.StateMachine.Stage.ID
         .allCases
         .filter { $0 != subject.id }
-        .map { StreamCallStateMachine.Stage(id: $0, call: call) }
-    private lazy var validOtherStages: Set<StreamCallStateMachine.Stage.ID>! = [
+        .map { Call.StateMachine.Stage(id: $0, context: .init(call: call)) }
+    private lazy var validOtherStages: Set<Call.StateMachine.Stage.ID>! = [
         .accepting
     ]
     private lazy var response: AcceptCallResponse! = .init(duration: .unique)
-    private lazy var subject: StreamCallStateMachine.Stage! = .accepted(call, response: response)
+    private lazy var subject: Call.StateMachine.Stage! = .accepted(.init(call: call), response: response)
 
     override func tearDown() {
         call = nil
@@ -33,8 +33,8 @@ final class StreamCallStateMachineStageAcceptedStage_Tests: StreamVideoTestCase,
 
     func testInitialization() {
         XCTAssertEqual(subject.id, .accepted)
-        XCTAssertTrue(subject.call === call)
-        XCTAssertEqual((subject as? StreamCallStateMachine.Stage.AcceptedStage)?.response, response)
+        XCTAssertTrue(subject.context.call === call)
+        XCTAssertEqual(subject.context.output.acceptResponse, response)
     }
 
     // MARK: - Test Transition
@@ -46,6 +46,17 @@ final class StreamCallStateMachineStageAcceptedStage_Tests: StreamVideoTestCase,
             } else {
                 XCTAssertNil(subject.transition(from: nextStage), "No error was thrown for \(nextStage.id)")
             }
+        }
+    }
+}
+
+extension Call.StateMachine.Stage.Context.Output {
+    var acceptResponse: AcceptCallResponse? {
+        switch self {
+        case let .accepted(output):
+            return output
+        default:
+            return nil
         }
     }
 }

@@ -13,7 +13,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.callCache) var callCache
 
-    private lazy var stateMachine: StreamCallStateMachine = .init(self)
+    private lazy var stateMachine: StateMachine = .init(self)
 
     @MainActor
     public internal(set) var state = CallState()
@@ -52,6 +52,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
     private var cancellables = DisposableBag()
+
+    /// A serialQueueActor ensuring that call operations (e.g. join) will happen in a serial manner.
+    private let callOperationSerialQueue = SerialActorQueue()
 
     /// This adapter is used to manage closed captions for the
     /// call.
@@ -144,50 +147,42 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
-        let currentStage = stateMachine.currentStage
-        switch currentStage.id {
-        case .joining:
-            break
-        case .joined where currentStage is StreamCallStateMachine.Stage.JoinedStage:
-            let stage = currentStage as! StreamCallStateMachine.Stage.JoinedStage
-            return stage.response
-        default:
-            stateMachine.transition(
-                .joining(
-                    self,
-                    actionBlock: { [weak self] in
-                        guard let self else { throw ClientError.Unexpected() }
-                        return try await executeTask(retryPolicy: .fastAndSimple, task: { [weak self] in
-                            guard let self else { throw ClientError.Unexpected() }
-                            let response = try await callController.joinCall(
+        try await callOperationSerialQueue.sync { [weak self] in
+            guard let self else {
+                throw ClientError()
+            }
+            let currentStage = stateMachine.currentStage
+
+            if
+                currentStage.id == .joined,
+                case let .joined(joinResponse) = currentStage.context.output {
+                return joinResponse
+            } else if
+                currentStage.id == .joining,
+                case let .join(input) = currentStage.context.input {
+                return try await input
+                    .deliverySubject
+                    .nextValue(timeout: CallConfiguration.timeout.join)
+            } else {
+                let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
+                stateMachine.transition(
+                    .joining(
+                        self,
+                        input: .join(
+                            .init(
                                 create: create,
                                 callSettings: callSettings,
                                 options: options,
                                 ring: ring,
-                                notify: notify
+                                notify: notify,
+                                deliverySubject: deliverySubject
                             )
-                            if let callSettings {
-                                await state.update(callSettings: callSettings)
-                            }
-                            await state.update(from: response)
-                            let updated = await state.callSettings
-                            updateCallSettingsManagers(with: updated)
-                            Task { @MainActor [weak self] in
-                                self?.streamVideo.state.activeCall = self
-                            }
-                            return response
-                        })
-                    }
+                        )
+                    )
                 )
-            )
+                return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.join)
+            }
         }
-
-        return try await stateMachine
-            .nextStageShouldBe(
-                StreamCallStateMachine.Stage.JoinedStage.self,
-                dropFirst: 1
-            )
-            .response
     }
 
     /// Gets the call on the backend with the given parameters.
@@ -350,24 +345,25 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func accept() async throws -> AcceptCallResponse {
         let currentStage = stateMachine.currentStage
-        switch currentStage.id {
-        case .accepting:
-            break
-        case .accepted where currentStage is StreamCallStateMachine.Stage.AcceptedStage:
-            let stage = currentStage as! StreamCallStateMachine.Stage.AcceptedStage
-            return stage.response
-        default:
-            stateMachine.transition(.accepting(self, actionBlock: { [coordinatorClient, callType, callId] in
-                try await coordinatorClient.acceptCall(type: callType, id: callId)
-            }))
-        }
 
-        return try await stateMachine
-            .nextStageShouldBe(
-                StreamCallStateMachine.Stage.AcceptedStage.self,
-                dropFirst: 1
+        if
+            currentStage.id == .accepted,
+            case let .accepted(response) = currentStage.context.output {
+            return response
+        } else if
+            currentStage.id == .accepting,
+            case let .accepting(deliverySubject) = currentStage.context.input {
+            return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.accept)
+        } else {
+            let deliverySubject = PassthroughSubject<AcceptCallResponse, Error>()
+            stateMachine.transition(
+                .accepting(
+                    self,
+                    input: .accepting(deliverySubject: deliverySubject)
+                )
             )
-            .response
+            return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.accept)
+        }
     }
 
     /// Rejects a call with an optional reason.
@@ -378,34 +374,27 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func reject(reason: String? = nil) async throws -> RejectCallResponse {
         let currentStage = stateMachine.currentStage
-        switch currentStage.id {
-        case .rejecting:
-            break
-        case .rejected where currentStage is StreamCallStateMachine.Stage.RejectedStage:
-            let stage = currentStage as! StreamCallStateMachine.Stage.RejectedStage
-            return stage.response
-        default:
-            stateMachine.transition(.rejecting(self, actionBlock: { [coordinatorClient, callType, callId, streamVideo, cId] in
-                let response = try await coordinatorClient.rejectCall(
-                    type: callType,
-                    id: callId,
-                    rejectCallRequest: .init(reason: reason)
-                )
-                if streamVideo.state.ringingCall?.cId == cId {
-                    Task { @MainActor in
-                        streamVideo.state.ringingCall = nil
-                    }
-                }
-                return response
-            }))
-        }
 
-        return try await stateMachine
-            .nextStageShouldBe(
-                StreamCallStateMachine.Stage.RejectedStage.self,
-                dropFirst: 1
+        if
+            currentStage.id == .rejected,
+            case let .rejected(response) = currentStage.context.output {
+            return response
+        } else if
+            currentStage.id == .rejecting,
+            case let .rejecting(input) = currentStage.context.input {
+            return try await input
+                .deliverySubject
+                .nextValue(timeout: CallConfiguration.timeout.reject)
+        } else {
+            let deliverySubject = PassthroughSubject<RejectCallResponse, Error>()
+            stateMachine.transition(
+                .rejecting(
+                    self,
+                    input: .rejecting(.init(deliverySubject: deliverySubject))
+                )
             )
-            .response
+            return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.reject)
+        }
     }
 
     /// Adds the given user to the list of blocked users for the call.
@@ -521,7 +510,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         cancellables.removeAll()
         callController.leave()
         closedCaptionsAdapter.stop()
-        stateMachine.transition(.idle(self))
+        stateMachine.transition(.idle(.init(call: self)))
         /// Upon `Call.leave` we remove the call from the cache. Any further actions that are required
         /// to happen on the call object (e.g. rejoin) will need to fetch a new instance from `StreamVideo`
         /// client.
@@ -1391,7 +1380,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         if stateMachine.currentStage.id == .joined {
             state.disconnectionError = error
         }
-        stateMachine.transition(.error(self, error: error))
+        stateMachine.transition(
+            .error(
+                .init(call: self),
+                error: error
+            )
+        )
     }
 
     // MARK: - private
@@ -1531,7 +1525,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
-    private func updateCallSettingsManagers(with callSettings: CallSettings) {
+    func updateCallSettingsManagers(with callSettings: CallSettings) {
         microphone.status = callSettings.audioOn ? .enabled : .disabled
         camera.status = callSettings.videoOn ? .enabled : .disabled
         camera.direction = callSettings.cameraPosition

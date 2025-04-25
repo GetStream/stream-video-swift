@@ -10,21 +10,34 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     enum MockFunctionKey: Hashable, CaseIterable {
         case join
         case setDisconnectionTimeout
+        case observeWebRTCStateUpdated
     }
 
     enum MockFunctionInputKey: Payloadable {
         case setDisconnectionTimeout(timeout: TimeInterval)
 
+        case join(
+            create: Bool = true,
+            callSettings: CallSettings?,
+            options: CreateCallOptions?,
+            ring: Bool = false,
+            notify: Bool = false
+        )
+
+        case observeWebRTCStateUpdated
+
         var payload: Any {
             switch self {
             case let .setDisconnectionTimeout(timeout):
                 return timeout
+            case let .join(create, callSettings, options, ring, notify):
+                return (create, callSettings, options, ring, notify)
+            case .observeWebRTCStateUpdated:
+                return ()
             }
         }
     }
 
-    var joinError: Error?
-    var timesJoinWasCalled: Int = 0
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
     @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] = FunctionKey
@@ -58,10 +71,19 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
-        timesJoinWasCalled += 1
+        stubbedFunctionInput[.join]?.append(
+            .join(
+                create: create,
+                callSettings: callSettings,
+                options: options,
+                ring: ring,
+                notify: notify
+            )
+        )
+
         if let stub = stubbedFunction[.join] as? JoinCallResponse {
             return stub
-        } else if let joinError {
+        } else if let joinError = stubbedFunction[.join] as? Error {
             throw joinError
         } else {
             return try await super.joinCall(
@@ -77,5 +99,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func setDisconnectionTimeout(_ timeout: TimeInterval) {
         stubbedFunctionInput[.setDisconnectionTimeout]?
             .append(.setDisconnectionTimeout(timeout: timeout))
+    }
+
+    override func observeWebRTCStateUpdated() {
+        stubbedFunctionInput[.observeWebRTCStateUpdated]?
+            .append(.observeWebRTCStateUpdated)
     }
 }

@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+- Improved the flow of joining a call [#747](https://github.com/GetStream/stream-video-swift/pull/747)
+
 ### 🐞 Fixed
 - Fix an issue causing audio/video misalignment with the server. [#772](https://github.com/GetStream/stream-video-swift/pull/772)
 
