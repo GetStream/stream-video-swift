@@ -84,7 +84,6 @@ final class PictureInPictureVideoCallViewControllerTests: XCTestCase, @unchecked
         store.dispatch(.setPreferredContentSize(expected))
         store.dispatch(.setPreferredContentSize(.zero))
 
-        await wait(for: 0.5)
-        XCTAssertEqual(subject.preferredContentSize, expected)
+        await fulfilmentInMainActor { self.subject.preferredContentSize == expected }
     }
 }
