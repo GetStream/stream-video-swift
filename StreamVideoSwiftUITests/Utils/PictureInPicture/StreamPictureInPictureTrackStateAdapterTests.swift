@@ -69,7 +69,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .participant(_, let participant, _):
+            case let .participant(_, participant, _):
                 return participant == self.participantA
             default:
                 return false
@@ -79,7 +79,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .participant(_, let participant, _):
+            case let .participant(_, participant, _):
                 return participant == self.participantB
             default:
                 return false
@@ -96,7 +96,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .participant(_, let participant, _):
+            case let .participant(_, participant, _):
                 return participant == self.participantA
             default:
                 return false
@@ -106,7 +106,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .participant(_, let participant, _):
+            case let .participant(_, participant, _):
                 return participant == self.participantB
             default:
                 return false
@@ -122,7 +122,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .participant(_, let participant, _):
+            case let .participant(_, participant, _):
                 return participant == self.participantA
             default:
                 return false
@@ -132,7 +132,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .participant(_, let participant, _):
+            case let .participant(_, participant, _):
                 return participant == self.participantB
             default:
                 return false
@@ -148,7 +148,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .screenSharing(_, let participant, _):
+            case let .screenSharing(_, participant, _):
                 return participant == self.participantA
             default:
                 return false
@@ -158,7 +158,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .participant(_, let participant, _):
+            case let .participant(_, participant, _):
                 return participant == self.participantB
             default:
                 return false
@@ -174,7 +174,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
 
         await fulfilmentInMainActor {
             switch self.store.state.content {
-            case .screenSharing(_, let participant, _):
+            case let .screenSharing(_, participant, _):
                 return participant == self.participantA
             default:
                 return false
