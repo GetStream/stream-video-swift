@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 import SwiftProtobuf
 
@@ -93,7 +94,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// Background worker that takes care about client connection recovery when the Internet comes back
     /// OR app transitions from background to foreground.
     private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
-    private(set) var timerType: Timer.Type = DefaultTimer.self
+    private(set) var timerType: StreamCore.Timer.Type = DefaultTimer.self
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
@@ -532,8 +533,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     private func loadConnectionIdFromHealthcheck() -> String? {
         if case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState {
-            if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
-                return healthCheck.connectionId
+            if let connectionId = healtCheckInfo.connectionId {
+                return connectionId
             }
         }
         return nil
@@ -672,7 +673,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
 extension StreamVideo: ConnectionStateDelegate {
     
-    func webSocketClient(
+    public func webSocketClient(
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
@@ -695,9 +696,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
                 }
             }
-            eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected())) }
+            eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected() as Event)) }
         case .connected(healthCheckInfo: _):
-            eventHandlers.forEach { $0.handler(.internalEvent(WSConnected())) }
+            eventHandlers.forEach { $0.handler(.internalEvent(WSConnected() as Event)) }
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -706,12 +707,16 @@ extension StreamVideo: ConnectionStateDelegate {
 
 extension StreamVideo: WSEventsSubscriber {
     
-    func onEvent(_ event: WrappedEvent) {
+    func onEvent(_ event: Event) {
         for eventHandler in eventHandlers {
-            eventHandler.handler(event)
+            if let event = event as? WrappedEvent {
+                eventHandler.handler(event)
+            }
         }
         Task { @MainActor [weak self] in
-            self?.checkRingEvent(event)
+            if let event = event as? WrappedEvent {
+                self?.checkRingEvent(event)
+            }
         }
     }
 

@@ -12,6 +12,7 @@ import class StreamChat.ChatClient
 import enum StreamChat.EntityChange
 import struct StreamChat.Token
 import StreamChatSwiftUI
+import StreamCore
 import StreamVideo
 import StreamVideoSwiftUI
 

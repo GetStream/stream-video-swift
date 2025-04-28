@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// Extension to `Publisher` providing utility methods for handling asynchronous
 /// tasks and managing their lifecycle using `Combine`.

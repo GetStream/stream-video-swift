@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI

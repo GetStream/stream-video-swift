@@ -7,6 +7,7 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 #endif
+import StreamCore
 
 ///
 /// A class that determines the current device type by inspecting available iOS

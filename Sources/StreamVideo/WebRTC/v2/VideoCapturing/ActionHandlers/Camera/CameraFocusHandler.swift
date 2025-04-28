@@ -5,6 +5,7 @@
 import AVFoundation
 import CoreMedia
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 final class CameraFocusHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {

@@ -4,6 +4,7 @@
 
 import Foundation
 import GoogleSignIn
+import StreamCore
 import StreamVideo
 import StreamVideoSwiftUI
 import StreamWebRTC

@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A protocol that provides a method to determine the rejection reason for a call.
 public protocol RejectionReasonProviding: Sendable {

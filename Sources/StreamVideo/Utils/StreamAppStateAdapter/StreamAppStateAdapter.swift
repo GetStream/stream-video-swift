@@ -7,6 +7,7 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 #endif
+import StreamCore
 
 /// An adapter that observes the app's state and publishes changes.
 public final class StreamAppStateAdapter: ObservableObject, @unchecked Sendable {

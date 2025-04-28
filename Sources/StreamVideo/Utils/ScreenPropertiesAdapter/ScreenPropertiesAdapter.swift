@@ -6,6 +6,7 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 #endif
+import StreamCore
 
 final class ScreenPropertiesAdapter: @unchecked Sendable {
 

@@ -5,6 +5,7 @@
 import AVKit
 import Combine
 import Foundation
+import StreamCore
 import StreamVideo
 import StreamWebRTC
 #if canImport(UIKit)

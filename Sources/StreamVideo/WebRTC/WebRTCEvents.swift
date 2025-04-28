@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 extension Stream_Video_Sfu_Event_SubscriberOffer: Event {}
 extension Stream_Video_Sfu_Event_ConnectionQualityChanged: Event {}

@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 extension InjectedValues {
     /// Provides access to the `StreamVideo` instance in the views and view models.

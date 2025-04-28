@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A protocol that defines a factory for creating instances of `WebRTCCoordinator`.
 /// The factory requires user details, API key, call identifier, video

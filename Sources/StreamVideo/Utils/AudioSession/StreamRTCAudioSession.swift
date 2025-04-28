@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A protocol defining an interface for managing an audio session.

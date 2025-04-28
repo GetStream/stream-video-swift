@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 actor SerialActor {
     /// Declare a private variable to store the previous task.

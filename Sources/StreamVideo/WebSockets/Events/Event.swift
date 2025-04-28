@@ -3,16 +3,9 @@
 //
 
 import Foundation
-
-/// An `Event` object representing an event in the chat system.
-public protocol Event: Sendable {}
-
-public protocol SendableEvent: Event, ProtoModel, ReflectiveStringConvertible {}
+import StreamCore
 
 extension Event {
-    var name: String {
-        String(describing: Self.self)
-    }
     
     func unwrap() -> VideoEvent? {
         if let unwrapped = self as? VideoEvent {
@@ -47,20 +40,20 @@ internal enum WrappedEvent: Event, Sendable {
         switch self {
         case let .coordinatorEvent(event):
             if case let .typeHealthCheckEvent(healthCheckEvent) = event {
-                return HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
+                return HealthCheckInfo(
+                    connectionId: healthCheckEvent.connectionId
+                )
             }
             if case let .typeConnectedEvent(connectedEvent) = event {
                 return HealthCheckInfo(
-                    coordinatorHealthCheck: .init(
-                        cid: nil,
-                        connectionId: connectedEvent.connectionId,
-                        createdAt: connectedEvent.createdAt
-                    )
+                    connectionId: connectedEvent.connectionId
                 )
             }
         case let .sfuEvent(event):
             if case let .healthCheckResponse(healthCheckEvent) = event {
-                return HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
+                return HealthCheckInfo(
+                    participantCount: Int(healthCheckEvent.participantCount.total)
+                )
             }
         case .internalEvent:
             break
@@ -125,3 +118,5 @@ extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: Event {
         }
     }
 }
+
+extension Stream_Video_Sfu_Models_Error: Error {}

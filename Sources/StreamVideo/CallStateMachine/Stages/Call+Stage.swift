@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 extension Call.StateMachine {
     /// Represents a stage in the call state machine.

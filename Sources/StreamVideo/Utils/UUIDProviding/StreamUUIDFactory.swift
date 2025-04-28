@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A protocol for types capable of providing UUIDs.
 public protocol UUIDProviding {

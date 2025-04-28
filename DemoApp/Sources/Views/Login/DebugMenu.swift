@@ -4,6 +4,7 @@
 
 import Foundation
 import GDPerformanceView_Swift
+import StreamCore
 import StreamVideo
 import SwiftUI
 

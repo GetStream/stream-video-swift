@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// `CallKitAdapter` acts as an intermediary between the application and CallKit services,
 /// facilitating registration for incoming calls and managing the CallKit service instance.

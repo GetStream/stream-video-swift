@@ -4,6 +4,7 @@
 
 import Combine
 import MetalKit
+import StreamCore
 import StreamVideo
 import StreamWebRTC
 import SwiftUI

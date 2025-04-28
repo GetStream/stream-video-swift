@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A protocol representing an observer of a device's thermal state.
 ///

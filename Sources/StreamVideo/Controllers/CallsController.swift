@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// Controller used for querying and watching calls.
 public class CallsController: ObservableObject, @unchecked Sendable {

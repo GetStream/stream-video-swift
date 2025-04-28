@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// Coordinates the peer connection, managing media, ICE, and SFU interactions.

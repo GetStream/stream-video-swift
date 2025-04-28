@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A thread-safe storage for managing `RTCRtpTransceiver` instances by key.

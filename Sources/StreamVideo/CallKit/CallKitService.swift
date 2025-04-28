@@ -6,6 +6,7 @@ import AVFoundation
 import CallKit
 import Combine
 import Foundation
+import StreamCore
 
 /// `CallKitService` manages interactions with the CallKit framework,
 /// facilitating VoIP calls in an application.

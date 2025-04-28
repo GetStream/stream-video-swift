@@ -4,6 +4,7 @@
 
 import class StreamChat.ChatChannelController
 import struct StreamChatSwiftUI.ChatChannelView
+import StreamCore
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI

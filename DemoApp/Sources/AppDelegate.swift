@@ -3,6 +3,7 @@
 //
 
 import GDPerformanceView_Swift
+import StreamCore
 import StreamVideo
 import SwiftUI
 import UIKit

@@ -4,6 +4,7 @@
 
 import Foundation
 import PushKit
+import StreamCore
 
 /// Handles push notifications for CallKit integration.
 open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject, @unchecked Sendable {

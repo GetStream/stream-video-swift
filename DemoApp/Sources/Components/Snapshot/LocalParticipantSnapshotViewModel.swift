@@ -5,6 +5,7 @@
 import AVFoundation
 import CoreImage
 import Foundation
+import StreamCore
 import StreamVideo
 import UIKit
 

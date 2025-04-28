@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A class that manages local video media for a call session.

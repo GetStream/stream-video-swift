@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// Represents options for publishing audio and video tracks.
 ///

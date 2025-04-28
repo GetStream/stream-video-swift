@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 enum BroadcastBufferReaderKey: InjectionKey {
     nonisolated(unsafe) static var currentValue: BroadcastBufferReader = .init()

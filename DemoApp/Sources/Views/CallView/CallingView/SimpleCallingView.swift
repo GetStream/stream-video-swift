@@ -3,6 +3,7 @@
 //
 
 import Intents
+import StreamCore
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI

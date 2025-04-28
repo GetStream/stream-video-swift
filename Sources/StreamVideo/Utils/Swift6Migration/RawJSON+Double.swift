@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 extension RawJSON {
     #if compiler(>=6.0)

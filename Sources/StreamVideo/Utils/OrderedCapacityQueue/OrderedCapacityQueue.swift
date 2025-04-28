@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A thread-safe queue that maintains a fixed capacity and removes elements after
 /// a specified time interval.

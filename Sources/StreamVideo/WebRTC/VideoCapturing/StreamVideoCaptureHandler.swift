@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 @preconcurrency import StreamWebRTC
 
 final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {

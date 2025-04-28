@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class UserResponse: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     

@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 public struct PermissionRequest: @unchecked Sendable, Identifiable {
     public let id: UUID = .init()

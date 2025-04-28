@@ -2,6 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import StreamCore
+
 extension WebRTCCoordinator.StateMachine.Stage {
 
     /// Creates and returns a migrating stage for the WebRTC coordinator state

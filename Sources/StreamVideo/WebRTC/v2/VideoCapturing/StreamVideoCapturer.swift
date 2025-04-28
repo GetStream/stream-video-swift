@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 @preconcurrency import StreamWebRTC
 
 protocol StreamVideoCapturerActionHandler: Sendable {

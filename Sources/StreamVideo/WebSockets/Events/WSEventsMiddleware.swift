@@ -3,12 +3,13 @@
 //
 
 import Foundation
+import StreamCore
 
 final class WSEventsMiddleware: EventMiddleware {
     
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
 
-    func handle(event: WrappedEvent) -> WrappedEvent? {
+    func handle(event: Event) -> Event? {
         var streamVideo: StreamVideo?
         for subscriber in subscribers.allObjects {
             if let subscriber = subscriber as? StreamVideo {
@@ -37,5 +38,5 @@ final class WSEventsMiddleware: EventMiddleware {
 
 protocol WSEventsSubscriber: AnyObject {
     
-    func onEvent(_ event: WrappedEvent)
+    func onEvent(_ event: Event)
 }

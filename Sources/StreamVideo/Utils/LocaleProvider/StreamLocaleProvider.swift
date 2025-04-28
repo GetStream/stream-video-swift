@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A protocol that defines the requirements for a locale provider.
 ///

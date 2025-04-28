@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
     private let urlSession: URLSession

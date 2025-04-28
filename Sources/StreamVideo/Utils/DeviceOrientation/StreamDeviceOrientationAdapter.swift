@@ -8,6 +8,7 @@ import Foundation
 import UIKit
 #endif
 import AVFoundation
+import StreamCore
 
 /// An enumeration representing device orientations: portrait or landscape.
 public enum StreamDeviceOrientation: Equatable, Sendable {

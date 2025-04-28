@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class UserRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     

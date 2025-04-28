@@ -3,6 +3,7 @@
 //
 
 import Combine
+import StreamCore
 import StreamVideo
 import SwiftUI
 

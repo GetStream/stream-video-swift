@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// Represents the settings for a call.
 public final class CallSettings: ObservableObject, Sendable, Equatable, ReflectiveStringConvertible {

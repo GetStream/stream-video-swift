@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A protocol defining methods for creating WebSocket clients.
 protocol WebSocketClientProviding {
@@ -58,7 +59,13 @@ final class WebSocketClientFactory: WebSocketClientProviding {
             webSocketClientType: webSocketClientType,
             environment: environment,
             connectURL: connectURL,
-            requiresAuth: requiresAuth
+            requiresAuth: requiresAuth,
+            pingRequestBuilder: {
+                var sfuRequest = Stream_Video_Sfu_Event_SfuRequest()
+                let healthCheckEvent = Stream_Video_Sfu_Event_HealthCheckRequest()
+                sfuRequest.healthCheckRequest = healthCheckEvent
+                return sfuRequest
+            }
         )
     }
 }
