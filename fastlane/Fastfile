@@ -188,6 +188,7 @@ private_lane :upload_beta do |options|
     else
       sdk_version
     end
+  UI.important("[TestFlight] Uploading DemoApp version: #{app_version}")
 
   testflight_build(
     api_key: appstore_api_key,
