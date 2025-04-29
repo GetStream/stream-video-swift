@@ -22,23 +22,27 @@ struct DemoCallTopView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            HStack {
-                if viewModel.callParticipants.count > 1, !hideLayoutMenu {
-                    LayoutMenuView(viewModel: viewModel)
-                        .accessibility(identifier: "viewMenu")
+            if !isCallLivestream {
+                HStack {
+                    if viewModel.callParticipants.count > 1, !hideLayoutMenu {
+                        LayoutMenuView(viewModel: viewModel)
+                            .accessibility(identifier: "viewMenu")
+                    }
+
+                    ToggleCameraIconView(viewModel: viewModel)
+
+                    Spacer()
                 }
-
-                ToggleCameraIconView(viewModel: viewModel)
-
-                Spacer()
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
 
-            HStack(alignment: .center) {
-                CallDurationView(viewModel)
+            if !isCallLivestream {
+                HStack(alignment: .center) {
+                    CallDurationView(viewModel)
+                }
+                .frame(height: 44)
+                .frame(maxWidth: .infinity)
             }
-            .frame(height: 44)
-            .frame(maxWidth: .infinity)
 
             HStack {
                 Spacer()
@@ -59,6 +63,11 @@ struct DemoCallTopView: View {
                 .opacity(sharingPopupDismissed ? 0 : 1)
                 : nil
         )
+    }
+
+    private var isCallLivestream: Bool {
+        guard let call = viewModel.call else { return false }
+        return call.callType == .livestream
     }
 
     private var hideLayoutMenu: Bool {

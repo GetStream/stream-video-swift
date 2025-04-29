@@ -9,6 +9,8 @@ import SwiftUI
 
 struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
 
+    @Injected(\.appearance) private var appearance
+
     var viewFactory: Factory
     var viewModel: CallViewModel
     var chatViewModel: DemoChatViewModel
@@ -27,32 +29,16 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
 
     func body(content: Content) -> some View {
         contentView(content)
+            .modifier(ThermalStateViewModifier())
     }
 
     @MainActor
     @ViewBuilder
     private func contentView(_ rootView: Content) -> some View {
-        if
-            let call = viewModel.call,
-            call.callType == .livestream {
-            ZStack {
-                rootView
-                LivestreamPlayer(
-                    viewFactory: viewFactory,
-                    type: call.callType,
-                    id: call.callId,
-                    joinPolicy: .none,
-                    showsLeaveCallButton: true,
-                    onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
-                )
-            }
-        } else {
-            VideoViewOverlay(
-                rootView: rootView,
-                viewFactory: viewFactory,
-                viewModel: viewModel
-            )
-            .modifier(ThermalStateViewModifier())
-        }
+        DemoVideoViewOverlay(
+            rootView: rootView,
+            viewFactory: viewFactory,
+            viewModel: viewModel
+        )
     }
 }

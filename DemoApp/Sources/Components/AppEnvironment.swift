@@ -41,6 +41,7 @@ extension AppEnvironment {
         case demo
         case legacy
         case prontoFrankfurtC2
+        case livestream
         case custom(baseURL: BaseURL, apiKey: String, token: String)
 
         var url: URL {
@@ -55,6 +56,8 @@ extension AppEnvironment {
                 URL(string: "https://getstream.io")!
             case .legacy:
                 URL(string: "https://stream-calls-dogfood.vercel.app")!
+            case .livestream:
+                URL(string: "https://livestream-react-demo.vercel.app")!
             case let .custom(baseURL, _, _):
                 baseURL.url
             }
@@ -72,6 +75,8 @@ extension AppEnvironment {
                 return "Staging"
             case .legacy:
                 return "Legacy"
+            case .livestream:
+                return "Livestream"
             case .demo:
                 return "Demo"
             case let .custom(_, apiKey, _):
@@ -94,6 +99,9 @@ extension AppEnvironment {
                     .appendingPathComponent("join")
                     .appendingPathComponent(callId)
                     .addQueryParameter("type", value: callType)
+            case .livestream:
+                return url
+                    .appending(.init(name: "id", value: callId))
             default:
                 return url
                     .appendingPathComponent("join")
@@ -107,7 +115,8 @@ extension AppEnvironment {
             .prontoStaging,
             .staging,
             .demo,
-            .legacy
+            .legacy,
+            .livestream
         ]
     }
 
@@ -258,6 +267,7 @@ extension AppEnvironment {
         case staging
         case demo
         case legacy
+        case livestream
 
         var deeplinkURL: URL {
             switch self {
@@ -269,6 +279,8 @@ extension AppEnvironment {
                 return BaseURL.demo.url
             case .legacy:
                 return BaseURL.legacy.url
+            case .livestream:
+                return BaseURL.livestream.url
             }
         }
 
@@ -282,6 +294,8 @@ extension AppEnvironment {
                 return "Demo"
             case .legacy:
                 return "Legacy"
+            case .livestream:
+                return "Livestream"
             }
         }
     }
@@ -289,11 +303,11 @@ extension AppEnvironment {
     static var supportedDeeplinks: [SupportedDeeplink] = {
         switch configuration {
         case .debug:
-            return [.pronto, .demo, .staging, .legacy]
+            return [.pronto, .demo, .staging, .legacy, .livestream]
         case .test:
             return [.pronto, .demo, .staging, .legacy]
         case .release:
-            return [.demo]
+            return [.demo, .livestream]
         }
     }()
 }
