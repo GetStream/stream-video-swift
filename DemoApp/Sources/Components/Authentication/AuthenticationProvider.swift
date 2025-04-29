@@ -46,6 +46,8 @@ enum AuthenticationProvider {
                 return "demo"
             case .prontoFrankfurtC2:
                 return "pronto-fra-c2"
+            case .livestream:
+                return "demo"
             case .custom:
                 return ""
             }
