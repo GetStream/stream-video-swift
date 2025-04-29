@@ -7,11 +7,11 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
-
+    
     var rootView: RootView
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
-
+    
     public init(
         rootView: RootView,
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -21,7 +21,7 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
         self.viewFactory = viewFactory
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-
+    
     public var body: some View {
         ZStack {
             rootView
@@ -31,12 +31,12 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
 }
 
 struct DemoCallContainer<Factory: ViewFactory>: View {
-
+    
     @Injected(\.appearance) private var appearance
-
+    
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
-
+    
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: CallViewModel
@@ -44,20 +44,29 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
         self.viewFactory = viewFactory
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-
+    
     public var body: some View {
         Group {
             if
                 let call = viewModel.call,
                 call.callType == .livestream {
-                LivestreamPlayer(
-                    viewFactory: viewFactory,
-                    type: call.callType,
-                    id: call.callId,
-                    joinPolicy: .none,
-                    showsLeaveCallButton: true,
-                    onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
-                )
+                ZStack {
+                    if call.state.backstage == true {
+                        VStack {
+                            viewFactory.makeCallTopView(viewModel: viewModel)
+                            Spacer()
+                        }
+                    }
+                    
+                    LivestreamPlayer(
+                        viewFactory: viewFactory,
+                        type: call.callType,
+                        id: call.callId,
+                        joinPolicy: .none,
+                        showsLeaveCallButton: true,
+                        onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
+                    )
+                }
                 .toastView(toast: $viewModel.toast)
                 .background(appearance.colors.lobbyBackground)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
