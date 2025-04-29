@@ -255,7 +255,7 @@ jobs:
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
     strategy:
       matrix:
-        batch: [0, 1]
+        batch: [0]
       fail-fast: false
     steps:
     - uses: actions/checkout@v4.1.1
