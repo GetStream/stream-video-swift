@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 extension StreamVideo {
     struct Environment: Sendable {
@@ -19,7 +20,8 @@ extension StreamVideo {
                 eventDecoder: JsonEventDecoder(),
                 eventNotificationCenter: $0,
                 webSocketClientType: .coordinator,
-                connectURL: $1
+                connectURL: $1,
+                pingRequestBuilder: nil
             )
             
             return webSocketClient

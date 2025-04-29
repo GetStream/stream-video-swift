@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A class that manages the communication with a Selective Forwarding Unit (SFU) for video streaming.
 ///
@@ -69,10 +70,14 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocket
             .eventSubject
             .compactMap {
-                switch $0 {
-                case let .sfuEvent(event):
-                    return event
-                default:
+                if let event = $0 as? WrappedEvent {
+                    switch event {
+                    case let .sfuEvent(event):
+                        return event
+                    default:
+                        return nil
+                    }
+                } else {
                     return nil
                 }
             }
@@ -112,7 +117,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 sessionConfiguration: webSocketConfiguration.sessionConfiguration,
                 eventDecoder: webSocketConfiguration.eventDecoder,
                 eventNotificationCenter: webSocketConfiguration.eventNotificationCenter,
-                webSocketClientType: .sfu,
+                webSocketClientType: WebSocketClientType.sfu,
                 connectURL: webSocketConfiguration.url,
                 requiresAuth: false
             ),
@@ -158,10 +163,14 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         webSocket
             .eventSubject
             .compactMap {
-                switch $0 {
-                case let .sfuEvent(event):
-                    return event.payload(T.self)
-                default:
+                if let event = $0 as? WrappedEvent {
+                    switch event {
+                    case let .sfuEvent(event):
+                        return event.payload(T.self)
+                    default:
+                        return nil
+                    }
+                } else {
                     return nil
                 }
             }
@@ -217,7 +226,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             sessionConfiguration: webSocketConfiguration.sessionConfiguration,
             eventDecoder: webSocketConfiguration.eventDecoder,
             eventNotificationCenter: webSocketConfiguration.eventNotificationCenter,
-            webSocketClientType: .sfu,
+            webSocketClientType: WebSocketClientType.sfu,
             environment: .init(),
             connectURL: webSocketConfiguration.url,
             requiresAuth: false
@@ -281,7 +290,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             "\(events.endIndex) event(s) of type \(eventType) found in bucket and will consume on sfuAdapter:\(self).",
             subsystems: .sfu
         )
-        events.forEach { webSocket.eventSubject.send(.sfuEvent($0)) }
+        events.forEach { webSocket.eventSubject.send(WrappedEvent.sfuEvent($0)) }
     }
 
     // MARK: - Service

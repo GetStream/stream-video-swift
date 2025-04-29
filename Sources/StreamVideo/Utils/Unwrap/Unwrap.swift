@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A function to safely unwrap an optional value. If the value is `nil`, it
 /// throws a `ClientError` with a custom error message, file, and line number

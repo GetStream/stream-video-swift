@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// Handles the speaker state during a call.
 public final class SpeakerManager: ObservableObject, CallSettingsManager, @unchecked Sendable {

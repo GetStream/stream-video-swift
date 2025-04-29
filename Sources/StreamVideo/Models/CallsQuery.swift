@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// Defines a query to retrieve a list of calls from the server, with specified page size, sort parameters,
 /// filters and watch flag.

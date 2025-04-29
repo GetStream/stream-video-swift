@@ -3,6 +3,7 @@
 //
 
 import Combine
+import StreamCore
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
@@ -48,8 +49,8 @@ import SwiftUI
         }
     }
 
-    private var timer: Timer?
-    private var sessionEndCountdown: Timer?
+    private var timer: Foundation.Timer?
+    private var sessionEndCountdown: Foundation.Timer?
     
     private let alertInterval: TimeInterval
     

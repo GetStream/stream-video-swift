@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// Class that handles a particular call.

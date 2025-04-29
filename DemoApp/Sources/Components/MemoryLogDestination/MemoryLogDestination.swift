@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamVideo
 
 final class MemoryLogDestination: BaseLogDestination, @unchecked Sendable {

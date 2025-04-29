@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import StreamCore
 
 final class CameraZoomHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {
 

@@ -7,6 +7,7 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 #endif
+import StreamCore
 
 public protocol AppStateProviding: Sendable {
     var state: ApplicationState { get }

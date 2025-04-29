@@ -5,6 +5,7 @@
 import Accelerate
 import CoreVideo
 import Foundation
+import StreamCore
 import StreamVideo
 import StreamWebRTC
 

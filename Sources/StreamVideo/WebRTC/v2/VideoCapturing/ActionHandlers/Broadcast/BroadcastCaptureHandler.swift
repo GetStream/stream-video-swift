@@ -4,6 +4,7 @@
 
 import Foundation
 import ReplayKit
+import StreamCore
 import StreamWebRTC
 
 final class BroadcastCaptureHandler: StreamVideoCapturerActionHandler, @unchecked Sendable {

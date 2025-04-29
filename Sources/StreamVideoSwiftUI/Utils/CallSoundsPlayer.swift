@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import StreamCore
 import StreamVideo
 
 /// Deals with sounds that are played during calls.

@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 public final class CallRequest: @unchecked Sendable, Codable, JSONEncodable, Hashable {
     

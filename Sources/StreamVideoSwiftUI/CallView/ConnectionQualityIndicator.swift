@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import StreamCore
 import StreamVideo
 import SwiftUI
 /// A view representing a connection quality indicator.

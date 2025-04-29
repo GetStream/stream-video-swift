@@ -4,6 +4,7 @@
 
 import CoreMedia
 import Foundation
+import StreamCore
 
 /// A class that defines video capture policies used by the `LocalVideoAdapter`
 /// to adjust video capture quality based on instructions from the SFU

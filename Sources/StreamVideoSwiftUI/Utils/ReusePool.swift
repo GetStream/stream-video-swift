@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamVideo
 
 /// A generic pool for reusing instances of elements that conform to AnyObject and Hashable protocols.

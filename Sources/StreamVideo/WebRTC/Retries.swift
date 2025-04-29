@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 func executeTask<Output>(
     retryPolicy: RetryPolicy,

@@ -5,6 +5,7 @@
 import Foundation
 import GoogleSignIn
 import GoogleSignInSwift
+import StreamCore
 import StreamVideo
 
 @MainActor

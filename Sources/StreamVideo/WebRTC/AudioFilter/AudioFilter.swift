@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// AudioFilter protocol defines the structure for audio filtering implementations.

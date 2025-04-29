@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// An adapter that handles video muting based on the application's lifecycle events.
 final class ApplicationLifecycleVideoMuteAdapter {

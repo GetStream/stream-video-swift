@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 final class SimulatorScreenCapturer: RTCVideoCapturer, @unchecked Sendable {

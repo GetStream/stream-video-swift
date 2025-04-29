@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A policy implementation where CallKit availability depends on the region.
 ///

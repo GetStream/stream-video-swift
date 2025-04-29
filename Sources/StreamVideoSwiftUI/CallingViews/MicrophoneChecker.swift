@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamCore
 import StreamVideo
 
 /// Checks the audio capabilities of the device.

@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// An actor class that handles WebRTC state management and media tracks for a

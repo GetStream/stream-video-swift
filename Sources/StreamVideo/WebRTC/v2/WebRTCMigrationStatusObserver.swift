@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// If we are migrating from another SFU, then we need to wait until a deadline (defaults to 7)
 /// for **Stream_Video_Sfu_Event_ParticipantMigrationComplete** to arrive.

@@ -2,6 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import StreamCore
+
 extension Call.StateMachine.Stage {
 
     /// Creates a rejecting stage for a call with the given input.

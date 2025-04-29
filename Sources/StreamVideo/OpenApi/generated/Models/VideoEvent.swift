@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 internal protocol WSCallEvent {
     var callCid: String { get }

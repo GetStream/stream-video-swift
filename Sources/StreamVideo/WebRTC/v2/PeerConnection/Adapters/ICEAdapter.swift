@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// Manages ICE (Interactive Connectivity Establishment) operations for WebRTC. The adapter is bound to

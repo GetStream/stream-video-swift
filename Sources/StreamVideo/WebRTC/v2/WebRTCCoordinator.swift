@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A coordinator that manages WebRTC connections, state transitions, and media

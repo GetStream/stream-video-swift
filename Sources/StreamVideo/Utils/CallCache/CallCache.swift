@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A cache for managing `Call` instances, ensuring thread-safe operations.
 final class CallCache {

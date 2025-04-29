@@ -4,9 +4,7 @@
 
 import Combine
 import Foundation
-
-import Combine
-import Foundation
+import StreamCore
 
 /// A class responsible for collecting and reporting WebRTC statistics.
 ///

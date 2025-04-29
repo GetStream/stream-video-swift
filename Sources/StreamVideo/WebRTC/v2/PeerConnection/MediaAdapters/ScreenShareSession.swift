@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A structure representing a screen sharing session.

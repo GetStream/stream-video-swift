@@ -5,6 +5,7 @@
 import CoreImage
 import CoreVideo
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 private class Message {

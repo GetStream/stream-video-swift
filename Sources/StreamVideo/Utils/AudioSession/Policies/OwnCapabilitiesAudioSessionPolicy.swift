@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import StreamCore
 
 /// An audio session policy that considers the users's own capabilities.
 /// By using this category, you can allow users that don't have the `sendAudio` capability (e.g. livestream

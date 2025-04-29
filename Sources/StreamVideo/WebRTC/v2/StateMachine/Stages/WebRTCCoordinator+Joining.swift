@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 extension WebRTCCoordinator.StateMachine.Stage {

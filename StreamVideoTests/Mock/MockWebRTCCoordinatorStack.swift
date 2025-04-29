@@ -3,6 +3,7 @@
 //
 
 import Combine
+import StreamCore
 @testable import StreamVideo
 import StreamWebRTC
 

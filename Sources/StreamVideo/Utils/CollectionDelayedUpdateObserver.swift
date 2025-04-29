@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A class that observes a collection and delays updates based on its size.
 /// It uses either debounce or throttle mechanisms to manage update frequency.

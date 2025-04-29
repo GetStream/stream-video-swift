@@ -3,6 +3,7 @@
 //
 
 import EffectsLibrary
+import StreamCore
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI

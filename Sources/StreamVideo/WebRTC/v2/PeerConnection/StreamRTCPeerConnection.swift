@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// Represents a WebRTC peer connection with additional Stream-specific functionality.

@@ -3,6 +3,7 @@
 //
 
 import AVFoundation
+import StreamCore
 
 /// A default implementation of the `AudioSessionPolicy` protocol.
 public struct DefaultAudioSessionPolicy: AudioSessionPolicy {

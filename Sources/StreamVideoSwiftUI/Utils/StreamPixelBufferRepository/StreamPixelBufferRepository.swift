@@ -4,6 +4,7 @@
 
 import CoreVideo
 import Foundation
+import StreamCore
 import StreamVideo
 
 /// A repository class that manages multiple pools of pixel buffers to efficiently handle various sizes and formats.

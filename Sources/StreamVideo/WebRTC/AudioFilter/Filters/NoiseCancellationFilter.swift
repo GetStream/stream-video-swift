@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A concrete implementation of `AudioFilter` that applies noise cancellation effects.

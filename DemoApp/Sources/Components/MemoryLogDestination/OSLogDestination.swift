@@ -4,6 +4,7 @@
 
 import Foundation
 import OSLog
+import StreamCore
 import StreamVideo
 
 final class OSLogDestination: BaseLogDestination, @unchecked Sendable {

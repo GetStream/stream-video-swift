@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 extension WebRTCCoordinator.StateMachine {
     /// Represents a stage in the WebRTC coordinator state machine.

@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A factory class for creating WebRTC-related objects such as peer connections,

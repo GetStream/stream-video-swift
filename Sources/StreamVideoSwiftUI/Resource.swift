@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamVideo
 
 /// A structure representing a resource with a name and optional file extension.

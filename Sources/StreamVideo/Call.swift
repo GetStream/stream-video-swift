@@ -5,6 +5,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
@@ -1360,7 +1361,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
-    internal func onEvent(_ event: WrappedEvent) {
+    internal func onEvent(_ event: Event) {
+        guard let event = event as? WrappedEvent else {
+            return
+        }
         guard case let .coordinatorEvent(videoEvent) = event else {
             return
         }

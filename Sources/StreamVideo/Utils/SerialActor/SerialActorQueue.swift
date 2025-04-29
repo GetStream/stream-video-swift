@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 /// A thread-safe utility for executing asynchronous tasks serially.
 ///

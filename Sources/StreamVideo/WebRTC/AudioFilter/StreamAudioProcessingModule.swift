@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 import StreamWebRTC
 
 /// A protocol defining requirements for an audio processing module that supports audio filters.

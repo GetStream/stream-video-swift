@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import StreamCore
 
 /// A protocol defining an object that can provide information regarding an active call.
 protocol StreamActiveCallProviding {

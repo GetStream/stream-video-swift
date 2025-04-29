@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamCore
 
 enum HTTPMethod: String {
     case get = "GET"
