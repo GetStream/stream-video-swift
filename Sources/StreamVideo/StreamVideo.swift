@@ -188,32 +188,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             coordinatorClient.middlewares.append(anonymousAuth)
         }
         prefetchLocation()
-        connectTask = Task {
-            if user.type == .guest {
-                do {
-                    try Task.checkCancellation()
-                    let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
 
-                    self.state.user = guestInfo.user
-                    self.token = guestInfo.token
-                    self.tokenProvider = guestInfo.tokenProvider
-
-                    try Task.checkCancellation()
-                    try await self.connectUser(isInitial: true)
-                } catch {
-                    log.error("Error connecting as guest", error: error)
-                }
-            } else if user.type != .anonymous {
-                do {
-                    try Task.checkCancellation()
-                    try await self.connectUser(isInitial: true)
-                } catch {
-                    log.error(error)
-                }
-            }
-        }
+        initialConnectIfRequired(apiKey: apiKey)
     }
-    
+
     deinit {
         connectTask?.cancel()
         connectTask = nil
@@ -418,7 +396,41 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     }
 
     // MARK: - private
-    
+
+    /// When initializing we perform an automatic connection attempt.
+    ///
+    /// - Important: This behaviour is only enabled for non-test environments. This is to reduce the
+    /// noise in logs and avoid unnecessary network operations with the backend.
+    private func initialConnectIfRequired(apiKey: String) {
+        guard NSClassFromString("XCTestCase") == nil else {
+            return
+        }
+        connectTask = Task {
+            if user.type == .guest {
+                do {
+                    try Task.checkCancellation()
+                    let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
+
+                    self.state.user = guestInfo.user
+                    self.token = guestInfo.token
+                    self.tokenProvider = guestInfo.tokenProvider
+
+                    try Task.checkCancellation()
+                    try await self.connectUser(isInitial: true)
+                } catch {
+                    log.error("Error connecting as guest", error: error)
+                }
+            } else if user.type != .anonymous {
+                do {
+                    try Task.checkCancellation()
+                    try await self.connectUser(isInitial: true)
+                } catch {
+                    log.error(error)
+                }
+            }
+        }
+    }
+
     /// Creates a call controller, used for establishing and managing a call.
     /// - Parameters:
     ///    - callType: the type of the call.
