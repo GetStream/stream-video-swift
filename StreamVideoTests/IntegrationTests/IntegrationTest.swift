@@ -62,7 +62,8 @@ class IntegrationTest: XCTestCase, @unchecked Sendable {
                 pushProviderInfo: .init(name: "ios-apn", pushProvider: .apn),
                 voipPushProviderInfo: .init(name: "ios-voip", pushProvider: .apn)
             ),
-            tokenProvider: { _ in }
+            tokenProvider: { _ in },
+            autoConnectOnInit: false
         )
         try await client.connect()
         return client

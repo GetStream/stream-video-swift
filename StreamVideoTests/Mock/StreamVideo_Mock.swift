@@ -31,7 +31,8 @@ extension StreamVideo {
                 result(.success(mockToken))
             },
             pushNotificationsConfig: .default,
-            environment: mockEnvironment(httpClient, callController)
+            environment: mockEnvironment(httpClient, callController),
+            autoConnectOnInit: false
         )
         return streamVideo
     }

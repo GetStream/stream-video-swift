@@ -126,10 +126,32 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             videoConfig: videoConfig,
             tokenProvider: tokenProvider ?? { _ in },
             pushNotificationsConfig: pushNotificationsConfig,
-            environment: Environment()
+            environment: Environment(),
+            autoConnectOnInit: true
         )
     }
-        
+
+    convenience init(
+        apiKey: String,
+        user: User,
+        token: UserToken,
+        videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default,
+        tokenProvider: UserTokenProvider? = nil,
+        autoConnectOnInit: Bool
+    ) {
+        self.init(
+            apiKey: apiKey,
+            user: user,
+            token: token,
+            videoConfig: videoConfig,
+            tokenProvider: tokenProvider ?? { _ in },
+            pushNotificationsConfig: pushNotificationsConfig,
+            environment: Environment(),
+            autoConnectOnInit: autoConnectOnInit
+        )
+    }
+
     init(
         apiKey: String,
         user: User,
@@ -137,7 +159,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         videoConfig: VideoConfig = VideoConfig(),
         tokenProvider: @escaping UserTokenProvider,
         pushNotificationsConfig: PushNotificationsConfig,
-        environment: Environment
+        environment: Environment,
+        autoConnectOnInit: Bool
     ) {
         self.apiKey = APIKey(apiKey)
         state = State(user: user)
@@ -189,7 +212,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         prefetchLocation()
 
-        initialConnectIfRequired(apiKey: apiKey)
+        if autoConnectOnInit {
+            initialConnectIfRequired(apiKey: apiKey)
+        }
     }
 
     deinit {
@@ -402,9 +427,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// - Important: This behaviour is only enabled for non-test environments. This is to reduce the
     /// noise in logs and avoid unnecessary network operations with the backend.
     private func initialConnectIfRequired(apiKey: String) {
-        guard NSClassFromString("XCTestCase") == nil else {
+        guard connectTask == nil else {
             return
         }
+
         connectTask = Task {
             if user.type == .guest {
                 do {
