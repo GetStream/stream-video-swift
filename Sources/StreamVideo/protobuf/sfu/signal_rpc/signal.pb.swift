@@ -254,6 +254,23 @@ struct Stream_Video_Sfu_Signal_SendStatsRequest {
     set {_uniqueStorage()._publisherRtcStats = newValue}
   }
 
+  var rtcStats: String {
+    get {return _storage._rtcStats}
+    set {_uniqueStorage()._rtcStats = newValue}
+  }
+
+  /// Encode stats for the publisher
+  var encodeStats: [Stream_Video_Sfu_Models_PerformanceStats] {
+    get {return _storage._encodeStats}
+    set {_uniqueStorage()._encodeStats = newValue}
+  }
+
+  /// Decode stats for the subscriber
+  var decodeStats: [Stream_Video_Sfu_Models_PerformanceStats] {
+    get {return _storage._decodeStats}
+    set {_uniqueStorage()._decodeStats = newValue}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_DeviceState: Equatable {
@@ -867,6 +884,9 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     12: .same(proto: "rtmp"),
     13: .standard(proto: "subscriber_rtc_stats"),
     14: .standard(proto: "publisher_rtc_stats"),
+    15: .standard(proto: "rtc_stats"),
+    16: .standard(proto: "encode_stats"),
+    17: .standard(proto: "decode_stats"),
   ]
 
 fileprivate class _StorageClass: @unchecked Sendable {
@@ -883,6 +903,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
     var _rtmp: Stream_Video_Sfu_Models_RTMPIngress? = nil
     var _subscriberRtcStats: String = String()
     var _publisherRtcStats: String = String()
+    var _rtcStats: String = String()
+    var _encodeStats: [Stream_Video_Sfu_Models_PerformanceStats] = []
+    var _decodeStats: [Stream_Video_Sfu_Models_PerformanceStats] = []
 
     static let defaultInstance = _StorageClass()
 
@@ -902,6 +925,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
       _rtmp = source._rtmp
       _subscriberRtcStats = source._subscriberRtcStats
       _publisherRtcStats = source._publisherRtcStats
+      _rtcStats = source._rtcStats
+      _encodeStats = source._encodeStats
+      _decodeStats = source._decodeStats
     }
   }
 
@@ -958,6 +984,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
         case 12: try { try decoder.decodeSingularMessageField(value: &_storage._rtmp) }()
         case 13: try { try decoder.decodeSingularStringField(value: &_storage._subscriberRtcStats) }()
         case 14: try { try decoder.decodeSingularStringField(value: &_storage._publisherRtcStats) }()
+        case 15: try { try decoder.decodeSingularStringField(value: &_storage._rtcStats) }()
+        case 16: try { try decoder.decodeRepeatedMessageField(value: &_storage._encodeStats) }()
+        case 17: try { try decoder.decodeRepeatedMessageField(value: &_storage._decodeStats) }()
         default: break
         }
       }
@@ -1017,6 +1046,15 @@ fileprivate class _StorageClass: @unchecked Sendable {
       if !_storage._publisherRtcStats.isEmpty {
         try visitor.visitSingularStringField(value: _storage._publisherRtcStats, fieldNumber: 14)
       }
+      if !_storage._rtcStats.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._rtcStats, fieldNumber: 15)
+      }
+      if !_storage._encodeStats.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._encodeStats, fieldNumber: 16)
+      }
+      if !_storage._decodeStats.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._decodeStats, fieldNumber: 17)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1039,6 +1077,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
         if _storage._rtmp != rhs_storage._rtmp {return false}
         if _storage._subscriberRtcStats != rhs_storage._subscriberRtcStats {return false}
         if _storage._publisherRtcStats != rhs_storage._publisherRtcStats {return false}
+        if _storage._rtcStats != rhs_storage._rtcStats {return false}
+        if _storage._encodeStats != rhs_storage._encodeStats {return false}
+        if _storage._decodeStats != rhs_storage._decodeStats {return false}
         return true
       }
       if !storagesAreEqual {return false}

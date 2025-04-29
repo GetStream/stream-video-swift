@@ -1373,6 +1373,49 @@ struct Stream_Video_Sfu_Models_AppleState {
   init() {}
 }
 
+/// PerformanceStats represents the encoding/decoding statistics for a track.
+struct Stream_Video_Sfu_Models_PerformanceStats {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// the type of the track (e.g., video, audio, screen share)
+  var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
+
+  /// the codec used for the track
+  var codec: Stream_Video_Sfu_Models_Codec {
+    get {return _codec ?? Stream_Video_Sfu_Models_Codec()}
+    set {_codec = newValue}
+  }
+  /// Returns true if `codec` has been explicitly set.
+  var hasCodec: Bool {return self._codec != nil}
+  /// Clears the value of `codec`. Subsequent reads from it will return its default value.
+  mutating func clearCodec() {self._codec = nil}
+
+  /// the average encode/decode time in ms
+  var avgFrameTimeMs: Float = 0
+
+  /// the average fps for the track
+  var avgFps: Float = 0
+
+  /// the track dimensions
+  var videoDimension: Stream_Video_Sfu_Models_VideoDimension {
+    get {return _videoDimension ?? Stream_Video_Sfu_Models_VideoDimension()}
+    set {_videoDimension = newValue}
+  }
+  /// Returns true if `videoDimension` has been explicitly set.
+  var hasVideoDimension: Bool {return self._videoDimension != nil}
+  /// Clears the value of `videoDimension`. Subsequent reads from it will return its default value.
+  mutating func clearVideoDimension() {self._videoDimension = nil}
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _codec: Stream_Video_Sfu_Models_Codec? = nil
+  fileprivate var _videoDimension: Stream_Video_Sfu_Models_VideoDimension? = nil
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Models_PeerType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
@@ -1410,6 +1453,7 @@ extension Stream_Video_Sfu_Models_CallGrants: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_InputDevices: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AndroidState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AppleState: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_PerformanceStats: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -2798,6 +2842,66 @@ extension Stream_Video_Sfu_Models_AppleState: SwiftProtobuf.Message, SwiftProtob
   static func ==(lhs: Stream_Video_Sfu_Models_AppleState, rhs: Stream_Video_Sfu_Models_AppleState) -> Bool {
     if lhs.thermalState != rhs.thermalState {return false}
     if lhs.isLowPowerModeEnabled != rhs.isLowPowerModeEnabled {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_PerformanceStats: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PerformanceStats"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "track_type"),
+    2: .same(proto: "codec"),
+    3: .standard(proto: "avg_frame_time_ms"),
+    4: .standard(proto: "avg_fps"),
+    5: .standard(proto: "video_dimension"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
+      case 3: try { try decoder.decodeSingularFloatField(value: &self.avgFrameTimeMs) }()
+      case 4: try { try decoder.decodeSingularFloatField(value: &self.avgFps) }()
+      case 5: try { try decoder.decodeSingularMessageField(value: &self._videoDimension) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.trackType != .unspecified {
+      try visitor.visitSingularEnumField(value: self.trackType, fieldNumber: 1)
+    }
+    try { if let v = self._codec {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if self.avgFrameTimeMs != 0 {
+      try visitor.visitSingularFloatField(value: self.avgFrameTimeMs, fieldNumber: 3)
+    }
+    if self.avgFps != 0 {
+      try visitor.visitSingularFloatField(value: self.avgFps, fieldNumber: 4)
+    }
+    try { if let v = self._videoDimension {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_PerformanceStats, rhs: Stream_Video_Sfu_Models_PerformanceStats) -> Bool {
+    if lhs.trackType != rhs.trackType {return false}
+    if lhs._codec != rhs._codec {return false}
+    if lhs.avgFrameTimeMs != rhs.avgFrameTimeMs {return false}
+    if lhs.avgFps != rhs.avgFps {return false}
+    if lhs._videoDimension != rhs._videoDimension {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -1738,8 +1738,6 @@
 		404A81372DA3CC0C001F7FA8 /* CallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfiguration.swift; sourceTree = "<group>"; };
 		4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sendable+Extensions.swift"; sourceTree = "<group>"; };
 		4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Conformances.swift"; sourceTree = "<group>"; };
-		4052BF4E2DBA2AC70085AFA5 /* ProximityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityPolicy.swift; sourceTree = "<group>"; };
-		4052BF522DBA2E510085AFA5 /* VideoProximityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoProximityPolicy.swift; sourceTree = "<group>"; };
 		4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppStateAdapter.swift; sourceTree = "<group>"; };
 		405687AD2D78A0E700093B98 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
@@ -2200,8 +2198,6 @@
 		40FE5EBA2C9C7D40006B0881 /* StreamVideoCaptureHandler_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoCaptureHandler_Tests.swift; sourceTree = "<group>"; };
 		40FE5EBC2C9C82A6006B0881 /* MockRTCVideoCapturerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRTCVideoCapturerDelegate.swift; sourceTree = "<group>"; };
 		40FE5EBE2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+Convenience.swift"; sourceTree = "<group>"; };
-		40FEA2C52DA4000A00AC523B /* SpeakerProximityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerProximityPolicy.swift; sourceTree = "<group>"; };
-		40FEA2C82DA4015300AC523B /* ProximityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityMonitor.swift; sourceTree = "<group>"; };
 		40FF825C2D63527D0029AA80 /* Comparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comparator.swift; sourceTree = "<group>"; };
 		40FF825E2D63532C0029AA80 /* Participants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Participants.swift; sourceTree = "<group>"; };
 		40FF82602D6353AB0029AA80 /* Presets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presets.swift; sourceTree = "<group>"; };
@@ -3467,33 +3463,6 @@
 				4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */,
 			);
 			path = Swift6Migration;
-			sourceTree = "<group>";
-		};
-		4052BF4D2DBA28700085AFA5 /* Proximity */ = {
-			isa = PBXGroup;
-			children = (
-				4052BF512DBA2AD80085AFA5 /* Monitor */,
-				4052BF502DBA2AD10085AFA5 /* Policies */,
-			);
-			path = Proximity;
-			sourceTree = "<group>";
-		};
-		4052BF502DBA2AD10085AFA5 /* Policies */ = {
-			isa = PBXGroup;
-			children = (
-				4052BF4E2DBA2AC70085AFA5 /* ProximityPolicy.swift */,
-				40FEA2C52DA4000A00AC523B /* SpeakerProximityPolicy.swift */,
-				4052BF522DBA2E510085AFA5 /* VideoProximityPolicy.swift */,
-			);
-			path = Policies;
-			sourceTree = "<group>";
-		};
-		4052BF512DBA2AD80085AFA5 /* Monitor */ = {
-			isa = PBXGroup;
-			children = (
-				40FEA2C82DA4015300AC523B /* ProximityMonitor.swift */,
-			);
-			path = Monitor;
 			sourceTree = "<group>";
 		};
 		4061287F2CF32FE4007F5CDC /* SDP Parsing */ = {
@@ -5752,7 +5721,6 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				4052BF4D2DBA28700085AFA5 /* Proximity */,
 				40FF825B2D63523C0029AA80 /* Sorting */,
 				403A4FE92D660E3E00ECD46A /* Swift6Migration */,
 				40ADB85D2D65DFB000B06AAF /* CustomStringInterpolation */,
