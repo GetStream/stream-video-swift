@@ -8,7 +8,7 @@ let app = XCUIApplication()
 var userRobot = UserRobot()
 
 class StreamTestCase: XCTestCase {
-    
+
     let deviceRobot = DeviceRobot(app)
     var participantRobot = ParticipantRobot()
     var sinatra = Sinatra()
@@ -20,8 +20,7 @@ class StreamTestCase: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
         continueAfterFailure = false
-        
-        setLaunchArguments()
+
         alertHandler()
         ipadSetup()
         startVideo()
@@ -42,7 +41,7 @@ class StreamTestCase: XCTestCase {
 }
 
 extension StreamTestCase {
-    
+
     static var randomCallId: String {
         let uuid = UUID().uuidString.split(separator: "-")
         if let first = uuid.first { return String(first) } else { return "Test" }
@@ -50,11 +49,6 @@ extension StreamTestCase {
 }
 
 extension StreamTestCase {
-    
-    private func setLaunchArguments() {
-        let secret = ProcessInfo.processInfo.environment[EnvironmentVariable.streamVideoSecret.rawValue] ?? ""
-        app.setEnvironmentVariables([.streamVideoSecret: secret])
-    }
 
     private func attachElementTree() {
         let attachment = XCTAttachment(string: app.debugDescription)
@@ -73,7 +67,7 @@ extension StreamTestCase {
             return false
         }
     }
-    
+
     private func ipadSetup() {
         if UIDevice.current.userInterfaceIdiom == .pad {
             app.landscape()
