@@ -108,7 +108,6 @@ open class CallViewModel: ObservableObject {
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
             updateCallStateIfNeeded()
-            checkCallSettingsForCurrentUser()
         }
     }
 

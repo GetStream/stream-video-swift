@@ -43,41 +43,21 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
 
             switch proximity {
             case .near:
-                if call.state.callSettings.speakerOn {
-                    self.callSettingsBeforeProximityChange = call.state.callSettings
-                    let updatedCallSettings = call
-                        .state
-                        .callSettings
-                        .withUpdatedSpeakerState(false)
-
-                    call.state.callSettings = updatedCallSettings
-
-                    log.debug(
-                        "Device proximity was updated to .near. Speaker was disabled.",
-                        subsystems: .audioSession
-                    )
-                } else if !call.state.callSettings.speakerOn {
-                    log.debug(
-                        "Device proximity was updated to .near but speaker is already off.",
-                        subsystems: .audioSession
-                    )
+                let callSettings = call.state.callSettings
+                if callSettings.speakerOn {
+                    self.callSettingsBeforeProximityChange = callSettings
+                    try? await call.callController.changeSpeakerState(isEnabled: false)
                 } else {
                     /* No-op */
                 }
             case .far:
-                if let callSettingsBeforeProximityChange {
-                    self.callSettingsBeforeProximityChange = nil
-                    call.state.callSettings = callSettingsBeforeProximityChange
-                    log.debug(
-                        "Device proximity was updated to .far. We restored the CallSettings.",
-                        subsystems: .audioSession
-                    )
-                } else {
-                    log.debug(
-                        "Device proximity was updated to .far but no CallSettings found to restore.",
-                        subsystems: .audioSession
-                    )
+                guard let callSettingsBeforeProximityChange else {
+                    return
                 }
+                self.callSettingsBeforeProximityChange = nil
+                try? await call
+                    .callController
+                    .changeSpeakerState(isEnabled: callSettingsBeforeProximityChange.speakerOn)
             }
         }
     }

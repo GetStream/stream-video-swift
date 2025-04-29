@@ -46,14 +46,15 @@ public final class VideoProximityPolicy: ProximityPolicy, @unchecked Sendable {
 
             switch proximity {
             case .near:
+                let callSettings = call.state.callSettings
                 let cachedValue = CachedValue(
                     incomingVideoQualitySettings: call.state.incomingVideoQualitySettings,
-                    videoOn: call.state.callSettings.videoOn
+                    videoOn: callSettings.videoOn
                 )
                 self.cachedValue = cachedValue
                 await call.setIncomingVideoQualitySettings(.disabled(group: .all))
                 if cachedValue.videoOn {
-                    try? await call.camera.disable()
+                    try? await call.callController.changeVideoState(isEnabled: false)
                 }
             case .far:
                 if let cachedValue {
@@ -62,7 +63,7 @@ public final class VideoProximityPolicy: ProximityPolicy, @unchecked Sendable {
                     }
 
                     if cachedValue.videoOn {
-                        try? await call.camera.enable()
+                        try? await call.callController.changeVideoState(isEnabled: true)
                     }
                 }
             }
