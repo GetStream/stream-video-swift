@@ -460,15 +460,15 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         let executionExpectation = expectation(description: "Iteration expectation")
         executionExpectation.expectedFulfillmentCount = 10
 
-        for _ in (0..<10) {
-            Task {
-                do {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for _ in (0..<executionExpectation.expectedFulfillmentCount) {
+                group.addTask {
                     _ = try await call.join()
-                } catch {
-                    log.error(error)
+                    executionExpectation.fulfill()
                 }
-                executionExpectation.fulfill()
             }
+
+            try await group.waitForAll()
         }
 
         await safeFulfillment(of: [executionExpectation], timeout: defaultTimeout)

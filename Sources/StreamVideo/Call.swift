@@ -158,10 +158,34 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 case let .joined(joinResponse) = currentStage.context.output {
                 return joinResponse
             } else if
-                currentStage.id == .joining,
-                case let .join(input) = currentStage.context.input {
-                return try await input
-                    .deliverySubject
+                currentStage.id == .joining {
+                return try await stateMachine
+                    .publisher
+                    .tryCompactMap {
+                        switch $0.id {
+                        case .joined:
+                            guard
+                                let stage = $0 as? Call.StateMachine.Stage.JoinedStage
+                            else {
+                                throw ClientError()
+                            }
+                            switch stage.context.output {
+                            case let .joined(response):
+                                return response
+                            default:
+                                throw ClientError()
+                            }
+                        case .error:
+                            guard
+                                let stage = $0 as? Call.StateMachine.Stage.ErrorStage
+                            else {
+                                throw ClientError()
+                            }
+                            throw stage.error
+                        default:
+                            return nil
+                        }
+                    }
                     .nextValue(timeout: CallConfiguration.timeout.join)
             } else {
                 let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()

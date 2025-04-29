@@ -54,7 +54,11 @@ extension Publisher where Output: Sendable {
                 receiveValue: { value in
                     timeoutWorkItem?.cancel()
                     if !receivedValue {
-                        continuation.resume(returning: value) // Resume only if value hasn't been received
+                        if let error = value as? Error {
+                            continuation.resume(throwing: error)
+                        } else {
+                            continuation.resume(returning: value) // Resume only if value hasn't been received
+                        }
                         receivedValue = true
                     }
                     cancellable?.cancel()

@@ -49,7 +49,8 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
             videoConfig: videoConfig,
             tokenProvider: tokenProvider,
             pushNotificationsConfig: pushNotificationsConfig,
-            environment: environment
+            environment: environment,
+            autoConnectOnInit: false
         )
     }
 

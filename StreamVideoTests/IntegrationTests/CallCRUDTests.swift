@@ -559,6 +559,7 @@ final class CallCRUDTests: IntegrationTest, @unchecked Sendable {
     }
     
     func test_acceptCall() async throws {
+        try await client.connect()
         let call = client.call(callType: defaultCallType, callId: randomCallId)
         try await call.create(memberIds: [user1])
         try await call.ring()
@@ -628,6 +629,7 @@ final class CallCRUDTests: IntegrationTest, @unchecked Sendable {
     }
     
     func test_pinAndUnpinUser() async throws {
+        try await client.connect()
         let firstUserCall = client.call(callType: .default, callId: randomCallId)
         try await firstUserCall.create(memberIds: [user1, user2])
         
