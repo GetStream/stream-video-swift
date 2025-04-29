@@ -156,8 +156,9 @@ struct SimpleCallingView: View {
             return
         }
 
-        if deeplinkInfo.baseURL == AppEnvironment
-            .baseURL || (deeplinkInfo.baseURL == .legacy && AppEnvironment.baseURL == .pronto) {
+        if
+            deeplinkInfo.baseURL == AppEnvironment.baseURL || (deeplinkInfo.baseURL == .legacy && AppEnvironment.baseURL == .pronto)
+        {
             if !Set(AppEnvironment.availableCallTypes).contains(deeplinkInfo.callType) {
                 AppEnvironment.availableCallTypes.append(deeplinkInfo.callType)
             }

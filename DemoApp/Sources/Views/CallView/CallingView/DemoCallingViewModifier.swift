@@ -20,11 +20,10 @@ struct DemoCallingViewModifier: ViewModifier {
 
     private var isAnonymous: Bool { appState.currentUser == .anonymous }
 
-    private var callType: String {
+    @State private var callType: String =
         !AppState.shared.deeplinkInfo.callType.isEmpty
             ? AppState.shared.deeplinkInfo.callType
             : AppEnvironment.preferredCallType ?? .default
-    }
 
     init(
         text: Binding<String>,
@@ -49,14 +48,15 @@ struct DemoCallingViewModifier: ViewModifier {
                 // deeplink.
 
                 if deeplinkInfo.callId.isEmpty {
-                    joinCallIfNeeded(with: self.text.wrappedValue, callType: callType)
+                    joinCallIfNeeded(with: self.text.wrappedValue, callType: deeplinkInfo.callType)
                 } else {
                     self.text.wrappedValue = deeplinkInfo.callId
                     joinCallIfNeeded(
                         with: self.text.wrappedValue,
-                        callType: callType
+                        callType: deeplinkInfo.callType
                     )
                 }
+                callType = deeplinkInfo.callType
             }
             .onChange(of: viewModel.callingState) { callingState in
                 switch callingState {

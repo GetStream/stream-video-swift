@@ -32,27 +32,11 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
     @MainActor
     @ViewBuilder
     private func contentView(_ rootView: Content) -> some View {
-        if
-            let call = viewModel.call,
-            call.callType == .livestream {
-            ZStack {
-                rootView
-                LivestreamPlayer(
-                    viewFactory: viewFactory,
-                    type: call.callType,
-                    id: call.callId,
-                    joinPolicy: .none,
-                    showsLeaveCallButton: true,
-                    onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
-                )
-            }
-        } else {
-            VideoViewOverlay(
-                rootView: rootView,
-                viewFactory: viewFactory,
-                viewModel: viewModel
-            )
-            .modifier(ThermalStateViewModifier())
-        }
+        DemoVideoViewOverlay(
+            rootView: rootView,
+            viewFactory: viewFactory,
+            viewModel: viewModel
+        )
+        .modifier(ThermalStateViewModifier())
     }
 }
