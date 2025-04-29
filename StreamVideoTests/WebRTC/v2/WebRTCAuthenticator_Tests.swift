@@ -252,7 +252,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         let notify = true
         let options = CreateCallOptions()
         let expected = JoinCallResponse.dummy(
-            statsOptions: .init(reportingIntervalMs: 12000)
+            statsOptions: .init(enableRtcStats: false, reportingIntervalMs: 12000)
         )
         mockCoordinatorStack.callAuthenticator.authenticateResult = .success(expected)
 
