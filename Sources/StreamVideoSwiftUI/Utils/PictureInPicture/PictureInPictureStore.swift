@@ -12,7 +12,7 @@ import UIKit
 /// Manages the state of the Picture-in-Picture window.
 ///
 /// Handles all state changes and provides a reactive interface for observing updates.
-final class PictureInPictureStore: ObservableObject {
+final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
 
     /// The current state of the Picture-in-Picture window.
     struct State: Sendable {
@@ -60,7 +60,7 @@ final class PictureInPictureStore: ObservableObject {
     private let subject: CurrentValueSubject<State, Never>
     var state: State { subject.value }
 
-    private let processingQueue = UnfairQueue()
+    private let processingQueue = SerialActorQueue()
 
     @MainActor
     init() {
@@ -71,32 +71,32 @@ final class PictureInPictureStore: ObservableObject {
     ///
     /// - Parameter action: The action to process
     func dispatch(_ action: Action) {
-        processingQueue.sync { [weak self] in
+        processingQueue.async { [weak self] in
             guard let self else {
                 return
             }
 
-            var currentState = state
+            var updatedState = state
             switch action {
             case let .setActive(value):
-                currentState.isActive = value
+                updatedState.isActive = value
             case let .setCall(value):
-                currentState.call = value
+                updatedState.call = value
             case let .setSourceView(value):
-                currentState.sourceView = value
+                updatedState.sourceView = value
             case let .setViewFactory(value):
-                currentState.viewFactory = value
+                updatedState.viewFactory = value
             case let .setContent(value):
-                currentState.content = value
+                updatedState.content = value
             case let .setPreferredContentSize(value):
-                currentState.preferredContentSize = value
+                updatedState.preferredContentSize = value
             case let .setContentSize(value):
-                currentState.contentSize = value
+                updatedState.contentSize = value
             case let .setCanStartPictureInPictureAutomaticallyFromInline(value):
-                currentState.canStartPictureInPictureAutomaticallyFromInline = value
+                updatedState.canStartPictureInPictureAutomaticallyFromInline = value
             }
 
-            self.subject.send(currentState)
+            self.subject.send(updatedState)
         }
     }
 

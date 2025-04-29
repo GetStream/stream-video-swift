@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import StreamCore
 
 /// An audio session policy that considers the users's own capabilities.
 /// By using this category, you can allow users that don't have the `sendAudio` capability (e.g. livestream
@@ -18,6 +19,8 @@ import Foundation
 // currentDevice has earpiece`: we use `playAndRecord` category.
 /// - Otherwise we use `playback` category.
 public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
+
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     private let currentDevice = CurrentDevice.currentValue
 
@@ -52,14 +55,19 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             : .playback
 
         let mode: AVAudioSession.Mode = category == .playAndRecord
-            ? callSettings.videoOn ? .videoChat : .voiceChat
+            ? callSettings.videoOn && callSettings.speakerOn ? .videoChat : .voiceChat
             : .default
 
         let categoryOptions: AVAudioSession.CategoryOptions = category == .playAndRecord
-            ? .playAndRecord
+            ? .playAndRecord(
+                videoOn: callSettings.videoOn,
+                speakerOn: callSettings.speakerOn,
+                appIsInForeground: applicationStateAdapter.state == .foreground
+            )
             : .playback
 
-        let overrideOutputAudioPort: AVAudioSession.PortOverride? = category == .playAndRecord
+        let overrideOutputAudioPort: AVAudioSession.PortOverride? = category == .playAndRecord && applicationStateAdapter
+            .state == .foreground
             ? callSettings.speakerOn == true ? .speaker : AVAudioSession.PortOverride.none
             : nil
 

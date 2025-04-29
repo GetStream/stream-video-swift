@@ -38,6 +38,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
         participantUpdateCancellable = nil
 
         guard let call else {
+            store.dispatch(.setContent(.inactive))
             return
         }
 
@@ -111,7 +112,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
 
     /// Updates the preferred content size for Picture-in-Picture if needed.
     private func updatePreferredContentSizeIfRequired(for participant: CallParticipant) {
-        guard !store.state.isActive, participant.hasVideo, participant.trackSize != .zero else {
+        guard participant.hasVideo, participant.trackSize != .zero else {
             return
         }
         store.dispatch(.setPreferredContentSize(participant.trackSize))

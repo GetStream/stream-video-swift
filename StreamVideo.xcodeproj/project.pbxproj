@@ -220,6 +220,7 @@
 		4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */; };
 		4051A2732D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
 		4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
+		4052BF552DBA830D0085AFA5 /* MockAppStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */; };
 		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
@@ -1109,6 +1110,7 @@
 		847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B62A260CF0000714CE /* CustomCallView.swift */; };
 		847BE09C29DADE0100B55D21 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09B29DADE0100B55D21 /* Call.swift */; };
 		847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D001F29C8AB1E00DD0A50 /* RecordingView.swift */; };
+		848897262DC0F4400082C5AF /* StreamCore in Frameworks */ = {isa = PBXBuildFile; productRef = 848897252DC0F4400082C5AF /* StreamCore */; };
 		848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73BF2926314F0089AA6E /* MinimizedCallView.swift */; };
 		848A73C229269E7D0089AA6E /* CornerDraggableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73C129269E7D0089AA6E /* CornerDraggableView.swift */; };
 		848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
@@ -1683,6 +1685,7 @@
 		404A81372DA3CC0C001F7FA8 /* CallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfiguration.swift; sourceTree = "<group>"; };
 		4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sendable+Extensions.swift"; sourceTree = "<group>"; };
 		4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Conformances.swift"; sourceTree = "<group>"; };
+		4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppStateAdapter.swift; sourceTree = "<group>"; };
 		405687AD2D78A0E700093B98 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineVisitor.swift; sourceTree = "<group>"; };
@@ -2368,7 +2371,6 @@
 		844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallsViewModel.swift; sourceTree = "<group>"; };
 		844ECF4E2A33458A0023263C /* Member.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Member.swift; sourceTree = "<group>"; };
 		84530C6B2A3C4E0700F2678E /* CallState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState.swift; sourceTree = "<group>"; };
-		845495CB2DBBA94400211413 /* StreamCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = StreamCore; path = ../StreamCore; sourceTree = SOURCE_ROOT; };
 		8454A3182AAB374B00A012C6 /* CallStatsReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatsReport.swift; sourceTree = "<group>"; };
 		8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+SafeSubscript.swift"; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -2734,6 +2736,7 @@
 				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
 				845495E12DBBAA5600211413 /* StreamCore in Frameworks */,
 				82EB8F572B0277730038B5A2 /* StreamWebRTC in Frameworks */,
+				848897262DC0F4400082C5AF /* StreamCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5022,7 +5025,6 @@
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
-				845495CB2DBBA94400211413 /* StreamCore */,
 				8427FF652A03D1D100AFD2C3 /* CallIntent */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				8493224D2908378A0013C029 /* DemoAppUIKit */,
@@ -5296,6 +5298,7 @@
 		8492B87629081CE700006649 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
+				4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */,
 				40AAD18E2D2EEAD500D10330 /* MockCaptureDeviceProvider.swift */,
 				40B48C482D14E822002C4EAB /* MockStreamVideoCapturer.swift */,
 				40B48C292D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift */,
@@ -6168,6 +6171,7 @@
 				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
 				82EB8F562B0277730038B5A2 /* StreamWebRTC */,
 				845495E02DBBAA5600211413 /* StreamCore */,
+				848897252DC0F4400082C5AF /* StreamCore */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -6352,6 +6356,7 @@
 				82EB8F552B0277730038B5A2 /* XCRemoteSwiftPackageReference "stream-video-swift-webrtc" */,
 				40AC73B22BE0062B00C57517 /* XCRemoteSwiftPackageReference "stream-video-noise-cancellation-swift" */,
 				4014F1012D8C2EBC004E7EFD /* XCRemoteSwiftPackageReference "Gleap-iOS-SDK" */,
+				848897242DC0F4400082C5AF /* XCRemoteSwiftPackageReference "stream-core-swift" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -7484,6 +7489,7 @@
 				40B48C372D14D424002C4EAB /* RTCAudioTrack_CloneTests.swift in Sources */,
 				404A81362DA3CBF0001F7FA8 /* CallConfigurationTests.swift in Sources */,
 				40F0174F2BBEEFED00E89FD1 /* ThumbnailsSettings+Dummy.swift in Sources */,
+				4052BF552DBA830D0085AFA5 /* MockAppStateAdapter.swift in Sources */,
 				401338782BF248B9007318BD /* MockStreamVideo.swift in Sources */,
 				84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */,
 				40AF6A432C93585B00BA2935 /* WebRTCCoordinatorStateMachine_MigratedStageTests.swift in Sources */,
@@ -9405,7 +9411,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-swift-webrtc";
 			requirement = {
 				kind = exactVersion;
-				version = 125.6422.070;
+				version = 125.6422.70;
 			};
 		};
 		8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
@@ -9422,6 +9428,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 6.0.0;
+			};
+		};
+		848897242DC0F4400082C5AF /* XCRemoteSwiftPackageReference "stream-core-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GetStream/stream-core-swift.git";
+			requirement = {
+				branch = main;
+				kind = branch;
 			};
 		};
 		84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
@@ -9552,6 +9566,11 @@
 		};
 		845495E02DBBAA5600211413 /* StreamCore */ = {
 			isa = XCSwiftPackageProductDependency;
+			productName = StreamCore;
+		};
+		848897252DC0F4400082C5AF /* StreamCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 848897242DC0F4400082C5AF /* XCRemoteSwiftPackageReference "stream-core-swift" */;
 			productName = StreamCore;
 		};
 		84BE8A5528BE314000B34D2F /* SwiftProtobuf */ = {

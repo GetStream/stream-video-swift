@@ -3,9 +3,12 @@
 //
 
 import AVFoundation
+import StreamCore
 
 /// A default implementation of the `AudioSessionPolicy` protocol.
 public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
+
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     /// Initializes a new `DefaultAudioSessionPolicy` instance.
     public init() {}
@@ -21,10 +24,27 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
         for callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>
     ) -> AudioSessionConfiguration {
-        .init(
+        guard applicationStateAdapter.state == .foreground else {
+            return .init(
+                category: .playAndRecord,
+                mode: callSettings.videoOn ? .videoChat : .voiceChat,
+                options: .playAndRecord(
+                    videoOn: callSettings.videoOn,
+                    speakerOn: callSettings.speakerOn,
+                    appIsInForeground: false
+                ),
+                overrideOutputAudioPort: nil
+            )
+        }
+
+        return .init(
             category: .playAndRecord,
-            mode: callSettings.videoOn ? .videoChat : .voiceChat,
-            options: .playAndRecord,
+            mode: callSettings.videoOn && callSettings.speakerOn ? .videoChat : .voiceChat,
+            options: .playAndRecord(
+                videoOn: callSettings.videoOn,
+                speakerOn: callSettings.speakerOn,
+                appIsInForeground: true
+            ),
             overrideOutputAudioPort: callSettings.speakerOn ? .speaker : AVAudioSession.PortOverride.none
         )
     }

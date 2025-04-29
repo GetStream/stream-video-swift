@@ -68,9 +68,10 @@ final class PictureInPictureController: @unchecked Sendable {
 
         // Add delay to prevent premature cancellation
         applicationStateAdapter
-            .$state
+            .statePublisher
             .filter { $0 == .foreground }
             .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.pictureInPictureController?.stopPictureInPicture() }
             .store(in: disposableBag)
     }

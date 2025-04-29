@@ -73,7 +73,7 @@ public final class CallSettings: ObservableObject, Sendable, Equatable, Reflecti
         }
 
         log.debug(
-            "CallSettings created.",
+            "Created \(self)",
             functionName: function,
             fileName: file,
             lineNumber: line

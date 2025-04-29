@@ -25,7 +25,7 @@ concurrency:
 
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
-  IOS_SIMULATOR_DEVICE: "iPhone 16 Pro (18.2)"
+  IOS_SIMULATOR_DEVICE: "iPhone 16 Pro (18.3)"
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
@@ -34,8 +34,6 @@ jobs:
     name: Test LLC (Debug)
     runs-on: macos-15
     if: ${{ github.event.inputs.record_snapshots_swiftui != 'true' && github.event.inputs.record_snapshots_uikit != 'true' }}
-    env:
-      STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     steps:
     - uses: actions/checkout@v4.1.1
       with:
@@ -280,7 +278,6 @@ jobs:
         STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}
         STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
         STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
-        STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     - name: Allure TestOps Upload
       if: env.LAUNCH_ID != '' && (success() || failure())
       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID

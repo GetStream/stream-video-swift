@@ -9,14 +9,21 @@ import UIKit
 #endif
 import StreamCore
 
-/// An adapter that observes the app's state and publishes changes.
-public final class StreamAppStateAdapter: ObservableObject, @unchecked Sendable {
+public protocol AppStateProviding: Sendable {
+    var state: ApplicationState { get }
 
-    /// Represents the app's state: foreground or background.
-    public enum State: Sendable, Equatable { case foreground, background }
+    var statePublisher: AnyPublisher<ApplicationState, Never> { get }
+}
+
+/// Represents the app's state: foreground or background.
+public enum ApplicationState: Sendable, Equatable { case foreground, background }
+
+/// An adapter that observes the app's state and publishes changes.
+final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @unchecked Sendable {
 
     /// The current state of the app.
-    @Published public private(set) var state: State = .foreground
+    @Published public private(set) var state: ApplicationState = .foreground
+    var statePublisher: AnyPublisher<ApplicationState, Never> { $state.eraseToAnyPublisher() }
 
     private let notificationCenter: NotificationCenter
     private let disposableBag = DisposableBag()
@@ -37,14 +44,14 @@ public final class StreamAppStateAdapter: ObservableObject, @unchecked Sendable 
             /// Observes app state changes to update the `state` property.
             notificationCenter
                 .publisher(for: UIApplication.willEnterForegroundNotification)
-                .map { _ in State.foreground }
+                .map { _ in ApplicationState.foreground }
                 .receive(on: DispatchQueue.main)
                 .assign(to: \.state, onWeak: self)
                 .store(in: disposableBag)
 
             notificationCenter
                 .publisher(for: UIApplication.didEnterBackgroundNotification)
-                .map { _ in State.background }
+                .map { _ in ApplicationState.background }
                 .receive(on: DispatchQueue.main)
                 .assign(to: \.state, onWeak: self)
                 .store(in: disposableBag)
@@ -55,17 +62,17 @@ public final class StreamAppStateAdapter: ObservableObject, @unchecked Sendable 
     }
 }
 
-extension StreamAppStateAdapter: InjectionKey {
-    nonisolated(unsafe) public static var currentValue: StreamAppStateAdapter = .init()
+enum AppStateProviderKey: InjectionKey {
+    nonisolated(unsafe) public static var currentValue: AppStateProviding = StreamAppStateAdapter()
 }
 
 extension InjectedValues {
-    public var applicationStateAdapter: StreamAppStateAdapter {
+    public var applicationStateAdapter: AppStateProviding {
         get {
-            Self[StreamAppStateAdapter.self]
+            Self[AppStateProviderKey.self]
         }
         set {
-            Self[StreamAppStateAdapter.self] = newValue
+            Self[AppStateProviderKey.self] = newValue
         }
     }
 }

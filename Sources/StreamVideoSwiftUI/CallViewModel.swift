@@ -615,6 +615,11 @@ open class CallViewModel: ObservableObject {
         recordingUpdates?.cancel()
         recordingUpdates = nil
         call?.leave()
+
+        pictureInPictureAdapter.call = nil
+        pictureInPictureAdapter.sourceView = nil
+        isPictureInPictureEnabled = false
+
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
@@ -902,7 +907,7 @@ open class CallViewModel: ObservableObject {
 
     private func subscribeToApplicationLifecycleEvents() {
         applicationLifecycleUpdates = applicationStateAdapter
-            .$state
+            .statePublisher
             .filter { $0 == .foreground }
             .sink { [weak self] _ in self?.applicationDidBecomeActive() }
     }

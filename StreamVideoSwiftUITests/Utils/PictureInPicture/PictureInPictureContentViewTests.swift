@@ -15,25 +15,25 @@ final class PictureInPictureContentViewTests: StreamVideoUITestCase, @unchecked 
 
     private lazy var targetSize: CGSize = .init(width: 400, height: 200)
 
-    func test_content_inactive() {
+    func test_content_inactive() async {
         AssertSnapshot(
-            makeSubject(.inactive),
+            await makeSubject(.inactive),
             variants: snapshotVariants,
             size: targetSize
         )
     }
 
-    func test_content_participant() {
+    func test_content_participant() async {
         AssertSnapshot(
-            makeSubject(.participant(MockCall(.dummy()), .dummy(name: "Get Stream"), nil)),
+            await makeSubject(.participant(MockCall(.dummy()), .dummy(name: "Get Stream"), nil)),
             variants: snapshotVariants,
             size: targetSize
         )
     }
 
-    func test_content_screenSharing() {
+    func test_content_screenSharing() async {
         AssertSnapshot(
-            makeSubject(
+            await makeSubject(
                 .screenSharing(
                     MockCall(.dummy()),
                     .dummy(name: "Get Stream"),
@@ -45,9 +45,9 @@ final class PictureInPictureContentViewTests: StreamVideoUITestCase, @unchecked 
         )
     }
 
-    func test_content_reconnecting() {
+    func test_content_reconnecting() async {
         AssertSnapshot(
-            makeSubject(.reconnecting),
+            await makeSubject(.reconnecting),
             variants: snapshotVariants,
             size: targetSize
         )
@@ -55,9 +55,12 @@ final class PictureInPictureContentViewTests: StreamVideoUITestCase, @unchecked 
 
     // MARK: - Private Helpers
 
-    private func makeSubject(_ content: PictureInPictureContent) -> some View {
+    private func makeSubject(_ content: PictureInPictureContent) async -> some View {
         let store = PictureInPictureStore()
         store.dispatch(.setContent(content))
+        await fulfilmentInMainActor {
+            store.state.content == content
+        }
         return PictureInPictureContentView(store: store)
             .frame(width: targetSize.width, height: targetSize.height)
     }

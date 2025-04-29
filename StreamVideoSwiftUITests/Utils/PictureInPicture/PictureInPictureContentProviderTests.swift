@@ -154,9 +154,14 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     }
 
     func test_participantsUpdates_screenSharingInactive_localParticipant_contentUpdates() async throws {
-        let participant = CallParticipant.dummy(trackSize: .init(width: 1, height: 1))
+        var participant: CallParticipant!
         try await assertContentUpdate {
+            participant = CallParticipant.dummy(
+                trackSize: .init(width: 1, height: 1),
+                sessionId: $0.state.sessionId
+            )
             $0.state.localParticipant = participant
+            $0.state.participants = [participant]
         } validation: {
             switch $0 {
             case let .participant(_, contentParticipant, _):
@@ -217,12 +222,15 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     func test_preferredContentSizeUpdates_pipIsNotActive_screenSharingInactive_localParticipant_preferredContentSizeUpdates(
     ) async throws {
         let expected = CGSize(width: 1, height: 1)
-        let participant = CallParticipant.dummy(
-            hasVideo: true,
-            trackSize: expected
-        )
+
         try await assertPreferredContentSizeUpdate(isActive: false, expected: expected) {
+            let participant = CallParticipant.dummy(
+                hasVideo: true,
+                trackSize: expected,
+                sessionId: $0.state.sessionId
+            )
             $0.state.localParticipant = participant
+            $0.state.participants = [participant]
         }
     }
 
@@ -266,12 +274,14 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     func test_preferredContentSizeUpdates_pipIsActive_screenSharingInactive_localParticipant_preferredContentSizeUpdates(
     ) async throws {
         let expected = CGSize(width: 1, height: 1)
-        let participant = CallParticipant.dummy(
-            hasVideo: true,
-            trackSize: expected
-        )
         try await assertPreferredContentSizeUpdate(isActive: true, expected: expected) {
+            let participant = CallParticipant.dummy(
+                hasVideo: true,
+                trackSize: expected,
+                sessionId: $0.state.sessionId
+            )
             $0.state.localParticipant = participant
+            $0.state.participants = [participant]
         }
     }
 
@@ -287,6 +297,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         // Given
         let call: MockCall = MockCall(.dummy(callController: .dummy(videoConfig: Self.videoConfig)))
         store.dispatch(.setCall(call))
+        await fulfilmentInMainActor { self.store.state.call?.cId == call.cId }
 
         _ = await Task { @MainActor in
             operation(call)
@@ -308,22 +319,14 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         line: UInt = #line
     ) async throws {
         // Given
-        store.dispatch(.setActive(isActive))
         let call: MockCall = MockCall(.dummy(callController: .dummy(videoConfig: Self.videoConfig)))
         store.dispatch(.setCall(call))
+        await fulfilmentInMainActor { self.store.state.call?.cId == call.cId }
 
         _ = await Task { @MainActor in
             operation(call)
         }.result
 
-        if isActive {
-            await wait(for: 0.5)
-            XCTAssertEqual(store.state.preferredContentSize, .init(width: 640, height: 480))
-        } else {
-            _ = try await store
-                .publisher(for: \.preferredContentSize)
-                .filter { $0 == expected }
-                .nextValue(timeout: defaultTimeout)
-        }
+        await fulfilmentInMainActor { self.store.state.preferredContentSize == expected }
     }
 }
