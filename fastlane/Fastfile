@@ -163,7 +163,7 @@ lane :uikit_testflight_build do |options|
 end
 
 private_lane :upload_beta do |options|
-  is_manual_upload = is_localhost || options[:configuration].to_s.empty?
+  is_manual_upload = is_localhost || !options[:configuration].to_s.empty?
   configuration = options[:configuration].to_s.empty? ? 'Release' : options[:configuration]
 
   match_me
