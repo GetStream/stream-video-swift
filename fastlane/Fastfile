@@ -163,6 +163,7 @@ lane :uikit_testflight_build do |options|
 end
 
 private_lane :upload_beta do |options|
+  is_manual_upload = is_localhost || options[:configuration].to_s.empty?
   configuration = options[:configuration].to_s.empty? ? 'Release' : options[:configuration]
 
   match_me
@@ -178,12 +179,22 @@ private_lane :upload_beta do |options|
     end
   end
 
+  sdk_version = get_sdk_version_from_environment
+  app_version =
+    if is_manual_upload
+      major, minor, _patch = sdk_version.split('.').map(&:to_i)
+      minor += 1
+      "#{major}.#{minor}.0"
+    else
+      sdk_version
+    end
+
   testflight_build(
     api_key: appstore_api_key,
     xcode_project: xcode_project,
     sdk_target: 'StreamVideo',
     app_target: options[:app_target],
-    app_version: get_sdk_version_from_environment,
+    app_version: app_version,
     app_identifier: options[:app_identifier],
     configuration: configuration,
     extensions: ['CallIntent', 'ScreenSharing']
