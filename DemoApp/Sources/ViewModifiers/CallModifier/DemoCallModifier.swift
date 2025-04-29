@@ -9,6 +9,8 @@ import SwiftUI
 
 struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
 
+    @Injected(\.appearance) private var appearance
+
     var viewFactory: Factory
     var viewModel: CallViewModel
     var chatViewModel: DemoChatViewModel
@@ -27,6 +29,7 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
 
     func body(content: Content) -> some View {
         contentView(content)
+            .modifier(ThermalStateViewModifier())
     }
 
     @MainActor
@@ -37,6 +40,5 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
             viewFactory: viewFactory,
             viewModel: viewModel
         )
-        .modifier(ThermalStateViewModifier())
     }
 }

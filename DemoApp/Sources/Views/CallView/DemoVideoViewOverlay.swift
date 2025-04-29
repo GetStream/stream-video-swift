@@ -32,6 +32,8 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
 
 struct DemoCallContainer<Factory: ViewFactory>: View {
 
+    @Injected(\.appearance) private var appearance
+
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
 
@@ -45,7 +47,9 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
 
     public var body: some View {
         Group {
-            if let call = viewModel.call, call.callType == .livestream {
+            if
+                let call = viewModel.call,
+                call.callType == .livestream {
                 LivestreamPlayer(
                     viewFactory: viewFactory,
                     type: call.callType,
@@ -55,6 +59,8 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
                     onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
                 )
                 .toastView(toast: $viewModel.toast)
+                .background(appearance.colors.lobbyBackground)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 CallContainer(viewFactory: viewFactory, viewModel: viewModel)
             }
