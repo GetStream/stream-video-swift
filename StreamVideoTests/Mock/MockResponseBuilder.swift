@@ -23,7 +23,7 @@ class MockResponseBuilder: @unchecked Sendable {
             duration: "1.0",
             members: [],
             ownCapabilities: [.sendAudio, .sendVideo],
-            statsOptions: StatsOptions(reportingIntervalMs: 10000)
+            statsOptions: StatsOptions(enableRtcStats: false, reportingIntervalMs: 10000)
         )
     }
     
