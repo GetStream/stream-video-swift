@@ -182,7 +182,7 @@ private_lane :upload_beta do |options|
   sdk_version = get_sdk_version_from_environment
   app_version =
     if is_manual_upload
-      major, minor, _patch = version.split('.').map(&:to_i)
+      major, minor, _patch = sdk_version.split('.').map(&:to_i)
       minor += 1
       "#{major}.#{minor}.0"
     else
