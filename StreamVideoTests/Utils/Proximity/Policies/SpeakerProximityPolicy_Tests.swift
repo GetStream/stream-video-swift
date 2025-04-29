@@ -1,14 +1,11 @@
 //
-//  VideoProximityPolicy_Tests.swift
-//  StreamVideoTests
-//
-//  Created by Ilias Pavlidakis on 25/4/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Foundation
 @testable import StreamVideo
 import XCTest
-import AVFoundation
 
 @MainActor
 final class SpeakerProximityPolicy_Tests: XCTestCase, @unchecked Sendable {

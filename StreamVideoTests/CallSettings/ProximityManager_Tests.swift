@@ -24,12 +24,14 @@ final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
         try await super.setUp()
         _ = mockCurrentDevice
         _ = mockCall
+        CurrentDevice.currentValue = mockCurrentDevice
     }
 
     override func tearDown() async throws {
         subject = nil
         mockCall = nil
         mockCurrentDevice = nil
+        CurrentDevice.currentValue = .init()
         try await super.tearDown()
     }
 

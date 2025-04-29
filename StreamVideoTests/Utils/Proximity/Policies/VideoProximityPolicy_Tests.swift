@@ -1,8 +1,5 @@
 //
-//  VideoProximityPolicy_Tests.swift
-//  StreamVideoTests
-//
-//  Created by Ilias Pavlidakis on 25/4/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -41,7 +38,8 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .disabled(group: .all))
     }
 
-    func test_didUpdateProximity_near_videoTrue_incomingVideoQualitySettingsNone_incomingVideoQualitySettingsAndCameraDisabled() async{
+    func test_didUpdateProximity_near_videoTrue_incomingVideoQualitySettingsNone_incomingVideoQualitySettingsAndCameraDisabled(
+    ) async {
         mockCall.state.callSettings = .init(videoOn: true)
         mockCall.state.incomingVideoQualitySettings = .none
 
@@ -52,7 +50,8 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .disabled(group: .all))
     }
 
-    func test_didUpdateProximity_near_videoFalse_incomingVideoQualitySettingsOtherThanNone_incomingVideoQualitySettingsAndCameraDisabled() async{
+    func test_didUpdateProximity_near_videoFalse_incomingVideoQualitySettingsOtherThanNone_incomingVideoQualitySettingsAndCameraDisabled(
+    ) async {
         mockCall.state.callSettings = .init(videoOn: false)
         mockCall.state.incomingVideoQualitySettings = .manual(group: .all, targetSize: .quarter)
 
@@ -63,7 +62,7 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .disabled(group: .all))
     }
 
-    func test_didUpdateProximity_far_noCachedValue_nothingHappens() async{
+    func test_didUpdateProximity_far_noCachedValue_nothingHappens() async {
         mockCall.state.callSettings = .init(videoOn: false)
         mockCall.state.incomingVideoQualitySettings = .manual(group: .all, targetSize: .quarter)
 
@@ -74,7 +73,7 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .manual(group: .all, targetSize: .quarter))
     }
 
-    func test_didUpdateProximity_far_cachedValueWithIncomingQualitySettingsAndVideoOff_incomingVideoQualitySettingsUpdated() async{
+    func test_didUpdateProximity_far_cachedValueWithIncomingQualitySettingsAndVideoOff_incomingVideoQualitySettingsUpdated() async {
         mockCall.state.callSettings = .init(videoOn: false)
         mockCall.state.incomingVideoQualitySettings = .manual(group: .all, targetSize: .quarter)
 
@@ -87,7 +86,7 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .manual(group: .all, targetSize: .quarter))
     }
 
-    func test_didUpdateProximity_far_cachedValueWithoutIncomingQualitySettingsAndVideoOn_videoWasUpdated() async{
+    func test_didUpdateProximity_far_cachedValueWithoutIncomingQualitySettingsAndVideoOn_videoWasUpdated() async {
         mockCall.state.callSettings = .init(videoOn: true)
         mockCall.state.incomingVideoQualitySettings = .none
 
@@ -101,7 +100,8 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockCall.state.incomingVideoQualitySettings, .none)
     }
 
-    func test_didUpdateProximity_far_cachedValueWithIncomingQualitySettingsAndVideoOn_incomingVideoQualitySettingsAndVideoWereUpdated() async{
+    func test_didUpdateProximity_far_cachedValueWithIncomingQualitySettingsAndVideoOn_incomingVideoQualitySettingsAndVideoWereUpdated(
+    ) async {
         mockCall.state.callSettings = .init(videoOn: true)
         mockCall.state.incomingVideoQualitySettings = .manual(group: .all, targetSize: .quarter)
 
