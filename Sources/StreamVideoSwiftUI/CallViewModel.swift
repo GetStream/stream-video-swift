@@ -715,7 +715,7 @@ open class CallViewModel: ObservableObject {
                 Task { @MainActor [weak self] in
                     guard let self = self else { return }
                     log.debug("Detected ringing timeout, hanging up...")
-                    handleCallHangUp(ringTimeout: true)
+                    self.handleCallHangUp(ringTimeout: true)
                 }
             }
         )
