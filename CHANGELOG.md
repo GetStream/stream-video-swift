@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Fix ringing flow issues. [#792](https://github.com/GetStream/stream-video-swift/pull/792)
 
 # [1.21.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.21.1)
 _April 25, 2025_
