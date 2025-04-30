@@ -848,16 +848,6 @@ open class CallViewModel: ObservableObject {
                 return
             }
 
-            if isCallCreatorRejection, !isCurrentUserRejection {
-                /// If the call that was rejected is the incoming call we are presenting, then we reject
-                /// and set the activeCall to the current one in order to reset the callingState to
-                /// inCall or idle.
-                Task {
-                    _ = try? await streamVideo
-                        .call(callType: incomingCall.type, callId: incomingCall.id)
-                        .reject()
-                }
-            }
             setActiveCall(call)
         case .outgoing where call?.cId == event.callCid:
             guard let outgoingCall = call else {
