@@ -46,17 +46,15 @@ struct DemoCallingViewModifier: ViewModifier {
 
                 // We may get in this situation when launching the app from a
                 // deeplink.
-
                 if deeplinkInfo.callId.isEmpty {
-                    joinCallIfNeeded(with: self.text.wrappedValue, callType: deeplinkInfo.callType)
+                    joinCallIfNeeded(with: self.text.wrappedValue, callType: callType)
                 } else {
                     self.text.wrappedValue = deeplinkInfo.callId
                     joinCallIfNeeded(
                         with: self.text.wrappedValue,
-                        callType: deeplinkInfo.callType
+                        callType: callType
                     )
                 }
-                callType = deeplinkInfo.callType
             }
             .onChange(of: viewModel.callingState) { callingState in
                 switch callingState {
