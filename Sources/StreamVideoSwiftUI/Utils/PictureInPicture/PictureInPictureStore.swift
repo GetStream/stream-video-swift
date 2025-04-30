@@ -106,6 +106,7 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
     func publisher<Value>(for keyPath: KeyPath<State, Value>) -> AnyPublisher<Value, Never> {
         subject
             .map(keyPath)
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 }
