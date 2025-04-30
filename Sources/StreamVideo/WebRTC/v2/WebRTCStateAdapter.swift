@@ -527,9 +527,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     /// Updates the call settings from the participants update.
     /// - Parameter participants: The participants to update the call settings from.
+    /// - Note: This is used when the localParticipant gets muted remotely by someone else.
     func updateCallSettingsFromParticipants(_ participants: [CallParticipant]) {
         guard
-            let localParticipant = participants.first(where: { $0.sessionId == sessionID })
+            let localParticipant = participants.first(where: { $0.sessionId == sessionID }),
+            /// Skip updates for the initial period while the connection is established.
+            Date().timeIntervalSince(localParticipant.joinedAt) > 5.0
         else {
             return
         }

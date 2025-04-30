@@ -756,7 +756,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertTrueAsync(await subject.callSettings.videoOn)
     }
 
-    func test_updateCallSettingsFromParticipants_localParticipantHasChanges_callSettingsWereUpdatedAsExpected() async {
+    func test_updateCallSettingsFromParticipants_localParticipantHasChanges_before5Seconds_callSettingsNotChange() async {
         let sessionID = await subject.sessionID
         await subject.set(callSettings: .init(audioOn: true, videoOn: true))
         let initialParticipants: [String: CallParticipant] = [
@@ -766,7 +766,29 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         ]
 
         await subject.enqueue { _ in initialParticipants }
+        await subject.enqueue { _ in
+            [sessionID: .dummy(id: sessionID, hasVideo: false, hasAudio: true)]
+        }
 
+        await fulfillment {
+            let participants = await self.subject.participants
+            return participants.count == 1
+        }
+        await assertTrueAsync(await subject.callSettings.audioOn)
+        await assertFalseAsync(await subject.callSettings.videoOn)
+    }
+
+    func test_updateCallSettingsFromParticipants_localParticipantHasChanges_after5Seconds_callSettingsWereChanged() async {
+        let sessionID = await subject.sessionID
+        await subject.set(callSettings: .init(audioOn: true, videoOn: true))
+        let initialParticipants: [String: CallParticipant] = [
+            sessionID: .dummy(id: sessionID, hasVideo: true, hasAudio: true),
+            "2": .dummy(id: "2"),
+            "3": .dummy(id: "3")
+        ]
+
+        await subject.enqueue { _ in initialParticipants }
+        await wait(for: 5)
         await subject.enqueue { _ in
             [sessionID: .dummy(id: sessionID, hasVideo: false, hasAudio: true)]
         }
