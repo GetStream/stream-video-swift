@@ -6,7 +6,7 @@
 </p>
 <p align="center">
   <a href="https://getstream.io/video/docs/sdk/ios/"><img src="https://img.shields.io/badge/iOS-13%2B-lightblue" /></a>
-  <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9%2B-orange.svg" /></a>
+  <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-6.0%2B-orange.svg" /></a>
 </p>
 <p align="center">
   <img id="stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/StreamVideo-7.48%20MB-blue"/>
