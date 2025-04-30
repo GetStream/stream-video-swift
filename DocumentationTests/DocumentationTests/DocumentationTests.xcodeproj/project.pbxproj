@@ -28,6 +28,7 @@
 		409C396F2B67CDF30090044C /* 09-broadcasting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396E2B67CDF30090044C /* 09-broadcasting.swift */; };
 		409F10EA2BE11698000A984B /* StreamVideoNoiseCancellation in Frameworks */ = {isa = PBXBuildFile; productRef = 409F10E92BE11698000A984B /* StreamVideoNoiseCancellation */; };
 		40AB356B2B73965D00E465CC /* 16-snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356A2B73965D00E465CC /* 16-snapshot.swift */; };
+		40AD64BB2DC2671E0077AE15 /* 05-proximity-policies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64BA2DC2671B0077AE15 /* 05-proximity-policies.swift */; };
 		40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */; };
 		40CB9FA92B7FC7DB006BED93 /* 17-camera-zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA82B7FC7DB006BED93 /* 17-camera-zoom.swift */; };
 		40E23B9B2B67BA4100D11FC1 /* 02-push-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */; };
@@ -108,6 +109,7 @@
 		409C396C2B67CD780090044C /* 08-recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-recording.swift"; sourceTree = "<group>"; };
 		409C396E2B67CDF30090044C /* 09-broadcasting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-broadcasting.swift"; sourceTree = "<group>"; };
 		40AB356A2B73965D00E465CC /* 16-snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "16-snapshot.swift"; sourceTree = "<group>"; };
+		40AD64BA2DC2671B0077AE15 /* 05-proximity-policies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-proximity-policies.swift"; sourceTree = "<group>"; };
 		40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "01-deeplinking.swift"; sourceTree = "<group>"; };
 		40CB9FA82B7FC7DB006BED93 /* 17-camera-zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "17-camera-zoom.swift"; sourceTree = "<group>"; };
 		40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-push-notifications.swift"; sourceTree = "<group>"; };
@@ -298,6 +300,7 @@
 				409C39682B67CC5C0090044C /* 04-screensharing.swift */,
 				409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */,
 				404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */,
+				40AD64BA2DC2671B0077AE15 /* 05-proximity-policies.swift */,
 				409C396C2B67CD780090044C /* 08-recording.swift */,
 				409C396E2B67CDF30090044C /* 09-broadcasting.swift */,
 			);
@@ -440,6 +443,7 @@
 			files = (
 				40FFDC5A2B63F08D004DA7A2 /* 01-call-participant.swift in Sources */,
 				40FFDC9A2B6405C7004DA7A2 /* 10-network-quality-indicator.swift in Sources */,
+				40AD64BB2DC2671E0077AE15 /* 05-proximity-policies.swift in Sources */,
 				400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */,
 				40FFDC4F2B63EE50004DA7A2 /* 04-active-call.swift in Sources */,
 				40FFDCA02B640676004DA7A2 /* 13-pinning-users.swift in Sources */,
