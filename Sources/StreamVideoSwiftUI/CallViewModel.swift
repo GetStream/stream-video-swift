@@ -108,7 +108,6 @@ open class CallViewModel: ObservableObject {
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
             updateCallStateIfNeeded()
-            checkCallSettingsForCurrentUser()
         }
     }
 
@@ -878,25 +877,6 @@ open class CallViewModel: ObservableObject {
             if shouldGoInCall, callingState != .inCall {
                 setCallingState(.inCall)
             }
-        }
-    }
-
-    private func checkCallSettingsForCurrentUser() {
-        guard let localParticipant = localParticipant,
-              // Skip updates for the initial period while the connection is established.
-              Date().timeIntervalSince(localParticipant.joinedAt) > 5.0 else {
-            return
-        }
-        if localParticipant.hasAudio != callSettings.audioOn
-            || localParticipant.hasVideo != callSettings.videoOn {
-            let previous = callSettings
-            callSettings = CallSettings(
-                audioOn: localParticipant.hasAudio,
-                videoOn: localParticipant.hasVideo,
-                speakerOn: previous.speakerOn,
-                audioOutputOn: previous.audioOutputOn,
-                cameraPosition: previous.cameraPosition
-            )
         }
     }
 

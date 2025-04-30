@@ -481,6 +481,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             let updated = assignTracks(on: next)
             /// Sends the updated participants to observers while helping publishing streamlined updates.
             set(participants: updated)
+            /// Updates the call settings from the participants update.
+            updateCallSettingsFromParticipants(Array(updated.values))
+
             /// Logs the completion of the participant operation.
             log.debug(
                 "Participant operation completed.",
@@ -520,6 +523,27 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
             partialResult[entry.key] = newParticipant
         }
+    }
+
+    /// Updates the call settings from the participants update.
+    /// - Parameter participants: The participants to update the call settings from.
+    func updateCallSettingsFromParticipants(_ participants: [CallParticipant]) {
+        guard
+            let localParticipant = participants.first(where: { $0.sessionId == sessionID })
+        else {
+            return
+        }
+
+        let currentCallSettings = self.callSettings
+        let participantCallSettings = currentCallSettings
+            .withUpdatedAudioState(localParticipant.hasAudio)
+            .withUpdatedVideoState(localParticipant.hasVideo)
+
+        guard participantCallSettings != currentCallSettings else {
+            return
+        }
+
+        self.set(callSettings: participantCallSettings)
     }
 
     // MARK: - Private Helpers
