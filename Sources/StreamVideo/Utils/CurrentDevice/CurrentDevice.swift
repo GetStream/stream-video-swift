@@ -46,30 +46,61 @@ public final class CurrentDevice: @unchecked Sendable {
     /// The identified `DeviceType` for the current environment.
     public internal(set) var deviceType: DeviceType = .unspecified
     public internal(set) var systemVersion: String = "-"
+    #if canImport(UIKit)
+    @MainActor
+    public var isProximityMonitoringEnabled: Bool {
+        get { UIDevice.current.isProximityMonitoringEnabled }
+        set { UIDevice.current.isProximityMonitoringEnabled = newValue }
+    }
+    #else
+    @MainActor
+    var isProximityMonitoringEnabled: Bool {
+        get { false }
+        set { _ = newValue }
+    }
+    #endif
+
+    convenience init() {
+        self.init(
+            currentDeviceProvider: {
+                #if canImport(UIKit)
+                switch UIDevice.current.userInterfaceIdiom {
+                case .unspecified:
+                    return .unspecified
+                case .phone:
+                    return .phone
+                case .pad:
+                    return .pad
+                case .tv:
+                    return .tv
+                case .carPlay:
+                    return .carPlay
+                case .mac:
+                    return .mac
+                case .vision:
+                    return .vision
+                @unknown default:
+                    return .unspecified
+                }
+                #elseif canImport(AppKit)
+                deviceType = .mac
+                #else
+                deviceType = .unspecified
+                #endif
+            }
+        )
+    }
 
     /// Creates a `CurrentDevice` by inspecting the user interface idiom.
     /// - Important: On platforms where UIKit is unavailable, the type defaults
     ///   to `.mac` (AppKit) or `.unspecified`.
 
-    private init() {
+    init(
+        currentDeviceProvider: @MainActor @escaping @Sendable() -> DeviceType
+    ) {
         Task { @MainActor in
             self.systemVersion = UIDevice.current.systemVersion
-            #if canImport(UIKit)
-            self.deviceType = switch UIDevice.current.userInterfaceIdiom {
-            case .unspecified: .unspecified
-            case .phone: .phone
-            case .pad: .pad
-            case .tv: .tv
-            case .carPlay: .carPlay
-            case .mac: .mac
-            case .vision: .vision
-            @unknown default: .unspecified
-            }
-            #elseif canImport(AppKit)
-            deviceType = .mac
-            #else
-            deviceType = .unspecified
-            #endif
+            self.deviceType = currentDeviceProvider()
         }
     }
 }

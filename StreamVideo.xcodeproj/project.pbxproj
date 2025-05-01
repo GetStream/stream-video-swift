@@ -225,6 +225,7 @@
 		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
+		405BFFD22DBB8BE8005B2BE4 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405BFFD12DBB8BE8005B2BE4 /* ProximityManager.swift */; };
 		406128812CF32FEF007F5CDC /* SDPLineVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */; };
 		406128832CF33000007F5CDC /* SDPParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128822CF33000007F5CDC /* SDPParser.swift */; };
 		406128882CF33029007F5CDC /* RTPMapVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128872CF33029007F5CDC /* RTPMapVisitor.swift */; };
@@ -483,6 +484,10 @@
 		40AB356D2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
 		40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
 		40AC73B42BE0062B00C57517 /* StreamVideoNoiseCancellation in Frameworks */ = {isa = PBXBuildFile; productRef = 40AC73B32BE0062B00C57517 /* StreamVideoNoiseCancellation */; };
+		40AD64C42DC269E60077AE15 /* ProximityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64BD2DC269E60077AE15 /* ProximityMonitor.swift */; };
+		40AD64C52DC269E60077AE15 /* VideoProximityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64C12DC269E60077AE15 /* VideoProximityPolicy.swift */; };
+		40AD64C62DC269E60077AE15 /* ProximityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64BF2DC269E60077AE15 /* ProximityPolicy.swift */; };
+		40AD64C72DC269E60077AE15 /* SpeakerProximityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AD64C02DC269E60077AE15 /* SpeakerProximityPolicy.swift */; };
 		40ADB8582D64AFDE00B06AAF /* PinInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40ADB8572D64AFDE00B06AAF /* PinInfo.swift */; };
 		40ADB85A2D64AFEC00B06AAF /* Stream_Video_Sfu_Models_Participant+CallParticipant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40ADB8592D64AFEC00B06AAF /* Stream_Video_Sfu_Models_Participant+CallParticipant.swift */; };
 		40ADB85C2D64B00E00B06AAF /* CGSize+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40ADB85B2D64B00E00B06AAF /* CGSize+Hashable.swift */; };
@@ -503,6 +508,13 @@
 		40B284E32D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B284E22D52423B0064C1FE /* AVAudioSessionCategory+Convenience.swift */; };
 		40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
 		40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B31AA72D10594F005FB448 /* PublishOptions+Dummy.swift */; };
+		40B3E53C2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E53B2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift */; };
+		40B3E53E2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E53D2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift */; };
+		40B3E5402DBBB6D900DE8F50 /* MockProximityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E53F2DBBB6D900DE8F50 /* MockProximityMonitor.swift */; };
+		40B3E5422DBBB83A00DE8F50 /* ProximityManager_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E5412DBBB83A00DE8F50 /* ProximityManager_Tests.swift */; };
+		40B3E5442DBBB99200DE8F50 /* MockProximityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E5432DBBB99200DE8F50 /* MockProximityPolicy.swift */; };
+		40B3E5472DBBCB2A00DE8F50 /* VideoProximityPolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E5462DBBCB2A00DE8F50 /* VideoProximityPolicy_Tests.swift */; };
+		40B3E5492DBBD2CA00DE8F50 /* SpeakerProximityPolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B3E5482DBBD2CA00DE8F50 /* SpeakerProximityPolicy_Tests.swift */; };
 		40B48C122D14C43F002C4EAB /* PublishOptions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C112D14C43F002C4EAB /* PublishOptions_Tests.swift */; };
 		40B48C152D14C93B002C4EAB /* CGSize_AdaptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C142D14C93B002C4EAB /* CGSize_AdaptTests.swift */; };
 		40B48C172D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C162D14C97F002C4EAB /* CGSize_DefaultValuesTests.swift */; };
@@ -767,6 +779,8 @@
 		40FE5EBF2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FE5EBE2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift */; };
 		40FE5EC02C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FE5EBE2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift */; };
 		40FE5EC12C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FE5EBE2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift */; };
+		40FEA2C62DA4000A00AC523B /* (null) in Sources */ = {isa = PBXBuildFile; };
+		40FEA2C92DA4015300AC523B /* (null) in Sources */ = {isa = PBXBuildFile; };
 		40FF825D2D63527D0029AA80 /* Comparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FF825C2D63527D0029AA80 /* Comparator.swift */; };
 		40FF825F2D63532C0029AA80 /* Participants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FF825E2D63532C0029AA80 /* Participants.swift */; };
 		40FF82612D6353AB0029AA80 /* Presets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FF82602D6353AB0029AA80 /* Presets.swift */; };
@@ -1924,6 +1938,10 @@
 		40AB34E02C5E73F900B5B6B3 /* Publisher+Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+Logger.swift"; sourceTree = "<group>"; };
 		40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoSnapshotViewModel.swift; sourceTree = "<group>"; };
 		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
+		40AD64BD2DC269E60077AE15 /* ProximityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityMonitor.swift; sourceTree = "<group>"; };
+		40AD64BF2DC269E60077AE15 /* ProximityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityPolicy.swift; sourceTree = "<group>"; };
+		40AD64C02DC269E60077AE15 /* SpeakerProximityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerProximityPolicy.swift; sourceTree = "<group>"; };
+		40AD64C12DC269E60077AE15 /* VideoProximityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoProximityPolicy.swift; sourceTree = "<group>"; };
 		40ADB8572D64AFDE00B06AAF /* PinInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinInfo.swift; sourceTree = "<group>"; };
 		40ADB8592D64AFEC00B06AAF /* Stream_Video_Sfu_Models_Participant+CallParticipant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_Participant+CallParticipant.swift"; sourceTree = "<group>"; };
 		40ADB85B2D64B00E00B06AAF /* CGSize+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+Hashable.swift"; sourceTree = "<group>"; };
@@ -4113,6 +4131,33 @@
 			path = Mocks;
 			sourceTree = "<group>";
 		};
+		40AD64BE2DC269E60077AE15 /* Monitor */ = {
+			isa = PBXGroup;
+			children = (
+				40AD64BD2DC269E60077AE15 /* ProximityMonitor.swift */,
+			);
+			path = Monitor;
+			sourceTree = "<group>";
+		};
+		40AD64C22DC269E60077AE15 /* Policies */ = {
+			isa = PBXGroup;
+			children = (
+				40AD64BF2DC269E60077AE15 /* ProximityPolicy.swift */,
+				40AD64C02DC269E60077AE15 /* SpeakerProximityPolicy.swift */,
+				40AD64C12DC269E60077AE15 /* VideoProximityPolicy.swift */,
+			);
+			path = Policies;
+			sourceTree = "<group>";
+		};
+		40AD64C32DC269E60077AE15 /* Proximity */ = {
+			isa = PBXGroup;
+			children = (
+				40AD64BE2DC269E60077AE15 /* Monitor */,
+				40AD64C22DC269E60077AE15 /* Policies */,
+			);
+			path = Proximity;
+			sourceTree = "<group>";
+		};
 		40ADB85D2D65DFB000B06AAF /* CustomStringInterpolation */ = {
 			isa = PBXGroup;
 			children = (
@@ -5721,6 +5766,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40AD64C32DC269E60077AE15 /* Proximity */,
 				40FF825B2D63523C0029AA80 /* Sorting */,
 				403A4FE92D660E3E00ECD46A /* Swift6Migration */,
 				40ADB85D2D65DFB000B06AAF /* CustomStringInterpolation */,
@@ -7265,6 +7311,7 @@
 				4061288B2CF33088007F5CDC /* SupportedPrefix.swift in Sources */,
 				40BBC4C02C629408002AEF92 /* RTCTemporaryPeerConnection.swift in Sources */,
 				84B0091B2A4C521100CF1FA7 /* Retries.swift in Sources */,
+				405BFFD22DBB8BE8005B2BE4 /* ProximityManager.swift in Sources */,
 				84DC38CD29ADFCFD00946713 /* SendEventRequest.swift in Sources */,
 				84DC38B029ADFCFD00946713 /* MuteUsersRequest.swift in Sources */,
 				406AF2012AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift in Sources */,
@@ -7337,6 +7384,7 @@
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
 				40E3635D2D0A17C10028C52A /* CameraVideoOutputHandler.swift in Sources */,
+				40FEA2C92DA4015300AC523B /* (null) in Sources */,
 				4159F17B2C86FA41002B94D3 /* RTMPSettingsRequest.swift in Sources */,
 				84DC38A129ADFCFD00946713 /* BlockUserResponse.swift in Sources */,
 				40E363362D09E4C80028C52A /* Stream_Video_Sfu_Models_VideoQuality+Convenience.swift in Sources */,
@@ -7400,6 +7448,7 @@
 				8490032529D308A000AD9BB4 /* GetCallResponse.swift in Sources */,
 				841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */,
 				40483CB82C9B1DEE00B4FCA8 /* WebRTCCoordinatorProviding.swift in Sources */,
+				40FEA2C62DA4000A00AC523B /* (null) in Sources */,
 				401C1EEB2D4900C500304609 /* ClosedCaptionsAdapter.swift in Sources */,
 				842E70D32B91BE1700D2D68B /* CallRecordingReadyEvent.swift in Sources */,
 				40ADB85A2D64AFEC00B06AAF /* Stream_Video_Sfu_Models_Participant+CallParticipant.swift in Sources */,
@@ -7469,6 +7518,10 @@
 				840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */,
 				406B3BDB2C8F346200FC93A1 /* RTCRtpEncodingParameters+Convenience.swift in Sources */,
 				40BBC4D62C6393A4002AEF92 /* WebRTCCoordinator+Joining.swift in Sources */,
+				40AD64C42DC269E60077AE15 /* ProximityMonitor.swift in Sources */,
+				40AD64C52DC269E60077AE15 /* VideoProximityPolicy.swift in Sources */,
+				40AD64C62DC269E60077AE15 /* ProximityPolicy.swift in Sources */,
+				40AD64C72DC269E60077AE15 /* SpeakerProximityPolicy.swift in Sources */,
 				841BAA3D2BD15CDE000C73E4 /* GetCallStatsResponse.swift in Sources */,
 				842E70D92B91BE1700D2D68B /* CallClosedCaption.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
@@ -7667,6 +7720,7 @@
 				406B3C552C92031000FC93A1 /* WebRTCCoordinatorStateMachine_JoiningStageTests.swift in Sources */,
 				40C9E4642C99886900802B28 /* WebRTCCoorindator_Tests.swift in Sources */,
 				40F017772BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */,
+				40B3E5442DBBB99200DE8F50 /* MockProximityPolicy.swift in Sources */,
 				40B48C2A2D14CF3B002C4EAB /* MockRTCRtpCodecCapability.swift in Sources */,
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
 				843061002D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift in Sources */,
@@ -7727,16 +7781,19 @@
 				40B48C1A2D14C9BE002C4EAB /* CMVideoDimensions_DefaultValuesTests.swift in Sources */,
 				408CF9C32CAE886D00F56833 /* WebRTCIntegrationTests.swift in Sources */,
 				8414081329F28B5700FF2D7C /* RTCConfiguration_Tests.swift in Sources */,
+				40B3E53C2DBBAF9500DE8F50 /* ProximityMonitor_Tests.swift in Sources */,
 				40F017712BBEF24E00E89FD1 /* CallSettingsResponse+Dummy.swift in Sources */,
 				40E18AB42CD522F700A65C9F /* RecursiveQueueTests.swift in Sources */,
 				40AF6A4B2C9369A900BA2935 /* WebRTCCoordinatorStateMachine_DisconnectedStageTests.swift in Sources */,
 				40B31AA92D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */,
 				842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */,
 				40C9E4552C988CE100802B28 /* WebRTCJoinRequestFactory_Tests.swift in Sources */,
+				40B3E53E2DBBB0AB00DE8F50 /* CurrentDevice+Dummy.swift in Sources */,
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
 				40B48C2E2D14D15E002C4EAB /* StreamVideoSfuModelsPublishOption_VideoLayersTests.swift in Sources */,
 				40FE5EBF2C9C82CD006B0881 /* CVPixelBuffer+Convenience.swift in Sources */,
 				403793C92D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift in Sources */,
+				40B3E5422DBBB83A00DE8F50 /* ProximityManager_Tests.swift in Sources */,
 				40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */,
 				40AAD1872D2D717300D10330 /* SFUEventBucket_Tests.swift in Sources */,
 				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,
@@ -7748,6 +7805,7 @@
 				40F017422BBEC81C00E89FD1 /* CallKitServiceTests.swift in Sources */,
 				4097B3802BF4B0850057992D /* MockCXProvider.swift in Sources */,
 				406B3C2B2C90601600FC93A1 /* MockLocalMediaAdapter.swift in Sources */,
+				40B3E5402DBBB6D900DE8F50 /* MockProximityMonitor.swift in Sources */,
 				404A812E2DA3C45C001F7FA8 /* CallStateMachine_JoinedStageTests.swift in Sources */,
 				40F0175D2BBEF0E200E89FD1 /* BackstageSettings+Dummy.swift in Sources */,
 				8490032F29D6D00C00AD9BB4 /* CallController_Mock.swift in Sources */,
@@ -7785,6 +7843,7 @@
 				4013A8EF2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift in Sources */,
 				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
+				40B3E5492DBBD2CA00DE8F50 /* SpeakerProximityPolicy_Tests.swift in Sources */,
 				40F0173E2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift in Sources */,
 				401338762BF2489C007318BD /* MockCXCallController.swift in Sources */,
 				842747FC29EEECBA00E063AD /* AssertTestQueue.swift in Sources */,
@@ -7860,6 +7919,7 @@
 				40AAD1832D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */,
 				84CC05892A530C3F00EE9815 /* SpeakerManager_Tests.swift in Sources */,
 				8251E62B2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
+				40B3E5472DBBCB2A00DE8F50 /* VideoProximityPolicy_Tests.swift in Sources */,
 				406B3C3F2C919BB300FC93A1 /* MockSFUStack.swift in Sources */,
 				403FB14C2BFE14760047A696 /* Publisher_NextTests.swift in Sources */,
 				84A4DCBB2A41DC6E00B1D1BF /* AsyncAssert.swift in Sources */,

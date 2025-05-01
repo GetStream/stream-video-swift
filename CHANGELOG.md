@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- You can now configure policies based on the the device's proximity information. Those policies can be used to toggle speaker and video. [#770](https://github.com/GetStream/stream-video-swift/pull/770)
+
 ### 🐞 Fixed
 - Fix ringing flow issues. [#792](https://github.com/GetStream/stream-video-swift/pull/792)
 
