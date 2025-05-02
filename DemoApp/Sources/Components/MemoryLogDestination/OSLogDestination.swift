@@ -50,13 +50,13 @@ final class OSLogDestination: BaseLogDestination, @unchecked Sendable {
 
         switch logDetails.level {
         case .debug:
-            logger.debug("\(formattedMessage)")
+            logger.debug("\(formattedMessage, privacy: .public)")
         case .info:
-            logger.notice("\(formattedMessage)")
+            logger.notice("\(formattedMessage, privacy: .public)")
         case .warning:
-            logger.warning("\(formattedMessage)")
+            logger.warning("\(formattedMessage, privacy: .public)")
         case .error:
-            logger.critical("\(formattedMessage)")
+            logger.critical("\(formattedMessage, privacy: .public)")
         }
     }
 }
