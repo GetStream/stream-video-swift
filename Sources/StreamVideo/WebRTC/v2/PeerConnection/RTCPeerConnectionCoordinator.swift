@@ -61,8 +61,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         didSet { didUpdatePublishOptions(publishOptions) }
     }
 
+    var configuration: RTCConfiguration { peerConnection.configuration }
+
     // MARK: State
 
+    var eventPublisher: AnyPublisher<RTCPeerConnectionEvent, Never> { peerConnection.publisher }
     var trackPublisher: AnyPublisher<TrackEvent, Never> { mediaAdapter.trackPublisher }
     var disconnectedPublisher: AnyPublisher<Void, Never> {
         peerConnection
@@ -101,6 +104,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - audioSession: The audio session to be used.
     ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
     ///   - screenShareSessionProvider: Provider for screen sharing sessions.
+    ///   - tracesAdapter: The adapter used to enqueue traces
     convenience init(
         sessionId: String,
         peerType: PeerConnectionType,
@@ -373,7 +377,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        return try await peerConnection.offer(for: constraints)
+        let result = try await peerConnection.offer(for: constraints)
+        peerConnection.subject.send(
+            StreamRTCPeerConnection.CreateOfferEvent(sessionDescription: result)
+        )
+        return result
     }
 
     /// Creates an answer for the peer connection.
@@ -394,7 +402,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        return try await peerConnection.answer(for: constraints)
+        let result = try await peerConnection.answer(for: constraints)
+        peerConnection.subject.send(
+            StreamRTCPeerConnection.CreateAnswerEvent(sessionDescription: result)
+        )
+        return result
     }
 
     /// Sets the local description for the peer connection.
@@ -415,7 +427,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        return try await peerConnection.setLocalDescription(sessionDescription)
+
+        try await peerConnection.setLocalDescription(sessionDescription)
+        peerConnection.subject.send(
+            StreamRTCPeerConnection.SetLocalDescriptionEvent(
+                sessionDescription: sessionDescription
+            )
+        )
     }
 
     /// Sets the remote description for the peer connection.
@@ -436,7 +454,13 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             """,
             subsystems: subsystem
         )
-        return try await peerConnection.setRemoteDescription(sessionDescription)
+
+        try await peerConnection.setRemoteDescription(sessionDescription)
+        peerConnection.subject.send(
+            StreamRTCPeerConnection.SetRemoteDescriptionEvent(
+                sessionDescription: sessionDescription
+            )
+        )
     }
 
     /// Closes the peer connection.
@@ -453,6 +477,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         )
         disposableBag.removeAll()
         await peerConnection.close()
+        peerConnection.subject.send(StreamRTCPeerConnection.CloseEvent())
     }
 
     /// Restarts the ICE (Interactive Connectivity Establishment) connection for the
@@ -502,6 +527,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 await self.negotiate(constraints: .iceRestartConstraints)
             }
         }
+
+        peerConnection.subject.send(StreamRTCPeerConnection.RestartICEEvent())
     }
 
     /// Retrieves the statistics report for the peer connection.

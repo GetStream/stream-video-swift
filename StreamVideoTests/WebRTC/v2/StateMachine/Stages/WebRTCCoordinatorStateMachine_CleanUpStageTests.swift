@@ -82,7 +82,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
+            .set(statsAdapter: .init(sessionID: .unique, unifiedSessionID: .unique, isTracingEnabled: true))
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -109,7 +109,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter)
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.publisher)
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.subscriber)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.statsReporter)
+        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.statsAdapter)
         await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.sessionID, "")
         await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.token, "")
         await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.ownCapabilities, [])

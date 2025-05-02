@@ -105,11 +105,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
             context.sfuEventObserver = nil
             context.disconnectionSource = nil
             Task {
-                let statsReporter = await context
+                let statsAdapter = await context
                     .coordinator?
                     .stateAdapter
-                    .statsReporter
-                statsReporter?.sfuAdapter = nil
+                    .statsAdapter
+                statsAdapter?.scheduleStatsReporting()
+                statsAdapter?.sfuAdapter = nil
 
                 /// We add a small delay of 100ms in oder to ensure that the internet connection state
                 /// has been updated, so that when we start observing it will receive the latest and
@@ -159,9 +160,20 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: DispatchQueue.main)
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
-                .filter { $0.isAvailable }
                 .removeDuplicates()
-                .sink { [weak self] _ in self?.reconnect() }
+                .sinkTask { [weak self] in
+                    /// Trace internet connection changes
+                    await self?
+                        .context
+                        .coordinator?
+                        .stateAdapter
+                        .statsAdapter?
+                        .trace(.init(status: $0))
+
+                    if $0.isAvailable {
+                        self?.reconnect()
+                    }
+                }
         }
 
         /// Observes the duration spent in the disconnected stage.

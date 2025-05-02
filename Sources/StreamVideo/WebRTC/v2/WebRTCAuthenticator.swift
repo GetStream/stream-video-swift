@@ -114,6 +114,10 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             }())
         )
 
+        await coordinator.stateAdapter.set(
+            isTracingEnabled: response.statsOptions.enableRtcStats
+        )
+
         let sfuAdapter = SFUAdapter(
             serviceConfiguration: .init(
                 url: try unwrap(
@@ -133,14 +137,17 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         )
 
         let statsReportingInterval = response.statsOptions.reportingIntervalMs / 1000
-        if let statsReporter = await coordinator.stateAdapter.statsReporter {
+        if let statsReporter = await coordinator.stateAdapter.statsAdapter {
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
         } else {
-            let statsReporter = WebRTCStatsReporter(
-                sessionID: await coordinator.stateAdapter.sessionID
+            let statsReporter = WebRTCStatsAdapter(
+                sessionID: await coordinator.stateAdapter.sessionID,
+                unifiedSessionID: coordinator.stateAdapter.unifiedSessionId,
+                isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled,
+                trackStorage: coordinator.stateAdapter.trackStorage
             )
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
-            await coordinator.stateAdapter.set(statsReporter: statsReporter)
+            await coordinator.stateAdapter.set(statsAdapter: statsReporter)
         }
 
         return (sfuAdapter, response)
