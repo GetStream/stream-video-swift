@@ -334,9 +334,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .$callSettings
                 .compactMap { $0 }
                 .removeDuplicates()
-                .log(.debug, subsystems: .webRTC) { "Updated \($0)" }
                 .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
                     guard let self else { return }
+
+                    if let statsAdapter = await context.coordinator?.stateAdapter.statsAdapter {
+                        statsAdapter.callSettings = callSettings
+                    }
 
                     do {
                         guard
@@ -418,25 +421,26 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let sessionId = await stateAdapter.sessionID
 
             /// Check if the stats reporter is already associated with the current session.
-            if await stateAdapter.statsReporter?.sessionID != sessionId {
+            if await stateAdapter.statsAdapter?.sessionID != sessionId {
                 /// Create a new stats reporter if the session ID does not match.
-                let statsReporter = WebRTCStatsReporter(
-                    sessionID: await stateAdapter.sessionID
+                let statsReporter = WebRTCStatsAdapter(
+                    sessionID: await stateAdapter.sessionID,
+                    isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled
                 )
 
                 /// Set the stats reporting interval and associate the reporter with the publisher,
                 /// subscriber, and SFU adapter.
-                statsReporter.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+                statsReporter.deliveryInterval = await stateAdapter.statsAdapter?.deliveryInterval ?? 0
                 statsReporter.publisher = await stateAdapter.publisher
                 statsReporter.subscriber = await stateAdapter.subscriber
                 statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
 
                 /// Update the state adapter with the new stats reporter.
-                await stateAdapter.set(statsReporter: statsReporter)
+                await stateAdapter.set(statsAdapter: statsReporter)
             } else {
                 /// If the session ID matches, update the existing stats reporter.
-                let statsReporter = await stateAdapter.statsReporter
-                statsReporter?.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+                let statsReporter = await stateAdapter.statsAdapter
+                statsReporter?.deliveryInterval = await stateAdapter.statsAdapter?.deliveryInterval ?? 0
                 statsReporter?.publisher = await stateAdapter.publisher
                 statsReporter?.subscriber = await stateAdapter.subscriber
                 statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter

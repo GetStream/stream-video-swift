@@ -108,7 +108,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 let statsReporter = await context
                     .coordinator?
                     .stateAdapter
-                    .statsReporter
+                    .statsAdapter
                 statsReporter?.sfuAdapter = nil
 
                 /// We add a small delay of 100ms in oder to ensure that the internet connection state

@@ -65,12 +65,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     @Published private(set) var sfuAdapter: SFUAdapter?
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
-    @Published private(set) var statsReporter: WebRTCStatsReporter?
+    @Published private(set) var statsCollector: WebRTCStatsCollector?
+    @Published private(set) var statsAdapter: WebRTCStatsAdapter?
     @Published private(set) var participants: ParticipantsStorage = [:]
     @Published private(set) var participantsCount: UInt32 = 0
     @Published private(set) var anonymousCount: UInt32 = 0
     @Published private(set) var participantPins: [PinInfo] = []
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
+    @Published private(set) var isTracingEnabled: Bool = false
 
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
@@ -154,15 +156,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
-    func set(statsReporter value: WebRTCStatsReporter?) {
-        self.statsReporter = value
+    func set(statsAdapter value: WebRTCStatsAdapter?) {
+        self.statsAdapter = value
+        value?.audioSession = audioSession
     }
 
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
         self.sfuAdapter = value
-        statsReporter?.sfuAdapter = sfuAdapter
+        statsAdapter?.sfuAdapter = sfuAdapter
     }
 
     /// Sets the number of participants in the call.
@@ -186,6 +189,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// Sets the manual trackSize that will be used when updating subscriptions with the SFU.
     func set(incomingVideoQualitySettings value: IncomingVideoQualitySettings) {
         self.incomingVideoQualitySettings = value
+    }
+
+    func set(isTracingEnabled value: Bool) {
+        self.isTracingEnabled = value
+        statsAdapter?.isTracingEnabled = value
     }
 
     // MARK: - Session Management
@@ -223,7 +231,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             peerType: .publisher,
             peerConnection: try StreamRTCPeerConnection(
                 peerConnectionFactory,
-                configuration: connectOptions.rtcConfiguration
+                configuration: connectOptions.rtcConfiguration,
             ),
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,
@@ -304,7 +312,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         await subscriber?.close()
         self.publisher = nil
         self.subscriber = nil
-        self.statsReporter = nil
+        self.statsAdapter = nil
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
         set(sfuAdapter: nil)
@@ -335,7 +343,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         publisher = nil
         subscriber = nil
         set(sfuAdapter: nil)
-        set(statsReporter: nil)
+        set(statsAdapter: nil)
         set(token: "")
         audioTracks = [:]
         videoTracks = [:]

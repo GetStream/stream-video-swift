@@ -165,7 +165,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     private var copyLinkView: some View {
         VStack {
             Button {
-                UIPasteboard.general.string = callLink
+                UIPasteboard.general.string = "app/1129528/\(callType):\(callId)"
             } label: {
                 HStack {
                     Label(
