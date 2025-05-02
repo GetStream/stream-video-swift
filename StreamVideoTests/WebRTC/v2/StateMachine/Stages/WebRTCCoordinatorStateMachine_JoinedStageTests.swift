@@ -234,6 +234,41 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
+    func test_transition_participantsUpdated_withoutChanges_updateSubscriptionsWasCalledOnSFUOnlyOnce() async throws {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
+        let participantsUpdate: [String: CallParticipant] = [
+            sessionId: .dummy(id: sessionId, hasAudio: true),
+            "0": .dummy(hasAudio: true),
+            "1": .dummy(hasAudio: true)
+        ]
+
+        await assertResultAfterTrigger(
+            trigger: { [mockCoordinatorStack] in
+                await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
+                    participantsUpdate
+                }
+
+                await self.wait(for: 0.5)
+
+                await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
+                    participantsUpdate
+                }
+            }
+        ) { [mockCoordinatorStack] expectation in
+            XCTAssertEqual(mockCoordinatorStack?.sfuStack.service.timesCalled(.updateSubscriptions), 2)
+            expectation.fulfill()
+        }
+    }
+
     func test_transition_participantsUpdatedUpdateSubscriptionsFails_noReconnectionOccurs() async throws {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter

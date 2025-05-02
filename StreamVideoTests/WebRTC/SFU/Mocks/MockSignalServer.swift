@@ -8,10 +8,12 @@ import StreamWebRTC
 
 final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     typealias FunctionKey = MockFunctionKey
-    typealias FunctionInputKey = EmptyPayloadable
+    typealias FunctionInputKey = MockFunctionInput
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [MockFunctionKey: Any] = [:]
-    var stubbedFunctionInput: [MockFunctionKey: [FunctionInputKey]] = [:]
+    var stubbedFunctionInput: [MockFunctionKey: [FunctionInputKey]] = FunctionKey
+        .allCases
+        .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
     func stub<T>(for keyPath: KeyPath<MockSignalServer, T>, with value: T) {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
@@ -30,6 +32,17 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         case sendAnswer
         case iCETrickle
         case iceRestart
+    }
+
+    enum MockFunctionInput: Payloadable {
+        case updateSubscriptions(request: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest)
+
+        var payload: Any {
+            switch self {
+            case let .updateSubscriptions(request):
+                return request
+            }
+        }
     }
 
     var updateMuteStatesWasCalledWithRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest?
@@ -101,6 +114,9 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         updateSubscriptionsRequest: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest
     ) async throws -> Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse {
         updateSubscriptionsWasCalledWithRequest = updateSubscriptionsRequest
+        stubbedFunctionInput[.updateSubscriptions]?.append(
+            .updateSubscriptions(request: updateSubscriptionsRequest)
+        )
         return stubbedFunction[.updateSubscriptions] as! Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse
     }
 
