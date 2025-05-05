@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.22.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.22.0)
+_May 05, 2025_
+
 ### ✅ Added
 - You can now configure policies based on the the device's proximity information. Those policies can be used to toggle speaker and video. [#770](https://github.com/GetStream/stream-video-swift/pull/770)
 
