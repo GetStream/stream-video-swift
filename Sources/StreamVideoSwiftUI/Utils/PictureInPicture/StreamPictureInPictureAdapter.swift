@@ -74,7 +74,9 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
             store
                 .publisher(for: \.sourceView)
                 .removeDuplicates()
-                .log(.debug, subsystems: .pictureInPicture) { "SourceView updated: \($0?.description ?? "-")." }
+                .log(.debug, subsystems: .pictureInPicture) {
+                    "SourceView updated frame:\($0?.frame ?? .zero) hasWindow:\($0?.window != nil)."
+                }
                 .sink { _ in }
                 .store(in: disposableBag)
         }

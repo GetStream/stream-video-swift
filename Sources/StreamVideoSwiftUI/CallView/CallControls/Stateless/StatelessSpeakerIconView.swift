@@ -15,7 +15,7 @@ public struct StatelessSpeakerIconView: View {
     @Injected(\.images) private var images
 
     /// The associated call for the speaker icon.
-    public var call: Call?
+    public weak var call: Call?
 
     /// The size of the speaker icon.
     public var size: CGFloat
