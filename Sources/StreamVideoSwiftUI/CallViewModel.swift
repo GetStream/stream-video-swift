@@ -616,7 +616,6 @@ open class CallViewModel: ObservableObject {
 
         pictureInPictureAdapter.call = nil
         pictureInPictureAdapter.sourceView = nil
-        isPictureInPictureEnabled = false
 
         call = nil
         callParticipants = [:]
