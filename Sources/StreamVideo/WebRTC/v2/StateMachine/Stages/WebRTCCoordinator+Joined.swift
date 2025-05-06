@@ -341,9 +341,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             await stateAdapter
                 .$participants
-                .removeDuplicates()
-                .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
                 .compactMapTask(storeIn: disposableBag) { [weak self] _ in await self?.subscribedTracks() }
+                .removeDuplicates { Set($0) == Set($1) } // Make comparison order irrelevant.
+                .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
                 .sink { [weak self] in self?.updateSubscriptions(for: $0) }
                 .store(in: disposableBag) // Store the Combine subscription in the disposable bag.
         }

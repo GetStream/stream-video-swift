@@ -476,6 +476,10 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
         try Task.checkCancellation()
 
+        log
+            .debug(
+                "Request sessionId:\(sessionId) tracks:\(tracks.map { "\($0.userID):\($0.sessionID):\($0.trackType.rawValue):\($0.dimension.width)x\($0.dimension.height)" }.sorted())"
+            )
         log.debug(request, subsystems: .sfu)
         let task = Task { [request, signalService] in
             try Task.checkCancellation()
