@@ -591,7 +591,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             peerType: .publisher,
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
-        nonisolated(unsafe) let subject = PassthroughSubject<Void, Never>()
+        let subject = PassthroughSubject<Void, Never>()
         mockPublisher?.stub(for: \.disconnectedPublisher, with: subject.eraseToAnyPublisher())
         mockCoordinatorStack
             .rtcPeerConnectionCoordinatorFactory
@@ -619,7 +619,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             peerType: .subscriber,
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
-        nonisolated(unsafe) let subject = PassthroughSubject<Void, Never>()
+        let subject = PassthroughSubject<Void, Never>()
         mockSubscriber?.stub(for: \.disconnectedPublisher, with: subject.eraseToAnyPublisher())
         mockCoordinatorStack
             .rtcPeerConnectionCoordinatorFactory
