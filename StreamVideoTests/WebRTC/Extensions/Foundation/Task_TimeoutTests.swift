@@ -54,7 +54,7 @@ final class TaskTimeoutTests: XCTestCase, @unchecked Sendable {
             return "Task 2"
         }.value
 
-        let (result1, result2) = try await(task1, task2)
+        let (result1, result2) = try await (task1, task2)
 
         XCTAssertEqual(result1, "Task 1")
         XCTAssertEqual(result2, "Task 2")
