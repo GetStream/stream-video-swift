@@ -14,7 +14,7 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
     @Injected(\.utils) var utils
 
     var viewFactory: Factory
-    public var outgoingCallMembers: [Member]
+    @State public var outgoingCallMembers: [Member]
     public var title: String
     public var callControls: CallControls
     public var callTopView: CallTopView
@@ -75,5 +75,8 @@ public struct CallConnectingView<CallControls: View, CallTopView: View, Factory:
         .background(
             OutgoingCallBackground(outgoingCallMembers: outgoingCallMembers)
         )
+        .onReceive(streamVideo.state.ringingCall?.state.$members.receive(on: DispatchQueue.main)) { members in
+            outgoingCallMembers = members.filter { $0.id != streamVideo.user.id }
+        }
     }
 }

@@ -23,6 +23,7 @@ final class CallControlsView_Tests: StreamVideoUITestCase, @unchecked Sendable {
     func test_callControlsView_activeCall_snapshot() throws {
         let call = streamVideoUI?.streamVideo.call(callType: .default, callId: .unique)
         call?.state.ownCapabilities = [.sendAudio, .sendVideo]
+        streamVideoUI?.streamVideo.state.ringingCall = call
         let viewModel = CallViewModel()
         viewModel.setActiveCall(call)
 
@@ -39,6 +40,7 @@ final class CallControlsView_Tests: StreamVideoUITestCase, @unchecked Sendable {
         call.state.ownCapabilities = [.sendAudio, .sendVideo]
         streamVideoUI?.streamVideo.state.ringingCall = call
         let viewModel = CallViewModel()
+        viewModel.setActiveCall(call)
         viewModel.callingState = .outgoing
 
         let view = CallControlsView(viewModel: viewModel)
