@@ -25,6 +25,7 @@ final class CallConnectingView_Tests: StreamVideoUITestCase, @unchecked Sendable
         call.state.ownCapabilities.append(.sendAudio)
         call.state.ownCapabilities.append(.sendVideo)
         streamVideoUI?.streamVideo.state.ringingCall = call
+        viewModel.setActiveCall(call)
         viewModel.callingState = .outgoing
 
         let view = CallConnectingView(

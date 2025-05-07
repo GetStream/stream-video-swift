@@ -29,8 +29,9 @@ final class OutgoingCallView_Tests: StreamVideoUITestCase, @unchecked Sendable {
             .init(user: viewModel.streamVideo.user),
             .init(userId: "test-user")
         ]
-        viewModel.callingState = .outgoing
         viewModel.streamVideo.state.ringingCall = call
+        viewModel.setActiveCall(call)
+        viewModel.callingState = .outgoing
 
         let view = factory.makeOutgoingCallView(viewModel: viewModel)
 
