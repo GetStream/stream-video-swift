@@ -16,6 +16,9 @@ _May 05, 2025_
 - Fix ringing flow issues. [#792](https://github.com/GetStream/stream-video-swift/pull/792)
 - Fix a few points that were negatively affecting Picture-in-Picture lifecycle. [#796](https://github.com/GetStream/stream-video-swift/pull/796)
 
+### 🔄 Changed
+- Update OutgoingCallView to get updates from ringing call [#798](https://github.com/GetStream/stream-video-swift/pull/798)
+
 # [1.21.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.21.1)
 _April 25, 2025_
 
