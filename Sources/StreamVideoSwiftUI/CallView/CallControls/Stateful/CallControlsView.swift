@@ -12,19 +12,21 @@ public struct CallControlsView: View {
     @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: CallViewModel
+    @State var ownCapabilities: [OwnCapability]
 
     /// Initializes the call controls view with a view model.
     /// - Parameter viewModel: The view model for the call controls.
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
+        ownCapabilities = viewModel.call?.state.ownCapabilities ?? []
     }
 
     public var body: some View {
         HStack {
-            if call?.state.ownCapabilities.contains(.sendVideo) == true {
+            if ownCapabilities.contains(.sendVideo) == true {
                 VideoIconView(viewModel: viewModel)
             }
-            if call?.state.ownCapabilities.contains(.sendAudio) == true {
+            if ownCapabilities.contains(.sendAudio) == true {
                 MicrophoneIconView(viewModel: viewModel)
             }
 
@@ -37,6 +39,8 @@ public struct CallControlsView: View {
         .padding(.horizontal, 16)
         .padding(.vertical)
         .frame(maxWidth: .infinity)
+        .onReceive(viewModel.call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
+        .onReceive(streamVideo.state.ringingCall?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
     }
 
     private var call: Call? {
