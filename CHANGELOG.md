@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🐞 Fixed
+- Fix an issue that when the app was becoming active from the application switcher, Picture-in-Picture wasn't stopped. [#803](https://github.com/GetStream/stream-video-swift/pull/803)
+
 ### 🔄 Changed
 - Update OutgoingCallView to get updates from ringing call [#798](https://github.com/GetStream/stream-video-swift/pull/798)
 
