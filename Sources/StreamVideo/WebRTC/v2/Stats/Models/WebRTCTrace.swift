@@ -98,16 +98,7 @@ extension WebRTCTrace {
         self.init(
             id: nil,
             tag: "navigator.mediaDevices.getUserMediaOnSuccess",
-            data: .init(
-                [
-                    "speakerOn": callSettings.speakerOn,
-                    "device": "\(audioSession.currentRoute)",
-                    "device.isExternal": audioSession.currentRoute.isExternal,
-                    "device.isSpeaker": audioSession.currentRoute.isSpeaker,
-                    "device.isReceiver": audioSession.currentRoute.isReceiver
-                ]
-            )
+            data: .init(audioSession)
         )
-        _ = 0
     }
 }
