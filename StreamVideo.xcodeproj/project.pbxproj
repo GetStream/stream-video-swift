@@ -3814,6 +3814,14 @@
 			path = Stages;
 			sourceTree = "<group>";
 		};
+		4077269F2DCCA40F00C33244 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				4028FE922DC4DAF1001F9DC3 /* Combine+Sendable.swift */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		408679F52BD12EFC00D027E0 /* AudioFilter */ = {
 			isa = PBXGroup;
 			children = (
@@ -5463,6 +5471,7 @@
 				84F73833287C146D00A363F4 /* StreamVideoUIKitTests */,
 				82392D522993C9E100941435 /* SwiftUIDemoAppUITests */,
 				82392D5C2993CBE200941435 /* TestTools */,
+				4077269F2DCCA40F00C33244 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -7348,7 +7357,6 @@
 				846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */,
 				40E3634C2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift in Sources */,
 				842E70DB2B91BE1700D2D68B /* ListTranscriptionsResponse.swift in Sources */,
-				4028FE932DC4DAF1001F9DC3 /* Combine+Sendable.swift in Sources */,
 				4012B1902BFCA4D3006B0031 /* Call+AcceptedStage.swift in Sources */,
 				40BBC4A12C623D03002AEF92 /* RTCMediaStream+Convenience.swift in Sources */,
 				84DCA20E2A3885FE000C3411 /* Permissions.swift in Sources */,
