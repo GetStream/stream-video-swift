@@ -39,8 +39,7 @@ public struct CallControlsView: View {
         .padding(.horizontal, 16)
         .padding(.vertical)
         .frame(maxWidth: .infinity)
-        .onReceive(viewModel.call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
-        .onReceive(streamVideo.state.ringingCall?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
+        .onReceive(call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
     }
 
     private var call: Call? {
