@@ -494,7 +494,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 let stateAdapter = context.coordinator?.stateAdapter,
                 let sfuAdapter = await stateAdapter.sfuAdapter
             else {
-                return []
+                return
             }
 
             updateSubscriptionsAdapter = .init(
