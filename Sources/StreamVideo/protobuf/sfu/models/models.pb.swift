@@ -1408,6 +1408,9 @@ struct Stream_Video_Sfu_Models_PerformanceStats {
   /// Clears the value of `videoDimension`. Subsequent reads from it will return its default value.
   mutating func clearVideoDimension() {self._videoDimension = nil}
 
+  /// the target bitrate for the track, only for published tracks
+  var targetBitrate: Int32 = 0
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -2855,6 +2858,7 @@ extension Stream_Video_Sfu_Models_PerformanceStats: SwiftProtobuf.Message, Swift
     3: .standard(proto: "avg_frame_time_ms"),
     4: .standard(proto: "avg_fps"),
     5: .standard(proto: "video_dimension"),
+    6: .standard(proto: "target_bitrate"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2868,6 +2872,7 @@ extension Stream_Video_Sfu_Models_PerformanceStats: SwiftProtobuf.Message, Swift
       case 3: try { try decoder.decodeSingularFloatField(value: &self.avgFrameTimeMs) }()
       case 4: try { try decoder.decodeSingularFloatField(value: &self.avgFps) }()
       case 5: try { try decoder.decodeSingularMessageField(value: &self._videoDimension) }()
+      case 6: try { try decoder.decodeSingularInt32Field(value: &self.targetBitrate) }()
       default: break
       }
     }
@@ -2893,6 +2898,9 @@ extension Stream_Video_Sfu_Models_PerformanceStats: SwiftProtobuf.Message, Swift
     try { if let v = self._videoDimension {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     } }()
+    if self.targetBitrate != 0 {
+      try visitor.visitSingularInt32Field(value: self.targetBitrate, fieldNumber: 6)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2902,6 +2910,7 @@ extension Stream_Video_Sfu_Models_PerformanceStats: SwiftProtobuf.Message, Swift
     if lhs.avgFrameTimeMs != rhs.avgFrameTimeMs {return false}
     if lhs.avgFps != rhs.avgFps {return false}
     if lhs._videoDimension != rhs._videoDimension {return false}
+    if lhs.targetBitrate != rhs.targetBitrate {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
