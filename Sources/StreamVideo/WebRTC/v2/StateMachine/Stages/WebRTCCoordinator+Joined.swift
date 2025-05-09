@@ -425,6 +425,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 /// Create a new stats reporter if the session ID does not match.
                 let statsReporter = WebRTCStatsAdapter(
                     sessionID: await stateAdapter.sessionID,
+                    unifiedSessionID: stateAdapter.unifiedSessionId,
                     isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled
                 )
 

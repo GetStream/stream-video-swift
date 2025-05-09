@@ -62,6 +62,8 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
     /// The session ID associated with this reporter.
     let sessionID: String
 
+    let unifiedSessionID: String
+
     private let disposableBag = DisposableBag()
 
     /// The interval at which statistics are collected, in seconds. Defaults to 2.
@@ -81,10 +83,12 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         collectionInterval: TimeInterval = 2,
         deliveryInterval: TimeInterval = 5,
         sessionID: String,
+        unifiedSessionID: String,
         isTracingEnabled: Bool,
         reconnectAttempts: UInt32 = 0
     ) {
         self.sessionID = sessionID
+        self.unifiedSessionID = unifiedSessionID
         self.reconnectAttempts = reconnectAttempts
         self.collectionInterval = collectionInterval
         self.deliveryInterval = deliveryInterval
@@ -167,6 +171,7 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
 
         return .init(
             sessionID: sessionID,
+            unifiedSessionID: unifiedSessionID,
             report: report,
             peerConnectionTraces: peerConnectionTraces,
             encoderPerformanceStats: traces.flushEncoderPerformanceStats(),

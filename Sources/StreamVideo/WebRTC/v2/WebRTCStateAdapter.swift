@@ -35,6 +35,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     }
 
     // Properties for user, API key, call ID, video configuration, and factories.
+    let unifiedSessionId: String = UUID().uuidString
     let user: User
     let apiKey: String
     let callCid: String

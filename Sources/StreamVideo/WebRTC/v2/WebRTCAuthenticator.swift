@@ -128,6 +128,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         } else {
             let statsReporter = WebRTCStatsAdapter(
                 sessionID: await coordinator.stateAdapter.sessionID,
+                unifiedSessionID: coordinator.stateAdapter.unifiedSessionId,
                 isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled
             )
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)

@@ -282,7 +282,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         bucket: FlushableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>
     ) {
         let events = bucket
-            .flush()
+            .consume(flush: true)
             .filter { $0.payload(EventType.self) != nil }
 
         guard !events.isEmpty else {
@@ -358,6 +358,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     func sendStats(
         _ report: CallStatsReport? = nil,
         for sessionId: String,
+        unifiedSessionId: String,
         traces: String? = nil,
         thermalState: ProcessInfo.ThermalState? = nil,
         telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil,
@@ -377,6 +378,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         statsRequest.decodeStats = decodeStats ?? []
         statsRequest.rtcStats = traces ?? ""
         statsRequest.telemetry = telemetry ?? .init()
+        statsRequest.unifiedSessionID = unifiedSessionId
 
         let task = Task { [statsRequest, signalService] in
             try Task.checkCancellation()

@@ -392,6 +392,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             reportTelemetry(
                 sessionId: await coordinator.stateAdapter.sessionID,
+                unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
                 sfuAdapter: sfuAdapter
             )
         }
@@ -409,6 +410,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// - Reconnection strategies (e.g., fast reconnect, rejoin, or migration) and their duration.
         private func reportTelemetry(
             sessionId: String,
+            unifiedSessionId: String,
             sfuAdapter: SFUAdapter
         ) {
             Task {
@@ -437,7 +439,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 do {
                     try await sfuAdapter.sendStats(
                         for: sessionId,
-                        telemetry: telemetry
+                        unifiedSessionId: unifiedSessionId,
+                        telemetry: telemetry,
                     )
                     log.debug("Join call completed in \(duration) seconds.")
                 } catch {
