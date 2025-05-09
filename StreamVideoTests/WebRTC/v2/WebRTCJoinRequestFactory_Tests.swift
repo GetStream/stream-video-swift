@@ -396,9 +396,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
                 .participants.count == 4
         }
 
-        let result = await subject.buildSubscriptionDetails(
+        let result = subject.buildSubscriptionDetails(
             .unique,
-            coordinator: mockCoordinatorStack.coordinator,
+            sessionID: await mockCoordinatorStack.coordinator.stateAdapter.sessionID,
+            participants: Array(await mockCoordinatorStack.coordinator.stateAdapter.participants.values),
             incomingVideoQualitySettings: .none
         ).sorted { $0.sessionID <= $1.sessionID }
 
