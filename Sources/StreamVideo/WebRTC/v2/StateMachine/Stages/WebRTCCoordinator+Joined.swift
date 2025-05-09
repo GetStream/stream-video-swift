@@ -31,6 +31,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
 
         private let disposableBag = DisposableBag()
+        private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
 
         /// Initializes a new instance of `JoinedStage`.
         /// - Parameter context: The context for the joined stage.
@@ -97,10 +98,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await observeForSubscriptionUpdates()
-
-                    try Task.checkCancellation()
-
                     await observeConnection()
 
                     try Task.checkCancellation()
@@ -121,10 +118,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await observeIncomingVideoQualitySettingsUpdates()
-
-                    try Task.checkCancellation()
-
                     await observeCallSettingsUpdates()
 
                     try Task.checkCancellation()
@@ -134,6 +127,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     await configureStatsCollectionAndDelivery()
+
+                    try Task.checkCancellation()
+
+                    await configureUpdateSubscriptions()
                 } catch {
                     await cleanUpPreviousSessionIfRequired()
                     transitionDisconnectOrError(error)
@@ -327,24 +324,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes changes to the list of participants and triggers subscription
-        /// updates when the participant list changes. This ensures that subscriptions
-        /// are kept in sync with the current participants.
-        private func observeForSubscriptionUpdates() async {
-            guard
-                let stateAdapter = context.coordinator?.stateAdapter
-            else {
-                return
-            }
-
-            await stateAdapter
-                .$participants
-                .removeDuplicates()
-                .log(.debug) { "\($0.count) Participants updated and we update subscriptions now." }
-                .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.updateSubscriptions() }
-                .store(in: disposableBag) // Store the Combine subscription in the disposable bag.
-        }
-
         /// Observes updates to the `callSettings` and ensures that any changes are
         /// reflected in the publisher. This ensures that updates to audio, video, and
         /// audio output settings are applied correctly during a WebRTC session.
@@ -355,9 +334,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .$callSettings
                 .compactMap { $0 }
                 .removeDuplicates()
-                .log(.debug, subsystems: .webRTC) { "Updated \($0)" }
                 .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
                     guard let self else { return }
+
+                    if let statsAdapter = await context.coordinator?.stateAdapter.statsAdapter {
+                        statsAdapter.callSettings = callSettings
+                    }
 
                     do {
                         guard
@@ -423,30 +405,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        /// Observes changes to the `incomingVideoQualitySettings` and triggers updates when
-        /// the settings change. It ensures that the video subscriptions are updated
-        /// accordingly and forces a participant update to refresh the UI.
-        private func observeIncomingVideoQualitySettingsUpdates() async {
-            guard
-                let stateAdapter = context.coordinator?.stateAdapter
-            else {
-                return
-            }
-
-            await stateAdapter
-                .$incomingVideoQualitySettings
-                .removeDuplicates()
-                .log(.debug) { "Incoming video quality settings updated \($0) and we update subscriptions now." }
-                .sinkTask(storeIn: disposableBag) { [weak self] _ in
-                    guard let self else { return }
-
-                    await updateSubscriptions()
-                    /// Force a participant update to ensure the UI reflects the new policy.
-                    await stateAdapter.enqueue { $0 }
-                }
-                .store(in: disposableBag)
-        }
-
         /// Configures the collection and delivery of WebRTC statistics by setting up
         /// or updating the `WebRTCStatsReporter` for the current session. This ensures
         /// that statistics such as network quality, peer connection status, and SFU
@@ -463,25 +421,28 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let sessionId = await stateAdapter.sessionID
 
             /// Check if the stats reporter is already associated with the current session.
-            if await stateAdapter.statsReporter?.sessionID != sessionId {
+            if await stateAdapter.statsAdapter?.sessionID != sessionId {
                 /// Create a new stats reporter if the session ID does not match.
-                let statsReporter = WebRTCStatsReporter(
-                    sessionID: await stateAdapter.sessionID
+                let statsReporter = WebRTCStatsAdapter(
+                    sessionID: await stateAdapter.sessionID,
+                    unifiedSessionID: stateAdapter.unifiedSessionId,
+                    isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled,
+                    trackStorage: coordinator.stateAdapter.trackStorage
                 )
 
                 /// Set the stats reporting interval and associate the reporter with the publisher,
                 /// subscriber, and SFU adapter.
-                statsReporter.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+                statsReporter.deliveryInterval = await stateAdapter.statsAdapter?.deliveryInterval ?? 0
                 statsReporter.publisher = await stateAdapter.publisher
                 statsReporter.subscriber = await stateAdapter.subscriber
                 statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
 
                 /// Update the state adapter with the new stats reporter.
-                await stateAdapter.set(statsReporter: statsReporter)
+                await stateAdapter.set(statsAdapter: statsReporter)
             } else {
                 /// If the session ID matches, update the existing stats reporter.
-                let statsReporter = await stateAdapter.statsReporter
-                statsReporter?.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+                let statsReporter = await stateAdapter.statsAdapter
+                statsReporter?.deliveryInterval = await stateAdapter.statsAdapter?.deliveryInterval ?? 0
                 statsReporter?.publisher = await stateAdapter.publisher
                 statsReporter?.subscriber = await stateAdapter.subscriber
                 statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
@@ -500,8 +461,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .filter { !$0.isAvailable }
                 .removeDuplicates()
-                .sink { [weak self] _ in
+                .sinkTask { [weak self] in
                     guard let self else { return }
+
+                    /// Trace internet connection changes
+                    await context
+                        .coordinator?
+                        .stateAdapter
+                        .statsAdapter?
+                        .trace(.init(status: $0))
 
                     /// Set the reconnection strategy to a fast reconnection attempt.
                     context.reconnectionStrategy = .fast(
@@ -527,58 +495,29 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
-        // MARK: - Private helpers
-
-        /// Updates the WebRTC subscriptions based on the current state, including the
-        /// incoming video policy and the list of participants. The method communicates
-        /// with the SFU (Selective Forwarding Unit) adapter to adjust track subscriptions.
+        /// Configures the subscription adapter responsible for managing WebRTC
+        /// track subscriptions.
         ///
-        /// - Throws: An error if the subscriptions cannot be updated or if the task
-        ///   is cancelled during execution.
-        private func updateSubscriptions() async {
+        /// This function initializes the `WebRTCUpdateSubscriptionsAdapter` using
+        /// the current participants and incoming video quality settings. It ensures
+        /// that subscription updates are properly set up for the active SFU adapter
+        /// and session.
+        private func configureUpdateSubscriptions() async {
             guard
-                let coordinator = context.coordinator,
-                let sfuAdapter = await coordinator.stateAdapter.sfuAdapter
+                let stateAdapter = context.coordinator?.stateAdapter,
+                let sfuAdapter = await stateAdapter.sfuAdapter
             else {
                 return
             }
 
-            let incomingVideoQualitySettings = await coordinator
-                .stateAdapter
-                .incomingVideoQualitySettings
-
-            let tracks = await WebRTCJoinRequestFactory()
-                .buildSubscriptionDetails(
-                    nil,
-                    coordinator: coordinator,
-                    incomingVideoQualitySettings: incomingVideoQualitySettings
-                )
-
-            do {
-                try Task.checkCancellation()
-
-                let participants = await coordinator.stateAdapter.participants
-
-                log.debug(
-                    """
-                    Updating subscriptions for \(participants.count - 1) participants 
-                    with incomingVideoQualitySettings: \(incomingVideoQualitySettings).
-                    """,
-                    subsystems: .webRTC
-                )
-
-                try await sfuAdapter.updateSubscriptions(
-                    tracks: tracks,
-                    for: await coordinator.stateAdapter.sessionID
-                )
-            } catch {
-                log.warning(
-                    """
-                    UpdateSubscriptions failed with error:\(error).
-                    """,
-                    subsystems: .webRTC
-                )
-            }
+            updateSubscriptionsAdapter = .init(
+                participantsPublisher: await stateAdapter.$participants.eraseToAnyPublisher(),
+                incomingVideoQualitySettingsPublisher: await stateAdapter
+                    .$incomingVideoQualitySettings
+                    .eraseToAnyPublisher(),
+                sfuAdapter: sfuAdapter,
+                sessionID: await stateAdapter.sessionID
+            )
         }
     }
 }
