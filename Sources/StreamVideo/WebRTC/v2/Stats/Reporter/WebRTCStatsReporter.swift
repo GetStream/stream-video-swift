@@ -126,7 +126,9 @@ final class WebRTCStatsReporter: @unchecked Sendable {
         activeDeliveryTask?.cancel()
         activeDeliveryTask = Task { [weak self] in
             do {
-                guard let self else { return }
+                guard let self, let sfuAdapter else {
+                    throw ClientError("Unable to deliver stats while SFU is unavailable.")
+                }
 
                 try Task.checkCancellation()
 
@@ -137,7 +139,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
 
                 try Task.checkCancellation()
 
-                try await sfuAdapter?.sendStats(
+                try await sfuAdapter.sendStats(
                     input.report,
                     for: input.sessionID,
                     unifiedSessionId: input.unifiedSessionID,

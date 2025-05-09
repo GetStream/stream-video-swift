@@ -460,8 +460,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .filter { !$0.isAvailable }
                 .removeDuplicates()
-                .sink { [weak self] _ in
+                .sinkTask { [weak self] in
                     guard let self else { return }
+
+                    /// Trace internet connection changes
+                    await context
+                        .coordinator?
+                        .stateAdapter
+                        .statsAdapter?
+                        .trace(.init(status: $0))
 
                     /// Set the reconnection strategy to a fast reconnection attempt.
                     context.reconnectionStrategy = .fast(

@@ -102,3 +102,23 @@ extension WebRTCTrace {
         )
     }
 }
+
+extension WebRTCTrace {
+    init(
+        status: InternetConnectionStatus
+    ) {
+        let data = {
+            switch status {
+            case .available:
+                return "online"
+            case .unavailable, .unknown:
+                return "offline"
+            }
+        }()
+        self.init(
+            id: nil,
+            tag: "network.changed",
+            data: .init(data)
+        )
+    }
+}

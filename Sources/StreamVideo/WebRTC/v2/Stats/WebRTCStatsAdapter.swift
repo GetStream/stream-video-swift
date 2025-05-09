@@ -101,10 +101,16 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         traces.isEnabled = isTracingEnabled
     }
 
+    // MARK: - Stats
+
+    func scheduleStatsReporting() {
+        reporter.triggerDelivery()
+    }
+
     // MARK: - Traces
 
-    func traceSFURequest(_ trace: WebRTCTrace) {
-        traces.tracePeerConnection(trace)
+    func trace(_ trace: WebRTCTrace) {
+        traces.trace(trace)
     }
 
     // MARK: - Private helpers
@@ -140,10 +146,10 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         let compressedReport = statsCompressor.compress(report)
 
         if let stats = compressedReport.publisher {
-            traces.tracePeerConnection(.init(peerType: .publisher, statsReport: stats))
+            traces.trace(.init(peerType: .publisher, statsReport: stats))
         }
         if let stats = compressedReport.subscriber {
-            traces.tracePeerConnection(.init(peerType: .subscriber, statsReport: stats))
+            traces.trace(.init(peerType: .subscriber, statsReport: stats))
         }
 
         let reconnectAttempts = self.reconnectAttempts
