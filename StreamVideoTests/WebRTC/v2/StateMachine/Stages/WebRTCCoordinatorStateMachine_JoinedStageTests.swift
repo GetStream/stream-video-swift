@@ -221,9 +221,9 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             trigger: { [mockCoordinatorStack] in
                 await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
                     [
-                        sessionId: .dummy(id: sessionId, hasAudio: true),
-                        "0": .dummy(hasAudio: true),
-                        "1": .dummy(hasAudio: true)
+                        sessionId: .dummy(id: sessionId, hasVideo: true),
+                        "0": .dummy(hasVideo: true),
+                        "1": .dummy(hasVideo: true)
                     ]
                 }
             }
@@ -246,9 +246,9 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             .filter { !$0.isEmpty }
             .nextValue()
         let participantsUpdate: [String: CallParticipant] = [
-            sessionId: .dummy(id: sessionId, hasAudio: true),
-            "0": .dummy(hasAudio: true),
-            "1": .dummy(hasAudio: true)
+            sessionId: .dummy(id: sessionId, hasVideo: true),
+            "0": .dummy(hasVideo: true),
+            "1": .dummy(hasVideo: true)
         ]
 
         await assertResultAfterTrigger(
@@ -264,7 +264,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                 }
             }
         ) { [mockCoordinatorStack] expectation in
-            XCTAssertEqual(mockCoordinatorStack?.sfuStack.service.timesCalled(.updateSubscriptions), 2)
+            XCTAssertEqual(mockCoordinatorStack?.sfuStack.service.timesCalled(.updateSubscriptions), 1)
             expectation.fulfill()
         }
     }
@@ -293,9 +293,9 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { [mockCoordinatorStack] in
             await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
                 [
-                    sessionId: .dummy(id: sessionId, hasAudio: true),
-                    "0": .dummy(hasAudio: true),
-                    "1": .dummy(hasAudio: true)
+                    sessionId: .dummy(id: sessionId, hasVideo: true),
+                    "0": .dummy(hasVideo: true),
+                    "1": .dummy(hasVideo: true)
                 ]
             }
         } validationHandler: { _ in }
