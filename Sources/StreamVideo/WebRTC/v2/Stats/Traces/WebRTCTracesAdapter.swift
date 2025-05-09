@@ -76,11 +76,15 @@ final class WebRTCTracesAdapter: @unchecked Sendable {
         )
     }
 
-    func tracePeerConnection(_ trace: WebRTCTrace) {
+    func trace(_ trace: WebRTCTrace) {
         guard isEnabled else {
             return
         }
-        peerConnectionBucket.append(trace)
+        if trace.id != nil {
+            peerConnectionBucket.append(trace)
+        } else {
+            sfuRequestsBucket.append(trace)
+        }
     }
 
     // MARK: - Flush
