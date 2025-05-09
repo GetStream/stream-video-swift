@@ -24,6 +24,8 @@ final class WebRTCStatsCollector: @unchecked Sendable {
     /// The interval at which statistics are collected, in seconds. Defaults to 2.
     var interval: TimeInterval { didSet { scheduleCollection(with: interval) } }
 
+    private let trackStorage: WebRTCTrackStorage
+
     /// Cancellable for the collection timer.
     private var collectionCancellable: AnyCancellable?
 
@@ -33,8 +35,12 @@ final class WebRTCStatsCollector: @unchecked Sendable {
     /// A helper object for building call statistics reports.
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
-    init(interval: TimeInterval = 2) {
+    init(
+        interval: TimeInterval = 2,
+        trackStorage: WebRTCTrackStorage
+    ) {
         self.interval = interval
+        self.trackStorage = trackStorage
     }
 
     /// Schedules the periodic collection of statistics.
@@ -84,7 +90,8 @@ final class WebRTCStatsCollector: @unchecked Sendable {
                 let report = callStatisticsReporter.buildReport(
                     publisherReport: result.first ?? .init(nil),
                     subscriberReport: result.last ?? .init(nil),
-                    datacenter: hostname
+                    datacenter: hostname,
+                    trackToKindMap: trackStorage.snapshot
                 )
 
                 try Task.checkCancellation()

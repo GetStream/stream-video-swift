@@ -64,6 +64,7 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
 
     let unifiedSessionID: String
 
+    private let trackStorage: WebRTCTrackStorage
     private let disposableBag = DisposableBag()
 
     /// The interval at which statistics are collected, in seconds. Defaults to 2.
@@ -71,7 +72,11 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         didSet { collector.interval = collectionInterval }
     }
 
-    private lazy var collector: WebRTCStatsCollector = .init(interval: collectionInterval)
+    private lazy var collector: WebRTCStatsCollector = .init(
+        interval: collectionInterval,
+        trackStorage: trackStorage
+    )
+
     private lazy var reporter: WebRTCStatsReporter = .init(
         interval: deliveryInterval,
         provider: { [weak self] in self?.prepareDeliveryInput() }
@@ -85,13 +90,15 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         sessionID: String,
         unifiedSessionID: String,
         isTracingEnabled: Bool,
-        reconnectAttempts: UInt32 = 0
+        reconnectAttempts: UInt32 = 0,
+        trackStorage: WebRTCTrackStorage
     ) {
         self.sessionID = sessionID
         self.unifiedSessionID = unifiedSessionID
         self.reconnectAttempts = reconnectAttempts
         self.collectionInterval = collectionInterval
         self.deliveryInterval = deliveryInterval
+        self.trackStorage = trackStorage
         self.isTracingEnabled = isTracingEnabled
 
         _ = collector

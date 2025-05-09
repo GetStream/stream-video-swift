@@ -7,56 +7,75 @@ import StreamWebRTC
 
 final class WebRTCEncoderStatsItemTransformer: FlushableBucketItemTransformer {
 
-    private var previousOutput: Stream_Video_Sfu_Models_PerformanceStats?
+    private var previousOutput: [TrackType: Stream_Video_Sfu_Models_PerformanceStats] = [:]
 
     init() {}
 
     func transform(
         _ input: CallStatsReport
-    ) -> Stream_Video_Sfu_Models_PerformanceStats? {
+    ) -> [Stream_Video_Sfu_Models_PerformanceStats] {
+
+        var result = [Stream_Video_Sfu_Models_PerformanceStats]()
+
+        let outbounds: [RTCStatistics] = input
+            .publisherRawStats?
+            .statistics
+            .filter { $0.value.type == "outbound-rtp" }
+            .compactMap(\.value) ?? []
+
         guard
-            let stats = input.publisherRawStats,
-            let rtp = stats.statistics.first(where: { $0.value.type == "outbound-rtp" })
+            !outbounds.isEmpty
         else {
-            return nil
+            previousOutput = [:]
+            return result
         }
 
-        let processingUnit = ProcessingUnit(rtp.value)
+        for outbound in outbounds {
+            let processingUnit = ProcessingUnit(outbound)
 
-        guard
-            processingUnit.kind != "audio",
-            let codecStatistics = input.publisherRawStats?.statistics[processingUnit.codecId]
-        else {
-            return nil
+            guard
+                processingUnit.kind != "audio",
+                let codecStatistics = input.publisherRawStats?.statistics[processingUnit.codecId],
+                let mediaSource = input.publisherRawStats?.statistics[processingUnit.mediaSourceId] as? RTCStatistics,
+                let trackIdentifier = mediaSource.values["trackIdentifier"] as? String,
+                let trackType = input.trackToKindMap[trackIdentifier]
+            else {
+                continue
+            }
+
+            let previousEvent = previousOutput[trackType]
+            let deltaTotalEncodeTime = processingUnit.totalEncodeTime - Double(previousEvent?.avgFrameTimeMs ?? 0)
+            let deltaFramesSent = processingUnit.framesSent - Int(previousEvent?.avgFps ?? 0)
+            let framesEncodeTime = deltaFramesSent > 0 ? (deltaTotalEncodeTime / Double(deltaFramesSent)) * 1000 : 0
+
+            var item = Stream_Video_Sfu_Models_PerformanceStats()
+            item.trackType = trackType == .video ? .video : trackType == .screenshare ? .screenShare : .unspecified
+            item.codec = .init()
+            item.codec.name = String((codecStatistics.values["mimeType"] as? String ?? "").split(separator: "/").last ?? "")
+            item.codec.clockRate = (codecStatistics.values["clockRate"] as? UInt32) ?? 0
+            item.codec.payloadType = (codecStatistics.values["payloadType"] as? UInt32) ?? 0
+            item.codec.fmtp = (codecStatistics.values["sdpFmtpLine"] as? String) ?? ""
+            item.avgFrameTimeMs = Float(framesEncodeTime)
+            item.avgFps = Float(deltaFramesSent)
+            item.videoDimension.width = UInt32(processingUnit.frameWidth)
+            item.videoDimension.height = UInt32(processingUnit.frameHeight)
+
+            result.append(item)
         }
 
-        let previousEvent = previousOutput
-        let deltaTotalEncodeTime = processingUnit.totalEncodeTime - Double(previousEvent?.avgFrameTimeMs ?? 0)
-        let deltaFramesSent = processingUnit.framesSent - Int(previousEvent?.avgFps ?? 0)
-        let framesEncodeTime = deltaFramesSent > 0 ? (deltaTotalEncodeTime / Double(deltaFramesSent)) * 1000 : 0
+        previousOutput = [:]
+        result.forEach {
+            switch $0.trackType {
+            case .video:
+                previousOutput[.video] = $0
+            case .screenShare:
+                previousOutput[.screenshare] = $0
+            default:
+                break
+            }
+        }
 
-        // TODO: Implement track type lookup based on trackIdentifier
-//        if
-//            let mediaSource = report.publisherRawStats?.statistics.values[processingUnit.mediaSourceId] as? RTCStatistics,
-//            let trackIdentifier = mediaSource.values["trackIdentifier"] as? String
-//        {
-//
-//        }
-
-        var item = Stream_Video_Sfu_Models_PerformanceStats()
-        item.trackType = .video
-        item.codec = .init()
-        item.codec.name = String((codecStatistics.values["mimeType"] as? String ?? "").split(separator: "/").last ?? "")
-        item.codec.clockRate = (codecStatistics.values["clockRate"] as? UInt32) ?? 0
-        item.codec.payloadType = (codecStatistics.values["payloadType"] as? UInt32) ?? 0
-        item.codec.fmtp = (codecStatistics.values["sdpFmtpLine"] as? String) ?? ""
-        item.avgFrameTimeMs = Float(framesEncodeTime)
-        item.avgFps = Float(deltaFramesSent)
-        item.videoDimension.width = UInt32(processingUnit.frameWidth)
-        item.videoDimension.height = UInt32(processingUnit.frameHeight)
-
-        previousOutput = item
-        return item
+        return result
     }
 }
 
