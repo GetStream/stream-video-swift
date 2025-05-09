@@ -23,10 +23,10 @@ final class WebRTCTracesAdapter: @unchecked Sendable {
     var isEnabled: Bool = true {
         didSet {
             if !isEnabled {
-                _ = peerConnectionBucket.flush()
-                _ = sfuRequestsBucket.flush()
-                _ = encoderStatsBucket.flush()
-                _ = decoderStatsBucket.flush()
+                _ = peerConnectionBucket.consume(flush: true)
+                _ = sfuRequestsBucket.consume(flush: true)
+                _ = encoderStatsBucket.consume(flush: true)
+                _ = decoderStatsBucket.consume(flush: true)
             }
         }
     }
@@ -86,17 +86,17 @@ final class WebRTCTracesAdapter: @unchecked Sendable {
     // MARK: - Flush
 
     func flushTraces() -> [WebRTCTrace] {
-        let peerConnectionTraces = peerConnectionBucket.flush()
-        let sfuRequestsTraces = sfuRequestsBucket.flush()
+        let peerConnectionTraces = peerConnectionBucket.consume(flush: true)
+        let sfuRequestsTraces = sfuRequestsBucket.consume(flush: true)
         return peerConnectionTraces + sfuRequestsTraces
     }
 
     func flushEncoderPerformanceStats() -> [Stream_Video_Sfu_Models_PerformanceStats] {
-        encoderStatsBucket.flush()
+        encoderStatsBucket.consume(flush: true)
     }
 
     func flushDecoderPerformanceStats() -> [Stream_Video_Sfu_Models_PerformanceStats] {
-        decoderStatsBucket.flush()
+        decoderStatsBucket.consume(flush: true)
     }
 
     // MARK: -

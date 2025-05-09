@@ -17,6 +17,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
 
     struct Input: @unchecked Sendable {
         var sessionID: String
+        var unifiedSessionID: String
         var report: CallStatsReport
         var peerConnectionTraces: [WebRTCTrace]
         var encoderPerformanceStats: [Stream_Video_Sfu_Models_PerformanceStats]
@@ -139,6 +140,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
                 try await sfuAdapter?.sendStats(
                     input.report,
                     for: input.sessionID,
+                    unifiedSessionId: input.unifiedSessionID,
                     traces: traces,
                     thermalState: thermalStateObserver.state,
                     encodeStats: input.encoderPerformanceStats,

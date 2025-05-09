@@ -74,15 +74,15 @@ final class FlushableBucket<Element> {
         queue.sync { [weak self] in self?.items.append(element) }
     }
 
-    func consume() -> [Element] {
-        queue.sync { items }
-    }
-
-    func flush() -> [Element] {
-        queue.sync {
-            let result = items
-            items = []
-            return result
+    func consume(flush: Bool = false) -> [Element] {
+        if flush {
+            return queue.sync {
+                let result = items
+                items = []
+                return result
+            }
+        } else {
+            return queue.sync { items }
         }
     }
 

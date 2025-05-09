@@ -268,7 +268,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
         let statsReporter = await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .statsReporter
+            .statsAdapter
         XCTAssertEqual(statsReporter?.deliveryInterval, 12)
     }
 
