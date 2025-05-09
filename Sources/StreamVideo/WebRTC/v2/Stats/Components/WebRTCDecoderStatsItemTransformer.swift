@@ -13,11 +13,11 @@ final class WebRTCDecoderStatsItemTransformer: FlushableBucketItemTransformer {
 
     func transform(
         _ input: CallStatsReport
-    ) -> Stream_Video_Sfu_Models_PerformanceStats? {
+    ) -> [Stream_Video_Sfu_Models_PerformanceStats] {
         guard
             let stats = input.publisherRawStats
         else {
-            return nil
+            return []
         }
 
         let processingUnits = stats
@@ -28,9 +28,12 @@ final class WebRTCDecoderStatsItemTransformer: FlushableBucketItemTransformer {
 
         guard
             let processingUnit = processingUnits.max(by: { $0.area < $1.area }),
-            let codecStatistics = input.publisherRawStats?.statistics[processingUnit.codecId]
+            let codecStatistics = input.publisherRawStats?.statistics[processingUnit.codecId],
+            let mediaSource = input.publisherRawStats?.statistics[processingUnit.mediaSourceId] as? RTCStatistics,
+            let trackIdentifier = mediaSource.values["trackIdentifier"] as? String,
+            let trackType = input.trackToKindMap[trackIdentifier]
         else {
-            return nil
+            return []
         }
 
         let previousEvent = previousOutput
@@ -38,16 +41,8 @@ final class WebRTCDecoderStatsItemTransformer: FlushableBucketItemTransformer {
         let deltaFramesDecoded = processingUnit.framesDecoded - Int(previousEvent?.avgFps ?? 0)
         let framesDecodeTime = deltaFramesDecoded > 0 ? (deltaTotalDecodeTime / Double(deltaFramesDecoded)) * 1000 : 0
 
-        // TODO: Implement track type lookup based on trackIdentifier
-//        if
-//            let mediaSource = report.publisherRawStats?.statistics.values[processingUnit.mediaSourceId] as? RTCStatistics,
-//            let trackIdentifier = mediaSource.values["trackIdentifier"] as? String
-//        {
-//
-//        }
-
         var item = Stream_Video_Sfu_Models_PerformanceStats()
-        item.trackType = .video
+        item.trackType = trackType == .video ? .video : trackType == .screenshare ? .screenShare : .unspecified
         item.codec = .init()
         item.codec.name = String((codecStatistics.values["mimeType"] as? String ?? "").split(separator: "/").last ?? "")
         item.codec.clockRate = (codecStatistics.values["clockRate"] as? UInt32) ?? 0
@@ -59,7 +54,7 @@ final class WebRTCDecoderStatsItemTransformer: FlushableBucketItemTransformer {
         item.videoDimension.height = UInt32(processingUnit.frameHeight)
 
         previousOutput = item
-        return item
+        return [item]
     }
 }
 
@@ -74,6 +69,7 @@ extension WebRTCDecoderStatsItemTransformer {
         var frameHeight: Int
         var frameWidth: Int
         var area: Int { frameWidth * frameHeight }
+        var mediaSourceId: String
 
         init(_ source: RTCStatistics) {
             kind = source.values["kind"] as? String ?? ""
@@ -84,6 +80,7 @@ extension WebRTCDecoderStatsItemTransformer {
             trackIdentifier = source.values["trackIdentifier"] as? String ?? ""
             frameHeight = source.values["frameHeight"] as? Int ?? 0
             frameWidth = source.values["frameWidth"] as? Int ?? 0
+            mediaSourceId = source.values["mediaSourceId"] as? String ?? ""
         }
     }
 

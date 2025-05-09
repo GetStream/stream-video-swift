@@ -54,8 +54,8 @@ final class WebRTCTracesAdapter: @unchecked Sendable {
 
     private let peerConnectionBucket: FlushableBucket<WebRTCTrace>
     private var sfuRequestsBucket: FlushableBucket<WebRTCTrace>
-    private let encoderStatsBucket: FlushableBucket<Stream_Video_Sfu_Models_PerformanceStats>
-    private let decoderStatsBucket: FlushableBucket<Stream_Video_Sfu_Models_PerformanceStats>
+    private let encoderStatsBucket: FlushableBucket<[Stream_Video_Sfu_Models_PerformanceStats]>
+    private let decoderStatsBucket: FlushableBucket<[Stream_Video_Sfu_Models_PerformanceStats]>
 
     private let disposableBag = DisposableBag()
 
@@ -96,11 +96,11 @@ final class WebRTCTracesAdapter: @unchecked Sendable {
     }
 
     func flushEncoderPerformanceStats() -> [Stream_Video_Sfu_Models_PerformanceStats] {
-        encoderStatsBucket.consume(flush: true)
+        encoderStatsBucket.consume(flush: true).flatMap { $0 }
     }
 
     func flushDecoderPerformanceStats() -> [Stream_Video_Sfu_Models_PerformanceStats] {
-        decoderStatsBucket.consume(flush: true)
+        decoderStatsBucket.consume(flush: true).flatMap { $0 }
     }
 
     // MARK: -

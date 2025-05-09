@@ -19,7 +19,8 @@ struct StreamCallStatisticsReporter {
     func buildReport(
         publisherReport: StreamRTCStatisticsReport,
         subscriberReport: StreamRTCStatisticsReport,
-        datacenter: String
+        datacenter: String,
+        trackToKindMap: [String: TrackType]
     ) -> CallStatsReport {
         /// Initializes a `StreamCallStatisticsBuilder` for the publisher using the provided statistics,
         /// marking the track as video and direction as outbound.
@@ -50,7 +51,8 @@ struct StreamCallStatisticsReporter {
             subscriberRawStats: subscriberReport.source, /// Raw statistics for the subscriber.
             participantsStats: publisherReportBuilder.participantsReport + subscriberReportBuilder.participantsReport,
             /// Combined participant statistics from both publisher and subscriber.
-            timestamp: publisherReportBuilder.timestamp /// Timestamp of the publisher's report, used for the overall report.
+            timestamp: publisherReportBuilder.timestamp, /// Timestamp of the publisher's report, used for the overall report.
+            trackToKindMap: trackToKindMap
         )
     }
 }

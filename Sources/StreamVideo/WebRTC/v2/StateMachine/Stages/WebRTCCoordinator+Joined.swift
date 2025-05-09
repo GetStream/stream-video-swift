@@ -426,7 +426,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 let statsReporter = WebRTCStatsAdapter(
                     sessionID: await stateAdapter.sessionID,
                     unifiedSessionID: stateAdapter.unifiedSessionId,
-                    isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled
+                    isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled,
+                    trackStorage: coordinator.stateAdapter.trackStorage
                 )
 
                 /// Set the stats reporting interval and associate the reporter with the publisher,
