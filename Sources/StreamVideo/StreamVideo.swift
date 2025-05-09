@@ -488,25 +488,34 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         } else {
             throw ClientError.Unknown()
         }
-        var connected = false
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 30, queue: .sdk) {
-            timeout = true
-        }
-        log.debug("Listening for WS connection")
-        webSocketClient?.onConnected = {
-            control.cancel()
-            connected = true
-            log.debug("WS connected")
-        }
 
-        while (!connected && !timeout) {
-            try await Task.sleep(nanoseconds: 100_000)
-        }
-        
-        if timeout {
-            log.debug("Timeout while waiting for WS connection opening")
-            throw ClientError.NetworkError()
+        log.debug("Listening for WS connection")
+        var continuationHandler: (() -> Void)? = nil
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await Task.sleep(nanoseconds: 30 * 1_000_000_000)
+                log.debug("Timeout while waiting for WS connection opening")
+                continuationHandler = nil
+                throw ClientError.NetworkError()
+            }
+            group.addTask {
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                    continuationHandler = {
+                        continuation.resume(returning: ())
+                    }
+                    webSocketClient?.onConnected = { [weak self] in
+                        self?.log.debug("WS connected")
+                        // Only resume if the handler still exists
+                        if let continuationHandler {
+                            continuationHandler()
+                            continuationHandler = nil
+                        }
+                    }
+                }
+            }
+            // race between “onConnected” and 30s timeout: whichever finishes first “wins”
+            try await group.next()
+            group.cancelAll()
         }
     }
     
