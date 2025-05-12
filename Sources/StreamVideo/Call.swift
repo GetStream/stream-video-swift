@@ -1428,6 +1428,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
+    internal func callKitActivated(_ audioSession: AVAudioSession) throws {
+        try callController.callKitActivated(audioSession)
+    }
+
     // MARK: - private
 
     private func updatePermissions(

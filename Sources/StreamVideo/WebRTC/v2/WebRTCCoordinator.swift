@@ -432,6 +432,10 @@ final class WebRTCCoordinator: @unchecked Sendable {
         try await stateAdapter.audioSession.didUpdatePolicy(policy)
     }
 
+    internal func callKitActivated(_ audioSession: AVAudioSession) throws {
+        try stateAdapter.audioSession.callKitActivated(audioSession)
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.
