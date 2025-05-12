@@ -516,6 +516,30 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.participantPins, pins)
     }
 
+    func test_cleanUpForReconnection_setsInitialCallSettingsToCallSettings() async throws {
+        let sfuStack = MockSFUStack()
+        let ownCapabilities = Set([OwnCapability.blockUsers])
+        let pins = [PinInfo(isLocal: true, pinnedAt: .init())]
+        let userId = String.unique
+        let currentParticipant = await CallParticipant.dummy(id: subject.sessionID)
+        let participants = [
+            userId: CallParticipant.dummy(id: userId),
+            currentParticipant.sessionId: currentParticipant
+        ]
+        try await prepare(
+            sfuStack: sfuStack,
+            ownCapabilities: ownCapabilities,
+            participants: participants,
+            participantPins: pins
+        )
+        await subject.set(callSettings: .init(cameraPosition: .back))
+
+        let sessionId = await subject.sessionID
+        await subject.cleanUpForReconnection()
+
+        await assertEqualAsync(await subject.callSettings.cameraPosition, .back)
+    }
+
     // MARK: - didAddTrack
 
     func test_didAddTrack_videoOfExistingParticipant_shouldAddTrack() async throws {

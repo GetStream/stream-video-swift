@@ -340,6 +340,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         audioTracks = [:]
         videoTracks = [:]
         screenShareTracks = [:]
+
+        /// We set the initialCallSettings to the last activated CallSettings, in order to maintain the state
+        /// during reconnects.
+        initialCallSettings = callSettings
     }
 
     /// Restores screen sharing if an active session exists.
