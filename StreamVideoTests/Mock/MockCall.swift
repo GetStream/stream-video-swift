@@ -14,6 +14,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         case accept
         case join
         case updateTrackSize
+        case callKitActivated
     }
 
     enum MockCallFunctionInputKey: Payloadable {
@@ -27,6 +28,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case updateTrackSize(trackSize: CGSize, participant: CallParticipant)
 
+        case callKitActivated(audioSession: AVAudioSessionProtocol)
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings):
@@ -34,6 +37,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
             case let .updateTrackSize(trackSize, participant):
                 return (trackSize, participant)
+
+            case let .callKitActivated(audioSession):
+                return audioSession
             }
         }
     }
@@ -120,6 +126,14 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     ) async {
         stubbedFunctionInput[.updateTrackSize]?.append(
             .updateTrackSize(trackSize: trackSize, participant: participant)
+        )
+    }
+
+    override func callKitActivated(
+        _ audioSession: AVAudioSessionProtocol
+    ) throws {
+        stubbedFunctionInput[.callKitActivated]?.append(
+            .callKitActivated(audioSession: audioSession)
         )
     }
 }

@@ -495,7 +495,7 @@ class CallController: @unchecked Sendable {
             .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
     }
 
-    internal func callKitActivated(_ audioSession: AVAudioSession) throws {
+    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
         try webRTCCoordinator.callKitActivated(audioSession)
     }
 

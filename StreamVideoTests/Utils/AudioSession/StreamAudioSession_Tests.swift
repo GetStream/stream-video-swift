@@ -244,7 +244,7 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
     func test_callKitActivated_configurationWasCalledOnPolicy() async throws {
         let mockPolicy = MockAudioSessionPolicy()
         try await subject.didUpdatePolicy(mockPolicy)
-        let audioSession = AVAudioSession()
+        let audioSession = MockAVAudioSession()
 
         try subject.callKitActivated(audioSession)
 
@@ -253,7 +253,7 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPolicy.timesCalled(.configuration), 2)
     }
 
-    func test_callKitActivated_providedAudioSessionWasConfiguredCorrectly() async throws {
+    func test_callKitActivated_providedAudioSessionSetCategoryWasCalledCorrectly() async throws {
         let mockPolicy = MockAudioSessionPolicy()
         mockPolicy.stub(
             for: .configuration,
@@ -265,13 +265,48 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
             )
         )
         try await subject.didUpdatePolicy(mockPolicy)
-        let audioSession: AVAudioSession = AVAudioSession()
+        let audioSession = MockAVAudioSession()
 
         try subject.callKitActivated(audioSession)
 
-        XCTAssertEqual(audioSession.category, .playAndRecord)
-        XCTAssertEqual(audioSession.mode, .voiceChat)
-        XCTAssertTrue(audioSession.categoryOptions.contains(.mixWithOthers))
+        let request = try XCTUnwrap(
+            audioSession.recordedInputPayload(
+                (
+                    AVAudioSession.Category,
+                    AVAudioSession.Mode,
+                    AVAudioSession.CategoryOptions
+                ).self,
+                for: .setCategory
+            )?.first
+        )
+        XCTAssertEqual(request.0, .playAndRecord)
+        XCTAssertEqual(request.1, .voiceChat)
+        XCTAssertTrue(request.2.contains(.mixWithOthers))
+    }
+
+    func test_callKitActivated_providedAudioSessionSetOverridePortWasCalledCorrectly() async throws {
+        let mockPolicy = MockAudioSessionPolicy()
+        mockPolicy.stub(
+            for: .configuration,
+            with: AudioSessionConfiguration(
+                category: .playAndRecord,
+                mode: .voiceChat,
+                options: .mixWithOthers,
+                overrideOutputAudioPort: .speaker
+            )
+        )
+        try await subject.didUpdatePolicy(mockPolicy)
+        let audioSession = MockAVAudioSession()
+
+        try subject.callKitActivated(audioSession)
+
+        let request = try XCTUnwrap(
+            audioSession.recordedInputPayload(
+                AVAudioSession.PortOverride.self,
+                for: .setOverrideOutputAudioPort
+            )?.first
+        )
+        XCTAssertEqual(request, .speaker)
     }
 
     // MARK: - Private Helpers

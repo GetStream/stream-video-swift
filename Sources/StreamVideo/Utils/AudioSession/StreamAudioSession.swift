@@ -133,7 +133,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
-    func callKitActivated(_ audioSession: AVAudioSession) throws {
+    func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
         let configuration = policy.configuration(
             for: activeCallSettings,
             ownCapabilities: ownCapabilities
@@ -142,13 +142,13 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         try audioSession.setCategory(
             configuration.category,
             mode: configuration.mode,
-            options: configuration.options
+            with: configuration.options
         )
 
         if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
-            try audioSession.overrideOutputAudioPort(overrideOutputAudioPort)
+            try audioSession.setOverrideOutputAudioPort(overrideOutputAudioPort)
         } else {
-            try audioSession.overrideOutputAudioPort(.none)
+            try audioSession.setOverrideOutputAudioPort(.none)
         }
     }
 
