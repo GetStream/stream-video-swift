@@ -239,6 +239,41 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(StreamAudioSession.currentValue)
     }
 
+    // MARK: - callKitActivated
+
+    func test_callKitActivated_configurationWasCalledOnPolicy() async throws {
+        let mockPolicy = MockAudioSessionPolicy()
+        try await subject.didUpdatePolicy(mockPolicy)
+        let audioSession = AVAudioSession()
+
+        try subject.callKitActivated(audioSession)
+
+        // The expected value is 2 as the audioSession will call it once
+        // when we first update the policy.
+        XCTAssertEqual(mockPolicy.timesCalled(.configuration), 2)
+    }
+
+    func test_callKitActivated_providedAudioSessionWasConfiguredCorrectly() async throws {
+        let mockPolicy = MockAudioSessionPolicy()
+        mockPolicy.stub(
+            for: .configuration,
+            with: AudioSessionConfiguration(
+                category: .playAndRecord,
+                mode: .voiceChat,
+                options: .mixWithOthers,
+                overrideOutputAudioPort: .speaker
+            )
+        )
+        try await subject.didUpdatePolicy(mockPolicy)
+        let audioSession: AVAudioSession = AVAudioSession()
+
+        try subject.callKitActivated(audioSession)
+
+        XCTAssertEqual(audioSession.category, .playAndRecord)
+        XCTAssertEqual(audioSession.mode, .voiceChat)
+        XCTAssertTrue(audioSession.categoryOptions.contains(.mixWithOthers))
+    }
+
     // MARK: - Private Helpers
 
     private func assertConfigurationWasCalledOnPolicy(
