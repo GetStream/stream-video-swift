@@ -645,7 +645,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     @MainActor
-    func test_callParticipantLeft_participantsLeftOnlyOne_callNotEnded() async throws {
+    func test_callParticipantLeft_participantsLeftOnlyOne_callWasEnded() async throws {
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(
@@ -680,6 +680,88 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         call.stub(for: \.state, with: callState)
 
         try await assertRequestTransaction(CXEndCallAction.self) {
+            subject.callParticipantLeft(.dummy(callCid: cid))
+        }
+    }
+
+    @MainActor
+    func test_callParticipantLeft_callIsReconnecting_callNotEnded() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(
+            response: .dummy(
+                call: defaultGetCallResponse.call,
+                duration: "100",
+                members: [],
+                ownCapabilities: []
+            )
+        )
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 2)
+
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
+            )
+        )
+
+        let callState = CallState()
+        callState.reconnectionStatus = .reconnecting
+        callState.participants = [.dummy()]
+        call.stub(for: \.state, with: callState)
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
+            subject.callParticipantLeft(.dummy(callCid: cid))
+        }
+    }
+
+    @MainActor
+    func test_callParticipantLeft_callIsMigrating_callNotEnded() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(
+            response: .dummy(
+                call: defaultGetCallResponse.call,
+                duration: "100",
+                members: [],
+                ownCapabilities: []
+            )
+        )
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 2)
+
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
+            )
+        )
+
+        let callState = CallState()
+        callState.reconnectionStatus = .migrating
+        callState.participants = [.dummy()]
+        call.stub(for: \.state, with: callState)
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
             subject.callParticipantLeft(.dummy(callCid: cid))
         }
     }

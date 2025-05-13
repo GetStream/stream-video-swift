@@ -290,8 +290,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         /// We listen for the event so in the case we are the only ones remaining
         /// in the call, we leave.
         Task { @MainActor in
-            if let call = callEntry(for: response.callCid)?.call,
-               call.state.participants.count == 1 {
+            if
+                let call = callEntry(for: response.callCid)?.call,
+                /// We should be processing `participantLeftEvent` when the call is in the
+                /// `.connected` state **only**.
+                /// In the scenario where our user reconnects, we are going to receive the `participantLeft`
+                /// for our participant and - wrongly - will try to process it.
+                call.state.reconnectionStatus == .connected,
+                call.state.participants.count == 1 {
                 callEnded(response.callCid)
             }
         }

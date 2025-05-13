@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Fix an issue where while reconnecting, `CallKitService` would leave the call after received the `Coordinator.participant_left` event. [#811](https://github.com/GetStream/stream-video-swift/pull/811)
 
 # [1.22.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.22.2)
 _May 13, 2025_
