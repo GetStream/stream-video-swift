@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import CallKit
 import Foundation
 @testable import StreamVideo
@@ -349,6 +350,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(callSettings, customCallSettings)
         case .updateTrackSize:
             XCTFail()
+        case .callKitActivated:
+            XCTFail()
         }
     }
 
@@ -412,6 +415,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         case let .join(_, _, _, _, callSettings):
             XCTAssertEqual(callSettings, customCallSettings)
         case .updateTrackSize:
+            XCTFail()
+        case .callKitActivated:
             XCTFail()
         }
         XCTAssertEqual(call.microphone.status, .enabled)
@@ -677,6 +682,41 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         try await assertRequestTransaction(CXEndCallAction.self) {
             subject.callParticipantLeft(.dummy(callCid: cid))
         }
+    }
+
+    // MARK: - didActivate
+
+    @MainActor
+    func test_didActivate_audioSessionWasConfiguredCorrectly() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+        // Accept call
+        subject.provider(
+            callProvider,
+            perform: CXAnswerCallAction(
+                call: firstCallUUID
+            )
+        )
+
+        await waitExpectation(timeout: 1)
+        call.state.callSettings = .init(speakerOn: true)
+
+        let audioSession = AVAudioSession.sharedInstance()
+        subject.provider(callProvider, didActivate: audioSession)
+
+        XCTAssertEqual(call.timesCalled(.callKitActivated), 1)
+        XCTAssertTrue(call.recordedInputPayload(AVAudioSession.self, for: .callKitActivated)?.first === audioSession)
     }
 
     // MARK: - Private Helpers

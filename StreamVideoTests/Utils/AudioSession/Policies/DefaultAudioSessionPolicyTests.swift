@@ -67,7 +67,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
                 .allowAirPlay
             ]
         )
-        XCTAssertNil(configuration.overrideOutputAudioPort)
+        XCTAssertNotNil(configuration.overrideOutputAudioPort)
     }
 
     func testConfiguration_WhenVideoCallWithoutSpeakerBackgroundFalse_ReturnsCorrectConfiguration() {
@@ -112,7 +112,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
                 .allowAirPlay
             ]
         )
-        XCTAssertNil(configuration.overrideOutputAudioPort)
+        XCTAssertNotNil(configuration.overrideOutputAudioPort)
     }
 
     // MARK: - AudioCall
@@ -160,7 +160,7 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
                 .allowAirPlay
             ]
         )
-        XCTAssertNil(configuration.overrideOutputAudioPort)
+        XCTAssertNotNil(configuration.overrideOutputAudioPort)
     }
 
     func testConfiguration_WhenAudioCallWithoutSpeakerBackgroundFalse_ReturnsCorrectConfiguration() {
@@ -206,6 +206,6 @@ final class DefaultAudioSessionPolicyTests: XCTestCase, @unchecked Sendable {
                 .allowAirPlay
             ]
         )
-        XCTAssertNil(configuration.overrideOutputAudioPort)
+        XCTAssertNotNil(configuration.overrideOutputAudioPort)
     }
 }
