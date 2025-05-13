@@ -327,6 +327,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             """,
             subsystems: .callKit
         )
+
+        if
+            let active,
+            let call = callEntry(for: active)?.call {
+            do {
+                try call.callKitActivated(audioSession)
+            } catch {
+                log.error(error, subsystems: .callKit)
+            }
+        }
     }
 
     public func provider(
