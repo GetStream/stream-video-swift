@@ -32,7 +32,9 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
                     speakerOn: callSettings.speakerOn,
                     appIsInForeground: false
                 ),
-                overrideOutputAudioPort: nil
+                overrideOutputAudioPort: callSettings.speakerOn
+                    ? .speaker
+                    : AVAudioSession.PortOverride.none
             )
         }
 
