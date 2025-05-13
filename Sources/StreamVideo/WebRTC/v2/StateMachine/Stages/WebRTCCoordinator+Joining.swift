@@ -319,7 +319,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             // We create an event bucket in which we collect all SFU events
             // that will be received until the moment our PeerConnections have
             // been setup.
-            let subscriberEventBucket = FlushableBucket(
+            let subscriberEventBucket = ConsumableBucket(
                 sfuAdapter
                     .publisher
                     .eraseToAnyPublisher()

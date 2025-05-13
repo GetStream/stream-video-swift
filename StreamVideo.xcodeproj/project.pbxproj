@@ -109,8 +109,8 @@
 		40245F672BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F662BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift */; };
 		40245F692BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */; };
 		402778832BD13C62002F4399 /* NoiseCancellationFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */; };
-		4028FE982DC4F638001F9DC3 /* FlushableBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE972DC4F638001F9DC3 /* FlushableBucket.swift */; };
-		4028FE9A2DC4FC8E001F9DC3 /* FlushableBucketItemTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE992DC4FC8E001F9DC3 /* FlushableBucketItemTransformer.swift */; };
+		4028FE982DC4F638001F9DC3 /* ConsumableBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE972DC4F638001F9DC3 /* ConsumableBucket.swift */; };
+		4028FE9A2DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE992DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift */; };
 		4028FE9C2DC4FCB8001F9DC3 /* WebRTCEncoderStatsItemTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE9B2DC4FCB8001F9DC3 /* WebRTCEncoderStatsItemTransformer.swift */; };
 		4028FE9E2DC500D3001F9DC3 /* WebRTCDecoderStatsItemTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FE9D2DC500D3001F9DC3 /* WebRTCDecoderStatsItemTransformer.swift */; };
 		4028FEA12DC50293001F9DC3 /* WebRTCStatsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4028FEA02DC50293001F9DC3 /* WebRTCStatsCollector.swift */; };
@@ -1690,8 +1690,8 @@
 		40245F662BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessSpeakerIconView_Tests.swift; sourceTree = "<group>"; };
 		40245F682BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessParticipantsListButton_Tests.swift; sourceTree = "<group>"; };
 		402778822BD13C62002F4399 /* NoiseCancellationFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseCancellationFilter.swift; sourceTree = "<group>"; };
-		4028FE972DC4F638001F9DC3 /* FlushableBucket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlushableBucket.swift; sourceTree = "<group>"; };
-		4028FE992DC4FC8E001F9DC3 /* FlushableBucketItemTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlushableBucketItemTransformer.swift; sourceTree = "<group>"; };
+		4028FE972DC4F638001F9DC3 /* ConsumableBucket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumableBucket.swift; sourceTree = "<group>"; };
+		4028FE992DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumableBucketItemTransformer.swift; sourceTree = "<group>"; };
 		4028FE9B2DC4FCB8001F9DC3 /* WebRTCEncoderStatsItemTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCEncoderStatsItemTransformer.swift; sourceTree = "<group>"; };
 		4028FE9D2DC500D3001F9DC3 /* WebRTCDecoderStatsItemTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCDecoderStatsItemTransformer.swift; sourceTree = "<group>"; };
 		4028FEA02DC50293001F9DC3 /* WebRTCStatsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsCollector.swift; sourceTree = "<group>"; };
@@ -3191,13 +3191,13 @@
 			path = Filters;
 			sourceTree = "<group>";
 		};
-		4028FE962DC4F62A001F9DC3 /* FlushableBucket */ = {
+		4028FE962DC4F62A001F9DC3 /* ConsumableBucket */ = {
 			isa = PBXGroup;
 			children = (
-				4028FE992DC4FC8E001F9DC3 /* FlushableBucketItemTransformer.swift */,
-				4028FE972DC4F638001F9DC3 /* FlushableBucket.swift */,
+				4028FE992DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift */,
+				4028FE972DC4F638001F9DC3 /* ConsumableBucket.swift */,
 			);
-			path = FlushableBucket;
+			path = ConsumableBucket;
 			sourceTree = "<group>";
 		};
 		4028FE9F2DC5027E001F9DC3 /* Collector */ = {
@@ -3823,14 +3823,6 @@
 				40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */,
 			);
 			path = Protocols;
-			sourceTree = "<group>";
-		};
-		4077269F2DCCA40F00C33244 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				4028FE922DC4DAF1001F9DC3 /* Combine+Sendable.swift */,
-			);
-			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		408679F52BD12EFC00D027E0 /* AudioFilter */ = {
@@ -5934,7 +5926,7 @@
 			isa = PBXGroup;
 			children = (
 				4028FEA72DC536BB001F9DC3 /* AnyEncodable.swift */,
-				4028FE962DC4F62A001F9DC3 /* FlushableBucket */,
+				4028FE962DC4F62A001F9DC3 /* ConsumableBucket */,
 				40AD64C32DC269E60077AE15 /* Proximity */,
 				40FF825B2D63523C0029AA80 /* Sorting */,
 				403A4FE92D660E3E00ECD46A /* Swift6Migration */,
@@ -7404,7 +7396,7 @@
 				40E363492D09F6BB0028C52A /* StreamVideoCapturer.swift in Sources */,
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,
 				84DC38DD29ADFCFD00946713 /* Models.swift in Sources */,
-				4028FE9A2DC4FC8E001F9DC3 /* FlushableBucketItemTransformer.swift in Sources */,
+				4028FE9A2DC4FC8E001F9DC3 /* ConsumableBucketItemTransformer.swift in Sources */,
 				842D3B5F29F6D3720051698A /* DeviceData.swift in Sources */,
 				842E70D02B91BE1700D2D68B /* ClosedCaptionEvent.swift in Sources */,
 				40E3632E2D09DBFA0028C52A /* Int+DefaultValues.swift in Sources */,
@@ -7594,7 +7586,7 @@
 				848CCCE62AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift in Sources */,
 				40FB8FF62D661DC400F4390A /* Call+Identifiable.swift in Sources */,
 				4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */,
-				4028FE982DC4F638001F9DC3 /* FlushableBucket.swift in Sources */,
+				4028FE982DC4F638001F9DC3 /* ConsumableBucket.swift in Sources */,
 				4097B3832BF4E37B0057992D /* OnChangeViewModifier_iOS13.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
 				40E741FA2D54E6F40044C955 /* RTCAudioSessionDelegatePublisher.swift in Sources */,

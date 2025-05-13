@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-final class WebRTCDecoderStatsItemTransformer: FlushableBucketItemTransformer {
+final class WebRTCDecoderStatsItemTransformer: ConsumableBucketItemTransformer {
 
     private var previousOutput: Stream_Video_Sfu_Models_PerformanceStats?
 

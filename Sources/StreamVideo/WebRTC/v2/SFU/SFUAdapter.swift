@@ -279,7 +279,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     ///   - bucket: The `SFUEventBucket` from which to consume events.
     func consume<EventType>(
         _ eventType: EventType.Type,
-        bucket: FlushableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>
+        bucket: ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>
     ) {
         let events = bucket
             .consume(flush: true)

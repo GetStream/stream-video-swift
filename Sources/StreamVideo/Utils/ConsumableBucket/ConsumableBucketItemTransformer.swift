@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol FlushableBucketItemTransformer {
+protocol ConsumableBucketItemTransformer {
 
     associatedtype Input
     associatedtype Output

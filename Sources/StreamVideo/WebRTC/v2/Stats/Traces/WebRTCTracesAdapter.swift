@@ -52,10 +52,10 @@ final class WebRTCTracesAdapter: @unchecked Sendable {
 
     var audioSession: StreamAudioSession?
 
-    private let peerConnectionBucket: FlushableBucket<WebRTCTrace>
-    private var sfuRequestsBucket: FlushableBucket<WebRTCTrace>
-    private let encoderStatsBucket: FlushableBucket<[Stream_Video_Sfu_Models_PerformanceStats]>
-    private let decoderStatsBucket: FlushableBucket<[Stream_Video_Sfu_Models_PerformanceStats]>
+    private let peerConnectionBucket: ConsumableBucket<WebRTCTrace>
+    private var sfuRequestsBucket: ConsumableBucket<WebRTCTrace>
+    private let encoderStatsBucket: ConsumableBucket<[Stream_Video_Sfu_Models_PerformanceStats]>
+    private let decoderStatsBucket: ConsumableBucket<[Stream_Video_Sfu_Models_PerformanceStats]>
 
     private let disposableBag = DisposableBag()
 

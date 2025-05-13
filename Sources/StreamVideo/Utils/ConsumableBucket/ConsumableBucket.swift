@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-final class FlushableBucket<Element> {
+final class ConsumableBucket<Element> {
 
     enum BucketType {
         case onDemand
@@ -17,7 +17,7 @@ final class FlushableBucket<Element> {
     private var items: [Element] = []
     private var cancellable: AnyCancellable?
 
-    convenience init<Source, Transformer: FlushableBucketItemTransformer>(
+    convenience init<Source, Transformer: ConsumableBucketItemTransformer>(
         _ source: AnyPublisher<Source, Never>,
         transformer: Transformer
     ) where Transformer.Input == Source, Transformer.Output == Element {
@@ -30,7 +30,7 @@ final class FlushableBucket<Element> {
         )
     }
 
-    convenience init<Source: Equatable, Transformer: FlushableBucketItemTransformer>(
+    convenience init<Source: Equatable, Transformer: ConsumableBucketItemTransformer>(
         _ source: AnyPublisher<Source, Never>,
         transformer: Transformer,
         removeDuplicates: Bool
