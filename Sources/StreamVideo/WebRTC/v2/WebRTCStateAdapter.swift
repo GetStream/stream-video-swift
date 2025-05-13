@@ -344,9 +344,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         set(statsAdapter: nil)
         set(token: "")
         trackStorage.removeAll()
-        audioTracks = [:]
-        videoTracks = [:]
-        screenShareTracks = [:]
 
         /// We set the initialCallSettings to the last activated CallSettings, in order to maintain the state
         /// during reconnects.

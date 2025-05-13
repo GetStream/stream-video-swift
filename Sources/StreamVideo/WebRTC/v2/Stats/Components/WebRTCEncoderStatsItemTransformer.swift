@@ -59,6 +59,7 @@ final class WebRTCEncoderStatsItemTransformer: FlushableBucketItemTransformer {
             item.avgFps = Float(deltaFramesSent)
             item.videoDimension.width = UInt32(processingUnit.frameWidth)
             item.videoDimension.height = UInt32(processingUnit.frameHeight)
+            item.targetBitrate = Int32(processingUnit.targetBitrate)
 
             result.append(item)
         }
@@ -90,6 +91,7 @@ extension WebRTCEncoderStatsItemTransformer {
         var frameHeight: Int
         var frameWidth: Int
         var mediaSourceId: String
+        var targetBitrate: Int
 
         init(_ source: RTCStatistics) {
             codecId = source.values["codecId"] as? String ?? ""
@@ -101,6 +103,7 @@ extension WebRTCEncoderStatsItemTransformer {
             frameHeight = source.values["frameHeight"] as? Int ?? 0
             frameWidth = source.values["frameWidth"] as? Int ?? 0
             mediaSourceId = source.values["mediaSourceId"] as? String ?? ""
+            targetBitrate = source.values["targetBitrate"] as? Int ?? 0
         }
     }
 
