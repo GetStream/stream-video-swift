@@ -110,7 +110,8 @@ struct WebRTCJoinRequestFactory {
             )
             result.subscriptions = await buildSubscriptionDetails(
                 nil,
-                coordinator: coordinator,
+                sessionID: await coordinator.stateAdapter.sessionID,
+                participants: Array(await coordinator.stateAdapter.participants.values),
                 incomingVideoQualitySettings: await coordinator
                     .stateAdapter
                     .incomingVideoQualitySettings,
@@ -132,7 +133,8 @@ struct WebRTCJoinRequestFactory {
             result.fromSfuID = fromHostname
             result.subscriptions = await buildSubscriptionDetails(
                 nil,
-                coordinator: coordinator,
+                sessionID: await coordinator.stateAdapter.sessionID,
+                participants: Array(await coordinator.stateAdapter.participants.values),
                 incomingVideoQualitySettings: await coordinator
                     .stateAdapter
                     .incomingVideoQualitySettings,
@@ -153,7 +155,8 @@ struct WebRTCJoinRequestFactory {
             )
             result.subscriptions = await buildSubscriptionDetails(
                 fromSessionID,
-                coordinator: coordinator,
+                sessionID: await coordinator.stateAdapter.sessionID,
+                participants: Array(await coordinator.stateAdapter.participants.values),
                 incomingVideoQualitySettings: await coordinator
                     .stateAdapter
                     .incomingVideoQualitySettings,
@@ -208,14 +211,14 @@ struct WebRTCJoinRequestFactory {
     /// - Returns: An array of track subscription details.
     func buildSubscriptionDetails(
         _ previousSessionID: String?,
-        coordinator: WebRTCCoordinator,
+        sessionID: String,
+        participants: [CallParticipant],
         incomingVideoQualitySettings: IncomingVideoQualitySettings,
         file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
-    ) async -> [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
-        let sessionID = await coordinator.stateAdapter.sessionID
-        return Array(await coordinator.stateAdapter.participants.values)
+    ) -> [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
+        participants
             .filter { $0.id != sessionID && $0.id != previousSessionID }
             .flatMap { $0.trackSubscriptionDetails(incomingVideoQualitySettings: incomingVideoQualitySettings) }
     }
