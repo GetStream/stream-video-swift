@@ -271,6 +271,14 @@ struct Stream_Video_Sfu_Signal_SendStatsRequest {
     set {_uniqueStorage()._decodeStats = newValue}
   }
 
+  /// user_session id can change during reconnects, this helps us to
+  /// identify the user across reconnects and should remain consistent until the user explicitly
+  /// disconnects, is kicked or the call is ended.
+  var unifiedSessionID: String {
+    get {return _storage._unifiedSessionID}
+    set {_uniqueStorage()._unifiedSessionID = newValue}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_DeviceState: Equatable {
@@ -887,6 +895,7 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest: SwiftProtobuf.Message, Swift
     15: .standard(proto: "rtc_stats"),
     16: .standard(proto: "encode_stats"),
     17: .standard(proto: "decode_stats"),
+    18: .standard(proto: "unified_session_id"),
   ]
 
 fileprivate class _StorageClass: @unchecked Sendable {
@@ -906,6 +915,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
     var _rtcStats: String = String()
     var _encodeStats: [Stream_Video_Sfu_Models_PerformanceStats] = []
     var _decodeStats: [Stream_Video_Sfu_Models_PerformanceStats] = []
+    var _unifiedSessionID: String = String()
 
     static let defaultInstance = _StorageClass()
 
@@ -928,6 +938,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
       _rtcStats = source._rtcStats
       _encodeStats = source._encodeStats
       _decodeStats = source._decodeStats
+      _unifiedSessionID = source._unifiedSessionID
     }
   }
 
@@ -987,6 +998,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         case 15: try { try decoder.decodeSingularStringField(value: &_storage._rtcStats) }()
         case 16: try { try decoder.decodeRepeatedMessageField(value: &_storage._encodeStats) }()
         case 17: try { try decoder.decodeRepeatedMessageField(value: &_storage._decodeStats) }()
+        case 18: try { try decoder.decodeSingularStringField(value: &_storage._unifiedSessionID) }()
         default: break
         }
       }
@@ -1055,6 +1067,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
       if !_storage._decodeStats.isEmpty {
         try visitor.visitRepeatedMessageField(value: _storage._decodeStats, fieldNumber: 17)
       }
+      if !_storage._unifiedSessionID.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._unifiedSessionID, fieldNumber: 18)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1080,6 +1095,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         if _storage._rtcStats != rhs_storage._rtcStats {return false}
         if _storage._encodeStats != rhs_storage._encodeStats {return false}
         if _storage._decodeStats != rhs_storage._decodeStats {return false}
+        if _storage._unifiedSessionID != rhs_storage._unifiedSessionID {return false}
         return true
       }
       if !storagesAreEqual {return false}

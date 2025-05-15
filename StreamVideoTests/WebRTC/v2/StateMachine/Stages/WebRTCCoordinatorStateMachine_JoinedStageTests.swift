@@ -221,15 +221,50 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             trigger: { [mockCoordinatorStack] in
                 await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
                     [
-                        sessionId: .dummy(id: sessionId, hasAudio: true),
-                        "0": .dummy(hasAudio: true),
-                        "1": .dummy(hasAudio: true)
+                        sessionId: .dummy(id: sessionId, hasVideo: true),
+                        "0": .dummy(hasVideo: true),
+                        "1": .dummy(hasVideo: true)
                     ]
                 }
             }
         ) { [mockCoordinatorStack] expectation in
             let request = try? XCTUnwrap(mockCoordinatorStack?.sfuStack.service.updateSubscriptionsWasCalledWithRequest)
             XCTAssertEqual(request?.tracks.count, 2)
+            expectation.fulfill()
+        }
+    }
+
+    func test_transition_participantsUpdated_withoutChanges_updateSubscriptionsWasCalledOnSFUOnlyOnce() async throws {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        let sessionId = try await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .$sessionID
+            .filter { !$0.isEmpty }
+            .nextValue()
+        let participantsUpdate: [String: CallParticipant] = [
+            sessionId: .dummy(id: sessionId, hasVideo: true),
+            "0": .dummy(hasVideo: true),
+            "1": .dummy(hasVideo: true)
+        ]
+
+        await assertResultAfterTrigger(
+            trigger: { [mockCoordinatorStack] in
+                await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
+                    participantsUpdate
+                }
+
+                await self.wait(for: 0.5)
+
+                await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
+                    participantsUpdate
+                }
+            }
+        ) { [mockCoordinatorStack] expectation in
+            XCTAssertEqual(mockCoordinatorStack?.sfuStack.service.timesCalled(.updateSubscriptions), 1)
             expectation.fulfill()
         }
     }
@@ -258,9 +293,9 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { [mockCoordinatorStack] in
             await mockCoordinatorStack?.coordinator.stateAdapter.enqueue { _ in
                 [
-                    sessionId: .dummy(id: sessionId, hasAudio: true),
-                    "0": .dummy(hasAudio: true),
-                    "1": .dummy(hasAudio: true)
+                    sessionId: .dummy(id: sessionId, hasVideo: true),
+                    "0": .dummy(hasVideo: true),
+                    "1": .dummy(hasVideo: true)
                 ]
             }
         } validationHandler: { _ in }
@@ -556,7 +591,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             peerType: .publisher,
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
-        nonisolated(unsafe) let subject = PassthroughSubject<Void, Never>()
+        let subject = PassthroughSubject<Void, Never>()
         mockPublisher?.stub(for: \.disconnectedPublisher, with: subject.eraseToAnyPublisher())
         mockCoordinatorStack
             .rtcPeerConnectionCoordinatorFactory
@@ -584,7 +619,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             peerType: .subscriber,
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
-        nonisolated(unsafe) let subject = PassthroughSubject<Void, Never>()
+        let subject = PassthroughSubject<Void, Never>()
         mockSubscriber?.stub(for: \.disconnectedPublisher, with: subject.eraseToAnyPublisher())
         mockCoordinatorStack
             .rtcPeerConnectionCoordinatorFactory

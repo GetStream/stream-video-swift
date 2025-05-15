@@ -68,6 +68,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private let processingQueue = SerialActorQueue()
     private let backgroundMuteAdapter: ApplicationLifecycleVideoMuteAdapter
     private var hasRegisteredPrimaryTrack: Bool = false
+    private var ownCapabilities: [OwnCapability] = []
 
     /// Initializes a new instance of the `LocalVideoMediaAdapter`.
     ///
@@ -150,6 +151,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         ownCapabilities: [OwnCapability]
     ) async throws {
         callSettings = settings
+        self.ownCapabilities = ownCapabilities
 
         guard ownCapabilities.contains(.sendVideo), settings.videoOn else {
             try await videoCaptureSessionProvider.activeSession?.capturer.stopCapture()
@@ -173,7 +175,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ settings: CallSettings
     ) async throws {
         processingQueue.async { [weak self] in
-            guard let self else { return }
+            guard let self, ownCapabilities.contains(.sendVideo) else { return }
             callSettings = settings
             registerPrimaryTrackIfPossible(settings)
 

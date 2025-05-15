@@ -1428,6 +1428,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
+    /// Notifies the `Call` instance that CallKit has activated the system audio
+    /// session.
+    ///
+    /// This method should be called when the system activates the `AVAudioSession`
+    /// as a result of an incoming or outgoing CallKit-managed call. It allows the
+    /// call to update the provided CallKit AVAudioSession based on the internal CallSettings.
+    ///
+    /// - Parameter audioSession: The active `AVAudioSession` instance provided by
+    ///   CallKit.
+    /// - Throws: An error if the call controller fails to handle the activation.
+    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
+        try callController.callKitActivated(audioSession)
+    }
+
     // MARK: - private
 
     private func updatePermissions(

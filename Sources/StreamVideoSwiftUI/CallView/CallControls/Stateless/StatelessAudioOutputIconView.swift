@@ -15,7 +15,7 @@ public struct StatelessAudioOutputIconView: View {
     @Injected(\.images) private var images
 
     /// The associated call for the audio output icon.
-    public var call: Call?
+    public weak var call: Call?
 
     /// The size of the audio output icon.
     public var size: CGFloat

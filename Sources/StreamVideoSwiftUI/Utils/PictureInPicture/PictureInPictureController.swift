@@ -43,6 +43,11 @@ final class PictureInPictureController: @unchecked Sendable {
     /// Collection of active subscriptions.
     private var disposableBag = DisposableBag()
 
+    /// Adapter responsible for enforcing the stop of Picture in Picture when
+    /// the application returns to the foreground. It monitors app state and
+    /// PiP activity to ensure PiP is stopped when appropriate.
+    private var enforcedStopAdapter: PictureInPictureEnforcedStopAdapter?
+
     // MARK: - Lifecycle
 
     /// Creates a new Picture-in-Picture controller.
@@ -65,21 +70,30 @@ final class PictureInPictureController: @unchecked Sendable {
             .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
             .store(in: disposableBag)
 
-        // Add delay to prevent premature cancellation
-        applicationStateAdapter
-            .statePublisher
-            .filter { $0 == .foreground }
-            .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.pictureInPictureController?.stopPictureInPicture() }
+        proxyDelegate
+            .publisher
+            .compactMap {
+                switch $0 {
+                case let .failedToStart(_, error):
+                    return error
+                default:
+                    return nil
+                }
+            }
+            .log(.error, subsystems: .pictureInPicture) { "Picture-in-Picture failed to start: \($0)." }
+            .sink { _ in }
             .store(in: disposableBag)
     }
 
     /// Updates the Picture-in-Picture controller when the source view changes.
     @MainActor
     private func didUpdate(_ sourceView: UIView?) {
-        guard let sourceView else {
+        guard let sourceView, store.state.call != nil else {
+            /// We ensure to cleanUp every Picture-in-Picture interacting component so that the next
+            /// Call will start with clean state.
+            pictureInPictureController?.stopPictureInPicture()
             pictureInPictureController?.contentSource = nil
+            contentViewController = nil
             pictureInPictureController = nil
             disposableBag.remove(DisposableKey.isPossible.rawValue)
             disposableBag.remove(DisposableKey.isActive.rawValue)
@@ -96,16 +110,27 @@ final class PictureInPictureController: @unchecked Sendable {
         guard let contentViewController else {
             return
         }
-
-        pictureInPictureController = .init(
-            contentSource: .init(
-                activeVideoCallSourceView: sourceView,
-                contentViewController: contentViewController
-            )
+        let contentSource = AVPictureInPictureController.ContentSource(
+            activeVideoCallSourceView: sourceView,
+            contentViewController: contentViewController
         )
-        pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = store.state
-            .canStartPictureInPictureAutomaticallyFromInline
-        pictureInPictureController?.delegate = proxyDelegate
+
+        if pictureInPictureController == nil {
+            pictureInPictureController = .init(
+                contentSource: contentSource
+            )
+            pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = store
+                .state
+                .canStartPictureInPictureAutomaticallyFromInline
+            pictureInPictureController?.delegate = proxyDelegate
+        } else {
+            pictureInPictureController?.contentSource = contentSource
+        }
+
+        log.debug(
+            "SourceView updated and contentViewController preferredContentSize:\(contentViewController.preferredContentSize)",
+            subsystems: .pictureInPicture
+        )
     }
 
     /// Updates the content view controller when the view factory changes.
@@ -135,8 +160,11 @@ final class PictureInPictureController: @unchecked Sendable {
                 .sink { [weak self] in self?.store.dispatch(.setActive($0)) }
                 .store(in: disposableBag, key: DisposableKey.isActive.rawValue)
 
+            enforcedStopAdapter = .init(pictureInPictureController)
+
             log.debug("Controller has been configured.", subsystems: .pictureInPicture)
         } else {
+            enforcedStopAdapter = nil
             disposableBag.remove(DisposableKey.isPossible.rawValue)
             disposableBag.remove(DisposableKey.isActive.rawValue)
             log.debug("Controller has been released.", subsystems: .pictureInPicture)

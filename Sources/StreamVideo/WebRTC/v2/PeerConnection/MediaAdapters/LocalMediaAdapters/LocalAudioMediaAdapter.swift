@@ -50,6 +50,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     let subject: PassthroughSubject<TrackEvent, Never>
 
     private var hasRegisteredPrimaryTrack: Bool = false
+    private var ownCapabilities: [OwnCapability] = []
 
     /// Initializes a new instance of `LocalAudioMediaAdapter`.
     ///
@@ -111,6 +112,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
+        self.ownCapabilities = ownCapabilities
         guard ownCapabilities.contains(.sendAudio), settings.audioOn else {
             return
         }
@@ -196,7 +198,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         _ settings: CallSettings
     ) async throws {
         processingQueue.async { [weak self] in
-            guard let self else { return }
+            guard let self, ownCapabilities.contains(.sendAudio) else { return }
             registerPrimaryTrackIfPossible(settings)
 
             guard lastUpdatedCallSettings != settings.audio else { return }

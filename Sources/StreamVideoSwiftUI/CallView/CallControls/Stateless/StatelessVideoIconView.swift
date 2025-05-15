@@ -15,7 +15,7 @@ public struct StatelessVideoIconView: View {
     @Injected(\.images) private var images
 
     /// The associated call for the video icon.
-    public var call: Call?
+    public weak var call: Call?
 
     /// The size of the video icon.
     public var size: CGFloat

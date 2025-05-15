@@ -5,10 +5,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### ✅ Added
+- `CallViewController` was updated to accept the `video` flag when starting a call. [#811](https://github.com/GetStream/stream-video-swift/pull/811)
+
+# [1.22.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.22.2)
+_May 13, 2025_
+
+### 🐞 Fixed
+- Fix an issue that was causing CallSettings misalignment during reconnection [#810](https://github.com/GetStream/stream-video-swift/pull/810)
+- Synchronize CallKit audioSession with the audioSession in the app. [#807](https://github.com/GetStream/stream-video-swift/pull/807)
+
+# [1.22.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.22.1)
+_May 08, 2025_
+
+### 🐞 Fixed
+- Fix an issue that when the app was becoming active from the application switcher, Picture-in-Picture wasn't stopped. [#803](https://github.com/GetStream/stream-video-swift/pull/803)
+
+### 🔄 Changed
+- Update OutgoingCallView to get updates from ringing call [#798](https://github.com/GetStream/stream-video-swift/pull/798)
+
+# [1.22.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.22.0)
+_May 05, 2025_
+
+### ✅ Added
 - You can now configure policies based on the the device's proximity information. Those policies can be used to toggle speaker and video. [#770](https://github.com/GetStream/stream-video-swift/pull/770)
 
 ### 🐞 Fixed
 - Fix ringing flow issues. [#792](https://github.com/GetStream/stream-video-swift/pull/792)
+- Fix a few points that were negatively affecting Picture-in-Picture lifecycle. [#796](https://github.com/GetStream/stream-video-swift/pull/796)
 
 # [1.21.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.21.1)
 _April 25, 2025_
