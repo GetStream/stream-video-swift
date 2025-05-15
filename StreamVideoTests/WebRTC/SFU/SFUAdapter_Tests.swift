@@ -155,14 +155,17 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     func test_sendStats_withoutThermalState_serviceWasCalledWithCorrectRequest() async throws {
         mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
+        let unifiedSessionId = String.unique
 
         try await subject.sendStats(
             .dummy(),
-            for: sessionID
+            for: sessionID,
+            unifiedSessionId: unifiedSessionId
         )
 
         let request = try XCTUnwrap(mockService.sendStatsWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionID)
+        XCTAssertEqual(request.unifiedSessionID, unifiedSessionId)
         XCTAssertEqual(request.sdk, "stream-ios")
         XCTAssertEqual(request.sdkVersion, SystemEnvironment.version)
         XCTAssertEqual(request.webrtcVersion, SystemEnvironment.webRTCVersion)
@@ -172,15 +175,18 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
     func test_sendStats_withThermalState_serviceWasCalledWithCorrectRequest() async throws {
         mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
+        let unifiedSessionId = String.unique
 
         try await subject.sendStats(
             .dummy(),
             for: sessionID,
+            unifiedSessionId: unifiedSessionId,
             thermalState: .critical
         )
 
         let request = try XCTUnwrap(mockService.sendStatsWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionID)
+        XCTAssertEqual(request.unifiedSessionID, unifiedSessionId)
         XCTAssertEqual(request.sdk, "stream-ios")
         XCTAssertEqual(request.sdkVersion, SystemEnvironment.version)
         XCTAssertEqual(request.webrtcVersion, SystemEnvironment.webRTCVersion)
