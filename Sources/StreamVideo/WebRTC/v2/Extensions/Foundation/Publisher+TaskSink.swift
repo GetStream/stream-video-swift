@@ -87,12 +87,13 @@ extension Publisher where Output: Sendable {
                 // Skip processing if the queue is unavailable.
                 return
             }
+            let capturedInput = input
             // Schedule the task on the provided serial actor queue.
             queue.async {
                 do {
                     // Check for task cancellation and process the value.
                     try Task.checkCancellation()
-                    try await receiveValue(input)
+                    try await receiveValue(capturedInput)
                 } catch let error as Failure {
                     // Handle specific failure cases.
                     receiveCompletion(.failure(error))
