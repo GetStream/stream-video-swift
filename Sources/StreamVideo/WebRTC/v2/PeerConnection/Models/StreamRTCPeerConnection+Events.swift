@@ -7,6 +7,9 @@ import StreamWebRTC
 
 extension StreamRTCPeerConnection {
     /// Indicates that a remote description has been set.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct HasRemoteDescription: RTCPeerConnectionEvent, Encodable {
         var sessionDescription: RTCSessionDescription
 
@@ -15,16 +18,23 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that the peer connection should negotiate.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
     struct ShouldNegotiateEvent: RTCPeerConnectionEvent {
         var traceTag: String { "shouldNegotiate" }
     }
 
     /// Indicates that an ICE restart has occurred.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
     struct ICERestartEvent: RTCPeerConnectionEvent {
         var traceTag: String { "ICERestart" }
     }
 
     /// Indicates a change in the signaling state.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct SignalingStateChangedEvent: RTCPeerConnectionEvent, Encodable {
         let state: RTCSignalingState
 
@@ -33,6 +43,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that a media stream has been added.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct AddedStreamEvent: RTCPeerConnectionEvent, Encodable {
         let stream: RTCMediaStream
 
@@ -41,6 +54,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that a media stream has been removed.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct RemovedStreamEvent: RTCPeerConnectionEvent, Encodable {
         let stream: RTCMediaStream
 
@@ -49,6 +65,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that an RTP receiver has been added.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct AddedReceiverEvent: RTCPeerConnectionEvent, Encodable {
         let receiver: RTCRtpReceiver
         let streams: [RTCMediaStream]
@@ -58,6 +77,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that an RTP receiver has been removed.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct RemovedReceiverEvent: RTCPeerConnectionEvent, Encodable {
         let receiver: RTCRtpReceiver
 
@@ -66,6 +88,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in the peer connection state.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct PeerConnectionStateChangedEvent: RTCPeerConnectionEvent, Encodable {
         let state: RTCPeerConnectionState
 
@@ -74,6 +99,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in the ICE connection state.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct ICEConnectionChangedEvent: RTCPeerConnectionEvent, Encodable {
         let state: RTCIceConnectionState
 
@@ -82,6 +110,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in the ICE gathering state.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct ICEGatheringChangedEvent: RTCPeerConnectionEvent, Encodable {
         let state: RTCIceGatheringState
 
@@ -90,6 +121,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that ICE candidates have been removed.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct ICECandidatesRemovedEvent: RTCPeerConnectionEvent, Encodable {
         let candidates: [RTCIceCandidate]
 
@@ -98,6 +132,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a failure in gathering an ICE candidate.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct ICECandidateFailedToGatherEvent: RTCPeerConnectionEvent, Encodable {
         let errorEvent: RTCIceCandidateErrorEvent
 
@@ -106,6 +143,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in the standardized ICE connection state.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidChangeStandardizedICEConnectionStateEvent: RTCPeerConnectionEvent, Encodable {
         let state: RTCIceConnectionState
 
@@ -114,6 +154,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that a data channel has been opened.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidOpenDataChannelEvent: RTCPeerConnectionEvent, Encodable {
         let dataChannel: RTCDataChannel
 
@@ -122,6 +165,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in the connection state.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidChangeConnectionStateEvent: RTCPeerConnectionEvent, Encodable {
         let state: RTCPeerConnectionState
 
@@ -130,6 +176,8 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that a transceiver has started receiving.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
     struct DidStartReceivingOnTransceiverEvent: RTCPeerConnectionEvent {
         let transceiver: RTCRtpTransceiver
 
@@ -137,6 +185,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that an RTP receiver has been added.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidAddReceiverEvent: RTCPeerConnectionEvent, Encodable {
         let receiver: RTCRtpReceiver
         let streams: [RTCMediaStream]
@@ -146,6 +197,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that an RTP receiver has been removed.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidRemoveReceiverEvent: RTCPeerConnectionEvent, Encodable {
         let receiver: RTCRtpReceiver
 
@@ -154,6 +208,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in the local ICE candidate.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidChangeLocalCandidateEvent: RTCPeerConnectionEvent, Encodable {
         let candidate: RTCIceCandidate
 
@@ -162,6 +219,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in the remote ICE candidate.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidChangeRemoteCandidateEvent: RTCPeerConnectionEvent, Encodable {
         let candidate: RTCIceCandidate
 
@@ -170,6 +230,8 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in a transceiver.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
     struct DidChangeEvent: RTCPeerConnectionEvent {
         let transceiver: RTCRtpTransceiver
 
@@ -177,6 +239,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that an ICE candidate has been generated.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidGenerateICECandidateEvent: RTCPeerConnectionEvent, Encodable {
         let candidate: RTCIceCandidate
 
@@ -185,6 +250,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates that ICE candidates have been removed.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidRemoveICECandidatesEvent: RTCPeerConnectionEvent, Encodable {
         let candidates: [RTCIceCandidate]
 
@@ -193,6 +261,9 @@ extension StreamRTCPeerConnection {
     }
 
     /// Indicates a change in both local and remote ICE candidates.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct DidChangeLocalCandidateWithRemoteEvent: RTCPeerConnectionEvent, Encodable {
         let localCandidate: RTCIceCandidate
         let remoteCandidate: RTCIceCandidate
@@ -203,6 +274,10 @@ extension StreamRTCPeerConnection {
         var traceData: AnyEncodable { .init(self) }
     }
 
+    /// Indicates that the peer connection has been created.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct CreatedEvent: RTCPeerConnectionEvent, Encodable {
         var configuration: RTCConfiguration
         var hostname: String
@@ -215,6 +290,10 @@ extension StreamRTCPeerConnection {
         }
     }
 
+    /// Indicates that an offer has been created.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct CreateOfferEvent: RTCPeerConnectionEvent, Encodable {
         var sessionDescription: RTCSessionDescription
 
@@ -222,6 +301,10 @@ extension StreamRTCPeerConnection {
         var traceData: AnyEncodable { .init(sessionDescription) }
     }
 
+    /// Indicates that an answer has been created.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct CreateAnswerEvent: RTCPeerConnectionEvent, Encodable {
         var sessionDescription: RTCSessionDescription
 
@@ -229,6 +312,10 @@ extension StreamRTCPeerConnection {
         var traceData: AnyEncodable { .init(sessionDescription) }
     }
 
+    /// Indicates that the local description has been set.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct SetLocalDescriptionEvent: RTCPeerConnectionEvent, Encodable {
         var sessionDescription: RTCSessionDescription
 
@@ -236,6 +323,10 @@ extension StreamRTCPeerConnection {
         var traceData: AnyEncodable { .init(sessionDescription) }
     }
 
+    /// Indicates that the remote description has been set.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
+    /// - traceData: The encoded data associated with this event.
     struct SetRemoteDescriptionEvent: RTCPeerConnectionEvent, Encodable {
         var sessionDescription: RTCSessionDescription
 
@@ -243,10 +334,16 @@ extension StreamRTCPeerConnection {
         var traceData: AnyEncodable { .init(sessionDescription) }
     }
 
+    /// Indicates that the peer connection has been closed.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
     struct CloseEvent: RTCPeerConnectionEvent, Encodable {
         var traceTag: String { "close" }
     }
 
+    /// Indicates that the ICE restart process has been initiated.
+    ///
+    /// - traceTag: A unique string identifier used in tracing.
     struct RestartICEEvent: RTCPeerConnectionEvent, Encodable {
         var traceTag: String { "restartICE" }
     }

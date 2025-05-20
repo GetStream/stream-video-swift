@@ -65,6 +65,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     /// The hostname of the SFU service.
     var hostname: String { signalService.hostname }
 
+    /// The host of the SFU service.
     var host: String {
         URL(string: signalService.hostname)?.host ?? signalService.hostname
     }

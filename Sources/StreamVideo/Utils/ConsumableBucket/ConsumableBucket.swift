@@ -5,10 +5,18 @@
 import Combine
 import Foundation
 
-final class ConsumableBucket<Element> {
+/// A thread-safe buffer that collects items for later consumption.
+///
+/// Supports on-demand appending or reactive observation from a
+/// publisher source. Items can be consumed in batch, with optional
+/// flushing of the internal buffer.
+final class ConsumableBucket<Element>: @unchecked Sendable {
 
+    /// Represents the type of bucket: on-demand or publisher-driven.
     enum BucketType {
+        /// A manually managed bucket where items are appended directly.
         case onDemand
+        /// A bucket that observes and collects items from a publisher.
         case observer(AnyPublisher<Element, Never>)
     }
 
@@ -17,6 +25,11 @@ final class ConsumableBucket<Element> {
     private var items: [Element] = []
     private var cancellable: AnyCancellable?
 
+    /// Initializes the bucket with a transformed publisher source.
+    ///
+    /// - Parameters:
+    ///   - source: A publisher of source values.
+    ///   - transformer: A transformer to map source to bucket elements.
     convenience init<Source, Transformer: ConsumableBucketItemTransformer>(
         _ source: AnyPublisher<Source, Never>,
         transformer: Transformer
@@ -30,6 +43,13 @@ final class ConsumableBucket<Element> {
         )
     }
 
+    /// Initializes the bucket with a transformed publisher source and
+    /// optionally removes duplicates.
+    ///
+    /// - Parameters:
+    ///   - source: A publisher of equatable source values.
+    ///   - transformer: A transformer to map source to bucket elements.
+    ///   - removeDuplicates: Whether to remove duplicate values.
     convenience init<Source: Equatable, Transformer: ConsumableBucketItemTransformer>(
         _ source: AnyPublisher<Source, Never>,
         transformer: Transformer,
@@ -49,12 +69,16 @@ final class ConsumableBucket<Element> {
         }
     }
 
+    /// Initializes the bucket with a publisher of bucket elements.
+    ///
+    /// - Parameter source: The publisher emitting elements to store.
     convenience init(
         _ source: AnyPublisher<Element, Never>
     ) {
         self.init(.observer(source))
     }
 
+    /// Initializes the bucket for manual on-demand use.
     convenience init() {
         self.init(.onDemand)
     }
@@ -70,10 +94,17 @@ final class ConsumableBucket<Element> {
         }
     }
 
+    /// Appends a single element to the bucket.
+    ///
+    /// - Parameter element: The item to be appended.
     func append(_ element: Element) {
         queue.sync { [weak self] in self?.items.append(element) }
     }
 
+    /// Returns the items in the bucket.
+    ///
+    /// - Parameter flush: Whether to clear the buffer after returning.
+    /// - Returns: An array of stored elements.
     func consume(flush: Bool = false) -> [Element] {
         if flush {
             return queue.sync {
@@ -86,6 +117,11 @@ final class ConsumableBucket<Element> {
         }
     }
 
+    /// Inserts elements at a specific position in the buffer.
+    ///
+    /// - Parameters:
+    ///   - items: The elements to insert.
+    ///   - index: The position at which to insert them.
     func insert(_ items: [Element], at index: Int) {
         guard !items.isEmpty else {
             return
@@ -97,6 +133,9 @@ final class ConsumableBucket<Element> {
 
     // MARK: - Private Helpers
 
+    /// Processes an incoming item from the observed publisher.
+    ///
+    /// - Parameter newItem: The new item to append.
     private func process(_ newItem: Element) {
         queue.sync {
             self.items.append(newItem)

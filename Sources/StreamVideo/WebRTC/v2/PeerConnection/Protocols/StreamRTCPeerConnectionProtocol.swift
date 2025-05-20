@@ -7,6 +7,10 @@ import StreamWebRTC
 
 /// Protocol defining the interface for a WebRTC peer connection with Stream-specific functionality.
 protocol StreamRTCPeerConnectionProtocol: AnyObject, Sendable {
+    /// The configuration used to initialize the peer connection.
+    ///
+    /// Contains settings such as ICE servers, SDP semantics, bundle policy,
+    /// and other connection-related options.
     var configuration: RTCConfiguration { get }
 
     /// The remote session description of the peer connection.

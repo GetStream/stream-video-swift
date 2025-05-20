@@ -19,10 +19,6 @@ extension RTCSessionDescription: @retroactive Encodable {}
 extension RTCConfiguration: @retroactive Encodable {}
 extension RTCIceServer: @retroactive Encodable {}
 extension RTCCryptoOptions: @retroactive Encodable {}
-
-extension RTCDataChannelState: @retroactive CustomStringConvertible {}
-extension RTCBundlePolicy: @retroactive CustomStringConvertible {}
-extension RTCContinualGatheringPolicy: @retroactive CustomStringConvertible {}
 #else
 extension RTCSignalingState: Encodable {}
 extension RTCMediaStream: Encodable {}
@@ -37,10 +33,6 @@ extension RTCSessionDescription: Encodable {}
 extension RTCConfiguration: Encodable {}
 extension RTCIceServer: Encodable {}
 extension RTCCryptoOptions: Encodable {}
-
-extension RTCDataChannelState: CustomStringConvertible {}
-extension RTCBundlePolicy: CustomStringConvertible {}
-extension RTCContinualGatheringPolicy: CustomStringConvertible {}
 #endif
 
 extension RTCSignalingState {

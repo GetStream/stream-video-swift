@@ -11,11 +11,13 @@ struct StreamCallStatisticsReporter {
     ///
     /// - Parameters:
     ///   - publisherReport: A `StreamRTCStatisticsReport` instance containing statistics
-    ///   for the publisher (outbound stream).
+    ///     for the publisher (outbound stream).
     ///   - subscriberReport: A `StreamRTCStatisticsReport` instance containing statistics
-    ///   for the subscriber (inbound stream).
+    ///     for the subscriber (inbound stream).
     ///   - datacenter: A string representing the datacenter where the call is hosted.
-    /// - Returns: A `CallStatsReport` structure containing aggregated statistics and raw data.
+    ///   - trackToKindMap: A dictionary mapping track identifiers to their corresponding
+    ///   `TrackType` (e.g., audio, video).
+    /// - Returns: A `CallStatsReport` structure containing aggregated statistics, raw data, and the track kind mapping.
     func buildReport(
         publisherReport: StreamRTCStatisticsReport,
         subscriberReport: StreamRTCStatisticsReport,

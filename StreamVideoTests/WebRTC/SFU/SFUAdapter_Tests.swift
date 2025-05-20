@@ -27,7 +27,7 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    // MARK: - connect
+    // MARK: - init
 
     func test_init_webSocketDelegateWasSetCorrectly() {
         _ = subject
@@ -45,6 +45,13 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockWebSocket.timesCalled(.connect), 1)
     }
 
+    func test_connect_eventWasPublished() async throws {
+        await assertEventWasPublished(
+            expected: SFUAdapter.ConnectEvent(hostname: mockService.hostname),
+            operation: { subject.connect() }
+        )
+    }
+
     // MARK: - disconnect
 
     func test_disconnect_givenConnectedState_thenCallsWebSocketDisconnect() async {
@@ -56,6 +63,16 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
         // Then
         XCTAssertEqual(mockWebSocket.timesCalled(.disconnectAsync), 1)
+    }
+
+    func test_disconnect_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+
+        await assertEventWasPublished(
+            expected: SFUAdapter.DisconnectEvent(hostname: mockService.hostname),
+            operation: { await subject.disconnect() }
+        )
     }
 
     // MARK: - sendHealthCheck
@@ -150,6 +167,32 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(muteState.muted)
     }
 
+    func test_updateTrackMuteState_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let sessionID = String.unique
+        var payload = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
+        payload.sessionID = sessionID
+        var muteState = Stream_Video_Sfu_Signal_TrackMuteState()
+        muteState.trackType = .audio
+        muteState.muted = true
+        payload.muteStates = [muteState]
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.UpdateTrackMuteStateEvent(
+                hostname: mockService.hostname,
+                payload: payload
+            ),
+            operation: {
+                try await subject.updateTrackMuteState(
+                    .audio,
+                    isMuted: true,
+                    for: sessionID
+                )
+            }
+        )
+    }
+
     // MARK: - sendStats
 
     func test_sendStats_withoutThermalState_serviceWasCalledWithCorrectRequest() async throws {
@@ -207,6 +250,24 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
+    func test_toggleNoiseCancellation_enabled_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let sessionID = String.unique
+        var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
+        request.sessionID = sessionID
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.StartNoiseCancellationEvent(
+                hostname: mockService.hostname,
+                payload: request
+            ),
+            operation: {
+                try await subject.toggleNoiseCancellation(true, for: sessionID)
+            }
+        )
+    }
+
     func test_toggleNoiseCancellation_disabled_serviceWasCalledWithCorrectRequest() async throws {
         mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
         let sessionID = String.unique
@@ -217,6 +278,24 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         // Then
         let request = try XCTUnwrap(mockService.stopNoiseCancellationWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionID)
+    }
+
+    func test_toggleNoiseCancellation_disabled_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let sessionID = String.unique
+        var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
+        request.sessionID = sessionID
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.StopNoiseCancellationEvent(
+                hostname: mockService.hostname,
+                payload: request
+            ),
+            operation: {
+                try await subject.toggleNoiseCancellation(false, for: sessionID)
+            }
+        )
     }
 
     // MARK: - setPublisher
@@ -240,6 +319,31 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.sdp, sessionDescription)
     }
 
+    func test_setPublisher_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let sessionID = String.unique
+        let sessionDescription = String.unique
+        var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
+        request.sdp = sessionDescription
+        request.sessionID = sessionID
+        request.tracks = []
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.SetPublisherEvent(
+                hostname: mockService.hostname,
+                payload: request
+            ),
+            operation: {
+                _ = try await subject.setPublisher(
+                    sessionDescription: sessionDescription,
+                    tracks: [],
+                    for: sessionID
+                )
+            }
+        )
+    }
+
     // MARK: - updateSubscriptions
 
     func test_updateSubscriptions_serviceWasCalledWithCorrectRequest() async throws {
@@ -255,6 +359,27 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         // Then
         let request = try XCTUnwrap(mockService.updateSubscriptionsWasCalledWithRequest)
         XCTAssertEqual(request.sessionID, sessionID)
+    }
+
+    func test_updateSubscriptions_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let sessionID = String.unique
+        var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
+        request.sessionID = sessionID
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.UpdateSubscriptionsEvent(
+                hostname: mockService.hostname,
+                payload: request
+            ),
+            operation: {
+                _ = try await subject.updateSubscriptions(
+                    tracks: [],
+                    for: sessionID
+                )
+            }
+        )
     }
 
     // MARK: - sendAnswer
@@ -277,6 +402,31 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
+    func test_sendAnswer_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let sessionDescription = String.unique
+        let sessionID = String.unique
+        var request = Stream_Video_Sfu_Signal_SendAnswerRequest()
+        request.sessionID = sessionID
+        request.sdp = sessionDescription
+        request.peerType = .subscriber
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.SendAnswerEvent(
+                hostname: mockService.hostname,
+                payload: request
+            ),
+            operation: {
+                _ = try await subject.sendAnswer(
+                    sessionDescription: sessionDescription,
+                    peerType: .subscriber,
+                    for: sessionID
+                )
+            }
+        )
+    }
+
     // MARK: - iCETrickle
 
     func test_iCETrickle_serviceWasCalledWithCorrectRequest() async throws {
@@ -297,6 +447,98 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(request.sessionID, sessionID)
     }
 
+    func test_iCETrickle_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let candidate = String.unique
+        let sessionID = String.unique
+        var request = Stream_Video_Sfu_Models_ICETrickle()
+        request.sessionID = sessionID
+        request.iceCandidate = candidate
+        request.peerType = .subscriber
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.ICETrickleEvent(
+                hostname: mockService.hostname,
+                payload: request
+            ),
+            operation: {
+                _ = try await subject.iCETrickle(
+                    candidate: candidate,
+                    peerType: .subscriber,
+                    for: sessionID
+                )
+            }
+        )
+    }
+
+    // MARK: - restartICE
+
+    func test_restartICE_serviceWasCalledWithCorrectRequest() async throws {
+        let sessionID = String.unique
+
+        // When
+        _ = try await subject.restartICE(
+            for: sessionID,
+            peerType: .subscriber
+        )
+
+        // Then
+        let request = try XCTUnwrap(mockService.iceRestartWasCalledWithRequest)
+        XCTAssertEqual(request.sessionID, sessionID)
+        XCTAssertEqual(request.peerType, .subscriber)
+    }
+
+    func test_restartICE_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        let sessionID = String.unique
+        var request = Stream_Video_Sfu_Signal_ICERestartRequest()
+        request.sessionID = sessionID
+        request.peerType = .subscriber
+
+        try await assertEventWasPublished(
+            expected: SFUAdapter.RestartICEEvent(
+                hostname: mockService.hostname,
+                payload: request
+            ),
+            operation: {
+                _ = try await subject.restartICE(
+                    for: sessionID,
+                    peerType: .subscriber
+                )
+            }
+        )
+    }
+
+    // MARK: - sendJoinRequest
+
+    func test_sendJoinRequest_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        var payload = Stream_Video_Sfu_Event_JoinRequest()
+        payload.sessionID = .unique
+
+        await assertEventWasPublished(
+            expected: SFUAdapter.JoinEvent(hostname: mockService.hostname, payload: payload),
+            operation: { subject.sendJoinRequest(payload) }
+        )
+    }
+
+    // MARK: - sendLeaveRequest
+
+    func test_sendLeaveRequest_eventWasPublished() async throws {
+        _ = subject
+        mockWebSocket.simulate(state: .connected(healthCheckInfo: .init()))
+        var payload = Stream_Video_Sfu_Event_LeaveCallRequest()
+        payload.sessionID = .unique
+
+        await assertEventWasPublished(
+            expected: SFUAdapter.LeaveEvent(hostname: mockService.hostname, payload: payload),
+            operation: { subject.sendLeaveRequest(for: payload.sessionID) }
+        )
+    }
+
     // MARK: - webSocketClient(_:didUpdateConnectionState:)
 
     func test_didUpdateConnectionState_connectionStateWasUpdated() {
@@ -312,5 +554,28 @@ final class SFUAdapterTests: XCTestCase, @unchecked Sendable {
 
             XCTAssertEqual(subject.connectionState, state)
         }
+    }
+
+    // MARK: - Private Helpers
+
+    private func assertEventWasPublished<Event: SFUAdapterEvent & Equatable>(
+        expected: Event,
+        operation: () async throws -> Void,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async rethrows {
+        let expectation = self.expectation(description: "\(type(of: expected)) was not received.")
+
+        let cancellable = subject
+            .publisherSendEvent
+            .compactMap { $0 as? Event }
+            .filter { $0 == expected }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable.cancel() }
+
+        try await operation()
+
+        await safeFulfillment(of: [expectation], file: file, line: line)
     }
 }

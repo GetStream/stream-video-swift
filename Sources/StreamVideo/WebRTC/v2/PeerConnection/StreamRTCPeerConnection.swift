@@ -12,6 +12,10 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// A dictionary groups transceivers based on the type of their carrying track.
     @Atomic private var transceiversMap: [TrackType: [RTCRtpTransceiver]] = [:]
 
+    /// The configuration used to initialize the peer connection.
+    ///
+    /// Contains settings such as ICE servers, SDP semantics, bundle policy,
+    /// and other connection-related options.
     var configuration: RTCConfiguration { source.configuration }
 
     /// The remote session description of the peer connection.

@@ -231,7 +231,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             peerType: .publisher,
             peerConnection: try StreamRTCPeerConnection(
                 peerConnectionFactory,
-                configuration: connectOptions.rtcConfiguration,
+                configuration: connectOptions.rtcConfiguration
             ),
             peerConnectionFactory: peerConnectionFactory,
             videoOptions: videoOptions,

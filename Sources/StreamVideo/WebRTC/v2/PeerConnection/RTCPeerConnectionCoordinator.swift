@@ -61,6 +61,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         didSet { didUpdatePublishOptions(publishOptions) }
     }
 
+    /// The current configuration used by the underlying peer connection.
+    ///
+    /// This includes ICE servers, SDP semantics, and other connection-related
+    /// parameters that define how the peer connection behaves.
     var configuration: RTCConfiguration { peerConnection.configuration }
 
     // MARK: State
