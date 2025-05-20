@@ -11,6 +11,7 @@ import XCTest
 
 final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
+    private nonisolated(unsafe) static var originalCallAudioRecorder: StreamCallAudioRecorder! = StreamCallAudioRecorderKey.currentValue
     private lazy var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
     private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = MockStreamCallAudioRecorder(filename: "test.wav")
@@ -23,11 +24,16 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         await subject.stopListening()
-        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorderKey.currentValue
+        InjectedValues[\.callAudioRecorder] = Self.originalCallAudioRecorder
         mockAudioRecorder = nil
         mockStreamVideo = nil
         subject = nil
         try await super.tearDown()
+    }
+
+    override class func tearDown() {
+        Self.originalCallAudioRecorder = nil
+        super.tearDown()
     }
 
     // MARK: - init
@@ -66,6 +72,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
         let values = try await subject
             .$audioLevels
             .filter { $0 == [0.5, 0.8, 0.0] }
+            .log(.debug) { "Received audioLevels: \($0)" }
             .nextValue(timeout: defaultTimeout)
 
         XCTAssertEqual(values, [0.5, 0.8, 0.0])
