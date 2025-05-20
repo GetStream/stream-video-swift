@@ -26,7 +26,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
         didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) }
     }
 
-    var streamVideo: StreamVideo? {
+    weak var streamVideo: StreamVideo? {
         didSet { didUpdate(streamVideo) }
     }
 

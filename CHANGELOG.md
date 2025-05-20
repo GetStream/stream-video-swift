@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - `CallViewController` was updated to accept the `video` flag when starting a call. [#811](https://github.com/GetStream/stream-video-swift/pull/811)
 
+### 🐞 Fixed
+- Fix a retain cycle that was causing StreamVideo to leak in projects using NoiseCancellation. [#814](https://github.com/GetStream/stream-video-swift/pull/814)
+
 # [1.22.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.22.2)
 _May 13, 2025_
 
