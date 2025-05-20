@@ -159,6 +159,10 @@ The `CallViewController` is created with a `CallViewModel` - the same one used i
 
 At the moment, all the customizations in the UIKit SDK, need to be done in SwiftUI.
 
+## Chat SDK
+
+We also offer [Chat SDK](https://github.com/GetStream/stream-chat-swift) that seamlessly integrates with our Video SDK. To find out more about this product, please check our [docs](https://getstream.io/chat/docs/ios/). 
+
 ## Roadmap
 
 Video roadmap and changelog is available [here](https://github.com/GetStream/protocol/discussions/127).
