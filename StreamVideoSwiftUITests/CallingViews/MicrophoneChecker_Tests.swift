@@ -49,7 +49,6 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - audioLevels
 
     func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async throws {
-        LogConfig.level = .debug
         await subject.startListening()
 
         let inputs = [
