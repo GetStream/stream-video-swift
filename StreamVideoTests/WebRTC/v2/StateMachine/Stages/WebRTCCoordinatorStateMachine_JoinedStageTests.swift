@@ -641,7 +641,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     // MARK: configureStatsCollectionAndDelivery
 
-    func test_transition_sameSessionId_configuresStatsReporter() async throws {
+    func test_transition_sameSessionId_configuresStatsAdapter() async throws {
         let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await stateAdapter.set(sfuAdapter: sfuAdapter)
@@ -653,7 +653,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         let initialStatsAdapter = WebRTCStatsAdapter(
             sessionID: sessionId,
             unifiedSessionID: unifiedSessionId,
-            isTracingEnabled: true
+            isTracingEnabled: true,
+            trackStorage: await stateAdapter.trackStorage
         )
         initialStatsAdapter.deliveryInterval = 12
         await stateAdapter.set(statsAdapter: initialStatsAdapter)
@@ -670,7 +671,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         XCTAssertEqual(newStatsAdapter?.unifiedSessionID, unifiedSessionId)
     }
 
-    func test_transition_differentSessionId_configuresStatsReporter() async throws {
+    func test_transition_differentSessionId_configuresStatsAdapter() async throws {
         let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await stateAdapter.set(sfuAdapter: sfuAdapter)
@@ -681,7 +682,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         let initialStatsAdapter = WebRTCStatsAdapter(
             sessionID: .unique,
             unifiedSessionID: unifiedSessionId,
-            isTracingEnabled: true
+            isTracingEnabled: true,
+            trackStorage: await stateAdapter.trackStorage
         )
         initialStatsAdapter.deliveryInterval = 11
         await stateAdapter.set(statsAdapter: initialStatsAdapter)
@@ -691,7 +693,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
         await fulfillment {
             let newStatsAdapter = await stateAdapter.statsAdapter
-            return newStatsAdapter !== newStatsAdapter && newStatsAdapter?.deliveryInterval == 11
+            return newStatsAdapter !== initialStatsAdapter && newStatsAdapter?.deliveryInterval == 11
         }
         let newStatsAdapter = await stateAdapter.statsAdapter
         XCTAssertEqual(newStatsAdapter?.deliveryInterval, 11)

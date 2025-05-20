@@ -769,7 +769,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                 statsAdapter: .init(
                     sessionID: .unique,
                     unifiedSessionID: .unique,
-                    isTracingEnabled: true
+                    isTracingEnabled: true,
+                    trackStorage: await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.trackStorage
                 )
             )
 

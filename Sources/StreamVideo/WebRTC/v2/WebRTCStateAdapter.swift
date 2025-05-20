@@ -412,6 +412,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         }
     }
 
+    /// Retrieves a track by lookup and track type.
+    ///
+    /// - Parameters:
+    ///   - lookup: The participant trackLookUpPrefix or sessionId for which we want to fetch the track.
+    ///   - trackType: The type of track (audio, video, screenshare).
+    /// - Returns: The associated media stream track, or `nil` if not found.
+    func track(
+        for lookup: String,
+        of trackType: TrackType
+    ) -> RTCMediaStreamTrack? {
+        trackStorage.track(for: lookup, of: trackType)
+    }
+
     // MARK: - Participant Operations
 
     /// Enqueues a participant operation to be executed asynchronously but in serial order for the actor.

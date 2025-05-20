@@ -91,16 +91,19 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         }
     }
 
-    func test_transition_SFUAdapterOnStatsReporterIsNil() async throws {
+    func test_transition_SFUAdapterOnStatsAdapterIsNil() async throws {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
-            statsReporter: WebRTCStatsReporter(
-                sessionID: .unique
+            statsAdapter: WebRTCStatsAdapter(
+                sessionID: .unique,
+                unifiedSessionID: .unique,
+                isTracingEnabled: true,
+                trackStorage: mockCoordinatorStack.coordinator.stateAdapter.trackStorage
             )
         )
 
         await assertTransitionAfterTrigger(trigger: {}) { target in
             await self.assertNilAsync(
-                await target.context.coordinator?.stateAdapter.statsReporter?.sfuAdapter
+                await target.context.coordinator?.stateAdapter.statsAdapter?.sfuAdapter
             )
         }
     }

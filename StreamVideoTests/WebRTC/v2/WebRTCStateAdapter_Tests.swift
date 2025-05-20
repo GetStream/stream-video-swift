@@ -167,24 +167,34 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - setStatsReporter
 
     func test_setStatsReporter_shouldUpdateStatsReporter() async throws {
-        let expected = WebRTCStatsReporter(sessionID: .unique)
+        let expected = WebRTCStatsAdapter(
+            sessionID: .unique,
+            unifiedSessionID: .unique,
+            isTracingEnabled: true,
+            trackStorage: await subject.trackStorage
+        )
 
-        await subject.set(statsReporter: expected)
+        await subject.set(statsAdapter: expected)
 
-        await assertTrueAsync(await subject.statsReporter === expected)
+        await assertTrueAsync(await subject.statsAdapter === expected)
     }
 
     // MARK: - setSFUAdapter
 
     func test_setSFUAdapter_shouldUpdateSFUAdapterAndStatsReporter() async throws {
-        let statsReporter = WebRTCStatsReporter(sessionID: .unique)
-        await subject.set(statsReporter: statsReporter)
+        let statsAdapter = WebRTCStatsAdapter(
+            sessionID: .unique,
+            unifiedSessionID: .unique,
+            isTracingEnabled: true,
+            trackStorage: await subject.trackStorage
+        )
+        await subject.set(statsAdapter: statsAdapter)
         let mockSFUStack = MockSFUStack()
 
         await subject.set(sfuAdapter: mockSFUStack.adapter)
 
         await assertTrueAsync(await subject.sfuAdapter === mockSFUStack.adapter)
-        XCTAssertTrue(statsReporter.sfuAdapter === mockSFUStack.adapter)
+        XCTAssertTrue(statsAdapter.sfuAdapter === mockSFUStack.adapter)
     }
 
     // MARK: - setParticipantsCount
@@ -429,7 +439,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await fulfillment { await self.subject.publisher == nil }
         await assertNilAsync(await subject.publisher)
         await assertNilAsync(await subject.subscriber)
-        await assertNilAsync(await subject.statsReporter)
+        await assertNilAsync(await subject.statsAdapter)
         await assertNilAsync(await subject.sfuAdapter)
         await assertEqualAsync(await subject.token, "")
         await assertEqualAsync(await subject.sessionID, "")
@@ -505,7 +515,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(sfuStack.webSocket.timesCalled(.disconnectAsync), 0)
         await assertNilAsync(await subject.publisher)
         await assertNilAsync(await subject.subscriber)
-        await assertNilAsync(await subject.statsReporter)
+        await assertNilAsync(await subject.statsAdapter)
         await assertNilAsync(await subject.sfuAdapter)
         await assertEqualAsync(await subject.token, "")
         await assertEqualAsync(await subject.sessionID, sessionId)
@@ -889,7 +899,14 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(participantPins: participantPins)
         await subject.enqueue { _ in participants }
         try await subject.configurePeerConnections()
-        await subject.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
+
+        let statsAdapter = WebRTCStatsAdapter(
+            sessionID: .unique,
+            unifiedSessionID: .unique,
+            isTracingEnabled: true,
+            trackStorage: await subject.trackStorage
+        )
+        await subject.set(statsAdapter: statsAdapter)
     }
 }
 
