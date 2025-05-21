@@ -82,6 +82,48 @@ struct MutableRTCStatistics: Codable, Equatable {
         }
     }
 
+    /// Returns the value associated with a type-safe statistics key.
+    ///
+    /// This method extracts the value for the given `TrackStatKey` from the
+    /// underlying statistics dictionary and attempts to cast it to the expected
+    /// generic type `T`.
+    ///
+    /// Example:
+    /// ```
+    /// let val: Int? = stats.value(for: .frameHeight)
+    /// ```
+    ///
+    /// - Parameter key: The statistics key as a `TrackStatKey`.
+    /// - Returns: The value cast to type `T` if it exists and is compatible,
+    ///   otherwise `nil`.
+    func value<T>(
+        for key: RTCStatistics.TrackStatKey
+    ) -> T? {
+        values[key.rawValue]?.value()
+    }
+
+    /// Returns the value for a type-safe key, or a fallback value if not present.
+    ///
+    /// This method extracts and casts the value for the given `TrackStatKey` from
+    /// the statistics dictionary. If the value is missing or not convertible to
+    /// the requested type, the provided fallback is returned.
+    ///
+    /// Example:
+    /// ```
+    /// let fps: Int = stats.value(for: .framesPerSecond, fallback: 0)
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - key: The statistics key as a `TrackStatKey`.
+    ///   - fallback: The value to return if the key is missing or incompatible.
+    /// - Returns: The value as type `T` or the fallback.
+    func value<T>(
+        for key: RTCStatistics.TrackStatKey,
+        fallback: T
+    ) -> T {
+        values[key.rawValue]?.value(fallback: fallback) ?? fallback
+    }
+
     /// Coding keys for static ("timestamp", "type") and dynamic (property) keys.
     private struct CodingKeys: CodingKey {
         var stringValue: String
@@ -95,6 +137,36 @@ struct MutableRTCStatistics: Codable, Equatable {
 
         static let timestamp = CodingKeys(stringValue: "timestamp")
         static let type = CodingKeys(stringValue: "type")
+    }
+}
+
+extension RTCStatistics {
+    /// Provides type-safe access to the keys of statistics relevant to
+    /// WebRTC track encoding and decoding.
+    ///
+    /// Using these keys prevents typos and allows for safer value extraction.
+    enum TrackStatKey: String {
+        case kind
+        case codecId
+        case framesSent
+        case framesDecoded
+        case framesPerSecond
+        case frameHeight
+        case frameWidth
+        case mediaSourceId
+        case trackIdentifier
+        case totalEncodeTime
+        case totalDecodeTime
+        case targetBitrate
+        case mimeType
+        case clockRate
+        case payloadType
+        case sdpFmtpLine
+        case unknown
+
+        public init(stringLiteral value: String) {
+            self = TrackStatKey(rawValue: value) ?? .unknown
+        }
     }
 }
 

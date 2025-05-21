@@ -146,7 +146,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
                     traces: traces,
                     thermalState: thermalStateObserver.state,
                     encodeStats: input.encoderPerformanceStats,
-                    decodeStats: input.decoderPerformanceStats,
+                    decodeStats: input.decoderPerformanceStats
                 )
             } catch {
                 input.onError(error)

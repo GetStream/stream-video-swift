@@ -102,13 +102,27 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
         sfuRequestsBucket = .init()
 
         encoderStatsBucket = .init(
-            latestReportPublisher,
-            transformer: WebRTCEncoderStatsItemTransformer()
+            latestReportPublisher
+                .compactMap {
+                    guard
+                        let stats = $0.publisherRawStats?.mutable
+                    else { return nil }
+                    return (stats: stats, trackToKindMap: $0.trackToKindMap)
+                }
+                .eraseToAnyPublisher(),
+            transformer: WebRTCStatsItemTransformer(mode: .encoder)
         )
 
         decoderStatsBucket = .init(
-            latestReportPublisher,
-            transformer: WebRTCDecoderStatsItemTransformer()
+            latestReportPublisher
+                .compactMap {
+                    guard
+                        let stats = $0.subscriberRawStats?.mutable
+                    else { return nil }
+                    return (stats: stats, trackToKindMap: $0.trackToKindMap)
+                }
+                .eraseToAnyPublisher(),
+            transformer: WebRTCStatsItemTransformer(mode: .decoder)
         )
     }
 

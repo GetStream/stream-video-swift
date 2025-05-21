@@ -185,6 +185,63 @@ public extension RawJSON {
             return false
         }
     }
+
+    /// Extracts the wrapped value as the specified type, if possible.
+    ///
+    /// This method tries to cast the underlying RawJSON value to the requested
+    /// generic type `T`. Returns `nil` if the wrapped value does not match the
+    /// requested type.
+    ///
+    /// Example:
+    /// ```
+    /// let json: RawJSON = .string("hello")
+    /// let value: String? = json.value()
+    /// ```
+    ///
+    /// - Returns: The value as type `T` if compatible, otherwise `nil`.
+    func value<T>() -> T? {
+        switch self {
+        case let .number(double):
+            // Handle all integer and floating-point conversions
+            if T.self == Int.self { return Int(double) as? T }
+            if T.self == Int32.self { return Int32(double) as? T }
+            if T.self == Int64.self { return Int64(double) as? T }
+            if T.self == UInt.self { return UInt(double) as? T }
+            if T.self == UInt32.self { return UInt32(double) as? T }
+            if T.self == UInt64.self { return UInt64(double) as? T }
+            if T.self == Double.self { return double as? T }
+            if T.self == Float.self { return Float(double) as? T }
+            // Fall back to cast (may work for NSNumber, etc)
+            return double as? T
+        case let .string(string):
+            return string as? T
+        case let .bool(bool):
+            return bool as? T
+        case let .dictionary(dictionary):
+            return dictionary as? T
+        case let .array(array):
+            return array as? T
+        case .nil:
+            return nil
+        }
+    }
+
+    /// Extracts the wrapped value as the specified type, or returns a fallback.
+    ///
+    /// This method tries to cast the underlying RawJSON value to the requested
+    /// generic type `T`. If the cast fails, the `fallback` value is returned.
+    ///
+    /// Example:
+    /// ```
+    /// let json: RawJSON = .number(42.0)
+    /// let value: Int = json.value(fallback: 0) // returns 0, as the value is a Double
+    /// ```
+    ///
+    /// - Parameter fallback: The value to return if the cast fails.
+    /// - Returns: The value as type `T` if compatible, otherwise the fallback.
+    func value<T>(fallback: T) -> T {
+        value() ?? fallback
+    }
 }
 
 // MARK: ExpressibleByLiteral
