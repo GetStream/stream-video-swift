@@ -440,7 +440,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try await sfuAdapter.sendStats(
                         for: sessionId,
                         unifiedSessionId: unifiedSessionId,
-                        telemetry: telemetry,
+                        telemetry: telemetry
                     )
                     log.debug("Join call completed in \(duration) seconds.")
                 } catch {

@@ -110,12 +110,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .stateAdapter
                     .statsAdapter
                 statsAdapter?.scheduleStatsReporting()
+
+                /// It's safe to set the `sfuAdapter` to nil, as the `scheduleStatsReporting`
+                /// will collect all traces and once the delivery fails, the traces will be stored and
+                /// will be delivered on the next batch of traces.
                 statsAdapter?.sfuAdapter = nil
 
                 /// We add a small delay of 100ms in oder to ensure that the internet connection state
                 /// has been updated, so that when we start observing it will receive the latest and
                 /// updated value.
                 try? await Task.sleep(nanoseconds: 100_000_000)
+
+                statsAdapter?.sfuAdapter = nil
 
                 observeInternetConnection()
                 observeDurationInStage()

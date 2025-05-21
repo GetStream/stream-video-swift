@@ -6,52 +6,77 @@ import Combine
 import Foundation
 import StreamWebRTC
 
-final class WebRTCStatsAdapter: @unchecked Sendable {
+/// Collects, compresses, and reports WebRTC statistics and traces.
+///
+/// This adapter acts as a central manager for stats collection, delivery,
+/// and trace event buffering. It coordinates between publisher/subscriber
+/// peer connections, the SFU adapter, and the underlying audio session to
+/// provide a unified reporting pipeline for WebRTC stats and performance.
+/// Integrates with Combine for reactive reporting and supports trace state
+/// restoration in the event of network errors or reconnects.
+final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
 
+    /// Identifiers for the different Combine subscriptions/disposables in use.
     private enum DisposableKey: String {
         case publisherUpdated
         case trackMuteStateUpdated
         case trackMuteStateObservation
     }
 
-    /// The SFU adapter used to send collected statistics.
+    /// The SFU adapter used to send collected statistics and trace events.
     ///
-    /// Setting this property triggers a reset of the collection and delivery processes.
+    /// Setting this property will re-attach all relevant observers and
+    /// subscriptions to the new adapter instance.
     var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
 
-    /// The publisher peer connection from which to collect statistics.
+    /// The publisher/subscriber peer connection coordinator.
+    ///
+    /// Setting this will re-attach statistics and trace collection to the
+    /// updated connection instance.
     var publisher: RTCPeerConnectionCoordinator? {
         didSet { didUpdate(publisher: publisher) }
     }
 
-    /// The subscriber peer connection from which to collect statistics.
+    /// The publisher/subscriber peer connection coordinator.
+    ///
+    /// Setting this will re-attach statistics and trace collection to the
+    /// updated connection instance.
     var subscriber: RTCPeerConnectionCoordinator? {
         didSet { didUpdate(subscriber: subscriber) }
     }
 
+    /// The current call settings associated with this adapter. Setting this
+    /// updates the trace adapter with the latest session configuration.
     var callSettings: CallSettings? {
         didSet { traces.callSettings = callSettings }
     }
 
+    /// The audio session used in this call. Used for trace enrichment.
     var audioSession: StreamAudioSession? {
         didSet { traces.audioSession = audioSession }
     }
 
-    /// The interval at which statistics are reported, in seconds.
+    /// The interval at which statistics are reported (in seconds).
     ///
-    /// Setting this property automatically reschedules the delivery timer.
+    /// Changing this property reschedules the reporting timer.
     var deliveryInterval: TimeInterval {
         didSet { reporter.interval = deliveryInterval }
     }
 
+    /// Whether trace collection and reporting is enabled for this adapter.
+    ///
+    /// When disabled, trace buffering and reporting will be halted.
     var isTracingEnabled: Bool {
         get { traces.isEnabled }
         set { traces.isEnabled = newValue }
     }
 
+    /// The number of reconnect attempts for this session.
     var reconnectAttempts: UInt32
 
-    /// A publisher for the latest statistics report.
+    /// A publisher that emits the latest WebRTC call stats report.
+    ///
+    /// This publisher emits only non-nil reports as they are collected.
     var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
         collector
             .$report
@@ -59,31 +84,51 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    /// The session ID associated with this reporter.
+    /// Session identifiers for stats and trace reporting.
     let sessionID: String
 
+    /// Session identifiers for stats and trace reporting.
     let unifiedSessionID: String
 
+    /// Storage for WebRTC tracks used by the stats collector.
     private let trackStorage: WebRTCTrackStorage
+    /// Manages Combine subscriptions for all observation and reporting.
     private let disposableBag = DisposableBag()
 
-    /// The interval at which statistics are collected, in seconds. Defaults to 2.
+    /// The interval at which raw statistics are collected (in seconds).
+    ///
+    /// Changing this will update the collector's internal timer.
     private var collectionInterval: TimeInterval {
         didSet { collector.interval = collectionInterval }
     }
 
+    /// The collector responsible for periodic collection of WebRTC stats.
     private lazy var collector: WebRTCStatsCollector = .init(
         interval: collectionInterval,
         trackStorage: trackStorage
     )
 
+    /// The reporter responsible for periodic delivery of compressed stats
+    /// and trace events.
     private lazy var reporter: WebRTCStatsReporter = .init(
         interval: deliveryInterval,
         provider: { [weak self] in self?.prepareDeliveryInput() }
     )
+    /// Adapter responsible for buffering and restoring WebRTC trace events.
     private lazy var traces: WebRTCTracesAdapter = .init(latestReportPublisher: latestReportPublisher)
+    /// Compresses raw stats reports for efficient reporting.
     private lazy var statsCompressor = WebRTCStatsCompressor()
 
+    /// Initializes a new WebRTCStatsAdapter.
+    ///
+    /// - Parameters:
+    ///   - collectionInterval: Stats collection interval (seconds).
+    ///   - deliveryInterval: Stats reporting interval (seconds).
+    ///   - sessionID: The current session's identifier.
+    ///   - unifiedSessionID: An additional identifier for unified reporting.
+    ///   - isTracingEnabled: Whether traces should be enabled.
+    ///   - reconnectAttempts: Number of reconnects for this session.
+    ///   - trackStorage: The track storage used for stats collection.
     init(
         collectionInterval: TimeInterval = 2,
         deliveryInterval: TimeInterval = 5,
@@ -110,18 +155,25 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
 
     // MARK: - Stats
 
+    /// Triggers immediate stats reporting via the reporter.
     func scheduleStatsReporting() {
         reporter.triggerDelivery()
     }
 
     // MARK: - Traces
 
+    /// Forwards a trace event to the trace adapter for buffering.
+    ///
+    /// - Parameter trace: The trace event to record.
     func trace(_ trace: WebRTCTrace) {
         traces.trace(trace)
     }
 
     // MARK: - Private helpers
 
+    /// Handles updates to the SFU adapter, reattaching all relevant observers.
+    ///
+    /// - Parameter sfuAdapter: The new SFU adapter instance.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
         collector.sfuAdapter = sfuAdapter
         reporter.sfuAdapter = sfuAdapter
@@ -129,6 +181,11 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         observeTracksMuteStateChanges(sfuAdapter)
     }
 
+    /// Handles updates to publisher/subscriber peer connections.
+    ///
+    /// Reattaches stats and trace collection to the new connection, if present.
+    ///
+    /// - Parameter publisher/subscriber: The new peer connection instance.
     private func didUpdate(publisher: RTCPeerConnectionCoordinator?) {
         collector.publisher = publisher
         traces.publisher = publisher
@@ -140,11 +197,20 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         }
     }
 
+    /// Handles updates to publisher/subscriber peer connections.
+    ///
+    /// Reattaches stats and trace collection to the new connection, if present.
+    ///
+    /// - Parameter publisher/subscriber: The new peer connection instance.
     private func didUpdate(subscriber: RTCPeerConnectionCoordinator?) {
         collector.subscriber = subscriber
         traces.subscriber = subscriber
     }
 
+    /// Prepares the delivery input for the reporter, flushing traces and
+    /// compressing stats.
+    ///
+    /// - Returns: An optional input for the reporter's delivery event.
     private func prepareDeliveryInput() -> WebRTCStatsReporter.Input? {
         guard let report = collector.report else {
             return nil
@@ -193,6 +259,9 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
         )
     }
 
+    /// Schedules periodic stats reporting for a given Combine subscription key.
+    ///
+    /// - Parameter key: The disposable key to manage the reporting timer.
     private func scheduleStatsReporting(for key: DisposableKey) {
         disposableBag.remove(key.rawValue)
         Foundation
@@ -206,6 +275,10 @@ final class WebRTCStatsAdapter: @unchecked Sendable {
             .store(in: disposableBag, key: key.rawValue)
     }
 
+    /// Observes mute state changes for SFU adapter tracks and triggers stats
+    /// reporting when necessary.
+    ///
+    /// - Parameter sfuAdapter: The SFU adapter to observe.
     private func observeTracksMuteStateChanges(_ sfuAdapter: SFUAdapter?) {
         disposableBag.remove(DisposableKey.trackMuteStateObservation.rawValue)
         guard let sfuAdapter else {

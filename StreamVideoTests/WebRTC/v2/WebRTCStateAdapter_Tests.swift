@@ -64,6 +64,16 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.sessionID, expected)
     }
 
+    // MARK: - setIsTracingEnabled
+
+    func test_setIsTracingEnabled_shouldUpdateIsTracingEnabled() async throws {
+        let expected = true
+
+        await subject.set(isTracingEnabled: expected)
+
+        await assertEqualAsync(await subject.isTracingEnabled, expected)
+    }
+
     // MARK: - setCallSettings
 
     func test_setCallSettings_shouldUpdateCallSettings() async throws {
@@ -164,9 +174,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.ownCapabilities, expected)
     }
 
-    // MARK: - setStatsReporter
+    // MARK: - setStatsAdapter
 
-    func test_setStatsReporter_shouldUpdateStatsReporter() async throws {
+    func test_setStatsReporter_shouldUpdateStatsAdapter() async throws {
         let expected = WebRTCStatsAdapter(
             sessionID: .unique,
             unifiedSessionID: .unique,
@@ -177,6 +187,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(statsAdapter: expected)
 
         await assertTrueAsync(await subject.statsAdapter === expected)
+        await assertTrueAsync(await subject.audioSession === expected.audioSession)
     }
 
     // MARK: - setSFUAdapter
@@ -544,7 +555,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
         await subject.set(callSettings: .init(cameraPosition: .back))
 
-        let sessionId = await subject.sessionID
         await subject.cleanUpForReconnection()
 
         await assertEqualAsync(await subject.callSettings.cameraPosition, .back)

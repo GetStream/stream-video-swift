@@ -5,10 +5,18 @@
 import Foundation
 import StreamWebRTC
 
+/// Compresses WebRTC statistics reports by removing unchanged entries.
+///
+/// This struct helps reduce payload size by only retaining updated
+/// statistics since the last report. Timestamps are normalized for consistency.
 struct WebRTCStatsCompressor {
 
     private var lastReport: CallStatsReport?
 
+    /// Compresses the provided call stats report against the previous one.
+    ///
+    /// - Parameter report: The current call statistics report.
+    /// - Returns: A tuple containing compressed publisher and subscriber stats.
     mutating func compress(_ report: CallStatsReport) -> (
         publisher: MutableRTCStatisticsReport?,
         subscriber: MutableRTCStatisticsReport?
@@ -34,11 +42,20 @@ struct WebRTCStatsCompressor {
                 return nil
             }
         }()
-        
+
         lastReport = report
         return (publisherRawStats, subscriberRawStats)
     }
-    
+
+    /// Computes the diff between old and new stats reports.
+    ///
+    /// Filters out unchanged statistics and resets the most recent timestamp(s).
+    ///
+    /// - Parameters:
+    ///   - oldStats: The previous statistics report to compare.
+    ///   - newStats: The current statistics report to compress.
+    /// - Returns: A mutable statistics report with only changed entries,
+    ///   or nil if no changes are found.
     private func execute(
         oldStats: RTCStatisticsReport?,
         newStats: RTCStatisticsReport
@@ -70,7 +87,7 @@ struct WebRTCStatsCompressor {
                 entry.timestamp = 0
                 newReport.statistics[$0.key] = entry
             }
-        
+
         // Set overall timestamp
         newReport.timestamp = maxTimestamp
 

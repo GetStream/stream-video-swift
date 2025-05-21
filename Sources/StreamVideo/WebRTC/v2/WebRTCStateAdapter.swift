@@ -68,7 +68,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
     @Published private(set) var statsCollector: WebRTCStatsCollector?
-    @Published private(set) var statsAdapter: WebRTCStatsAdapter?
+    @Published private(set) var statsAdapter: WebRTCStatsAdapting?
     @Published private(set) var participants: ParticipantsStorage = [:]
     @Published private(set) var participantsCount: UInt32 = 0
     @Published private(set) var anonymousCount: UInt32 = 0
@@ -156,7 +156,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
-    func set(statsAdapter value: WebRTCStatsAdapter?) {
+    func set(statsAdapter value: WebRTCStatsAdapting?) {
         self.statsAdapter = value
         value?.audioSession = audioSession
     }

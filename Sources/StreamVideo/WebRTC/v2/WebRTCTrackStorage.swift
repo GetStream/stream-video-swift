@@ -5,20 +5,30 @@
 import Foundation
 import StreamWebRTC
 
+/// A thread-safe storage container for WebRTC media stream tracks.
+///
+/// This storage provides access and management for audio, video, and
+/// screen share tracks, organizing them by participant ID. All mutations
+/// and reads are synchronized on a dedicated queue to ensure thread safety
+/// when accessed concurrently from multiple threads in the WebRTC pipeline.
 final class WebRTCTrackStorage: @unchecked Sendable {
 
+    /// An unfair locking queue used to synchronize all storage access.
     private let accessingQueue = UnfairQueue()
 
+    /// A dictionary of audio tracks keyed by participant ID.
     private var audioTracks: [String: RTCAudioTrack] = [:]
+    /// A dictionary of video tracks keyed by participant ID.
     private var videoTracks: [String: RTCVideoTrack] = [:]
+    /// A dictionary of screen share video tracks keyed by participant ID.
     private var screenShareTracks: [String: RTCVideoTrack] = [:]
 
-    /// Retrieves a track by ID and track type.
+    /// Retrieves a media stream track for a given participant and type.
     ///
     /// - Parameters:
-    ///   - id: The participant ID.
-    ///   - trackType: The type of track (audio, video, screenshare).
-    /// - Returns: The associated media stream track, or `nil` if not found.
+    ///   - id: The participant ID whose track should be fetched.
+    ///   - trackType: The type of the track (audio, video, or screenshare).
+    /// - Returns: The media stream track if found, otherwise `nil`.
     func track(
         for id: String,
         of trackType: TrackType
@@ -37,6 +47,12 @@ final class WebRTCTrackStorage: @unchecked Sendable {
         }
     }
 
+    /// Adds a media stream track to storage for the specified participant and type.
+    ///
+    /// - Parameters:
+    ///   - track: The media stream track to add.
+    ///   - type: The type of the track (audio, video, or screenshare).
+    ///   - id: The participant ID to associate with this track.
     func addTrack(
         _ track: RTCMediaStreamTrack,
         type: TrackType,
@@ -62,6 +78,11 @@ final class WebRTCTrackStorage: @unchecked Sendable {
         }
     }
 
+    /// Removes a specific track (or all tracks) for a participant.
+    ///
+    /// - Parameters:
+    ///   - id: The participant ID whose track(s) should be removed.
+    ///   - type: The type of track to remove (optional). If `nil`, removes all.
     func removeTrack(for id: String, type: TrackType? = nil) {
         accessingQueue.sync {
             if let type {
@@ -83,6 +104,7 @@ final class WebRTCTrackStorage: @unchecked Sendable {
         }
     }
 
+    /// Removes all stored tracks from storage for all participants.
     func removeAll() {
         accessingQueue.sync {
             audioTracks = [:]
@@ -91,6 +113,10 @@ final class WebRTCTrackStorage: @unchecked Sendable {
         }
     }
 
+    /// A snapshot mapping participant IDs to the type of their stored track.
+    ///
+    /// This returns a dictionary containing the current IDs and their associated
+    /// track type, regardless of the actual underlying track object.
     var snapshot: [String: TrackType] {
         var result: [String: TrackType] = [:]
         let audioTracks = accessingQueue.sync { self.audioTracks }

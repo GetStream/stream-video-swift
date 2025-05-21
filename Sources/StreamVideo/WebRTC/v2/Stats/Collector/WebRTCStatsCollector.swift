@@ -6,22 +6,42 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+/// A collector responsible for gathering WebRTC call statistics.
+///
+/// This class collects metrics from publisher and subscriber peer
+/// connections at a configurable interval and generates a unified
+/// `CallStatsReport`. The report is built using the
+/// `StreamCallStatisticsReporter` and includes audio/video track mappings.
+///
+/// The collected stats are published to subscribers via the `report`
+/// property. The collector can be configured with an `SFUAdapter` and
+/// will start periodic collection upon setting it.
 final class WebRTCStatsCollector: @unchecked Sendable {
 
+    /// The most recent `CallStatsReport` generated from collected stats.
+    ///
+    /// Observers can subscribe to this publisher to receive updates.
     @Published private(set) var report: CallStatsReport?
 
-    /// The publisher peer connection from which to collect statistics.
+    /// The peer connection used for publishing local media.
+    ///
+    /// Stats from this connection contribute to the outbound part of the report.
     var publisher: RTCPeerConnectionCoordinator?
 
-    /// The subscriber peer connection from which to collect statistics.
+    /// The peer connection used for receiving remote media.
+    ///
+    /// Stats from this connection contribute to the inbound part of the report.
     var subscriber: RTCPeerConnectionCoordinator?
 
-    /// The SFU adapter used to send collected statistics.
+    /// The adapter responsible for forwarding metrics to the SFU.
     ///
-    /// Setting this property triggers a reset of the collection and delivery processes.
+    /// Setting this property automatically starts or resets the periodic
+    /// collection process.
     var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
 
-    /// The interval at which statistics are collected, in seconds. Defaults to 2.
+    /// The interval in seconds at which statistics are collected.
+    ///
+    /// Changing this property will reschedule the timer used for stat collection.
     var interval: TimeInterval { didSet { scheduleCollection(with: interval) } }
 
     private let trackStorage: WebRTCTrackStorage
@@ -43,9 +63,10 @@ final class WebRTCStatsCollector: @unchecked Sendable {
         self.trackStorage = trackStorage
     }
 
-    /// Schedules the periodic collection of statistics.
+    /// Configures a repeating timer to trigger statistics collection.
     ///
-    /// - Parameter interval: The interval at which to collect statistics, in seconds.
+    /// - Parameter interval: The frequency in seconds at which to collect stats.
+    ///   If 0 or less, the timer is cancelled and no collection occurs.
     private func scheduleCollection(with interval: TimeInterval) {
         guard interval > 0 else {
             log.warning("Collection interval should be greater than 0.", subsystems: .webRTC)
@@ -67,9 +88,10 @@ final class WebRTCStatsCollector: @unchecked Sendable {
         )
     }
 
-    /// Collects statistics from the publisher and subscriber peer connections.
+    /// Starts a new async task to gather statistics from both peer connections.
     ///
-    /// This method creates a new task for collecting stats, cancelling any existing collection task.
+    /// Cancels any existing task before starting a new one. If both connections
+    /// are available, the task gathers stats, generates a report, and publishes it.
     private func collectStats() {
         activeCollectionTask?.cancel()
         activeCollectionTask = Task { [weak self] in
@@ -102,6 +124,9 @@ final class WebRTCStatsCollector: @unchecked Sendable {
         }
     }
 
+    /// Resets collection when the SFU adapter is updated.
+    ///
+    /// Cancels existing tasks and timers, then restarts collection if needed.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
         activeCollectionTask?.cancel()
         collectionCancellable?.cancel()

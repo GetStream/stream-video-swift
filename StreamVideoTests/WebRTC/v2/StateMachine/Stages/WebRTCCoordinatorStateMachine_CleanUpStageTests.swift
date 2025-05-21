@@ -82,14 +82,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
-            .set(
-                statsAdapter: .init(
-                    sessionID: .unique,
-                    unifiedSessionID: .unique,
-                    isTracingEnabled: true,
-                    trackStorage: await mockCoordinatorStack.coordinator.stateAdapter.trackStorage
-                )
-            )
+            .set(statsAdapter: MockWebRTCStatsAdapter())
         await mockCoordinatorStack
             .coordinator
             .stateAdapter

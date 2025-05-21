@@ -14,7 +14,7 @@ public indirect enum RawJSON: Codable, Hashable, Sendable {
     case dictionary([String: RawJSON])
     case array([RawJSON])
     case `nil`
-    
+
     public init(from decoder: Decoder) throws {
         let singleValueContainer = try decoder.singleValueContainer()
         if let value = try? singleValueContainer.decode(Bool.self) {
@@ -42,7 +42,7 @@ public indirect enum RawJSON: Codable, Hashable, Sendable {
                     .Context(codingPath: decoder.codingPath, debugDescription: "Could not find reasonable type to map to JSONValue")
             )
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
@@ -333,6 +333,42 @@ extension RawJSON {
 
             array[index] = newValue
             self = .array(array)
+        }
+    }
+}
+
+extension RawJSON {
+    /// Initializes a `RawJSON` value from an `NSObject`.
+    ///
+    /// This is useful for converting Foundation types (e.g., from `NSDictionary`,
+    /// `NSArray`, `NSNumber`) into strongly typed `RawJSON` enums.
+    init(_ object: NSObject) {
+        switch object {
+        /// Converts NSString into a `.string` RawJSON value.
+        case let str as NSString:
+            self = .string(str as String)
+        /// Converts NSNumber into a `.number` RawJSON value.
+        case let num as NSNumber:
+            self = .number(num.doubleValue)
+        /// Converts NSArray into a `.array` of recursively converted RawJSON.
+        case let arr as NSArray:
+            let mappedArray = arr.compactMap { elem -> RawJSON? in
+                guard let elem = elem as? NSObject else { return nil }
+                return .init(elem)
+            }
+            self = .array(mappedArray)
+        /// Converts NSDictionary into a `.dictionary` of recursively converted RawJSON.
+        case let dict as NSDictionary:
+            var mappedDict = [String: RawJSON]()
+            dict.forEach { key, value in
+                if let keyStr = key as? String, let valueObj = value as? NSObject {
+                    mappedDict[keyStr] = .init(valueObj)
+                }
+            }
+            self = .dictionary(mappedDict)
+        /// Fallback: uses the object's description as a `.string`.
+        default:
+            self = .string(object.description)
         }
     }
 }
