@@ -341,7 +341,8 @@ open class CallViewModel: ObservableObject {
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
         customData: [String: RawJSON]? = nil,
-        video: Bool? = nil
+        video: Bool? = nil,
+        team: String? = nil
     ) {
         outgoingCallMembers = members
         setCallingState(ring ? .outgoing : .joining)
@@ -358,7 +359,8 @@ open class CallViewModel: ObservableObject {
                 maxParticipants: maxParticipants,
                 startsAt: startsAt,
                 backstage: backstage,
-                customData: customData
+                customData: customData,
+                team: team
             )
         } else {
             let call = streamVideo.call(
@@ -372,6 +374,7 @@ open class CallViewModel: ObservableObject {
                     let callData = try await call.create(
                         members: membersRequest,
                         custom: customData,
+                        team: team,
                         ring: ring,
                         maxDuration: maxDuration,
                         maxParticipants: maxParticipants,
@@ -641,7 +644,8 @@ open class CallViewModel: ObservableObject {
         maxParticipants: Int? = nil,
         startsAt: Date? = nil,
         backstage: BackstageSettingsRequest? = nil,
-        customData: [String: RawJSON]? = nil
+        customData: [String: RawJSON]? = nil,
+        team: String? = nil
     ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
@@ -664,7 +668,8 @@ open class CallViewModel: ObservableObject {
                     members: members,
                     custom: customData,
                     settings: settingsRequest,
-                    startsAt: startsAt
+                    startsAt: startsAt,
+                    team: team
                 )
                 let settings = localCallSettingsChange ? callSettings : nil
 
