@@ -11,7 +11,7 @@ import StreamWebRTC
 /// This class manages the periodic collection of statistics from WebRTC peer connections
 /// and sends these statistics to an SFU (Selective Forwarding Unit) adapter.
 ///
-final class WebRTCStatsReporter: @unchecked Sendable {
+final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
 

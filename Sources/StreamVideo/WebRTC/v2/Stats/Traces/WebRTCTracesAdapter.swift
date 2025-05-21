@@ -17,7 +17,7 @@ import SwiftProtobuf
 /// adapters change.
 ///
 /// - Note: Setting `isEnabled` to false will flush and clear all current buckets.
-final class WebRTCTracesAdapter: @unchecked Sendable {
+final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
 
     /// Identifiers for different disposable subscriptions in the adapter.
     private enum DisposableKey: String {

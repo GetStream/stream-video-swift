@@ -79,7 +79,7 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
     /// This publisher emits only non-nil reports as they are collected.
     var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
         collector
-            .$report
+            .reportPublisher
             .compactMap { $0 }
             .eraseToAnyPublisher()
     }
@@ -103,21 +103,48 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
     }
 
     /// The collector responsible for periodic collection of WebRTC stats.
-    private lazy var collector: WebRTCStatsCollector = .init(
+    private lazy var collector: WebRTCStatsCollecting = WebRTCStatsCollector(
         interval: collectionInterval,
         trackStorage: trackStorage
     )
 
     /// The reporter responsible for periodic delivery of compressed stats
     /// and trace events.
-    private lazy var reporter: WebRTCStatsReporter = .init(
+    private lazy var reporter: WebRTCStatsReporting = WebRTCStatsReporter(
         interval: deliveryInterval,
         provider: { [weak self] in self?.prepareDeliveryInput() }
     )
     /// Adapter responsible for buffering and restoring WebRTC trace events.
-    private lazy var traces: WebRTCTracesAdapter = .init(latestReportPublisher: latestReportPublisher)
+    private lazy var traces: WebRTCTracing = WebRTCTracesAdapter(latestReportPublisher: latestReportPublisher)
     /// Compresses raw stats reports for efficient reporting.
     private lazy var statsCompressor = WebRTCStatsCompressor()
+
+    convenience init(
+        collectionInterval: TimeInterval = 2,
+        deliveryInterval: TimeInterval = 5,
+        sessionID: String,
+        unifiedSessionID: String,
+        isTracingEnabled: Bool,
+        reconnectAttempts: UInt32 = 0,
+        trackStorage: WebRTCTrackStorage,
+        collector: WebRTCStatsCollecting,
+        reporter: WebRTCStatsReporting,
+        traces: WebRTCTracing
+    ) {
+        self.init(
+            collectionInterval: collectionInterval,
+            deliveryInterval: deliveryInterval,
+            sessionID: sessionID,
+            unifiedSessionID: unifiedSessionID,
+            isTracingEnabled: isTracingEnabled,
+            reconnectAttempts: reconnectAttempts,
+            trackStorage: trackStorage
+        )
+
+        self.collector = collector
+        self.reporter = reporter
+        self.traces = traces
+    }
 
     /// Initializes a new WebRTCStatsAdapter.
     ///

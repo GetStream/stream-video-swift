@@ -17,11 +17,12 @@ final class WebRTCEncoderStatsItemTransformer: ConsumableBucketItemTransformer {
 
         var result = [Stream_Video_Sfu_Models_PerformanceStats]()
 
-        let outbounds: [RTCStatistics] = input
+        let _outbounds = input
             .publisherRawStats?
             .statistics
             .filter { $0.value.type == "outbound-rtp" }
-            .compactMap(\.value) ?? []
+            .compactMap(\.value)
+        let outbounds = _outbounds ?? []
 
         guard
             !outbounds.isEmpty

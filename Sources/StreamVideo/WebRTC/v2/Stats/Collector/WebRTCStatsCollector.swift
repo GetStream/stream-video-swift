@@ -16,12 +16,13 @@ import StreamWebRTC
 /// The collected stats are published to subscribers via the `report`
 /// property. The collector can be configured with an `SFUAdapter` and
 /// will start periodic collection upon setting it.
-final class WebRTCStatsCollector: @unchecked Sendable {
+final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
 
     /// The most recent `CallStatsReport` generated from collected stats.
     ///
     /// Observers can subscribe to this publisher to receive updates.
     @Published private(set) var report: CallStatsReport?
+    var reportPublisher: AnyPublisher<CallStatsReport?, Never> { $report.eraseToAnyPublisher() }
 
     /// The peer connection used for publishing local media.
     ///
