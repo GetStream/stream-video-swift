@@ -268,7 +268,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         _ cId: String,
         ringingTimedOut: Bool
     ) {
-        guard var callEndedEntry = callEntry(for: cId) else {
+        guard let callEndedEntry = callEntry(for: cId) else {
             return
         }
         callEndedEntry.ringingTimedOut = ringingTimedOut
