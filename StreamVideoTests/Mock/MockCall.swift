@@ -12,6 +12,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     enum MockCallFunctionKey: Hashable, CaseIterable {
         case get
         case accept
+        case reject
         case join
         case updateTrackSize
         case callKitActivated
@@ -30,6 +31,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
         case callKitActivated(audioSession: AVAudioSessionProtocol)
 
+        case reject(reason: String?)
+
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings):
@@ -40,6 +43,9 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
             case let .callKitActivated(audioSession):
                 return audioSession
+
+            case let .reject(reason):
+                return reason ?? ""
             }
         }
     }
@@ -89,6 +95,11 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
     override func accept() async throws -> AcceptCallResponse {
         stubbedFunction[.accept] as! AcceptCallResponse
+    }
+
+    override func reject(reason: String? = nil) async throws -> RejectCallResponse {
+        stubbedFunctionInput[.reject]?.append(.reject(reason: reason))
+        return stubbedFunction[.reject] as! RejectCallResponse
     }
 
     override func join(

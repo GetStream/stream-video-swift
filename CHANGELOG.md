@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 - When joining a Call, if the user has an external audio device connected, we will ignore the remote `CallSettings.speakerOn = true`. [#819](https://github.com/GetStream/stream-video-swift/pull/819)
+- CallKit will report correctly the rejection reason when ringing timeout is reached. [#820](https://github.com/GetStream/stream-video-swift/pull/820)
 
 ### 🐞 Fixed
 - Fix a retain cycle that was causing StreamVideo to leak in projects using NoiseCancellation. [#814](https://github.com/GetStream/stream-video-swift/pull/814)
