@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `CallViewController` was updated to accept the `video` flag when starting a call. [#811](https://github.com/GetStream/stream-video-swift/pull/811)
 - `team` property when creating calls through `CallViewModel` and/or `CallViewController` [#817](https://github.com/GetStream/stream-video-swift/pull/817)
 
+### 🔄 Changed
+- When joining a Call, if the user has an external audio device connected, we will ignore the remote `CallSettings.speakerOn = true`. [#819](https://github.com/GetStream/stream-video-swift/pull/819)
+
 ### 🐞 Fixed
 - Fix a retain cycle that was causing StreamVideo to leak in projects using NoiseCancellation. [#814](https://github.com/GetStream/stream-video-swift/pull/814)
 - Fix occasional crash caused inside `MicrophoneChecker`. [#813](https://github.com/GetStream/stream-video-swift/pull/813)
