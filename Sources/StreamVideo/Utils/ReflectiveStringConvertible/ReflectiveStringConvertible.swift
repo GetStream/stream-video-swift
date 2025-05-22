@@ -49,18 +49,18 @@ public enum ReflectiveStringConvertibleSkipRule: Hashable {
         switch self {
         case .empty:
             if (child.value as? String)?.isEmpty == true {
-                return true
+                true
             } else if (child.value as? (any Collection))?.isEmpty == true {
-                return true
+                true
             } else {
-                return false
+                false
             }
 
         case .nilValues:
-            return "\(child.value)" == "nil"
+            "\(child.value)" == "nil"
 
         case let .custom(_, rule):
-            return rule(child)
+            rule(child)
         }
     }
 
@@ -76,19 +76,19 @@ public enum ReflectiveStringConvertibleSkipRule: Hashable {
     ) -> Bool {
         switch (lhs, rhs) {
         case (.empty, .empty):
-            return true
+            true
         case (.nilValues, .nilValues):
-            return true
+            true
         case let (.custom(lhsIdentifier, _), .custom(rhsIdentifier, _)) where lhsIdentifier == rhsIdentifier:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }
 
 /// An extension for collections of `ReflectiveStringConvertibleSkipRule` values.
-extension Collection where Element == ReflectiveStringConvertibleSkipRule {
+extension Collection<ReflectiveStringConvertibleSkipRule> {
     /// Determines whether a given property should be skipped based on the rules
     /// in the collection.
     ///
@@ -172,7 +172,7 @@ public extension ReflectiveStringConvertible {
         let mirror = Mirror(reflecting: self)
         var output: [String] = ["Type: \(type(of: self))"]
 
-        let excludedProperties = self.excludedProperties
+        let excludedProperties = excludedProperties
         mirror
             .children
             .filter { !skipRuleSet.shouldBeSkipped($0) }
@@ -184,7 +184,7 @@ public extension ReflectiveStringConvertible {
                     return nil
                 }
             }
-            .forEach { (child: (label: String, value: Any)) -> Void in
+            .forEach { (child: (label: String, value: Any)) in
                 output.append(" - \(child.label): \(child.value)")
             }
 

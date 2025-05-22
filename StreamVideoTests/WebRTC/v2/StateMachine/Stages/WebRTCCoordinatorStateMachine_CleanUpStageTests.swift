@@ -32,7 +32,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
     // MARK: - Lifecycle
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -106,16 +106,16 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         _ = subject.transition(from: .disconnected(subject.context))
         await wait(for: 0.5)
 
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.publisher)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.subscriber)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.statsReporter)
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.sessionID, "")
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.token, "")
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.ownCapabilities, [])
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.participants, [:])
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.participantsCount, 0)
-        await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.participantPins, [])
+        await assertNilAsync(mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter)
+        await assertNilAsync(mockCoordinatorStack.coordinator.stateAdapter.publisher)
+        await assertNilAsync(mockCoordinatorStack.coordinator.stateAdapter.subscriber)
+        await assertNilAsync(mockCoordinatorStack.coordinator.stateAdapter.statsReporter)
+        await assertEqualAsync(mockCoordinatorStack.coordinator.stateAdapter.sessionID, "")
+        await assertEqualAsync(mockCoordinatorStack.coordinator.stateAdapter.token, "")
+        await assertEqualAsync(mockCoordinatorStack.coordinator.stateAdapter.ownCapabilities, [])
+        await assertEqualAsync(mockCoordinatorStack.coordinator.stateAdapter.participants, [:])
+        await assertEqualAsync(mockCoordinatorStack.coordinator.stateAdapter.participantsCount, 0)
+        await assertEqualAsync(mockCoordinatorStack.coordinator.stateAdapter.participantPins, [])
 
         XCTAssertEqual(publisher?.timesCalled(.close), 1)
         XCTAssertEqual(subscriber?.timesCalled(.close), 1)
@@ -183,7 +183,7 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,
         subject: WebRTCCoordinator.StateMachine.Stage,
-        validator: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        validator: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -212,8 +212,8 @@ final class WebRTCCoordinatorStateMachine_CleanUpStageTests: XCTestCase, @unchec
 
     // MARK: - Private helpers
 
-    private func assertNilAsync<T>(
-        _ expression: @autoclosure () async throws -> T?,
+    private func assertNilAsync(
+        _ expression: @autoclosure () async throws -> (some Any)?,
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {

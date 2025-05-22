@@ -20,22 +20,22 @@ protocol Mockable {
     var stubbedFunction: [FunctionKey: Any] { get set }
     var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] { get set }
 
-    func propertyKey<T>(for keyPath: KeyPath<Self, T>) -> String
+    func propertyKey(for keyPath: KeyPath<Self, some Any>) -> String
 
-    static func propertyKey<T>(for keyPath: KeyPath<Self, T>) -> String
+    static func propertyKey(for keyPath: KeyPath<Self, some Any>) -> String
 
     func stub<T>(for keyPath: KeyPath<Self, T>, with value: T)
 
-    func stub<T>(for function: FunctionKey, with value: T)
+    func stub(for function: FunctionKey, with value: some Any)
 }
 
 extension Mockable {
 
-    func propertyKey<T>(for keyPath: KeyPath<Self, T>) -> String {
+    func propertyKey(for keyPath: KeyPath<Self, some Any>) -> String {
         "\(keyPath)"
     }
 
-    static func propertyKey<T>(for keyPath: KeyPath<Self, T>) -> String {
+    static func propertyKey(for keyPath: KeyPath<Self, some Any>) -> String {
         "\(keyPath)"
     }
 

@@ -25,7 +25,7 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
     // MARK: - Lifecycle
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -125,7 +125,7 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         from: WebRTCCoordinator.StateMachine.Stage.ID,
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID,
         subject: WebRTCCoordinator.StateMachine.Stage,
-        validator: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        validator: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {

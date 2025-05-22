@@ -20,10 +20,10 @@ struct StreamAsyncImage<Content: View>: View {
         self.url = url
         self.scale = scale
         conditionalContent = { image in
-            if let image = image {
-                return ViewBuilder.buildEither(first: content(image))
+            if let image {
+                ViewBuilder.buildEither(first: content(image))
             } else {
-                return ViewBuilder.buildEither(second: placeholder())
+                ViewBuilder.buildEither(second: placeholder())
             }
         }
     }

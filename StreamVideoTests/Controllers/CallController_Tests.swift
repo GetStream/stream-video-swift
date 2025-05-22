@@ -37,7 +37,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     // MARK: - Lifecycle
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -82,7 +82,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
             await self.assertEqualAsync(
-                await self
+                self
                     .mockWebRTCCoordinatorFactory
                     .mockCoordinatorStack
                     .coordinator
@@ -183,7 +183,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let expected = VideoFilter(id: .unique, name: .unique, filter: { _ in fatalError() })
         try await prepareAsConnected(videoFilter: nil)
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -205,7 +205,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let ownCapabilities = [OwnCapability.createReaction]
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -229,7 +229,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let ownCapabilities = [OwnCapability.createReaction]
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: Set(ownCapabilities))
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -253,7 +253,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_stopScreensharing_shouldStopScreenSharing() async throws {
         try await prepareAsConnected()
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -335,7 +335,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_focus_shouldFocusOnSpecifiedPoint() async throws {
         try await prepareAsConnected()
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -355,7 +355,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_addCapturePhotoOutput_shouldAddPhotoOutputToCaptureSession() async throws {
         try await prepareAsConnected()
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -375,7 +375,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_removeCapturePhotoOutput_shouldRemovePhotoOutputFromCaptureSession() async throws {
         try await prepareAsConnected()
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -395,7 +395,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_addVideoOutput_shouldAddVideoOutputToCaptureSession() async throws {
         try await prepareAsConnected()
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -415,7 +415,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_removeVideoOutput_shouldRemoveVideoOutputFromCaptureSession() async throws {
         try await prepareAsConnected()
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -435,7 +435,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_zoom_shouldZoomCameraBySpecifiedFactor() async throws {
         try await prepareAsConnected()
         let mockPublisher = try await XCTAsyncUnwrap(
-            await mockWebRTCCoordinatorFactory
+            mockWebRTCCoordinatorFactory
                 .mockCoordinatorStack
                 .coordinator
                 .stateAdapter
@@ -653,8 +653,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private func assertTransitionToStage(
         _ id: WebRTCCoordinator.StateMachine.Stage.ID,
-        operation: @escaping @Sendable() async throws -> Void,
-        handler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
+        operation: @escaping @Sendable () async throws -> Void,
+        handler: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {
@@ -671,8 +671,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                     .filter { $0.id == id }
                     .nextValue(timeout: defaultTimeout)
 
-                await self.assertNoThrowAsync(
-                    try await handler(target),
+                try await self.assertNoThrowAsync(
+                    handler(target),
                     file: file,
                     line: line
                 )
@@ -722,15 +722,15 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     ) async throws {
         try await operation()
         await assertEqualAsync(
-            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.callSettings,
+            mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.callSettings,
             expected(),
             file: file,
             line: line
         )
     }
 
-    private func assertNilAsync<T>(
-        _ expression: @autoclosure () async throws -> T?,
+    private func assertNilAsync(
+        _ expression: @autoclosure () async throws -> (some Any)?,
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {

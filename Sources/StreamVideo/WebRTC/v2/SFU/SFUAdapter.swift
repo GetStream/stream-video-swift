@@ -47,9 +47,9 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     private var isConnected: Bool {
         switch connectionState {
         case .connected, .authenticating:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 
@@ -71,9 +71,9 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             .compactMap {
                 switch $0 {
                 case let .sfuEvent(event):
-                    return event
+                    event
                 default:
-                    return nil
+                    nil
                 }
             }
             .eraseToAnyPublisher()
@@ -160,9 +160,9 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             .compactMap {
                 switch $0 {
                 case let .sfuEvent(event):
-                    return event.payload(T.self)
+                    event.payload(T.self)
                 default:
-                    return nil
+                    nil
                 }
             }
             .eraseToAnyPublisher()
@@ -263,8 +263,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     /// - Parameters:
     ///   - eventType: The type of events to consume.
     ///   - bucket: The `SFUEventBucket` from which to consume events.
-    func consume<EventType>(
-        _ eventType: EventType.Type,
+    func consume(
+        _ eventType: (some Any).Type,
         bucket: SFUEventBucket
     ) {
         let events = bucket.consume(eventType)
@@ -669,8 +669,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         lineNumber: UInt = #line
     ) {
         guard !isConnected else { return }
-        log.assert(
-            false,
+        log.assertionFailure(
             """
             Attempting to send a message before connecting to SFU
             hostname: \(hostname)

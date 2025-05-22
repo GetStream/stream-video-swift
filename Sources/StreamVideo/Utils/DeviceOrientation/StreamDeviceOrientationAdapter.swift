@@ -18,9 +18,9 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
     public var isPortrait: Bool {
         switch self {
         case .landscape:
-            return false
+            false
         case .portrait:
-            return true
+            true
         }
     }
 
@@ -28,9 +28,9 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
     public var isLandscape: Bool {
         switch self {
         case .landscape:
-            return true
+            true
         case .portrait:
-            return false
+            false
         }
     }
 
@@ -38,11 +38,11 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
         switch self {
         /// Handle known portrait orientations
         case let .portrait(isUpsideDown):
-            return isUpsideDown ?.right : .left
+            isUpsideDown ?.right : .left
 
         /// Handle known landscape orientations
         case let .landscape(isLeft):
-            return isLeft ? .up : .down
+            isLeft ? .up : .down
         }
     }
 
@@ -50,9 +50,9 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
     public var deviceOrientation: UIDeviceOrientation {
         switch self {
         case let .portrait(isUpsideDown):
-            return isUpsideDown ? .portraitUpsideDown : .portrait
+            isUpsideDown ? .portraitUpsideDown : .portrait
         case let .landscape(isLeft):
-            return isLeft ? .landscapeLeft : .landscapeRight
+            isLeft ? .landscapeLeft : .landscapeRight
         }
     }
     #endif
@@ -60,16 +60,16 @@ public enum StreamDeviceOrientation: Equatable, Sendable {
     public var captureVideoOrientation: AVCaptureVideoOrientation {
         switch self {
         case let .portrait(isUpsideDown):
-            return isUpsideDown ? .portraitUpsideDown : .portrait
+            isUpsideDown ? .portraitUpsideDown : .portrait
         case let .landscape(isLeft):
-            return isLeft ? .landscapeLeft : .landscapeRight
+            isLeft ? .landscapeLeft : .landscapeRight
         }
     }
 }
 
 /// An observable object that adapts to device orientation changes.
 open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable {
-    public typealias Provider = @Sendable() async -> StreamDeviceOrientation
+    public typealias Provider = @Sendable () async -> StreamDeviceOrientation
 
     /// The default provider for device orientation based on platform.
     public static let defaultProvider: Provider = {
@@ -123,8 +123,8 @@ open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable
                 .map { _ in }
                 .receive(on: DispatchQueue.main)
                 .sinkTask { @MainActor [weak self] in
-                    guard let self = self else { return }
-                    self.orientation = await provider() // Update orientation based on the provider.
+                    guard let self else { return }
+                    orientation = await provider() // Update orientation based on the provider.
                 }
 
             self.orientation = await provider()

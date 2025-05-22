@@ -14,8 +14,8 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
 
     @MainActor
     func test_appearance_noParticipantsNotActive_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 0,
                 isActive: false
             ),
@@ -26,8 +26,8 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
 
     @MainActor
     func test_appearance_noParticipantsIsActive_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 0,
                 isActive: true
             ),
@@ -38,8 +38,8 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
 
     @MainActor
     func test_appearance_oneParticipantNotActive_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 1,
                 isActive: false
             ),
@@ -50,8 +50,8 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
 
     @MainActor
     func test_appearance_oneParticipantIsActive_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 1,
                 isActive: true
             ),
@@ -62,8 +62,8 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
 
     @MainActor
     func test_appearance_twoParticipantsNotActive_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 2,
                 isActive: false
             ),
@@ -74,8 +74,8 @@ final class StatelessParticipantsListButton_Tests: StreamVideoUITestCase, @unche
 
     @MainActor
     func test_appearance_twoParticipantsIsActive_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 2,
                 isActive: true
             ),

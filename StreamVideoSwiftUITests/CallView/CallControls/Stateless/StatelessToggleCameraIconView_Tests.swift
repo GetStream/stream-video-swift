@@ -14,8 +14,8 @@ final class StatelessToggleCameraIconView_Tests: StreamVideoUITestCase, @uncheck
 
     @MainActor
     func test_appearance_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(),
+        try AssertSnapshot(
+            makeSubject(),
             variants: snapshotVariants,
             size: sizeThatFits
         )

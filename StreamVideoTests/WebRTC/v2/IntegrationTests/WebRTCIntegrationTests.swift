@@ -10,7 +10,7 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
 
     struct Operation {
         var delay: TimeInterval = 0
-        var operation: @Sendable() async throws -> Void
+        var operation: @Sendable () async throws -> Void
     }
 
     private enum FlowOperation {
@@ -77,8 +77,8 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
                 .concurrent(
                     [
                         .init(delay: 0.5) {
-                            self.mockStack.joinResponse(
-                                [.dummy(id: await self.stateAdapter.sessionID)]
+                            await self.mockStack.joinResponse(
+                                [.dummy(id: self.stateAdapter.sessionID)]
                             )
                         },
                         .init {
@@ -153,7 +153,7 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
                 try await item.operation()
             case let .concurrent(operations):
                 try await withThrowingTaskGroup(of: Void.self) { group in
-                    operations.forEach { item in
+                    for item in operations {
                         group.addTask {
                             if item.delay > 0 {
                                 await self.wait(for: item.delay)

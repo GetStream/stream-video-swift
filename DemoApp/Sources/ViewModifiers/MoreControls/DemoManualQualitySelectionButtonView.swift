@@ -21,19 +21,19 @@ struct DemoManualQualitySelectionButtonView: View {
         var policy: IncomingVideoQualitySettings {
             switch self {
             case .auto:
-                return .none
+                .none
             case .fourK:
-                return .manual(group: .all, targetSize: .init(width: 3840, height: 2160))
+                .manual(group: .all, targetSize: .init(width: 3840, height: 2160))
             case .fullHD:
-                return .manual(group: .all, targetSize: .init(width: 1920, height: 1080))
+                .manual(group: .all, targetSize: .init(width: 1920, height: 1080))
             case .HD:
-                return .manual(group: .all, targetSize: .init(width: 1280, height: 720))
+                .manual(group: .all, targetSize: .init(width: 1280, height: 720))
             case .SD:
-                return .manual(group: .all, targetSize: .init(width: 640, height: 480))
+                .manual(group: .all, targetSize: .init(width: 640, height: 480))
             case .dataSaver:
-                return .manual(group: .all, targetSize: .init(width: 256, height: 144))
+                .manual(group: .all, targetSize: .init(width: 256, height: 144))
             case .disabled:
-                return .disabled(group: .all)
+                .disabled(group: .all)
             }
         }
     }
@@ -78,24 +78,22 @@ struct DemoManualQualitySelectionButtonView: View {
     private func buttonView(
         for manualQuality: ManualQuality
     ) -> some View {
-        let title: String = {
-            switch manualQuality {
-            case .auto:
-                return "Auto quality"
-            case .fourK:
-                return "4K 2160p"
-            case .fullHD:
-                return "Full HD 1080p"
-            case .HD:
-                return "HD 720p"
-            case .SD:
-                return "SD 480p"
-            case .dataSaver:
-                return "Data saver 144p"
-            case .disabled:
-                return "Disable video"
-            }
-        }()
+        let title: String = switch manualQuality {
+        case .auto:
+            "Auto quality"
+        case .fourK:
+            "4K 2160p"
+        case .fullHD:
+            "Full HD 1080p"
+        case .HD:
+            "HD 720p"
+        case .SD:
+            "SD 480p"
+        case .dataSaver:
+            "Data saver 144p"
+        case .disabled:
+            "Disable video"
+        }
         Button {
             execute(manualQuality)
         } label: {

@@ -11,13 +11,13 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
     var availableFrame: CGRect
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    var onChangeTrackVisibility: @MainActor (CallParticipant, Bool) -> Void
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: CallViewModel,
         availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
@@ -133,8 +133,8 @@ public struct VideoCallParticipantModifier: ViewModifier {
 extension View {
 
     @ViewBuilder
-    public func applyDecorationModifierIfRequired<Modifier: ViewModifier>(
-        _ modifier: @autoclosure () -> Modifier,
+    public func applyDecorationModifierIfRequired(
+        _ modifier: @autoclosure () -> some ViewModifier,
         decoration: VideoCallParticipantDecoration,
         availableDecorations: Set<VideoCallParticipantDecoration>
     ) -> some View {
@@ -396,7 +396,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
                 } else {
                     content()
                 }
-            }.onReceive(call?.state.$callSettings) { self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
+            }.onReceive(call?.state.$callSettings) { isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
         } else {
             content()
         }

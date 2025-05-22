@@ -66,44 +66,44 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .pronto:
-                return "Pronto"
+                "Pronto"
             case .prontoStaging:
-                return "Pronto Staging"
+                "Pronto Staging"
             case .prontoFrankfurtC2:
-                return "Pronto Staging C2"
+                "Pronto Staging C2"
             case .staging:
-                return "Staging"
+                "Staging"
             case .legacy:
-                return "Legacy"
+                "Legacy"
             case .livestream:
-                return "Livestream"
+                "Livestream"
             case .demo:
-                return "Demo"
+                "Demo"
             case let .custom(_, apiKey, _):
-                return apiKey.isEmpty ? "Custom" : "Custom(\(apiKey)"
+                apiKey.isEmpty ? "Custom" : "Custom(\(apiKey)"
             }
         }
 
         func joinLink(_ callId: String, callType: String = .default) -> URL {
             switch self {
             case .demo:
-                return url
+                url
                     .appendingPathComponent("video")
                     .appendingPathComponent("demos")
                     .appendingPathComponent("join")
                     .appendingPathComponent(callId)
                     .addQueryParameter("type", value: callType)
             case let .custom(baseURL, _, _):
-                return baseURL
+                baseURL
                     .url
                     .appendingPathComponent("join")
                     .appendingPathComponent(callId)
                     .addQueryParameter("type", value: callType)
             case .livestream:
-                return url
+                url
                     .appending(.init(name: "id", value: callId))
             default:
-                return url
+                url
                     .appendingPathComponent("join")
                     .appendingPathComponent(callId)
                     .addQueryParameter("type", value: callType)
@@ -120,16 +120,14 @@ extension AppEnvironment {
         ]
     }
 
-    static var baseURL: BaseURL = {
-        switch configuration {
-        case .test:
-            return .demo
-        case .debug:
-            return .pronto
-        case .release:
-            return .demo
-        }
-    }()
+    static var baseURL: BaseURL = switch configuration {
+    case .test:
+        .demo
+    case .debug:
+        .pronto
+    case .release:
+        .demo
+    }
 }
 
 extension AppEnvironment {
@@ -138,7 +136,7 @@ extension AppEnvironment {
         case universal = "streamvideo"
     }
 
-    static var appURLScheme: String = { AppURLScheme.universal.rawValue }()
+    static var appURLScheme: String = AppURLScheme.universal.rawValue
 }
 
 extension AppEnvironment {
@@ -149,7 +147,7 @@ extension AppEnvironment {
         var url: URL { URL(string: rawValue)! }
     }
 
-    static var authBaseURL: URL = { AuthBaseURL.universal.url }()
+    static var authBaseURL: URL = AuthBaseURL.universal.url
 }
 
 extension AppEnvironment {
@@ -197,9 +195,9 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .simple:
-                return "Simple"
+                "Simple"
             case .detailed:
-                return "Detailed"
+                "Detailed"
             }
         }
     }
@@ -228,16 +226,14 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .visible:
-                return "Visible"
+                "Visible"
             case .hidden:
-                return "Hidden"
+                "Hidden"
             }
         }
     }
 
-    static var performanceTrackerVisibility: PerformanceTrackerVisibility = {
-        .hidden
-    }()
+    static var performanceTrackerVisibility: PerformanceTrackerVisibility = .hidden
 }
 
 extension AppEnvironment {
@@ -248,16 +244,14 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .enabled:
-                return "Enabled"
+                "Enabled"
             case .disabled:
-                return "Disabled"
+                "Disabled"
             }
         }
     }
 
-    static var chatIntegration: ChatIntegration = {
-        .enabled
-    }()
+    static var chatIntegration: ChatIntegration = .enabled
 }
 
 extension AppEnvironment {
@@ -272,44 +266,42 @@ extension AppEnvironment {
         var deeplinkURL: URL {
             switch self {
             case .pronto:
-                return BaseURL.pronto.url
+                BaseURL.pronto.url
             case .staging:
-                return BaseURL.staging.url
+                BaseURL.staging.url
             case .demo:
-                return BaseURL.demo.url
+                BaseURL.demo.url
             case .legacy:
-                return BaseURL.legacy.url
+                BaseURL.legacy.url
             case .livestream:
-                return BaseURL.livestream.url
+                BaseURL.livestream.url
             }
         }
 
         var title: String {
             switch self {
             case .pronto:
-                return "Pronto"
+                "Pronto"
             case .staging:
-                return "Staging"
+                "Staging"
             case .demo:
-                return "Demo"
+                "Demo"
             case .legacy:
-                return "Legacy"
+                "Legacy"
             case .livestream:
-                return "Livestream"
+                "Livestream"
             }
         }
     }
 
-    static var supportedDeeplinks: [SupportedDeeplink] = {
-        switch configuration {
-        case .debug:
-            return [.pronto, .demo, .staging, .legacy, .livestream]
-        case .test:
-            return [.pronto, .demo, .staging, .legacy]
-        case .release:
-            return [.demo, .livestream]
-        }
-    }()
+    static var supportedDeeplinks: [SupportedDeeplink] = switch configuration {
+    case .debug:
+        [.pronto, .demo, .staging, .legacy, .livestream]
+    case .test:
+        [.pronto, .demo, .staging, .legacy]
+    case .release:
+        [.demo, .livestream]
+    }
 }
 
 extension AppEnvironment {
@@ -320,16 +312,14 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .enabled:
-                return "Enabled"
+                "Enabled"
             case .disabled:
-                return "Disabled"
+                "Disabled"
             }
         }
     }
 
-    static var pictureInPictureIntegration: PictureInPictureIntegration = {
-        .enabled
-    }()
+    static var pictureInPictureIntegration: PictureInPictureIntegration = .enabled
 }
 
 extension AppEnvironment {
@@ -345,48 +335,46 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .never:
-                return "Never"
+                "Never"
             case .oneMinute:
-                return "1'"
+                "1'"
             case .fiveMinutes:
-                return "5'"
+                "5'"
             case .tenMinutes:
-                return "10'"
+                "10'"
             case .thirtyMinutes:
-                return "30'"
+                "30'"
             case let .custom(value):
-                return "\(value)\""
+                "\(value)\""
             }
         }
 
         var interval: Int {
             switch self {
             case .never:
-                return 0
+                0
             case .oneMinute:
-                return 1 * 60
+                1 * 60
             case .fiveMinutes:
-                return 5 * 60
+                5 * 60
             case .tenMinutes:
-                return 10 * 60
+                10 * 60
             case .thirtyMinutes:
-                return 30 * 60
+                30 * 60
             case let .custom(value):
-                return value
+                value
             }
         }
     }
 
-    static var tokenExpiration: TokenExpiration = {
-        switch configuration {
-        case .debug:
-            return .never
-        case .test:
-            return .oneMinute
-        case .release:
-            return .thirtyMinutes
-        }
-    }()
+    static var tokenExpiration: TokenExpiration = switch configuration {
+    case .debug:
+        .never
+    case .test:
+        .oneMinute
+    case .release:
+        .thirtyMinutes
+    }
 }
 
 extension AppEnvironment {
@@ -401,30 +389,30 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .never:
-                return "Never"
+                "Never"
             case .twoMinutes:
-                return "2'"
+                "2'"
             case .fiveMinutes:
-                return "5'"
+                "5'"
             case .tenMinutes:
-                return "10'"
+                "10'"
             case let .custom(value):
-                return "\(value)\""
+                "\(value)\""
             }
         }
 
         var duration: Int? {
             switch self {
             case .never:
-                return nil
+                nil
             case .twoMinutes:
-                return 2 * 60
+                2 * 60
             case .fiveMinutes:
-                return 5 * 60
+                5 * 60
             case .tenMinutes:
-                return 10 * 60
+                10 * 60
             case let .custom(value):
-                return value
+                value
             }
         }
     }
@@ -441,9 +429,9 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .default:
-                return "Default"
+                "Default"
             case .lastParticipant:
-                return "Last Participant"
+                "Last Participant"
             }
         }
 
@@ -470,22 +458,22 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .never:
-                return "Never"
+                "Never"
             case .twoMinutes:
-                return "2'"
+                "2'"
             case let .custom(value):
-                return "\(value)\""
+                "\(value)\""
             }
         }
 
         var duration: TimeInterval {
             switch self {
             case .never:
-                return 0
+                0
             case .twoMinutes:
-                return 2 * 60
+                2 * 60
             case let .custom(value):
-                return value
+                value
             }
         }
     }
@@ -504,26 +492,26 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .h264:
-                return "h264"
+                "h264"
             case .vp8:
-                return "VP8"
+                "VP8"
             case .vp9:
-                return "VP9"
+                "VP9"
             case .av1:
-                return "AV1"
+                "AV1"
             }
         }
 
         var videoCodec: VideoCodec {
             switch self {
             case .h264:
-                return .h264
+                .h264
             case .vp8:
-                return .vp8
+                .vp8
             case .vp9:
-                return .vp9
+                .vp9
             case .av1:
-                return .av1
+                .av1
             }
         }
     }
@@ -539,16 +527,14 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .enabled:
-                return "Enabled"
+                "Enabled"
             case .disabled:
-                return "Disabled"
+                "Disabled"
             }
         }
     }
 
-    static var closedCaptionsIntegration: ClosedCaptionsIntegration = {
-        .disabled
-    }()
+    static var closedCaptionsIntegration: ClosedCaptionsIntegration = .disabled
 }
 
 extension AppEnvironment {
@@ -559,25 +545,23 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .default:
-                return "Default"
+                "Default"
             case .ownCapabilities:
-                return "OwnCapabilities"
+                "OwnCapabilities"
             }
         }
 
         var value: AudioSessionPolicy {
             switch self {
             case .default:
-                return DefaultAudioSessionPolicy()
+                DefaultAudioSessionPolicy()
             case .ownCapabilities:
-                return OwnCapabilitiesAudioSessionPolicy()
+                OwnCapabilitiesAudioSessionPolicy()
             }
         }
     }
 
-    static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = {
-        .default
-    }()
+    static var audioSessionPolicy: AudioSessionPolicyDebugConfiguration = .default
 }
 
 extension AppEnvironment {
@@ -599,25 +583,23 @@ extension AppEnvironment {
         var title: String {
             switch self {
             case .speaker:
-                return "Speaker"
+                "Speaker"
             case .video:
-                return "Video"
+                "Video"
             }
         }
 
         var value: ProximityPolicy {
             switch self {
             case .speaker:
-                return SpeakerProximityPolicy()
+                SpeakerProximityPolicy()
             case .video:
-                return VideoProximityPolicy()
+                VideoProximityPolicy()
             }
         }
     }
 
-    static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = {
-        [.speaker, .video]
-    }()
+    static var proximityPolicies: Set<ProximityPolicyDebugConfiguration> = [.speaker, .video]
 }
 
 extension String: Debuggable {

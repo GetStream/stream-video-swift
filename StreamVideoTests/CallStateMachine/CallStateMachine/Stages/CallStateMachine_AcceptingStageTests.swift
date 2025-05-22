@@ -114,9 +114,9 @@ extension Call.StateMachine.Stage.Context.Input {
     var accepting: PassthroughSubject<AcceptCallResponse, Error>? {
         switch self {
         case let .accepting(deliverySubject):
-            return deliverySubject
+            deliverySubject
         default:
-            return nil
+            nil
         }
     }
 }

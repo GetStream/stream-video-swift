@@ -42,7 +42,7 @@ struct MemoryLogViewer: View {
             }
         )
         .sheet(isPresented: $isSharePresented) {
-            if let logFileURL = logFileURL {
+            if let logFileURL {
                 ShareActivityView(activityItems: [logFileURL])
             }
         }
@@ -83,15 +83,16 @@ struct MemoryLogViewer: View {
             let logContent = """
             Stream Video Logs - Generated: \(Date())
             \(logs.reversed().map { "\($0.level) - [\($0.fileName):\($0.lineNumber):\($0.functionName)] \($0.message)" }
-                .joined(separator: "\n"))
+                .joined(separator: "\n")
+            )
             """
 
             // Write to file
             do {
                 try logContent.write(to: fileURL, atomically: true, encoding: .utf8)
-                self.logFileURL = fileURL
+                logFileURL = fileURL
                 Task { @MainActor in
-                    self.isSharePresented = true
+                    isSharePresented = true
                 }
             } catch {
                 print("Error creating log file: \(error)")
@@ -113,18 +114,16 @@ struct MemoryLogViewer: View {
 
     @ViewBuilder
     func makeEntryView(for entry: LogDetails) -> some View {
-        let (iconName, iconColor): (String, Color) = {
-            switch entry.level {
-            case .debug:
-                return ("ladybug", appearance.colors.text)
-            case .info:
-                return ("info.circle", Color.blue)
-            case .warning:
-                return ("exclamationmark.circle", Color.yellow)
-            case .error:
-                return ("x.circle", appearance.colors.accentRed)
-            }
-        }()
+        let (iconName, iconColor): (String, Color) = switch entry.level {
+        case .debug:
+            ("ladybug", appearance.colors.text)
+        case .info:
+            ("info.circle", Color.blue)
+        case .warning:
+            ("exclamationmark.circle", Color.yellow)
+        case .error:
+            ("x.circle", appearance.colors.accentRed)
+        }
         
         Label {
             Text(entry.message)

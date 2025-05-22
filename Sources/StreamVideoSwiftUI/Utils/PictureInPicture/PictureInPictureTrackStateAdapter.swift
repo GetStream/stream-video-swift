@@ -88,27 +88,23 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
             return
         }
 
-        let currentTrack: RTCVideoTrack? = {
-            switch oldValue {
-            case let .participant(_, _, track):
-                return track
-            case let .screenSharing(_, _, track):
-                return track
-            default:
-                return nil
-            }
-        }()
+        let currentTrack: RTCVideoTrack? = switch oldValue {
+        case let .participant(_, _, track):
+            track
+        case let .screenSharing(_, _, track):
+            track
+        default:
+            nil
+        }
 
-        let newTrack: RTCVideoTrack? = {
-            switch content {
-            case let .participant(_, _, track):
-                return track
-            case let .screenSharing(_, _, track):
-                return track
-            default:
-                return nil
-            }
-        }()
+        let newTrack: RTCVideoTrack? = switch content {
+        case let .participant(_, _, track):
+            track
+        case let .screenSharing(_, _, track):
+            track
+        default:
+            nil
+        }
 
         guard
             newTrack?.trackId != currentTrack?.trackId

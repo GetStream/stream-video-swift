@@ -57,7 +57,7 @@ final class SFUsubject_Tests: XCTestCase, @unchecked Sendable {
         // Given
         _ = subject
         let expectedEvent = Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload.subscriberOffer(.dummy())
-        let expectation = self.expectation(description: "Thread safety test")
+        let expectation = expectation(description: "Thread safety test")
 
         // When
         Task {

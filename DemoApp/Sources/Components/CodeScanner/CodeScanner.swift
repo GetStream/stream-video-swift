@@ -198,7 +198,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
     }
 
     private func setupSession() {
-        guard let captureSession = captureSession else {
+        guard let captureSession else {
             return
         }
 
@@ -236,7 +236,6 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         case .authorized:
             setupCaptureDevice()
             setupSession()
-
         default:
             break
         }

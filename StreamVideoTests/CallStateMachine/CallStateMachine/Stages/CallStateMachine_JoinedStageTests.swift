@@ -54,9 +54,9 @@ extension Call.StateMachine.Stage.Context.Output {
     var joinResponse: JoinCallResponse? {
         switch self {
         case let .joined(output):
-            return output
+            output
         default:
-            return nil
+            nil
         }
     }
 }

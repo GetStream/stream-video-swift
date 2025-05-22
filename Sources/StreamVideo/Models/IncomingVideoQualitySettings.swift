@@ -25,9 +25,9 @@ public enum IncomingVideoQualitySettings: CustomStringConvertible, Equatable, Se
         public var description: String {
             switch self {
             case .all:
-                return ".all"
+                ".all"
             case let .custom(sessionIds):
-                return ".custom(\(sessionIds.joined(separator: ",")))"
+                ".custom(\(sessionIds.joined(separator: ",")))"
             }
         }
 
@@ -39,9 +39,9 @@ public enum IncomingVideoQualitySettings: CustomStringConvertible, Equatable, Se
         func contains(_ sessionId: String) -> Bool {
             switch self {
             case .all:
-                return true
+                true
             case let .custom(sessionIds):
-                return sessionIds.contains(sessionId)
+                sessionIds.contains(sessionId)
             }
         }
     }
@@ -68,11 +68,11 @@ public enum IncomingVideoQualitySettings: CustomStringConvertible, Equatable, Se
     public var description: String {
         switch self {
         case .none:
-            return ".none"
+            ".none"
         case let .manual(group, targetSize):
-            return ".manual(group: \(group), targetSize: \(targetSize))"
+            ".manual(group: \(group), targetSize: \(targetSize))"
         case let .disabled(group):
-            return ".disabled(group: \(group))"
+            ".disabled(group: \(group))"
         }
     }
 
@@ -83,11 +83,11 @@ public enum IncomingVideoQualitySettings: CustomStringConvertible, Equatable, Se
     var targetSize: CGSize? {
         switch self {
         case .none:
-            return nil
+            nil
         case let .manual(_, targetSize):
-            return targetSize
+            targetSize
         case .disabled:
-            return nil
+            nil
         }
     }
 
@@ -99,11 +99,11 @@ public enum IncomingVideoQualitySettings: CustomStringConvertible, Equatable, Se
     func contains(_ sessionId: String) -> Bool {
         switch self {
         case .none:
-            return false
+            false
         case let .manual(group, _):
-            return group.contains(sessionId)
+            group.contains(sessionId)
         case let .disabled(group):
-            return group.contains(sessionId)
+            group.contains(sessionId)
         }
     }
 
@@ -115,11 +115,11 @@ public enum IncomingVideoQualitySettings: CustomStringConvertible, Equatable, Se
     func isVideoDisabled(for sessionId: String) -> Bool {
         switch self {
         case .none:
-            return false
+            false
         case .manual:
-            return false
+            false
         case let .disabled(group):
-            return group.contains(sessionId)
+            group.contains(sessionId)
         }
     }
 }

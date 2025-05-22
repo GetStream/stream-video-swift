@@ -42,27 +42,27 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
         var payload: Any {
             switch self {
             case let .startCapture(position, dimensions, frameRate):
-                return (position, dimensions, frameRate)
+                (position, dimensions, frameRate)
             case .stopCapture:
-                return ()
+                ()
             case let .setCameraPosition(position):
-                return position
+                position
             case let .setVideoFilter(videoFilter):
-                return videoFilter!
+                videoFilter!
             case let .updateCaptureQuality(dimensions):
-                return dimensions
+                dimensions
             case let .focus(point):
-                return point
+                point
             case let .zoom(factor):
-                return factor
+                factor
             case let .addCapturePhotoOutput(capturePhotoOutput):
-                return capturePhotoOutput
+                capturePhotoOutput
             case let .removeCapturePhotoOutput(capturePhotoOutput):
-                return capturePhotoOutput
+                capturePhotoOutput
             case let .addVideoOutput(videoOutput):
-                return videoOutput
+                videoOutput
             case let .removeVideoOutput(videoOutput):
-                return videoOutput
+                videoOutput
             }
         }
     }
@@ -80,7 +80,7 @@ final class MockStreamVideoCapturer: StreamVideoCapturing, Mockable, @unchecked 
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 

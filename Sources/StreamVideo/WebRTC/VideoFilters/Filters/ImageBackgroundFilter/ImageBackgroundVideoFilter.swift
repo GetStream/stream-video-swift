@@ -68,7 +68,7 @@ public final class ImageBackgroundVideoFilter: VideoFilter, @unchecked Sendable 
     /// Returns the cached or processed background image for a given input.
     private func backgroundImage(for input: Input) -> CIImage {
         if
-            let cachedValue = cachedValue,
+            let cachedValue,
             cachedValue.originalImageSize == input.originalImage.extent.size,
             cachedValue.originalImageOrientation == input.originalImageOrientation {
             return cachedValue.result

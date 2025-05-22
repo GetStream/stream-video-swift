@@ -136,7 +136,7 @@ struct DebugMenu: View {
                 currentValue: baseURL,
                 additionalItems: { customEnvironmentView },
                 label: "Environment"
-            ) { self.baseURL = $0 }
+            ) { baseURL = $0 }
 
             makeMultipleSelectMenu(
                 for: AppEnvironment.SupportedDeeplink.allCases,
@@ -154,45 +154,45 @@ struct DebugMenu: View {
                 for: [.simple, .detailed],
                 currentValue: loggedInView,
                 label: "LoggedIn View"
-            ) { self.loggedInView = $0 }
+            ) { loggedInView = $0 }
 
             makeMenu(
                 for: [.never, .oneMinute, .fiveMinutes, .thirtyMinutes],
                 currentValue: tokenExpiration,
                 additionalItems: { customTokenExpirationView },
                 label: "Token Expiration"
-            ) { self.tokenExpiration = $0 }
+            ) { tokenExpiration = $0 }
 
             makeMenu(
                 for: [.never, .twoMinutes, .fiveMinutes, .tenMinutes],
                 currentValue: callExpiration,
                 additionalItems: { customCallExpirationView },
                 label: "Call Expiration"
-            ) { self.callExpiration = $0 }
+            ) { callExpiration = $0 }
 
             makeMenu(
                 for: [.enabled, .disabled],
                 currentValue: chatIntegration,
                 label: "Chat Integration"
-            ) { self.chatIntegration = $0 }
+            ) { chatIntegration = $0 }
 
             makeMenu(
                 for: [.enabled, .disabled],
                 currentValue: pictureInPictureIntegration,
                 label: "Picture in Picture Integration"
-            ) { self.pictureInPictureIntegration = $0 }
+            ) { pictureInPictureIntegration = $0 }
 
             makeMenu(
                 for: [.enabled, .disabled],
                 currentValue: closedCaptionsIntegration,
                 label: "ClosedCaptions Integration"
-            ) { self.closedCaptionsIntegration = $0 }
+            ) { closedCaptionsIntegration = $0 }
 
             makeMenu(
                 for: [.default, .ownCapabilities],
                 currentValue: audioSessionPolicy,
                 label: "AudioSession policy"
-            ) { self.audioSessionPolicy = $0 }
+            ) { audioSessionPolicy = $0 }
 
             makeMultipleSelectMenu(
                 for: AppEnvironment.ProximityPolicyDebugConfiguration.allCases,
@@ -210,14 +210,14 @@ struct DebugMenu: View {
                 for: [.default, .lastParticipant],
                 currentValue: autoLeavePolicy,
                 label: "Auto Leave policy"
-            ) { self.autoLeavePolicy = $0 }
+            ) { autoLeavePolicy = $0 }
 
             makeMenu(
                 for: [.never, .twoMinutes],
                 currentValue: disconnectionTimeout,
                 additionalItems: { customDisconnectionTimeoutView },
                 label: "Disconnection Timeout"
-            ) { self.disconnectionTimeout = $0 }
+            ) { disconnectionTimeout = $0 }
 
             makeMenu(
                 for: availableCallTypes,
@@ -228,7 +228,7 @@ struct DebugMenu: View {
                     if preferredCallType != nil {
                         Divider()
                         Button {
-                            self.preferredCallType = nil
+                            preferredCallType = nil
                         } label: {
                             Label {
                                 Text("Clear")
@@ -239,19 +239,19 @@ struct DebugMenu: View {
                     }
                 },
                 label: "Preferred CallType"
-            ) { self.preferredCallType = $0 }
+            ) { preferredCallType = $0 }
 
             makeMenu(
                 for: [.h264, .vp8, .vp9, .av1],
                 currentValue: preferredVideoCodec,
                 label: "Preferred Video Codec"
-            ) { self.preferredVideoCodec = $0 }
+            ) { preferredVideoCodec = $0 }
 
             makeMenu(
                 for: [.visible, .hidden],
                 currentValue: performanceTrackerVisibility,
                 label: "Performance Tracker"
-            ) { self.performanceTrackerVisibility = $0 }
+            ) { performanceTrackerVisibility = $0 }
 
             Button {
                 isLogsViewerVisible = true
@@ -289,7 +289,7 @@ struct DebugMenu: View {
                         apiKey: "",
                         token: ""
                     ) {
-                        self.baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
+                        baseURL = .custom(baseURL: $0, apiKey: $1, token: $2)
                         presentsCustomEnvironmentSetup = false
                     }
                 }
@@ -301,7 +301,7 @@ struct DebugMenu: View {
             presentationBinding: $presentsCustomCallExpiration,
             valueBinding: $customCallExpirationValue,
             transformer: { Int($0) ?? 0 },
-            action: { self.callExpiration = .custom(customCallExpirationValue) }
+            action: { callExpiration = .custom(customCallExpirationValue) }
         )
         .alertWithTextField(
             title: "Enter Token expiration interval in seconds",
@@ -309,7 +309,7 @@ struct DebugMenu: View {
             presentationBinding: $presentsCustomTokenExpiration,
             valueBinding: $customTokenExpirationValue,
             transformer: { Int($0) ?? 0 },
-            action: { self.tokenExpiration = .custom(customTokenExpirationValue) }
+            action: { tokenExpiration = .custom(customTokenExpirationValue) }
         )
         .alertWithTextField(
             title: "Enter disconnection timeout in seconds",
@@ -317,7 +317,7 @@ struct DebugMenu: View {
             presentationBinding: $presentsCustomDisconnectionTimeout,
             valueBinding: $customDisconnectionTimeoutValue,
             transformer: { TimeInterval($0) ?? 0 },
-            action: { self.disconnectionTimeout = .custom(customDisconnectionTimeoutValue) }
+            action: { disconnectionTimeout = .custom(customDisconnectionTimeoutValue) }
         )
         .alertWithTextField(
             title: "Enter call type",
@@ -326,8 +326,8 @@ struct DebugMenu: View {
             valueBinding: $customPreferredCallType,
             transformer: { $0 },
             action: {
-                self.availableCallTypes.append(customPreferredCallType)
-                self.preferredCallType = customPreferredCallType
+                availableCallTypes.append(customPreferredCallType)
+                preferredCallType = customPreferredCallType
             }
         )
     }

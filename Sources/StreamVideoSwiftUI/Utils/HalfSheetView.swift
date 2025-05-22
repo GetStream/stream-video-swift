@@ -99,11 +99,11 @@ extension View {
     /// Presents the content in a sheet that will occupy the half of the screen.
     /// - Note: On iOS16.0+ it will use the presentationDetents provided by the system.
     @ViewBuilder
-    public func halfSheet<Content>(
+    public func halfSheet(
         isPresented: Binding<Bool>,
         onDismiss: (() -> Void)? = nil,
-        @ViewBuilder content: @escaping () -> Content
-    ) -> some View where Content: View {
+        @ViewBuilder content: @escaping () -> some View
+    ) -> some View {
         if #available(iOS 16.0, *) {
             sheet(isPresented: isPresented, onDismiss: onDismiss) {
                 content()

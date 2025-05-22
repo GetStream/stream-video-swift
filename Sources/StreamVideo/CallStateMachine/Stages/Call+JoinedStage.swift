@@ -56,9 +56,9 @@ extension Call.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .joining:
-                return self
+                self
             default:
-                return nil
+                nil
             }
         }
     }

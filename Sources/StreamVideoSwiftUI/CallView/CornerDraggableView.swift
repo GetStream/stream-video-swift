@@ -66,15 +66,15 @@ public struct CornerDraggableView<Content: View>: View {
             .gesture(
                 DragGesture(coordinateSpace: .global)
                     .onChanged {
-                        self.dragAmount = CGSize(width: $0.translation.width, height: $0.translation.height)
+                        dragAmount = CGSize(width: $0.translation.width, height: $0.translation.height)
                     }
                     .onEnded { gestureState in
                         withAnimation {
-                            self.callViewPlacement = self.checkCallPlacement(
+                            callViewPlacement = checkCallPlacement(
                                 for: gestureState.location,
                                 in: proxy.frame(in: .global)
                             )
-                            self.dragAmount = .zero
+                            dragAmount = .zero
                         }
                     }
             )
@@ -149,9 +149,9 @@ public enum CallViewPlacement {
     ) -> CGFloat {
         switch self {
         case .topLeading, .bottomLeading:
-            return -(availableWidth - viewWidth) / 2 + padding.left
+            -(availableWidth - viewWidth) / 2 + padding.left
         case .topTrailing, .bottomTrailing:
-            return (availableWidth - viewWidth) / 2 - padding.right
+            (availableWidth - viewWidth) / 2 - padding.right
         }
     }
 
@@ -162,9 +162,9 @@ public enum CallViewPlacement {
     ) -> CGFloat {
         switch self {
         case .topTrailing, .topLeading:
-            return -(availableHeight - viewHeight) / 2 + padding.top
+            -(availableHeight - viewHeight) / 2 + padding.top
         case .bottomLeading, .bottomTrailing:
-            return (availableHeight - viewHeight) / 2 - padding.bottom
+            (availableHeight - viewHeight) / 2 - padding.bottom
         }
     }
 

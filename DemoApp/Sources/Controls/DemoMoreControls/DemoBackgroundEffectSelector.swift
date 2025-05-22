@@ -36,11 +36,11 @@ struct DemoEffectButton: View {
     private var isSelected: Bool {
         switch effect {
         case .none:
-            return appState.videoFilter == nil
+            appState.videoFilter == nil
         case .blur:
-            return appState.videoFilter?.id == VideoFilter.blurredBackground.id
+            appState.videoFilter?.id == VideoFilter.blurredBackground.id
         default:
-            return appState.videoFilter?.id == effect.rawValue
+            appState.videoFilter?.id == effect.rawValue
         }
     }
 
@@ -100,22 +100,22 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
     var image: Image {
         switch self {
         case .none:
-            return Image(systemName: "circle.slash")
+            Image(systemName: "circle.slash")
         case .blur:
-            return Image(systemName: "square.stack.3d.forward.dottedline.fill")
+            Image(systemName: "square.stack.3d.forward.dottedline.fill")
         default:
-            return Image(rawValue)
+            Image(rawValue)
         }
     }
 
     var padding: Double {
         switch self {
         case .none:
-            return 10
+            10
         case .blur:
-            return 10
+            10
         default:
-            return 0
+            0
         }
     }
 }

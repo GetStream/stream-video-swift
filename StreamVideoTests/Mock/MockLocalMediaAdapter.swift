@@ -20,7 +20,7 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case setUp
@@ -43,17 +43,17 @@ final class MockLocalMediaAdapter: LocalMediaAdapting, Mockable, @unchecked Send
         var payload: Any {
             switch self {
             case let .setUp(settings, ownCapabilities):
-                return (settings, ownCapabilities)
+                (settings, ownCapabilities)
             case let .didUpdateCallSettings(settings):
-                return settings
+                settings
             case .publish:
-                return ()
+                ()
             case .unpublish:
-                return ()
+                ()
             case let .trackInfo(collectionType):
-                return collectionType
+                collectionType
             case let .didUpdatePublishOptions(publishOptions):
-                return publishOptions
+                publishOptions
             }
         }
     }

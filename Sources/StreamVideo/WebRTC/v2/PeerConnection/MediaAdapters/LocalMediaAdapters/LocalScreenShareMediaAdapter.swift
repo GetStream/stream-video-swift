@@ -145,26 +145,25 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
             primaryTrack.isEnabled = true
 
-            publishOptions.forEach {
-                self.addTransceiverIfRequired(
-                    for: $0,
-                    with: self.primaryTrack.clone(from: self.peerConnectionFactory),
+            for publishOption in publishOptions {
+                addTransceiverIfRequired(
+                    for: publishOption,
+                    with: primaryTrack.clone(from: peerConnectionFactory),
                     screenSharingType: activeSession.screenSharingType
                 )
             }
 
-            let activePublishOptions = Set(self.publishOptions)
+            let activePublishOptions = Set(publishOptions)
 
-            transceiverStorage
-                .forEach {
-                    if activePublishOptions.contains($0.key) {
-                        $0.value.track.isEnabled = true
-                        $0.value.transceiver.sender.track = $0.value.track
-                    } else {
-                        $0.value.track.isEnabled = false
-                        $0.value.transceiver.sender.track = nil
-                    }
+            for item in transceiverStorage {
+                if activePublishOptions.contains(item.key) {
+                    item.value.track.isEnabled = true
+                    item.value.transceiver.sender.track = item.value.track
+                } else {
+                    item.value.track.isEnabled = false
+                    item.value.transceiver.sender.track = nil
                 }
+            }
 
             log.debug(
                 """
@@ -247,16 +246,15 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
 
             let activePublishOptions = Set(self.publishOptions)
 
-            transceiverStorage
-                .forEach {
-                    if activePublishOptions.contains($0.key) {
-                        $0.value.track.isEnabled = true
-                        $0.value.transceiver.sender.track = $0.value.track
-                    } else {
-                        $0.value.track.isEnabled = false
-                        $0.value.transceiver.sender.track = nil
-                    }
+            for item in transceiverStorage {
+                if activePublishOptions.contains(item.key) {
+                    item.value.track.isEnabled = true
+                    item.value.transceiver.sender.track = item.value.track
+                } else {
+                    item.value.track.isEnabled = false
+                    item.value.transceiver.sender.track = nil
                 }
+            }
 
             log.debug(
                 """
@@ -287,24 +285,22 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     func trackInfo(
         for collectionType: RTCPeerConnectionTrackInfoCollectionType
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
-        let transceivers = {
-            switch collectionType {
-            case .allAvailable:
-                return transceiverStorage
-                    .map { ($0, $1.transceiver, $1.track) }
-            case .lastPublishOptions:
-                return publishOptions
-                    .compactMap {
-                        if
-                            let entry = transceiverStorage.get(for: $0),
-                            entry.transceiver.sender.track != nil {
-                            return ($0, entry.transceiver, entry.track)
-                        } else {
-                            return nil
-                        }
+        let transceivers = switch collectionType {
+        case .allAvailable:
+            transceiverStorage
+                .map { ($0, $1.transceiver, $1.track) }
+        case .lastPublishOptions:
+            publishOptions
+                .compactMap {
+                    if
+                        let entry = transceiverStorage.get(for: $0),
+                        entry.transceiver.sender.track != nil {
+                        ($0, entry.transceiver, entry.track)
+                    } else {
+                        nil
                     }
-            }
-        }()
+                }
+        }
 
         return transceivers
             .compactMap { publishOptions, transceiver, track in

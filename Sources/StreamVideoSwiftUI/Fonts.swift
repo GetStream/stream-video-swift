@@ -26,17 +26,17 @@ public struct Fonts {
     
     private static var title2Font: Font {
         if #available(iOS 14.0, *) {
-            return Font.title2
+            Font.title2
         } else {
-            return Font.headline
+            Font.headline
         }
     }
     
     private static var title3Font: Font {
         if #available(iOS 14.0, *) {
-            return Font.title3
+            Font.title3
         } else {
-            return Font.headline
+            Font.headline
         }
     }
 }

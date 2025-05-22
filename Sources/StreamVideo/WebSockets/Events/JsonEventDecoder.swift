@@ -35,7 +35,7 @@ extension ClientError {
             super.init(message, file, line)
         }
         
-        init<T>(missingValue: String, for type: T.Type, _ file: StaticString = #fileID, _ line: UInt = #line) {
+        init(missingValue: String, for type: (some Any).Type, _ file: StaticString = #fileID, _ line: UInt = #line) {
             super.init("`\(missingValue)` field can't be `nil` for the `\(type)` event.", file, line)
         }
     }

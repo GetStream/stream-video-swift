@@ -8,7 +8,7 @@ import Foundation
 /// Handles the camera state during a call.
 public final class CameraManager: ObservableObject, CallSettingsManager, @unchecked Sendable {
     
-    internal let callController: CallController
+    let callController: CallController
     @Published public internal(set) var status: CallSettingsStatus
     @Published public internal(set) var direction: CameraPosition
     let state = CallSettingsState()

@@ -32,10 +32,10 @@ final class StreamLocaleProvider: LocaleProviding {
     var identifier: String? {
         if #available(iOS 16, *) {
             // Retrieve the region identifier for iOS 16 and later.
-            return NSLocale.current.region?.identifier
+            NSLocale.current.region?.identifier
         } else {
             // Retrieve the region code for earlier iOS versions.
-            return NSLocale.current.regionCode
+            NSLocale.current.regionCode
         }
     }
 }

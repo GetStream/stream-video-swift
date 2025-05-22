@@ -138,9 +138,9 @@ extension InternetConnectionStatus {
     /// Returns `true` if the internet connection is available, ignoring the quality of the connection.
     public var isAvailable: Bool {
         if case .available = self {
-            return true
+            true
         } else {
-            return false
+            false
         }
     }
 }
@@ -235,7 +235,7 @@ extension InternetConnection: InjectionKey {
     ///
     /// This property provides a default implementation of the
     /// `InternetConnection` with a default monitor.
-    nonisolated(unsafe) public static var currentValue: InternetConnectionProtocol = InternetConnection(
+    public nonisolated(unsafe) static var currentValue: InternetConnectionProtocol = InternetConnection(
         monitor: InternetConnection.Monitor()
     )
 }

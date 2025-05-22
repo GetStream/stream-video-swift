@@ -231,7 +231,7 @@ final class RTCAudioSessionDelegatePublisherTests: XCTestCase, @unchecked Sendab
         _ action: @autoclosure () -> Void,
         validator: @escaping (AudioSessionEvent) -> Void
     ) {
-        let expectation = self.expectation(description: "AudioSession event received.")
+        let expectation = expectation(description: "AudioSession event received.")
         _ = RTCAudioSession.sharedInstance()
 
         subject

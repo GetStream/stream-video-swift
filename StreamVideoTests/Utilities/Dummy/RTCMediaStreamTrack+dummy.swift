@@ -28,7 +28,7 @@ extension RTCMediaStreamTrack {
             return track
 
         default:
-            assert(false)
+            assertionFailure()
         }
     }
 }

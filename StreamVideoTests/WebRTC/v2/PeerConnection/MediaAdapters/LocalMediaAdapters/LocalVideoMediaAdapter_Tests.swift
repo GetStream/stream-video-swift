@@ -82,9 +82,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await assertTrackEvent {
             switch $0 {
             case let .added(id, trackType, track):
-                return (id, trackType, track)
+                (id, trackType, track)
             default:
-                return nil
+                nil
             }
         } operation: { subject in
             try await subject.setUp(
@@ -210,9 +210,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await assertTrackEvent {
             switch $0 {
             case let .added(id, trackType, track):
-                return (id, trackType, track)
+                (id, trackType, track)
             default:
-                return nil
+                nil
             }
         } operation: { subject in
             try await subject.didUpdateCallSettings(.init(videoOn: true))
@@ -244,9 +244,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await assertTrackEvent {
             switch $0 {
             case let .added(id, trackType, track):
-                return (id, trackType, track)
+                (id, trackType, track)
             default:
-                return nil
+                nil
             }
         } operation: { subject in
             try await subject.setUp(
@@ -264,9 +264,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await assertTrackEvent(isInverted: true) {
             switch $0 {
             case let .added(id, trackType, track):
-                return (id, trackType, track)
+                (id, trackType, track)
             default:
-                return nil
+                nil
             }
         } operation: { subject in
             try await subject.didUpdateCallSettings(.init(videoOn: true))
@@ -291,9 +291,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiveExists_noTransceiverWasAdded() async throws {
         publishOptions = [.dummy(codec: .h264)]
         try publishOptions.forEach { publishOption in
-            mockPeerConnection.stub(
+            try mockPeerConnection.stub(
                 for: .addTransceiver,
-                with: try makeTransceiver(of: .video, videoOptions: publishOption)
+                with: makeTransceiver(of: .video, videoOptions: publishOption)
             )
         }
         subject.primaryTrack.isEnabled = true
@@ -317,9 +317,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
         publishOptions = [.dummy(id: 0, codec: .h264)]
         try publishOptions.forEach { publishOption in
-            mockPeerConnection.stub(
+            try mockPeerConnection.stub(
                 for: .addTransceiver,
-                with: try makeTransceiver(of: .video, videoOptions: publishOption)
+                with: makeTransceiver(of: .video, videoOptions: publishOption)
             )
         }
         // We call publish to simulate the publishing flow that will create
@@ -438,9 +438,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - publish
 
     func test_publish_disabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
-        mockPeerConnection.stub(
+        try mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(
+            with: makeTransceiver(
                 of: .video,
                 videoOptions: .dummy(codec: .h264)
             )
@@ -496,9 +496,9 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         let mockCaptureDevice = MockCaptureDevice()
         mockCaptureDevice.stub(for: \.position, with: .front)
         mockCaptureDeviceProvider.stubbedFunction[.deviceForAVPosition] = mockCaptureDevice
-        mockPeerConnection.stub(
+        try mockPeerConnection.stub(
             for: .addTransceiver,
-            with: try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+            with: makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
         )
         try await subject.setUp(
             with: .init(videoOn: true),
@@ -687,7 +687,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
                 .sender
                 .parameters
                 .encodings
-                .filter { $0.isActive }
+                .filter(\.isActive)
                 .first?.rid == "q"
         }
 
@@ -696,7 +696,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
                 .sender
                 .parameters
                 .encodings
-                .filter { $0.isActive }
+                .filter(\.isActive)
                 .first
         )
         XCTAssertEqual(activeEncoding.rid, "q")
@@ -758,7 +758,7 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private func assertTrackEvent(
         isInverted: Bool = false,
-        filter: @escaping @Sendable(TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
+        filter: @escaping @Sendable (TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
         operation: @Sendable @escaping (LocalVideoMediaAdapter) async throws -> Void,
         validation: @Sendable @escaping (String, TrackType, RTCMediaStreamTrack) -> Void = { _, _, _ in XCTFail() }
     ) async throws {

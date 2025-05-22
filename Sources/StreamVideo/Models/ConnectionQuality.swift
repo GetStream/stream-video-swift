@@ -17,13 +17,13 @@ extension Stream_Video_Sfu_Models_ConnectionQuality {
     var mapped: ConnectionQuality {
         switch self {
         case .poor:
-            return .poor
+            .poor
         case .good:
-            return .good
+            .good
         case .excellent:
-            return .excellent
+            .excellent
         default:
-            return .unknown
+            .unknown
         }
     }
 }

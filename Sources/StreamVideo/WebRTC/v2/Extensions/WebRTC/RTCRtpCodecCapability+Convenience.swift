@@ -19,7 +19,7 @@ extension RTCRtpCodecCapability {
 }
 
 /// Extension providing utility methods for sequences of `RTCRtpCodecCapability`.
-extension Sequence where Element == RTCRtpCodecCapability {
+extension Sequence<RTCRtpCodecCapability> {
 
     /// Retrieves the baseline codec for a given video codec.
     ///
@@ -51,15 +51,15 @@ extension VideoCodec {
     fileprivate var baselineComparator: (RTCRtpCodecCapability, RTCRtpCodecCapability) -> Bool {
         switch self {
         case .h264:
-            return h264Comparator
+            h264Comparator
         case .vp8:
-            return noOpComparator
+            noOpComparator
         case .vp9:
-            return vp9Comparator
+            vp9Comparator
         case .av1:
-            return noOpComparator
+            noOpComparator
         case .unknown:
-            return noOpComparator
+            noOpComparator
         }
     }
 }
@@ -72,11 +72,11 @@ extension AudioCodec {
     fileprivate var baselineComparator: (RTCRtpCodecCapability, RTCRtpCodecCapability) -> Bool {
         switch self {
         case .unknown:
-            return noOpComparator
+            noOpComparator
         case .opus:
-            return noOpComparator
+            noOpComparator
         case .red:
-            return noOpComparator
+            noOpComparator
         }
     }
 }

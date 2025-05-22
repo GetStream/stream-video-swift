@@ -10,8 +10,7 @@ import StreamWebRTC
 final class MockRTCPeerConnectionCoordinator:
     RTCPeerConnectionCoordinator,
     Mockable,
-    @unchecked Sendable
-{
+    @unchecked Sendable {
 
     // MARK: - Mockable
 
@@ -64,45 +63,45 @@ final class MockRTCPeerConnectionCoordinator:
         var payload: Any {
             switch self {
             case let .changePublishQuality(event):
-                return event
+                event
             case let .didUpdateCallSettings(callSettings):
-                return callSettings
+                callSettings
             case let .didUpdateCameraPosition(position):
-                return position
+                position
             case let .mid(type):
-                return type
+                type
             case let .localTrack(type):
-                return type
+                type
             case .restartICE:
-                return ()
+                ()
             case .close:
-                return ()
+                ()
             case let .setVideoFilter(videoFilter):
-                return videoFilter as Any
+                videoFilter as Any
             case .ensureSetUpHasBeenCompleted:
-                return ()
+                ()
             case let .setUp(settings, ownCapabilities):
-                return (settings, ownCapabilities)
+                (settings, ownCapabilities)
             case let .beginScreenSharing(type, ownCapabilities):
-                return (type, ownCapabilities)
+                (type, ownCapabilities)
             case .stopScreenSharing:
-                return ()
+                ()
             case let .focus(point):
-                return point
+                point
             case let .addCapturePhotoOutput(capturePhotoOutput):
-                return capturePhotoOutput
+                capturePhotoOutput
             case let .removeCapturePhotoOutput(capturePhotoOutput):
-                return capturePhotoOutput
+                capturePhotoOutput
             case let .addVideoOutput(videoOutput):
-                return videoOutput
+                videoOutput
             case let .removeVideoOutput(videoOutput):
-                return videoOutput
+                videoOutput
             case let .zoom(factor):
-                return factor
+                factor
             case let .trackInfo(trackType):
-                return trackType
+                trackType
             case .statsReport:
-                return ()
+                ()
             }
         }
     }
@@ -117,7 +116,7 @@ final class MockRTCPeerConnectionCoordinator:
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 
@@ -129,9 +128,9 @@ final class MockRTCPeerConnectionCoordinator:
 
     override var disconnectedPublisher: AnyPublisher<Void, Never> {
         if let stub = stubbedProperty[propertyKey(for: \.disconnectedPublisher)] as? AnyPublisher<Void, Never> {
-            return stub
+            stub
         } else {
-            return super.disconnectedPublisher
+            super.disconnectedPublisher
         }
     }
 

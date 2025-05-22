@@ -21,7 +21,7 @@ final class MockAVPictureInPictureController: StreamPictureInPictureControllerPr
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {}
+    func stub(for function: FunctionKey, with value: some Any) {}
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case stopPictureInPicture
@@ -33,7 +33,7 @@ final class MockAVPictureInPictureController: StreamPictureInPictureControllerPr
         var payload: Any {
             switch self {
             case .stopPictureInPicture:
-                return ()
+                ()
             }
         }
     }

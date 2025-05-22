@@ -17,18 +17,18 @@ final class MockRTCRtpEncodingParameters: RTCRtpEncodingParametersProtocol, Mock
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 
-    func propertyKey<T>(for keyPath: KeyPath<MockRTCRtpEncodingParameters, T>) -> String {
+    func propertyKey(for keyPath: KeyPath<MockRTCRtpEncodingParameters, some Any>) -> String {
         switch keyPath {
         case \.rid:
-            return MockPropertyKey.rid.rawValue
+            MockPropertyKey.rid.rawValue
         case \.maxBitrateBps:
-            return MockPropertyKey.maxBitrateBps.rawValue
+            MockPropertyKey.maxBitrateBps.rawValue
         case \.maxFramerate:
-            return MockPropertyKey.maxFramerate.rawValue
+            MockPropertyKey.maxFramerate.rawValue
         default:
             fatalError()
         }

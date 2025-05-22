@@ -10,7 +10,7 @@ protocol BackgroundTaskScheduler: Sendable {
     ///
     /// Returns: `false` if system forbid background task, `true` otherwise
     @MainActor
-    func beginTask(expirationHandler: (@Sendable() -> Void)?) -> Bool
+    func beginTask(expirationHandler: (@Sendable () -> Void)?) -> Bool
     @MainActor
     func endTask()
     @MainActor
@@ -30,11 +30,10 @@ import UIKit
 class IOSBackgroundTaskScheduler: BackgroundTaskScheduler, @unchecked Sendable {
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
-    private lazy var app: UIApplication? = {
+    private lazy var app: UIApplication? =
         // We can't use `UIApplication.shared` directly because there's no way to convince the compiler
         // this code is accessible only for non-extension executables.
         UIApplication.value(forKeyPath: "sharedApplication") as? UIApplication
-    }()
 
     /// The identifier of the currently running background task. `nil` if no background task is running.
     private var activeBackgroundTask: UIBackgroundTaskIdentifier?
@@ -42,7 +41,7 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler, @unchecked Sendable {
     var isAppActive: Bool { applicationStateAdapter.state == .foreground }
 
     @MainActor
-    func beginTask(expirationHandler: (@Sendable() -> Void)?) -> Bool {
+    func beginTask(expirationHandler: (@Sendable () -> Void)?) -> Bool {
         activeBackgroundTask = app?.beginBackgroundTask { [weak self] in
             expirationHandler?()
             self?.endTask()

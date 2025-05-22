@@ -14,7 +14,7 @@ protocol EventMiddleware {
     func handle(event: WrappedEvent) -> WrappedEvent?
 }
 
-extension Array where Element == EventMiddleware {
+extension [EventMiddleware] {
     /// Evaluates an array of `EventMiddleware`s in the order they're specified in the array. It's not guaranteed that
     /// all middlewares are called. If a middleware returns `nil`, no middlewares down in the chain are called.
     ///

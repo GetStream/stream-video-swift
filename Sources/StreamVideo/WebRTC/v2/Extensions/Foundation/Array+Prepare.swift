@@ -36,7 +36,7 @@ extension Array where Element: RTCRtpEncodingParameters {
     }
 }
 
-extension Array where Element == Stream_Video_Sfu_Models_VideoLayer {
+extension [Stream_Video_Sfu_Models_VideoLayer] {
 
     /// Prepares the array of `RTCRtpEncodingParameters` for use with SVC codecs.
     ///

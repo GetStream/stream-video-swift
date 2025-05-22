@@ -33,7 +33,7 @@ class DemoCallsViewModel: ObservableObject {
             do {
                 let allEmployees = try await GoogleHelper.loadUsers()
                 self.streamEmployees = allEmployees.filter { $0.isFavorite == false }
-                self.favorites = allEmployees.filter { $0.isFavorite }
+                self.favorites = allEmployees.filter(\.isFavorite)
             } catch {
                 log.error(error)
             }

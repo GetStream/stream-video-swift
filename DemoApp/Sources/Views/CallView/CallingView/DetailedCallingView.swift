@@ -185,8 +185,8 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
             )
         )
         .onReceive(appState.$currentUser) { currentUser in
-            self.callAction = currentUser?.type == .regular ? callAction : .joinCall
-            self.callFlow = currentUser?.type == .regular ? callFlow : .joinImmediately
+            callAction = currentUser?.type == .regular ? callAction : .joinCall
+            callFlow = currentUser?.type == .regular ? callFlow : .joinImmediately
         }
     }
 

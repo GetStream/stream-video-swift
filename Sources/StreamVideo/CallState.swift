@@ -160,7 +160,7 @@ public class CallState: ObservableObject {
     /// properties, will publish changes on the main thread.
     nonisolated init() {}
 
-    internal func updateState(from event: VideoEvent) {
+    func updateState(from event: VideoEvent) {
         switch event {
         case let .typeBlockedUserEvent(event):
             blockUser(id: event.user.id)
@@ -283,7 +283,7 @@ public class CallState: ObservableObject {
         }
     }
     
-    internal func addPermissionRequest(user: User, permissions: [String], requestedAt: Date) {
+    func addPermissionRequest(user: User, permissions: [String], requestedAt: Date) {
         let requests = permissions.map {
             PermissionRequest(
                 permission: $0,
@@ -295,35 +295,35 @@ public class CallState: ObservableObject {
         permissionRequests.append(contentsOf: requests)
     }
     
-    internal func removePermissionRequest(request: PermissionRequest) {
+    func removePermissionRequest(request: PermissionRequest) {
         permissionRequests = permissionRequests.filter {
             $0.id != request.id
         }
     }
     
-    internal func blockUser(id: String) {
+    func blockUser(id: String) {
         if !blockedUserIds.contains(id) {
             blockedUserIds.insert(id)
         }
     }
     
-    internal func unblockUser(id: String) {
+    func unblockUser(id: String) {
         blockedUserIds.remove(id)
     }
     
-    internal func mergeMembers(_ response: [MemberResponse]) {
+    func mergeMembers(_ response: [MemberResponse]) {
         var current = members
         var changed = false
         let membersDict = Dictionary(uniqueKeysWithValues: members.lazy.map { ($0.id, $0) })
-        response.forEach {
-            guard let m = membersDict[$0.userId] else {
-                current.insert($0.toMember, at: 0)
+        for item in response {
+            guard let m = membersDict[item.userId] else {
+                current.insert(item.toMember, at: 0)
                 changed = true
-                return
+                continue
             }
-            if m.updatedAt != $0.updatedAt {
+            if m.updatedAt != item.updatedAt {
                 if let index = members.firstIndex(where: { $0.id == m.id }) {
-                    current[index] = $0.toMember
+                    current[index] = item.toMember
                 }
                 changed = true
             }
@@ -333,48 +333,48 @@ public class CallState: ObservableObject {
         }
     }
     
-    internal func update(from response: GetOrCreateCallResponse) {
+    func update(from response: GetOrCreateCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from response: JoinCallResponse) {
+    func update(from response: JoinCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
         statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
     }
     
-    internal func update(from response: GetCallResponse) {
+    func update(from response: GetCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from response: CallStateResponseFields) {
+    func update(from response: CallStateResponseFields) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from response: UpdateCallResponse) {
+    func update(from response: UpdateCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
     }
     
-    internal func update(from event: CallCreatedEvent) {
+    func update(from event: CallCreatedEvent) {
         update(from: event.call)
         mergeMembers(event.members)
     }
     
-    internal func update(from event: CallRingEvent) {
+    func update(from event: CallRingEvent) {
         update(from: event.call)
         mergeMembers(event.members)
     }
     
-    internal func update(from response: CallResponse) {
+    func update(from response: CallResponse) {
         custom = response.custom
         createdAt = response.createdAt
         updatedAt = response.updatedAt
@@ -402,16 +402,16 @@ public class CallState: ObservableObject {
         }
     }
     
-    internal func update(callSettings: CallSettings) {
+    func update(callSettings: CallSettings) {
         self.callSettings = callSettings
         localCallSettingsUpdate = true
     }
     
-    internal func update(statsReport: CallStatsReport?) {
+    func update(statsReport: CallStatsReport?) {
         self.statsReport = statsReport
     }
 
-    internal func update(closedCaptions: [CallClosedCaption]) {
+    func update(closedCaptions: [CallClosedCaption]) {
         self.closedCaptions = closedCaptions
     }
 

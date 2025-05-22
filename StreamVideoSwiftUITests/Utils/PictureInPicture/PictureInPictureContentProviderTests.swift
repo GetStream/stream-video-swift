@@ -11,7 +11,7 @@ import XCTest
 @MainActor
 final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendable {
 
-    private static nonisolated(unsafe) var videoConfig: VideoConfig! = .dummy()
+    private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
     private lazy var store: PictureInPictureStore! = .init()
     private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .mock()
@@ -30,7 +30,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     }
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -73,9 +73,9 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         } validation: {
             switch $0 {
             case let .screenSharing(_, contentParticipant, track):
-                return participant == contentParticipant && track.trackId == videoTrack?.trackId
+                participant == contentParticipant && track.trackId == videoTrack?.trackId
             default:
-                return false
+                false
             }
         }
     }
@@ -95,9 +95,9 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         } validation: {
             switch $0 {
             case let .participant(_, contentParticipant, track):
-                return participant == contentParticipant && track?.trackId == videoTrack?.trackId
+                participant == contentParticipant && track?.trackId == videoTrack?.trackId
             default:
-                return false
+                false
             }
         }
     }
@@ -111,9 +111,9 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         } validation: {
             switch $0 {
             case let .participant(_, contentParticipant, _):
-                return participant == contentParticipant
+                participant == contentParticipant
             default:
-                return false
+                false
             }
         }
     }
@@ -132,9 +132,9 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         } validation: {
             switch $0 {
             case let .participant(_, contentParticipant, track):
-                return participant == contentParticipant && track?.trackId == videoTrack?.trackId
+                participant == contentParticipant && track?.trackId == videoTrack?.trackId
             default:
-                return false
+                false
             }
         }
     }
@@ -146,9 +146,9 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         } validation: {
             switch $0 {
             case let .participant(_, contentParticipant, _):
-                return participant == contentParticipant
+                participant == contentParticipant
             default:
-                return false
+                false
             }
         }
     }
@@ -165,9 +165,9 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
         } validation: {
             switch $0 {
             case let .participant(_, contentParticipant, _):
-                return participant == contentParticipant
+                participant == contentParticipant
             default:
-                return false
+                false
             }
         }
     }
@@ -288,7 +288,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     // MARK: - Private Helpers
 
     private func assertContentUpdate(
-        _ operation: @MainActor @escaping @Sendable(MockCall) -> Void,
+        _ operation: @MainActor @escaping @Sendable (MockCall) -> Void,
         validation: @escaping (PictureInPictureContent) -> Bool,
         file: StaticString = #file,
         function: StaticString = #function,
@@ -313,7 +313,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     private func assertPreferredContentSizeUpdate(
         isActive: Bool,
         expected: CGSize,
-        _ operation: @MainActor @escaping @Sendable(MockCall) -> Void,
+        _ operation: @MainActor @escaping @Sendable (MockCall) -> Void,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line

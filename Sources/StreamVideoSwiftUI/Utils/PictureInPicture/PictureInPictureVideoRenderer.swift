@@ -131,7 +131,7 @@ final class PictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
         Task { @MainActor in
-            guard let frame = frame else {
+            guard let frame else {
                 return
             }
 

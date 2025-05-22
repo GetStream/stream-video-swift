@@ -38,7 +38,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -214,7 +214,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         await stateAdapter.didAddTrack(
             .dummy(
                 kind: .audio,
-                peerConnectionFactory: await stateAdapter.peerConnectionFactory
+                peerConnectionFactory: stateAdapter.peerConnectionFactory
             ),
             type: .audio,
             for: participant.sessionId
@@ -222,7 +222,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         await stateAdapter.didAddTrack(
             .dummy(
                 kind: .video,
-                peerConnectionFactory: await stateAdapter.peerConnectionFactory
+                peerConnectionFactory: stateAdapter.peerConnectionFactory
             ),
             type: .video,
             for: participant.sessionId
@@ -230,7 +230,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         await stateAdapter.didAddTrack(
             .dummy(
                 kind: .screenshare,
-                peerConnectionFactory: await stateAdapter.peerConnectionFactory
+                peerConnectionFactory: stateAdapter.peerConnectionFactory
             ),
             type: .video,
             for: participant.sessionId
@@ -240,7 +240,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         await stateAdapter.didAddTrack(
             .dummy(
                 kind: .audio,
-                peerConnectionFactory: await stateAdapter.peerConnectionFactory
+                peerConnectionFactory: stateAdapter.peerConnectionFactory
             ),
             type: .audio,
             for: trackLookupPrefix
@@ -248,7 +248,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         await stateAdapter.didAddTrack(
             .dummy(
                 kind: .video,
-                peerConnectionFactory: await stateAdapter.peerConnectionFactory
+                peerConnectionFactory: stateAdapter.peerConnectionFactory
             ),
             type: .video,
             for: trackLookupPrefix
@@ -256,7 +256,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         await stateAdapter.didAddTrack(
             .dummy(
                 kind: .screenshare,
-                peerConnectionFactory: await stateAdapter.peerConnectionFactory
+                peerConnectionFactory: stateAdapter.peerConnectionFactory
             ),
             type: .video,
             for: trackLookupPrefix
@@ -558,8 +558,8 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Private helpers
 
-    private func assert<T>(
-        _ event: T,
+    private func assert(
+        _ event: some Any,
         wrappedEvent: WrappedEvent,
         initialState: [String: CallParticipant],
         handler: @Sendable @escaping ([String: CallParticipant]) async throws -> Bool
@@ -588,7 +588,7 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await fulfillment {
             do {
-                return try await handler(await self.stateAdapter.participants)
+                return try await handler(self.stateAdapter.participants)
             } catch {
                 return false
             }

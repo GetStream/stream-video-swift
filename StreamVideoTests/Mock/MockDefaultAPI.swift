@@ -20,10 +20,10 @@ final class MockDefaultAPI: DefaultAPI, Mockable, @unchecked Sendable {
         var payload: Any {
             switch self {
             case let .acceptCall(type, id):
-                return (type, id)
+                (type, id)
 
             case let .rejectCall(type, id, request):
-                return (type, id, request)
+                (type, id, request)
             }
         }
     }
@@ -38,7 +38,7 @@ final class MockDefaultAPI: DefaultAPI, Mockable, @unchecked Sendable {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 

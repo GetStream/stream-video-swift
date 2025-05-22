@@ -56,7 +56,7 @@ extension AVCaptureDevice {
 
 /// Extension adding utilities to filter and select `AVCaptureDevice.Format`
 /// objects based on specific requirements.
-extension Array where Element == AVCaptureDevice.Format {
+extension [AVCaptureDevice.Format] {
     /// Requirements for filtering or selecting an `AVCaptureDevice.Format`.
     enum Requirement {
         /// Requires the format to have dimensions greater than or equal to

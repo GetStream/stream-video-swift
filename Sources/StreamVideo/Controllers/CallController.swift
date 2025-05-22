@@ -495,7 +495,7 @@ class CallController: @unchecked Sendable {
             .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
     }
 
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
+    func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
         try webRTCCoordinator.callKitActivated(audioSession)
     }
 
@@ -674,10 +674,9 @@ class CallController: @unchecked Sendable {
                 .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
                 .sinkTask { [weak self] _ in
                     guard let self else { return }
-                    self
-                        .webRTCCoordinator
+                    webRTCCoordinator
                         .stateMachine
-                        .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
+                        .transition(.blocked(webRTCCoordinator.stateMachine.currentStage.context))
                 }
                 .store(in: disposableBag, key: DisposableKey.currentUserBlocked.rawValue)
         }

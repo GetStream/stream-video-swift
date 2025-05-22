@@ -24,7 +24,7 @@ extension Publisher where Output: Sendable {
             var receivedValue = false // Track whether a value has been received
             var timeoutWorkItem: DispatchWorkItem?
 
-            if let timeout = timeout {
+            if let timeout {
                 let workItem = DispatchWorkItem {
                     if !receivedValue {
                         continuation.resume(

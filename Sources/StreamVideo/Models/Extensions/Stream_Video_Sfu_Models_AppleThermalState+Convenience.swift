@@ -16,9 +16,9 @@ extension Stream_Video_Sfu_Signal_SendStatsRequest.OneOf_DeviceState {
     var thermalState: Stream_Video_Sfu_Models_AppleThermalState {
         switch self {
         case .android:
-            return .UNRECOGNIZED(0)
+            .UNRECOGNIZED(0)
         case let .apple(state):
-            return state.thermalState
+            state.thermalState
         }
     }
 }

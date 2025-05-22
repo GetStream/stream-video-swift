@@ -99,8 +99,8 @@ import SwiftUI
     private func subscribeForSessionUpdates() {
         call?.state.$session.sink { [weak self] response in
             guard let self else { return }
-            if response?.timerEndsAt != self.timerEndsAt {
-                self.timerEndsAt = response?.timerEndsAt
+            if response?.timerEndsAt != timerEndsAt {
+                timerEndsAt = response?.timerEndsAt
             }
         }
         .store(in: &cancellables)

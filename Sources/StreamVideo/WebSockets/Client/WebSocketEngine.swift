@@ -37,7 +37,7 @@ struct WebSocketEngineError: Error {
 
 extension WebSocketEngineError {
     init(error: Error?) {
-        if let error = error {
+        if let error {
             self.init(
                 reason: error.localizedDescription,
                 code: (error as NSError).code,

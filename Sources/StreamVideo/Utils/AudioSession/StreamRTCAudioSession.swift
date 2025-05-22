@@ -131,7 +131,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         try await performOperation { [weak self] in
             guard let self else { return }
 
-            let state = self.state
+            let state = state
             let needsCategoryUpdate = category != state.category
             let needsModeUpdate = mode != state.mode
             let needsOptionsUpdate = categoryOptions != state.options
@@ -203,7 +203,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
 
             try source.overrideOutputAudioPort(port)
             state.overrideOutputPort = port
-            log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
+            log.debug("AudioSession updated with state \(state)", subsystems: .audioSession)
         }
     }
 

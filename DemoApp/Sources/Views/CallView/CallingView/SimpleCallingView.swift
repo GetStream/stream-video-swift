@@ -171,7 +171,7 @@ struct SimpleCallingView: View {
             DispatchQueue
                 .main
                 .asyncAfter(deadline: .now() + 0.1) {
-                    self.showChangeEnvironmentPrompt = true
+                    showChangeEnvironmentPrompt = true
                 }
         }
     }
@@ -215,11 +215,11 @@ struct SimpleCallingView: View {
     private var callTypeTitle: String {
         switch callType {
         case .livestream:
-            return "Livestream"
+            "Livestream"
         case .audioRoom:
-            return "AudioRoom"
+            "AudioRoom"
         default:
-            return "Call"
+            "Call"
         }
     }
 

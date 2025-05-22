@@ -156,7 +156,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
     }
 }
 
-internal struct ParticipantMicrophoneCheckView: View {
+struct ParticipantMicrophoneCheckView: View {
 
     var audioLevels: [Float]
     var microphoneOn: Bool

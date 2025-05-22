@@ -41,7 +41,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
         let imageStream = (camera as? Camera)?.previewStream.dropFirst()
             .map(\.image)
         
-        guard let imageStream = imageStream else { return }
+        guard let imageStream else { return }
 
         for await image in imageStream {
             await MainActor.run {
@@ -56,7 +56,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
                 (camera as? Camera)?.switchCaptureDevice()
             }
             Task {
-                await(camera as? Camera)?.start()
+                await (camera as? Camera)?.start()
             }
         }
     }

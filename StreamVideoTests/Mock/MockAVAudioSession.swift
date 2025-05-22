@@ -33,10 +33,10 @@ final class MockAVAudioSession: AVAudioSessionProtocol, Mockable, @unchecked Sen
         var payload: Any {
             switch self {
             case let .setCategory(category, mode, options):
-                return (category, mode, options)
+                (category, mode, options)
 
             case let .setOverrideOutputAudioPort(value):
-                return value
+                value
             }
         }
     }
@@ -53,7 +53,7 @@ final class MockAVAudioSession: AVAudioSessionProtocol, Mockable, @unchecked Sen
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 

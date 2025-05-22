@@ -38,7 +38,7 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
     }
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -100,7 +100,7 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
 
         await assertTransitionAfterTrigger(trigger: {}) { target in
             await self.assertNilAsync(
-                await target.context.coordinator?.stateAdapter.statsReporter?.sfuAdapter
+                target.context.coordinator?.stateAdapter.statsReporter?.sfuAdapter
             )
         }
     }
@@ -227,8 +227,8 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
 
     private func assertTransitionAfterTrigger(
         expectedTarget: WebRTCCoordinator.StateMachine.Stage.ID? = nil,
-        trigger: @escaping @Sendable() async -> Void,
-        validationHandler: @escaping @Sendable(WebRTCCoordinator.StateMachine.Stage) async -> Void,
+        trigger: @escaping @Sendable () async -> Void,
+        validationHandler: @escaping @Sendable (WebRTCCoordinator.StateMachine.Stage) async -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -278,8 +278,8 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         }
     }
 
-    private func assertNilAsync<T>(
-        _ expression: @autoclosure () async throws -> T?,
+    private func assertNilAsync(
+        _ expression: @autoclosure () async throws -> (some Any)?,
         file: StaticString = #file,
         line: UInt = #line
     ) async rethrows {

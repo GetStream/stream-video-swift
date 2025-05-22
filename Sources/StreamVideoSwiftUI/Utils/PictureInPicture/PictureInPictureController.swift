@@ -75,9 +75,9 @@ final class PictureInPictureController: @unchecked Sendable {
             .compactMap {
                 switch $0 {
                 case let .failedToStart(_, error):
-                    return error
+                    error
                 default:
-                    return nil
+                    nil
                 }
             }
             .log(.error, subsystems: .pictureInPicture) { "Picture-in-Picture failed to start: \($0)." }

@@ -4,6 +4,7 @@
 
 import StreamVideo
 import SwiftUI
+
 /// A view representing a connection quality indicator.
 public struct ConnectionQualityIndicator: View {
 
@@ -54,13 +55,13 @@ public struct ConnectionQualityIndicator: View {
     /// - Returns: The color for the specified indicator part.
     private func color(for index: Int) -> Color {
         if connectionQuality == .excellent {
-            return colors.goodConnectionQualityIndicatorColor
+            colors.goodConnectionQualityIndicatorColor
         } else if connectionQuality == .good {
-            return index == 3 ? colors.white : colors.goodConnectionQualityIndicatorColor
+            index == 3 ? colors.white : colors.goodConnectionQualityIndicatorColor
         } else if connectionQuality == .poor {
-            return index == 1 ? colors.badConnectionQualityIndicatorColor : colors.white
+            index == 1 ? colors.badConnectionQualityIndicatorColor : colors.white
         } else {
-            return .clear
+            .clear
         }
     }
 
@@ -69,11 +70,11 @@ public struct ConnectionQualityIndicator: View {
     /// - Returns: The height for the specified indicator part.
     private func height(for part: Int) -> CGFloat {
         if part == 1 {
-            return width * 2
+            width * 2
         } else if part == 2 {
-            return width * 3
+            width * 3
         } else {
-            return width * 4
+            width * 4
         }
     }
 }

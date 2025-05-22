@@ -29,8 +29,8 @@ extension Publisher where Output: Sendable {
     public func sinkTask(
         storeIn disposableBag: DisposableBag? = nil,
         identifier: String? = nil,
-        receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
-        receiveValue: @escaping (@Sendable(Output) async throws -> Void)
+        receiveCompletion: @escaping (@Sendable (Subscribers.Completion<Failure>) -> Void) = { _ in },
+        receiveValue: @escaping (@Sendable (Output) async throws -> Void)
     ) -> AnyCancellable {
         // Subscribe to the publisher's events and process the received input.
         sink(receiveCompletion: receiveCompletion) { @Sendable [weak disposableBag] input in
@@ -78,8 +78,8 @@ extension Publisher where Output: Sendable {
     ///   - Task cancellation and errors are handled similarly to `sinkTask(storeIn:identifier:receiveCompletion:receiveValue:)`.
     public func sinkTask(
         queue: SerialActorQueue,
-        receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
-        receiveValue: @escaping (@Sendable(Output) async throws -> Void)
+        receiveCompletion: @escaping (@Sendable (Subscribers.Completion<Failure>) -> Void) = { _ in },
+        receiveValue: @escaping (@Sendable (Output) async throws -> Void)
     ) -> AnyCancellable {
         // Subscribe to the publisher's events and process the received input.
         sink(receiveCompletion: receiveCompletion) { [weak queue] input in

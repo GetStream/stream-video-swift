@@ -33,7 +33,7 @@ final class MockWebSocketClientFactory: WebSocketClientProviding, Mockable, @unc
                 connectURL,
                 requiresAuth
             ):
-                return (
+                (
                     sessionConfiguration,
                     eventDecoder,
                     eventNotificationCenter,
@@ -54,7 +54,7 @@ final class MockWebSocketClientFactory: WebSocketClientProviding, Mockable, @unc
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     init() {
         stub(for: .build, with: MockWebSocketClient(webSocketClientType: .sfu))

@@ -13,7 +13,7 @@ struct CallingParticipantView<Factory: ViewFactory>: View {
     
     var body: some View {
         ZStack {
-            if let participant = participant {
+            if let participant {
                 IncomingCallParticipantView(
                     viewFactory: viewFactory,
                     participant: participant

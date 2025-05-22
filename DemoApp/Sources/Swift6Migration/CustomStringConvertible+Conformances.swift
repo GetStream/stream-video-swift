@@ -19,13 +19,13 @@ extension TranscriptionSettings.Mode {
     public var description: String {
         switch self {
         case .autoOn:
-            return "auto-on"
+            "auto-on"
         case .available:
-            return "Available"
+            "Available"
         case .disabled:
-            return "Disabled"
+            "Disabled"
         case .unknown:
-            return "Unknown"
+            "Unknown"
         }
     }
 }
@@ -34,13 +34,13 @@ extension TranscriptionSettings.ClosedCaptionMode {
     public var description: String {
         switch self {
         case .autoOn:
-            return "auto-on"
+            "auto-on"
         case .available:
-            return "Available"
+            "Available"
         case .disabled:
-            return "Disabled"
+            "Disabled"
         case .unknown:
-            return "Unknown"
+            "Unknown"
         }
     }
 }
@@ -48,41 +48,41 @@ extension TranscriptionSettings.ClosedCaptionMode {
 extension TranscriptionSettings.Language {
     public var description: String {
         switch self {
-        case .ar: return "Arabic"
-        case .auto: return "Auto"
-        case .ca: return "Catalan"
-        case .cs: return "Czech"
-        case .da: return "Danish"
-        case .de: return "German"
-        case .el: return "Greek"
-        case .en: return "English"
-        case .es: return "Spanish"
-        case .fi: return "Finnish"
-        case .fr: return "French"
-        case .he: return "Hebrew"
-        case .hi: return "Hindi"
-        case .hr: return "Croatian"
-        case .hu: return "Hungarian"
-        case .id: return "Indonesian"
-        case .it: return "Italian"
-        case .ja: return "Japanese"
-        case .ko: return "Korean"
-        case .ms: return "Malay"
-        case .nl: return "Dutch"
-        case .no: return "Norwegian"
-        case .pl: return "Polish"
-        case .pt: return "Portuguese"
-        case .ro: return "Romanian"
-        case .ru: return "Russian"
-        case .sv: return "Swedish"
-        case .ta: return "Tamil"
-        case .th: return "Thai"
-        case .tl: return "Tagalog"
-        case .tr: return "Turkish"
-        case .uk: return "Ukrainian"
-        case .zh: return "Chinese"
+        case .ar: "Arabic"
+        case .auto: "Auto"
+        case .ca: "Catalan"
+        case .cs: "Czech"
+        case .da: "Danish"
+        case .de: "German"
+        case .el: "Greek"
+        case .en: "English"
+        case .es: "Spanish"
+        case .fi: "Finnish"
+        case .fr: "French"
+        case .he: "Hebrew"
+        case .hi: "Hindi"
+        case .hr: "Croatian"
+        case .hu: "Hungarian"
+        case .id: "Indonesian"
+        case .it: "Italian"
+        case .ja: "Japanese"
+        case .ko: "Korean"
+        case .ms: "Malay"
+        case .nl: "Dutch"
+        case .no: "Norwegian"
+        case .pl: "Polish"
+        case .pt: "Portuguese"
+        case .ro: "Romanian"
+        case .ru: "Russian"
+        case .sv: "Swedish"
+        case .ta: "Tamil"
+        case .th: "Thai"
+        case .tl: "Tagalog"
+        case .tr: "Turkish"
+        case .uk: "Ukrainian"
+        case .zh: "Chinese"
         case .unknown:
-            return "Unknown"
+            "Unknown"
         }
     }
 }

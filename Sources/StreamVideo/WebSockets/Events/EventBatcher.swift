@@ -7,7 +7,7 @@ import Foundation
 /// The type that does events batching.
 protocol EventBatcher: Sendable {
     typealias Batch = [WrappedEvent]
-    typealias BatchHandler = @Sendable(_ batch: Batch, _ completion: @Sendable @escaping () -> Void) -> Void
+    typealias BatchHandler = @Sendable (_ batch: Batch, _ completion: @Sendable @escaping() -> Void) -> Void
 
     /// The current batch of events.
     var currentBatch: Batch { get }
@@ -28,14 +28,15 @@ protocol EventBatcher: Sendable {
 extension Batcher: EventBatcher, @unchecked Sendable where Item == WrappedEvent {}
 
 final class Batcher<Item> {
-    /// The batching period. If the item is added sonner then `period` has passed after the first item they will get into the same batch.
+    /// The batching period. If the item is added sonner then `period` has passed after the first item they will get into the same
+    /// batch.
     private let period: TimeInterval
     /// The time used to create timers.
     private let timerType: Timer.Type
     /// The timer that  calls `processor` when fired.
     private var batchProcessingTimer: TimerControl?
     /// The closure which processes the batch.
-    private let handler: @Sendable(_ batch: [Item], _ completion: @Sendable @escaping () -> Void) -> Void
+    private let handler: @Sendable (_ batch: [Item], _ completion: @Sendable @escaping() -> Void) -> Void
     /// The serial queue where item appends and batch processing is happening on.
     private let queue = DispatchQueue(label: "io.getstream.Batch.\(Item.self)")
     /// The current batch of items.
@@ -55,11 +56,11 @@ final class Batcher<Item> {
         timerType.schedule(timeInterval: 0, queue: queue) { [weak self] in
             self?.currentBatch.append(item)
             
-            guard let self = self, self.batchProcessingTimer == nil else { return }
+            guard let self, batchProcessingTimer == nil else { return }
             
-            self.batchProcessingTimer = self.timerType.schedule(
-                timeInterval: self.period,
-                queue: self.queue,
+            batchProcessingTimer = timerType.schedule(
+                timeInterval: period,
+                queue: queue,
                 onFire: { self.process() }
             )
         }
@@ -71,7 +72,7 @@ final class Batcher<Item> {
         }
     }
     
-    private func process(completion: (@Sendable() -> Void)? = nil) {
+    private func process(completion: (@Sendable () -> Void)? = nil) {
         handler(currentBatch) { completion?() }
         currentBatch.removeAll()
         batchProcessingTimer?.cancel()

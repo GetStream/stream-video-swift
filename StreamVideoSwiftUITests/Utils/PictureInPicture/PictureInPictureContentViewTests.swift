@@ -16,24 +16,24 @@ final class PictureInPictureContentViewTests: StreamVideoUITestCase, @unchecked 
     private lazy var targetSize: CGSize = .init(width: 400, height: 200)
 
     func test_content_inactive() async {
-        AssertSnapshot(
-            await makeSubject(.inactive),
+        await AssertSnapshot(
+            makeSubject(.inactive),
             variants: snapshotVariants,
             size: targetSize
         )
     }
 
     func test_content_participant() async {
-        AssertSnapshot(
-            await makeSubject(.participant(MockCall(.dummy()), .dummy(name: "Get Stream"), nil)),
+        await AssertSnapshot(
+            makeSubject(.participant(MockCall(.dummy()), .dummy(name: "Get Stream"), nil)),
             variants: snapshotVariants,
             size: targetSize
         )
     }
 
     func test_content_screenSharing() async {
-        AssertSnapshot(
-            await makeSubject(
+        await AssertSnapshot(
+            makeSubject(
                 .screenSharing(
                     MockCall(.dummy()),
                     .dummy(name: "Get Stream"),
@@ -46,8 +46,8 @@ final class PictureInPictureContentViewTests: StreamVideoUITestCase, @unchecked 
     }
 
     func test_content_reconnecting() async {
-        AssertSnapshot(
-            await makeSubject(.reconnecting),
+        await AssertSnapshot(
+            makeSubject(.reconnecting),
             variants: snapshotVariants,
             size: targetSize
         )

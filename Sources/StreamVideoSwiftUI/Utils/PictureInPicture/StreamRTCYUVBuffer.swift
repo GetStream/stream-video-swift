@@ -46,9 +46,9 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
     /// - Returns: An object conforming to `RTCI420BufferProtocol`.
     func toI420() -> any RTCI420BufferProtocol {
         if let i420 = source as? RTCI420Buffer {
-            return i420
+            i420
         } else {
-            return source.toI420()
+            source.toI420()
         }
     }
 
@@ -86,11 +86,11 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
     /// Retrieves the underlying pixel buffer if available.
     var pixelBuffer: CVPixelBuffer? {
         if source is RTCI420Buffer {
-            return i420ToYUVPixelBuffer
+            i420ToYUVPixelBuffer
         } else if let pixelBuffer = source as? RTCCVPixelBuffer {
-            return pixelBuffer.pixelBuffer
+            pixelBuffer.pixelBuffer
         } else {
-            return nil
+            nil
         }
     }
 
@@ -110,7 +110,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             formatDescriptionOut: &formatDescription
         )
 
-        guard let formatDescription = formatDescription else {
+        guard let formatDescription else {
             log.error("Cannot create sample buffer formatDescription.", subsystems: .pictureInPicture)
             return nil
         }

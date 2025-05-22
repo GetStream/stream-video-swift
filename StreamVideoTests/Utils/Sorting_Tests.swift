@@ -668,7 +668,8 @@ final class Sorting_Tests: XCTestCase, @unchecked Sendable {
             ],
             comparator: combined,
             expectedTransformer: { [$0[0], $0[1]]
-            } // Participant with screen sharing should come first even if the other is a dominant speaker and is speaking, when both are invisible.
+            } // Participant with screen sharing should come first even if the other is a dominant speaker and is speaking, when
+            // both are invisible.
         )
     }
 
@@ -687,7 +688,8 @@ final class Sorting_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    /// Test the `defaultComparators` mixed: considering `screensharing`, `dominantSpeaker`, `ifInvisible` for `publishingVideo`, and `ifInvisible` for `publishingAudio`.
+    /// Test the `defaultComparators` mixed: considering `screensharing`, `dominantSpeaker`, `ifInvisible` for `publishingVideo`,
+    /// and `ifInvisible` for `publishingAudio`.
     func test_defaultComparators_mixed_screenshareDominantInvisibleVideoAndAudio() {
         let combined = combineComparators(defaultSortPreset)
 
@@ -698,7 +700,8 @@ final class Sorting_Tests: XCTestCase, @unchecked Sendable {
             ],
             comparator: combined,
             expectedTransformer: { [$0[0], $0[1]]
-            } // Participant with screen sharing should come first even if the other is a dominant speaker, has video but no audio, when both are invisible.
+            } // Participant with screen sharing should come first even if the other is a dominant speaker, has video but no audio,
+            // when both are invisible.
         )
     }
 

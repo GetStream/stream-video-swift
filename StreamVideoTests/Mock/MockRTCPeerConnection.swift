@@ -20,7 +20,7 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case setLocalDescription
@@ -50,25 +50,25 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         var payload: Any {
             switch self {
             case let .setLocalDescription(sessionDescription):
-                return sessionDescription
+                sessionDescription
             case let .setRemoteDescription(sessionDescription):
-                return sessionDescription
+                sessionDescription
             case let .offer(constraints):
-                return constraints
+                constraints
             case let .answer(constraints):
-                return constraints
+                constraints
             case .statistics:
-                return ()
+                ()
             case let .addTransceiver(trackType, track, transceiverInit):
-                return (trackType, track, transceiverInit)
+                (trackType, track, transceiverInit)
             case let .addCandidate(candidate):
-                return candidate
+                candidate
             case .restartICE:
-                return ()
+                ()
             case .close:
-                return ()
+                ()
             case let .transceivers(trackType):
-                return trackType
+                trackType
             }
         }
     }

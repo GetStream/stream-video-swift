@@ -90,7 +90,7 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler, @unchecked Sendable
     /// Sets up the client connection and defines an `onClose` callback.
     private func setupConnection() {
         clientConnection?.onClose = { [weak self] error in
-            if let error = error {
+            if let error {
                 self?.finishBroadcastWithError(error)
             } else {
                 let screenshareError = NSError(

@@ -19,7 +19,7 @@ final class MockAudioSessionPolicy: Mockable, AudioSessionPolicy, @unchecked Sen
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case configuration
@@ -31,7 +31,7 @@ final class MockAudioSessionPolicy: Mockable, AudioSessionPolicy, @unchecked Sen
         var payload: Any {
             switch self {
             case let .configuration(callSettings, ownCapabilities):
-                return (callSettings, ownCapabilities)
+                (callSettings, ownCapabilities)
             }
         }
     }

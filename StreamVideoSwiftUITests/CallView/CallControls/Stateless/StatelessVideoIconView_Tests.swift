@@ -14,8 +14,8 @@ final class StatelessVideoIconView_Tests: StreamVideoUITestCase, @unchecked Send
 
     @MainActor
     func test_appearance_videoOn_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 true
             ),
             variants: snapshotVariants,
@@ -25,8 +25,8 @@ final class StatelessVideoIconView_Tests: StreamVideoUITestCase, @unchecked Send
 
     @MainActor
     func test_appearance_videoOff_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 false
             ),
             variants: snapshotVariants,

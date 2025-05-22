@@ -33,9 +33,9 @@ public class Images {
 
     private static var toggleCameraImageName: String {
         if #available(iOS 14, *) {
-            return "arrow.triangle.2.circlepath.camera.fill"
+            "arrow.triangle.2.circlepath.camera.fill"
         } else {
-            return "arrow.up.arrow.down"
+            "arrow.up.arrow.down"
         }
     }
 }

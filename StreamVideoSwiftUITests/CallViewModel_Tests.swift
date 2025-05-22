@@ -275,9 +275,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         
         await fulfilmentInMainActor {
             if case .incoming = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -330,9 +330,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         await fulfilmentInMainActor {
             if case .incoming = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -394,9 +394,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         await fulfilmentInMainActor {
             if case .incoming = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -424,9 +424,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
             {
                 switch callViewModel.callingState {
                 case .incoming:
-                    return true
+                    true
                 default:
-                    return false
+                    false
                 }
             }()
         )
@@ -464,9 +464,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         await fulfilmentInMainActor {
             if case .incoming = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -494,9 +494,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
             {
                 switch callViewModel.callingState {
                 case .incoming:
-                    return true
+                    true
                 default:
-                    return false
+                    false
                 }
             }()
         )
@@ -534,9 +534,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         await fulfilmentInMainActor {
             if case .incoming = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -564,9 +564,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
             {
                 switch callViewModel.callingState {
                 case .incoming:
-                    return true
+                    true
                 default:
-                    return false
+                    false
                 }
             }()
         )
@@ -605,9 +605,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         
         await fulfilmentInMainActor {
             if case .incoming = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -658,9 +658,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
         await fulfilmentInMainActor {
             if case .lobby = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -700,9 +700,9 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
         await fulfilmentInMainActor {
             if case .lobby = callViewModel.callingState {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 

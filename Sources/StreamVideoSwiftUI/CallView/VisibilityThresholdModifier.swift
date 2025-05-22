@@ -51,7 +51,7 @@ struct VisibilityThresholdModifier: ViewModifier {
 
                     /// Update the isOnScreen state based on visibility calculations.
                     Task { @MainActor in
-                        self.isOnScreen = verticalVisible && horizontalVisible
+                        isOnScreen = verticalVisible && horizontalVisible
                     }
 
                     /// Use a clear color for the background to not affect the appearance.

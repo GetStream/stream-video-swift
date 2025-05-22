@@ -21,7 +21,7 @@ final class MockProximityMonitor: ProximityProviding, Mockable {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {}
+    func stub(for function: FunctionKey, with value: some Any) {}
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case startObservation, stopObservation

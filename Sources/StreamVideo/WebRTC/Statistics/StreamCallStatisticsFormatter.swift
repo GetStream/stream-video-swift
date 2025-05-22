@@ -154,7 +154,7 @@ struct StreamCallStatisticsFormatter {
 
         /// Determines the MIME type of the codec used for the stream.
         let mimeType = {
-            guard let codecId = statistic.codecId, let codec = self.codec(for: codecId) else { return "" }
+            guard let codecId = statistic.codecId, let codec = codec(for: codecId) else { return "" }
             return codec.mimeType ?? ""
         }()
 

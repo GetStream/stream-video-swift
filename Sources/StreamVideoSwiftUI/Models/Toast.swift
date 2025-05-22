@@ -54,17 +54,17 @@ public indirect enum ToastStyle: Equatable {
     ) -> Bool {
         switch (lhs, rhs) {
         case (.error, .error):
-            return true
+            true
         case (.warning, .warning):
-            return true
+            true
         case (.success, .success):
-            return true
+            true
         case (.info, .info):
-            return true
+            true
         case (.custom, .custom):
-            return false
+            false
         default:
-            return false
+            false
         }
     }
 }
@@ -72,21 +72,21 @@ public indirect enum ToastStyle: Equatable {
 extension ToastStyle {
     var themeColor: Color {
         switch self {
-        case .error: return Color.red
-        case .warning: return Color.orange
-        case .info: return Color.blue
-        case .success: return Color.green
-        case let .custom(baseStyle, _): return baseStyle.themeColor
+        case .error: Color.red
+        case .warning: Color.orange
+        case .info: Color.blue
+        case .success: Color.green
+        case let .custom(baseStyle, _): baseStyle.themeColor
         }
     }
     
     var iconFileName: String {
         switch self {
-        case .info: return "info.circle.fill"
-        case .warning: return "exclamationmark.triangle.fill"
-        case .success: return "checkmark.circle.fill"
-        case .error: return "exclamationmark.circle.fill"
-        case let .custom(baseStyle, _): return baseStyle.iconFileName
+        case .info: "info.circle.fill"
+        case .warning: "exclamationmark.triangle.fill"
+        case .success: "checkmark.circle.fill"
+        case .error: "exclamationmark.circle.fill"
+        case let .custom(baseStyle, _): baseStyle.iconFileName
         }
     }
 }

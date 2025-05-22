@@ -25,7 +25,7 @@ private class Message {
             framedMessage = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, false).takeRetainedValue()
         }
         
-        guard let framedMessage = framedMessage else {
+        guard let framedMessage else {
             return -1
         }
         
@@ -104,19 +104,19 @@ private class Message {
     }
     
     private func copyImageData(_ data: Data?, to pixelBuffer: CVPixelBuffer?) {
-        if let pixelBuffer = pixelBuffer {
+        if let pixelBuffer {
             CVPixelBufferLockBaseAddress(pixelBuffer, [])
         }
         
         var image: CIImage?
-        if let data = data {
+        if let data {
             image = CIImage(data: data)
         }
-        if let image = image, let pixelBuffer = pixelBuffer {
+        if let image, let pixelBuffer {
             imageContext()?.render(image, to: pixelBuffer)
         }
         
-        if let pixelBuffer = pixelBuffer {
+        if let pixelBuffer {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
         }
     }
@@ -190,20 +190,19 @@ final class BroadcastBufferReader: NSObject {
         _ pixelBuffer: CVPixelBuffer?,
         with orientation: CGImagePropertyOrientation
     ) {
-        guard let pixelBuffer = pixelBuffer else {
+        guard let pixelBuffer else {
             return
         }
         
-        var rotation: RTCVideoRotation
-        switch orientation {
+        var rotation: RTCVideoRotation = switch orientation {
         case .left:
-            rotation = ._90
+            ._90
         case .down:
-            rotation = ._180
+            ._180
         case .right:
-            rotation = ._270
+            ._270
         default:
-            rotation = ._0
+            ._0
         }
         
         onCapture?(pixelBuffer, rotation)

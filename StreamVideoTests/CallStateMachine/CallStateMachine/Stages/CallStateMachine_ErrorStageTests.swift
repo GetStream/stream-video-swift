@@ -14,9 +14,7 @@ final class StreamCallStateMachineStageErrorStage_Tests: StreamVideoTestCase, @u
         .allCases
         .filter { $0 != subject.id }
         .map { Call.StateMachine.Stage(id: $0, context: .init(call: call)) }
-    private lazy var error: Error! = {
-        TestError()
-    }()
+    private lazy var error: Error! = TestError()
 
     private lazy var subject: Call.StateMachine.Stage! = .error(.init(call: call), error: error)
     private var transitionedToStage: Call.StateMachine.Stage?

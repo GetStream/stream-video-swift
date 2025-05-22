@@ -36,7 +36,7 @@ final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
     }
 
     override class func tearDown() {
-        Self.mockStreamVideo = nil
+        mockStreamVideo = nil
         super.tearDown()
     }
 

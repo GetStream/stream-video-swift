@@ -40,11 +40,11 @@ final class StreamCaptureDeviceProvider: CaptureDeviceProviding {
     /// - Returns: A capture device conforming to CaptureDeviceProtocol.
     func device(for position: AVCaptureDevice.Position) -> CaptureDeviceProtocol? {
         if let deviceFound = devices.first(where: { $0.position == position }) {
-            return deviceFound
+            deviceFound
         } else if useFallback {
-            return devices.first
+            devices.first
         } else {
-            return nil
+            nil
         }
     }
 

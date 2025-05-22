@@ -33,13 +33,13 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         var payload: Any {
             switch self {
             case let .join(create, options, ring, notify, callSettings):
-                return (create, options, ring, notify, callSettings)
+                (create, options, ring, notify, callSettings)
 
             case let .updateTrackSize(trackSize, participant):
-                return (trackSize, participant)
+                (trackSize, participant)
 
             case let .callKitActivated(audioSession):
-                return audioSession
+                audioSession
             }
         }
     }
@@ -75,7 +75,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 

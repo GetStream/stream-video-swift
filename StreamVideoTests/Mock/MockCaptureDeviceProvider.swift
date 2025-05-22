@@ -21,9 +21,9 @@ final class MockCaptureDeviceProvider: CaptureDeviceProviding, Mockable, @unchec
         var payload: Any {
             switch self {
             case let .deviceForAVPosition(position):
-                return position
+                position
             case let .deviceForPosition(position):
-                return position
+                position
             }
         }
     }
@@ -36,7 +36,7 @@ final class MockCaptureDeviceProvider: CaptureDeviceProviding, Mockable, @unchec
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     // MARK: - CaptureDeviceProviding
 

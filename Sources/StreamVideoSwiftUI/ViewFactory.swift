@@ -48,7 +48,7 @@ public protocol ViewFactory: AnyObject {
     func makeVideoParticipantsView(
         viewModel: CallViewModel,
         availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
 
     associatedtype ParticipantViewType: View = VideoCallParticipantView<Self>
@@ -237,7 +237,7 @@ extension ViewFactory {
     public func makeVideoParticipantsView(
         viewModel: CallViewModel,
         availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
             viewFactory: self,

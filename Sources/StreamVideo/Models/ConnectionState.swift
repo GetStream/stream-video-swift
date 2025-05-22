@@ -14,11 +14,11 @@ public enum DisconnectionReason: Equatable, Sendable {
     public static func == (lhs: DisconnectionReason, rhs: DisconnectionReason) -> Bool {
         switch (lhs, rhs) {
         case (.user, .user):
-            return true
+            true
         case (.networkError(_), .networkError(_)):
-            return true
+            true
         default:
-            return false
+            false
         }
     }
     

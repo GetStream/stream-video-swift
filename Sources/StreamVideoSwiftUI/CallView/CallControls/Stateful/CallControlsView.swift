@@ -45,9 +45,9 @@ public struct CallControlsView: View {
     private var call: Call? {
         switch viewModel.callingState {
         case .incoming, .outgoing:
-            return streamVideo.state.ringingCall
+            streamVideo.state.ringingCall
         default:
-            return viewModel.call
+            viewModel.call
         }
     }
 }

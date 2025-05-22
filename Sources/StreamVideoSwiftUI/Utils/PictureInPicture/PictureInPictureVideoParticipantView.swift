@@ -82,7 +82,7 @@ struct PictureInPictureVideoParticipantView: View {
                 }
             }
             .onReceive(store.state.call?.state.$callSettings) {
-                self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front
+                isUsingFrontCameraForLocalUser = $0.cameraPosition == .front
             }
         } else {
             content()

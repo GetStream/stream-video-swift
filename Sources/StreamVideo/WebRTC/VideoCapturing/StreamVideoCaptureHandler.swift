@@ -52,21 +52,21 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
 
                     var _buffer: RTCCVPixelBuffer?
 
-                    if self.selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
+                    if selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
                         _buffer = buffer
                         let imageBuffer = buffer.pixelBuffer
                         CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-                        let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: self.colorSpace])
-                        let outputImage = await self.filter(image: inputImage, pixelBuffer: imageBuffer)
+                        let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
+                        let outputImage = await filter(image: inputImage, pixelBuffer: imageBuffer)
                         CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-                        self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: self.colorSpace)
+                        context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
                     }
 
-                    let updatedFrame = self.handleRotation
-                        ? self.adjustRotation(capturer, for: _buffer, frame: frame)
+                    let updatedFrame = handleRotation
+                        ? adjustRotation(capturer, for: _buffer, frame: frame)
                         : frame
 
-                    self.source.capturer(capturer, didCapture: updatedFrame)
+                    source.capturer(capturer, didCapture: updatedFrame)
                 }
             } catch {
                 log.error(error)

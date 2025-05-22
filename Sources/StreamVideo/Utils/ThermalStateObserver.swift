@@ -36,16 +36,15 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
     @Published private(set) var state: ProcessInfo.ThermalState {
         didSet {
             // Determine the appropriate log level based on the thermal state
-            let logLevel: LogLevel
-            switch state {
+            let logLevel: LogLevel = switch state {
             case .nominal, .fair:
-                logLevel = .debug
+                .debug
             case .serious:
-                logLevel = .warning
+                .warning
             case .critical:
-                logLevel = .error
+                .error
             @unknown default:
-                logLevel = .debug
+                .debug
             }
             // Log the thermal state change with the calculated log level
             log.log(

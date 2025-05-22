@@ -7,7 +7,7 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
-internal struct DemoCallContainerView: View {
+struct DemoCallContainerView: View {
 
     private var callId: String
     private var callType: String
@@ -17,7 +17,7 @@ internal struct DemoCallContainerView: View {
     @StateObject var chatViewModel: DemoChatViewModel
     @ObservedObject var appState = AppState.shared
 
-    internal init(callId: String, callType: String = .default) {
+    init(callId: String, callType: String = .default) {
         let callViewModel = CallViewModel()
         callViewModel.participantAutoLeavePolicy = AppEnvironment.autoLeavePolicy.policy
         callViewModel.isPictureInPictureEnabled = AppEnvironment.pictureInPictureIntegration == .enabled
@@ -27,7 +27,7 @@ internal struct DemoCallContainerView: View {
         self.callType = callType
     }
 
-    internal var body: some View {
+    var body: some View {
         DemoCallContentView(viewModel: viewModel, callId: callId, loggedInView: AppEnvironment.loggedInView)
             .modifier(
                 DemoCallModifier(

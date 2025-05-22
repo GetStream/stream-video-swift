@@ -35,11 +35,11 @@ public enum VideoCodec: String, Sendable, Hashable, CustomStringConvertible {
     var isSVC: Bool {
         switch self {
         case .vp9, .av1:
-            return true
+            true
         case .h264, .vp8:
-            return false
+            false
         default:
-            return false
+            false
         }
     }
 

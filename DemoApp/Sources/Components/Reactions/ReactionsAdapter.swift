@@ -106,7 +106,6 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
                 self?.handleReaction(reaction, from: event.reaction.user.toUser)
                 log.debug("\(event.reaction.user.name ?? event.reaction.user.id) reacted with reaction:\(reaction.id)")
             }
-            return
         }
     }
 

@@ -47,18 +47,18 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// The unique identifier for the call.
     open var callId: String {
         if let active, let callEntry = callEntry(for: active) {
-            return callEntry.call.callId
+            callEntry.call.callId
         } else {
-            return ""
+            ""
         }
     }
 
     /// The type of call.
     open var callType: String {
         if let active, let callEntry = callEntry(for: active) {
-            return callEntry.call.callType
+            callEntry.call.callType
         } else {
-            return ""
+            ""
         }
     }
 
@@ -604,13 +604,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private func buildProvider(
         supportedHandleTypes: Set<CXHandle.HandleType> = [.generic]
     ) -> CXProvider {
-        let configuration = {
-            if #available(iOS 14.0, *) {
-                return CXProviderConfiguration()
-            } else {
-                return CXProviderConfiguration(localizedName: "video.provider.configuration")
-            }
-        }()
+        let configuration = if #available(iOS 14.0, *) {
+            CXProviderConfiguration()
+        } else {
+            CXProviderConfiguration(localizedName: "video.provider.configuration")
+        }
         configuration.supportsVideo = supportsVideo
         configuration.supportedHandleTypes = supportedHandleTypes
         configuration.iconTemplateImageData = iconTemplateImageData
@@ -688,7 +686,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
 extension CallKitService: InjectionKey {
     /// Provides the current instance of `CallKitService`.
-    nonisolated(unsafe) public static var currentValue: CallKitService = .init()
+    public nonisolated(unsafe) static var currentValue: CallKitService = .init()
 }
 
 extension InjectedValues {

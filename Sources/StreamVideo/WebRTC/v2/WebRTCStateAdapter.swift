@@ -13,7 +13,7 @@ import StreamWebRTC
 actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     typealias ParticipantsStorage = [String: CallParticipant]
-    typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
+    typealias ParticipantOperation = @Sendable (ParticipantsStorage) -> ParticipantsStorage
 
     /// Enum representing different types of media tracks.
     enum TrackEntry {
@@ -25,11 +25,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         var id: String {
             switch self {
             case let .audio(id, _):
-                return id
+                id
             case let .video(id, _):
-                return id
+                id
             case let .screenShare(id, _):
-                return id
+                id
             }
         }
     }
@@ -111,7 +111,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        self.peerConnectionFactory = PeerConnectionFactory.build(
+        peerConnectionFactory = PeerConnectionFactory.build(
             audioProcessingModule: videoConfig.audioProcessingModule
         )
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
@@ -129,53 +129,53 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     /// Sets the session ID.
     func set(sessionID value: String) {
-        self.sessionID = value
+        sessionID = value
     }
 
     /// Sets the call settings.
-    func set(callSettings value: CallSettings) { self.callSettings = value }
+    func set(callSettings value: CallSettings) { callSettings = value }
 
     /// Sets the initial call settings.
-    func set(initialCallSettings value: CallSettings?) { self.initialCallSettings = value }
+    func set(initialCallSettings value: CallSettings?) { initialCallSettings = value }
 
     /// Sets the audio settings.
-    func set(audioSettings value: AudioSettings) { self.audioSettings = value }
+    func set(audioSettings value: AudioSettings) { audioSettings = value }
 
     /// Sets the video options.
-    func set(videoOptions value: VideoOptions) { self.videoOptions = value }
+    func set(videoOptions value: VideoOptions) { videoOptions = value }
 
     /// Sets the publish options.
-    func set(publishOptions value: PublishOptions) { self.publishOptions = value }
+    func set(publishOptions value: PublishOptions) { publishOptions = value }
 
     /// Sets the connection options.
-    func set(connectOptions value: ConnectOptions) { self.connectOptions = value }
+    func set(connectOptions value: ConnectOptions) { connectOptions = value }
 
     /// Sets the own capabilities of the current user.
-    func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
+    func set(ownCapabilities value: Set<OwnCapability>) { ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
     func set(statsReporter value: WebRTCStatsReporter?) {
-        self.statsReporter = value
+        statsReporter = value
     }
 
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
-        self.sfuAdapter = value
+        sfuAdapter = value
         statsReporter?.sfuAdapter = sfuAdapter
     }
 
     /// Sets the number of participants in the call.
-    func set(participantsCount value: UInt32) { self.participantsCount = value }
+    func set(participantsCount value: UInt32) { participantsCount = value }
 
     /// Sets the anonymous participant count.
-    func set(anonymousCount value: UInt32) { self.anonymousCount = value }
+    func set(anonymousCount value: UInt32) { anonymousCount = value }
 
     /// Sets the participant pins.
-    func set(participantPins value: [PinInfo]) { self.participantPins = value }
+    func set(participantPins value: [PinInfo]) { participantPins = value }
 
     /// Sets the token for the session.
-    func set(token value: String) { self.token = value }
+    func set(token value: String) { token = value }
 
     /// Sets the video filter and applies it to the publisher.
     func set(videoFilter value: VideoFilter?) {
@@ -185,7 +185,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     /// Sets the manual trackSize that will be used when updating subscriptions with the SFU.
     func set(incomingVideoQualitySettings value: IncomingVideoQualitySettings) {
-        self.incomingVideoQualitySettings = value
+        incomingVideoQualitySettings = value
     }
 
     // MARK: - Session Management
@@ -200,7 +200,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// - Throws: Throws an error if the SFU adapter is not set or other
     ///   connection setup fails.
     func configurePeerConnections() async throws {
-        guard let sfuAdapter = sfuAdapter else {
+        guard let sfuAdapter else {
             throw ClientError("SFUAdapter hasn't been created.")
         }
 
@@ -218,10 +218,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         )
 
         peerConnectionsDisposableBag.removeAll()
-        let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
+        let publisher = try rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,
-            peerConnection: try StreamRTCPeerConnection(
+            peerConnection: StreamRTCPeerConnection(
                 peerConnectionFactory,
                 configuration: connectOptions.rtcConfiguration
             ),
@@ -236,10 +236,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             screenShareSessionProvider: screenShareSessionProvider
         )
 
-        let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
+        let subscriber = try rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .subscriber,
-            peerConnection: try StreamRTCPeerConnection(
+            peerConnection: StreamRTCPeerConnection(
                 peerConnectionFactory,
                 configuration: connectOptions.rtcConfiguration
             ),
@@ -302,9 +302,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         peerConnectionsDisposableBag.removeAll()
         await publisher?.close()
         await subscriber?.close()
-        self.publisher = nil
-        self.subscriber = nil
-        self.statsReporter = nil
+        publisher = nil
+        subscriber = nil
+        statsReporter = nil
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
         set(sfuAdapter: nil)
@@ -431,13 +431,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     ) -> RTCMediaStreamTrack? {
         switch trackType {
         case .audio:
-            return audioTracks[id]
+            audioTracks[id]
         case .video:
-            return videoTracks[id]
+            videoTracks[id]
         case .screenshare:
-            return screenShareTracks[id]
+            screenShareTracks[id]
         default:
-            return nil
+            nil
         }
     }
 
@@ -452,9 +452,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         of trackType: TrackType
     ) -> RTCMediaStreamTrack? {
         if let trackLookupPrefix = participant.trackLookupPrefix {
-            return track(for: trackLookupPrefix, of: trackType) ?? track(for: participant.sessionId, of: trackType)
+            track(for: trackLookupPrefix, of: trackType) ?? track(for: participant.sessionId, of: trackType)
         } else {
-            return track(for: participant.sessionId, of: trackType)
+            track(for: participant.sessionId, of: trackType)
         }
     }
 
@@ -520,8 +520,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             /// provide additional limits.
             if
                 newParticipant.sessionId != sessionID,
-                incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId)
-            {
+                incomingVideoQualitySettings.isVideoDisabled(for: entry.value.sessionId) {
                 newParticipant = newParticipant.withUpdated(track: nil)
             }
 
@@ -541,7 +540,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             return
         }
 
-        let currentCallSettings = self.callSettings
+        let currentCallSettings = callSettings
         let participantCallSettings = currentCallSettings
             .withUpdatedAudioState(localParticipant.hasAudio)
             .withUpdatedVideoState(localParticipant.hasVideo)
@@ -550,7 +549,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             return
         }
 
-        self.set(callSettings: participantCallSettings)
+        set(callSettings: participantCallSettings)
     }
 
     // MARK: - Private Helpers

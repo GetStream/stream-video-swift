@@ -9,12 +9,12 @@ import protocol StreamVideo.Timer
 final class EventBatcher_Mock: EventBatcher, @unchecked Sendable {
     var currentBatch: [WrappedEvent] = []
 
-    let handler: @Sendable(_ batch: [WrappedEvent], _ completion: @escaping @Sendable() -> Void) -> Void
+    let handler: @Sendable (_ batch: [WrappedEvent], _ completion: @escaping @Sendable() -> Void) -> Void
 
     init(
         period: TimeInterval = 0,
         timerType: Timer.Type = DefaultTimer.self,
-        handler: @escaping @Sendable(_ batch: [WrappedEvent], _ completion: @escaping @Sendable() -> Void) -> Void
+        handler: @escaping @Sendable (_ batch: [WrappedEvent], _ completion: @escaping @Sendable() -> Void) -> Void
     ) {
         self.handler = handler
     }

@@ -56,8 +56,8 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
 
     @MainActor
     @ViewBuilder
-    private func withLongPress<Content: View>(
-        @ViewBuilder _ content: () -> Content
+    private func withLongPress(
+        @ViewBuilder _ content: () -> some View
     ) -> some View {
         if call?.state.sessionId == participant.sessionId, participant.hasVideo {
             content().longPressToFocus(

@@ -91,7 +91,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     }
 
     /// Delegate method called when the device receives a VoIP push notification.
-    nonisolated open func pushRegistry(
+    open nonisolated func pushRegistry(
         _ registry: PKPushRegistry,
         didReceiveIncomingPushWith payload: PKPushPayload,
         for type: PKPushType,
@@ -153,15 +153,13 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             fallback: defaultCallText
         )
 
-        let hasVideo: Bool = {
-            if let booleanValue = streamDict[PayloadKey.video.rawValue] as? Bool {
-                return booleanValue
-            } else if let stringValue = streamDict[PayloadKey.video.rawValue] as? String {
-                return stringValue == "true"
-            } else {
-                return false
-            }
-        }()
+        let hasVideo: Bool = if let booleanValue = streamDict[PayloadKey.video.rawValue] as? Bool {
+            booleanValue
+        } else if let stringValue = streamDict[PayloadKey.video.rawValue] as? String {
+            stringValue == "true"
+        } else {
+            false
+        }
 
         return .init(
             cid: cid,
@@ -174,7 +172,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
 
 extension CallKitPushNotificationAdapter: InjectionKey {
     /// Provides the current instance of `CallKitPushNotificationAdapter`.
-    nonisolated(unsafe) public static var currentValue: CallKitPushNotificationAdapter = .init()
+    public nonisolated(unsafe) static var currentValue: CallKitPushNotificationAdapter = .init()
 }
 
 extension InjectedValues {

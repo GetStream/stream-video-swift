@@ -26,8 +26,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the joining stage in the WebRTC coordinator state machine.
     final class JoiningStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         private enum FlowType { case regular, fast, rejoin, migrate }
         private let disposableBag = DisposableBag()
         private let startTime = Date()
@@ -94,25 +93,25 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await sfuAdapter.sendJoinRequest(
+                    try await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
                             .buildRequest(
                                 with: isFastReconnecting ? .fastReconnect : .default,
                                 coordinator: coordinator,
-                                publisherSdp: try await buildSessionDescription(
+                                publisherSdp: buildSessionDescription(
                                     peerConnectionType: .publisher,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
                                     isFastReconnecting: isFastReconnecting
                                 ),
-                                subscriberSdp: try await buildSessionDescription(
+                                subscriberSdp: buildSessionDescription(
                                     peerConnectionType: .subscriber,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
                                     isFastReconnecting: isFastReconnecting
                                 ),
                                 reconnectAttempt: context.reconnectAttempts,
-                                publisher: await coordinator.stateAdapter.publisher
+                                publisher: coordinator.stateAdapter.publisher
                             )
                     )
 
@@ -158,18 +157,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await sfuAdapter.sendJoinRequest(
+                    try await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
                             .buildRequest(
                                 with: .migration(fromHostname: context.migratingFromSFU),
                                 coordinator: coordinator,
-                                publisherSdp: try await buildSessionDescription(
+                                publisherSdp: buildSessionDescription(
                                     peerConnectionType: .publisher,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
                                     isFastReconnecting: false
                                 ),
-                                subscriberSdp: try await buildSessionDescription(
+                                subscriberSdp: buildSessionDescription(
                                     peerConnectionType: .subscriber,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
@@ -217,18 +216,18 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await sfuAdapter.sendJoinRequest(
+                    try await sfuAdapter.sendJoinRequest(
                         WebRTCJoinRequestFactory()
                             .buildRequest(
                                 with: .rejoin(fromSessionID: isRejoiningFromSessionID),
                                 coordinator: coordinator,
-                                publisherSdp: try await buildSessionDescription(
+                                publisherSdp: buildSessionDescription(
                                     peerConnectionType: .publisher,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
                                     isFastReconnecting: false
                                 ),
-                                subscriberSdp: try await buildSessionDescription(
+                                subscriberSdp: buildSessionDescription(
                                     peerConnectionType: .subscriber,
                                     coordinator: coordinator,
                                     sfuAdapter: sfuAdapter,
@@ -366,7 +365,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try await coordinator
                 .stateAdapter
                 .publisher?
-                .didUpdateCallSettings(await coordinator.stateAdapter.callSettings)
+                .didUpdateCallSettings(coordinator.stateAdapter.callSettings)
 
             try Task.checkCancellation()
 
@@ -378,8 +377,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 joinResponse.fastReconnectDeadlineSeconds
             )
 
-            reportTelemetry(
-                sessionId: await coordinator.stateAdapter.sessionID,
+            await reportTelemetry(
+                sessionId: coordinator.stateAdapter.sessionID,
                 sfuAdapter: sfuAdapter
             )
         }

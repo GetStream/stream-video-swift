@@ -37,11 +37,11 @@ final class StreamPixelBufferPool {
         var errorDescription: String? {
             switch self {
             case .returnWouldExceedAllocationThreshold:
-                return "BufferPool is out of buffers, dropping frame"
+                "BufferPool is out of buffers, dropping frame"
             case let .unknown(bufferSize):
-                return "An unknown error occurred while trying to dequeue a pixelBuffer for size: \(bufferSize)"
+                "An unknown error occurred while trying to dequeue a pixelBuffer for size: \(bufferSize)"
             case .unavailableBufferPool:
-                return "BufferPool is unavailable."
+                "BufferPool is unavailable."
             }
         }
     }
@@ -97,7 +97,7 @@ final class StreamPixelBufferPool {
     /// - Returns: A pixel buffer from the pool.
     /// - Throws: An `Error` if it cannot dequeue a pixel buffer.
     func dequeuePixelBuffer() throws -> CVPixelBuffer {
-        guard let pool = self.pool else {
+        guard let pool else {
             throw Error.unavailableBufferPool
         }
 

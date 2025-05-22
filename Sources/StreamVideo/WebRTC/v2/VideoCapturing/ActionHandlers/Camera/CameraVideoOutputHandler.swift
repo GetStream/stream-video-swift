@@ -24,6 +24,7 @@ final class CameraVideoOutputHandler: StreamVideoCapturerActionHandler, @uncheck
                 videoOutput: videoOutput,
                 captureSession: captureSession
             )
+
         default:
             break
         }

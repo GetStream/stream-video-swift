@@ -17,7 +17,7 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Lifecycle
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 

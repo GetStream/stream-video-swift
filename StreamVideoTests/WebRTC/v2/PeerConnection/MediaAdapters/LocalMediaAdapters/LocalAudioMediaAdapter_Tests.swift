@@ -51,9 +51,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             filter: {
                 switch $0 {
                 case let .added(id, trackType, track):
-                    return (id, trackType, track)
+                    (id, trackType, track)
                 default:
-                    return nil
+                    nil
                 }
             },
             operation: { subject in
@@ -134,9 +134,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await assertTrackEvent {
             switch $0 {
             case let .added(id, trackType, track):
-                return (id, trackType, track)
+                (id, trackType, track)
             default:
-                return nil
+                nil
             }
         } operation: { subject in
             try await subject.didUpdateCallSettings(.init(audioOn: true))
@@ -168,9 +168,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await assertTrackEvent {
             switch $0 {
             case let .added(id, trackType, track):
-                return (id, trackType, track)
+                (id, trackType, track)
             default:
-                return nil
+                nil
             }
         } operation: { subject in
             try await subject.setUp(
@@ -188,9 +188,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         try await assertTrackEvent(isInverted: true) {
             switch $0 {
             case let .added(id, trackType, track):
-                return (id, trackType, track)
+                (id, trackType, track)
             default:
-                return nil
+                nil
             }
         } operation: { subject in
             try await subject.didUpdateCallSettings(.init(audioOn: true))
@@ -215,9 +215,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_currentlyPublishedTransceiveExists_noTransceiverWasAdded() async throws {
         publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
-            mockPeerConnection.stub(
+            try mockPeerConnection.stub(
                 for: .addTransceiver,
-                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+                with: makeTransceiver(of: .audio, audioOptions: publishOption)
             )
         }
         subject.primaryTrack.isEnabled = true
@@ -241,9 +241,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_didUpdatePublishOptions_primaryTrackIsEnabled_newTransceiverAddedForNewPublishOption() async throws {
         publishOptions = [.dummy(id: 0, codec: .opus)]
         try publishOptions.forEach { publishOption in
-            mockPeerConnection.stub(
+            try mockPeerConnection.stub(
                 for: .addTransceiver,
-                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+                with: makeTransceiver(of: .audio, audioOptions: publishOption)
             )
         }
         // We call publish to simulate the publishing flow that will create
@@ -365,9 +365,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         publishOptions = [.dummy(codec: .opus)]
 
         try publishOptions.forEach { publishOption in
-            mockPeerConnection.stub(
+            try mockPeerConnection.stub(
                 for: .addTransceiver,
-                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+                with: makeTransceiver(of: .audio, audioOptions: publishOption)
             )
         }
 
@@ -398,9 +398,9 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
         publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
-            mockPeerConnection.stub(
+            try mockPeerConnection.stub(
                 for: .addTransceiver,
-                with: try makeTransceiver(of: .audio, audioOptions: publishOption)
+                with: makeTransceiver(of: .audio, audioOptions: publishOption)
             )
         }
         try await subject.setUp(
@@ -424,7 +424,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private func assertTrackEvent(
         isInverted: Bool = false,
-        filter: @escaping @Sendable(TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
+        filter: @escaping @Sendable (TrackEvent) -> (String, TrackType, RTCMediaStreamTrack)? = { _ in nil },
         operation: @Sendable @escaping (LocalAudioMediaAdapter) async throws -> Void,
         validation: @Sendable @escaping (String, TrackType, RTCMediaStreamTrack) -> Void = { _, _, _ in XCTFail() }
     ) async throws {

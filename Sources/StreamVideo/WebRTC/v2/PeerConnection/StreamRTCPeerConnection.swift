@@ -44,8 +44,8 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         configuration: RTCConfiguration,
         constraints: RTCMediaConstraints = .defaultConstraints
     ) throws {
-        self.init(
-            source: try factory.makePeerConnection(
+        try self.init(
+            source: factory.makePeerConnection(
                 configuration: configuration,
                 constraints: constraints,
                 delegate: nil
@@ -77,7 +77,7 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
             }
 
             source.setLocalDescription(sessionDescription) { error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                 } else {
                     continuation.resume(returning: ())
@@ -103,7 +103,7 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
             }
 
             source.setRemoteDescription(sessionDescription) { error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                 } else {
                     self.subject.send(HasRemoteDescription())

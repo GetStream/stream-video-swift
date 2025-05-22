@@ -18,7 +18,8 @@ extension vImage_YpCbCrPixelRange {
     /// - YpMin: The minimum possible value for Y', usually set to 1 for video ranges.
     /// - CbCrMax: The maximum possible value for Cb and Cr, typically 255.
     /// - CbCrMin: The minimum possible value for Cb and Cr, often 0.
-    /// Reference: [Apple's documentation on vImageConvert_YpCbCrToARGB](https://developer.apple.com/documentation/accelerate/1533189-vimageconvert_ypcbcrtoargb_gener)
+    /// Reference: [Apple's documentation on
+    /// vImageConvert_YpCbCrToARGB](https://developer.apple.com/documentation/accelerate/1533189-vimageconvert_ypcbcrtoargb_gener)
     static let `default` = vImage_YpCbCrPixelRange(
         Yp_bias: 0, /// The bias applied to the Y' component.
         CbCr_bias: 128, /// The bias applied to the Cb and Cr components.

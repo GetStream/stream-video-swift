@@ -25,8 +25,8 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
         didSet { Task { await didUpdateCall(call) } }
     }
 
-    internal let callController: CallController
-    internal let state = CallSettingsState()
+    let callController: CallController
+    let state = CallSettingsState()
 
     private let disposableBag = DisposableBag()
 

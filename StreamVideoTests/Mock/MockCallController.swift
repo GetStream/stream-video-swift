@@ -32,13 +32,13 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         var payload: Any {
             switch self {
             case let .setDisconnectionTimeout(timeout):
-                return timeout
+                timeout
             case let .join(create, callSettings, options, ring, notify):
-                return (create, callSettings, options, ring, notify)
+                (create, callSettings, options, ring, notify)
             case .observeWebRTCStateUpdated:
-                return ()
+                ()
             case let .changeVideoState(value):
-                return value
+                value
             }
         }
     }
@@ -65,7 +65,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 

@@ -17,7 +17,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
     /// `SnapshotViewContainer`.
     final class SnapshotViewContainerCoordinator: @unchecked Sendable {
         private var trigger: SnapshotTriggering
-        private let snapshotHandler: @Sendable(UIImage) -> Void
+        private let snapshotHandler: @Sendable (UIImage) -> Void
         private var cancellable: AnyCancellable?
 
         /// Weak reference to the contained `UIView`.
@@ -31,7 +31,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
         ///   - trigger: The `SnapshotTriggering` object responsible for triggering snapshot
         ///   events.
         ///   - snapshotHandler: A closure that handles the captured `UIImage` from snapshots.
-        init(trigger: SnapshotTriggering, snapshotHandler: @escaping @Sendable(UIImage) -> Void) {
+        init(trigger: SnapshotTriggering, snapshotHandler: @escaping @Sendable (UIImage) -> Void) {
             self.trigger = trigger
             self.snapshotHandler = snapshotHandler
 
@@ -48,13 +48,13 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
         @MainActor
         private func captureSnapshot() {
             defer { trigger.binding.wrappedValue = false }
-            guard let content = content, trigger.binding.wrappedValue == true else { return }
+            guard let content, trigger.binding.wrappedValue == true else { return }
             snapshotHandler(content.snapshot())
         }
     }
 
     private let trigger: SnapshotTriggering
-    private let snapshotHandler: @Sendable(UIImage) -> Void
+    private let snapshotHandler: @Sendable (UIImage) -> Void
     let contentProvider: () -> Content
 
     /// Initializes a new `SnapshotViewContainer` with the specified trigger, snapshot handler, and
@@ -66,7 +66,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
     ///   encapsulated in a UIKit view.
     init(
         trigger: SnapshotTriggering,
-        snapshotHandler: @escaping @Sendable(UIImage) -> Void,
+        snapshotHandler: @escaping @Sendable (UIImage) -> Void,
         @ViewBuilder contentProvider: @escaping () -> Content
     ) {
         self.trigger = trigger
@@ -96,7 +96,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
 struct SnapshotViewModifier: ViewModifier {
 
     var trigger: SnapshotTriggering
-    var snapshotHandler: @Sendable(UIImage) -> Void
+    var snapshotHandler: @Sendable (UIImage) -> Void
 
     /// Applies the `SnapshotViewContainer` with the specified trigger and snapshot handler to the
     /// provided content.
@@ -135,7 +135,7 @@ extension View {
     @ViewBuilder
     public func snapshot(
         trigger: SnapshotTriggering,
-        snapshotHandler: @escaping @Sendable(UIImage) -> Void
+        snapshotHandler: @escaping @Sendable (UIImage) -> Void
     ) -> some View {
         modifier(
             SnapshotViewModifier(

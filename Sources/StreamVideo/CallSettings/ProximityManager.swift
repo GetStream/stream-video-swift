@@ -91,8 +91,7 @@ final class ProximityManager: @unchecked Sendable {
             log.info("Proximity observation has started.")
         } else if
             activeCall == nil,
-            observationCancellable != nil
-        {
+            observationCancellable != nil {
             observationCancellable?.cancel()
             observationCancellable = nil
             proximityMonitor.stopObservation()

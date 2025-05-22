@@ -58,7 +58,7 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: MockStreamVideoFunctionKey, with value: T) {
+    func stub(for function: MockStreamVideoFunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 

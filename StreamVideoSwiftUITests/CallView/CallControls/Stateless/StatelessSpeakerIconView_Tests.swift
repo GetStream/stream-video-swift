@@ -14,8 +14,8 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
 
     @MainActor
     func test_appearance_cameraOn_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 cameraOn: true
             ),
             variants: snapshotVariants,
@@ -25,8 +25,8 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
 
     @MainActor
     func test_appearance_cameraOff_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 cameraOn: false
             ),
             variants: snapshotVariants,
@@ -36,8 +36,8 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
 
     @MainActor
     func test_appearance_audioDefaultDeviceSpeaker_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 audioDefaultDevice: .speaker
             ),
             variants: snapshotVariants,
@@ -47,8 +47,8 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
 
     @MainActor
     func test_appearance_audioDefaultDeviceEarpiece_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 audioDefaultDevice: .earpiece
             ),
             variants: snapshotVariants,
@@ -58,8 +58,8 @@ final class StatelessSpeakerIconView_Tests: StreamVideoUITestCase, @unchecked Se
 
     @MainActor
     func test_appearance_audioDefaultDeviceUnknown_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 audioDefaultDevice: .unknown
             ),
             variants: snapshotVariants,

@@ -55,7 +55,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
         let tempDirectory = FileManager.default.temporaryDirectory
 
         let filename = tempDirectory.appendingPathComponent("test_recording.m4a")
-        let mockBuilder = AVAudioRecorderBuilder(cachedResult: try .init(url: filename, settings: [:]))
+        let mockBuilder = try AVAudioRecorderBuilder(cachedResult: .init(url: filename, settings: [:]))
         var recorder: StreamCallAudioRecorder! = StreamCallAudioRecorder(audioRecorderBuilder: mockBuilder)
 
         await recorder.startRecording() // Simulate recording
@@ -149,7 +149,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
-        let audioRecorder = try await XCTAsyncUnwrap(await builder.result)
+        let audioRecorder = try await XCTAsyncUnwrap(builder.result)
         XCTAssertEqual(
             audioRecorder.isRecording,
             isRecording,

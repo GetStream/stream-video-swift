@@ -14,8 +14,8 @@ final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked
 
     @MainActor
     func test_appearance_micOn_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 true
             ),
             variants: snapshotVariants,
@@ -25,8 +25,8 @@ final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked
 
     @MainActor
     func test_appearance_micOff_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 false
             ),
             variants: snapshotVariants,

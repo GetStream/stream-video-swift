@@ -23,8 +23,8 @@ final class EventNotificationCenter_Tests: XCTestCase, @unchecked Sendable {
         // Assert middlewares are assigned correctly
         let centerMiddlewares = center.middlewares as! [EventMiddleware_Mock]
         XCTAssertEqual(middlewares.count, centerMiddlewares.count)
-        zip(middlewares, centerMiddlewares).forEach {
-            XCTAssertTrue($0.0 === $0.1)
+        for item in zip(middlewares, centerMiddlewares) {
+            XCTAssertTrue(item.0 === item.1)
         }
     }
 
@@ -45,8 +45,8 @@ final class EventNotificationCenter_Tests: XCTestCase, @unchecked Sendable {
         // Assert middlewares are assigned correctly
         let centerMiddlewares = center.middlewares as! [EventMiddleware_Mock]
         XCTAssertEqual(middlewares.count, centerMiddlewares.count)
-        zip(middlewares, centerMiddlewares).forEach {
-            XCTAssertTrue($0.0 === $0.1)
+        for item in zip(middlewares, centerMiddlewares) {
+            XCTAssertTrue(item.0 === item.1)
         }
     }
 

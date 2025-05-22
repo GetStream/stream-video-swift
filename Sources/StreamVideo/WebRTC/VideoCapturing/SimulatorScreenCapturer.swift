@@ -26,13 +26,13 @@ final class SimulatorScreenCapturer: RTCVideoCapturer, @unchecked Sendable {
     func startCapturing() {
         queue.async { [weak self] in
             guard let self else { return }
-            self.setupAssetReader()
-            self.displayLink = CADisplayLink(
+            setupAssetReader()
+            displayLink = CADisplayLink(
                 target: self,
-                selector: #selector(self.readFrame)
+                selector: #selector(readFrame)
             )
-            self.displayLink?.preferredFramesPerSecond = 30 // Assuming 30 fps video
-            self.displayLink?.add(to: .main, forMode: .common)
+            displayLink?.preferredFramesPerSecond = 30 // Assuming 30 fps video
+            displayLink?.add(to: .main, forMode: .common)
         }
     }
 

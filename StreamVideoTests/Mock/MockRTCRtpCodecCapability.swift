@@ -17,20 +17,20 @@ final class MockRTCRtpCodecCapability: NSObject, RTCRtpCodecCapabilityProtocol, 
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 
-    func propertyKey<T>(for keyPath: KeyPath<MockRTCRtpCodecCapability, T>) -> String {
+    func propertyKey(for keyPath: KeyPath<MockRTCRtpCodecCapability, some Any>) -> String {
         switch keyPath {
         case \.name:
-            return MockPropertyKey.name.rawValue
+            MockPropertyKey.name.rawValue
         case \.fmtp:
-            return MockPropertyKey.fmtp.rawValue
+            MockPropertyKey.fmtp.rawValue
         case \.clockRate:
-            return MockPropertyKey.clockRate.rawValue
+            MockPropertyKey.clockRate.rawValue
         case \.preferredPayloadType:
-            return MockPropertyKey.preferredPayloadType.rawValue
+            MockPropertyKey.preferredPayloadType.rawValue
         default:
             fatalError()
         }

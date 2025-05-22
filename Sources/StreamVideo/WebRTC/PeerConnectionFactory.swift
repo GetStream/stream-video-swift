@@ -53,9 +53,9 @@ final class PeerConnectionFactory: @unchecked Sendable {
         if let factory = PeerConnectionFactoryStorage.shared.factory(
             for: audioProcessingModule
         ) {
-            return factory
+            factory
         } else {
-            return .init(audioProcessingModule)
+            .init(audioProcessingModule)
         }
     }
     

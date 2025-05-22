@@ -44,7 +44,7 @@ open class CallViewController: UIViewController {
         view.embed(videoView)
     }
     
-    open func makeVideoView<Factory: ViewFactory>(with viewFactory: Factory) -> UIView {
+    open func makeVideoView(with viewFactory: some ViewFactory) -> UIView {
         if #available(iOS 14.0, *) {
             let videoView = CallContainer(viewFactory: viewFactory, viewModel: viewModel)
             return CallViewContainer(view: videoView, frame: view.frame)
@@ -96,7 +96,7 @@ class PassthroughView: UIView {
 final class CallViewContainer: UIView {
     
     @available(iOS 14.0, *)
-    init<Factory: ViewFactory>(view: CallContainer<Factory>, frame: CGRect) {
+    init(view: CallContainer<some ViewFactory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
         
@@ -107,7 +107,7 @@ final class CallViewContainer: UIView {
     }
     
     @available(iOS, introduced: 13, obsoleted: 14)
-    init<Factory: ViewFactory>(view: CallContainer_iOS13<Factory>, frame: CGRect) {
+    init(view: CallContainer_iOS13<some ViewFactory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
         

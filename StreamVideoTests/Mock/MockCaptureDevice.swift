@@ -21,7 +21,7 @@ final class MockCaptureDevice: CaptureDeviceProtocol, Mockable, @unchecked Senda
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {}
+    func stub(for function: FunctionKey, with value: some Any) {}
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case outputFormat
@@ -33,7 +33,7 @@ final class MockCaptureDevice: CaptureDeviceProtocol, Mockable, @unchecked Senda
         var payload: Any {
             switch self {
             case let .outputFormat(preferredDimensions, preferredFrameRate):
-                return (preferredDimensions, preferredFrameRate)
+                (preferredDimensions, preferredFrameRate)
             }
         }
     }

@@ -32,26 +32,24 @@ enum AuthenticationProvider {
             return .init(stringLiteral: token)
         }
 
-        let environment = {
-            switch AppEnvironment.baseURL {
-            case .staging:
-                return "pronto"
-            case .pronto:
-                return "pronto"
-            case .prontoStaging:
-                return "pronto-staging"
-            case .legacy:
-                return "pronto"
-            case .demo:
-                return "demo"
-            case .prontoFrankfurtC2:
-                return "pronto-fra-c2"
-            case .livestream:
-                return "demo"
-            case .custom:
-                return ""
-            }
-        }()
+        let environment = switch AppEnvironment.baseURL {
+        case .staging:
+            "pronto"
+        case .pronto:
+            "pronto"
+        case .prontoStaging:
+            "pronto-staging"
+        case .legacy:
+            "pronto"
+        case .demo:
+            "demo"
+        case .prontoFrankfurtC2:
+            "pronto-fra-c2"
+        case .livestream:
+            "demo"
+        case .custom:
+            ""
+        }
 
         var url = AppEnvironment
             .authBaseURL
@@ -92,15 +90,13 @@ enum AuthenticationProvider {
         let (data, _) = try await URLSession.shared.data(from: url)
         let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
         AppState.shared.apiKey = tokenResponse.apiKey
-        let token = {
-            if
-                AppEnvironment.configuration.isTest,
-                AppEnvironment.contains(.breakJWT) {
-                return UserToken(rawValue: "")
-            } else {
-                return UserToken(rawValue: tokenResponse.token)
-            }
-        }()
+        let token = if
+            AppEnvironment.configuration.isTest,
+            AppEnvironment.contains(.breakJWT) {
+            UserToken(rawValue: "")
+        } else {
+            UserToken(rawValue: tokenResponse.token)
+        }
         log.debug("Authentication response: \(tokenResponse)")
         return token
     }

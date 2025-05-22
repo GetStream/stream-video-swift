@@ -41,16 +41,14 @@ struct DemoReconnectionButtonView: View {
     private func buttonView(
         for reconnectStrategy: ReconnectStrategy
     ) -> some View {
-        let (title, icon): (String, String) = {
-            switch reconnectStrategy {
-            case .fast:
-                return ("Fast", "hare")
-            case .rejoin:
-                return ("Rejoin", "arrow.clockwise.circle")
-            case .migrate:
-                return ("Migrate", "arrowshape.zigzag.right")
-            }
-        }()
+        let (title, icon): (String, String) = switch reconnectStrategy {
+        case .fast:
+            ("Fast", "hare")
+        case .rejoin:
+            ("Rejoin", "arrow.clockwise.circle")
+        case .migrate:
+            ("Migrate", "arrowshape.zigzag.right")
+        }
 
         Button {
             execute(reconnectStrategy)

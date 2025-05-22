@@ -11,7 +11,8 @@ import XCTest
 
 final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
-    private nonisolated(unsafe) static var originalCallAudioRecorder: StreamCallAudioRecorder! = StreamCallAudioRecorderKey.currentValue
+    private nonisolated(unsafe) static var originalCallAudioRecorder: StreamCallAudioRecorder! = StreamCallAudioRecorderKey
+        .currentValue
     private lazy var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
     private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = MockStreamCallAudioRecorder(filename: "test.wav")
@@ -32,7 +33,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
     }
 
     override class func tearDown() {
-        Self.originalCallAudioRecorder = nil
+        originalCallAudioRecorder = nil
         super.tearDown()
     }
 

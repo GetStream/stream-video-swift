@@ -20,7 +20,7 @@ final class MockProximityPolicy: ProximityPolicy, Mockable, @unchecked Sendable 
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {}
+    func stub(for function: FunctionKey, with value: some Any) {}
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case didUpdateProximity
@@ -32,7 +32,7 @@ final class MockProximityPolicy: ProximityPolicy, Mockable, @unchecked Sendable 
         var payload: Any {
             switch self {
             case let .didUpdateProximity(proximityState, call):
-                return (proximityState, call)
+                (proximityState, call)
             }
         }
     }

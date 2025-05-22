@@ -84,8 +84,8 @@ final class PictureInPictureBufferTransformerTests: XCTestCase, @unchecked Senda
     func test_RTCCVPixelBuffer_TransformWithNoResizeRequired() throws {
         var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = false
-        let sourceBuffer = RTCCVPixelBuffer(
-            pixelBuffer: try XCTUnwrap(
+        let sourceBuffer = try RTCCVPixelBuffer(
+            pixelBuffer: XCTUnwrap(
                 CVPixelBuffer.make(
                     with: .init(width: 100, height: 100),
                     pixelFormat: kCVPixelFormatType_32ARGB
@@ -107,8 +107,8 @@ final class PictureInPictureBufferTransformerTests: XCTestCase, @unchecked Senda
     func test_RTCCVPixelBuffer_TransformWithResizeRequired() throws {
         var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = true
-        let sourceBuffer = RTCCVPixelBuffer(
-            pixelBuffer: try XCTUnwrap(
+        let sourceBuffer = try RTCCVPixelBuffer(
+            pixelBuffer: XCTUnwrap(
                 CVPixelBuffer.make(
                     with: .init(width: 200, height: 200),
                     pixelFormat: kCVPixelFormatType_32ARGB
@@ -130,8 +130,8 @@ final class PictureInPictureBufferTransformerTests: XCTestCase, @unchecked Senda
     func test_RTCCVPixelBuffer_ResizeSizeToFitWithinContainer() throws {
         var transformer = PictureInPictureBufferTransformer()
         transformer.requiresResize = true
-        let sourceBuffer = RTCCVPixelBuffer(
-            pixelBuffer: try XCTUnwrap(
+        let sourceBuffer = try RTCCVPixelBuffer(
+            pixelBuffer: XCTUnwrap(
                 CVPixelBuffer.make(
                     with: .init(width: 450, height: 225),
                     pixelFormat: kCVPixelFormatType_32ARGB

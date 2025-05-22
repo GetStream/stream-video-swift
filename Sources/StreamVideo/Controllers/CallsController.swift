@@ -58,13 +58,13 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     
     private func subscribeToConnectionUpdates() {
         streamVideo.state.$connection.sink { [weak self] status in
-            guard let self = self else { return }
+            guard let self else { return }
             if case .disconnected = status {
-                self.socketDisconnected = true
+                socketDisconnected = true
             } else if status == .disconnecting {
-                self.socketDisconnected = true
-            } else if status == .connected && self.socketDisconnected {
-                self.reWatchCalls()
+                socketDisconnected = true
+            } else if status == .connected && socketDisconnected {
+                reWatchCalls()
             }
         }
         .store(in: cancellables)

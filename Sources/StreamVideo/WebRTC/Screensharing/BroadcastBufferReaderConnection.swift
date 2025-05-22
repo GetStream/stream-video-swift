@@ -36,18 +36,18 @@ final class BroadcastBufferReaderConnection: BroadcastBufferConnection, @uncheck
         let listeningSource = DispatchSource.makeReadSource(fileDescriptor: socketHandle)
         listeningSource.setEventHandler { [weak self] in
             guard let self else { return }
-            let clientSocket = Darwin.accept(self.socketHandle, nil, nil)
+            let clientSocket = Darwin.accept(socketHandle, nil, nil)
             
             guard clientSocket >= 0 else {
                 return
             }
             
-            self.setupStreams(
+            setupStreams(
                 clientSocket: clientSocket,
-                delegate: self.streamDelegate,
+                delegate: streamDelegate,
                 handleOutput: false
             )
-            self.openStreams()
+            openStreams()
         }
         
         self.listeningSource = listeningSource

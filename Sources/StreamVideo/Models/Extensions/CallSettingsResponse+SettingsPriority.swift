@@ -18,11 +18,11 @@ extension CallSettingsResponse {
     /// preference or system requirement.
     var speakerOnWithSettingsPriority: Bool {
         if video.cameraDefaultOn {
-            return true
+            true
         } else if audio.speakerDefaultOn {
-            return true
+            true
         } else {
-            return audio.defaultDevice == .speaker
+            audio.defaultDevice == .speaker
         }
     }
 }

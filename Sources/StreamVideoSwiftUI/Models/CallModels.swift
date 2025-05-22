@@ -21,9 +21,9 @@ public enum ParticipantAction: Sendable {
     public var display: String {
         switch self {
         case .leave:
-            return "left"
+            "left"
         case .join:
-            return "joined"
+            "joined"
         }
     }
 }

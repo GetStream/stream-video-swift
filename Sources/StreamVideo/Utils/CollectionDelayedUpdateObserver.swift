@@ -25,15 +25,15 @@ final class CollectionDelayedUpdateObserver<Value: Collection>: @unchecked Senda
         var value: TimeInterval {
             switch self {
             case .none:
-                return 0
+                0
             case .low:
-                return 0.25
+                0.25
             case .medium:
-                return 0.5
+                0.5
             case .high:
-                return 1
+                1
             case .screenRefreshRate:
-                return ScreenPropertiesAdapter.currentValue.refreshRate
+                ScreenPropertiesAdapter.currentValue.refreshRate
             }
         }
 
@@ -128,18 +128,18 @@ final class CollectionDelayedUpdateObserver<Value: Collection>: @unchecked Senda
         switch interval {
         case .none:
             /// If no delay is needed, return the original publisher.
-            return publisher.eraseToAnyPublisher()
+            publisher.eraseToAnyPublisher()
         default:
             switch mode {
             case let .debounce(scheduler):
                 /// Applies a debounce to the publisher, delaying emissions until no new data arrives
                 /// within the interval.
-                return publisher
+                publisher
                     .debounce(for: .seconds(interval.value), scheduler: scheduler)
                     .eraseToAnyPublisher()
             case let .throttle(scheduler, latest):
                 /// Applies a throttle to the publisher, emitting values at most once per interval.
-                return publisher
+                publisher
                     .throttle(for: .seconds(interval.value), scheduler: scheduler, latest: latest)
                     .eraseToAnyPublisher()
             }

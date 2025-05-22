@@ -95,7 +95,7 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
                 updatedState.canStartPictureInPictureAutomaticallyFromInline = value
             }
 
-            self.subject.send(updatedState)
+            subject.send(updatedState)
         }
     }
 

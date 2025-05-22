@@ -60,8 +60,8 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     public func initialize(sampleRate: Int, channels: Int) {
         serialQueue.async { [weak self] in
             guard let self, !isActive else { return }
-            self.initializeClosure(sampleRate, channels)
-            self.isActive = true
+            initializeClosure(sampleRate, channels)
+            isActive = true
             log.debug("AudioFilter:\(id) initialize sampleRate:\(sampleRate) channels:\(channels).")
         }
     }
@@ -84,7 +84,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     /// Releases the filter by stopping noise cancellation for the active call.
     public func release() {
         serialQueue.async { [weak self] in
-            guard let self, let activeCall = self.activeCall else {
+            guard let self, let activeCall else {
                 return
             }
             await stopNoiseCancellation(for: activeCall)

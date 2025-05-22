@@ -27,8 +27,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// machine.
     final class DisconnectedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
 
         private var internetObservationCancellable: AnyCancellable?
@@ -159,7 +158,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .receive(on: DispatchQueue.main)
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
-                .filter { $0.isAvailable }
+                .filter(\.isAvailable)
                 .removeDuplicates()
                 .sink { [weak self] _ in self?.reconnect() }
         }

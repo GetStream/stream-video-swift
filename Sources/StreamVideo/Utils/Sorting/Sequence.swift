@@ -18,14 +18,14 @@ public enum StreamSortOrder {
     var rawValue: SortOrder {
         switch self {
         case .ascending:
-            return .forward
+            .forward
         case .descending:
-            return .reverse
+            .reverse
         }
     }
 }
 
-extension Sequence where Element == CallParticipant {
+extension Sequence<CallParticipant> {
 
     /// Sorts the sequence's elements using a specified comparator and order.
     ///
@@ -40,9 +40,9 @@ extension Sequence where Element == CallParticipant {
         sorted {
             switch order {
             case .ascending:
-                return comparator($0, $1) == .orderedAscending
+                comparator($0, $1) == .orderedAscending
             case .descending:
-                return comparator($0, $1) == .orderedDescending
+                comparator($0, $1) == .orderedDescending
             }
         }
     }
@@ -70,10 +70,10 @@ extension Sequence where Element == CallParticipant {
 ///   - rhs: The right-hand side object for comparison.
 ///   - keyPath: The key path to a property of `Value` that should be used for comparison.
 /// - Returns: A `ComparisonResult` value indicating the ordering of `lhs` and `rhs` based on the property.
-func comparison<Value, T: Comparable>(
+func comparison<Value>(
     _ lhs: Value,
     _ rhs: Value,
-    keyPath: KeyPath<Value, T>
+    keyPath: KeyPath<Value, some Comparable>
 ) -> ComparisonResult {
     let lhsValue = lhs[keyPath: keyPath]
     let rhsValue = rhs[keyPath: keyPath]

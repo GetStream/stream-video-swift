@@ -32,7 +32,7 @@ final class RTCRtpTransceiverInit_ConvenienceTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(transceiverInit.direction, .sendOnly)
         XCTAssertEqual(transceiverInit.streamIds, ["temp-screenshare"])
         XCTAssertEqual(transceiverInit.sendEncodings.count, 1)
-        XCTAssertTrue(transceiverInit.sendEncodings.allSatisfy { $0.isActive })
+        XCTAssertTrue(transceiverInit.sendEncodings.allSatisfy(\.isActive))
     }
 
     func test_temporary_withUnknownTrack() {
@@ -232,7 +232,7 @@ final class RTCRtpTransceiverInit_ConvenienceTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(transceiverInit.direction, .sendRecv)
         XCTAssertEqual(transceiverInit.streamIds, ["screenshare-stream"])
         XCTAssertEqual(transceiverInit.sendEncodings.count, 1)
-        XCTAssertTrue(transceiverInit.sendEncodings.allSatisfy { $0.isActive })
+        XCTAssertTrue(transceiverInit.sendEncodings.allSatisfy(\.isActive))
 
         XCTAssertEqual(transceiverInit.sendEncodings[0].rid, VideoLayer.Quality.quarter.rawValue)
     }

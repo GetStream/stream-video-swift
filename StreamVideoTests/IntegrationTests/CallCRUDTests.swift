@@ -138,7 +138,6 @@ final class CallCRUDTests: IntegrationTest, @unchecked Sendable {
         let call = client.call(callType: wrongCallType, callId: randomCallId)
         let apiErr = await XCTAssertThrowsErrorAsync {
             _ = try await call.get()
-            return
         }
         guard let apiErr = apiErr as? APIError else {
             XCTAssert((apiErr as Any) is APIError)
@@ -191,10 +190,10 @@ final class CallCRUDTests: IntegrationTest, @unchecked Sendable {
 
         await fulfilmentInMainActor {
             if let member = call.state.members.first {
-                return member.id == self.user1
+                member.id == self.user1
                     && member.customData[membersGroup]?.numberValue == membersCount
             } else {
-                return false
+                false
             }
         }
 
@@ -213,10 +212,10 @@ final class CallCRUDTests: IntegrationTest, @unchecked Sendable {
         
         await fulfilmentInMainActor {
             if let member = call.state.members.first {
-                return member.id == self.user1
+                member.id == self.user1
                     && member.customData[roleKey]?.stringValue == roleValue
             } else {
-                return false
+                false
             }
         }
     }

@@ -115,7 +115,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         error: Error?
     ) {
         guard
-            let activeSession = self.activeSession
+            let activeSession
         else {
             log.warning(
                 "\(type(of: self)) received sample buffer but no active session was found.",
@@ -193,7 +193,7 @@ extension RPScreenRecorder {
                 continuation.resume(throwing: ClientError())
                 return
             }
-            self.stopCapture { error in
+            stopCapture { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {

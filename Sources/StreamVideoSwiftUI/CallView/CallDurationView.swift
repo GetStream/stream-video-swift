@@ -41,7 +41,7 @@ public struct CallDurationView: View {
                 EmptyView()
             }
         }
-        .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
+        .onReceive(viewModel.call?.state.$duration) { duration = $0 }
         .accessibility(identifier: accessibilityIdentifier)
     }
 

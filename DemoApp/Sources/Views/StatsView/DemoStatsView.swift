@@ -185,8 +185,7 @@ struct DemoStatsView: View {
         )
         if
             resolution != .zero,
-            report.highestFramesPerSecond > 0
-        {
+            report.highestFramesPerSecond > 0 {
             return "\(Int(resolution.width))x\(Int(resolution.height))@\(report.highestFramesPerSecond)"
         } else {
             return "none"
@@ -199,9 +198,9 @@ struct DemoStatsView: View {
         if
             let qualityLimitationReasons = report?.qualityLimitationReasons,
             !qualityLimitationReasons.isEmpty {
-            return qualityLimitationReasons
+            qualityLimitationReasons
         } else {
-            return "none"
+            "none"
         }
     }
 
@@ -209,9 +208,9 @@ struct DemoStatsView: View {
         from bytes: Int?
     ) -> String {
         if let bytes {
-            return "\(bytesFormatter.string(fromByteCount: Int64(bytes)))ps"
+            "\(bytesFormatter.string(fromByteCount: Int64(bytes)))ps"
         } else {
-            return "none"
+            "none"
         }
     }
 
@@ -324,7 +323,7 @@ private struct DemoStatView<Value: Comparable>: View {
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] value in
                     guard let self else { return }
-                    self.previousValue = self.value
+                    previousValue = self.value
                     self.value = value
                 }
         }

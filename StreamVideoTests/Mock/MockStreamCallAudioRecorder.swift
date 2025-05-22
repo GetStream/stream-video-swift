@@ -18,7 +18,7 @@ final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sen
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case startRecording
@@ -32,9 +32,9 @@ final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sen
         var payload: Any {
             switch self {
             case let .startRecording(ignoreActiveCall):
-                return ignoreActiveCall
+                ignoreActiveCall
             case .stopRecording:
-                return ()
+                ()
             }
         }
     }

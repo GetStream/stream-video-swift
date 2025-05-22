@@ -86,6 +86,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
                 return
             }
             await executeStop(cameraVideoCapturer)
+
         default:
             break
         }

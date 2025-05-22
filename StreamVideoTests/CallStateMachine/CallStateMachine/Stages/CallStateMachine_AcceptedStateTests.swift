@@ -54,9 +54,9 @@ extension Call.StateMachine.Stage.Context.Output {
     var acceptResponse: AcceptCallResponse? {
         switch self {
         case let .accepted(output):
-            return output
+            output
         default:
-            return nil
+            nil
         }
     }
 }

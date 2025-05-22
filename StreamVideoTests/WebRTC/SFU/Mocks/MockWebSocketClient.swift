@@ -28,11 +28,11 @@ final class MockWebSocketClient: WebSocketClient, Mockable, @unchecked Sendable 
         var payload: Any {
             switch self {
             case .connect:
-                return ()
+                ()
             case let .disconnect(code, source, completion):
-                return (code, source, completion)
+                (code, source, completion)
             case let .disconnectAsync(source):
-                return source
+                source
             }
         }
     }
@@ -46,7 +46,7 @@ final class MockWebSocketClient: WebSocketClient, Mockable, @unchecked Sendable 
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {
+    func stub(for function: FunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 

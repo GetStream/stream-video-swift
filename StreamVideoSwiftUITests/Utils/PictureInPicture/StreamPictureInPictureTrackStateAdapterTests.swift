@@ -70,9 +70,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .participant(_, participant, _):
-                return participant == self.participantA
+                participant == self.participantA
             default:
-                return false
+                false
             }
         }
         store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
@@ -80,9 +80,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .participant(_, participant, _):
-                return participant == self.participantB
+                participant == self.participantB
             default:
-                return false
+                false
             }
         }
         XCTAssertTrue(participantA.track?.isEnabled ?? false)
@@ -97,9 +97,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .participant(_, participant, _):
-                return participant == self.participantA
+                participant == self.participantA
             default:
-                return false
+                false
             }
         }
         store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
@@ -107,9 +107,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .participant(_, participant, _):
-                return participant == self.participantB
+                participant == self.participantB
             default:
-                return false
+                false
             }
         }
         XCTAssertFalse(participantA.track?.isEnabled ?? true)
@@ -123,9 +123,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .participant(_, participant, _):
-                return participant == self.participantA
+                participant == self.participantA
             default:
-                return false
+                false
             }
         }
         store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
@@ -133,9 +133,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .participant(_, participant, _):
-                return participant == self.participantB
+                participant == self.participantB
             default:
-                return false
+                false
             }
         }
         XCTAssertFalse(participantA.track?.isEnabled ?? true)
@@ -149,9 +149,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .screenSharing(_, participant, _):
-                return participant == self.participantA
+                participant == self.participantA
             default:
-                return false
+                false
             }
         }
         store.dispatch(.setContent(.participant(mockCall, participantB, participantB.track)))
@@ -159,9 +159,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .participant(_, participant, _):
-                return participant == self.participantB
+                participant == self.participantB
             default:
-                return false
+                false
             }
         }
         XCTAssertFalse(participantA.track?.isEnabled ?? true)
@@ -175,9 +175,9 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         await fulfilmentInMainActor {
             switch self.store.state.content {
             case let .screenSharing(_, participant, _):
-                return participant == self.participantA
+                participant == self.participantA
             default:
-                return false
+                false
             }
         }
         store.dispatch(.setContent(.screenSharing(mockCall, participantA, participantA.track!)))

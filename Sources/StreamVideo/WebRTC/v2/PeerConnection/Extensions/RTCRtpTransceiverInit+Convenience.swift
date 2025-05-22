@@ -29,13 +29,13 @@ extension RTCRtpTransceiverInit {
     ) -> RTCRtpTransceiverInit {
         switch trackType {
         case .audio:
-            return .init(
+            .init(
                 direction: .sendOnly,
                 streamIds: ["temp-audio"],
                 audioOptions: .init(id: 0, codec: .unknown)
             )
         case .video, .screenshare:
-            return .init(
+            .init(
                 trackType: trackType,
                 direction: .sendOnly,
                 streamIds: [
@@ -49,7 +49,7 @@ extension RTCRtpTransceiverInit {
                 )
             )
         default:
-            return .init()
+            .init()
         }
     }
 
@@ -141,9 +141,9 @@ extension RTCRtpTransceiverInit {
             .reversed()
             .filter {
                 if videoOptions.codec.isSVC {
-                    return $0.rid == VideoLayer.Quality.full.rawValue
+                    $0.rid == VideoLayer.Quality.full.rawValue
                 } else {
-                    return true
+                    true
                 }
             }
             .prepare()

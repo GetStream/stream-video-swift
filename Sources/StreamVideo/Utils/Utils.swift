@@ -4,7 +4,7 @@
 
 import Foundation
 
-internal extension DispatchQueue {
+extension DispatchQueue {
 
     static let sdk = DispatchQueue(label: "StreamVideoSDK", qos: .userInitiated)
 }
@@ -35,7 +35,7 @@ struct EventHandler {
     var cancel: () -> Void
 }
 
-func executeOnMain(_ task: @Sendable @escaping @MainActor() -> Void) {
+func executeOnMain(_ task: @Sendable @escaping @MainActor () -> Void) {
     Task {
         await task()
     }

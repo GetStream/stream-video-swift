@@ -81,21 +81,21 @@ public class CallEventsHandler {
     public func checkForParticipantEvents(from event: VideoEvent) -> ParticipantEvent? {
         switch event {
         case let .typeCallSessionParticipantJoinedEvent(event):
-            return ParticipantEvent(
+            ParticipantEvent(
                 id: event.participant.user.id,
                 action: .join,
                 user: event.participant.user.name ?? event.participant.user.id,
                 imageURL: URL(string: event.participant.user.image ?? "")
             )
         case let .typeCallSessionParticipantLeftEvent(event):
-            return ParticipantEvent(
+            ParticipantEvent(
                 id: event.participant.user.id,
                 action: .leave,
                 user: event.participant.user.name ?? event.participant.user.id,
                 imageURL: URL(string: event.participant.user.image ?? "")
             )
         default:
-            return nil
+            nil
         }
     }
 }

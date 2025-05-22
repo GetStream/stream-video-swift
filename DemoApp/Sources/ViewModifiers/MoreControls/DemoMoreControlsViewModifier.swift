@@ -27,8 +27,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
             .halfSheet(isPresented: $viewModel.moreControlsShown) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: {
-                        if #available(iOS 15.0, *) { return 8 }
-                        else { return 32 }
+                        if #available(iOS 15.0, *) { 8 }
+                        else { 32 }
                     }()) {
                         VStack(spacing: 8) {
                             DemoReactionSelectorView { viewModel.moreControlsShown = false }

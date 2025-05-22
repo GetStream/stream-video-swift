@@ -93,7 +93,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 }
                 return (session, reason, previousRoute)
             }
-            .filter { $0.0.isActive }
+            .filter(\.0.isActive)
             .log(.debug, subsystems: .audioSession) { [weak self] session, reason, previousRoute in
                 """
                 AudioSession didChangeRoute reason:\(reason)
@@ -362,8 +362,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
             if
                 configuration.overrideOutputAudioPort == nil,
-                audioSession.category == AVAudioSession.Category.playAndRecord
-            {
+                audioSession.category == AVAudioSession.Category.playAndRecord {
                 try await audioSession.overrideOutputAudioPort(.none)
             }
 

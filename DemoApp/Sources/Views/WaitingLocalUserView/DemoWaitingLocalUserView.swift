@@ -20,7 +20,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     private let viewFactory: Factory
 
-    internal init(
+    init(
         viewFactory: Factory,
         viewModel: CallViewModel
     ) {

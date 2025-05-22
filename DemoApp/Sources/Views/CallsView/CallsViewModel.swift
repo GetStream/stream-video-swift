@@ -9,9 +9,9 @@ import StreamVideo
 @MainActor
 final class CallsViewModel: ObservableObject {
 
-    @Injected(\.streamVideo) internal var streamVideo
+    @Injected(\.streamVideo) var streamVideo
 
-    @Published internal var calls = [Call]()
+    @Published var calls = [Call]()
 
     private var cancellables = Set<AnyCancellable>()
 

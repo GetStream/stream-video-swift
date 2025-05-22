@@ -25,8 +25,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the migrated stage in the WebRTC coordinator state machine.
     final class MigratedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         private let disposableBag = DisposableBag()
 
         /// Initializes a new instance of `MigratedStage`.

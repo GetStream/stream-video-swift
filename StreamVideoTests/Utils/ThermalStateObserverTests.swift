@@ -33,7 +33,7 @@ final class ThermalStateObserverTests: XCTestCase, @unchecked Sendable {
         ) {
             stubThermalState = expected
 
-            let expectation = self.expectation(description: "Notification was received")
+            let expectation = expectation(description: "Notification was received")
             var cancellable: AnyCancellable?
             cancellable = subject
                 .$state
@@ -68,7 +68,7 @@ final class ThermalStateObserverTests: XCTestCase, @unchecked Sendable {
         ) {
             stubThermalState = thermalState
 
-            let expectation = self.expectation(description: "Notification was received")
+            let expectation = expectation(description: "Notification was received")
             var cancellable: AnyCancellable?
             cancellable = subject
                 .$state

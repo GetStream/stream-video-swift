@@ -5,7 +5,7 @@
 import Foundation
 
 extension String.StringInterpolation {
-    mutating func appendInterpolation<T: CustomStringConvertible>(_ value: T?) {
+    mutating func appendInterpolation(_ value: (some CustomStringConvertible)?) {
         appendInterpolation(value ?? "nil" as CustomStringConvertible)
     }
 }

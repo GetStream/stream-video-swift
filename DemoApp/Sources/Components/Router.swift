@@ -38,8 +38,7 @@ final class Router: ObservableObject {
 
         if
             appState.unsecureRepository.currentConfiguration() != AppEnvironment.configuration
-            || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL
-        {
+            || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL {
             // Clean up the currently logged in use, if we run in different
             // configuration since the last time.
             appState.unsecureRepository.removeCurrentUser()
@@ -156,13 +155,11 @@ final class Router: ObservableObject {
     private func handleGuestUser(
         deeplinkInfo: DeeplinkInfo
     ) async throws {
-        let (user, token): (User, String) = try await {
-            if let currentUser = appState.currentUser {
-                return (currentUser, "")
-            } else {
-                return try await AuthenticationProvider.createUser()
-            }
-        }()
+        let (user, token): (User, String) = if let currentUser = appState.currentUser {
+            (currentUser, "")
+        } else {
+            try await AuthenticationProvider.createUser()
+        }
 
         handle(
             user: user,

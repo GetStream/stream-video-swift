@@ -14,8 +14,8 @@ final class StatelessAudioOutputIconView_Tests: StreamVideoUITestCase, @unchecke
 
     @MainActor
     func test_appearance_audioOutputOn_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 true
             ),
             variants: snapshotVariants,
@@ -25,8 +25,8 @@ final class StatelessAudioOutputIconView_Tests: StreamVideoUITestCase, @unchecke
 
     @MainActor
     func test_appearance_audioOutputOff_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(
+        try AssertSnapshot(
+            makeSubject(
                 false
             ),
             variants: snapshotVariants,

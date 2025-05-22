@@ -14,8 +14,8 @@ final class StatelessHangUpIconView_Tests: StreamVideoUITestCase, @unchecked Sen
 
     @MainActor
     func test_appearance_wasConfiguredCorrectly() throws {
-        AssertSnapshot(
-            try makeSubject(),
+        try AssertSnapshot(
+            makeSubject(),
             variants: snapshotVariants,
             size: sizeThatFits
         )

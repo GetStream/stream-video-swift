@@ -45,7 +45,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
             case .near:
                 let callSettings = call.state.callSettings
                 if callSettings.speakerOn {
-                    self.callSettingsBeforeProximityChange = callSettings
+                    callSettingsBeforeProximityChange = callSettings
                     try? await call.callController.changeSpeakerState(isEnabled: false)
                 } else {
                     /* No-op */

@@ -182,9 +182,9 @@ final class CallState_Tests: XCTestCase, @unchecked Sendable {
 
         assertDuration(maxDuration: 5) {
             /// Add 2500 users
-            (0..<10).forEach {
-                add(count: cycleCount, namePrefix: $0, in: subject)
-                XCTAssertEqual(subject.participants.count, cycleCount * ($0 + 1))
+            for item in (0..<10) {
+                add(count: cycleCount, namePrefix: item, in: subject)
+                XCTAssertEqual(subject.participants.count, cycleCount * (item + 1))
             }
             XCTAssertEqual(subject.participants.count, 2500)
 

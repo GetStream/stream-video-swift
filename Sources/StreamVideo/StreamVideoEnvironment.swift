@@ -6,7 +6,7 @@ import Foundation
 
 extension StreamVideo {
     struct Environment: Sendable {
-        var webSocketClientBuilder: @Sendable(
+        var webSocketClientBuilder: @Sendable (
             _ eventNotificationCenter: EventNotificationCenter,
             _ url: URL
         ) -> WebSocketClient = {
@@ -25,7 +25,7 @@ extension StreamVideo {
             return webSocketClient
         }
         
-        var callControllerBuilder: @Sendable(
+        var callControllerBuilder: @Sendable (
             _ defaultAPI: DefaultAPI,
             _ user: User,
             _ callId: String,
@@ -45,7 +45,7 @@ extension StreamVideo {
             )
         }
         
-        var apiTransportBuilder: @Sendable(
+        var apiTransportBuilder: @Sendable (
             _ tokenProvider: @escaping UserTokenProvider
         ) -> DefaultAPITransport = {
             URLSessionTransport(
@@ -54,7 +54,7 @@ extension StreamVideo {
             )
         }
         
-        var connectionRecoveryHandlerBuilder: @Sendable(
+        var connectionRecoveryHandlerBuilder: @Sendable (
             _ webSocketClient: WebSocketClient,
             _ eventNotificationCenter: EventNotificationCenter
         ) -> ConnectionRecoveryHandler = {
@@ -83,7 +83,7 @@ extension StreamVideo {
             )
         }
 
-        internal static func makeURLSession() -> URLSession {
+        static func makeURLSession() -> URLSession {
             let config = URLSessionConfiguration.default
             config.requestCachePolicy = .reloadIgnoringLocalCacheData
             config.urlCache = nil

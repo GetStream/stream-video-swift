@@ -62,7 +62,7 @@ struct DemoApp: App {
                     }
                 }
             }
-            .onReceive(router.appState.$userState) { self.userState = $0 }
+            .onReceive(router.appState.$userState) { userState = $0 }
             .preferredColorScheme(.dark)
             .onOpenURL { router.handle(url: $0) }
             .onContinueUserActivity(

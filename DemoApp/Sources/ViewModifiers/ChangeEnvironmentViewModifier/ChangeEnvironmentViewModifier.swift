@@ -13,7 +13,7 @@ struct ChangeEnvironmentModifier: ViewModifier {
         content
             .alert(isPresented: $showChangeEnvironmentPrompt) {
                 if let url = changeEnvironmentPromptForURL {
-                    return Alert(
+                    Alert(
                         title: Text("Change environment"),
                         message: Text(
                             "In order to access the call you scanned, we will need to change the environment you are logged in. Would you like to proceed?"
@@ -29,7 +29,7 @@ struct ChangeEnvironmentModifier: ViewModifier {
                         }
                     )
                 } else {
-                    return Alert(
+                    Alert(
                         title: Text("Invalid URL"),
                         message: Text("The URL contained in the QR you scanned was invalid. Please try again."),
                         dismissButton: .cancel {

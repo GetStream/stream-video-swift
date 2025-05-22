@@ -34,9 +34,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             .compactMap {
                 switch $0 {
                 case let .coordinatorEvent(event):
-                    return event
+                    event
                 default:
-                    return nil
+                    nil
                 }
             }
             .eraseToAnyPublisher()
@@ -51,8 +51,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Provides access to device's proximity
     private lazy var proximity: ProximityManager = .init(self)
 
-    internal let callController: CallController
-    internal let coordinatorClient: DefaultAPI
+    let callController: CallController
+    let coordinatorClient: DefaultAPI
     private var cancellables = DisposableBag()
 
     /// A serialQueueActor ensuring that call operations (e.g. join) will happen in a serial manner.
@@ -62,7 +62,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// call.
     private lazy var closedCaptionsAdapter = ClosedCaptionsAdapter(self)
 
-    internal init(
+    init(
         callType: String,
         callId: String,
         coordinatorClient: DefaultAPI,
@@ -91,7 +91,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         configure(callSettings: callSettings)
     }
 
-    internal convenience init(
+    convenience init(
         from response: CallStateResponseFields,
         coordinatorClient: DefaultAPI,
         callController: CallController
@@ -658,7 +658,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         executeOnMain { [weak self] in
             guard let self else { return }
-            self.state.removePermissionRequest(request: request)
+            state.removePermissionRequest(request: request)
         }
         return response
     }
@@ -885,7 +885,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     // MARK: - Query members methods
 
-    internal func queryMembers(
+    func queryMembers(
         filters: [String: RawJSON]? = nil, limit: Int? = nil, next: String? = nil, sort: [SortParamRequest]? = nil
     ) async throws -> QueryMembersResponse {
         let request = QueryMembersRequest(
@@ -905,7 +905,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// - Parameters:
     ///   - filters: An optional dictionary of filters.
-    ///   - sort: An optional array of `SortParamRequest` that determines the sorting order of the results. Defaults to sorting by `created_at` in descending order.
+    ///   - sort: An optional array of `SortParamRequest` that determines the sorting order of the results. Defaults to sorting by
+    /// `created_at` in descending order.
     ///   - limit: The maximum number of members to return. Defaults to 25.
     ///
     /// - Returns: A `QueryMembersResponse` containing the results of the query.
@@ -1388,22 +1389,22 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     // MARK: - Internal
 
-    internal func update(reconnectionStatus: ReconnectionStatus) {
+    func update(reconnectionStatus: ReconnectionStatus) {
         executeOnMain { [weak self] in
             guard let self else { return }
-            if reconnectionStatus != self.state.reconnectionStatus {
-                self.state.reconnectionStatus = reconnectionStatus
+            if reconnectionStatus != state.reconnectionStatus {
+                state.reconnectionStatus = reconnectionStatus
             }
         }
     }
 
-    internal func update(recordingState: RecordingState) {
+    func update(recordingState: RecordingState) {
         executeOnMain { [weak self] in
             self?.state.recordingState = recordingState
         }
     }
 
-    internal func onEvent(_ event: WrappedEvent) {
+    func onEvent(_ event: WrappedEvent) {
         guard case let .coordinatorEvent(videoEvent) = event else {
             return
         }
@@ -1412,14 +1413,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         executeOnMain { [weak self] in
             guard let self else { return }
-            self.state.updateState(from: videoEvent)
+            state.updateState(from: videoEvent)
         }
 
         eventSubject.send(event)
     }
 
     @MainActor
-    internal func transitionDueToError(_ error: Error) {
+    func transitionDueToError(_ error: Error) {
         if stateMachine.currentStage.id == .joined {
             state.disconnectionError = error
         }
@@ -1441,7 +1442,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter audioSession: The active `AVAudioSession` instance provided by
     ///   CallKit.
     /// - Throws: An error if the call controller fails to handle the activation.
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
+    func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
         try callController.callKitActivated(audioSession)
     }
 
@@ -1487,8 +1488,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func subscribeToOwnCapabilitiesChanges() {
         executeOnMain { [weak self] in
             guard let self else { return }
-            self
-                .state
+            state
                 .$ownCapabilities
                 .removeDuplicates()
                 .sinkTask { [weak self] in await self?.callController.updateOwnCapabilities(ownCapabilities: $0) }
@@ -1547,7 +1547,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         executeOnMain { [weak self] in
             guard let self else { return }
             Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
+                .CombineLatest(state.$session, state.$settings)
                 .filter { $0.0 != nil }
                 .map { $0.1?.audio.noiseCancellation }
                 .removeDuplicates()
@@ -1560,7 +1560,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         executeOnMain { [weak self] in
             guard let self else { return }
             Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
+                .CombineLatest(state.$session, state.$settings)
                 .filter { $0.0 != nil }
                 .map { $0.1?.transcription }
                 .removeDuplicates()
@@ -1573,7 +1573,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         executeOnMain { [weak self] in
             guard let self else { return }
             Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
+                .CombineLatest(state.$session, state.$settings)
                 .filter { $0.0 != nil }
                 .map { $0.1?.transcription.closedCaptionMode }
                 .removeDuplicates()
@@ -1666,7 +1666,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Handles updates to transcription settings.
     /// - Parameter value: The updated `TranscriptionSettings` value.
     private func didUpdate(_ mode: TranscriptionSettings.ClosedCaptionMode?) {
-        guard let mode = mode else {
+        guard let mode else {
             log.debug("ClosedCaptionSettings updated. No action!")
             return
         }

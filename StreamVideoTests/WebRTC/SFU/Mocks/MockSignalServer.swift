@@ -18,7 +18,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: MockFunctionKey, with value: T) {
+    func stub(for function: MockFunctionKey, with value: some Any) {
         stubbedFunction[function] = value
     }
 
@@ -40,7 +40,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
         var payload: Any {
             switch self {
             case let .updateSubscriptions(request):
-                return request
+                request
             }
         }
     }

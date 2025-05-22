@@ -7,8 +7,8 @@ import Foundation
 import StreamWebRTC
 import SwiftProtobuf
 
-public typealias UserTokenProvider = @Sendable(@Sendable @escaping (Result<UserToken, Error>) -> Void) -> Void
-public typealias UserTokenUpdater = @Sendable(UserToken) -> Void
+public typealias UserTokenProvider = @Sendable (@Sendable @escaping(Result<UserToken, Error>) -> Void) -> Void
+public typealias UserTokenUpdater = @Sendable (UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
@@ -203,7 +203,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 guard let self else {
                     throw ClientError.Unexpected()
                 }
-                return await self.loadConnectionId()
+                return await loadConnectionId()
             }
             coordinatorClient.middlewares.append(userAuth)
         } else {
@@ -317,7 +317,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         eventHandlers.removeAll()
 
         await withCheckedContinuation { [webSocketClient] continuation in
-            if let webSocketClient = webSocketClient {
+            if let webSocketClient {
                 webSocketClient.disconnect {
                     continuation.resume()
                 }
@@ -379,7 +379,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
     }
 
-    internal func queryCalls(
+    func queryCalls(
         filters: [String: RawJSON]?,
         sort: [SortParamRequest]?,
         limit: Int? = 25,
@@ -414,7 +414,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// Queries calls with the provided request.
     /// - Parameter request: the query calls request.
     /// - Returns: response with the queried calls.
-    internal func queryCalls(
+    func queryCalls(
         request: QueryCallsRequest
     ) async throws -> QueryCallsResponse {
         try await coordinatorClient.queryCalls(queryCallsRequest: request)
@@ -518,17 +518,17 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         
         webSocketClient.connectionStateDelegate = self
         webSocketClient.onWSConnectionEstablished = { [weak self, weak webSocketClient] in
-            guard let self = self, let webSocketClient else { return }
+            guard let self, let webSocketClient else { return }
 
             let connectUserRequest = ConnectUserDetailsRequest(
-                custom: self.user.customData,
-                id: self.user.id,
-                image: self.user.imageURL?.absoluteString,
-                name: self.user.originalName
+                custom: user.customData,
+                id: user.id,
+                image: user.imageURL?.absoluteString,
+                name: user.originalName
             )
             
             let authRequest = WSAuthMessageRequest(
-                token: self.token.rawValue,
+                token: token.rawValue,
                 userDetails: connectUserRequest
             )
 
@@ -634,7 +634,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     }
     
     private func setupConnectionRecoveryHandler() {
-        guard let webSocketClient = webSocketClient else {
+        guard let webSocketClient else {
             return
         }
 
@@ -762,7 +762,7 @@ extension StreamVideo: WSEventsSubscriber {
             executeOnMain { [weak self, call] in
                 guard let self else { return }
                 call.state.update(from: ringEvent)
-                self.state.ringingCall = call
+                state.ringingCall = call
             }
         }
     }

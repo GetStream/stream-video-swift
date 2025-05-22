@@ -34,9 +34,9 @@ extension WebRTCCoordinator.StateMachine {
             func nextReconnectionStrategy() -> ReconnectionStrategy {
                 switch reconnectionStrategy {
                 case .fast:
-                    return .rejoin
+                    .rejoin
                 default:
-                    return reconnectionStrategy
+                    reconnectionStrategy
                 }
             }
         }
@@ -143,11 +143,11 @@ extension WebRTCCoordinator.StateMachine {
         var next: ReconnectionStrategy {
             switch self {
             case .unknown, .disconnected:
-                return .disconnected
+                .disconnected
             case .fast:
-                return .rejoin
+                .rejoin
             case .rejoin, .migrate:
-                return self
+                self
             }
         }
 

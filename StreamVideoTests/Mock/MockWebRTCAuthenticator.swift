@@ -26,11 +26,11 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
         var payload: Any {
             switch self {
             case let .authenticate(coordinator, currentSFU, create, ring, notify, options):
-                return (coordinator, currentSFU, create, ring, notify, options)
+                (coordinator, currentSFU, create, ring, notify, options)
             case let .waitForAuthentication(sfuAdapter):
-                return sfuAdapter
+                sfuAdapter
             case let .waitForConnect(sfuAdapter):
-                return sfuAdapter
+                sfuAdapter
             }
         }
     }
@@ -60,7 +60,7 @@ final class MockWebRTCAuthenticator: WebRTCAuthenticating, Mockable, @unchecked 
         )
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     func authenticate(
         coordinator: WebRTCCoordinator,

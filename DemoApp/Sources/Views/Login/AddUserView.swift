@@ -232,8 +232,8 @@ struct DemoTextEditor: View {
                 notificationCenter.publisher(for: UIResponder.keyboardWillShowNotification),
                 perform: { _ in
                     withAnimation {
-                        if self.text.wrappedValue == placeholder {
-                            self.text.wrappedValue = ""
+                        if text.wrappedValue == placeholder {
+                            text.wrappedValue = ""
                         }
                     }
                 }
@@ -242,8 +242,8 @@ struct DemoTextEditor: View {
                 notificationCenter.publisher(for: UIResponder.keyboardWillHideNotification),
                 perform: { _ in
                     withAnimation {
-                        if self.text.wrappedValue.isEmpty {
-                            self.text.wrappedValue = placeholder
+                        if text.wrappedValue.isEmpty {
+                            text.wrappedValue = placeholder
                         }
                     }
                 }

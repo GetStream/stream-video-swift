@@ -55,9 +55,7 @@ extension JSONDecoder {
     static let `default`: JSONDecoder = stream
 
     /// A Stream Chat JSON decoder.
-    static let stream: StreamJSONDecoder = {
-        StreamJSONDecoder()
-    }()
+    static let stream: StreamJSONDecoder = StreamJSONDecoder()
 }
 
 // MARK: - JSONEncoder Stream

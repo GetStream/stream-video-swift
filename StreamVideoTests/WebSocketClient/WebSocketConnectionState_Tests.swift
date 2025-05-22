@@ -22,7 +22,7 @@ final class WebSocketConnectionState_Tests: XCTestCase, @unchecked Sendable {
         ]
 
         // Iterate pairs
-        testCases.forEach { source, serverError in
+        for (source, serverError) in testCases {
             // Assert returned server error matches expected one
             XCTAssertEqual(source.serverError, serverError)
         }

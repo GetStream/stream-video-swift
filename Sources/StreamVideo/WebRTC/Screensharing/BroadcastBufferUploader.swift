@@ -33,7 +33,7 @@ actor BroadcastBufferUploader {
         
         dataToSend = prepare(sample: buffer)
         byteIndex = 0
-        self.sendDataChunk()
+        sendDataChunk()
         
         return true
     }
@@ -59,7 +59,7 @@ actor BroadcastBufferUploader {
     }
     
     @discardableResult func sendDataChunk() -> Bool {
-        guard let dataToSend = dataToSend else {
+        guard let dataToSend else {
             return false
         }
         
@@ -103,7 +103,7 @@ actor BroadcastBufferUploader {
             attachmentModeOut: nil
         )?.uintValue ?? 0
         
-        let bufferData = self.jpegData(from: imageBuffer)
+        let bufferData = jpegData(from: imageBuffer)
         
         CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
         

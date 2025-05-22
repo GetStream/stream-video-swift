@@ -26,9 +26,9 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler, @unchec
     private let internetConnection: InternetConnection
     private let reconnectionTimerType: Timer.Type
     private let keepConnectionAliveInBackground: Bool
-    nonisolated(unsafe) private var reconnectionStrategy: RetryStrategy
-    nonisolated(unsafe) private var reconnectionTimer: TimerControl?
-    nonisolated(unsafe) private var reconnectionPolicies: [AutomaticReconnectionPolicy]
+    private nonisolated(unsafe) var reconnectionStrategy: RetryStrategy
+    private nonisolated(unsafe) var reconnectionTimer: TimerControl?
+    private nonisolated(unsafe) var reconnectionPolicies: [AutomaticReconnectionPolicy]
 
     // MARK: - Init
 
@@ -183,7 +183,6 @@ extension DefaultConnectionRecoveryHandler {
         switch state {
         case .connecting:
             cancelReconnectionTimer()
-            
         case .connected:
             reconnectionStrategy.resetConsecutiveFailures()
         case .disconnected:
@@ -336,9 +335,9 @@ struct CompositeReconnectionPolicy: AutomaticReconnectionPolicy {
     func canBeReconnected() -> Bool {
         switch `operator` {
         case .and:
-            return policies.first { $0.canBeReconnected() == false } == nil
+            policies.first { $0.canBeReconnected() == false } == nil
         case .or:
-            return policies.first { $0.canBeReconnected() } != nil
+            policies.first { $0.canBeReconnected() } != nil
         }
     }
 }

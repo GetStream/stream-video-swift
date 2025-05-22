@@ -27,8 +27,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// machine.
     final class FastReconnectingStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         private let disposableBag = DisposableBag()
 
         /// Initializes a new instance of `FastReconnectingStage`.

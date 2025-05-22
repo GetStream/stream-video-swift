@@ -18,7 +18,7 @@ final class MockThermalStateObserver: ThermalStateObserving, Mockable, @unchecke
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) {}
+    func stub(for function: FunctionKey, with value: some Any) {}
 
     enum MockFunctionKey: Hashable, CaseIterable {}
 

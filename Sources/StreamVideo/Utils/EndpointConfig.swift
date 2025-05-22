@@ -42,7 +42,7 @@ extension EndpointConfig {
     }
 }
 
-internal extension URL {
+extension URL {
     func appendingQueryItems(_ items: [String: String]) throws -> URL {
         let queryItems = items.map { URLQueryItem(name: $0.key, value: $0.value) }
         return try appendingQueryItems(queryItems)

@@ -21,7 +21,7 @@ final class PictureInPictureViewFactory: @unchecked Sendable {
     /// - Parameter viewFactory: A view factory that conforms to the `ViewFactory`
     ///   protocol, used to create the participant image views.
     @MainActor
-    init<Factory: ViewFactory>(_ viewFactory: Factory) {
+    init(_ viewFactory: some ViewFactory) {
         _makeParticipantImageView = {
             AnyView(
                 CallParticipantImageView(

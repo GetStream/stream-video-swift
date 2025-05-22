@@ -110,7 +110,7 @@ final class URLSessionWebSocketEngine: NSObject, WebSocketEngine, @unchecked Sen
 
     private func doRead() {
         task?.receive { [weak self] result in
-            guard let self = self, task != nil else {
+            guard let self, task != nil else {
                 return
             }
 
@@ -118,19 +118,19 @@ final class URLSessionWebSocketEngine: NSObject, WebSocketEngine, @unchecked Sen
             case let .success(message):
                 if case let .data(data) = message {
                     log.debug("Received webSocket message: \(data.debugPrettyPrintedJSON)", subsystems: .webSocket)
-                    self.callbackQueue.async { [weak self] in
+                    callbackQueue.async { [weak self] in
                         guard self?.task != nil else { return }
                         self?.delegate?.webSocketDidReceiveMessage(data)
                     }
                 } else if case let .string(string) = message {
                     let messageData = Data(string.utf8)
                     log.debug("Received webSocket message:\(messageData.debugPrettyPrintedJSON)", subsystems: .webSocket)
-                    self.callbackQueue.async { [weak self] in
+                    callbackQueue.async { [weak self] in
                         guard self?.task != nil else { return }
                         self?.delegate?.webSocketDidReceiveMessage(messageData)
                     }
                 }
-                self.doRead()
+                doRead()
 
             case let .failure(error):
                 log.error("Failed while trying to receive webSocket message.", subsystems: .webSocket, error: error)
@@ -166,7 +166,7 @@ final class URLSessionWebSocketEngine: NSObject, WebSocketEngine, @unchecked Sen
             // intentionally, `error` param will be `nil`.
             // Delegate is already informed with `didCloseWith` callback,
             // so we don't need to call delegate again.
-            guard let error = error else { return }
+            guard let error else { return }
 
             self?.callbackQueue.async { [weak self] in
                 let socketError = WebSocketEngineError(error: error)

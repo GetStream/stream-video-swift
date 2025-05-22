@@ -26,8 +26,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the joined stage in the WebRTC coordinator state machine.
     final class JoinedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
 
         private let disposableBag = DisposableBag()
@@ -166,7 +165,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             _ migrationStatusObserver: WebRTCMigrationStatusObserver?,
             previousSFUAdapter: SFUAdapter?
         ) async throws {
-            if let migrationStatusObserver = migrationStatusObserver {
+            if let migrationStatusObserver {
                 let task = Task {
                     do {
                         try Task.checkCancellation()
@@ -199,11 +198,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .compactMap {
                     switch $0 {
                     case let .disconnecting(source):
-                        return source
+                        source
                     case let .disconnected(source):
-                        return source
+                        source
                     default:
-                        return nil
+                        nil
                     }
                 }
                 .sink { [weak self] (source: WebSocketConnectionState.DisconnectionSource) in
@@ -420,8 +419,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             /// Check if the stats reporter is already associated with the current session.
             if await stateAdapter.statsReporter?.sessionID != sessionId {
                 /// Create a new stats reporter if the session ID does not match.
-                let statsReporter = WebRTCStatsReporter(
-                    sessionID: await stateAdapter.sessionID
+                let statsReporter = await WebRTCStatsReporter(
+                    sessionID: stateAdapter.sessionID
                 )
 
                 /// Set the stats reporting interval and associate the reporter with the publisher,
@@ -497,13 +496,13 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return
             }
 
-            updateSubscriptionsAdapter = .init(
-                participantsPublisher: await stateAdapter.$participants.eraseToAnyPublisher(),
-                incomingVideoQualitySettingsPublisher: await stateAdapter
+            updateSubscriptionsAdapter = await .init(
+                participantsPublisher: stateAdapter.$participants.eraseToAnyPublisher(),
+                incomingVideoQualitySettingsPublisher: stateAdapter
                     .$incomingVideoQualitySettings
                     .eraseToAnyPublisher(),
                 sfuAdapter: sfuAdapter,
-                sessionID: await stateAdapter.sessionID
+                sessionID: stateAdapter.sessionID
             )
         }
     }

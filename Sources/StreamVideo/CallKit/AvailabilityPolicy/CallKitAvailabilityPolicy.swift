@@ -25,11 +25,11 @@ public enum CallKitAvailabilityPolicy: CustomStringConvertible {
     public var description: String {
         switch self {
         case .always:
-            return ".always"
+            ".always"
         case .regionBased:
-            return ".regionBased"
+            ".regionBased"
         case let .custom(policy):
-            return ".custom(\(policy))"
+            ".custom(\(policy))"
         }
     }
 
@@ -39,11 +39,11 @@ public enum CallKitAvailabilityPolicy: CustomStringConvertible {
     var policy: CallKitAvailabilityPolicyProtocol {
         switch self {
         case .always:
-            return CallKitAlwaysAvailabilityPolicy()
+            CallKitAlwaysAvailabilityPolicy()
         case .regionBased:
-            return CallKitRegionBasedAvailabilityPolicy()
+            CallKitRegionBasedAvailabilityPolicy()
         case let .custom(policy):
-            return policy
+            policy
         }
     }
 }

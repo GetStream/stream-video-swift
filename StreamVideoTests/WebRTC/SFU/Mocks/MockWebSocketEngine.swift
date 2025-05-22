@@ -20,7 +20,7 @@ final class MockWebSocketEngine: WebSocketEngine, Mockable, @unchecked Sendable 
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [MockFunctionKey: Any] = [:]
     func stub<T>(for keyPath: KeyPath<MockWebSocketEngine, T>, with value: T) {}
-    func stub<T>(for function: MockFunctionKey, with value: T) {}
+    func stub(for function: MockFunctionKey, with value: some Any) {}
 
     enum FunctionInput: Payloadable {
         case connect
@@ -33,17 +33,17 @@ final class MockWebSocketEngine: WebSocketEngine, Mockable, @unchecked Sendable 
         var payload: Any {
             switch self {
             case .connect:
-                return ()
+                ()
             case .disconnect:
-                return ()
+                ()
             case .sendPing:
-                return ()
+                ()
             case let .sendMessage(message):
-                return message
+                message
             case let .sendJSON(json):
-                return json
+                json
             case let .disconnectWithCode(closeCode):
-                return closeCode
+                closeCode
             }
         }
     }

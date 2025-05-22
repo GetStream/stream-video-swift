@@ -563,7 +563,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private func assertCoordinatorEventReceived(
         _ event: VideoEvent,
-        fulfillmentHandler: @MainActor(Call) async throws -> Void
+        fulfillmentHandler: @MainActor (Call) async throws -> Void
     ) async throws {
         let streamVideo = try XCTUnwrap(streamVideo)
         let call = streamVideo.call(callType: callType, callId: callId)
@@ -579,7 +579,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 private struct UpdateStateStep: Sendable {
     var event: VideoEvent
     var onEventUpdate: Bool
-    var validation: @Sendable(Call) -> Bool
+    var validation: @Sendable (Call) -> Bool
 
     init<V: Equatable & Sendable>(
         event: VideoEvent,

@@ -78,9 +78,9 @@ final class StreamVideoCapturerFactory: VideoCapturerProviding {
     ) -> StreamVideoCapturing {
         switch type {
         case .inApp:
-            return StreamVideoCapturer.screenShareCapturer(with: source)
+            StreamVideoCapturer.screenShareCapturer(with: source)
         case .broadcast:
-            return StreamVideoCapturer.broadcastCapturer(with: source)
+            StreamVideoCapturer.broadcastCapturer(with: source)
         }
     }
 }

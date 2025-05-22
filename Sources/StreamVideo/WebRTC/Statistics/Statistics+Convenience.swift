@@ -97,7 +97,7 @@ protocol StreamStatisticsReportProtocol {
 extension RTCStatistics: StreamStatisticsProtocol {}
 extension RTCStatisticsReport: StreamStatisticsReportProtocol {
     var stats: [String: any StreamStatisticsProtocol] {
-        self.statistics
+        statistics
     }
 }
 

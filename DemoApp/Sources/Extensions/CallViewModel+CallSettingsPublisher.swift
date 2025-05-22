@@ -9,7 +9,7 @@ import StreamVideoSwiftUI
 
 extension CallViewModel {
 
-    internal var callSettingsPublisher: AnyPublisher<CallSettings, Never> {
+    var callSettingsPublisher: AnyPublisher<CallSettings, Never> {
         $callSettings.eraseToAnyPublisher()
     }
 }

@@ -43,7 +43,7 @@ actor AVAudioRecorderBuilder {
             for: .cachesDirectory,
             in: .userDomainMask
         )[0]
-        self.fileURL = documentPath.appendingPathComponent(filename)
+        fileURL = documentPath.appendingPathComponent(filename)
         self.settings = settings
     }
 
@@ -51,14 +51,14 @@ actor AVAudioRecorderBuilder {
         cachedResult: AVAudioRecorder
     ) {
         self.cachedResult = cachedResult
-        self.fileURL = cachedResult.url
-        self.settings = cachedResult.settings
+        fileURL = cachedResult.url
+        settings = cachedResult.settings
     }
 
     /// Instructs the `AVAudioRecorderBuilder` to build and cache an instance of AVAudioRecorder.
     func build() throws {
         guard cachedResult == nil else { return }
         let audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
-        self.cachedResult = audioRecorder
+        cachedResult = audioRecorder
     }
 }

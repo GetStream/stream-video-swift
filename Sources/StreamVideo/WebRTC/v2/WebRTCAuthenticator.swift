@@ -91,8 +91,7 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         var callSettings = initialCallSettings ?? remoteCallSettings
         if
             coordinator.stateAdapter.audioSession.currentRoute.isExternal,
-            callSettings.speakerOn
-        {
+            callSettings.speakerOn {
             callSettings = callSettings.withUpdatedSpeakerState(false)
         }
         await coordinator.stateAdapter.set(
@@ -103,28 +102,28 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             videoOptions: .init(preferredCameraPosition: {
                 switch response.call.settings.video.cameraFacing {
                 case .back:
-                    return .back
+                    .back
                 case .external:
-                    return .front
+                    .front
                 case .front:
-                    return .front
+                    .front
                 case .unknown:
-                    return .front
+                    .front
                 }
             }())
         )
 
-        let sfuAdapter = SFUAdapter(
+        let sfuAdapter = try await SFUAdapter(
             serviceConfiguration: .init(
-                url: try unwrap(
+                url: unwrap(
                     .init(string: response.credentials.server.url),
                     errorMessage: "Server URL is invalid."
                 ),
                 apiKey: coordinator.stateAdapter.apiKey,
-                token: await coordinator.stateAdapter.token
+                token: coordinator.stateAdapter.token
             ),
             webSocketConfiguration: .init(
-                url: try unwrap(
+                url: unwrap(
                     .init(string: response.credentials.server.wsEndpoint),
                     errorMessage: "WebSocket URL is invalid."
                 ),
@@ -136,8 +135,8 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         if let statsReporter = await coordinator.stateAdapter.statsReporter {
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
         } else {
-            let statsReporter = WebRTCStatsReporter(
-                sessionID: await coordinator.stateAdapter.sessionID
+            let statsReporter = await WebRTCStatsReporter(
+                sessionID: coordinator.stateAdapter.sessionID
             )
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
             await coordinator.stateAdapter.set(statsReporter: statsReporter)
@@ -156,9 +155,9 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             .filter {
                 switch $0 {
                 case .authenticating:
-                    return true
+                    true
                 default:
-                    return false
+                    false
                 }
             }
             .nextValue(timeout: WebRTCConfiguration.timeout.authenticate)
@@ -173,9 +172,9 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             .filter {
                 switch $0 {
                 case .connected:
-                    return true
+                    true
                 default:
-                    return false
+                    false
                 }
             }
             .nextValue(timeout: WebRTCConfiguration.timeout.connect)

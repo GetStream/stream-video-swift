@@ -29,13 +29,13 @@ final class SDPParser {
                 continue
             }
 
-            visitors.forEach {
+            for visitor in visitors {
                 guard
-                    $0.supportedPrefixes.contains(supportedPrefix)
+                    visitor.supportedPrefixes.contains(supportedPrefix)
                 else {
-                    return
+                    continue
                 }
-                $0.visit(line: line)
+                visitor.visit(line: line)
             }
         }
     }

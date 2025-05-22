@@ -59,7 +59,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let scene = scene as? UIWindowScene else { return }
         self.window = UIWindow(windowScene: scene)
-        guard let window = self.window else { return }
+        guard let window else { return }
         window.makeKeyAndVisible()
     }
 

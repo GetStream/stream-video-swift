@@ -71,9 +71,9 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
     private var shouldShowCallView: Bool {
         switch viewModel.callingState {
         case .outgoing, .incoming(_), .inCall, .joining, .lobby:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }

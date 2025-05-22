@@ -65,7 +65,7 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
 }
 
 enum AudioProcessingModuleKey: InjectionKey {
-    nonisolated(unsafe) public static var currentValue: AudioProcessingModule = StreamAudioFilterProcessingModule()
+    public nonisolated(unsafe) static var currentValue: AudioProcessingModule = StreamAudioFilterProcessingModule()
 }
 
 extension InjectedValues {

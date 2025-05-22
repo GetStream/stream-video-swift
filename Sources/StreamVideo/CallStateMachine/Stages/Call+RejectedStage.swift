@@ -49,9 +49,9 @@ extension Call.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .rejecting:
-                return self
+                self
             default:
-                return nil
+                nil
             }
         }
     }

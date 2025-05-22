@@ -35,7 +35,7 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
 
             let channelId = ChannelId(type: .custom("videocall"), id: newCall.callId)
             self.channelId = channelId
-            self.channelController = self.chatWrapper?
+            channelController = chatWrapper?
                 .chatClient
                 .channelController(for: channelId)
         }
@@ -68,7 +68,7 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
     }
 
     func channelDisappeared() {
-        guard let channelId = channelId else { return }
+        guard let channelId else { return }
         channelController = chatWrapper?
             .chatClient
             .channelController(for: channelId)

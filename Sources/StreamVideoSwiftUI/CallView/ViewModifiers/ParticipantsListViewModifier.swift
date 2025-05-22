@@ -11,9 +11,9 @@ extension View {
     /// Will use the provided Binding to present the Participants List.
     @ViewBuilder
     @MainActor
-    public func presentParticipantListView<Factory: ViewFactory>(
+    public func presentParticipantListView(
         @ObservedObject viewModel: CallViewModel,
-        viewFactory: Factory = DefaultViewFactory.shared
+        viewFactory: some ViewFactory = DefaultViewFactory.shared
     ) -> some View {
         halfSheet(isPresented: $viewModel.participantsShown) {
             viewFactory.makeParticipantsListView(viewModel: viewModel)

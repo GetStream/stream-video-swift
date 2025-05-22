@@ -42,7 +42,7 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
     }
 
     /// Lazily-initialized Metal view used for rendering.
-    private lazy var metalView: MTKView? = { subviews.compactMap { $0 as? MTKView }.first }()
+    private lazy var metalView: MTKView? = subviews.compactMap { $0 as? MTKView }.first
 
     /// The ID of the associated RTCVideoTrack.
     var trackId: String? { track?.trackId }
@@ -63,16 +63,16 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
         cancellable = thermalStateObserver
             .statePublisher
             .sink { [weak self] state in
-                guard let self = self else { return }
+                guard let self else { return }
                 switch state {
                 case .nominal, .fair:
-                    self.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+                    preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
                 case .serious:
-                    self.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.5)
+                    preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.5)
                 case .critical:
-                    self.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.4)
+                    preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.4)
                 @unknown default:
-                    self.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+                    preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
                 }
             }
     }
@@ -130,7 +130,7 @@ extension VideoRenderer {
     ///   - onTrackSizeUpdate: A closure to be called when the track size is updated.
     public func handleViewRendering(
         for participant: CallParticipant,
-        onTrackSizeUpdate: @escaping @Sendable(CGSize, CallParticipant) -> Void
+        onTrackSizeUpdate: @escaping @Sendable (CGSize, CallParticipant) -> Void
     ) {
         if let track = participant.track {
             log.info(

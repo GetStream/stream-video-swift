@@ -18,7 +18,7 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
         stubbedProperty[propertyKey(for: keyPath)] = value
     }
 
-    func stub<T>(for function: FunctionKey, with value: T) { stubbedFunction[function] = value }
+    func stub(for function: FunctionKey, with value: some Any) { stubbedFunction[function] = value }
 
     enum MockFunctionKey: Hashable, CaseIterable {
         case buildCameraCapturer
@@ -37,9 +37,9 @@ final class MockVideoCapturerFactory: VideoCapturerProviding, Mockable, @uncheck
         var payload: Any {
             switch self {
             case let .buildCameraCapturer(source):
-                return (source)
+                (source)
             case let .buildScreenCapturer(type, source):
-                return (type, source)
+                (type, source)
             }
         }
     }

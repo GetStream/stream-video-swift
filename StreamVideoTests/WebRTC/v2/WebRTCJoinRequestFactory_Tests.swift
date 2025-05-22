@@ -18,7 +18,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Lifecycle
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 
@@ -396,10 +396,10 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
                 .participants.count == 4
         }
 
-        let result = subject.buildSubscriptionDetails(
+        let result = await subject.buildSubscriptionDetails(
             .unique,
-            sessionID: await mockCoordinatorStack.coordinator.stateAdapter.sessionID,
-            participants: Array(await mockCoordinatorStack.coordinator.stateAdapter.participants.values),
+            sessionID: mockCoordinatorStack.coordinator.stateAdapter.sessionID,
+            participants: Array(mockCoordinatorStack.coordinator.stateAdapter.participants.values),
             incomingVideoQualitySettings: .none
         ).sorted { $0.sessionID <= $1.sessionID }
 

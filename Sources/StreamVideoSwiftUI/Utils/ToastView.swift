@@ -81,7 +81,7 @@ public struct ToastModifier: ViewModifier {
     }
     
     @ViewBuilder func toastView() -> some View {
-        if let toast = toast {
+        if let toast {
             VStack {
                 if toast.placement == .bottom {
                     Spacer()
@@ -100,7 +100,7 @@ public struct ToastModifier: ViewModifier {
     }
     
     private func showToast() {
-        guard let toast = toast else { return }
+        guard let toast else { return }
         
         UIImpactFeedbackGenerator(style: .light)
             .impactOccurred()

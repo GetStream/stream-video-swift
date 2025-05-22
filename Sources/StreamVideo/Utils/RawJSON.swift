@@ -180,9 +180,9 @@ public extension RawJSON {
     var isNil: Bool {
         switch self {
         case .nil:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }
@@ -327,7 +327,7 @@ extension RawJSON {
             return array[index]
         }
         set {
-            guard case var .array(array) = self, let newValue = newValue else {
+            guard case var .array(array) = self, let newValue else {
                 return
             }
 

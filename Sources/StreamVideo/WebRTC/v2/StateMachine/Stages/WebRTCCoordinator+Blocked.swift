@@ -25,8 +25,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// Represents the leaving stage in the WebRTC coordinator state machine.
     final class BlockedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         private let disposableBag = DisposableBag()
 
         /// Initializes a new instance of `BlockedStage`.

@@ -14,7 +14,7 @@ struct LegacyAsyncImage<Content>: View where Content: View {
         @Published var data: Data? = nil
         private var cancellables = Set<AnyCancellable>()
         init(_ url: URL?) {
-            guard let url = url else { return }
+            guard let url else { return }
             URLSession.shared.dataTaskPublisher(for: url)
                 .map(\.data)
                 .map { $0 as Data? }
@@ -75,10 +75,10 @@ struct LegacyAsyncImage<Content>: View where Content: View {
         imageLoader = Loader(url)
         self.scale = scale
         conditionalContent = { image in
-            if let image = image {
-                return ViewBuilder.buildEither(first: content(image))
+            if let image {
+                ViewBuilder.buildEither(first: content(image))
             } else {
-                return ViewBuilder.buildEither(second: placeholder())
+                ViewBuilder.buildEither(second: placeholder())
             }
         }
     }
@@ -92,9 +92,9 @@ struct LegacyAsyncImage<Content>: View where Content: View {
     }
 
     var body: some View {
-        if let conditionalContent = conditionalContent {
+        if let conditionalContent {
             conditionalContent(image)
-        } else if let image = image {
+        } else if let image {
             image
         }
     }

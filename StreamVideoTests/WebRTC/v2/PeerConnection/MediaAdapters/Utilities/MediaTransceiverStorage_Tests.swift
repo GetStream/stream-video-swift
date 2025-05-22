@@ -30,7 +30,7 @@ final class MediaTransceiverStorage_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Storage Operations
 
     func test_addTransceiver() throws {
-        subject.set(try makeTransceiver(), track: trackA, for: "transceiver1")
+        try subject.set(makeTransceiver(), track: trackA, for: "transceiver1")
 
         XCTAssertEqual(subject.count, 1)
     }
@@ -45,8 +45,8 @@ final class MediaTransceiverStorage_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_removeAllTransceivers() throws {
-        subject.set(try makeTransceiver(), track: trackA, for: "transceiver1")
-        subject.set(try makeTransceiver(), track: trackB, for: "transceiver2")
+        try subject.set(makeTransceiver(), track: trackA, for: "transceiver1")
+        try subject.set(makeTransceiver(), track: trackB, for: "transceiver2")
 
         subject.removeAll()
 

@@ -41,7 +41,7 @@ public final class BackportStateObject<ObjectType: ObservableObject & Sendable>:
         self.thunk = thunk
     }
 
-    nonisolated public func update() {
+    public nonisolated func update() {
         Task { @MainActor in
             // Not sure what this does but we'll just forward it
             _state.update()

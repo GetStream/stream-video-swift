@@ -85,7 +85,7 @@ final class ProximityMonitor: ProximityProviding, ObservableObject, @unchecked S
 
 /// Injection key for the proximity monitor dependency
 enum ProximityProviderKey: InjectionKey {
-    nonisolated(unsafe) public static var currentValue: ProximityProviding = ProximityMonitor()
+    public nonisolated(unsafe) static var currentValue: ProximityProviding = ProximityMonitor()
 }
 
 extension InjectedValues {

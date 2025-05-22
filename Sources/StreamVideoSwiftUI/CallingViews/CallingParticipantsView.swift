@@ -22,11 +22,11 @@ struct CallingParticipantsView: View {
     
     private var text: String {
         if participants.isEmpty {
-            return caller
+            caller
         } else if participants.count == 1 {
-            return participants[0].user.name
+            participants[0].user.name
         } else {
-            return multipleParticipantsText
+            multipleParticipantsText
         }
     }
     

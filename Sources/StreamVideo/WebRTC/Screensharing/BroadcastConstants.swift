@@ -4,7 +4,7 @@
 
 import Foundation
 
-internal enum BroadcastConstants {
+enum BroadcastConstants {
     static let bufferMaxLength = 10240
     static let contentLength = "Content-Length"
     static let bufferWidth = "Buffer-Width"

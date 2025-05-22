@@ -29,9 +29,9 @@ public struct UserAvatar<Failback: View>: View {
         self.size = size
         self.failbackProvider = {
             if let failbackProvider {
-                return ViewBuilder.buildEither(first: failbackProvider())
+                ViewBuilder.buildEither(first: failbackProvider())
             } else {
-                return ViewBuilder.buildEither(second: EmptyView())
+                ViewBuilder.buildEither(second: EmptyView())
             }
         }
     }

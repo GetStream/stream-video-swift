@@ -23,16 +23,14 @@ struct PictureInPictureBufferTransformer {
         _ frame: RTCVideoFrame,
         targetSize: CGSize
     ) -> RTCVideoFrame? {
-        let pixelBuffer: RTCVideoFrameBuffer? = {
-            if let i420buffer = frame.buffer as? RTCI420Buffer {
-                return i420buffer
-            } else {
-                return frame.buffer
-            }
-        }()
+        let pixelBuffer: RTCVideoFrameBuffer? = if let i420buffer = frame.buffer as? RTCI420Buffer {
+            i420buffer
+        } else {
+            frame.buffer
+        }
 
         if
-            let pixelBuffer = pixelBuffer,
+            let pixelBuffer,
             let buffer = transformAndResizeIfRequired(pixelBuffer, targetSize: targetSize) {
             return .init(
                 buffer: buffer,
@@ -58,14 +56,12 @@ struct PictureInPictureBufferTransformer {
         targetSize: CGSize
     ) -> StreamRTCYUVBuffer? {
         let sourceSize = CGSize(width: Int(source.width), height: Int(source.height))
-        let resultBuffer: StreamRTCYUVBuffer? = {
-            if requiresResize {
-                return .init(source: source)
-                    .resize(to: resizeSize(sourceSize, toFitWithin: targetSize))
-            } else {
-                return .init(source: source)
-            }
-        }()
+        let resultBuffer: StreamRTCYUVBuffer? = if requiresResize {
+            .init(source: source)
+                .resize(to: resizeSize(sourceSize, toFitWithin: targetSize))
+        } else {
+            .init(source: source)
+        }
 
         return resultBuffer
     }

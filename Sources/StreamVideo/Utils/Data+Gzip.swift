@@ -150,28 +150,26 @@ struct GzipError: Swift.Error {
 
     init(code: Int32, msg: UnsafePointer<CChar>?) {
         message = {
-            guard let msg = msg, let message = String(validatingUTF8: msg) else {
+            guard let msg, let message = String(validatingUTF8: msg) else {
                 return "Unknown gzip error"
             }
             return message
         }()
 
-        kind = {
-            switch code {
-            case Z_STREAM_ERROR:
-                return .stream
-            case Z_DATA_ERROR:
-                return .data
-            case Z_MEM_ERROR:
-                return .memory
-            case Z_BUF_ERROR:
-                return .buffer
-            case Z_VERSION_ERROR:
-                return .version
-            default:
-                return .unknown(code: Int(code))
-            }
-        }()
+        kind = switch code {
+        case Z_STREAM_ERROR:
+            .stream
+        case Z_DATA_ERROR:
+            .data
+        case Z_MEM_ERROR:
+            .memory
+        case Z_BUF_ERROR:
+            .buffer
+        case Z_VERSION_ERROR:
+            .version
+        default:
+            .unknown(code: Int(code))
+        }
     }
 
     var localizedDescription: String {

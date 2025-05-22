@@ -60,8 +60,8 @@ final class MediaTransceiverStorage<KeyType: Hashable>: Sequence, CustomStringCo
     /// Deinitializes the storage, ensuring all transceivers are stopped and cleared.
     deinit {
         storageQueue.sync {
-            storage.forEach {
-                $0.value.transceiver.sender.track = nil
+            for item in storage {
+                item.value.transceiver.sender.track = nil
             }
             storage.removeAll()
         }

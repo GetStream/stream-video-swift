@@ -8,7 +8,7 @@ import StreamVideoSwiftUI
 
 extension MicrophoneChecker {
 
-    internal var decibelsPublisher: AnyPublisher<[Float], Never> {
+    var decibelsPublisher: AnyPublisher<[Float], Never> {
         $audioLevels.eraseToAnyPublisher()
     }
 }

@@ -129,69 +129,69 @@ public enum LayoutAnchorName {
     func makeConstraint(fromView: UIView, toView: UIView, constant: CGFloat = 0) -> NSLayoutConstraint {
         switch self {
         case .bottom:
-            return fromView.bottomAnchor.pinItem(equalTo: toView.bottomAnchor, constant: constant)
+            fromView.bottomAnchor.pinItem(equalTo: toView.bottomAnchor, constant: constant)
         case .centerX:
-            return fromView.centerXAnchor.pinItem(equalTo: toView.centerXAnchor, constant: constant)
+            fromView.centerXAnchor.pinItem(equalTo: toView.centerXAnchor, constant: constant)
         case .centerY:
-            return fromView.centerYAnchor.pinItem(equalTo: toView.centerYAnchor, constant: constant)
+            fromView.centerYAnchor.pinItem(equalTo: toView.centerYAnchor, constant: constant)
         case .firstBaseline:
-            return fromView.firstBaselineAnchor.pinItem(equalTo: toView.firstBaselineAnchor, constant: constant)
+            fromView.firstBaselineAnchor.pinItem(equalTo: toView.firstBaselineAnchor, constant: constant)
         case .height:
-            return fromView.heightAnchor.pinItem(equalTo: toView.heightAnchor, constant: constant)
+            fromView.heightAnchor.pinItem(equalTo: toView.heightAnchor, constant: constant)
         case .lastBaseline:
-            return fromView.lastBaselineAnchor.pinItem(equalTo: toView.lastBaselineAnchor, constant: constant)
+            fromView.lastBaselineAnchor.pinItem(equalTo: toView.lastBaselineAnchor, constant: constant)
         case .leading:
-            return fromView.leadingAnchor.pinItem(equalTo: toView.leadingAnchor, constant: constant)
+            fromView.leadingAnchor.pinItem(equalTo: toView.leadingAnchor, constant: constant)
         case .left:
-            return fromView.leftAnchor.pinItem(equalTo: toView.leftAnchor, constant: constant)
+            fromView.leftAnchor.pinItem(equalTo: toView.leftAnchor, constant: constant)
         case .right:
-            return fromView.rightAnchor.pinItem(equalTo: toView.rightAnchor, constant: constant)
+            fromView.rightAnchor.pinItem(equalTo: toView.rightAnchor, constant: constant)
         case .top:
-            return fromView.topAnchor.pinItem(equalTo: toView.topAnchor, constant: constant)
+            fromView.topAnchor.pinItem(equalTo: toView.topAnchor, constant: constant)
         case .trailing:
-            return fromView.trailingAnchor.pinItem(equalTo: toView.trailingAnchor, constant: constant)
+            fromView.trailingAnchor.pinItem(equalTo: toView.trailingAnchor, constant: constant)
         case .width:
-            return fromView.widthAnchor.pinItem(equalTo: toView.widthAnchor, constant: constant)
+            fromView.widthAnchor.pinItem(equalTo: toView.widthAnchor, constant: constant)
         }
     }
     
     func makeConstraint(fromView: UIView, toLayoutGuide: UILayoutGuide, constant: CGFloat = 0) -> NSLayoutConstraint? {
         switch self {
         case .bottom:
-            return fromView.bottomAnchor.pinItem(equalTo: toLayoutGuide.bottomAnchor, constant: constant)
+            fromView.bottomAnchor.pinItem(equalTo: toLayoutGuide.bottomAnchor, constant: constant)
         case .centerX:
-            return fromView.centerXAnchor.pinItem(equalTo: toLayoutGuide.centerXAnchor, constant: constant)
+            fromView.centerXAnchor.pinItem(equalTo: toLayoutGuide.centerXAnchor, constant: constant)
         case .centerY:
-            return fromView.centerYAnchor.pinItem(equalTo: toLayoutGuide.centerYAnchor, constant: constant)
+            fromView.centerYAnchor.pinItem(equalTo: toLayoutGuide.centerYAnchor, constant: constant)
         case .height:
-            return fromView.heightAnchor.pinItem(equalTo: toLayoutGuide.heightAnchor, constant: constant)
+            fromView.heightAnchor.pinItem(equalTo: toLayoutGuide.heightAnchor, constant: constant)
         case .leading:
-            return fromView.leadingAnchor.pinItem(equalTo: toLayoutGuide.leadingAnchor, constant: constant)
+            fromView.leadingAnchor.pinItem(equalTo: toLayoutGuide.leadingAnchor, constant: constant)
         case .left:
-            return fromView.leftAnchor.pinItem(equalTo: toLayoutGuide.leftAnchor, constant: constant)
+            fromView.leftAnchor.pinItem(equalTo: toLayoutGuide.leftAnchor, constant: constant)
         case .right:
-            return fromView.rightAnchor.pinItem(equalTo: toLayoutGuide.rightAnchor, constant: constant)
+            fromView.rightAnchor.pinItem(equalTo: toLayoutGuide.rightAnchor, constant: constant)
         case .top:
-            return fromView.topAnchor.pinItem(equalTo: toLayoutGuide.topAnchor, constant: constant)
+            fromView.topAnchor.pinItem(equalTo: toLayoutGuide.topAnchor, constant: constant)
         case .trailing:
-            return fromView.trailingAnchor.pinItem(equalTo: toLayoutGuide.trailingAnchor, constant: constant)
+            fromView.trailingAnchor.pinItem(equalTo: toLayoutGuide.trailingAnchor, constant: constant)
         case .width:
-            return fromView.widthAnchor.pinItem(equalTo: toLayoutGuide.widthAnchor, constant: constant)
+            fromView.widthAnchor.pinItem(equalTo: toLayoutGuide.widthAnchor, constant: constant)
         case .firstBaseline, .lastBaseline:
             // TODO: Log warning? Error?
-            return nil
+            nil
         }
     }
     
     func makeConstraint(fromView: UIView, constant: CGFloat) -> NSLayoutConstraint? {
         switch self {
         case .height:
-            return fromView.heightAnchor.pinItem(equalToConstant: constant)
+            fromView.heightAnchor.pinItem(equalToConstant: constant)
         case .width:
-            return fromView.widthAnchor.pinItem(equalToConstant: constant)
+            fromView.widthAnchor.pinItem(equalToConstant: constant)
         default:
             // TODO: Log warning? Error?
-            return nil
+            nil
         }
     }
 }

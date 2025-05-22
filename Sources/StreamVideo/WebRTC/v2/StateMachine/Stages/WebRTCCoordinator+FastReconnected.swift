@@ -26,8 +26,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
     /// machine.
     final class FastReconnectedStage:
         WebRTCCoordinator.StateMachine.Stage,
-        @unchecked Sendable
-    {
+        @unchecked Sendable {
         /// Initializes a new instance of `FastReconnectedStage`.
         /// - Parameter context: The context for the fast reconnected stage.
         init(

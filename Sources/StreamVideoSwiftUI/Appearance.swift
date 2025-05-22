@@ -33,12 +33,12 @@ public class Appearance {
 // MARK: - Appearance + Default
 
 public extension Appearance {
-    static nonisolated(unsafe) var `default`: Appearance = .init()
+    nonisolated(unsafe) static var `default`: Appearance = .init()
 }
 
 /// Provides the default value of the `Appearance` class.
 enum AppearanceKey: InjectionKey {
-    static nonisolated(unsafe) var currentValue: Appearance = Appearance()
+    nonisolated(unsafe) static var currentValue: Appearance = Appearance()
 }
 
 extension InjectedValues {

@@ -395,9 +395,9 @@ extension Call.StateMachine.Stage.Context.Input {
     var join: Call.StateMachine.Stage.Context.JoinInput? {
         switch self {
         case let .join(input):
-            return input
+            input
         default:
-            return nil
+            nil
         }
     }
 }

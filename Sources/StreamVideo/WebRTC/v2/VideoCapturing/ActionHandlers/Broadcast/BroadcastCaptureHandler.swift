@@ -108,7 +108,7 @@ final class BroadcastCaptureHandler: StreamVideoCapturerActionHandler, @unchecke
         rotation: RTCVideoRotation
     ) {
         guard
-            let activeSession = self.activeSession
+            let activeSession
         else {
             log.warning(
                 "\(type(of: self)) received sample buffer but no active session was found.",

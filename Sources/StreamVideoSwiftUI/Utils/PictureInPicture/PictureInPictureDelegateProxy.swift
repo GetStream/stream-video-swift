@@ -22,17 +22,17 @@ final class PictureInPictureDelegateProxy: NSObject, AVPictureInPictureControlle
         var description: String {
             switch self {
             case let .willStart(controller):
-                return ".willStart(controller: \(controller))"
+                ".willStart(controller: \(controller))"
             case let .didStart(controller):
-                return ".didStart(controller: \(controller))"
+                ".didStart(controller: \(controller))"
             case let .failedToStart(controller, error):
-                return ".failedToStart(controller: \(controller), error: \(error))"
+                ".failedToStart(controller: \(controller), error: \(error))"
             case let .willStop(controller):
-                return ".willStop(controller: \(controller))"
+                ".willStop(controller: \(controller))"
             case let .didStop(controller):
-                return ".didStop(controller: \(controller))"
+                ".didStop(controller: \(controller))"
             case let .restoreUI(controller, _):
-                return ".restoreUI(controller: \(controller), completionHandler: (closure))"
+                ".restoreUI(controller: \(controller), completionHandler: (closure))"
             }
         }
     }

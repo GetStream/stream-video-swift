@@ -12,7 +12,7 @@ extension UIView {
         let renderer = UIGraphicsImageRenderer(size: bounds.size)
         return renderer.image { [weak self] _ in
             guard let self else { return }
-            self.drawHierarchy(in: bounds, afterScreenUpdates: true)
+            drawHierarchy(in: bounds, afterScreenUpdates: true)
         }
     }
 }

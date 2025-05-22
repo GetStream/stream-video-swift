@@ -32,13 +32,13 @@ enum PictureInPictureContent: Equatable, CustomStringConvertible {
     var description: String {
         switch self {
         case .inactive:
-            return ".inactive"
+            ".inactive"
         case let .participant(call, participant, track):
-            return ".participant(cId:\(call?.cId ?? "-"), name:\(participant.name), track:\(track?.trackId ?? "-"))"
+            ".participant(cId:\(call?.cId ?? "-"), name:\(participant.name), track:\(track?.trackId ?? "-"))"
         case let .screenSharing(call, participant, track):
-            return ".screenSharing(cId:\(call?.cId ?? "-"), name:\(participant.name), track:\(track.trackId))"
+            ".screenSharing(cId:\(call?.cId ?? "-"), name:\(participant.name), track:\(track.trackId))"
         case .reconnecting:
-            return ".reconnecting"
+            ".reconnecting"
         }
     }
 
@@ -48,23 +48,23 @@ enum PictureInPictureContent: Equatable, CustomStringConvertible {
     ) -> Bool {
         switch (lhs, rhs) {
         case (.inactive, .inactive):
-            return true
+            true
 
         case (let .participant(lhsCall, lhsParticipant, lhsTrack), let .participant(rhsCall, rhsParticipant, rhsTrack)):
-            return lhsCall?.cId == rhsCall?.cId
+            lhsCall?.cId == rhsCall?.cId
                 && lhsParticipant == rhsParticipant
                 && lhsTrack == rhsTrack
 
         case (let .screenSharing(lhsCall, lhsParticipant, lhsTrack), let .screenSharing(rhsCall, rhsParticipant, rhsTrack)):
-            return lhsCall?.cId == rhsCall?.cId
+            lhsCall?.cId == rhsCall?.cId
                 && lhsParticipant == rhsParticipant
                 && lhsTrack == rhsTrack
 
         case (.reconnecting, .reconnecting):
-            return true
+            true
 
         default:
-            return false
+            false
         }
     }
 }

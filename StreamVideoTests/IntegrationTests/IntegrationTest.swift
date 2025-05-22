@@ -29,7 +29,7 @@ class IntegrationTest: XCTestCase, @unchecked Sendable {
     }
 
     override class func tearDown() {
-        Self.videoConfig = nil
+        videoConfig = nil
         super.tearDown()
     }
 

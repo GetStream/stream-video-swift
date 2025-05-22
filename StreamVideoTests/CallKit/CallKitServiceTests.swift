@@ -128,7 +128,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     @MainActor
     func test_reportIncomingCall_callProviderWasCalledWithExpectedValues() {
         // Given
-        let expectation = self.expectation(description: "Report Incoming Call")
+        let expectation = expectation(description: "Report Incoming Call")
         var completionError: Error?
 
         // When
@@ -724,7 +724,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     @MainActor
     private func assertReportCallEnded(
         _ expectedReason: CXCallEndedReason,
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -734,9 +734,9 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
         await fulfillment(timeout: defaultTimeout, file: file, line: line) {
             if case .reportCall = self.callProvider.invocations.last {
-                return true
+                true
             } else {
-                return false
+                false
             }
         }
 
@@ -750,7 +750,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     private func assertNoAction(
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async {
@@ -765,7 +765,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     @MainActor
     private func assertRequestTransaction<T>(
         _ expected: T.Type,
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -798,7 +798,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     private func assertNotRequestTransaction<T>(
         _ expected: T.Type,
-        actionBlock: @Sendable() -> Void,
+        actionBlock: @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -819,7 +819,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     @MainActor
     private func assertWithoutRequestTransaction(
-        actionBlock: @MainActor @Sendable() -> Void,
+        actionBlock: @MainActor @Sendable () -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -842,17 +842,15 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         wasRejectedByEveryoneElse: Bool = false
     ) async throws {
         let acceptedBy = wasAccepted ? [user.id: Date()] : [:]
-        let rejectedBy: [String: Date] = {
-            if wasRejected {
-                return [user.id: Date()]
-            } else if wasRejectedByEveryoneElse {
-                return otherMembers.reduce(into: [String: Date]()) { partialResult, otherMember in
-                    partialResult[otherMember.userId] = .init()
-                }
-            } else {
-                return [:]
+        let rejectedBy: [String: Date] = if wasRejected {
+            [user.id: Date()]
+        } else if wasRejectedByEveryoneElse {
+            otherMembers.reduce(into: [String: Date]()) { partialResult, otherMember in
+                partialResult[otherMember.userId] = .init()
             }
-        }()
+        } else {
+            [:]
+        }
         stubCall(
             response: .dummy(
                 call: .dummy(

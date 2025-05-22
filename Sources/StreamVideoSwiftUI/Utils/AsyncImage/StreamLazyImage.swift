@@ -21,7 +21,7 @@ public struct StreamLazyImage<Placeholder: View>: View {
     }
 
     public var body: some View {
-        if let localImage = localImage {
+        if let localImage {
             applyResizingMode { localImage }
         } else {
             StreamAsyncImage(
@@ -36,7 +36,7 @@ public struct StreamLazyImage<Placeholder: View>: View {
 
     private var localImage: Image? {
         guard
-            let imageURL = imageURL,
+            let imageURL,
             let image = UIImage(contentsOfFile: imageURL.path)
         else {
             return nil
