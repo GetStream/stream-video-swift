@@ -278,9 +278,9 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) { [trackLookupPrefix] participants in
             XCTAssertTrue(participants.isEmpty)
-            let audioTrack = await self.stateAdapter.track(for: participant.sessionId, of: .audio)
-            let videoTrack = await self.stateAdapter.track(for: participant.sessionId, of: .video)
-            let screenShareTrack = await self.stateAdapter.track(for: participant.sessionId, of: .screenshare)
+            let audioTrack = await self.stateAdapter.track(for: participant, of: .audio)
+            let videoTrack = await self.stateAdapter.track(for: participant, of: .video)
+            let screenShareTrack = await self.stateAdapter.track(for: participant, of: .screenshare)
             let prefix_audioTrack = await self.stateAdapter.track(for: trackLookupPrefix, of: .audio)
             let prefix_videoTrack = await self.stateAdapter.track(for: trackLookupPrefix, of: .video)
             let prefix_screenShareTrack = await self.stateAdapter.track(for: trackLookupPrefix, of: .screenshare)

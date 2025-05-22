@@ -204,6 +204,33 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
+    func test_transition_internetConnectionChanges_traceWasCalledOnStatsAdapter() async {
+        let statsAdapter = MockWebRTCStatsAdapter()
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                await mockCoordinatorStack?
+                    .coordinator
+                    .stateAdapter
+                    .set(statsAdapter: statsAdapter)
+
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.unavailable)
+            }
+        ) { _ in
+            do {
+                let trace = try XCTUnwrap(statsAdapter.recordedInputPayload(WebRTCTrace.self, for: .trace)?.first)
+                XCTAssertEqual(trace.tag, "network.changed")
+                XCTAssertEqual(trace.data?.value as? String, "offline")
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
+    }
+
     // MARK: observeForSubscriptionUpdates
 
     func test_transition_participantsUpdated_updateSubscriptionsWasCalledOnSFU() async throws {
@@ -554,6 +581,27 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in }
     }
 
+    func test_transition_callSettingsUpdated_statsAdapterUpdated() async throws {
+        let statsAdapter = MockWebRTCStatsAdapter()
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            statsAdapter: statsAdapter
+        )
+
+        let updateCallSettings = CallSettings(audioOn: true, videoOn: true)
+
+        await assertResultAfterTrigger(
+            trigger: { [mockCoordinatorStack] in
+                await mockCoordinatorStack?
+                    .coordinator
+                    .stateAdapter
+                    .set(callSettings: updateCallSettings)
+            }
+        ) { expectation in
+            XCTAssertEqual(statsAdapter.callSettings, updateCallSettings)
+            expectation.fulfill()
+        }
+    }
+
     func test_transition_callSettingsUpdated_publisherUpdated() async throws {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
@@ -641,53 +689,69 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
 
     // MARK: configureStatsCollectionAndDelivery
 
-    func test_transition_sameSessionId_configuresStatsReporter() async throws {
+    func test_transition_sameSessionId_configuresStatsAdapter() async throws {
         let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await stateAdapter.set(sfuAdapter: sfuAdapter)
         let sessionId = await stateAdapter.sessionID
+        let unifiedSessionId = await stateAdapter.unifiedSessionId
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
-        let initialStatsReporter = WebRTCStatsReporter(
-            deliveryInterval: 12,
-            sessionID: sessionId
+        let initialStatsAdapter = WebRTCStatsAdapter(
+            sessionID: sessionId,
+            unifiedSessionID: unifiedSessionId,
+            isTracingEnabled: true,
+            trackStorage: await stateAdapter.trackStorage
         )
-        await stateAdapter.set(statsReporter: initialStatsReporter)
+        initialStatsAdapter.deliveryInterval = 12
+        await stateAdapter.set(statsAdapter: initialStatsAdapter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
         _ = subject.transition(from: .joining(subject.context))
 
         await wait(for: 1)
-        let newStatsReporter = await stateAdapter.statsReporter
-        XCTAssertEqual(newStatsReporter?.deliveryInterval, 12)
-        XCTAssertTrue(newStatsReporter?.publisher === publisher)
-        XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
-        XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)
+        let newStatsAdapter = await stateAdapter.statsAdapter
+        XCTAssertEqual(newStatsAdapter?.deliveryInterval, 12)
+        XCTAssertTrue(newStatsAdapter?.publisher === publisher)
+        XCTAssertTrue(newStatsAdapter?.subscriber === subscriber)
+        XCTAssertTrue(newStatsAdapter?.sfuAdapter === sfuAdapter)
+        XCTAssertEqual(newStatsAdapter?.unifiedSessionID, unifiedSessionId)
     }
 
-    func test_transition_differentSessionId_configuresStatsReporter() async throws {
+    func test_transition_differentSessionId_configuresStatsAdapter() async throws {
         let stateAdapter = mockCoordinatorStack.coordinator.stateAdapter
         let sfuAdapter = mockCoordinatorStack.sfuStack.adapter
         await stateAdapter.set(sfuAdapter: sfuAdapter)
+        await stateAdapter.set(isTracingEnabled: true)
+        let unifiedSessionId = await stateAdapter.unifiedSessionId
         try await stateAdapter.configurePeerConnections()
         let publisher = await stateAdapter.publisher
         let subscriber = await stateAdapter.subscriber
-        let initialStatsReporter = WebRTCStatsReporter(deliveryInterval: 11, sessionID: .unique)
-        await stateAdapter.set(statsReporter: initialStatsReporter)
+        let initialStatsAdapter = WebRTCStatsAdapter(
+            sessionID: .unique,
+            unifiedSessionID: unifiedSessionId,
+            isTracingEnabled: await stateAdapter.isTracingEnabled,
+            trackStorage: await stateAdapter.trackStorage
+        )
+        initialStatsAdapter.deliveryInterval = 11
+        await stateAdapter.set(statsAdapter: initialStatsAdapter)
         subject.context.coordinator = mockCoordinatorStack.coordinator
 
         _ = subject.transition(from: .joining(subject.context))
 
         await fulfillment {
-            let newStatsReporter = await stateAdapter.statsReporter
-            return newStatsReporter !== initialStatsReporter && newStatsReporter?.deliveryInterval == 11
+            let newStatsAdapter = await stateAdapter.statsAdapter
+            return newStatsAdapter !== initialStatsAdapter && newStatsAdapter?.deliveryInterval == 11
         }
-        let newStatsReporter = await stateAdapter.statsReporter
-        XCTAssertEqual(newStatsReporter?.deliveryInterval, 11)
-        XCTAssertTrue(newStatsReporter?.publisher === publisher)
-        XCTAssertTrue(newStatsReporter?.subscriber === subscriber)
-        XCTAssertTrue(newStatsReporter?.sfuAdapter === sfuAdapter)
+        let newStatsAdapter = await stateAdapter.statsAdapter
+        XCTAssertEqual(newStatsAdapter?.unifiedSessionID, initialStatsAdapter.unifiedSessionID)
+        XCTAssertEqual(newStatsAdapter?.isTracingEnabled, initialStatsAdapter.isTracingEnabled)
+        XCTAssertEqual(newStatsAdapter?.deliveryInterval, 11)
+        XCTAssertTrue(newStatsAdapter?.publisher === publisher)
+        XCTAssertTrue(newStatsAdapter?.subscriber === subscriber)
+        XCTAssertTrue(newStatsAdapter?.sfuAdapter === sfuAdapter)
+        XCTAssertEqual(newStatsAdapter?.unifiedSessionID, unifiedSessionId)
     }
 
     // MARK: observeIncomingVideoQualitySettings

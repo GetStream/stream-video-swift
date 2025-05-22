@@ -91,16 +91,30 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         }
     }
 
-    func test_transition_SFUAdapterOnStatsReporterIsNil() async throws {
+    func test_transition_scheduleStatsReportingWasCalled() async throws {
+        let statsAdapter = MockWebRTCStatsAdapter()
         await mockCoordinatorStack.coordinator.stateAdapter.set(
-            statsReporter: WebRTCStatsReporter(
-                sessionID: .unique
+            statsAdapter: statsAdapter
+        )
+
+        await assertTransitionAfterTrigger(trigger: {}) { _ in
+            XCTAssertEqual(statsAdapter.timesCalled(.scheduleStatsReporting), 1)
+        }
+    }
+
+    func test_transition_SFUAdapterOnStatsAdapterIsNil() async throws {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            statsAdapter: WebRTCStatsAdapter(
+                sessionID: .unique,
+                unifiedSessionID: .unique,
+                isTracingEnabled: true,
+                trackStorage: mockCoordinatorStack.coordinator.stateAdapter.trackStorage
             )
         )
 
         await assertTransitionAfterTrigger(trigger: {}) { target in
             await self.assertNilAsync(
-                await target.context.coordinator?.stateAdapter.statsReporter?.sfuAdapter
+                await target.context.coordinator?.stateAdapter.statsAdapter?.sfuAdapter
             )
         }
     }
@@ -221,6 +235,26 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
             expectedTarget: .error,
             trigger: {}
         ) { _ in }
+    }
+
+    func test_transition_connectionStateChanges_traceWasCalledOnstatsAdapter() async {
+        subject.context.reconnectionStrategy = .disconnected
+        let statsAdapter = MockWebRTCStatsAdapter()
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            statsAdapter: statsAdapter
+        )
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .leaving,
+            trigger: { [mockCoordinatorStack] in
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.available(.great))
+            }
+        ) { _ in
+            XCTAssertEqual(statsAdapter.timesCalled(.trace), 1)
+        }
     }
 
     // MARK: - Private helpers

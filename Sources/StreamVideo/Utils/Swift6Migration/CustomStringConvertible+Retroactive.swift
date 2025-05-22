@@ -19,6 +19,9 @@ extension RTCPeerConnectionState: @retroactive CustomStringConvertible {}
 extension RTCRtpTransceiverDirection: @retroactive CustomStringConvertible {}
 extension RTCSdpType: @retroactive CustomStringConvertible {}
 extension RTCSignalingState: @retroactive CustomStringConvertible {}
+extension RTCDataChannelState: @retroactive CustomStringConvertible {}
+extension RTCBundlePolicy: @retroactive CustomStringConvertible {}
+extension RTCContinualGatheringPolicy: @retroactive CustomStringConvertible {}
 #else
 extension AVAudioSession.Category: CustomStringConvertible {}
 extension AVAudioSession.CategoryOptions: CustomStringConvertible {}
@@ -32,4 +35,7 @@ extension RTCPeerConnectionState: CustomStringConvertible {}
 extension RTCRtpTransceiverDirection: CustomStringConvertible {}
 extension RTCSdpType: CustomStringConvertible {}
 extension RTCSignalingState: CustomStringConvertible {}
+extension RTCDataChannelState: CustomStringConvertible {}
+extension RTCBundlePolicy: CustomStringConvertible {}
+extension RTCContinualGatheringPolicy: CustomStringConvertible {}
 #endif
