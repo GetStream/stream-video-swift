@@ -352,6 +352,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             XCTFail()
         case .callKitActivated:
             XCTFail()
+        case .reject:
+            XCTFail()
         }
     }
 
@@ -417,6 +419,8 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         case .updateTrackSize:
             XCTFail()
         case .callKitActivated:
+            XCTFail()
+        case .reject:
             XCTFail()
         }
         XCTAssertEqual(call.microphone.status, .enabled)
@@ -606,8 +610,30 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         ) { _ in }
 
         try await assertRequestTransaction(CXEndCallAction.self) {
-            subject.callEnded(cid)
+            subject.callEnded(cid, ringingTimedOut: false)
         }
+    }
+
+    @MainActor
+    func test_callEnded_ringingTimedOutTrue_expectedTransactionWasRequested() async throws {
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        try await assertRequestTransaction(CXEndCallAction.self) {
+            subject.callEnded(cid, ringingTimedOut: true)
+        }
+
+        await fulfillment { call.timesCalled(.reject) == 1 }
+
+        let reason = try XCTUnwrap(call.recordedInputPayload(String.self, for: .reject)?.first)
+        XCTAssertEqual(reason, "timeout")
     }
 
     // MARK: - callParticipantLeft
@@ -924,6 +950,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
             )
         )
         call.stub(for: .accept, with: AcceptCallResponse(duration: "0"))
+        call.stub(for: .reject, with: RejectCallResponse(duration: "0"))
         call.stub(for: \.state, with: .init())
         mockedStreamVideo.stub(for: .call, with: call)
         return call

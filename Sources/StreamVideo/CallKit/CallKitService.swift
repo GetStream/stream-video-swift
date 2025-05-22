@@ -20,6 +20,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var callUUID: UUID
         var createdBy: User?
         var isActive: Bool = false
+        var ringingTimedOut: Bool = false
 
         init(
             call: Call,
@@ -100,7 +101,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .default
             .publisher(for: Notification.Name(CallNotification.callEnded))
             .compactMap { $0.object as? Call }
-            .sink { [weak self] in self?.callEnded($0.cId) }
+            .sink { [weak self] in self?.callEnded($0.cId, ringingTimedOut: false) }
     }
 
     /// Reports an incoming call to the CallKit framework.
@@ -151,7 +152,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 """,
                 subsystems: .callKit
             )
-            callEnded(cid)
+            callEnded(cid, ringingTimedOut: false)
             return
         }
 
@@ -191,7 +192,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         """,
                         subsystems: .callKit
                     )
-                    callEnded(cid)
+                    callEnded(cid, ringingTimedOut: false)
                 }
             } catch {
                 log.error(
@@ -202,7 +203,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     """,
                     subsystems: .callKit
                 )
-                callEnded(cid)
+                callEnded(cid, ringingTimedOut: false)
             }
         }
     }
@@ -263,10 +264,15 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     }
 
     /// Handles the event when a call ends.
-    open func callEnded(_ cId: String) {
-        guard let callEndedEntry = callEntry(for: cId) else {
+    open func callEnded(
+        _ cId: String,
+        ringingTimedOut: Bool
+    ) {
+        guard var callEndedEntry = callEntry(for: cId) else {
             return
         }
+        callEndedEntry.ringingTimedOut = ringingTimedOut
+        set(callEndedEntry, for: callEndedEntry.callUUID)
         Task {
             do {
                 // End the call.
@@ -292,7 +298,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         Task { @MainActor in
             if let call = callEntry(for: response.callCid)?.call,
                call.state.participants.count == 1 {
-                callEnded(response.callCid)
+                callEnded(response.callCid, ringingTimedOut: false)
             }
         }
     }
@@ -449,7 +455,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         .rejectionReasonProvider
                         .reason(
                             for: stackEntry.call.cId,
-                            ringTimeout: false
+                            ringTimeout: stackEntry.ringingTimedOut
                         )
                     log.debug(
                         """
@@ -546,7 +552,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 "Detected ringing timeout, hanging up...",
                 subsystems: .callKit
             )
-            self?.callEnded(callState.call.cid)
+            self?.callEnded(callState.call.cid, ringingTimedOut: true)
             self?.ringingTimerCancellable = nil
         }
     }
@@ -582,7 +588,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             for await event in streamVideo.subscribe() {
                 switch event {
                 case let .typeCallEndedEvent(response):
-                    callEnded(response.callCid)
+                    callEnded(response.callCid, ringingTimedOut: false)
                 case let .typeCallAcceptedEvent(response):
                     callAccepted(response)
                 case let .typeCallRejectedEvent(response):

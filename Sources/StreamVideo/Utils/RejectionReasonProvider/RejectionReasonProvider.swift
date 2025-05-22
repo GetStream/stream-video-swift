@@ -59,11 +59,11 @@ final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked 
         if isUserBusy {
             return RejectCallRequest.Reason.busy
         } else if isUserRejectingOutgoingCall {
+            return RejectCallRequest.Reason.cancel
+        } else {
             return ringTimeout
                 ? RejectCallRequest.Reason.timeout
-                : RejectCallRequest.Reason.cancel
-        } else {
-            return RejectCallRequest.Reason.decline
+                : RejectCallRequest.Reason.decline
         }
     }
 }
