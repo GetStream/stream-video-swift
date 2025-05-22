@@ -66,13 +66,12 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
         for value in inputs {
             mockAudioRecorder.mockMetersPublisher.send(Float(value))
-            try? await Task.sleep(nanoseconds: 100_000)
+            await wait(for: 0.1)
         }
 
         let values = try await subject
             .$audioLevels
             .filter { $0 == [0.5, 0.8, 0.0] }
-            .log(.debug) { "Received audioLevels: \($0)" }
             .nextValue(timeout: defaultTimeout)
 
         XCTAssertEqual(values, [0.5, 0.8, 0.0])
