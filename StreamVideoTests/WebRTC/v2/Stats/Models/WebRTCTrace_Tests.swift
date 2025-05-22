@@ -48,7 +48,7 @@ final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertNil(trace.id)
         XCTAssertEqual(trace.tag, "proto")
-        XCTAssertEqual(trace.data?.value as? String, try proto.jsonString())
+        XCTAssertEqual(trace.data?.value as? Stream_Video_Sfu_Event_CallEnded, proto)
     }
 
     func test_init_getUserMedia() {
