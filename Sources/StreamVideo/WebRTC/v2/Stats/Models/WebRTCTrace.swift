@@ -116,12 +116,12 @@ extension WebRTCTrace {
     ///   - event: The protocol buffer message, encoded as JSON.
     init(
         tag: String,
-        event: SwiftProtobuf.Message
+        event: SelectiveEncodable
     ) {
         self.init(
             id: nil,
             tag: tag,
-            data: .init(try? event.jsonString())
+            data: .init(event)
         )
     }
 }

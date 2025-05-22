@@ -48,7 +48,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Event_JoinRequest
 
         var traceTag: String { "join" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent when the client leaves the SFU call with an explicit leave request.
@@ -57,7 +57,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Event_LeaveCallRequest
 
         var traceTag: String { "leave" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent when the client updates mute states for its published tracks.
@@ -66,7 +66,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest
 
         var traceTag: String { "updateTrackMuteState" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent to instruct the SFU to start noise cancellation for the client.
@@ -75,7 +75,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest
 
         var traceTag: String { "startNoiseCancellation" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent to instruct the SFU to stop noise cancellation for the client.
@@ -84,7 +84,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest
 
         var traceTag: String { "stopNoiseCancellation" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent when a new RTP sender/track is registered with the SFU.
@@ -93,7 +93,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Signal_SetPublisherRequest
 
         var traceTag: String { "setPublisher" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent when subscription preferences for remote tracks are updated.
@@ -102,7 +102,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest
 
         var traceTag: String { "updateSubscriptions" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent when the client sends an SDP answer back to the SFU.
@@ -111,7 +111,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Signal_SendAnswerRequest
 
         var traceTag: String { "sendAnswer" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent to deliver ICE candidates incrementally to the SFU.
@@ -120,7 +120,7 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Models_ICETrickle
 
         var traceTag: String { "iceTrickle" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 
     /// Sent when the client requests an ICE restart via the SFU.
@@ -129,6 +129,6 @@ extension SFUAdapter {
         var payload: Stream_Video_Sfu_Signal_ICERestartRequest
 
         var traceTag: String { "iceRestart" }
-        var traceData: AnyEncodable? { .init(try? payload.jsonString()) }
+        var traceData: AnyEncodable? { .init(payload) }
     }
 }

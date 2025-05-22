@@ -189,13 +189,17 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
         guard let sfuAdapter else {
             return
         }
-        // TODO: Ensure we have flushed the bucket before this operation.
+
+        // We collect the pending items from the current SFU (if any). We will
+        // apply them in the new bucket once it has been created.
+        let pendingSFUItems = sfuRequestsBucket.consume(flush: true)
         sfuRequestsBucket = .init(
             sfuAdapter
                 .publisherSendEvent
                 .map { WebRTCTrace(event: $0) }
                 .eraseToAnyPublisher()
         )
+        sfuRequestsBucket.insert(pendingSFUItems, at: 0)
 
         sfuRequestsBucket
             .append(.init(event: SFUAdapter.CreateEvent(hostname: sfuAdapter.host)))

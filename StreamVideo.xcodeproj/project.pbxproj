@@ -202,6 +202,8 @@
 		404098BF2DDE29AD00D7BEC5 /* WebRTCItemTransformerProcessingUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404098BE2DDE29AD00D7BEC5 /* WebRTCItemTransformerProcessingUnit.swift */; };
 		404098C12DDE2B2500D7BEC5 /* WebRTCStatsItemTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404098C02DDE2B2500D7BEC5 /* WebRTCStatsItemTransformer.swift */; };
 		404098C42DDE383F00D7BEC5 /* WebRTCStatsItemTransformer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404098C32DDE383F00D7BEC5 /* WebRTCStatsItemTransformer_Tests.swift */; };
+		404098C62DDF444B00D7BEC5 /* SelectiveEncodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404098C52DDF444B00D7BEC5 /* SelectiveEncodable.swift */; };
+		404098C92DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404098C82DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift */; };
 		40429D5B2C779ADB00AC7FFF /* SFUEventAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C6891D2C6661990054528A /* SFUEventAdapter.swift */; };
 		40429D5D2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40429D5C2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift */; };
 		40429D5F2C779B3D00AC7FFF /* ScreenShareSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40429D5E2C779B3D00AC7FFF /* ScreenShareSession.swift */; };
@@ -1798,6 +1800,8 @@
 		404098BE2DDE29AD00D7BEC5 /* WebRTCItemTransformerProcessingUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCItemTransformerProcessingUnit.swift; sourceTree = "<group>"; };
 		404098C02DDE2B2500D7BEC5 /* WebRTCStatsItemTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsItemTransformer.swift; sourceTree = "<group>"; };
 		404098C32DDE383F00D7BEC5 /* WebRTCStatsItemTransformer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsItemTransformer_Tests.swift; sourceTree = "<group>"; };
+		404098C52DDF444B00D7BEC5 /* SelectiveEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectiveEncodable.swift; sourceTree = "<group>"; };
+		404098C82DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Protobuf+SelectiveEncodable.swift"; sourceTree = "<group>"; };
 		40429D5C2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebRTCMigrationStatusObserver.swift; sourceTree = "<group>"; };
 		40429D5E2C779B3D00AC7FFF /* ScreenShareSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenShareSession.swift; sourceTree = "<group>"; };
 		4045D9D42DAD35790077A660 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
@@ -3624,6 +3628,15 @@
 				404098C32DDE383F00D7BEC5 /* WebRTCStatsItemTransformer_Tests.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		404098C72DDF45DA00D7BEC5 /* SelectiveEncodable */ = {
+			isa = PBXGroup;
+			children = (
+				404098C52DDF444B00D7BEC5 /* SelectiveEncodable.swift */,
+				404098C82DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift */,
+			);
+			path = SelectiveEncodable;
 			sourceTree = "<group>";
 		};
 		4049CE802BBBF73A003D07D2 /* AsyncImage */ = {
@@ -6078,6 +6091,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				404098C72DDF45DA00D7BEC5 /* SelectiveEncodable */,
 				4028FEA72DC536BB001F9DC3 /* AnyEncodable.swift */,
 				4028FE962DC4F62A001F9DC3 /* ConsumableBucket */,
 				40AD64C32DC269E60077AE15 /* Proximity */,
@@ -7693,9 +7707,11 @@
 				40FB15142BF77D9000D5E580 /* Call+Stage.swift in Sources */,
 				84DC38D229ADFCFD00946713 /* UpdatedCallPermissionsEvent.swift in Sources */,
 				40429D5B2C779ADB00AC7FFF /* SFUEventAdapter.swift in Sources */,
+				404098C62DDF444B00D7BEC5 /* SelectiveEncodable.swift in Sources */,
 				4028FEB32DC7CCA8001F9DC3 /* SFUAdapter+Events.swift in Sources */,
 				8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */,
 				84DC389829ADFCFD00946713 /* VideoSettingsRequest.swift in Sources */,
+				404098C92DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift in Sources */,
 				846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */,
 				840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */,
 				84DCA21C2A39D950000C3411 /* DefaultAPI.swift in Sources */,
