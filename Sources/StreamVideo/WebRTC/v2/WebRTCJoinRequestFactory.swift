@@ -108,7 +108,7 @@ struct WebRTCJoinRequestFactory {
                 function: function,
                 line: line
             )
-            result.subscriptions = await buildSubscriptionDetails(
+            result.subscriptions = buildSubscriptionDetails(
                 nil,
                 sessionID: await coordinator.stateAdapter.sessionID,
                 participants: Array(await coordinator.stateAdapter.participants.values),
@@ -131,7 +131,7 @@ struct WebRTCJoinRequestFactory {
                 line: line
             )
             result.fromSfuID = fromHostname
-            result.subscriptions = await buildSubscriptionDetails(
+            result.subscriptions = buildSubscriptionDetails(
                 nil,
                 sessionID: await coordinator.stateAdapter.sessionID,
                 participants: Array(await coordinator.stateAdapter.participants.values),
@@ -153,7 +153,7 @@ struct WebRTCJoinRequestFactory {
                 function: function,
                 line: line
             )
-            result.subscriptions = await buildSubscriptionDetails(
+            result.subscriptions = buildSubscriptionDetails(
                 fromSessionID,
                 sessionID: await coordinator.stateAdapter.sessionID,
                 participants: Array(await coordinator.stateAdapter.participants.values),
