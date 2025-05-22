@@ -324,7 +324,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 video: video
             ),
             notify: notify,
-            ring: ring
+            ring: ring,
+            // This parameter is required for setting the video/audio in the
+            // CallKit VoIP notifications.
+            video: video
         )
         let response = try await coordinatorClient.getOrCreateCall(
             type: callType,
