@@ -11,10 +11,9 @@ import XCTest
 
 final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
-    private nonisolated(unsafe) static var originalCallAudioRecorder: StreamCallAudioRecorder! = StreamCallAudioRecorderKey.currentValue
     private lazy var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
-    private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = MockStreamCallAudioRecorder(filename: "test.wav")
+    private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = .init(filename: "test.wav")
 
     override func setUp() {
         super.setUp()
@@ -24,16 +23,11 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         await subject.stopListening()
-        InjectedValues[\.callAudioRecorder] = Self.originalCallAudioRecorder
+        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorder(filename: "test.wav")
         mockAudioRecorder = nil
         mockStreamVideo = nil
         subject = nil
         try await super.tearDown()
-    }
-
-    override class func tearDown() {
-        Self.originalCallAudioRecorder = nil
-        super.tearDown()
     }
 
     // MARK: - init
