@@ -431,7 +431,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             return
         }
 
-        connectTask = Task {
+        connectTask = Task { [weak self] in
+            defer { self?.connectTask = nil }
+            
+            guard let self else {
+                return
+            }
+
             if user.type == .guest {
                 do {
                     try Task.checkCancellation()

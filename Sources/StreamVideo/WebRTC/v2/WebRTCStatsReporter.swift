@@ -45,6 +45,8 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// Cancellable for the delivery subscription.
     private var deliveryCancellable: AnyCancellable?
 
+    private let disposableBag = DisposableBag()
+
     /// The currently active task for collecting statistics.
     private var activeCollectionTask: Task<Void, Never>?
 
@@ -157,8 +159,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     ///
     /// This method creates a new task for collecting stats, cancelling any existing collection task.
     private func collectStats() {
-        activeCollectionTask?.cancel()
-        activeCollectionTask = Task { [weak self] in
+        Task { [weak self] in
             guard
                 let self,
                 let hostname = sfuAdapter?.hostname
@@ -167,15 +168,11 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             }
 
             do {
-                async let statsPublisher = publisher?.statsReport() ?? .init(nil)
-                async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
-
                 try Task.checkCancellation()
-                let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
 
-                let report = callStatisticsReporter.buildReport(
-                    publisherReport: result.first ?? .init(nil),
-                    subscriberReport: result.last ?? .init(nil),
+                let report = await callStatisticsReporter.buildReport(
+                    publisherReport: try publisher?.statsReport() ?? .init(nil),
+                    subscriberReport: try subscriber?.statsReport() ?? .init(nil),
                     datacenter: hostname
                 )
 
@@ -184,7 +181,10 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             } catch {
                 log.error(error, subsystems: .webRTC)
             }
+
+            disposableBag.remove("collect", cancel: false)
         }
+        .store(in: disposableBag, key: "collect")
     }
 
     /// Delivers the collected statistics to the SFU adapter.
