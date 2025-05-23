@@ -16,7 +16,7 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
 
     var player: AVAudioPlayer?
 
-    private var reactionsTask: Task<Void, Error>?
+    private var reactionsTask: AnyCancellable?
     private var callEndedNotificationObserver: Any?
     private var activeCallUpdated: AnyCancellable?
     private var call: Call? { didSet { subscribeToReactionEvents() } }
@@ -94,20 +94,17 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
             return
         }
 
-        let callReactionEventsStream = call.subscribe(for: CallReactionEvent.self)
-
-        reactionsTask = Task { [weak self] in
-            for await event in callReactionEventsStream {
+        reactionsTask = call
+            .eventPublisher(for: CallReactionEvent.self)
+            .sink { [weak self] event in
                 guard
                     let reaction = self?.reaction(for: event)
                 else {
-                    continue
+                    return
                 }
                 self?.handleReaction(reaction, from: event.reaction.user.toUser)
                 log.debug("\(event.reaction.user.name ?? event.reaction.user.id) reacted with reaction:\(reaction.id)")
             }
-            return
-        }
     }
 
     private func reaction(for event: CallReactionEvent) -> Reaction? {
