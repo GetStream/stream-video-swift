@@ -47,24 +47,33 @@ public final class SerialActorQueue: Sendable {
         line: UInt = #line,
         _ block: @Sendable @escaping () async throws -> Void
     ) {
-        Task {
-            do {
-                try Task.checkCancellation()
-                // Execute the task serially via the actor.
-                try await actor.execute(block)
-            } catch {
-                if error is CancellationError { /* No-op */ }
-                else {
-                    // Log any errors encountered during task execution.
-                    log.error(
-                        error,
-                        functionName: functionName,
-                        fileName: file,
-                        lineNumber: line
-                    )
+        let identifier = UUID().uuidString
+        Task { [weak disposableBag] in
+            await trace.trace(
+                subsystem: .other,
+                file: file,
+                function: functionName,
+                line: line
+            ) { [weak disposableBag] in
+                do {
+                    try Task.checkCancellation()
+                    // Execute the task serially via the actor.
+                    try await actor.execute(block)
+                } catch {
+                    if error is CancellationError { /* No-op */ }
+                    else {
+                        // Log any errors encountered during task execution.
+                        log.error(
+                            error,
+                            functionName: functionName,
+                            fileName: file,
+                            lineNumber: line
+                        )
+                    }
                 }
+                disposableBag?.remove(identifier, cancel: false)
             }
-        }.store(in: disposableBag)
+        }.store(in: disposableBag, key: identifier)
     }
 
     /// Submits an asynchronous task to be executed serially and waits for it to complete.

@@ -505,7 +505,7 @@ class CallController: @unchecked Sendable {
         webRTCParticipantsObserver = participants?
             .$value
             .removeDuplicates() // Avoid unnecessary updates when participants haven't changed.
-            .sinkTask { @MainActor [weak self] participants in
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] participants in
                 self?.call?.state.participantsMap = participants
             }
     }
@@ -638,7 +638,7 @@ class CallController: @unchecked Sendable {
 
         call
             .eventPublisher(for: CallSessionParticipantCountsUpdatedEvent.self)
-            .sinkTask { @MainActor [weak call] event in
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak call] event in
                 call?.state.participantCount = event
                     .participantsCountByRole
                     .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
@@ -672,7 +672,7 @@ class CallController: @unchecked Sendable {
                 .$blockedUserIds
                 .filter { $0.contains(currentUser.id) }
                 .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
-                .sinkTask { [weak self] _ in
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
                     self
                         .webRTCCoordinator
@@ -696,6 +696,9 @@ class CallController: @unchecked Sendable {
             .$statsReporter
             .compactMap { $0 }
             .sink { [weak disposableBag, weak self] statsReporter in
+                guard let disposableBag else {
+                    return
+                }
                 statsReporter
                     .latestReportPublisher
                     .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }

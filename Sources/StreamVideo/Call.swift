@@ -53,6 +53,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
+    private let disposableBag = DisposableBag()
     private var cancellables = DisposableBag()
 
     /// A serialQueueActor ensuring that call operations (e.g. join) will happen in a serial manner.
@@ -1491,7 +1492,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .state
                 .$ownCapabilities
                 .removeDuplicates()
-                .sinkTask { [weak self] in await self?.callController.updateOwnCapabilities(ownCapabilities: $0) }
+                .sinkTask(storeIn: disposableBag) { [weak self] in
+                    await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
+                }
                 .store(in: cancellables)
         }
     }

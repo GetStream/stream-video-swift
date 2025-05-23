@@ -153,7 +153,7 @@ public class CallState: ObservableObject {
     }
     
     private var localCallSettingsUpdate = false
-    private var durationTimer: Foundation.Timer?
+    private var durationCancellable: AnyCancellable?
 
     /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
     /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`
@@ -497,22 +497,17 @@ public class CallState: ObservableObject {
     
     private func setupDurationTimer() {
         resetTimer()
-        durationTimer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] timer in
-            guard let self else {
-                timer.invalidate()
-                return
-            }
-            Task {
-                await MainActor.run {
-                    self.updateDuration()
-                }
-            }
-        })
+        durationCancellable = Foundation
+            .Timer
+            .publish(every: 1.0, on: .main, in: .default)
+            .autoconnect()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateDuration() }
     }
     
     private func resetTimer() {
-        durationTimer?.invalidate()
-        durationTimer = nil
+        durationCancellable?.cancel()
+        durationCancellable = nil
     }
     
     @objc private func updateDuration() {

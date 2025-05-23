@@ -59,7 +59,6 @@ actor ICEAdapter: @unchecked Sendable {
             return
         }
         trickleTask(for: candidate)
-            .store(in: disposableBag)
     }
 
     /// Adds an ICE candidate to the peer connection.
@@ -100,7 +99,12 @@ actor ICEAdapter: @unchecked Sendable {
     private func trickleTask(
         for candidate: RTCIceCandidate
     ) -> Task<Void, Never> {
-        Task {
+        let identifier = UUID().uuidString
+        let task = Task { [weak self] in
+            guard let self else {
+                return
+            }
+
             do {
                 let iceCandidate = ICECandidate(from: candidate)
                 let json = try encoder.encode(iceCandidate)
@@ -135,7 +139,11 @@ actor ICEAdapter: @unchecked Sendable {
                         : .peerConnectionSubscriber
                 )
             }
+
+            await disposableBag.remove(identifier, cancel: false)
         }
+        task.store(in: disposableBag, key: identifier)
+        return task
     }
 
     // MARK: - Private helpers
@@ -202,9 +210,9 @@ actor ICEAdapter: @unchecked Sendable {
     ///
     /// - Note: This method is typically called as part of the connection state
     ///   change handling in the configure() method.
-    private func drainPendingLocalCandidates() async {
+    private func drainPendingLocalCandidates() {
         for candidate in pendingLocalCandidates {
-            trickleTask(for: candidate).store(in: disposableBag)
+            _ = trickleTask(for: candidate)
         }
         pendingLocalCandidates = []
     }

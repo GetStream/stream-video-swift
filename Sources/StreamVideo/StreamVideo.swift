@@ -77,7 +77,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
-    private var eventHandlers = [EventHandler]()
 
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -101,6 +100,18 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
+
+    private let eventSubject: PassthroughSubject<WrappedEvent, Never> = .init()
+    public var eventPublisher: AnyPublisher<VideoEvent, Never> {
+        eventSubject
+            .compactMap {
+                guard case let .coordinatorEvent(event) = $0 else {
+                    return nil
+                }
+                return event
+            }
+            .eraseToAnyPublisher()
+    }
 
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -313,9 +324,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        eventHandlers.forEach { $0.cancel() }
-        eventHandlers.removeAll()
-
         await withCheckedContinuation { [webSocketClient] continuation in
             if let webSocketClient = webSocketClient {
                 webSocketClient.disconnect {
@@ -326,35 +334,19 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             }
         }
     }
-    
+
     /// Subscribes to all video events.
     /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
-        AsyncStream(VideoEvent.self) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard case let .coordinatorEvent(event) = event else {
-                    return
-                }
-                continuation.yield(event)
-            }, cancel: { continuation.finish() })
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventPublisher.eraseAsAsyncStream()
     }
 
     /// Subscribes to a particular WS event.
     /// - Returns: `AsyncStream` of the requested WS event.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
-        AsyncStream(event) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard let coordinatorEvent = event.unwrap() else {
-                    return
-                }
-                if let event = coordinatorEvent.unwrap() as? WSEvent {
-                    continuation.yield(event)
-                }
-            }, cancel: { continuation.finish() })
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventSubject
+            .compactMap { $0.unwrap()?.unwrap() as? WSEvent }
+            .eraseAsAsyncStream()
     }
     
     public func queryCalls(
@@ -431,7 +423,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             return
         }
 
-        connectTask = Task {
+        connectTask = Task { [weak self] in
+            defer { self?.connectTask = nil }
+
+            guard let self else {
+                return
+            }
+
             if user.type == .guest {
                 do {
                     try Task.checkCancellation()
@@ -488,23 +486,26 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         } else {
             throw ClientError.Unknown()
         }
-        var connected = false
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 30, queue: .sdk) {
-            timeout = true
-        }
-        log.debug("Listening for WS connection")
-        webSocketClient?.onConnected = {
-            control.cancel()
-            connected = true
-            log.debug("WS connected")
-        }
 
-        while (!connected && !timeout) {
-            try await Task.sleep(nanoseconds: 100_000)
-        }
-        
-        if timeout {
+        do {
+            log.debug("Listening for WS connection")
+            _ = try await Foundation
+                .Timer
+                .publish(every: 0.1, on: .main, in: .default)
+                .autoconnect()
+                .filter { [weak webSocketClient] _ in
+                    guard let webSocketClient else {
+                        return false
+                    }
+                    switch webSocketClient.connectionState {
+                    case .connected:
+                        return true
+                    default:
+                        return false
+                    }
+                }
+                .nextValue(timeout: 30)
+        } catch {
             log.debug("Timeout while waiting for WS connection opening")
             throw ClientError.NetworkError()
         }
@@ -547,25 +548,19 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             || webSocketClient?.connectionState == .authenticating else {
             return ""
         }
-        
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 5, queue: .sdk) {
-            timeout = true
-        }
-        log.debug("Waiting for connection id")
 
-        while (loadConnectionIdFromHealthcheck() == nil && !timeout) {
-            try? await Task.sleep(nanoseconds: 100_000)
+        do {
+            return try await Foundation
+                .Timer
+                .publish(every: 0.1, on: .main, in: .default)
+                .autoconnect()
+                .log(.debug) { _ in "Waiting for connection id" }
+                .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
+                .nextValue(timeout: 5)
+        } catch {
+            log.warning("Unable to load connectionId.")
+            return ""
         }
-        
-        control.cancel()
-        
-        if let connectionId = loadConnectionIdFromHealthcheck() {
-            log.debug("Connection id available from the WS")
-            return connectionId
-        }
-        
-        return ""
     }
     
     private func loadConnectionIdFromHealthcheck() -> String? {
@@ -733,9 +728,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
                 }
             }
-            eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected())) }
+            eventSubject.send(.internalEvent(WSDisconnected()))
         case .connected(healthCheckInfo: _):
-            eventHandlers.forEach { $0.handler(.internalEvent(WSConnected())) }
+            eventSubject.send(.internalEvent(WSConnected()))
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -745,9 +740,7 @@ extension StreamVideo: ConnectionStateDelegate {
 extension StreamVideo: WSEventsSubscriber {
     
     func onEvent(_ event: WrappedEvent) {
-        for eventHandler in eventHandlers {
-            eventHandler.handler(event)
-        }
+        eventSubject.send(event)
         Task { @MainActor [weak self] in
             self?.checkRingEvent(event)
         }

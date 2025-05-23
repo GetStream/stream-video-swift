@@ -68,7 +68,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @State var controlsTask: Task<Void, Never>?
     
     @State var recordings: [CallRecording]?
-        
+
+    private let disposableBag = DisposableBag()
+
     /// Initializes a `LivestreamPlayer` with the specified parameters.
     ///
     /// - Parameters:
@@ -158,7 +160,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 timerCancellable = Timer
                     .publish(every: 1, on: .main, in: .default)
                     .autoconnect()
-                    .sinkTask { @MainActor _ in
+                    .sinkTask(storeIn: disposableBag) { @MainActor _ in
                         countdown = startsAt.timeIntervalSinceNow
                         if countdown <= 0 {
                             stopTimer()
