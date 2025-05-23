@@ -29,6 +29,7 @@ final class ClosedCaptionsAdapter {
     private var cancellable: AnyCancellable?
     private var itemsCancellable: AnyCancellable?
     private let items: OrderedCapacityQueue<CallClosedCaption>
+    private let disposableBag = DisposableBag()
 
     /**
      Initializes a new instance of `ClosedCaptionsAdapter`.
@@ -82,6 +83,6 @@ final class ClosedCaptionsAdapter {
 
         itemsCancellable = items
             .publisher
-            .sinkTask { @MainActor [weak call] in call?.state.update(closedCaptions: $0) }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak call] in call?.state.update(closedCaptions: $0) }
     }
 }

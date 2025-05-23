@@ -611,7 +611,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
         $callSettings
             .removeDuplicates()
-            .sinkTask { [weak audioSession] in
+            .sinkTask(storeIn: disposableBag) { [weak audioSession] in
                 do {
                     try await audioSession?.didUpdateCallSettings($0)
                 } catch {
@@ -622,7 +622,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
         $ownCapabilities
             .removeDuplicates()
-            .sinkTask { [weak audioSession] in
+            .sinkTask(storeIn: disposableBag) { [weak audioSession] in
                 do {
                     try await audioSession?.didUpdateOwnCapabilities($0)
                 } catch {
