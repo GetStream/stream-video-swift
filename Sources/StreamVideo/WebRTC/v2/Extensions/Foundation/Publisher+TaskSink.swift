@@ -29,6 +29,9 @@ extension Publisher where Output: Sendable {
     public func sinkTask(
         storeIn disposableBag: DisposableBag,
         identifier: String = UUID().uuidString,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
         receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
@@ -43,24 +46,31 @@ extension Publisher where Output: Sendable {
             }
             // Create a new task to handle the received value.
             let task = Task { [weak disposableBag] in
-                do {
-                    // Check for task cancellation and process the value.
-                    try Task.checkCancellation()
-                    try await receiveValue(input)
-                } catch let error as Failure {
-                    // Handle specific failure cases.
-                    receiveCompletion(.failure(error))
-                } catch is CancellationError {
-                    // Handle task cancellation as a failure with a custom error.
-                    if let error = ClientError("Task was cancelled.") as? Failure {
+                await trace.trace(
+                    subsystem: .other,
+                    file: file,
+                    function: function,
+                    line: line
+                ) { [weak disposableBag] in
+                    do {
+                        // Check for task cancellation and process the value.
+                        try Task.checkCancellation()
+                        try await receiveValue(input)
+                    } catch let error as Failure {
+                        // Handle specific failure cases.
                         receiveCompletion(.failure(error))
+                    } catch is CancellationError {
+                        // Handle task cancellation as a failure with a custom error.
+                        if let error = ClientError("Task was cancelled.") as? Failure {
+                            receiveCompletion(.failure(error))
+                        }
+                    } catch {
+                        // Log any unexpected errors during task execution.
+                        LogConfig.logger.error(ClientError(with: error))
                     }
-                } catch {
-                    // Log any unexpected errors during task execution.
-                    LogConfig.logger.error(ClientError(with: error))
-                }
 
-                disposableBag?.remove(identifier, cancel: false)
+                    disposableBag?.remove(identifier, cancel: false)
+                }
             }
 
             task.store(in: disposableBag, key: identifier)
@@ -84,6 +94,9 @@ extension Publisher where Output: Sendable {
     ///   - Task cancellation and errors are handled similarly to `sinkTask(storeIn:identifier:receiveCompletion:receiveValue:)`.
     public func sinkTask(
         queue: SerialActorQueue,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
         receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
@@ -96,21 +109,28 @@ extension Publisher where Output: Sendable {
             let capturedInput = input
             // Schedule the task on the provided serial actor queue.
             queue.async {
-                do {
-                    // Check for task cancellation and process the value.
-                    try Task.checkCancellation()
-                    try await receiveValue(capturedInput)
-                } catch let error as Failure {
-                    // Handle specific failure cases.
-                    receiveCompletion(.failure(error))
-                } catch is CancellationError {
-                    // Handle task cancellation as a failure with a custom error.
-                    if let error = ClientError("Task was cancelled.") as? Failure {
+                await trace.trace(
+                    subsystem: .other,
+                    file: file,
+                    function: function,
+                    line: line
+                ) {
+                    do {
+                        // Check for task cancellation and process the value.
+                        try Task.checkCancellation()
+                        try await receiveValue(capturedInput)
+                    } catch let error as Failure {
+                        // Handle specific failure cases.
                         receiveCompletion(.failure(error))
+                    } catch is CancellationError {
+                        // Handle task cancellation as a failure with a custom error.
+                        if let error = ClientError("Task was cancelled.") as? Failure {
+                            receiveCompletion(.failure(error))
+                        }
+                    } catch {
+                        // Log any unexpected errors during task execution.
+                        LogConfig.logger.error(error)
                     }
-                } catch {
-                    // Log any unexpected errors during task execution.
-                    LogConfig.logger.error(error)
                 }
             }
         }
