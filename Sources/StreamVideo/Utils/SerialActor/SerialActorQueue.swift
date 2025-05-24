@@ -85,9 +85,19 @@ public final class SerialActorQueue: Sendable {
     /// Use this method when you need to wait for the completion of the submitted task
     /// and handle its results or errors immediately.
     public func sync<T: Sendable>(
+        file: StaticString = #file,
+        functionName: StaticString = #function,
+        line: UInt = #line,
         _ block: @Sendable @escaping () async throws -> T
     ) async throws -> T {
-        // Execute the task serially and wait for its completion.
-        try await actor.execute(block)
+        try await trace.trace(
+            subsystem: .other,
+            file: file,
+            function: functionName,
+            line: line
+        ) {
+            // Execute the task serially and wait for its completion.
+            try await actor.execute(block)
+        }
     }
 }

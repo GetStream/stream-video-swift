@@ -79,6 +79,7 @@ class CallController: @unchecked Sendable {
 
         _ = webRTCCoordinator
 
+        let identifier = UUID().uuidString
         Task {
             await handleParticipantCountUpdated()
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
@@ -91,8 +92,10 @@ class CallController: @unchecked Sendable {
             await observeSessionIDUpdates()
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
+
+            disposableBag.remove(identifier, cancel: false)
         }
-        .store(in: disposableBag)
+        .store(in: disposableBag, key: identifier)
 
         joinCallResponseFetchObserver = joinCallResponseSubject
             .compactMap { $0 }
