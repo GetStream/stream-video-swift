@@ -741,9 +741,7 @@ extension StreamVideo: WSEventsSubscriber {
     
     func onEvent(_ event: WrappedEvent) {
         eventSubject.send(event)
-        Task { @MainActor [weak self] in
-            self?.checkRingEvent(event)
-        }
+        checkRingEvent(event)
     }
 
     private func checkRingEvent(_ event: WrappedEvent) {

@@ -764,51 +764,51 @@ open class CallViewModel: ObservableObject {
     }
 
     private func process(_ event: VideoEvent) {
-        let identifier = UUID().uuidString
-        Task { @MainActor [weak self] in
-            guard let self else {
+        if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
+            switch callEvent {
+            case let .incoming(incomingCall):
+                if incomingCall.caller.id != streamVideo.user.id {
+                    let isAppActive = UIApplication.shared.applicationState == .active
+                    // TODO: implement holding a call.
+                    if callingState == .idle && isAppActive {
+                        setCallingState(.incoming(incomingCall))
+                        /// We start the ringing timer, so we can cancel when the timeout
+                        /// is over.
+                        startTimer(timeout: incomingCall.timeout)
+                    }
+                }
+            case .accepted:
+                handleAcceptedEvent(callEvent)
+            case .rejected:
+                handleRejectedEvent(callEvent)
+            case .ended:
+                leaveCall()
+            case let .userBlocked(callEventInfo):
+                if callEventInfo.user?.id == streamVideo.user.id {
+                    leaveCall()
+                }
+            case .userUnblocked:
+                break
+            case .sessionStarted:
+                break
+            }
+        } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {
+            guard participants.count < 25 else {
+                log.debug("Skipping participant events for big calls")
                 return
             }
-            if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
-                switch callEvent {
-                case let .incoming(incomingCall):
-                    if incomingCall.caller.id != streamVideo.user.id {
-                        let isAppActive = UIApplication.shared.applicationState == .active
-                        // TODO: implement holding a call.
-                        if callingState == .idle && isAppActive {
-                            setCallingState(.incoming(incomingCall))
-                            /// We start the ringing timer, so we can cancel when the timeout
-                            /// is over.
-                            startTimer(timeout: incomingCall.timeout)
-                        }
-                    }
-                case .accepted:
-                    handleAcceptedEvent(callEvent)
-                case .rejected:
-                    handleRejectedEvent(callEvent)
-                case .ended:
-                    leaveCall()
-                case let .userBlocked(callEventInfo):
-                    if callEventInfo.user?.id == streamVideo.user.id {
-                        leaveCall()
-                    }
-                case .userUnblocked:
-                    break
-                case .sessionStarted:
-                    break
-                }
-            } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {
-                guard participants.count < 25 else {
-                    log.debug("Skipping participant events for big calls")
+
+            let identifier = UUID().uuidString
+            Task { @MainActor [weak self] in
+                guard let self else {
                     return
                 }
-
                 self.participantEvent = participantEvent
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
                 self.participantEvent = nil
-            }
-            disposableBag.remove(identifier, cancel: false)
-        }.store(in: disposableBag, key: identifier)
+                disposableBag.remove(identifier, cancel: false)
+            }.store(in: disposableBag, key: identifier)
+        }
     }
 
     private func handleAcceptedEvent(_ callEvent: CallEvent) {
