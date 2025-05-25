@@ -28,7 +28,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @Injected(\.colors) var colors
     
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
-    
+    @Injected(\.timers) private var timers
+
     var viewFactory: Factory
     
     /// The policy that defines how users join the livestream.
@@ -157,9 +158,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 let startsAt = state.startsAt,
                 livestreamState == .backstage,
                 timerCancellable == nil {
-                timerCancellable = Timer
-                    .publish(every: 1, on: .main, in: .default)
-                    .autoconnect()
+                timerCancellable = timers
+                    .timer(for: 1)
                     .sinkTask(storeIn: disposableBag) { @MainActor _ in
                         countdown = startsAt.timeIntervalSinceNow
                         if countdown <= 0 {

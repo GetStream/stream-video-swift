@@ -13,7 +13,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
-    
+    @Injected(\.timers) private var timers
+
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
         var call: Call
@@ -541,20 +542,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Parameter callState: The state of the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
         let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
-        ringingTimerCancellable = Foundation.Timer.publish(
-            every: timeout,
-            on: .main,
-            in: .default
-        )
-        .autoconnect()
-        .sink { [weak self] _ in
-            log.debug(
-                "Detected ringing timeout, hanging up...",
-                subsystems: .callKit
-            )
-            self?.callEnded(callState.call.cid, ringingTimedOut: true)
-            self?.ringingTimerCancellable = nil
-        }
+        ringingTimerCancellable = timers
+            .timer(for: timeout)
+            .sink { [weak self] _ in
+                log.debug(
+                    "Detected ringing timeout, hanging up...",
+                    subsystems: .callKit
+                )
+                self?.callEnded(callState.call.cid, ringingTimedOut: true)
+                self?.ringingTimerCancellable = nil
+            }
     }
     
     /// A method that's being called every time the StreamVideo instance is getting updated.

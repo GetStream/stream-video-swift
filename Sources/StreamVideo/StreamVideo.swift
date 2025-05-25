@@ -15,6 +15,7 @@ public typealias UserTokenUpdater = @Sendable(UserToken) -> Void
 public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
+    @Injected(\.timers) private var timers
 
     public final class State: ObservableObject, @unchecked Sendable {
         @Published public internal(set) var connection: ConnectionStatus
@@ -489,10 +490,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         do {
             log.debug("Listening for WS connection")
-            _ = try await Foundation
-                .Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
+            _ = try await timers
+                .timer(for: 0.1)
                 .filter { [weak webSocketClient] _ in
                     guard let webSocketClient else {
                         return false
@@ -550,10 +549,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
 
         do {
-            return try await Foundation
-                .Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
+            return try await timers
+                .timer(for: 0.1)
                 .log(.debug) { _ in "Waiting for connection id" }
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
                 .nextValue(timeout: 5)

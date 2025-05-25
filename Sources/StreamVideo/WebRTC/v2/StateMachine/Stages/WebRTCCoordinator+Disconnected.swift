@@ -30,6 +30,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
+        @Injected(\.timers) private var timers
 
         private var internetObservationCancellable: AnyCancellable?
         private var timeInStageCancellable: AnyCancellable?
@@ -186,10 +187,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             guard context.disconnectionTimeout > 0 else {
                 return
             }
-            timeInStageCancellable = Foundation
-                .Timer
-                .publish(every: context.disconnectionTimeout, on: .main, in: .default)
-                .autoconnect()
+            timeInStageCancellable = timers
+                .timer(for: context.disconnectionTimeout)
                 .sink { [weak self] _ in self?.didTimeInStageExpired() }
         }
 
