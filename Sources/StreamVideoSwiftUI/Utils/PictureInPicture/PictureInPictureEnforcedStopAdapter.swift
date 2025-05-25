@@ -17,6 +17,8 @@ final class PictureInPictureEnforcedStopAdapter {
 
     /// Adapter that provides the current application state.
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+    @Injected(\.timers) private var timers
+    @Injected(\.screenProperties) private var screenProperties
 
     /// A serial dispatch queue for background processing.
     private let processingQueue = DispatchQueue(label: UUID().uuidString)
@@ -63,10 +65,8 @@ final class PictureInPictureEnforcedStopAdapter {
     ) {
         switch (applicationState, isPictureInPictureActive) {
         case (.foreground, true):
-            Foundation
-                .Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
+            timers
+                .timer(for: screenProperties.refreshRate)
                 .filter { [weak self] _ in self?.applicationStateAdapter.state == .foreground }
                 .log(.debug) { _ in "Will attempt to forcefully stop Picture-in-Picture." }
                 .receive(on: DispatchQueue.main)

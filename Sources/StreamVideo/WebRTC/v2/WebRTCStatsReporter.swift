@@ -16,6 +16,7 @@ import Foundation
 final class WebRTCStatsReporter: @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
+    @Injected(\.timers) private var timers
 
     /// The session ID associated with this reporter.
     var sessionID: String
@@ -121,10 +122,8 @@ final class WebRTCStatsReporter: @unchecked Sendable {
         }
 
         collectionCancellable?.cancel()
-        collectionCancellable = Foundation
-            .Timer
-            .publish(every: interval, on: .main, in: .default)
-            .autoconnect()
+        collectionCancellable = timers
+            .timer(for: interval)
             .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
             .sink { [weak self] _ in self?.collectStats() }
 
@@ -142,10 +141,8 @@ final class WebRTCStatsReporter: @unchecked Sendable {
         }
 
         deliveryCancellable?.cancel()
-        deliveryCancellable = Foundation
-            .Timer
-            .publish(every: interval, on: .main, in: .default)
-            .autoconnect()
+        deliveryCancellable = timers
+            .timer(for: interval)
             .compactMap { [weak self] _ in self?.latestReportSubject.value }
             .log(.debug, subsystems: .webRTC) { [weak self] in
                 "Will deliver stats report (timestamp:\($0.timestamp)) on \(self?.sfuAdapter?.hostname ?? "-")."

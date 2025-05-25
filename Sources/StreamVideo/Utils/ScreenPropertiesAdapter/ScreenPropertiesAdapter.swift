@@ -7,11 +7,11 @@ import Foundation
 import UIKit
 #endif
 
-final class ScreenPropertiesAdapter: @unchecked Sendable {
+public final class ScreenPropertiesAdapter: @unchecked Sendable {
 
-    private(set) var preferredFramesPerSecond: Int = 0
-    private(set) var refreshRate: TimeInterval = 0
-    private(set) var scale: CGFloat = 0
+    public private(set) var preferredFramesPerSecond: Int = 0
+    public private(set) var refreshRate: TimeInterval = 0
+    public private(set) var scale: CGFloat = 0
 
     init() {
         Task { @MainActor in
@@ -29,11 +29,11 @@ final class ScreenPropertiesAdapter: @unchecked Sendable {
 }
 
 extension ScreenPropertiesAdapter: InjectionKey {
-    nonisolated(unsafe) static var currentValue: ScreenPropertiesAdapter = .init()
+    public nonisolated(unsafe) static var currentValue: ScreenPropertiesAdapter = .init()
 }
 
 extension InjectedValues {
-    var screenProperties: ScreenPropertiesAdapter {
+    public var screenProperties: ScreenPropertiesAdapter {
         set { Self[ScreenPropertiesAdapter.self] = newValue }
         get { Self[ScreenPropertiesAdapter.self] }
     }
