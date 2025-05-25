@@ -559,9 +559,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter videoFilter: The video filter to apply.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
+        let identifier = "\(#function)"
         Task { [weak self] in
             await self?.capturer?.setVideoFilter(videoFilter)
-        }.store(in: disposableBag, key: "\(#function)")
+            self?.disposableBag.remove(identifier)
+        }.store(in: disposableBag, key: identifier)
     }
 
     /// Zooms the camera by a given factor.

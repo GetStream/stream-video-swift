@@ -84,7 +84,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let peerConnectionsDisposableBag = DisposableBag()
 
     /// Subject to handle participant updates.
-    private var previousParticipantOperation: Task<Void, Never>?
+    private let serialActor = SerialActor()
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -473,36 +473,37 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         lineNumber: UInt = #line
     ) {
         let identifier = UUID().uuidString
-        /// Creates a new asynchronous task for the operation.
-        let newTask = Task { [previousParticipantOperation] in
-            /// Awaits the result of the previous participant operation.
-            _ = await previousParticipantOperation?.result
+        Task { [weak self] in
+            await self?.serialActor.execute { [weak self] in
+                guard let self else {
+                    return
+                }
+                await processParticipantOperation(operation)
+                /// Logs the completion of the participant operation.
+                log.debug(
+                    "Participant operation completed.",
+                    functionName: functionName,
+                    fileName: fileName,
+                    lineNumber: lineNumber
+                )
+                disposableBag.remove(identifier)
+            }
+        }.store(in: disposableBag, key: identifier)
+    }
 
-            /// Retrieves the current participants.
-            let current = participants
-            /// Applies the operation to get the next state of participants.
-            let next = operation(current)
-            /// Assigns media tracks to the participants.
-            let updated = assignTracks(on: next)
-            /// Sends the updated participants to observers while helping publishing streamlined updates.
-            set(participants: updated)
-            /// Updates the call settings from the participants update.
-            updateCallSettingsFromParticipants(Array(updated.values))
-
-            /// Logs the completion of the participant operation.
-            log.debug(
-                "Participant operation completed.",
-                functionName: functionName,
-                fileName: fileName,
-                lineNumber: lineNumber
-            )
-
-            disposableBag.remove(identifier)
-        }
-        newTask.store(in: disposableBag, key: identifier)
-
-        /// Stores the new task as the previous operation for chaining.
-        previousParticipantOperation = newTask
+    private func processParticipantOperation(
+        _ operation: @escaping ParticipantOperation
+    ) {
+        /// Retrieves the current participants.
+        let current = participants
+        /// Applies the operation to get the next state of participants.
+        let next = operation(current)
+        /// Assigns media tracks to the participants.
+        let updated = assignTracks(on: next)
+        /// Sends the updated participants to observers while helping publishing streamlined updates.
+        set(participants: updated)
+        /// Updates the call settings from the participants update.
+        updateCallSettingsFromParticipants(Array(updated.values))
     }
 
     /// Assigns media tracks to participants based on their media type.

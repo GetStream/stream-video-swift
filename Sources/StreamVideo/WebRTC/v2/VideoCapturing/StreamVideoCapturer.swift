@@ -112,6 +112,9 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         return cameraVideoCapturer.captureSession
     }
 
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { executor.asUnownedSerialExecutor() }
+
     // MARK: - Initialisers
 
     static func cameraCapturer(
