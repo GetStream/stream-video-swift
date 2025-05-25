@@ -184,7 +184,10 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     private func setUp() {
         setUpTask?.cancel()
-        setUpTask = Task {
+        setUpTask = Task { [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 try await audioRecorderBuilder.build()
             } catch {
@@ -192,6 +195,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
                     log.error("🎙️Failed to create AVAudioRecorder.", error: error)
                 }
             }
+            self.setUpTask = nil
         }
 
         hasActiveCallCancellable = activeCallProvider

@@ -50,9 +50,6 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// The currently active task for collecting statistics.
     private var activeCollectionTask: Task<Void, Never>?
 
-    /// The currently active task for delivering statistics.
-    private var activeDeliveryTask: Task<Void, Never>?
-
     /// A helper object for building call statistics reports.
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
@@ -86,10 +83,10 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     deinit {
         sfuAdapter = nil
         // Cancel all active tasks and subscriptions
-        activeCollectionTask?.cancel()
+        disposableBag.remove("collect")
+        disposableBag.remove("deliver")
         collectionCancellable?.cancel()
         deliveryCancellable?.cancel()
-        activeDeliveryTask?.cancel()
     }
 
     // MARK: - Private helpers
@@ -99,10 +96,10 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// This method cancels any existing tasks and subscriptions, and sets up new ones if an adapter
     /// is provided.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
-        activeDeliveryTask?.cancel()
         deliveryCancellable?.cancel()
-        activeCollectionTask?.cancel()
         collectionCancellable?.cancel()
+        disposableBag.remove("collect")
+        disposableBag.remove("deliver")
 
         guard sfuAdapter != nil else {
             return
@@ -191,11 +188,9 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     ///
     /// - Parameter report: The statistics report to deliver.
     private func deliverStats(report: CallStatsReport) {
-        activeDeliveryTask?.cancel()
-        activeDeliveryTask = Task { [weak self] in
+        Task { [weak self] in
+            guard let self else { return }
             do {
-                guard let self else { return }
-
                 try Task.checkCancellation()
                 try await sfuAdapter?.sendStats(
                     report,
@@ -205,6 +200,8 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             } catch {
                 log.error(error, subsystems: .webRTC)
             }
+            disposableBag.remove("deliver")
         }
+        .store(in: disposableBag, key: "deliver")
     }
 }

@@ -65,6 +65,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the joined stage logic.
         private func execute() {
+            let identifier = UUID().uuidString
             Task { [weak self] in
                 guard let self else { return }
                 do {
@@ -135,8 +136,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     await cleanUpPreviousSessionIfRequired()
                     transitionDisconnectOrError(error)
                 }
+                disposableBag.remove(identifier)
             }
-            .store(in: disposableBag)
+            .store(in: disposableBag, key: identifier)
         }
 
         /// Cleans up the previous WebRTC session, including closing and removing the

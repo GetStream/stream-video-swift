@@ -472,6 +472,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
+        let identifier = UUID().uuidString
         /// Creates a new asynchronous task for the operation.
         let newTask = Task { [previousParticipantOperation] in
             /// Awaits the result of the previous participant operation.
@@ -495,7 +496,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 fileName: fileName,
                 lineNumber: lineNumber
             )
+
+            disposableBag.remove(identifier)
         }
+        newTask.store(in: disposableBag, key: identifier)
 
         /// Stores the new task as the previous operation for chaining.
         previousParticipantOperation = newTask
