@@ -26,6 +26,8 @@ final class ProximityManager: @unchecked Sendable {
     /// Cancellable for proximity state observation
     private var observationCancellable: AnyCancellable?
 
+    private let disposableBag = DisposableBag()
+
     /// Creates a new proximity manager for the specified call
     /// - Parameter call: Call instance to manage proximity for
     init(_ call: Call) {
@@ -35,7 +37,7 @@ final class ProximityManager: @unchecked Sendable {
             activeCallCancellable = streamVideo
                 .state
                 .$activeCall
-                .sinkTask { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
         }
     }
 

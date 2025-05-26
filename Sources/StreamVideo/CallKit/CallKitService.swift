@@ -13,6 +13,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
+    @Injected(\.timers) private var timers
 
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
@@ -88,7 +89,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private var active: UUID?
     var callCount: Int { storageAccessQueue.sync { _storage.count } }
 
-    private var callEventsSubscription: Task<Void, Error>?
+    private var callEventsCancellable: AnyCancellable?
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
@@ -541,20 +542,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Parameter callState: The state of the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
         let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
-        ringingTimerCancellable = Foundation.Timer.publish(
-            every: timeout,
-            on: .main,
-            in: .default
-        )
-        .autoconnect()
-        .sink { [weak self] _ in
-            log.debug(
-                "Detected ringing timeout, hanging up...",
-                subsystems: .callKit
-            )
-            self?.callEnded(callState.call.cid, ringingTimedOut: true)
-            self?.ringingTimerCancellable = nil
-        }
+        ringingTimerCancellable = timers
+            .timer(for: timeout)
+            .log(.debug, subsystems: .callKit) { _ in "Detected ringing timeout, hanging up..." }
+            .sink { [weak self] _ in
+                self?.callEnded(callState.call.cid, ringingTimedOut: true)
+                self?.ringingTimerCancellable = nil
+            }
     }
 
     /// A method that's being called every time the StreamVideo instance is getting updated.
@@ -570,8 +564,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Subscribing to events is being used to reject/stop calls that have been accepted/rejected
     /// on other devices or components (e.g. incoming callScreen, CallKitService)
     private func subscribeToCallEvents() {
-        callEventsSubscription?.cancel()
-        callEventsSubscription = nil
+        callEventsCancellable?.cancel()
+        callEventsCancellable = nil
 
         guard let streamVideo else {
             log.warning(
@@ -584,8 +578,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return
         }
 
-        callEventsSubscription = Task {
-            for await event in streamVideo.subscribe() {
+        callEventsCancellable = streamVideo
+            .eventPublisher
+            .sink { [weak self] event in
+                guard let self else {
+                    return
+                }
                 switch event {
                 case let .typeCallEndedEvent(response):
                     callEnded(response.callCid, ringingTimedOut: false)
@@ -599,7 +597,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     break
                 }
             }
-        }
 
         log.debug(
             "\(type(of: self)) is now subscribed to CallEvent updates.",

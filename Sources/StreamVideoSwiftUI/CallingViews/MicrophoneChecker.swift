@@ -68,6 +68,10 @@ public final class MicrophoneChecker: ObservableObject {
     
     /// Stops listening to audio updates.
     public func stopListening() async {
+        guard audioRecorder.isRecording else {
+            return
+        }
+
         do {
             try await
                 serialQueue.sync { [weak self] in

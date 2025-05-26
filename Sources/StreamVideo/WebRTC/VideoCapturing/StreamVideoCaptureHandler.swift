@@ -18,7 +18,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
 
-    private lazy var serialActor = SerialActor()
+    private lazy var serialQueue = SerialActorQueue()
     private var orientationCancellable: AnyCancellable?
 
     init(
@@ -45,33 +45,59 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         _ capturer: RTCVideoCapturer,
         didCapture frame: RTCVideoFrame
     ) {
-        Task { [serialActor, weak self] in
-            do {
-                try await serialActor.execute { [weak self] in
-                    guard let self else { return }
-
-                    var _buffer: RTCCVPixelBuffer?
-
-                    if self.selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
-                        _buffer = buffer
-                        let imageBuffer = buffer.pixelBuffer
-                        CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-                        let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: self.colorSpace])
-                        let outputImage = await self.filter(image: inputImage, pixelBuffer: imageBuffer)
-                        CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-                        self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: self.colorSpace)
-                    }
-
-                    let updatedFrame = self.handleRotation
-                        ? self.adjustRotation(capturer, for: _buffer, frame: frame)
-                        : frame
-
-                    self.source.capturer(capturer, didCapture: updatedFrame)
-                }
-            } catch {
-                log.error(error)
-            }
+        guard
+            let selectedFilter,
+            let originalBuffer = frame.buffer as? RTCCVPixelBuffer
+        else {
+            return process(capturer, frame: frame, buffer: nil)
         }
+        let originalImageOrientation = sceneOrientation.cgOrientation
+
+        serialQueue.async { [weak self, selectedFilter] in
+            guard let self else { return }
+
+            let buffer: RTCCVPixelBuffer? = originalBuffer
+            let imageBuffer = originalBuffer.pixelBuffer
+
+            CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+            let inputImage = CIImage(
+                cvPixelBuffer: imageBuffer,
+                options: [CIImageOption.colorSpace: self.colorSpace]
+            )
+
+            let outputImage = await selectedFilter.filter(
+                VideoFilter.Input(
+                    originalImage: inputImage,
+                    originalPixelBuffer: imageBuffer,
+                    originalImageOrientation: originalImageOrientation
+                )
+            )
+
+            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+
+            self.context.render(
+                outputImage,
+                to: imageBuffer,
+                bounds: outputImage.extent,
+                colorSpace: self.colorSpace
+            )
+
+            self.process(capturer, frame: frame, buffer: buffer)
+        }
+    }
+
+    private func process(
+        _ capturer: RTCVideoCapturer,
+        frame: RTCVideoFrame,
+        buffer: RTCCVPixelBuffer?
+    ) {
+        guard handleRotation else {
+            source.capturer(capturer, didCapture: frame)
+            return
+        }
+
+        let updatedFrame = adjustRotation(capturer, for: buffer, frame: frame)
+        source.capturer(capturer, didCapture: updatedFrame)
     }
 
     private func adjustRotation(
@@ -107,19 +133,6 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         } else {
             return frame
         }
-    }
-
-    private func filter(
-        image: CIImage,
-        pixelBuffer: CVPixelBuffer
-    ) async -> CIImage {
-        await selectedFilter?.filter(
-            VideoFilter.Input(
-                originalImage: image,
-                originalPixelBuffer: pixelBuffer,
-                originalImageOrientation: sceneOrientation.cgOrientation
-            )
-        ) ?? image
     }
 }
 

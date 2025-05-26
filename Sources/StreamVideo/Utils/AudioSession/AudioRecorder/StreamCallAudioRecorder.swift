@@ -12,14 +12,15 @@ import StreamWebRTC
 /// publishing the average power of the audio signal. Additionally, it adjusts its behavior based on the
 /// presence of an active call, automatically stopping recording if needed.
 open class StreamCallAudioRecorder: @unchecked Sendable {
-    private let processingQueue = SerialActorQueue()
 
     @Injected(\.activeCallProvider) private var activeCallProvider
     @Injected(\.activeCallAudioSession) private var activeCallAudioSession
+    @Injected(\.timers) private var timers
 
     /// The builder used to create the AVAudioRecorder instance.
     let audioRecorderBuilder: AVAudioRecorderBuilder
 
+    private let processingQueue = SerialActorQueue()
     private let _isRecordingSubject: CurrentValueSubject<Bool, Never> = .init(false)
     var isRecordingPublisher: AnyPublisher<Bool, Never> {
         _isRecordingSubject.eraseToAnyPublisher()
@@ -39,7 +40,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// A public publisher that exposes the average power of the audio signal.
     open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
 
-    @Atomic private(set) var isRecording: Bool = false {
+    @Atomic public private(set) var isRecording: Bool = false {
         willSet {
             activeCallAudioSession?.isRecording = newValue
             _isRecordingSubject.send(newValue)
@@ -123,11 +124,9 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
             updateMetersTimerCancellable?.cancel()
             disposableBag.remove("update-meters")
-            updateMetersTimerCancellable = Foundation
-                .Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
-                .sinkTask(storeIn: disposableBag, identifier: "update-meters") { [weak self, audioRecorder] _ in
+            updateMetersTimerCancellable = timers
+                .timer(for: 0.1)
+                .sink { [weak self, audioRecorder] _ in
                     audioRecorder.updateMeters()
                     self?._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))
                 }
@@ -146,7 +145,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             guard
                 let self,
                 isRecording,
-                let audioRecorder = await audioRecorderBuilder.result
+                let audioRecorder = audioRecorderBuilder.result
             else {
                 return
             }
@@ -183,15 +182,10 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     }
 
     private func setUp() {
-        setUpTask?.cancel()
-        setUpTask = Task {
-            do {
-                try await audioRecorderBuilder.build()
-            } catch {
-                if type(of: error) != CancellationError.self {
-                    log.error("🎙️Failed to create AVAudioRecorder.", error: error)
-                }
-            }
+        do {
+            try audioRecorderBuilder.build()
+        } catch {
+            log.error(error)
         }
 
         hasActiveCallCancellable = activeCallProvider
@@ -209,7 +203,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         }
 
         guard
-            let audioRecorder = await audioRecorderBuilder.result
+            let audioRecorder = audioRecorderBuilder.result
         else {
             throw ClientError("🎙️Unable to fetch AVAudioRecorder instance.")
         }

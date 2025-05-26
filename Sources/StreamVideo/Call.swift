@@ -57,6 +57,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// A serialQueueActor ensuring that call operations (e.g. join) will happen in a serial manner.
     private let callOperationSerialQueue = SerialActorQueue()
+    private let disposableBag = DisposableBag()
 
     /// This adapter is used to manage closed captions for the
     /// call.
@@ -1491,7 +1492,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .state
                 .$ownCapabilities
                 .removeDuplicates()
-                .sinkTask { [weak self] in await self?.callController.updateOwnCapabilities(ownCapabilities: $0) }
+                .sinkTask(storeIn: disposableBag) { [weak self] in
+                    await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
+                }
                 .store(in: cancellables)
         }
     }

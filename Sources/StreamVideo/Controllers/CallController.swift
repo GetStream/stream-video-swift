@@ -8,6 +8,8 @@ import StreamWebRTC
 
 /// Class that handles a particular call.
 class CallController: @unchecked Sendable {
+    @Injected(\.uuidFactory) private var uuidFactory
+
     private enum DisposableKey: String {
         case participantsCountUpdatesEvent
         case currentUserBlocked
@@ -79,6 +81,7 @@ class CallController: @unchecked Sendable {
 
         _ = webRTCCoordinator
 
+        let identifier = uuidFactory.get().uuidString
         Task {
             await handleParticipantCountUpdated()
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
@@ -91,8 +94,10 @@ class CallController: @unchecked Sendable {
             await observeSessionIDUpdates()
             await observeStatsReporterUpdates()
             await observeCallSettingsUpdates()
+
+            disposableBag.remove(identifier, cancel: false)
         }
-        .store(in: disposableBag)
+        .store(in: disposableBag, key: identifier)
 
         joinCallResponseFetchObserver = joinCallResponseSubject
             .compactMap { $0 }
@@ -505,7 +510,7 @@ class CallController: @unchecked Sendable {
         webRTCParticipantsObserver = participants?
             .$value
             .removeDuplicates() // Avoid unnecessary updates when participants haven't changed.
-            .sinkTask { @MainActor [weak self] participants in
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] participants in
                 self?.call?.state.participantsMap = participants
             }
     }
@@ -638,7 +643,7 @@ class CallController: @unchecked Sendable {
 
         call
             .eventPublisher(for: CallSessionParticipantCountsUpdatedEvent.self)
-            .sinkTask { @MainActor [weak call] event in
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak call] event in
                 call?.state.participantCount = event
                     .participantsCountByRole
                     .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
@@ -672,7 +677,7 @@ class CallController: @unchecked Sendable {
                 .$blockedUserIds
                 .filter { $0.contains(currentUser.id) }
                 .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
-                .sinkTask { [weak self] _ in
+                .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
                     self
                         .webRTCCoordinator
@@ -695,7 +700,7 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$statsReporter
             .compactMap { $0 }
-            .sink { [weak disposableBag, weak self] statsReporter in
+            .sink { [disposableBag, weak self] statsReporter in
                 statsReporter
                     .latestReportPublisher
                     .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }

@@ -25,9 +25,11 @@ public final class DisposableBag: @unchecked Sendable {
             }
         }
 
-        func remove(_ key: String) {
+        func remove(_ key: String, cancel: Bool) {
             queue.sync {
-                storage[key]?.cancel()
+                if cancel {
+                    storage[key]?.cancel()
+                }
                 storage[key] = nil
             }
         }
@@ -53,8 +55,8 @@ public final class DisposableBag: @unchecked Sendable {
         storage.insert(cancellable, with: key)
     }
 
-    public func remove(_ key: String) {
-        storage.remove(key)
+    public func remove(_ key: String, cancel: Bool = true) {
+        storage.remove(key, cancel: cancel)
     }
 
     public func removeAll() {
@@ -72,7 +74,7 @@ extension AnyCancellable {
 }
 
 extension Task {
-    
+
     func eraseToAnyCancellable() -> AnyCancellable { .init(cancel) }
 
     public func store(

@@ -13,8 +13,9 @@ public typealias UserTokenUpdater = @Sendable(UserToken) -> Void
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo: ObservableObject, @unchecked Sendable {
-    
+
     @Injected(\.callCache) private var callCache
+    @Injected(\.timers) private var timers
 
     public final class State: ObservableObject, @unchecked Sendable {
         @Published public internal(set) var connection: ConnectionStatus
@@ -24,7 +25,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
 
         @Published public internal(set) var ringingCall: Call?
-        
+
         init(user: User) {
             self.user = user
             connection = .initialized
@@ -48,7 +49,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             ringingCall = nil
         }
     }
-    
+
     public var state: State
     public let videoConfig: VideoConfig
     public var user: User {
@@ -67,17 +68,16 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private static let endpointConfig: EndpointConfig = .production
     private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
-    
+
     private var webSocketClient: WebSocketClient? {
         didSet {
             setupConnectionRecoveryHandler()
         }
     }
-        
+
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
-    private var eventHandlers = [EventHandler]()
 
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -89,7 +89,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         center.add(middlewares: middlewares)
         return center
     }()
-    
+
     /// Background worker that takes care about client connection recovery when the Internet comes back
     /// OR app transitions from background to foreground.
     private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
@@ -97,10 +97,22 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
-        
+
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
+
+    private let eventSubject: PassthroughSubject<WrappedEvent, Never> = .init()
+    public var eventPublisher: AnyPublisher<VideoEvent, Never> {
+        eventSubject
+            .compactMap {
+                guard case let .coordinatorEvent(event) = $0 else {
+                    return nil
+                }
+                return event
+            }
+            .eraseToAnyPublisher()
+    }
 
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -169,7 +181,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         self.videoConfig = videoConfig
         self.environment = environment
         self.pushNotificationsConfig = pushNotificationsConfig
-        
+
         apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
         coordinatorClient = DefaultAPI(
@@ -226,7 +238,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public func connect() async throws {
         try await connectUser()
     }
-    
+
     /// Creates a call with the provided call id, type and members.
     /// This method doesn't create the call on the backend, for that you need to call `join` or `getOrCreateCall`.
     /// - Parameters:
@@ -264,7 +276,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
         return controller
     }
-    
+
     /// Sets a device for push notifications.
     /// - Parameter id: the id of the device (token) for push notifications.
     @discardableResult
@@ -279,7 +291,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             isVoip: false
         )
     }
-    
+
     /// Sets a device for VoIP push notifications.
     /// - Parameter id: the id of the device (token) for VoIP push notifications.
     @discardableResult
@@ -294,7 +306,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             isVoip: true
         )
     }
-    
+
     /// Deletes the device with the provided id.
     /// - Parameter id: the id of the device that will be deleted.
     @discardableResult
@@ -304,18 +316,15 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         return try await coordinatorClient.deleteDevice(id: id)
     }
-    
+
     /// Lists the devices registered for the user.
     /// - Returns: an array of `Device`s.
     public func listDevices() async throws -> [Device] {
         try await coordinatorClient.listDevices().devices
     }
-    
+
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        eventHandlers.forEach { $0.cancel() }
-        eventHandlers.removeAll()
-
         await withCheckedContinuation { [webSocketClient] continuation in
             if let webSocketClient = webSocketClient {
                 webSocketClient.disconnect {
@@ -326,37 +335,21 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             }
         }
     }
-    
+
     /// Subscribes to all video events.
     /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
-        AsyncStream(VideoEvent.self) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard case let .coordinatorEvent(event) = event else {
-                    return
-                }
-                continuation.yield(event)
-            }, cancel: { continuation.finish() })
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventPublisher.eraseAsAsyncStream()
     }
 
     /// Subscribes to a particular WS event.
     /// - Returns: `AsyncStream` of the requested WS event.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
-        AsyncStream(event) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard let coordinatorEvent = event.unwrap() else {
-                    return
-                }
-                if let event = coordinatorEvent.unwrap() as? WSEvent {
-                    continuation.yield(event)
-                }
-            }, cancel: { continuation.finish() })
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventSubject
+            .compactMap { $0.unwrap()?.unwrap() as? WSEvent }
+            .eraseAsAsyncStream()
     }
-    
+
     public func queryCalls(
         next: String? = nil,
         watch: Bool = false
@@ -431,7 +424,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             return
         }
 
-        connectTask = Task {
+        connectTask = Task { [weak self] in
+            defer { self?.connectTask = nil }
+
+            guard let self else {
+                return
+            }
+
             if user.type == .guest {
                 do {
                     try Task.checkCancellation()
@@ -477,7 +476,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
         return controller
     }
-    
+
     private func connectWebSocketClient() async throws {
         let queryParams = Self.endpointConfig.connectQueryParams(
             apiKey: apiKey.apiKeyString
@@ -488,34 +487,35 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         } else {
             throw ClientError.Unknown()
         }
-        var connected = false
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 30, queue: .sdk) {
-            timeout = true
-        }
-        log.debug("Listening for WS connection")
-        webSocketClient?.onConnected = {
-            control.cancel()
-            connected = true
-            log.debug("WS connected")
-        }
 
-        while (!connected && !timeout) {
-            try await Task.sleep(nanoseconds: 100_000)
-        }
-        
-        if timeout {
+        do {
+            log.debug("Listening for WS connection")
+            _ = try await timers
+                .timer(for: 0.1)
+                .filter { [weak webSocketClient] _ in
+                    guard let webSocketClient else {
+                        return false
+                    }
+                    switch webSocketClient.connectionState {
+                    case .connected:
+                        return true
+                    default:
+                        return false
+                    }
+                }
+                .nextValue(timeout: 30)
+        } catch {
             log.debug("Timeout while waiting for WS connection opening")
             throw ClientError.NetworkError()
         }
     }
-    
+
     private func makeWebSocketClient(
         url: URL,
         apiKey: APIKey
     ) -> WebSocketClient {
         let webSocketClient = environment.webSocketClientBuilder(eventNotificationCenter, url)
-        
+
         webSocketClient.connectionStateDelegate = self
         webSocketClient.onWSConnectionEstablished = { [weak self, weak webSocketClient] in
             guard let self = self, let webSocketClient else { return }
@@ -526,7 +526,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 image: self.user.imageURL?.absoluteString,
                 name: self.user.originalName
             )
-            
+
             let authRequest = WSAuthMessageRequest(
                 token: self.token.rawValue,
                 userDetails: connectUserRequest
@@ -534,40 +534,32 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
             webSocketClient.engine?.send(jsonMessage: authRequest)
         }
-        
+
         return webSocketClient
     }
-    
+
     private func loadConnectionId() async -> String {
         if let connectionId = loadConnectionIdFromHealthcheck() {
             return connectionId
         }
-        
+
         guard webSocketClient?.connectionState == .connecting
             || webSocketClient?.connectionState == .authenticating else {
             return ""
         }
-        
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 5, queue: .sdk) {
-            timeout = true
-        }
-        log.debug("Waiting for connection id")
 
-        while (loadConnectionIdFromHealthcheck() == nil && !timeout) {
-            try? await Task.sleep(nanoseconds: 100_000)
+        do {
+            return try await timers
+                .timer(for: 0.1)
+                .log(.debug) { _ in "Waiting for connection id" }
+                .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
+                .nextValue(timeout: 5)
+        } catch {
+            log.warning("Unable to load connectionId.")
+            return ""
         }
-        
-        control.cancel()
-        
-        if let connectionId = loadConnectionIdFromHealthcheck() {
-            log.debug("Connection id available from the WS")
-            return connectionId
-        }
-        
-        return ""
     }
-    
+
     private func loadConnectionIdFromHealthcheck() -> String? {
         if case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState {
             if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
@@ -576,7 +568,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         return nil
     }
-    
+
     private func loadGuestUserInfo(
         for user: User,
         apiKey: String
@@ -587,7 +579,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             environment: environment
         )
         let token = UserToken(rawValue: guestUserResponse.accessToken)
-        
+
         // Update the user and token provider.
         var updatedUser = guestUserResponse.user.toUser
         let lastNameComponent = updatedUser.name.split(separator: "-").last.map { String($0) }
@@ -611,7 +603,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         return (user: updatedUser, token: token, tokenProvider: tokenProvider)
     }
-    
+
     private func setDevice(
         id: String,
         pushProvider: PushNotificationsProvider,
@@ -627,12 +619,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             pushProviderName: name,
             voipToken: isVoip
         )
-        
+
         log.debug("Sending request to save device")
 
         return try await coordinatorClient.createDevice(createDeviceRequest: createDeviceRequest)
     }
-    
+
     private func setupConnectionRecoveryHandler() {
         guard let webSocketClient = webSocketClient else {
             return
@@ -644,7 +636,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             eventNotificationCenter
         )
     }
-    
+
     private func connectUser(isInitial: Bool = false) async throws {
         if !isInitial && connectTask != nil {
             log.debug("Waiting for already running connect task")
@@ -659,7 +651,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         try await connectWebSocketClient()
     }
-    
+
     private static func createGuestUser(
         id: String,
         apiKey: String,
@@ -674,7 +666,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         let request = CreateGuestRequest(user: UserRequest(id: id))
         return try await defaultAPI.createGuest(createGuestRequest: request)
     }
-    
+
     private static func loadGuestToken(
         userId: String,
         apiKey: String,
@@ -696,7 +688,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             }
         }
     }
-    
+
     private func prefetchLocation() {
         Task {
             do {
@@ -709,7 +701,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 }
 
 extension StreamVideo: ConnectionStateDelegate {
-    
+
     func webSocketClient(
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
@@ -733,9 +725,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
                 }
             }
-            eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected())) }
+            eventSubject.send(.internalEvent(WSDisconnected()))
         case .connected(healthCheckInfo: _):
-            eventHandlers.forEach { $0.handler(.internalEvent(WSConnected())) }
+            eventSubject.send(.internalEvent(WSConnected()))
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -743,14 +735,10 @@ extension StreamVideo: ConnectionStateDelegate {
 }
 
 extension StreamVideo: WSEventsSubscriber {
-    
+
     func onEvent(_ event: WrappedEvent) {
-        for eventHandler in eventHandlers {
-            eventHandler.handler(event)
-        }
-        Task { @MainActor [weak self] in
-            self?.checkRingEvent(event)
-        }
+        eventSubject.send(event)
+        checkRingEvent(event)
     }
 
     private func checkRingEvent(_ event: WrappedEvent) {

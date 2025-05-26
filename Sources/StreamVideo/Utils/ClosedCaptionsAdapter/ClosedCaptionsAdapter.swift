@@ -29,6 +29,7 @@ final class ClosedCaptionsAdapter {
     private var cancellable: AnyCancellable?
     private var itemsCancellable: AnyCancellable?
     private let items: OrderedCapacityQueue<CallClosedCaption>
+    private let disposableBag = DisposableBag()
 
     /**
      Initializes a new instance of `ClosedCaptionsAdapter`.
@@ -74,7 +75,8 @@ final class ClosedCaptionsAdapter {
      - Parameter call: The call instance to subscribe for closed caption events.
      */
     private func configure(with call: Call) {
-        cancellable = AsyncStreamPublisher(call.subscribe(for: ClosedCaptionEvent.self))
+        cancellable = call
+            .eventPublisher(for: ClosedCaptionEvent.self)
             .map(\.closedCaption)
             .removeDuplicates()
             .log(.debug) { "Processing closedCaption for speakerId:\($0.speakerId) text:\($0.text)." }
@@ -82,6 +84,8 @@ final class ClosedCaptionsAdapter {
 
         itemsCancellable = items
             .publisher
-            .sinkTask { @MainActor [weak call] in call?.state.update(closedCaptions: $0) }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak call] in
+                call?.state.update(closedCaptions: $0)
+            }
     }
 }

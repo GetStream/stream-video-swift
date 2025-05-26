@@ -16,8 +16,8 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
 
     var player: AVAudioPlayer?
 
-    private var reactionsTask: Task<Void, Error>?
-    private var callEndedNotificationObserver: Any?
+    private var reactionsCancellable: AnyCancellable?
+    private var callEndedNotificationObserver: AnyCancellable?
     private var activeCallUpdated: AnyCancellable?
     private var call: Call? { didSet { subscribeToReactionEvents() } }
 
@@ -81,33 +81,32 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
             .$activeCall
             .sink { [weak self] in self?.call = $0 }
 
-        callEndedNotificationObserver = NotificationCenter.default.addObserver(
-            forName: .init(CallNotification.callEnded),
-            object: nil,
-            queue: nil
-        ) { _ in Task { @MainActor [weak self] in self?.handleCallEnded() } }
+        callEndedNotificationObserver = NotificationCenter
+            .default
+            .publisher(for: .init(CallNotification.callEnded))
+            .sink { [weak self] _ in
+                self?.reactionsCancellable?.cancel()
+                self?.reactionsCancellable = nil
+            }
     }
 
     private func subscribeToReactionEvents() {
+        reactionsCancellable?.cancel()
         guard let call else {
-            reactionsTask?.cancel()
             return
         }
 
-        let callReactionEventsStream = call.subscribe(for: CallReactionEvent.self)
-
-        reactionsTask = Task { [weak self] in
-            for await event in callReactionEventsStream {
+        reactionsCancellable = call
+            .eventPublisher(for: CallReactionEvent.self)
+            .sink { [weak self] event in
                 guard
                     let reaction = self?.reaction(for: event)
                 else {
-                    continue
+                    return
                 }
                 self?.handleReaction(reaction, from: event.reaction.user.toUser)
                 log.debug("\(event.reaction.user.name ?? event.reaction.user.id) reacted with reaction:\(reaction.id)")
             }
-            return
-        }
     }
 
     private func reaction(for event: CallReactionEvent) -> Reaction? {
@@ -206,12 +205,8 @@ final class ReactionsAdapter: ObservableObject, @unchecked Sendable {
     }
 
     private func handleCallEnded() {
-        Task {
-            await MainActor.run { [weak self] in
-                self?.reactionsTask?.cancel()
-                self?.reactionsTask = nil
-            }
-        }
+        reactionsCancellable?.cancel()
+        reactionsCancellable = nil
     }
 }
 

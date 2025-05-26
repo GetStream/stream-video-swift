@@ -11,7 +11,7 @@ import Foundation
 /// Customisable settings: Allows you to tailor recording parameters to your specific needs.
 ///
 /// - Important: You need to call `.build()` before trying to access the `result` property.
-actor AVAudioRecorderBuilder {
+final class AVAudioRecorderBuilder {
 
     // `kAudioFormatLinearPCM` is being used to be able to support multiple
     // instances of AVAudioRecorders. (useful when using MicrophoneChecker
@@ -32,6 +32,7 @@ actor AVAudioRecorderBuilder {
 
     /// A property storing the built AVAudioRecorder instance.
     private var cachedResult: AVAudioRecorder?
+    private let queue = UnfairQueue()
 
     var result: AVAudioRecorder? { cachedResult }
 
@@ -43,7 +44,7 @@ actor AVAudioRecorderBuilder {
             for: .cachesDirectory,
             in: .userDomainMask
         )[0]
-        self.fileURL = documentPath.appendingPathComponent(filename)
+        fileURL = documentPath.appendingPathComponent(filename)
         self.settings = settings
     }
 
@@ -51,14 +52,18 @@ actor AVAudioRecorderBuilder {
         cachedResult: AVAudioRecorder
     ) {
         self.cachedResult = cachedResult
-        self.fileURL = cachedResult.url
-        self.settings = cachedResult.settings
+        fileURL = cachedResult.url
+        settings = cachedResult.settings
     }
 
     /// Instructs the `AVAudioRecorderBuilder` to build and cache an instance of AVAudioRecorder.
     func build() throws {
-        guard cachedResult == nil else { return }
-        let audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
-        self.cachedResult = audioRecorder
+        try queue.sync {
+            guard cachedResult == nil else {
+                return
+            }
+            let audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
+            self.cachedResult = audioRecorder
+        }
     }
 }

@@ -103,6 +103,9 @@ actor StreamVideoCapturer: StreamVideoCapturing {
     private let videoCapturerDelegate: RTCVideoCapturerDelegate
     private let actionHandlers: [StreamVideoCapturerActionHandler]
 
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { executor.asUnownedSerialExecutor() }
+
     private var videoCaptureSession: AVCaptureSession? {
         guard
             let cameraVideoCapturer = videoCapturer as? RTCCameraVideoCapturer

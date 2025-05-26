@@ -17,6 +17,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     @Injected(\.videoCapturePolicy) private var videoCapturePolicy
     @Injected(\.captureDeviceProvider) private var captureDeviceProvider
+    @Injected(\.uuidFactory) private var uuidFactory
 
     /// A unique identifier representing the current call session.
     private let sessionID: String
@@ -559,9 +560,11 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter videoFilter: The video filter to apply.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
+        let identifier = uuidFactory.get().uuidString
         Task { [weak self] in
             await self?.capturer?.setVideoFilter(videoFilter)
-        }.store(in: disposableBag, key: "\(#function)")
+            self?.disposableBag.remove(identifier, cancel: false)
+        }.store(in: disposableBag, key: identifier)
     }
 
     /// Zooms the camera by a given factor.

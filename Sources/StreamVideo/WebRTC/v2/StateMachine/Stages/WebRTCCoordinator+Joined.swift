@@ -29,6 +29,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
+        @Injected(\.uuidFactory) private var uuidFactory
 
         private let disposableBag = DisposableBag()
         private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
@@ -65,6 +66,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the joined stage logic.
         private func execute() {
+            let identifier = uuidFactory.get().uuidString
             Task { [weak self] in
                 guard let self else { return }
                 do {
@@ -135,8 +137,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     await cleanUpPreviousSessionIfRequired()
                     transitionDisconnectOrError(error)
                 }
+
+                disposableBag.remove(identifier, cancel: false)
             }
-            .store(in: disposableBag)
+            .store(in: disposableBag, key: identifier)
         }
 
         /// Cleans up the previous WebRTC session, including closing and removing the

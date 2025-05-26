@@ -23,23 +23,23 @@ extension CallSettingsManager {
         action: (Bool) async throws -> Void,
         onUpdate: @Sendable(Bool) -> Void
     ) async throws {
-        let updatingState = await self.state.updatingState
+        let updatingState = self.state.updatingState
         if state == current || updatingState == state {
             return
         }
-        await self.state.setUpdatingState(state)
+        self.state.setUpdatingState(state)
         try await action(state)
         await MainActor.run {
             onUpdate(state)
         }
-        await self.state.setUpdatingState(nil)
+        self.state.setUpdatingState(nil)
     }
 }
 
-actor CallSettingsState {
-    var updatingState: Bool?
+final class CallSettingsState {
+    @Atomic var updatingState: Bool?
     func setUpdatingState(_ state: Bool?) {
-        self.updatingState = state
+        updatingState = state
     }
 }
 
