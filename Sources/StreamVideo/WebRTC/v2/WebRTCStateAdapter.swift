@@ -82,9 +82,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
+    private let executor: DispatchQueueExecutor
 
-    /// Subject to handle participant updates.
-    private var previousParticipantOperation: Task<Void, Never>?
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -107,6 +107,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
+        self.executor = .init()
         self.user = user
         self.apiKey = apiKey
         self.callCid = callCid
@@ -162,7 +163,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
         self.sfuAdapter = value
-        statsReporter?.sfuAdapter = sfuAdapter
+        Task(disposableBag: disposableBag) { [weak value, weak self] in
+            await self?.statsReporter?.set(sfuAdapter: value)
+        }
     }
 
     /// Sets the number of participants in the call.
@@ -473,13 +476,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         lineNumber: UInt = #line
     ) {
         /// Creates a new asynchronous task for the operation.
-        let newTask = Task(disposableBag: disposableBag) { [weak self, previousParticipantOperation] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
-            /// Awaits the result of the previous participant operation.
-            _ = await previousParticipantOperation?.result
-
             await processEnqueue(
                 functionName: functionName,
                 fileName: fileName,
@@ -487,9 +487,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 operation
             )
         }
-
-        /// Stores the new task as the previous operation for chaining.
-        previousParticipantOperation = newTask
     }
 
     private func processEnqueue(

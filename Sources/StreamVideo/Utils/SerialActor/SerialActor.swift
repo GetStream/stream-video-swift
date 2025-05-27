@@ -6,12 +6,16 @@ import Foundation
 
 actor SerialActor {
     /// Declare a private variable to store the previous task.
-    private var previousTask: Task<Void, Error>?
     private let disposableBag = DisposableBag()
+    private let executor: DispatchQueueExecutor
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
+    init(file: StaticString = #file) {
+        self.executor = .init(file: file)
+    }
 
     deinit {
         disposableBag.removeAll()
-        previousTask = nil
     }
 
     nonisolated func cancel() {
@@ -32,31 +36,6 @@ actor SerialActor {
     /// - Throws: Any error thrown by the provided block.
     /// - Returns: The value returned by the provided block.
     func execute<T: Sendable>(_ block: @Sendable @escaping () async throws -> T) async throws -> T {
-        /// Create a new task that runs the provided block of code within a closure.
-        /// This closure captures the `previousTask` variable by value.
-        let task = Task<T, Error>(disposableBag: disposableBag) { [previousTask] in
-            /// Wait for the previous task to finish by awaiting its result.
-            /// If the previous task is nil, this line does nothing.
-            _ = await previousTask?.result
-
-            try Task.checkCancellation()
-
-            /// Execute the provided block of code and re-throw any errors.
-            return try await block()
-        }
-
-        /// Create a void task that we can store for synchronization
-        let voidTask = Task<Void, Error>(disposableBag: disposableBag) {
-            _ = try await task.value
-        }
-
-        /// Update the `previousTask` variable to point to the void task.
-        previousTask = voidTask
-
-        try Task.checkCancellation()
-        
-        /// Wait for the newly created task to finish by awaiting its value.
-        /// This will re-throw any errors thrown by the block.
-        return try await task.value
+        try await block()
     }
 }

@@ -144,6 +144,7 @@
 		4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */; };
 		4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4035913B2BC53D2A00B5B767 /* Accelerate.framework */; };
 		4035AD732DE640F300F56FAB /* Task+DisposableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4035AD722DE640F300F56FAB /* Task+DisposableBag.swift */; };
+		4035AD752DE651A900F56FAB /* DispatchQueueExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4035AD742DE651A900F56FAB /* DispatchQueueExecutor.swift */; };
 		403793C52D35196600C752DF /* StreamAppStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C0B2D14B75B002C4EAB /* StreamAppStateAdapter.swift */; };
 		403793C72D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */; };
 		403793C92D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */; };
@@ -1703,6 +1704,7 @@
 		4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamActiveCallProvider.swift; sourceTree = "<group>"; };
 		4035913B2BC53D2A00B5B767 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		4035AD722DE640F300F56FAB /* Task+DisposableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+DisposableBag.swift"; sourceTree = "<group>"; };
+		4035AD742DE651A900F56FAB /* DispatchQueueExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchQueueExecutor.swift; sourceTree = "<group>"; };
 		403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter.swift; sourceTree = "<group>"; };
 		403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter_Tests.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
@@ -3215,6 +3217,7 @@
 		402D0E862D0C914F00E9B83F /* SerialActor */ = {
 			isa = PBXGroup;
 			children = (
+				4035AD742DE651A900F56FAB /* DispatchQueueExecutor.swift */,
 				402D0E842D0C914900E9B83F /* SerialActorQueue.swift */,
 				40013DDB2B87AA2300915453 /* SerialActor.swift */,
 			);
@@ -7728,6 +7731,7 @@
 				84DC38BF29ADFCFD00946713 /* ScreensharingSettings.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
+				4035AD752DE651A900F56FAB /* DispatchQueueExecutor.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				40BBC4CE2C639054002AEF92 /* WebRTCCoordinator+Error.swift in Sources */,

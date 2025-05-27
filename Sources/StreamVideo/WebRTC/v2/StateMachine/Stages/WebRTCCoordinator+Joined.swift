@@ -425,20 +425,33 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                 /// Set the stats reporting interval and associate the reporter with the publisher,
                 /// subscriber, and SFU adapter.
-                statsReporter.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
-                statsReporter.publisher = await stateAdapter.publisher
-                statsReporter.subscriber = await stateAdapter.subscriber
-                statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
+                await statsReporter.configure(
+                    deliveryInterval: await stateAdapter.statsReporter?.deliveryInterval ?? 0,
+                    publisher: await stateAdapter.publisher,
+                    subscriber: await stateAdapter.subscriber,
+                    sfuAdapter: await stateAdapter.sfuAdapter
+                )
+//                statsReporter.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+//                statsReporter.publisher = await stateAdapter.publisher
+//                statsReporter.subscriber = await stateAdapter.subscriber
+//                statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
 
                 /// Update the state adapter with the new stats reporter.
                 await stateAdapter.set(statsReporter: statsReporter)
             } else {
                 /// If the session ID matches, update the existing stats reporter.
                 let statsReporter = await stateAdapter.statsReporter
-                statsReporter?.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
-                statsReporter?.publisher = await stateAdapter.publisher
-                statsReporter?.subscriber = await stateAdapter.subscriber
-                statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
+                await statsReporter?.configure(
+                    deliveryInterval: await stateAdapter.statsReporter?.deliveryInterval ?? 0,
+                    publisher: await stateAdapter.publisher,
+                    subscriber: await stateAdapter.subscriber,
+                    sfuAdapter: await stateAdapter.sfuAdapter
+                )
+
+//                statsReporter?.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+//                statsReporter?.publisher = await stateAdapter.publisher
+//                statsReporter?.subscriber = await stateAdapter.subscriber
+//                statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
             }
         }
 

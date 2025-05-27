@@ -220,25 +220,22 @@ actor ICEAdapter: @unchecked Sendable {
     ///   regardless of success or failure of individual additions.
     private func drainPendingSFUCandidates() async {
         let candidates = pendingSFUCandidates
-        await withTaskGroup(of: Void.self) { [weak self] group in
-            guard let self else { return }
-            for candidate in candidates {
-                group.addTask { [weak self] in
-                    guard let self else { return }
-                    do {
+        for candidate in candidates {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
+                do {
+                    try Task.checkCancellation()
+                    try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
                         try Task.checkCancellation()
-                        try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
-                            try Task.checkCancellation()
-                            try await self?.peerConnection.add(candidate)
-                        }
-                    } catch {
-                        log.error(
-                            error,
-                            subsystems: peerType == .publisher
-                                ? .peerConnectionPublisher
-                                : .peerConnectionSubscriber
-                        )
+                        try await self?.peerConnection.add(candidate)
                     }
+                } catch {
+                    log.error(
+                        error,
+                        subsystems: peerType == .publisher
+                            ? .peerConnectionPublisher
+                            : .peerConnectionSubscriber
+                    )
                 }
             }
         }
