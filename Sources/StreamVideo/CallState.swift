@@ -33,7 +33,8 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
 public class CallState: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
-    
+    @Injected(\.timers) var timers
+
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
     @Published public internal(set) var sessionId: String = ""
@@ -153,7 +154,7 @@ public class CallState: ObservableObject {
     }
     
     private var localCallSettingsUpdate = false
-    private var durationTimer: Foundation.Timer?
+    private var durationCancellable: AnyCancellable?
 
     /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
     /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`
@@ -497,36 +498,21 @@ public class CallState: ObservableObject {
     
     private func setupDurationTimer() {
         resetTimer()
-        durationTimer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] timer in
-            guard let self else {
-                timer.invalidate()
-                return
-            }
-            Task {
-                await MainActor.run {
-                    self.updateDuration()
+        durationCancellable = timers
+            .timer(for: 1.0)
+            .receive(on: DispatchQueue.main)
+            .compactMap { [weak self] _ in
+                if let startedAt = self?.startedAt {
+                    return Date().timeIntervalSince(startedAt)
+                } else {
+                    return 0
                 }
             }
-        })
+            .assign(to: \.duration, onWeak: self)
     }
     
     private func resetTimer() {
-        durationTimer?.invalidate()
-        durationTimer = nil
-    }
-    
-    @objc private func updateDuration() {
-        guard let startedAt else {
-            update(duration: 0)
-            return
-        }
-        let timeInterval = Date().timeIntervalSince(startedAt)
-        update(duration: timeInterval)
-    }
-    
-    private func update(duration: TimeInterval) {
-        if duration != self.duration {
-            self.duration = duration
-        }
+        durationCancellable?.cancel()
+        durationCancellable = nil
     }
 }
