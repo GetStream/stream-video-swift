@@ -791,7 +791,7 @@ extension StreamVideo: ConnectionStateDelegate {
 
 extension StreamVideo: WSEventsSubscriber {
     
-    func onEvent(_ event: WrappedEvent) {
+    func onEvent(_ event: WrappedEvent) async {
         eventSubject.send(event)
         checkRingEvent(event)
     }

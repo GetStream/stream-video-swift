@@ -1403,17 +1403,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
-    internal func onEvent(_ event: WrappedEvent) {
+    internal func onEvent(_ event: WrappedEvent) async {
         guard case let .coordinatorEvent(videoEvent) = event else {
             return
         }
         guard videoEvent.forCall(cid: cId) else {
             return
         }
-        executeOnMain { [weak self] in
+        await Task { @MainActor [weak self] in
             guard let self else { return }
             self.state.updateState(from: videoEvent)
-        }
+        }.value
 
         eventSubject.send(event)
     }
