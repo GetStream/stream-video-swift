@@ -125,7 +125,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             updateSession: Bool,
             onErrorDisconnect: Bool
         ) {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
                     guard
@@ -190,7 +190,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     }
                 }
             }
-            .store(in: disposableBag)
         }
     }
 }

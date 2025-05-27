@@ -41,8 +41,8 @@ actor ICEAdapter: @unchecked Sendable {
         self.peerConnection = peerConnection
         self.sfuAdapter = sfuAdapter
 
-        Task {
-            await configure()
+        Task(disposableBag: disposableBag) { [weak self] in
+            await self?.configure()
         }
     }
 
@@ -59,7 +59,6 @@ actor ICEAdapter: @unchecked Sendable {
             return
         }
         trickleTask(for: candidate)
-            .store(in: disposableBag)
     }
 
     /// Adds an ICE candidate to the peer connection.
@@ -88,7 +87,6 @@ actor ICEAdapter: @unchecked Sendable {
             subsystems: .iceAdapter
         )
         task(for: candidate)
-            .store(in: disposableBag)
     }
 
     // MARK: - Private helpers
@@ -99,8 +97,9 @@ actor ICEAdapter: @unchecked Sendable {
     /// - Returns: A task that performs the trickle operation.
     private func trickleTask(
         for candidate: RTCIceCandidate
-    ) -> Task<Void, Never> {
-        Task {
+    ) {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 let iceCandidate = ICECandidate(from: candidate)
                 let json = try encoder.encode(iceCandidate)
@@ -157,7 +156,6 @@ actor ICEAdapter: @unchecked Sendable {
             }
 
             task(for: iceCandidate)
-                .store(in: disposableBag)
 
         } catch {
             log.error(
@@ -175,8 +173,8 @@ actor ICEAdapter: @unchecked Sendable {
     /// - Returns: A task that adds the candidate to the peer connection.
     private func task(
         for candidate: RTCIceCandidate
-    ) -> Task<Void, Never> {
-        Task { @MainActor [weak peerConnection] in
+    ) {
+        Task(disposableBag: disposableBag) { @MainActor [weak peerConnection, peerType] in
             guard let peerConnection else { return }
             do {
                 try Task.checkCancellation()
@@ -204,7 +202,7 @@ actor ICEAdapter: @unchecked Sendable {
     ///   change handling in the configure() method.
     private func drainPendingLocalCandidates() async {
         for candidate in pendingLocalCandidates {
-            trickleTask(for: candidate).store(in: disposableBag)
+            trickleTask(for: candidate)
         }
         pendingLocalCandidates = []
     }

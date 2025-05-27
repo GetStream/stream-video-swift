@@ -21,10 +21,9 @@ final class ProximityManager: @unchecked Sendable {
     /// Thread-safe storage for registered proximity policies
     @Atomic private var policies: [ObjectIdentifier: any ProximityPolicy] = [:]
 
-    /// Cancellable for active call observation
-    private var activeCallCancellable: AnyCancellable?
     /// Cancellable for proximity state observation
     private var observationCancellable: AnyCancellable?
+    private let disposableBag = DisposableBag()
 
     /// Creates a new proximity manager for the specified call
     /// - Parameter call: Call instance to manage proximity for
@@ -32,15 +31,16 @@ final class ProximityManager: @unchecked Sendable {
         self.call = call
 
         if isSupported {
-            activeCallCancellable = streamVideo
+            streamVideo
                 .state
                 .$activeCall
-                .sinkTask { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
+                .store(in: disposableBag)
         }
     }
 
     deinit {
-        activeCallCancellable?.cancel()
+        disposableBag.removeAll()
         observationCancellable?.cancel()
     }
 

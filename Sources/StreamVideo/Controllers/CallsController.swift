@@ -176,7 +176,8 @@ public class CallsController: ObservableObject, @unchecked Sendable {
         // Clean up and re-watch the calls
         prev = nil
         next = nil
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 await state.update(loadedAllCalls: false)
                 try await loadCalls(shouldRefresh: true)

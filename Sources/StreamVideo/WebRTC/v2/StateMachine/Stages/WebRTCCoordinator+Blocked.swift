@@ -58,7 +58,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the leaving process.
         private func execute() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
                     guard
@@ -74,7 +74,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionErrorOrLog(error)
                 }
             }
-            .store(in: disposableBag)
         }
     }
 }

@@ -59,7 +59,7 @@ final class ApplicationLifecycleVideoMuteAdapter {
             .statePublisher
             .filter { $0 == .background }
             .log(.debug, subsystems: .webRTC) { "Application state changed to \($0) and we are going to mute the video track." }
-            .sinkTask { [weak sfuAdapter, sessionID] _ in
+            .sinkTask(storeIn: disposableBag) { [weak sfuAdapter, sessionID] _ in
                 try await sfuAdapter?.updateTrackMuteState(
                     .video,
                     isMuted: true,
@@ -72,7 +72,7 @@ final class ApplicationLifecycleVideoMuteAdapter {
             .statePublisher
             .filter { $0 == .foreground }
             .log(.debug, subsystems: .webRTC) { "Application state changed to \($0) and we are going to unmute the video track." }
-            .sinkTask { [weak sfuAdapter, sessionID] _ in
+            .sinkTask(storeIn: disposableBag) { [weak sfuAdapter, sessionID] _ in
                 try await sfuAdapter?.updateTrackMuteState(
                     .video,
                     isMuted: false,

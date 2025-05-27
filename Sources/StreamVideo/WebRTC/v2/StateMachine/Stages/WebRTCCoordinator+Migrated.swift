@@ -57,7 +57,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the migrated stage logic.
         private func execute() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
 
                 do {
@@ -118,7 +118,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
-            .store(in: disposableBag)
         }
     }
 }

@@ -34,7 +34,7 @@ actor SerialActor {
     func execute<T: Sendable>(_ block: @Sendable @escaping () async throws -> T) async throws -> T {
         /// Create a new task that runs the provided block of code within a closure.
         /// This closure captures the `previousTask` variable by value.
-        let task = Task<T, Error> { [previousTask] in
+        let task = Task<T, Error>(disposableBag: disposableBag) { [previousTask] in
             /// Wait for the previous task to finish by awaiting its result.
             /// If the previous task is nil, this line does nothing.
             _ = await previousTask?.result
@@ -44,13 +44,11 @@ actor SerialActor {
             /// Execute the provided block of code and re-throw any errors.
             return try await block()
         }
-        task.store(in: disposableBag)
 
         /// Create a void task that we can store for synchronization
-        let voidTask = Task<Void, Error> {
+        let voidTask = Task<Void, Error>(disposableBag: disposableBag) {
             _ = try await task.value
         }
-        voidTask.store(in: disposableBag)
 
         /// Update the `previousTask` variable to point to the void task.
         previousTask = voidTask

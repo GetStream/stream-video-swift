@@ -51,6 +51,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Provides access to device's proximity
     private lazy var proximity: ProximityManager = .init(self)
 
+    private let disposableBag = DisposableBag()
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
     private var cancellables = DisposableBag()
@@ -115,7 +116,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func configure(callSettings: CallSettings?) {
         /// If we received a non-nil initial callSettings, we updated them here.
         if let callSettings {
-            Task { @MainActor [weak self] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 self?.state.update(callSettings: callSettings)
             }
         }
@@ -234,8 +235,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            Task { @MainActor in
-                streamVideo.state.ringingCall = self
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                self?.streamVideo.state.ringingCall = self
             }
         }
         return response
@@ -336,8 +337,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            Task { @MainActor in
-                streamVideo.state.ringingCall = self
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                self?.streamVideo.state.ringingCall = self
             }
         }
         return response.call
@@ -548,7 +549,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // Reset the activeAudioFilter
         setAudioFilter(nil)
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             if streamVideo.state.ringingCall?.cId == cId {
                 streamVideo.state.ringingCall = nil
             }
@@ -1491,7 +1495,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .state
                 .$ownCapabilities
                 .removeDuplicates()
-                .sinkTask { [weak self] in await self?.callController.updateOwnCapabilities(ownCapabilities: $0) }
+                .sinkTask(storeIn: disposableBag) { [weak self] in
+                    await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
+                }
                 .store(in: cancellables)
         }
     }
@@ -1645,7 +1651,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 switch value.mode {
                 case .disabled where state.transcribing == true:
@@ -1671,7 +1680,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 switch mode {
                 case .disabled where state.captioning == true:

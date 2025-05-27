@@ -147,7 +147,10 @@ public class CallState: ObservableObject {
     
     var sortComparators = defaultSortPreset {
         didSet {
-            Task { @MainActor in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else {
+                    return
+                }
                 didUpdate(participants)
             }
         }
@@ -155,6 +158,7 @@ public class CallState: ObservableObject {
     
     private var localCallSettingsUpdate = false
     private var durationCancellable: AnyCancellable?
+    private nonisolated let disposableBag = DisposableBag()
 
     /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
     /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`

@@ -53,7 +53,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             guard hasActiveCall != oldValue else { return }
             log.debug("🎙️updated with hasActiveCall:\(hasActiveCall).")
             if !hasActiveCall {
-                Task { await stopRecording() }
+                Task(disposableBag: disposableBag) { [weak self] in await self?.stopRecording() }
             }
         }
     }
@@ -183,9 +183,9 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     private func setUp() {
         setUpTask?.cancel()
-        setUpTask = Task {
+        setUpTask = Task(disposableBag: disposableBag) { [weak self] in
             do {
-                try await audioRecorderBuilder.build()
+                try await self?.audioRecorderBuilder.build()
             } catch {
                 if type(of: error) != CancellationError.self {
                     log.error("🎙️Failed to create AVAudioRecorder.", error: error)

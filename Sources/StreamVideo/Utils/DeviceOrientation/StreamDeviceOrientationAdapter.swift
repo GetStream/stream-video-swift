@@ -98,8 +98,7 @@ open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable
     }
 
     private var provider: Provider
-    private var notificationCancellable: AnyCancellable?
-    private var __cancelable: AnyCancellable?
+    private let disposableBag = DisposableBag()
 
     /// The current orientation observed by the adapter.
     @Published public private(set) var orientation: StreamDeviceOrientation = .portrait(isUpsideDown: false)
@@ -115,17 +114,19 @@ open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable
         self.provider = provider
 
         #if canImport(UIKit)
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
             UIDevice.current.beginGeneratingDeviceOrientationNotifications()
             // Subscribe to orientation change notifications on UIKit platforms.
-            notificationCancellable = notificationCenter
+            notificationCenter
                 .publisher(for: UIDevice.orientationDidChangeNotification)
                 .map { _ in }
                 .receive(on: DispatchQueue.main)
-                .sinkTask { @MainActor [weak self] in
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                     guard let self = self else { return }
                     self.orientation = await provider() // Update orientation based on the provider.
                 }
+                .store(in: disposableBag)
 
             self.orientation = await provider()
         }
@@ -134,7 +135,7 @@ open class StreamDeviceOrientationAdapter: ObservableObject, @unchecked Sendable
 
     /// Cleans up resources when the adapter is deallocated.
     deinit {
-        notificationCancellable?.cancel() // Cancel notification subscription.
+        disposableBag.removeAll()
         #if canImport(UIKit)
         Task { @MainActor in
             UIDevice.current.endGeneratingDeviceOrientationNotifications()

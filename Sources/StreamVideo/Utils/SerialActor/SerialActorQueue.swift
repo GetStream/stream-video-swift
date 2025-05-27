@@ -47,7 +47,8 @@ public final class SerialActorQueue: Sendable {
         line: UInt = #line,
         _ block: @Sendable @escaping () async throws -> Void
     ) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 try Task.checkCancellation()
                 // Execute the task serially via the actor.
@@ -64,7 +65,7 @@ public final class SerialActorQueue: Sendable {
                     )
                 }
             }
-        }.store(in: disposableBag)
+        }
     }
 
     /// Submits an asynchronous task to be executed serially and waits for it to complete.

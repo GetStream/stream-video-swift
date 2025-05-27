@@ -27,15 +27,21 @@ extension Publisher where Output: Sendable {
     ///     optional custom error (`ClientError`) can be propagated as a failure.
     ///   - Errors during task execution are logged using `LogConfig.logger`.
     public func sinkTask(
-        storeIn disposableBag: DisposableBag? = nil,
-        identifier: String? = nil,
+        storeIn disposableBag: DisposableBag,
+        identifier: String = UUIDProviderKey.currentValue.get().uuidString,
         receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
         receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
         // Subscribe to the publisher's events and process the received input.
         sink(receiveCompletion: receiveCompletion) { @Sendable [weak disposableBag] input in
+            guard let disposableBag else {
+                if let error = ClientError("Lifecycle error.") as? Failure {
+                    receiveCompletion(.failure(error))
+                }
+                return
+            }
             // Create a new task to handle the received value.
-            let task = Task {
+            Task(disposableBag: disposableBag, identifier: identifier) {
                 do {
                     // Check for task cancellation and process the value.
                     try Task.checkCancellation()
@@ -52,11 +58,6 @@ extension Publisher where Output: Sendable {
                     // Log any unexpected errors during task execution.
                     LogConfig.logger.error(ClientError(with: error))
                 }
-            }
-
-            // Store the task in the `DisposableBag` if provided.
-            if let disposableBag {
-                task.store(in: disposableBag, key: identifier ?? UUID().uuidString)
             }
         }
     }

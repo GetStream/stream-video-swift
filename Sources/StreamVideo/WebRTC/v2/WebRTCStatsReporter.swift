@@ -58,6 +58,8 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// A subject for publishing the latest collected statistics report.
     private let latestReportSubject = CurrentValueSubject<CallStatsReport?, Never>(nil)
 
+    private let disposableBag = DisposableBag()
+
     /// A publisher for the latest statistics report.
     var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
         latestReportSubject
@@ -155,7 +157,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// This method creates a new task for collecting stats, cancelling any existing collection task.
     private func collectStats() {
         activeCollectionTask?.cancel()
-        activeCollectionTask = Task { [weak self] in
+        activeCollectionTask = Task(disposableBag: disposableBag) { [weak self] in
             guard
                 let self,
                 let hostname = sfuAdapter?.hostname
@@ -164,15 +166,11 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             }
 
             do {
-                async let statsPublisher = publisher?.statsReport() ?? .init(nil)
-                async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
-
                 try Task.checkCancellation()
-                let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
 
                 let report = callStatisticsReporter.buildReport(
-                    publisherReport: result.first ?? .init(nil),
-                    subscriberReport: result.last ?? .init(nil),
+                    publisherReport: try await publisher?.statsReport() ?? .init(nil),
+                    subscriberReport: try await subscriber?.statsReport() ?? .init(nil),
                     datacenter: hostname
                 )
 
@@ -189,7 +187,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// - Parameter report: The statistics report to deliver.
     private func deliverStats(report: CallStatsReport) {
         activeDeliveryTask?.cancel()
-        activeDeliveryTask = Task { [weak self] in
+        activeDeliveryTask = Task(disposableBag: disposableBag) { [weak self] in
             do {
                 guard let self else { return }
 
