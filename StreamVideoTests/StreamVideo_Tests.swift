@@ -318,7 +318,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // When
         Task {
-            await withThrowingTaskGroup { group in
+            await withThrowingTaskGroup(of: Void.self) { group in
                 group.addTask {
                     for await value in streamVideo.subscribe() {
                         XCTAssertEqual(value, event)
@@ -352,7 +352,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // When
         Task {
-            await withThrowingTaskGroup { group in
+            await withThrowingTaskGroup(of: Void.self) { group in
                 group.addTask {
                     for await value in streamVideo.subscribe(for: CallAcceptedEvent.self) {
                         XCTAssertEqual(value, content)
