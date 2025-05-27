@@ -15,6 +15,7 @@ public typealias UserTokenUpdater = @Sendable(UserToken) -> Void
 public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
+    @Injected(\.timers) private var timers
 
     public final class State: ObservableObject, @unchecked Sendable {
         @Published public internal(set) var connection: ConnectionStatus
@@ -500,11 +501,23 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             log.debug("WS connected")
         }
 
-        while (!connected && !timeout) {
-            try await Task.sleep(nanoseconds: 100_000)
-        }
-        
-        if timeout {
+        do {
+            log.debug("Listening for WS connection")
+            _ = try await timers
+                .timer(for: 0.1)
+                .filter { [weak webSocketClient] _ in
+                    guard let webSocketClient else {
+                        return false
+                    }
+                    switch webSocketClient.connectionState {
+                    case .connected:
+                        return true
+                    default:
+                        return false
+                    }
+                }
+                .nextValue(timeout: 30)
+        } catch {
             log.debug("Timeout while waiting for WS connection opening")
             throw ClientError.NetworkError()
         }
@@ -554,18 +567,16 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         log.debug("Waiting for connection id")
 
-        while (loadConnectionIdFromHealthcheck() == nil && !timeout) {
-            try? await Task.sleep(nanoseconds: 100_000)
+        do {
+            return try await timers
+                .timer(for: 0.1)
+                .log(.debug) { _ in "Waiting for connection id" }
+                .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
+                .nextValue(timeout: 5)
+        } catch {
+            log.warning("Unable to load connectionId.")
+            return ""
         }
-        
-        control.cancel()
-        
-        if let connectionId = loadConnectionIdFromHealthcheck() {
-            log.debug("Connection id available from the WS")
-            return connectionId
-        }
-        
-        return ""
     }
     
     private func loadConnectionIdFromHealthcheck() -> String? {
