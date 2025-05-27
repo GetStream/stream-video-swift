@@ -36,7 +36,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             XCTAssert(error is ClientError.MissingPermissions)
         }
     }
-    
+
     func test_streamVideo_makeCall() {
         // Given
         let streamVideo = StreamVideo(
@@ -70,7 +70,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // Then
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
-        
+
         // When
         call.leave()
 
@@ -79,7 +79,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
     }
-    
+
     func test_streamVideo_ringCallAccept() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
@@ -96,7 +96,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
         XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
-        
+
         // When
         let callAcceptedEvent = CallAcceptedEvent(
             call: makeCallResponse(),
@@ -116,7 +116,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(streamVideo.state.ringingCall == nil)
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
     }
-    
+
     func test_streamVideo_ringCallReject() async throws {
         let httpClient = httpClientWithGetCallResponse()
         let rejectCallResponse = RejectCallResponse(duration: "1")
@@ -136,7 +136,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
         XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
-        
+
         // When
         try await call.reject()
         await fulfillment {
@@ -144,7 +144,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
                 && streamVideo.state.ringingCall == nil
         }
     }
-    
+
     func test_streamVideo_incomingCallAccept() async throws {
         // Given
         let streamVideo = StreamVideo.mock(httpClient: HTTPClient_Mock())
@@ -164,7 +164,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         let incomingCall = WrappedEvent.coordinatorEvent(.typeCallRingEvent(ringEvent))
         streamVideo.eventNotificationCenter.process(incomingCall)
         try await waitForCallEvent()
-        
+
         // Then
         XCTAssert(streamVideo.state.activeCall == nil)
         XCTAssert(streamVideo.state.ringingCall?.cId == call.cId)
@@ -180,7 +180,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssert(streamVideo.state.ringingCall == nil)
         XCTAssert(streamVideo.state.activeCall?.cId == call.cId)
     }
-    
+
     func test_streamVideo_incomingCallReject() async throws {
         // Given
         let httpClient = HTTPClient_Mock()
@@ -223,7 +223,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertNil(streamVideo.state.ringingCall)
         XCTAssertNil(streamVideo.state.activeCall)
     }
-    
+
     func test_streamVideo_initialState() {
         // Given
         let streamVideo = StreamVideo(
@@ -233,19 +233,150 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             videoConfig: .dummy(),
             tokenProvider: { _ in }
         )
-        
+
         // Then
         XCTAssert(streamVideo.state.user == StreamVideo.mockUser)
         XCTAssert(streamVideo.state.connection == .initialized)
     }
-    
+
+    // MARK: - Event Publisher & Subscribe Tests
+
+    func test_eventPublisher_filtersOnlyCoordinatorEvents() async {
+        // Given
+        let streamVideo = StreamVideo(
+            apiKey: "key1",
+            user: .anonymous,
+            token: StreamVideo.mockToken,
+            videoConfig: .dummy(),
+            tokenProvider: { _ in }
+        )
+        self.streamVideo = streamVideo
+        nonisolated(unsafe) var receivedEvents: [VideoEvent] = []
+
+        let cancellable = streamVideo.eventPublisher().sink {
+            receivedEvents.append($0)
+        }
+
+        // When
+        let coordinatorEvent = VideoEvent.typeCallAcceptedEvent(.dummy(callCid: "cid"))
+        let internalEvent = WrappedEvent.internalEvent(WSConnected())
+        streamVideo.eventNotificationCenter.process(.coordinatorEvent(coordinatorEvent))
+        streamVideo.eventNotificationCenter.process(internalEvent)
+        await fulfillment { receivedEvents.count == 1 }
+
+        // Then
+        XCTAssertEqual(receivedEvents.count, 1)
+        XCTAssertEqual(receivedEvents.first, coordinatorEvent)
+
+        cancellable.cancel()
+    }
+
+    func test_eventPublisherFor_specificEventType() async {
+        // Given
+        let streamVideo = StreamVideo(
+            apiKey: "key1",
+            user: .anonymous,
+            token: StreamVideo.mockToken,
+            videoConfig: .dummy(),
+            tokenProvider: { _ in }
+        )
+        self.streamVideo = streamVideo
+        nonisolated(unsafe) var receivedEvents: [CallAcceptedEvent] = []
+
+        let cancellable = streamVideo.eventPublisher(for: CallAcceptedEvent.self).sink {
+            receivedEvents.append($0)
+        }
+
+        // When
+        let event = CallAcceptedEvent.dummy()
+        streamVideo.eventNotificationCenter.process(
+            .coordinatorEvent(.typeCallAcceptedEvent(event))
+        )
+
+        await fulfillment { receivedEvents.count == 1 }
+
+        // Then
+        XCTAssertEqual(receivedEvents.count, 1)
+        XCTAssertEqual(receivedEvents.first, event)
+
+        cancellable.cancel()
+    }
+
+//
+    func test_subscribe_returnsAsyncStreamOfVideoEvents() async throws {
+        // Given
+        let streamVideo = StreamVideo(
+            apiKey: "key1",
+            user: .anonymous,
+            token: StreamVideo.mockToken,
+            videoConfig: .dummy(),
+            tokenProvider: { _ in }
+        )
+        self.streamVideo = streamVideo
+        let event = VideoEvent.typeCallAcceptedEvent(.dummy())
+        let expectation = expectation(description: "Received async event")
+
+        // When
+        Task {
+            await withThrowingTaskGroup { group in
+                group.addTask {
+                    for await value in streamVideo.subscribe() {
+                        XCTAssertEqual(value, event)
+                        expectation.fulfill()
+                    }
+                }
+                group.addTask {
+                    await self.wait(for: 0.5)
+                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                }
+            }
+        }
+
+        // Then
+        await fulfillment(of: [expectation], timeout: defaultTimeout)
+    }
+
+    func test_subscribeFor_specificEventType_returnsAsyncStream() async throws {
+        // Given
+        let streamVideo = StreamVideo(
+            apiKey: "key1",
+            user: .anonymous,
+            token: StreamVideo.mockToken,
+            videoConfig: .dummy(),
+            tokenProvider: { _ in }
+        )
+        self.streamVideo = streamVideo
+        let content = CallAcceptedEvent.dummy()
+        let event = VideoEvent.typeCallAcceptedEvent(content)
+        let expectation = expectation(description: "Received async event")
+
+        // When
+        Task {
+            await withThrowingTaskGroup { group in
+                group.addTask {
+                    for await value in streamVideo.subscribe(for: CallAcceptedEvent.self) {
+                        XCTAssertEqual(value, content)
+                        expectation.fulfill()
+                    }
+                }
+                group.addTask {
+                    await self.wait(for: 0.5)
+                    streamVideo.eventNotificationCenter.process(.coordinatorEvent(event))
+                }
+            }
+        }
+
+        // Then
+        await fulfillment(of: [expectation], timeout: defaultTimeout)
+    }
+
     // MARK: - private
-    
+
     private func makeCallResponse() -> CallResponse {
         let callResponse = MockResponseBuilder().makeCallResponse(cid: cId)
         return callResponse
     }
-    
+
     private func makeUserResponse() -> UserResponse {
         UserResponse(
             blockedUserIds: [],
@@ -258,7 +389,7 @@ final class StreamVideo_Tests: StreamVideoTestCase, @unchecked Sendable {
             updatedAt: Date()
         )
     }
-    
+
     private func httpClientWithGetCallResponse() -> HTTPClient_Mock {
         let httpClient = HTTPClient_Mock()
         let callResponse = makeCallResponse()
