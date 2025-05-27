@@ -13,6 +13,9 @@ import StreamWebRTC
 /// and maintains track state consistency.
 final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
 
+    @Injected(\.timers) private var timers
+    @Injected(\.screenProperties) private var screenProperties
+
     private enum DisposableKey: String { case timePublisher }
 
     private let store: PictureInPictureStore
@@ -70,9 +73,8 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
             self.activeTracksBeforePiP = activeTracksBeforePiP
         }
 
-        Timer
-            .publish(every: 0.1, on: .main, in: .default)
-            .autoconnect()
+        timers
+            .timer(for: screenProperties.refreshRate)
             .sink { [weak self] _ in self?.checkTracksState() }
             .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
 
