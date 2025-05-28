@@ -489,7 +489,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         functionName: StaticString = #function,
         fileName: StaticString = #fileID,
         lineNumber: UInt = #line,
-        _ operation: @escaping ParticipantOperation,
+        _ operation: @escaping ParticipantOperation
     ) {
         /// Retrieves the current participants.
         let current = participants
