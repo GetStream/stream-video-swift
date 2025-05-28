@@ -169,7 +169,9 @@ public extension ReflectiveStringConvertible {
     ///
     /// - Returns: A string representation of the object.
     var description: String {
-        #if ENABLE_REFLECTION
+        guard LogConfig.level == .debug else {
+            return "\(type(of: self))"
+        }
         let mirror = Mirror(reflecting: self)
         var output: [String] = ["Type: \(type(of: self))"]
 
@@ -190,8 +192,5 @@ public extension ReflectiveStringConvertible {
             }
 
         return output.joined(separator: separator)
-        #else
-        return "\(type(of: self))"
-        #endif
     }
 }
