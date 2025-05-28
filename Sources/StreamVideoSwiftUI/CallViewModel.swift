@@ -102,7 +102,11 @@ open class CallViewModel: ObservableObject {
     @Published public var moreControlsShown = false
 
     /// List of the outgoing call members.
-    @Published public var outgoingCallMembers = [Member]()
+    @Published public var outgoingCallMembers = [Member]() {
+        willSet {
+            _ = 0
+        }
+    }
 
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
@@ -169,9 +173,9 @@ open class CallViewModel: ObservableObject {
 
     private var lastLayoutChange = Date()
     private var enteringCallTask: Task<Void, Never>?
-    private var callEventsSubscriptionTask: Task<Void, Never>?
     private var participantsSortComparators = defaultSortPreset
     private let callEventsHandler = CallEventsHandler()
+    private let disposableBag = DisposableBag()
 
     /// The variable is `true` if CallSettings have been set on the CallViewModel instance (directly or indirectly).
     /// The variable will be reset to `false` when `leaveCall` will be invoked.
@@ -211,7 +215,7 @@ open class CallViewModel: ObservableObject {
 
     /// A simple value, signalling that the viewModel has been subscribed to receive callEvents from
     /// `StreamVideo`.
-    var isSubscribedToCallEvents: Bool { callEventsSubscriptionTask != nil }
+    private(set) var isSubscribedToCallEvents: Bool = false
 
     public init(
         participantsLayout: ParticipantsLayout = .grid,
@@ -232,7 +236,7 @@ open class CallViewModel: ObservableObject {
 
     deinit {
         enteringCallTask?.cancel()
-        callEventsSubscriptionTask?.cancel()
+        disposableBag.removeAll()
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
@@ -760,8 +764,10 @@ open class CallViewModel: ObservableObject {
     }
 
     private func subscribeToCallEvents() {
-        callEventsSubscriptionTask = Task {
-            for await event in streamVideo.subscribe() {
+        streamVideo
+            .eventPublisher()
+            .sink { [weak self] event in
+                guard let self else { return }
                 if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
                     switch callEvent {
                     case let .incoming(incomingCall):
@@ -796,12 +802,15 @@ open class CallViewModel: ObservableObject {
                         return
                     }
 
-                    self.participantEvent = participantEvent
-                    try? await Task.sleep(nanoseconds: 2_000_000_000)
-                    self.participantEvent = nil
+                    Task { @MainActor in
+                        self.participantEvent = participantEvent
+                        try? await Task.sleep(nanoseconds: 2_000_000_000)
+                        self.participantEvent = nil
+                    }
                 }
             }
-        }
+            .store(in: disposableBag)
+        isSubscribedToCallEvents = true
     }
 
     private func handleAcceptedEvent(_ callEvent: CallEvent) {
@@ -860,7 +869,13 @@ open class CallViewModel: ObservableObject {
                 return
             }
             let outgoingMembersCount = outgoingCallMembers.filter { $0.id != streamVideo.user.id }.count
-            let rejections = outgoingCall.state.session?.rejectedBy.count ?? 0
+            let rejections = {
+                if outgoingMembersCount == 1, event.user?.id != streamVideo.user.id {
+                    return 1
+                } else {
+                    return outgoingCall.state.session?.rejectedBy.count ?? 0
+                }
+            }()
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
                 Task {

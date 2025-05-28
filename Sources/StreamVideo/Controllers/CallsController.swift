@@ -31,10 +31,9 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     
     private let callsQuery: CallsQuery
     private let streamVideo: StreamVideo
-    
-    private var watchTask: Task<Void, Error>?
+
     private var socketDisconnected = false
-    private var cancellables = DisposableBag()
+    private var disposableBag = DisposableBag()
 
     init(streamVideo: StreamVideo, callsQuery: CallsQuery) {
         self.callsQuery = callsQuery
@@ -49,9 +48,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     }
     
     public func cleanUp() {
-        watchTask?.cancel()
-        watchTask = nil
-        cancellables.removeAll()
+        disposableBag.removeAll()
     }
     
     // MARK: - private
@@ -67,7 +64,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
                 self.reWatchCalls()
             }
         }
-        .store(in: cancellables)
+        .store(in: disposableBag)
     }
     
     private func loadCalls(shouldRefresh: Bool = false) async throws {
@@ -190,11 +187,10 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     }
     
     private func subscribeToWatchEvents() {
-        watchTask = Task {
-            for await event in streamVideo.subscribe() {
-                handle(event: event)
-            }
-        }
+        streamVideo
+            .eventPublisher()
+            .sink { [weak self] in self?.handle(event: $0) }
+            .store(in: disposableBag)
     }
     
     deinit {
