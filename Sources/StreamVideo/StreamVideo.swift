@@ -17,6 +17,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     @Injected(\.callCache) private var callCache
     @Injected(\.timers) private var timers
 
+    private enum DisposableKey: String { case ringEventReceived }
+
     public final class State: ObservableObject, @unchecked Sendable {
         @Published public internal(set) var connection: ConnectionStatus
         @Published public internal(set) var user: User
@@ -62,6 +64,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// A protocol that provides a method to determine the rejection reason for a call.
     public lazy var rejectionReasonProvider: RejectionReasonProviding = StreamRejectionReasonProvider(self)
 
+    private let eventSubject: PassthroughSubject<WrappedEvent, Never> = .init()
+
     var token: UserToken
 
     private var tokenProvider: UserTokenProvider
@@ -78,7 +82,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
-    private var eventHandlers = [EventHandler]()
+    private let disposableBag = DisposableBag()
 
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -216,6 +220,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         if autoConnectOnInit {
             initialConnectIfRequired(apiKey: apiKey)
         }
+
+        observeCallRingEvents()
     }
 
     deinit {
@@ -314,9 +320,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        eventHandlers.forEach { $0.cancel() }
-        eventHandlers.removeAll()
-
         await withCheckedContinuation { [webSocketClient] continuation in
             if let webSocketClient = webSocketClient {
                 webSocketClient.disconnect {
@@ -327,35 +330,50 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             }
         }
     }
-    
+
+    /// Publishes all received video events coming from the coordinator.
+    ///
+    /// Use this method to observe all incoming `VideoEvent`s regardless of
+    /// specific type. Events are filtered to only include those classified as
+    /// `coordinatorEvent` cases.
+    ///
+    /// - Returns: A publisher emitting `VideoEvent` instances.
+    public func eventPublisher() -> AnyPublisher<VideoEvent, Never> {
+        eventSubject
+            .compactMap {
+                guard case let .coordinatorEvent(event) = $0 else {
+                    return nil
+                }
+                return event
+            }
+            .eraseToAnyPublisher()
+    }
+
+    /// Publishes specific typed WebSocket events.
+    ///
+    /// Use this method to subscribe only to a specific type of event emitted by
+    /// the coordinator. The `WSEvent` must conform to `Event`.
+    ///
+    /// - Parameter event: The type of WebSocket event to observe.
+    /// - Returns: A publisher emitting events of the specified `WSEvent` type.
+    public func eventPublisher<WSEvent: Event>(
+        for event: WSEvent.Type
+    ) -> AnyPublisher<WSEvent, Never> {
+        eventSubject
+            .compactMap { $0.unwrap()?.rawValue as? WSEvent }
+            .eraseToAnyPublisher()
+    }
+
     /// Subscribes to all video events.
     /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
-        AsyncStream(VideoEvent.self) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard case let .coordinatorEvent(event) = event else {
-                    return
-                }
-                continuation.yield(event)
-            }, cancel: { continuation.finish() })
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventPublisher().eraseAsAsyncStream()
     }
 
     /// Subscribes to a particular WS event.
     /// - Returns: `AsyncStream` of the requested WS event.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
-        AsyncStream(event) { [weak self] continuation in
-            let eventHandler = EventHandler(handler: { event in
-                guard let coordinatorEvent = event.unwrap() else {
-                    return
-                }
-                if let event = coordinatorEvent.unwrap() as? WSEvent {
-                    continuation.yield(event)
-                }
-            }, cancel: { continuation.finish() })
-            self?.eventHandlers.append(eventHandler)
-        }
+        eventPublisher(for: event).eraseAsAsyncStream()
     }
     
     public func queryCalls(
@@ -489,17 +507,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         } else {
             throw ClientError.Unknown()
         }
-        var connected = false
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 30, queue: .sdk) {
-            timeout = true
-        }
-        log.debug("Listening for WS connection")
-        webSocketClient?.onConnected = {
-            control.cancel()
-            connected = true
-            log.debug("WS connected")
-        }
 
         do {
             log.debug("Listening for WS connection")
@@ -560,12 +567,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             || webSocketClient?.connectionState == .authenticating else {
             return ""
         }
-        
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 5, queue: .sdk) {
-            timeout = true
-        }
-        log.debug("Waiting for connection id")
 
         do {
             return try await timers
@@ -744,24 +745,55 @@ extension StreamVideo: ConnectionStateDelegate {
                     connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
                 }
             }
-            eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected())) }
+            eventSubject.send(.internalEvent(WSDisconnected()))
         case .connected(healthCheckInfo: _):
-            eventHandlers.forEach { $0.handler(.internalEvent(WSConnected())) }
+            eventSubject.send(.internalEvent(WSConnected()))
         default:
             log.debug("Web socket connection state update \(state)")
         }
+    }
+
+    /// Observes incoming call ring events from the coordinator.
+    ///
+    /// This method subscribes to `typeCallRingEvent` messages from the internal
+    /// event stream. When such an event is received, it attempts to retrieve or
+    /// create a `Call` object matching the event's call ID and type. Once the
+    /// call is found, it updates the call's state with the event data and sets it
+    /// as the current `ringingCall`.
+    ///
+    /// The resulting subscription is stored in `disposableBag` under a specific
+    /// key to allow later cancellation or cleanup.
+    private func observeCallRingEvents() {
+        eventSubject
+            .eraseToAnyPublisher()
+            .compactMap { (source: WrappedEvent) -> CallRingEvent? in
+                guard
+                    case let .typeCallRingEvent(event) = source.unwrap()
+                else {
+                    return nil
+                }
+                return event
+            }
+            .compactMap { [weak self] (source: CallRingEvent) -> (event: CallRingEvent, call: Call)? in
+                guard let call = self?.call(callType: source.call.type, callId: source.call.id) else {
+                    return nil
+                }
+                return (event: source, call: call)
+            }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
+                $0.call.state.update(from: $0.event)
+                self.state.ringingCall = $0.call
+            }
+            .store(in: disposableBag, key: DisposableKey.ringEventReceived.rawValue)
     }
 }
 
 extension StreamVideo: WSEventsSubscriber {
     
-    func onEvent(_ event: WrappedEvent) {
-        for eventHandler in eventHandlers {
-            eventHandler.handler(event)
-        }
-        Task { @MainActor [weak self] in
-            self?.checkRingEvent(event)
-        }
+    func onEvent(_ event: WrappedEvent) async {
+        eventSubject.send(event)
+        checkRingEvent(event)
     }
 
     private func checkRingEvent(_ event: WrappedEvent) {
