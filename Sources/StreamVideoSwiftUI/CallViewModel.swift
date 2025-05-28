@@ -15,6 +15,7 @@ open class CallViewModel: ObservableObject {
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
     @Injected(\.applicationStateAdapter) var applicationStateAdapter
+    @Injected(\.timers) var timers
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -168,7 +169,7 @@ open class CallViewModel: ObservableObject {
     private var callSettingsUpdates: AnyCancellable?
     private var applicationLifecycleUpdates: AnyCancellable?
 
-    private var ringingTimer: Foundation.Timer?
+    private var ringingCancellable: AnyCancellable?
     private var lastScreenSharingParticipant: CallParticipant?
 
     private var lastLayoutChange = Date()
@@ -245,7 +246,8 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedVideoState(!callSettings.videoOn)
             return
         }
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 try await call.camera.toggle()
                 localCallSettingsChange = true
@@ -261,7 +263,8 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedAudioState(!callSettings.audioOn)
             return
         }
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 try await call.microphone.toggle()
                 localCallSettingsChange = true
@@ -277,7 +280,8 @@ open class CallViewModel: ObservableObject {
             self.callSettings = callSettings.withUpdatedCameraPosition(callSettings.cameraPosition.next())
             return
         }
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 try await call.camera.flip()
                 localCallSettingsChange = true
@@ -293,7 +297,8 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedAudioOutputState(!callSettings.audioOutputOn)
             return
         }
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 if callSettings.audioOutputOn {
                     try await call.speaker.disableAudioOutput()
@@ -313,7 +318,8 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedSpeakerState(!callSettings.speakerOn)
             return
         }
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 try await call.speaker.toggleSpeakerPhone()
                 localCallSettingsChange = true
@@ -373,7 +379,8 @@ open class CallViewModel: ObservableObject {
                 callSettings: callSettings
             )
             self.call = call
-            Task {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
                 do {
                     let callData = try await call.create(
                         members: membersRequest,
@@ -428,7 +435,8 @@ open class CallViewModel: ObservableObject {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
         setCallingState(.lobby(lobbyInfo))
         if !localCallSettingsChange {
-            Task {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
                 do {
                     let call = streamVideo.call(callType: callType, callId: callId)
                     let info = try await call.get()
@@ -449,7 +457,8 @@ open class CallViewModel: ObservableObject {
         callId: String,
         customData: [String: RawJSON]? = nil
     ) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             let call = streamVideo.call(callType: callType, callId: callId)
             do {
                 hasAcceptedCall = true
@@ -478,7 +487,8 @@ open class CallViewModel: ObservableObject {
         callType: String,
         callId: String
     ) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             let call = streamVideo.call(callType: callType, callId: callId)
             let rejectionReason = await streamVideo
                 .rejectionReasonProvider
@@ -501,7 +511,8 @@ open class CallViewModel: ObservableObject {
     ///  - participant: the participant whose track visibility would be changed.
     ///  - isVisible: whether the track should be visible.
     public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             await call?.changeTrackVisibility(for: participant, isVisible: isVisible)
         }
     }
@@ -511,14 +522,16 @@ open class CallViewModel: ObservableObject {
     ///  - trackSize: the size of the track.
     ///  - participant: the call participant.
     public func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             log.debug("Updating track size for participant \(participant.name) to \(trackSize)")
             await call?.updateTrackSize(trackSize, for: participant)
         }
     }
 
     public func startScreensharing(type: ScreensharingType) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 await disablePictureInPictureIfRequired(type)
                 try await call?.startScreensharing(type: type)
@@ -529,7 +542,8 @@ open class CallViewModel: ObservableObject {
     }
 
     public func stopScreensharing() {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 try await call?.stopScreensharing()
             } catch {
@@ -654,7 +668,8 @@ open class CallViewModel: ObservableObject {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
-        enteringCallTask = Task {
+        enteringCallTask = Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 log.debug("Starting call")
                 let call = call ?? streamVideo.call(
@@ -693,7 +708,9 @@ open class CallViewModel: ObservableObject {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 setCallingState(.idle)
-                Task { await audioRecorder.stopRecording() }
+                Task(disposableBag: disposableBag) { [weak self] in
+                    await self?.audioRecorder.stopRecording()
+                }
                 enteringCallTask = nil
             }
         }
@@ -711,22 +728,20 @@ open class CallViewModel: ObservableObject {
 
     private func handleRingingEvents() {
         if callingState != .outgoing {
-            ringingTimer?.invalidate()
+            ringingCancellable?.cancel()
+            ringingCancellable = nil
         }
     }
 
     private func startTimer(timeout: TimeInterval) {
-        ringingTimer = Foundation.Timer.scheduledTimer(
-            withTimeInterval: timeout,
-            repeats: false,
-            block: { [weak self] _ in
-                Task { @MainActor [weak self] in
-                    guard let self = self else { return }
-                    log.debug("Detected ringing timeout, hanging up...")
-                    handleCallHangUp(ringTimeout: true)
-                }
+        ringingCancellable = timers
+            .timer(for: timeout)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                log.debug("Detected ringing timeout, hanging up...")
+                handleCallHangUp(ringTimeout: true)
             }
-        )
     }
 
     private func handleCallHangUp(ringTimeout: Bool = false) {
@@ -738,7 +753,8 @@ open class CallViewModel: ObservableObject {
             return
         }
 
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 let rejectionReason = await streamVideo
                     .rejectionReasonProvider
@@ -799,10 +815,10 @@ open class CallViewModel: ObservableObject {
                         return
                     }
 
-                    Task { @MainActor in
-                        self.participantEvent = participantEvent
+                    Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                        self?.participantEvent = participantEvent
                         try? await Task.sleep(nanoseconds: 2_000_000_000)
-                        self.participantEvent = nil
+                        self?.participantEvent = nil
                     }
                 }
             }
@@ -875,9 +891,9 @@ open class CallViewModel: ObservableObject {
             }()
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
-                Task {
+                Task(disposableBag: disposableBag) { [weak self] in
                     _ = try? await outgoingCall.reject()
-                    leaveCall()
+                    self?.leaveCall()
                 }
             }
         default:

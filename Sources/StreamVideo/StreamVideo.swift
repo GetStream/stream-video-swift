@@ -478,6 +478,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     log.error(error)
                 }
             }
+
+            connectTask = nil
         }
     }
 

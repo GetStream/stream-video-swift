@@ -82,9 +82,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
-    private let executor: DispatchQueueExecutor
 
-    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+    private let processingQueue = SerialActorQueue()
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -107,7 +106,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
     ) {
-        self.executor = .init()
         self.user = user
         self.apiKey = apiKey
         self.callCid = callCid
@@ -474,7 +472,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         lineNumber: UInt = #line
     ) {
         /// Creates a new asynchronous task for the operation.
-        Task(disposableBag: disposableBag) { [weak self] in
+        processingQueue.async { [weak self] in
             guard let self else {
                 return
             }

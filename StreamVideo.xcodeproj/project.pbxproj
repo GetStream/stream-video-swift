@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40013DDB2B87AA2300915453 /* SerialActor.swift */; };
 		40034C202CFDABE600A318B1 /* PublishOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C1F2CFDABE600A318B1 /* PublishOptions.swift */; };
 		40034C262CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */; };
 		40034C282CFE156800A318B1 /* CallKitAvailabilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */; };
@@ -142,7 +141,6 @@
 		4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */; };
 		4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4035913B2BC53D2A00B5B767 /* Accelerate.framework */; };
 		4035AD732DE640F300F56FAB /* Task+DisposableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4035AD722DE640F300F56FAB /* Task+DisposableBag.swift */; };
-		4035AD752DE651A900F56FAB /* DispatchQueueExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4035AD742DE651A900F56FAB /* DispatchQueueExecutor.swift */; };
 		403793C52D35196600C752DF /* StreamAppStateAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C0B2D14B75B002C4EAB /* StreamAppStateAdapter.swift */; };
 		403793C72D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */; };
 		403793C92D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */; };
@@ -405,7 +403,6 @@
 		409D2A532D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */; };
-		40A0E9642B88DE830089E8D3 /* SerialActor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */; };
 		40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */; };
 		40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */; };
 		40A941702B4D96E6006D6965 /* PictureInPictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416F2B4D96E6006D6965 /* PictureInPictureController.swift */; };
@@ -1609,7 +1606,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		40013DDB2B87AA2300915453 /* SerialActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor.swift; sourceTree = "<group>"; };
 		40034C1F2CFDABE600A318B1 /* PublishOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishOptions.swift; sourceTree = "<group>"; };
 		40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAvailabilityPolicyProtocol.swift; sourceTree = "<group>"; };
 		40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAvailabilityPolicy.swift; sourceTree = "<group>"; };
@@ -1700,7 +1696,6 @@
 		4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamActiveCallProvider.swift; sourceTree = "<group>"; };
 		4035913B2BC53D2A00B5B767 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		4035AD722DE640F300F56FAB /* Task+DisposableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+DisposableBag.swift"; sourceTree = "<group>"; };
-		4035AD742DE651A900F56FAB /* DispatchQueueExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchQueueExecutor.swift; sourceTree = "<group>"; };
 		403793C62D3670BC00C752DF /* ApplicationLifecycleVideoMuteAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter.swift; sourceTree = "<group>"; };
 		403793C82D367F6300C752DF /* ApplicationLifecycleVideoMuteAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationLifecycleVideoMuteAdapter_Tests.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
@@ -1912,7 +1907,6 @@
 		409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBroadcastMoreControlsListButtonView.swift; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
 		40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIInterfaceOrientation+CGOrientation.swift"; sourceTree = "<group>"; };
-		40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor_Tests.swift; sourceTree = "<group>"; };
 		40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIImage_Resize_Tests.swift; sourceTree = "<group>"; };
 		40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapter.swift; sourceTree = "<group>"; };
 		40A9416F2B4D96E6006D6965 /* PictureInPictureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureController.swift; sourceTree = "<group>"; };
@@ -2981,7 +2975,6 @@
 		400C9FC22D9D0BC900DB26DC /* SerialActor */ = {
 			isa = PBXGroup;
 			children = (
-				40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */,
 				400C9FC32D9D0BDA00DB26DC /* SerialActorQueue_Tests.swift */,
 			);
 			path = SerialActor;
@@ -3202,14 +3195,12 @@
 			path = Mocks;
 			sourceTree = "<group>";
 		};
-		402D0E862D0C914F00E9B83F /* SerialActor */ = {
+		402D0E862D0C914F00E9B83F /* SerialActorQueue */ = {
 			isa = PBXGroup;
 			children = (
-				4035AD742DE651A900F56FAB /* DispatchQueueExecutor.swift */,
 				402D0E842D0C914900E9B83F /* SerialActorQueue.swift */,
-				40013DDB2B87AA2300915453 /* SerialActor.swift */,
 			);
-			path = SerialActor;
+			path = SerialActorQueue;
 			sourceTree = "<group>";
 		};
 		402F04A52B70ED8600CA1986 /* Statistics */ = {
@@ -5839,7 +5830,7 @@
 				401C1EE92D4900BA00304609 /* ClosedCaptionsAdapter */,
 				401C1EDF2D48EB9800304609 /* OrderedCapacityQueue */,
 				40B48C0A2D14B707002C4EAB /* StreamAppStateAdapter */,
-				402D0E862D0C914F00E9B83F /* SerialActor */,
+				402D0E862D0C914F00E9B83F /* SerialActorQueue */,
 				40034C2F2CFE168900A318B1 /* LocaleProvider */,
 				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				84A7E183288362DF00526C98 /* Atomic.swift */,
@@ -7425,7 +7416,6 @@
 				84DCA2232A39E432000C3411 /* AuthMiddlewares.swift in Sources */,
 				40034C202CFDABE600A318B1 /* PublishOptions.swift in Sources */,
 				84DC389329ADFCFD00946713 /* ScreensharingSettingsRequest.swift in Sources */,
-				40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */,
 				84EBA4A22A72B81100577297 /* BroadcastBufferConnection.swift in Sources */,
 				40FB150A2BF74C1300D5E580 /* CallCache.swift in Sources */,
 				40FB02012BAC8A4A00A1C206 /* CallKitService.swift in Sources */,
@@ -7717,7 +7707,6 @@
 				84DC38BF29ADFCFD00946713 /* ScreensharingSettings.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
-				4035AD752DE651A900F56FAB /* DispatchQueueExecutor.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				40BBC4CE2C639054002AEF92 /* WebRTCCoordinator+Error.swift in Sources */,
@@ -7924,7 +7913,6 @@
 				403FB1492BFDF3950047A696 /* CallCache_Tests.swift in Sources */,
 				40AB34BA2C5D2F6200B5B6B3 /* Task_TimeoutTests.swift in Sources */,
 				40AAD1972D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift in Sources */,
-				40A0E9642B88DE830089E8D3 /* SerialActor_Tests.swift in Sources */,
 				40802AEB2DD2A92E00B9F970 /* MockAVAudioSession.swift in Sources */,
 				40F017692BBEF1DA00E89FD1 /* EgressHLSResponse+Dummy.swift in Sources */,
 				40382F3F2C89C14300C2D00F /* RTCMediaStreamTrack+dummy.swift in Sources */,

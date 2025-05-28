@@ -59,7 +59,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     ///   - sampleRate: The sample rate in Hz.
     ///   - channels: The number of audio channels.
     public func initialize(sampleRate: Int, channels: Int) {
-        serialQueue.async { [weak self] in
+        serialQueue.async { @MainActor [weak self] in
             guard let self, !isActive else { return }
             self.initializeClosure(sampleRate, channels)
             self.isActive = true

@@ -80,9 +80,4 @@ extension AnyCancellable {
 extension Task {
     
     func eraseToAnyCancellable() -> AnyCancellable { .init(cancel) }
-
-//    public func store(
-//        in disposableBag: DisposableBag,
-//        key: String = UUID().uuidString
-//    ) { disposableBag.insert(.init(cancel), with: key) }
 }
