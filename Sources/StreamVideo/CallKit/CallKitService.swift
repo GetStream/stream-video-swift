@@ -16,8 +16,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     @Injected(\.timers) private var timers
     private let disposableBag = DisposableBag()
 
-    private let disposableBag = DisposableBag()
-
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
         var call: Call

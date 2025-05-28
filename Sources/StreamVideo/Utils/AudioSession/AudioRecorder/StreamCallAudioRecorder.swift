@@ -26,9 +26,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         _isRecordingSubject.eraseToAnyPublisher()
     }
 
-    /// A private task responsible for setting up the recorder in the background.
-    private var setUpTask: Task<Void, Error>?
-
     private var hasActiveCallCancellable: AnyCancellable?
 
     /// A cancellable used to schedule the update of audio meters.
@@ -82,8 +79,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     deinit {
         removeRecodingFile()
-        setUpTask?.cancel()
-        setUpTask = nil
         hasActiveCallCancellable?.cancel()
         hasActiveCallCancellable = nil
     }
@@ -145,7 +140,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             guard
                 let self,
                 isRecording,
-                let audioRecorder = await audioRecorderBuilder.result
+                let audioRecorder = audioRecorderBuilder.result
             else {
                 return
             }
@@ -182,14 +177,11 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     }
 
     private func setUp() {
-        setUpTask?.cancel()
-        setUpTask = Task(disposableBag: disposableBag) { [weak self] in
-            do {
-                try await self?.audioRecorderBuilder.build()
-            } catch {
-                if type(of: error) != CancellationError.self {
-                    log.error("🎙️Failed to create AVAudioRecorder.", error: error)
-                }
+        do {
+            try audioRecorderBuilder.build()
+        } catch {
+            if type(of: error) != CancellationError.self {
+                log.error("🎙️Failed to create AVAudioRecorder.", error: error)
             }
         }
 
@@ -208,7 +200,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         }
 
         guard
-            let audioRecorder = await audioRecorderBuilder.result
+            let audioRecorder = audioRecorderBuilder.result
         else {
             throw ClientError("🎙️Unable to fetch AVAudioRecorder instance.")
         }

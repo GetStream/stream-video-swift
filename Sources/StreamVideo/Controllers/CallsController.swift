@@ -140,7 +140,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
         guard let callEvent = event.rawValue as? WSCallEvent else { return }
         for (index, call) in calls.enumerated() {
             if call.cId == callEvent.callCid {
-                executeOnMain { [weak self] in
+                Task(disposableBag: disposableBag) { @MainActor [weak self] in
                     call.state.updateState(from: event)
                     self?.calls[index] = call
                 }
@@ -152,7 +152,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
                 callType: callCreated.call.type,
                 callId: callCreated.call.id
             )
-            executeOnMain { [weak self] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 call.state.update(from: callCreated)
                 self?.calls.insert(call, at: 0)
             }
@@ -164,7 +164,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
             callType: callResponse.call.type,
             callId: callResponse.call.id
         )
-        executeOnMain {
+        Task(disposableBag: disposableBag) { @MainActor in
             call.state.update(from: callResponse)
         }
         return call

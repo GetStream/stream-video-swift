@@ -163,9 +163,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
         self.sfuAdapter = value
-        Task(disposableBag: disposableBag) { [weak value, weak self] in
-            await self?.statsReporter?.set(sfuAdapter: value)
-        }
+        statsReporter?.sfuAdapter = value
     }
 
     /// Sets the number of participants in the call.

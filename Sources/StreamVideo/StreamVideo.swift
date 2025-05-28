@@ -84,7 +84,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
-    private let disposableBag = DisposableBag()
 
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -814,7 +813,7 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            executeOnMain { [weak self, call] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
                 guard let self else { return }
                 call.state.update(from: ringEvent)
                 self.state.ringingCall = call

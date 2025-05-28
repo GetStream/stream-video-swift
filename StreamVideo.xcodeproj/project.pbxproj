@@ -60,11 +60,9 @@
 		401C1EDA2D48DCF300304609 /* DemoTranscriptionAndClosedCaptionsButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1ED92D48DCF300304609 /* DemoTranscriptionAndClosedCaptionsButtonView.swift */; };
 		401C1EDB2D48DCF300304609 /* DemoTranscriptionAndClosedCaptionsButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1ED92D48DCF300304609 /* DemoTranscriptionAndClosedCaptionsButtonView.swift */; };
 		401C1EE12D48EB9F00304609 /* OrderedCapacityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EE02D48EB9F00304609 /* OrderedCapacityQueue.swift */; };
-		401C1EE52D48F09F00304609 /* AsyncStreamPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EE42D48F09F00304609 /* AsyncStreamPublisher.swift */; };
 		401C1EE72D48F20F00304609 /* DemoClosedCaptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EE62D48F20F00304609 /* DemoClosedCaptionsView.swift */; };
 		401C1EE82D48F20F00304609 /* DemoClosedCaptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EE62D48F20F00304609 /* DemoClosedCaptionsView.swift */; };
 		401C1EEB2D4900C500304609 /* ClosedCaptionsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EEA2D4900C500304609 /* ClosedCaptionsAdapter.swift */; };
-		401C1EEE2D493BE700304609 /* AsyncStreamPublisherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EED2D493BE700304609 /* AsyncStreamPublisherTests.swift */; };
 		401C1EF02D493DCA00304609 /* OrderedCapacityQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */; };
 		401C1EF22D4945BE00304609 /* ClosedCaptionsAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */; };
 		401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */; };
@@ -1656,10 +1654,8 @@
 		401BEC502AE17F2900EEEAC5 /* SpotlightSpeakerView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightSpeakerView_Tests.swift; sourceTree = "<group>"; };
 		401C1ED92D48DCF300304609 /* DemoTranscriptionAndClosedCaptionsButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTranscriptionAndClosedCaptionsButtonView.swift; sourceTree = "<group>"; };
 		401C1EE02D48EB9F00304609 /* OrderedCapacityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderedCapacityQueue.swift; sourceTree = "<group>"; };
-		401C1EE42D48F09F00304609 /* AsyncStreamPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncStreamPublisher.swift; sourceTree = "<group>"; };
 		401C1EE62D48F20F00304609 /* DemoClosedCaptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoClosedCaptionsView.swift; sourceTree = "<group>"; };
 		401C1EEA2D4900C500304609 /* ClosedCaptionsAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedCaptionsAdapter.swift; sourceTree = "<group>"; };
-		401C1EED2D493BE700304609 /* AsyncStreamPublisherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncStreamPublisherTests.swift; sourceTree = "<group>"; };
 		401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderedCapacityQueueTests.swift; sourceTree = "<group>"; };
 		401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedCaptionsAdapterTests.swift; sourceTree = "<group>"; };
 		401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier.swift; sourceTree = "<group>"; };
@@ -3079,14 +3075,6 @@
 				401C1EE62D48F20F00304609 /* DemoClosedCaptionsView.swift */,
 			);
 			path = ClosedCaptionsView;
-			sourceTree = "<group>";
-		};
-		401C1EE32D48F09100304609 /* AyncStreamPublisher */ = {
-			isa = PBXGroup;
-			children = (
-				401C1EE42D48F09F00304609 /* AsyncStreamPublisher.swift */,
-			);
-			path = AyncStreamPublisher;
 			sourceTree = "<group>";
 		};
 		401C1EE92D4900BA00304609 /* ClosedCaptionsAdapter */ = {
@@ -5348,7 +5336,6 @@
 				400C9FC22D9D0BC900DB26DC /* SerialActor */,
 				401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */,
 				401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */,
-				401C1EED2D493BE700304609 /* AsyncStreamPublisherTests.swift */,
 				4067F31A2CDA55D1002E28BD /* AudioSession */,
 				40E18AB02CD51FB900A65C9F /* Queues */,
 				4029E9562CB943E800E1D571 /* CollectionDelayedUpdateObserver_Tests.swift */,
@@ -5850,7 +5837,6 @@
 				40ADB85D2D65DFB000B06AAF /* CustomStringInterpolation */,
 				40E741FD2D553AB40044C955 /* CurrentDevice */,
 				401C1EE92D4900BA00304609 /* ClosedCaptionsAdapter */,
-				401C1EE32D48F09100304609 /* AyncStreamPublisher */,
 				401C1EDF2D48EB9800304609 /* OrderedCapacityQueue */,
 				40B48C0A2D14B707002C4EAB /* StreamAppStateAdapter */,
 				402D0E862D0C914F00E9B83F /* SerialActor */,
@@ -7750,7 +7736,6 @@
 				842B8E272A2DFED900863A87 /* CallSessionEndedEvent.swift in Sources */,
 				844982482C738A830029734D /* DeleteCallResponse.swift in Sources */,
 				84DC38CF29ADFCFD00946713 /* QueryCallsRequest.swift in Sources */,
-				401C1EE52D48F09F00304609 /* AsyncStreamPublisher.swift in Sources */,
 				40BBC4D82C639740002AEF92 /* WebRTCJoinRequestFactory.swift in Sources */,
 				40E363402D09F0950028C52A /* Comparable+Clamped.swift in Sources */,
 				84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */,
@@ -7977,7 +7962,6 @@
 				409AF6EC2DAFE31900EE7BF6 /* XCTestCase+Wait.swift in Sources */,
 				40AB34BC2C5D30AD00B5B6B3 /* URLSessionConfiguration_WaitsForConnectivityTests.swift in Sources */,
 				40F101792D5CBA2D00C49481 /* XCTAsyncUnwrap.swift in Sources */,
-				401C1EEE2D493BE700304609 /* AsyncStreamPublisherTests.swift in Sources */,
 				40C4DF502C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift in Sources */,
 				4013387C2BF248E9007318BD /* Mockable.swift in Sources */,
 				406B3C512C91F8C000FC93A1 /* MockWebRTCAuthenticator.swift in Sources */,

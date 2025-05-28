@@ -13,7 +13,7 @@ import Foundation
 /// This class manages the periodic collection of statistics from WebRTC peer connections
 /// and sends these statistics to an SFU (Selective Forwarding Unit) adapter.
 ///
-actor WebRTCStatsReporter: @unchecked Sendable {
+final class WebRTCStatsReporter: @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
     @Injected(\.timers) private var timers
@@ -53,12 +53,10 @@ actor WebRTCStatsReporter: @unchecked Sendable {
     private let latestReportSubject = CurrentValueSubject<CallStatsReport?, Never>(nil)
 
     private let disposableBag = DisposableBag()
-
-    private let executor: DispatchQueueExecutor
-    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+    private let processingQueue = SerialActorQueue()
 
     /// A publisher for the latest statistics report.
-    nonisolated var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
+    var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
         latestReportSubject
             .compactMap { $0 }
             .eraseToAnyPublisher()
@@ -76,7 +74,6 @@ actor WebRTCStatsReporter: @unchecked Sendable {
         deliveryInterval: TimeInterval = 5,
         sessionID: String
     ) {
-        self.executor = .init()
         self.collectionInterval = collectionInterval
         self.deliveryInterval = deliveryInterval
         self.sessionID = sessionID
@@ -90,26 +87,6 @@ actor WebRTCStatsReporter: @unchecked Sendable {
         disposableBag.removeAll()
     }
 
-    func set(deliveryInterval: TimeInterval) {
-        self.deliveryInterval = deliveryInterval
-    }
-
-    func set(sfuAdapter: SFUAdapter?) {
-        self.sfuAdapter = sfuAdapter
-    }
-
-    func configure(
-        deliveryInterval: TimeInterval,
-        publisher: RTCPeerConnectionCoordinator?,
-        subscriber: RTCPeerConnectionCoordinator?,
-        sfuAdapter: SFUAdapter?
-    ) {
-        self.deliveryInterval = deliveryInterval
-        self.publisher = publisher
-        self.subscriber = subscriber
-        self.sfuAdapter = sfuAdapter
-    }
-
     // MARK: - Private helpers
 
     /// Updates the reporter's state when a new SFU adapter is set.
@@ -117,10 +94,9 @@ actor WebRTCStatsReporter: @unchecked Sendable {
     /// This method cancels any existing tasks and subscriptions, and sets up new ones if an adapter
     /// is provided.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
-        activeDeliveryTask?.cancel()
         deliveryCancellable?.cancel()
-        activeCollectionTask?.cancel()
         collectionCancellable?.cancel()
+        disposableBag.removeAll()
 
         guard sfuAdapter != nil else {
             return
@@ -144,7 +120,7 @@ actor WebRTCStatsReporter: @unchecked Sendable {
         collectionCancellable = timers
             .timer(for: interval)
             .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.collectStats() }
+            .sinkTask(queue: processingQueue) { [weak self] _ in await self?.collectStats() }
 
         log.debug(
             "Stats collection is now scheduled with interval:\(interval).",
@@ -163,10 +139,10 @@ actor WebRTCStatsReporter: @unchecked Sendable {
         deliveryCancellable = timers
             .timer(for: interval)
             .compactMap { [weak self] _ in self?.latestReportSubject.value }
-//            .log(.debug, subsystems: .webRTC) { [weak self] in
-//                "Will deliver stats report (timestamp:\($0.timestamp)) on \(self?.sfuAdapter?.hostname ?? "-")."
-//            }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.deliverStats(report: $0) }
+            .log(.debug, subsystems: .webRTC) { [weak self] in
+                "Will deliver stats report (timestamp:\($0.timestamp)) on \(self?.sfuAdapter?.hostname ?? "-")."
+            }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.deliverStats(report: $0) }
     }
 
     /// Collects statistics from the publisher and subscriber peer connections.
@@ -211,5 +187,3 @@ actor WebRTCStatsReporter: @unchecked Sendable {
         }
     }
 }
-
-extension StreamRTCStatisticsReport: @unchecked Sendable {}
