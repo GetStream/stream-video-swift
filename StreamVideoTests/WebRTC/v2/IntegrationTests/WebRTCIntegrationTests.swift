@@ -89,6 +89,7 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
                         }
                     ]
                 ),
+                .buildDefault(delay: 0.5) {}, // Wait for the stage transition to complete
                 .concurrent(
                     [
                         .init {
