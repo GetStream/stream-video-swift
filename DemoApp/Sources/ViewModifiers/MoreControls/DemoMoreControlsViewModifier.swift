@@ -10,7 +10,7 @@ import SwiftUI
 struct DemoMoreControlsViewModifier: ViewModifier {
 
     @ObservedObject var appState: AppState = .shared
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @Injected(\.snapshotTrigger) var snapshotTrigger
     @Injected(\.appearance) var appearance
     @Injected(\.localParticipantSnapshotViewModel) var localParticipantSnapshotViewModel
@@ -24,7 +24,7 @@ struct DemoMoreControlsViewModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .halfSheet(isPresented: $viewModel.moreControlsShown) {
+            .halfSheet(isPresented: .init(get: { viewModel.moreControlsShown }, set: { viewModel.moreControlsShown = $0 })) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: {
                         if #available(iOS 15.0, *) { return 8 }
@@ -41,15 +41,20 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                         VStack {
                             DemoNoiseCancellationButtonView(viewModel: viewModel)
 
-                            DemoMoreControlListButtonView(
-                                action: { viewModel.toggleSpeaker() },
-                                label: viewModel.callSettings.speakerOn ? "Disable Speaker" : "Speaker"
-                            ) {
-                                Image(
-                                    systemName: viewModel.callSettings.speakerOn
-                                        ? "speaker.wave.3.fill"
-                                        : "speaker.fill"
-                                )
+                            PublisherSubscriptionView(
+                                initial: viewModel.callSettings.speakerOn,
+                                publisher: viewModel.$callSettings.map(\.speakerOn).eraseToAnyPublisher()
+                            ) { speakerOn in
+                                DemoMoreControlListButtonView(
+                                    action: { viewModel.toggleSpeaker() },
+                                    label: speakerOn ? "Disable Speaker" : "Speaker"
+                                ) {
+                                    Image(
+                                        systemName: speakerOn
+                                            ? "speaker.wave.3.fill"
+                                            : "speaker.fill"
+                                    )
+                                }
                             }
 
                             DemoTranscriptionAndClosedCaptionsButtonView(viewModel: viewModel)

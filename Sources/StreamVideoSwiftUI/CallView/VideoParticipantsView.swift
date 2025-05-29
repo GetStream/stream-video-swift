@@ -319,7 +319,7 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
     }
 }
 
-public struct VideoCallParticipantView<Factory: ViewFactory>: View {
+public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
 
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
@@ -332,6 +332,15 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     var edgesIgnoringSafeArea: Edge.Set
     var customData: [String: RawJSON]
     var call: Call?
+
+    nonisolated public static func ==(
+        lhs: VideoCallParticipantView<Factory>,
+        rhs: VideoCallParticipantView<Factory>
+    ) -> Bool {
+        lhs.participant == rhs.participant
+        && lhs.availableFrame == rhs.availableFrame
+        && lhs.contentMode == rhs.contentMode
+    }
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,

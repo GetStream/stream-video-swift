@@ -14,7 +14,7 @@ struct DemoStatsView: View {
     @Injected(\.fonts) private var fonts
     @Injected(\.images) private var images
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var presentationBinding: Binding<Bool>
     var bytesFormatter = ByteCountFormatter()
 
@@ -22,7 +22,6 @@ struct DemoStatsView: View {
         List {
             if #available(iOS 16.0, *) {
                 DemoStatsSection(
-                    viewModel: viewModel,
                     iconName: "timer",
                     title: "Call Latency",
                     description: "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
@@ -252,8 +251,6 @@ private struct DemoStatsSection<Content: View>: View {
 
     @Injected(\.fonts) private var fonts
     @Injected(\.colors) private var colors
-
-    @ObservedObject var viewModel: CallViewModel
 
     var iconName: String
     var title: String
