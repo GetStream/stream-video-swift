@@ -17,7 +17,7 @@ final class VideoRendererPool: @unchecked Sendable {
     ///
     /// - Parameter initialCapacity: The initial capacity of the pool (default is 0).
     @MainActor
-    init(initialCapacity: Int = 0) {
+    init(initialCapacity: Int = 2) {
         // Initialize the pool with a capacity and a factory closure to create `VideoRenderer` instances
         pool = ReusePool(initialCapacity: initialCapacity) {
             VideoRenderer(frame: CGRect(origin: .zero, size: .zero))

@@ -2,9 +2,37 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
+
+extension Publishers {
+    /// Creates a CombineLatest publisher from two optional publishers.
+    /// If either is nil, returns an Empty publisher.
+    public static func combineLatest<A, B>(
+        _ a: AnyPublisher<A, Never>?,
+        _ b: AnyPublisher<B, Never>?
+    ) -> AnyPublisher<(A, B), Never> {
+        guard let a, let b else {
+            return Empty(completeImmediately: true).eraseToAnyPublisher()
+        }
+        return a.combineLatest(b).eraseToAnyPublisher()
+    }
+
+    /// Creates a CombineLatest publisher from three optional publishers.
+    /// If either is nil, returns an Empty publisher.
+    public static func combineLatest<A, B, C>(
+        _ a: AnyPublisher<A, Never>?,
+        _ b: AnyPublisher<B, Never>?,
+        _ c: AnyPublisher<C, Never>?,
+    ) -> AnyPublisher<(A, B, C), Never> {
+        guard let a, let b, let c else {
+            return Empty(completeImmediately: true).eraseToAnyPublisher()
+        }
+        return Publishers.CombineLatest3(a, b, c).eraseToAnyPublisher()
+    }
+}
 
 /// A view representing a stateless participants list button.
 public struct StatelessParticipantsListButton: View {
@@ -28,8 +56,6 @@ public struct StatelessParticipantsListButton: View {
     /// The action handler for the participants list button.
     public var actionHandler: ActionHandler?
 
-    @State private var count: Int
-
     /// Initializes a stateless participants list button view.
     ///
     /// - Parameters:
@@ -47,30 +73,30 @@ public struct StatelessParticipantsListButton: View {
         self.call = call
         self.size = size
         self.isActive = isActive
-        _count = .init(initialValue: call?.state.participants.endIndex ?? 0)
         self.actionHandler = actionHandler
     }
 
     /// The body of the participants list button view.
     public var body: some View {
-        Button(
-            action: { actionHandler?() },
-            label: {
-                CallIconView(
-                    icon: images.participantsIcon,
-                    size: size,
-                    iconStyle: isActive.wrappedValue ? .secondaryActive : .secondary
-                )
-            }
-        )
-        .overlay(
-            ControlBadgeView("\(count)")
-                .opacity(count > 1 ? 1 : 0)
-        )
-        .accessibility(identifier: "participantMenu")
-        .onReceive(call?.state.$participants) {
-            // Update the count based on the number of participants in the call.
-            count = $0.endIndex
+        PublisherSubscriptionView(
+            initial: call?.state.participants.endIndex ?? 0,
+            publisher: call?.state.$participants.map(\.endIndex).eraseToAnyPublisher()
+        ) { count in
+            Button(
+                action: { actionHandler?() },
+                label: {
+                    CallIconView(
+                        icon: images.participantsIcon,
+                        size: size,
+                        iconStyle: isActive.wrappedValue ? .secondaryActive : .secondary
+                    )
+                }
+            )
+            .overlay(
+                ControlBadgeView("\(count)")
+                    .opacity(count > 1 ? 1 : 0)
+            )
+            .accessibility(identifier: "participantMenu")
         }
     }
 }

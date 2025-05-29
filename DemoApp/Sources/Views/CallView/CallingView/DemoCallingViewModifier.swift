@@ -13,7 +13,7 @@ struct DemoCallingViewModifier: ViewModifier {
     @Injected(\.callKitAdapter) private var callKitAdapter
     @Injected(\.appearance) private var appearance
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
 
     private var text: Binding<String>
@@ -56,6 +56,23 @@ struct DemoCallingViewModifier: ViewModifier {
                     )
                 }
             }
+            .onAppear {
+                guard !isAnonymous else { return }
+                callKitAdapter.registerForIncomingCalls()
+                callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
+                joinCallIfNeeded(with: text.wrappedValue, callType: callType)
+            }
+            .toastView(toast: .init(get: { viewModel.toast }, set: { viewModel.toast = $0 }))
+            .background(callingStateObserverView)
+            .background(activeAnonymousCallIdObserverView)
+            .background(activeCallObserverView)
+            .background(userStateObserverView)
+    }
+
+    @ViewBuilder
+    private var callingStateObserverView: some View {
+        Color
+            .clear
             .onChange(of: viewModel.callingState) { callingState in
                 switch callingState {
                 case .inCall where !self.text.wrappedValue.isEmpty:
@@ -65,26 +82,37 @@ struct DemoCallingViewModifier: ViewModifier {
                     break
                 }
             }
+    }
+
+    @ViewBuilder
+    private var activeAnonymousCallIdObserverView: some View {
+        Color
+            .clear
             .onReceive(appState.$activeAnonymousCallId) { activeAnonymousCallId in
                 guard isAnonymous, !activeAnonymousCallId.isEmpty else { return }
                 self.text.wrappedValue = activeAnonymousCallId
             }
-            .onAppear {
-                guard !isAnonymous else { return }
-                callKitAdapter.registerForIncomingCalls()
-                callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
-                joinCallIfNeeded(with: text.wrappedValue, callType: callType)
-            }
+    }
+
+    @ViewBuilder
+    private var activeCallObserverView: some View {
+        Color
+            .clear
             .onReceive(appState.$activeCall) { call in
                 viewModel.setActiveCall(call)
                 call?.setDisconnectionTimeout(AppEnvironment.disconnectionTimeout.duration)
             }
+    }
+
+    @ViewBuilder
+    private var userStateObserverView: some View {
+        Color
+            .clear
             .onReceive(appState.$userState) { userState in
                 if userState == .notLoggedIn {
                     text.wrappedValue = ""
                 }
             }
-            .toastView(toast: $viewModel.toast)
     }
 
     private func joinCallIfNeeded(with callId: String, callType: String) {

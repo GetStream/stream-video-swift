@@ -12,13 +12,22 @@ extension View {
     @ViewBuilder
     @MainActor
     public func presentParticipantListView<Factory: ViewFactory>(
-        @ObservedObject viewModel: CallViewModel,
+        viewModel: CallViewModel,
         viewFactory: Factory = DefaultViewFactory.shared
     ) -> some View {
-        halfSheet(isPresented: $viewModel.participantsShown) {
-            viewFactory.makeParticipantsListView(viewModel: viewModel)
-                .opacity(viewModel.hideUIElements ? 0 : 1)
-                .accessibility(identifier: "trailingTopView")
+        PublisherSubscriptionView(
+            initial: viewModel.participantsShown,
+            publisher: viewModel.$participantsShown.eraseToAnyPublisher()
+        ) { participantsShown in
+            halfSheet(
+                isPresented: .constant(participantsShown),
+                onDismiss: { viewModel.participantsShown = false
+                }
+            ) {
+                viewFactory.makeParticipantsListView(viewModel: viewModel)
+                    .opacity(viewModel.hideUIElements ? 0 : 1)
+                    .accessibility(identifier: "trailingTopView")
+            }
         }
     }
 }

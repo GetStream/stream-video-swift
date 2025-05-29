@@ -107,7 +107,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
 
     @Injected(\.appearance) var appearance
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var viewFactory: Factory
     
     public init(viewModel: CallViewModel, viewFactory: Factory) {
@@ -124,34 +124,47 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                 viewFactory.makeCallTopView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
 
-                Group {
-                    if let localParticipant = viewModel.localParticipant {
-                        GeometryReader { proxy in
-                            LocalVideoView(
-                                viewFactory: viewFactory,
-                                participant: localParticipant,
-                                idSuffix: "waiting",
-                                callSettings: viewModel.callSettings,
-                                call: viewModel.call,
-                                availableFrame: proxy.frame(in: .global)
-                            )
-                            .modifier(viewFactory.makeLocalParticipantViewModifier(
-                                localParticipant: localParticipant,
-                                callSettings: $viewModel.callSettings,
-                                call: viewModel.call
-                            ))
-                        }
-                    } else {
-                        Spacer()
-                    }
-                }
-                .padding(.horizontal, 8)
-                .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
+                contentView
 
                 viewFactory.makeCallControlsView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
             }
             .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
+        }
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        PublisherSubscriptionView(
+            initial: viewModel.callingState,
+            publisher: viewModel.$callingState.eraseToAnyPublisher()
+        ) { callingState in
+            PublisherSubscriptionView(
+                initial: viewModel.localParticipant,
+                publisher: viewModel.call?.state.$localParticipant.eraseToAnyPublisher()
+            ) { localParticipant in
+                if let localParticipant = localParticipant {
+                    GeometryReader { proxy in
+                        LocalVideoView(
+                            viewFactory: viewFactory,
+                            participant: localParticipant,
+                            idSuffix: "waiting",
+                            callSettings: viewModel.callSettings,
+                            call: viewModel.call,
+                            availableFrame: proxy.frame(in: .global)
+                        )
+                        .modifier(viewFactory.makeLocalParticipantViewModifier(
+                            localParticipant: localParticipant,
+                            callSettings: .init(get: { viewModel.callSettings }, set: { viewModel.callSettings = $0 }),
+                            call: viewModel.call
+                        ))
+                    }
+                } else {
+                    Spacer()
+                }
+            }
+            .padding(.horizontal, 8)
+            .opacity(callingState == .reconnecting ? 0 : 1)
         }
     }
 }
