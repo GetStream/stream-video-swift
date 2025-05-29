@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 
 /// An actor-based serial queue that enqueues operations to run sequentially.
@@ -27,10 +28,21 @@ public actor SerialActorQueue {
     /// A task wrapper used internally by `SerialActorQueue` to represent a unit
     /// of work to be executed serially.
     public final class QueueTask: @unchecked Sendable {
-        private let queue = UnfairQueue()
+        fileprivate let file: StaticString
+        fileprivate let function: StaticString
+        fileprivate let line: UInt
+        fileprivate let queue = UnfairQueue()
         let operation: Operation
 
-        init(operation: @escaping Operation) {
+        init(
+            file: StaticString,
+            function: StaticString,
+            line: UInt,
+            operation: @escaping Operation
+        ) {
+            self.file = file
+            self.function = function
+            self.line = line
             self.operation = operation
         }
 
@@ -43,32 +55,47 @@ public actor SerialActorQueue {
         }
     }
 
-    /// Internal stream type used to drive the serial queue consumption.
-    typealias Stream = AsyncStream<QueueTask>
-
-    /// The continuation used to enqueue tasks into the async stream.
-    private let continuation: Stream.Continuation
     /// Holds cancellable task references for cleanup.
     private let disposableBag = DisposableBag()
 
+    private let executor: DispatchQueueExecutor
+    private let subject: PassthroughSubject<QueueTask, Never> = .init()
+    private nonisolated(unsafe) var subscriptionCancellable: AnyCancellable?
+
+    nonisolated public var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     /// Initializes the serial actor queue and launches the main task loop.
-    public init() {
-        let (stream, continuation) = Stream.makeStream()
-
-        self.continuation = continuation
-
-        Task(disposableBag: disposableBag, identifier: "main") {
-            for await item in stream {
-                try? Task.checkCancellation()
-                try? await item.run()
-            }
-        }
+    public init(file: StaticString = #file) {
+        self.executor = .init(file: file)
+        subscriptionCancellable = subject
+            .sinkTask(on: self, storeIn: disposableBag) { await $0.execute($1) }
     }
 
     /// Cleans up task references and finalizes the task stream.
     deinit {
+        subscriptionCancellable?.cancel()
         disposableBag.removeAll()
-        continuation.finish()
+    }
+
+    private func execute(_ task: QueueTask) async {
+        do {
+            try Task.checkCancellation()
+            try await task.run()
+            log.debug(
+                "Task completed.",
+                functionName: task.function,
+                fileName: task.file,
+                lineNumber: task.line
+            )
+        } catch {
+            log.error(
+                "Task failed.",
+                error: error,
+                functionName: task.function,
+                fileName: task.file,
+                lineNumber: task.line
+            )
+        }
     }
 
     #if compiler(<6.0)
@@ -79,7 +106,7 @@ public actor SerialActorQueue {
     ) -> QueueTask {
         let queueTask = QueueTask(operation: operation)
 
-        continuation.yield(queueTask)
+        subject.send(queueTask)
 
         return queueTask
     }
@@ -91,7 +118,7 @@ public actor SerialActorQueue {
     ) -> QueueTask {
         let queueTask = QueueTask(operation: operation)
 
-        continuation.yield(queueTask)
+        subject.send(queueTask)
 
         return queueTask
     }
@@ -99,11 +126,19 @@ public actor SerialActorQueue {
     /// Submit an operation to the queue.
     @discardableResult
     public nonisolated func async<Failure>(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         @_inheritActorContext operation: sending @escaping @isolated(any) () async throws (Failure) -> Void
     ) -> QueueTask {
-        let queueTask = QueueTask(operation: operation)
+        let queueTask = QueueTask(
+            file: file,
+            function: function,
+            line: line,
+            operation: operation
+        )
 
-        continuation.yield(queueTask)
+        subject.send(queueTask)
 
         return queueTask
     }
@@ -129,7 +164,6 @@ public actor SerialActorQueue {
     ///
     /// - Note: Once cancelled a queue cannot be started again.
     public nonisolated func cancelAll() {
-        disposableBag.remove("main")
-        continuation.finish()
+        disposableBag.removeAll()
     }
 }

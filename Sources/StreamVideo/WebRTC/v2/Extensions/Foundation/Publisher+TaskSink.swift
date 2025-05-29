@@ -79,6 +79,9 @@ extension Publisher where Output: Sendable {
     ///   - Task cancellation and errors are handled similarly to `sinkTask(storeIn:identifier:receiveCompletion:receiveValue:)`.
     public func sinkTask(
         queue: SerialActorQueue,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
         receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
@@ -90,7 +93,7 @@ extension Publisher where Output: Sendable {
             }
             let capturedInput = input
             // Schedule the task on the provided serial actor queue.
-            queue.async {
+            queue.async(file: file, function: function, line: line) {
                 do {
                     // Check for task cancellation and process the value.
                     try Task.checkCancellation()
@@ -106,6 +109,38 @@ extension Publisher where Output: Sendable {
                 } catch {
                     // Log any unexpected errors during task execution.
                     LogConfig.logger.error(error)
+                }
+            }
+        }
+    }
+
+    /// Subscribes to the publisher and executes each received value using the
+    /// provided actor, ensuring the handler is executed on the actor context.
+    ///
+    /// - Parameters:
+    ///   - actor: The actor on which to execute the handler.
+    ///   - disposableBag: The `DisposableBag` to track and manage task lifecycle.
+    ///   - handler: An async closure that receives the actor and the output value.
+    /// - Returns: An `AnyCancellable` for managing the subscription.
+    func sinkTask<ActorType: Actor>(
+        on actor: ActorType,
+        storeIn disposableBag: DisposableBag,
+        handler: @escaping @Sendable(ActorType, Output) async -> Void
+    ) -> AnyCancellable {
+        sink(receiveCompletion: { _ in }) { @Sendable [weak actor] input in
+            guard let actor else {
+                return
+            }
+            Task(disposableBag: disposableBag) {
+                do {
+                    try Task.checkCancellation()
+                    await handler(actor, input)
+                } catch is CancellationError {
+                    if let error = ClientError("Task was cancelled.") as? Failure {
+                        LogConfig.logger.error(error)
+                    }
+                } catch {
+                    LogConfig.logger.error(ClientError(with: error))
                 }
             }
         }
