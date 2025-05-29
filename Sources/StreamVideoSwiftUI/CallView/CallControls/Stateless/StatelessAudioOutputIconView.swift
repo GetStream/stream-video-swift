@@ -23,8 +23,6 @@ public struct StatelessAudioOutputIconView: View {
     /// The action handler for the audio output icon button.
     public var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
-
     /// Initializes a stateless audio output icon view.
     ///
     /// - Parameters:
@@ -39,25 +37,29 @@ public struct StatelessAudioOutputIconView: View {
     ) {
         self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
         self.actionHandler = actionHandler
     }
 
     /// The body of the audio output icon view.
     public var body: some View {
-        Button(
-            action: { actionHandler?() },
-            label: {
-                CallIconView(
-                    icon: callSettings.audioOutputOn
+        PublisherSubscriptionView(
+            initial: call?.state.callSettings.audioOutputOn ?? false,
+            publisher: call?.state.$callSettings.compactMap { $0.audioOutputOn }.eraseToAnyPublisher()
+        ) { isActive in
+            Button(
+                action: { actionHandler?() },
+                label: {
+                    CallIconView(
+                        icon: isActive
                         ? images.speakerOn
                         : images.speakerOff,
-                    size: size,
-                    iconStyle: callSettings.audioOutputOn
+                        size: size,
+                        iconStyle: isActive
                         ? .primary
                         : .transparent
-                )
-            }
-        )
+                    )
+                }
+            )
+        }
     }
 }

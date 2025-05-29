@@ -5,6 +5,7 @@
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
+import Combine
 
 struct DemoCallTopView: View {
 
@@ -12,7 +13,7 @@ struct DemoCallTopView: View {
     @Injected(\.colors) var colors
     @Injected(\.images) var images
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject var appState = AppState.shared
     @State var sharingPopupDismissed = false
 
@@ -24,10 +25,7 @@ struct DemoCallTopView: View {
         HStack(spacing: 0) {
             if !isCallLivestream {
                 HStack {
-                    if viewModel.callParticipants.count > 1, !hideLayoutMenu {
-                        LayoutMenuView(viewModel: viewModel)
-                            .accessibility(identifier: "viewMenu")
-                    }
+                    layoutMenuView
 
                     ToggleCameraIconView(viewModel: viewModel)
 
@@ -54,15 +52,7 @@ struct DemoCallTopView: View {
         .padding(.horizontal, 16)
         .padding(.top)
         .frame(maxWidth: .infinity)
-        .overlay(
-            viewModel.call?.state.isCurrentUserScreensharing == true ?
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-                .opacity(sharingPopupDismissed ? 0 : 1)
-                : nil
-        )
+        .overlay(sharingIndicatorView)
     }
 
     private var isCallLivestream: Bool {
@@ -73,6 +63,36 @@ struct DemoCallTopView: View {
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
+            && viewModel.callParticipants.count > 1
+    }
+
+    private var hideLayoutMenuPublisher: AnyPublisher<Bool, Never> {
+        Publishers.combineLatest(
+            viewModel.call?.state.$screenSharingSession.eraseToAnyPublisher(),
+            viewModel.call?.state.$isCurrentUserScreensharing.eraseToAnyPublisher(),
+            viewModel.$callParticipants.map { $0.count }.eraseToAnyPublisher()
+        )
+        .map { screenSharingSession, isCurrentUserScreensharing, participantsCount in
+            screenSharingSession != nil
+                && isCurrentUserScreensharing == false
+                && participantsCount > 1
+        }
+        .eraseToAnyPublisher()
+    }
+
+    @ViewBuilder
+    private var layoutMenuView: some View {
+        PublisherSubscriptionView(
+            initial: hideLayoutMenu,
+            publisher: hideLayoutMenuPublisher
+        ) { hideLayoutMenu in
+            if hideLayoutMenu {
+                EmptyView()
+            } else {
+                LayoutMenuView(viewModel: viewModel)
+                    .accessibility(identifier: "viewMenu")
+            }
+        }
     }
 
     @ViewBuilder
@@ -120,15 +140,33 @@ struct DemoCallTopView: View {
             EmptyView()
         }
     }
+
+    @ViewBuilder
+    private var sharingIndicatorView: some View {
+        PublisherSubscriptionView(
+            initial: viewModel.call?.state.isCurrentUserScreensharing == true,
+            publisher: viewModel.call?.state.$isCurrentUserScreensharing.eraseToAnyPublisher()
+        ) { isCurrentUserScreensharing in
+            if isCurrentUserScreensharing {
+                SharingIndicator(
+                    viewModel: viewModel,
+                    sharingPopupDismissed: $sharingPopupDismissed
+                )
+                .opacity(sharingPopupDismissed ? 0 : 1)
+            } else {
+                EmptyView()
+            }
+        }
+    }
 }
 
 struct SharingIndicator: View {
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @Binding var sharingPopupDismissed: Bool
 
     init(viewModel: CallViewModel, sharingPopupDismissed: Binding<Bool>) {
-        _viewModel = ObservedObject(initialValue: viewModel)
+        self.viewModel = viewModel
         _sharingPopupDismissed = sharingPopupDismissed
     }
 

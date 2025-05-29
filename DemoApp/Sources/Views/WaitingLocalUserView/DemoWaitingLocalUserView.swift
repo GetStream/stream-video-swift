@@ -11,7 +11,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     @Injected(\.appearance) var appearance
     @Injected(\.chatViewModel) var chatViewModel
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     @State private var isSharePresented = false
     @State private var isChatVisible = false
@@ -32,35 +32,42 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
         VStack {
             viewFactory.makeCallTopView(viewModel: viewModel)
 
-            Group {
-                if let localParticipant = viewModel.localParticipant {
-                    GeometryReader { proxy in
-                        LocalVideoView(
-                            viewFactory: viewFactory,
-                            participant: localParticipant,
-                            idSuffix: "waiting",
-                            callSettings: viewModel.callSettings,
-                            call: viewModel.call,
-                            availableFrame: proxy.frame(in: .local)
-                        )
-                        .modifier(viewFactory.makeLocalParticipantViewModifier(
-                            localParticipant: localParticipant,
-                            callSettings: .init(get: { viewModel.callSettings }, set: { _ in }),
-                            call: viewModel.call
-                        ))
-                    }
-                    .overlay(sharePromptView)
-                } else {
-                    Spacer()
-                }
-            }
-            .padding(.horizontal)
+            contentView.padding(.horizontal)
 
             viewFactory.makeCallControlsView(viewModel: viewModel)
         }
         .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
         .chat(viewModel: viewModel, chatViewModel: chatViewModel)
         .background(Color(appearance.colors.callBackground).edgesIgnoringSafeArea(.all))
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        PublisherSubscriptionView(
+            initial: viewModel.localParticipant,
+            publisher: viewModel.call?.state.$localParticipant.eraseToAnyPublisher()
+        ) { localParticipant in
+            if let localParticipant = localParticipant {
+                GeometryReader { proxy in
+                    LocalVideoView(
+                        viewFactory: viewFactory,
+                        participant: localParticipant,
+                        idSuffix: "waiting",
+                        callSettings: viewModel.callSettings,
+                        call: viewModel.call,
+                        availableFrame: proxy.frame(in: .local)
+                    )
+                    .modifier(viewFactory.makeLocalParticipantViewModifier(
+                        localParticipant: localParticipant,
+                        callSettings: .init(get: { viewModel.callSettings }, set: { _ in }),
+                        call: viewModel.call
+                    ))
+                }
+                .overlay(sharePromptView)
+            } else {
+                Spacer()
+            }
+        }
     }
 
     @ViewBuilder

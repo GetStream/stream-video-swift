@@ -23,8 +23,6 @@ public struct StatelessSpeakerIconView: View {
     /// The action handler for the speaker icon button.
     public var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
-
     /// Initializes a stateless speaker icon view.
     ///
     /// - Parameters:
@@ -39,25 +37,29 @@ public struct StatelessSpeakerIconView: View {
     ) {
         self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
         self.actionHandler = actionHandler
     }
 
     /// The body of the speaker icon view.
     public var body: some View {
-        Button(
-            action: { actionHandler?() },
-            label: {
-                CallIconView(
-                    icon: callSettings.speakerOn
+        PublisherSubscriptionView(
+            initial: call?.state.callSettings.speakerOn ?? false,
+            publisher: call?.state.$callSettings.compactMap { $0.speakerOn }.eraseToAnyPublisher()
+        ) { isActive in
+            Button(
+                action: { actionHandler?() },
+                label: {
+                    CallIconView(
+                        icon: isActive
                         ? images.speakerOn
                         : images.speakerOff,
-                    size: size,
-                    iconStyle: callSettings.speakerOn
+                        size: size,
+                        iconStyle: isActive
                         ? .primary
                         : .transparent
-                )
-            }
-        )
+                    )
+                }
+            )
+        }
     }
 }

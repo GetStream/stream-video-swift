@@ -11,7 +11,7 @@ struct CustomCallView<Factory: ViewFactory>: View {
     @Injected(\.colors) var colors
     
     var viewFactory: Factory
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     
     @StateObject var microphoneChecker = MicrophoneChecker()
     @State var mutedIndicatorShown = false

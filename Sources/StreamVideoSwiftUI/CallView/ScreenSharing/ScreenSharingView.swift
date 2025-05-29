@@ -4,12 +4,15 @@
 
 import StreamVideo
 import SwiftUI
+import Combine
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     @Injected(\.colors) var colors
+    @Injected(\.currentDevice) var currentDevice
+    @Injected(\.orientationAdapter) var orientationAdapter
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
     var frame: CGRect
     var innerItemSpace: CGFloat
@@ -17,7 +20,6 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     var isZoomEnabled: Bool
 
     private let identifier = UUID()
-    @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
 
     public init(
         viewModel: CallViewModel,
@@ -53,28 +55,45 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     }
 
     public var body: some View {
-        VStack(spacing: innerItemSpace) {
-            if !viewModel.hideUIElements, orientationAdapter.orientation.isPortrait || UIDevice.current.isIpad {
+        PublisherSubscriptionView(
+            initial: viewModel.hideUIElements,
+            publisher: viewModel.$hideUIElements.eraseToAnyPublisher()
+        ) { hideUIElements in
+            VStack(spacing: innerItemSpace) {
+                isPresentingLabelView(hideUIElements: hideUIElements)
+                
+                if isZoomEnabled, !hideUIElements {
+                    ZoomableScrollView { screensharingView }
+                } else {
+                    screensharingView
+                }
+                
+                if !hideUIElements {
+                    HorizontalParticipantsListView(
+                        viewFactory: viewFactory,
+                        participants: viewModel.participants,
+                        frame: participantsStripFrame,
+                        call: viewModel.call,
+                        showAllInfo: true
+                    )
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func isPresentingLabelView(hideUIElements: Bool) -> some View {
+        PublisherSubscriptionView(
+            initial: !hideUIElements && (orientationAdapter.orientation.isPortrait || currentDevice.deviceType == .pad),
+            publisher: orientationAdapter.$orientation.map { $0.isPortrait }.eraseToAnyPublisher()
+        ) { isPortrait in
+            if !hideUIElements, (isPortrait || currentDevice.deviceType == .pad) {
                 Text("\(screenSharing.participant.name) presenting")
                     .foregroundColor(colors.text)
                     .padding()
                     .accessibility(identifier: "participantPresentingLabel")
-            }
-
-            if isZoomEnabled, !viewModel.hideUIElements {
-                ZoomableScrollView { screensharingView }
             } else {
-                screensharingView
-            }
-            
-            if !viewModel.hideUIElements {
-                HorizontalParticipantsListView(
-                    viewFactory: viewFactory,
-                    participants: viewModel.participants,
-                    frame: participantsStripFrame,
-                    call: viewModel.call,
-                    showAllInfo: true
-                )
+                EmptyView()
             }
         }
     }

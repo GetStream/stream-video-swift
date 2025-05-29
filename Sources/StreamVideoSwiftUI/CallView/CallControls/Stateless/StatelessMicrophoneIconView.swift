@@ -23,8 +23,6 @@ public struct StatelessMicrophoneIconView: View {
     /// The action handler for the microphone icon button.
     public var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
-
     /// Initializes a stateless microphone icon view.
     ///
     /// - Parameters:
@@ -39,27 +37,31 @@ public struct StatelessMicrophoneIconView: View {
     ) {
         self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
         self.actionHandler = actionHandler
     }
 
     /// The body of the microphone icon view.
     public var body: some View {
-        Button(
-            action: { actionHandler?() },
-            label: {
-                CallIconView(
-                    icon: callSettings.audioOn
+        PublisherSubscriptionView(
+            initial: call?.state.callSettings.audioOn ?? false,
+            publisher: call?.state.$callSettings.compactMap { $0.audioOn }.eraseToAnyPublisher()
+        ) { isActive in
+            Button(
+                action: { actionHandler?() },
+                label: {
+                    CallIconView(
+                        icon: isActive
                         ? images.micTurnOn
                         : images.micTurnOff,
-                    size: size,
-                    iconStyle: callSettings.audioOn
+                        size: size,
+                        iconStyle: isActive
                         ? .transparent
                         : .disabled
-                )
-            }
-        )
-        .accessibility(identifier: "microphoneToggle")
-        .streamAccessibility(value: callSettings.audioOn ? "1" : "0")
+                    )
+                }
+            )
+            .accessibility(identifier: "microphoneToggle")
+            .streamAccessibility(value: isActive ? "1" : "0")
+        }
     }
 }

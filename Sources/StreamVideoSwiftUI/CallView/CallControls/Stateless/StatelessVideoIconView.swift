@@ -23,8 +23,6 @@ public struct StatelessVideoIconView: View {
     /// The action handler for the video icon button.
     public var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
-
     /// Initializes a stateless video icon view.
     ///
     /// - Parameters:
@@ -38,27 +36,31 @@ public struct StatelessVideoIconView: View {
     ) {
         self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
         self.actionHandler = actionHandler
     }
 
     /// The body of the video icon view.
     public var body: some View {
-        Button(
-            action: { actionHandler?() },
-            label: {
-                CallIconView(
-                    icon: callSettings.videoOn
-                        ? images.videoTurnOn
-                        : images.videoTurnOff,
-                    size: size,
-                    iconStyle: callSettings.videoOn
-                        ? .transparent
-                        : .disabled
-                )
-            }
-        )
-        .accessibility(identifier: "cameraToggle")
-        .streamAccessibility(value: callSettings.videoOn ? "1" : "0")
+        PublisherSubscriptionView(
+            initial: call?.state.callSettings.videoOn ?? false,
+            publisher: call?.state.$callSettings.compactMap { $0.videoOn }.eraseToAnyPublisher()
+        ) { isActive in
+            Button(
+                action: { actionHandler?() },
+                label: {
+                    CallIconView(
+                        icon: isActive
+                            ? images.videoTurnOn
+                            : images.videoTurnOff,
+                        size: size,
+                        iconStyle: isActive
+                            ? .transparent
+                            : .disabled
+                    )
+                }
+            )
+            .accessibility(identifier: "cameraToggle")
+            .streamAccessibility(value: isActive ? "1" : "0")
+        }
     }
 }

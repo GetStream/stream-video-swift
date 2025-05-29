@@ -10,7 +10,7 @@ struct ParticipantEventsNotificationViewModifier: ViewModifier {
 
     @Injected(\.colors) private var colors
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     func body(content: Content) -> some View {
         content.overlay(overlayContent)
@@ -18,16 +18,21 @@ struct ParticipantEventsNotificationViewModifier: ViewModifier {
 
     @ViewBuilder
     private var overlayContent: some View {
-        if let event = viewModel.participantEvent {
-            Text("\(event.user) \(event.action.display) the call.")
-                .padding(8)
-                .background(Color(UIColor.systemBackground))
-                .foregroundColor(colors.text)
-                .modifier(ShadowViewModifier())
-                .padding()
-                .accessibility(identifier: "participantEventLabel")
-        } else {
-            EmptyView()
+        PublisherSubscriptionView(
+            initial: viewModel.participantEvent,
+            publisher: viewModel.$participantEvent.eraseToAnyPublisher()
+        ) { participantEvent in
+            if let event = participantEvent {
+                Text("\(event.user) \(event.action.display) the call.")
+                    .padding(8)
+                    .background(Color(UIColor.systemBackground))
+                    .foregroundColor(colors.text)
+                    .modifier(ShadowViewModifier())
+                    .padding()
+                    .accessibility(identifier: "participantEventLabel")
+            } else {
+                EmptyView()
+            }
         }
     }
 }

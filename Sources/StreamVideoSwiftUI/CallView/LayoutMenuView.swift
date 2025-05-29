@@ -10,43 +10,48 @@ public struct LayoutMenuView: View {
     
     @Injected(\.images) var images
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var size: CGFloat
 
     public init(viewModel: CallViewModel, size: CGFloat = 44) {
-        _viewModel = ObservedObject(initialValue: viewModel)
+        self.viewModel = viewModel
         self.size = size
     }
     
     public var body: some View {
-        Menu {
-            LayoutMenuItem(
-                title: L10n.Call.Current.layoutGrid,
-                layout: .grid,
-                selectedLayout: viewModel.participantsLayout
-            ) { layout in
-                viewModel.update(participantsLayout: layout)
+        PublisherSubscriptionView(
+            initial: viewModel.participantsLayout,
+            publisher: viewModel.$participantsLayout.eraseToAnyPublisher()
+        ) { participantsLayout in
+            Menu {
+                LayoutMenuItem(
+                    title: L10n.Call.Current.layoutGrid,
+                    layout: .grid,
+                    selectedLayout: participantsLayout
+                ) { layout in
+                    viewModel.update(participantsLayout: layout)
+                }
+                LayoutMenuItem(
+                    title: L10n.Call.Current.layoutFullScreen,
+                    layout: .fullScreen,
+                    selectedLayout: participantsLayout
+                ) { layout in
+                    viewModel.update(participantsLayout: layout)
+                }
+                LayoutMenuItem(
+                    title: L10n.Call.Current.layoutSpotlight,
+                    layout: .spotlight,
+                    selectedLayout: participantsLayout
+                ) { layout in
+                    viewModel.update(participantsLayout: layout)
+                }
+            } label: {
+                CallIconView(
+                    icon: images.layoutSelectorIcon,
+                    size: size,
+                    iconStyle: .secondary
+                )
             }
-            LayoutMenuItem(
-                title: L10n.Call.Current.layoutFullScreen,
-                layout: .fullScreen,
-                selectedLayout: viewModel.participantsLayout
-            ) { layout in
-                viewModel.update(participantsLayout: layout)
-            }
-            LayoutMenuItem(
-                title: L10n.Call.Current.layoutSpotlight,
-                layout: .spotlight,
-                selectedLayout: viewModel.participantsLayout
-            ) { layout in
-                viewModel.update(participantsLayout: layout)
-            }
-        } label: {
-            CallIconView(
-                icon: images.layoutSelectorIcon,
-                size: size,
-                iconStyle: .secondary
-            )
         }
     }
 }

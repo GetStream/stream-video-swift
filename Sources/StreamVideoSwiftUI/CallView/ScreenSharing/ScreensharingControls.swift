@@ -4,13 +4,14 @@
 
 import StreamVideo
 import SwiftUI
+import Combine
 
 public struct ScreenshareIconView: View {
     
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
     
     public init(viewModel: CallViewModel, size: CGFloat = 44) {
@@ -19,14 +20,19 @@ public struct ScreenshareIconView: View {
     }
     
     public var body: some View {
-        Button {
-            viewModel.startScreensharing(type: .inApp)
-        } label: {
-            CallIconView(
-                icon: images.screenshareIcon,
-                size: size,
-                iconStyle: (viewModel.call?.state.isCurrentUserScreensharing == false ? .transparent : .primary)
-            )
+        PublisherSubscriptionView(
+            initial: viewModel.call?.state.isCurrentUserScreensharing ?? false,
+            publisher: viewModel.call?.state.$isCurrentUserScreensharing.eraseToAnyPublisher()
+        ) { isCurrentUserScreensharing in
+            Button {
+                viewModel.startScreensharing(type: .inApp)
+            } label: {
+                CallIconView(
+                    icon: images.screenshareIcon,
+                    size: size,
+                    iconStyle: (isCurrentUserScreensharing ?.primary : .transparent)
+                )
+            }
         }
     }
 }
@@ -37,7 +43,7 @@ public struct BroadcastIconView: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @StateObject var broadcastObserver = BroadcastObserver()
     let size: CGFloat
     let iconStyle = CallIconStyle.transparent
@@ -63,38 +69,59 @@ public struct BroadcastIconView: View {
     }
     
     public var body: some View {
-        ZStack(alignment: .center) {
-            Circle().fill(
-                iconStyle.backgroundColor.opacity(iconStyle.opacity)
-            )
-            BroadcastPickerView(
-                preferredExtension: preferredExtension,
-                size: iconSize
-            )
-            .frame(width: iconSize, height: iconSize)
-            .offset(x: offset.x, y: offset.y)
-            .foregroundColor(iconStyle.foregroundColor)
-        }
-        .frame(width: size, height: size)
-        .modifier(ShadowModifier())
-        .onChange(of: broadcastObserver.broadcastState, perform: { newValue in
-            if newValue == .started {
-                viewModel.startScreensharing(type: .broadcast)
-            } else if newValue == .finished {
-                viewModel.stopScreensharing()
-                broadcastObserver.broadcastState = .notStarted
+        withDisableControl {
+            ZStack(alignment: .center) {
+                Circle().fill(
+                    iconStyle.backgroundColor.opacity(iconStyle.opacity)
+                )
+                BroadcastPickerView(
+                    preferredExtension: preferredExtension,
+                    size: iconSize
+                )
+                .frame(width: iconSize, height: iconSize)
+                .offset(x: offset.x, y: offset.y)
+                .foregroundColor(iconStyle.foregroundColor)
             }
-        })
-        .disabled(isDisabled)
-        .onAppear {
-            broadcastObserver.observe()
+            .frame(width: size, height: size)
+            .modifier(ShadowModifier())
+            .onChange(of: broadcastObserver.broadcastState, perform: { newValue in
+                if newValue == .started {
+                    viewModel.startScreensharing(type: .broadcast)
+                } else if newValue == .finished {
+                    viewModel.stopScreensharing()
+                    broadcastObserver.broadcastState = .notStarted
+                }
+            })
+            .onAppear {
+                broadcastObserver.observe()
+            }
         }
     }
-    
-    private var isDisabled: Bool {
-        guard viewModel.call?.state.screenSharingSession != nil else {
-            return false
+
+    @ViewBuilder
+    private func withDisableControl(_ content: @escaping () -> some View) -> some View {
+        let initial = {
+            guard viewModel.call?.state.screenSharingSession != nil else {
+                return false
+            }
+            return viewModel.call?.state.isCurrentUserScreensharing == false
+        }()
+
+        PublisherSubscriptionView(
+            initial: initial,
+            publisher: Publishers.combineLatest(
+                viewModel.call?.state.$screenSharingSession.eraseToAnyPublisher(),
+                viewModel.call?.state.$isCurrentUserScreensharing.eraseToAnyPublisher()
+            )
+            .map { screenSharingSession, isCurrentUserScreensharing in
+                guard screenSharingSession != nil else {
+                    return false
+                }
+                return isCurrentUserScreensharing == false
+            }
+                .eraseToAnyPublisher()
+        ) { isDisabled in
+            content().disabled(isDisabled)
         }
-        return viewModel.call?.state.isCurrentUserScreensharing == false
     }
 }

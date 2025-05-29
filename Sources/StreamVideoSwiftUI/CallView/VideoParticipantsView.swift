@@ -9,7 +9,7 @@ import SwiftUI
 public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
 
@@ -26,32 +26,40 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     }
     
     public var body: some View {
-        ZStack {
-            if viewModel.participantsLayout == .fullScreen, let first = viewModel.participants.first {
-                ParticipantsFullScreenLayout(
-                    viewFactory: viewFactory,
-                    participant: first,
-                    call: viewModel.call,
-                    frame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
-                )
-            } else if viewModel.participantsLayout == .spotlight, let first = viewModel.participants.first {
-                ParticipantsSpotlightLayout(
-                    viewFactory: viewFactory,
-                    participant: first,
-                    call: viewModel.call,
-                    participants: Array(viewModel.participants.dropFirst()),
-                    frame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
-                )
-            } else {
-                ParticipantsGridLayout(
-                    viewFactory: viewFactory,
-                    call: viewModel.call,
-                    participants: viewModel.participants,
-                    availableFrame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
-                )
+        PublisherSubscriptionView(
+            initial: viewModel.participantsLayout,
+            publisher: viewModel.$participantsLayout.eraseToAnyPublisher()
+        ) { participantsLayout in
+            PublisherSubscriptionView(
+                initial: viewModel.participants,
+                publisher: viewModel.$callParticipants.map { _ in viewModel.participants }.eraseToAnyPublisher()
+            ) { participants in
+                if participantsLayout == .fullScreen, let first = participants.first {
+                    ParticipantsFullScreenLayout(
+                        viewFactory: viewFactory,
+                        participant: first,
+                        call: viewModel.call,
+                        frame: availableFrame,
+                        onChangeTrackVisibility: onChangeTrackVisibility
+                    )
+                } else if viewModel.participantsLayout == .spotlight, let first = participants.first {
+                    ParticipantsSpotlightLayout(
+                        viewFactory: viewFactory,
+                        participant: first,
+                        call: viewModel.call,
+                        participants: Array(participants.dropFirst()),
+                        frame: availableFrame,
+                        onChangeTrackVisibility: onChangeTrackVisibility
+                    )
+                } else {
+                    ParticipantsGridLayout(
+                        viewFactory: viewFactory,
+                        call: viewModel.call,
+                        participants: participants,
+                        availableFrame: availableFrame,
+                        onChangeTrackVisibility: onChangeTrackVisibility
+                    )
+                }
             }
         }
     }
@@ -325,8 +333,6 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     var customData: [String: RawJSON]
     var call: Call?
 
-    @State private var isUsingFrontCameraForLocalUser: Bool = false
-
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         participant: CallParticipant,
@@ -386,17 +392,20 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     @MainActor
     @ViewBuilder
     private func withCallSettingsObservation(
-        @ViewBuilder _ content: () -> some View
+        @ViewBuilder _ content: @escaping ()-> some View
     ) -> some View {
         if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
-            Group {
-                if isUsingFrontCameraForLocalUser {
+            PublisherSubscriptionView(
+                initial: call?.state.callSettings.cameraPosition,
+                publisher: call?.state.$callSettings.map(\.cameraPosition).eraseToAnyPublisher()
+            ) { isUsingFrontCameraForLocalUser in
+                if isUsingFrontCameraForLocalUser == .front {
                     content()
                         .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                 } else {
                     content()
                 }
-            }.onReceive(call?.state.$callSettings) { self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
+            }
         } else {
             content()
         }
