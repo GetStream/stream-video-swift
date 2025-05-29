@@ -323,7 +323,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(
             for: .offer,
             with: StubVariantResultProvider { iteration in
-                iteration == 1 ? offerA : offerB
+                iteration == 0 ? offerA : offerB
             }
         )
 

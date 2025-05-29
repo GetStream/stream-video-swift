@@ -153,9 +153,7 @@ public actor SerialActorQueue {
     public nonisolated func sync<Failure, Output: Sendable>(
         @_inheritActorContext operation: sending @escaping @isolated(any) () async throws (Failure) -> Output
     ) async throws -> Output {
-        try await Task {
-            try await operation()
-        }.value
+        try await operation()
     }
 
     /// Cancels all enqueued and executing operations in the queue.

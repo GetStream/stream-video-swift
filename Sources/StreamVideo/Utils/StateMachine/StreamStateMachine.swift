@@ -37,43 +37,68 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         line: UInt = #line
     ) {
         queue.sync {
-            var nextStage = nextStage
-            nextStage.transition = {
-                [weak self] in self?.transition(
-                    to: $0,
-                    file: file,
-                    function: function,
-                    line: line
-                )
-            }
+            performTransition(
+                to: nextStage,
+                file: file,
+                function: function,
+                line: line
+            )
+        }
+    }
 
-            let transitioningFromStage = currentStage
-            transitioningFromStage.willTransitionAway()
-            
-            guard
-                let newStage = nextStage.transition(from: currentStage)
-            else {
-                let error = ClientError.InvalidStateMachineTransition(from: currentStage, to: nextStage)
-                log.warning(
-                    error,
-                    functionName: function,
-                    fileName: file,
-                    lineNumber: line
-                )
-                return
-            }
+    func executeBarrierOperation<T>(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
+        _ operation: (StageType, (StageType) -> Void) -> T
+    ) -> T {
+        queue.sync {
+            operation(currentStage) { performTransition(to: $0) }
+        }
+    }
 
-            transitioningFromStage.didTransitionAway()
+    private func performTransition(
+        to nextStage: StageType,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        var nextStage = nextStage
+        nextStage.transition = {
+            [weak self] in self?.transition(
+                to: $0,
+                file: file,
+                function: function,
+                line: line
+            )
+        }
 
-            log.debug(
-                "Transition \(currentStage.description) → \(newStage.description)",
-                subsystems: logSubsystem,
+        let transitioningFromStage = currentStage
+        transitioningFromStage.willTransitionAway()
+
+        guard
+            let newStage = nextStage.transition(from: currentStage)
+        else {
+            let error = ClientError.InvalidStateMachineTransition(from: currentStage, to: nextStage)
+            log.warning(
+                error,
                 functionName: function,
                 fileName: file,
                 lineNumber: line
             )
-            publisher.send(nextStage)
+            return
         }
+
+        transitioningFromStage.didTransitionAway()
+
+        log.debug(
+            "Transition \(currentStage.description) → \(newStage.description)",
+            subsystems: logSubsystem,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
+        publisher.send(nextStage)
     }
 }
 

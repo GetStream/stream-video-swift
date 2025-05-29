@@ -9,7 +9,6 @@ import Foundation
 /// and proximity state observation. Only active on phone devices.
 final class ProximityManager: @unchecked Sendable {
 
-    @Injected(\.streamVideo) private var streamVideo
     @Injected(\.currentDevice) private var currentDevice
     @Injected(\.proximityMonitor) private var proximityMonitor
 
@@ -27,15 +26,17 @@ final class ProximityManager: @unchecked Sendable {
 
     /// Creates a new proximity manager for the specified call
     /// - Parameter call: Call instance to manage proximity for
-    init(_ call: Call) {
+    init(_ call: Call, activeCallPublisher: AnyPublisher<Call?, Never>) {
         self.call = call
 
         if isSupported {
-            streamVideo
-                .state
-                .$activeCall
-                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
+            activeCallPublisher
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+                    self?.didUpdateActiveCall($0)
+                }
                 .store(in: disposableBag)
+        } else {
+            fatalError()
         }
     }
 

@@ -49,7 +49,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Provides access to the speaker.
     public let speaker: SpeakerManager
     /// Provides access to device's proximity
-    private lazy var proximity: ProximityManager = .init(self)
+    private lazy var proximity: ProximityManager = .init(
+        self,
+        activeCallPublisher: streamVideo.state.$activeCall.eraseToAnyPublisher()
+    )
 
     private let disposableBag = DisposableBag()
     internal let callController: CallController
@@ -150,19 +153,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
-        try await callOperationSerialQueue.sync { [weak self] in
-            guard let self else {
-                throw ClientError()
-            }
-            let currentStage = stateMachine.currentStage
-
+        let result: Any? = stateMachine.executeBarrierOperation { currentStage, transitionHandler in
             if
                 currentStage.id == .joined,
                 case let .joined(joinResponse) = currentStage.context.output {
                 return joinResponse
             } else if
                 currentStage.id == .joining {
-                return try await stateMachine
+                return stateMachine
                     .publisher
                     .tryCompactMap {
                         switch $0.id {
@@ -189,10 +187,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                             return nil
                         }
                     }
-                    .nextValue(timeout: CallConfiguration.timeout.join)
+                    .eraseToAnyPublisher()
             } else {
                 let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
-                stateMachine.transition(
+                transitionHandler(
                     .joining(
                         self,
                         input: .join(
@@ -207,8 +205,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                         )
                     )
                 )
-                return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.join)
+                return deliverySubject.eraseToAnyPublisher()
             }
+        }
+
+        if let joinResponse = result as? JoinCallResponse {
+            return joinResponse
+        } else if let publisher = result as? AnyPublisher<JoinCallResponse, Error> {
+            return try await publisher.nextValue(timeout: CallConfiguration.timeout.join)
+        } else {
+            throw ClientError("Call was unable to join call.")
         }
     }
 

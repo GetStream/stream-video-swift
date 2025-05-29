@@ -396,6 +396,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - unpublish
 
     func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
+        LogConfig.level = .debug
         publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
             mockPeerConnection.stub(
@@ -408,16 +409,17 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             ownCapabilities: [.sendAudio]
         )
         subject.publish()
+        await fulfilmentInMainActor { self.subject.primaryTrack.isEnabled == true }
 
         subject.unpublish()
 
-        await fulfillment { self.subject.primaryTrack.isEnabled == false }
+        await fulfilmentInMainActor { self.subject.primaryTrack.isEnabled == false }
         let transceiver = try XCTUnwrap(
             mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver
         )
         XCTAssertNotEqual(transceiver.sender.track?.trackId, subject.primaryTrack.trackId)
         XCTAssertEqual(transceiver.sender.track?.kind, subject.primaryTrack.kind)
-        XCTAssertFalse(transceiver.sender.track?.isEnabled ?? true)
+        await fulfilmentInMainActor { transceiver.sender.track?.isEnabled == false }
     }
 
     // MARK: - Private

@@ -41,5 +41,11 @@ extension Call {
                 line: line
             )
         }
+
+        func executeBarrierOperation<T>(
+            _ operation: (Stage, (Stage) -> Void) -> T
+        ) -> T {
+            stateMachine.executeBarrierOperation(operation)
+        }
     }
 }

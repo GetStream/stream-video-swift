@@ -11,7 +11,7 @@ final class MockSignalServer: SFUSignalService, Mockable, @unchecked Sendable {
     typealias FunctionInputKey = MockFunctionInput
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [MockFunctionKey: Any] = [:]
-    var stubbedFunctionInput: [MockFunctionKey: [FunctionInputKey]] = FunctionKey
+    @Atomic var stubbedFunctionInput: [MockFunctionKey: [FunctionInputKey]] = FunctionKey
         .allCases
         .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
     func stub<T>(for keyPath: KeyPath<MockSignalServer, T>, with value: T) {
