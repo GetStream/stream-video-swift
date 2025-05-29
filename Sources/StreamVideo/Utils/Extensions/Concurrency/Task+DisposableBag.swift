@@ -25,7 +25,7 @@ extension Task {
     public init(
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
-        priority: TaskPriority? = nil,
+        priority: TaskPriority? = .background,
         @_inheritActorContext block: @Sendable @escaping () async -> Success
     ) where Failure == Never {
         self.init(priority: priority) { [weak disposableBag] in
@@ -49,7 +49,7 @@ extension Task {
     public init(
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
-        priority: TaskPriority? = nil,
+        priority: TaskPriority? = .background,
         @_inheritActorContext block: @Sendable @escaping () async throws -> Success
     ) where Failure == Error {
         self.init(priority: priority) { [weak disposableBag] in
