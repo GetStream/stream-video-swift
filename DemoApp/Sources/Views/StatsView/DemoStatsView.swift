@@ -20,115 +20,13 @@ struct DemoStatsView: View {
 
     var body: some View {
         List {
-            if #available(iOS 16.0, *) {
-                DemoStatsSection(
-                    iconName: "timer",
-                    title: "Call Latency",
-                    description: "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
-                ) {
-                    DemoLatencyChartView()
-                        .frame(height: 150)
-                }
-                .withoutListSeparator()
-            }
-
             DemoStatsSection(
-                viewModel: viewModel,
                 iconName: "chart.bar.xaxis",
                 title: "Call Performance",
                 description: "Review the key data points below to assess call performance"
             ) {
                 VStack(spacing: 16) {
-                    row {
-                        DemoStatView(
-                            viewModel,
-                            title: "REGION",
-                            value: "none",
-                            valueTransformer: { $0?.datacenter.stringValue ?? "" }
-                        )
-                    } _: {
-                        DemoStatView(
-                            viewModel,
-                            title: "LATENCY",
-                            value: 0.0,
-                            valueTransformer: { $0?.publisherStats.averageRoundTripTimeInMs ?? 0 },
-                            presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
-                            valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
-                        )
-                    }
-
-                    row {
-                        DemoStatView(
-                            viewModel,
-                            title: "RECEIVE JITTER",
-                            value: 0.0,
-                            valueTransformer: {
-                                $0?.subscriberStats.averageJitterInMs ?? 0
-                            },
-                            presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
-                            valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
-                        )
-                    } _: {
-                        DemoStatView(
-                            viewModel,
-                            title: "PUBLISH JITTER",
-                            value: 0.0,
-                            valueTransformer: { $0?.publisherStats.averageJitterInMs ?? 0 },
-                            presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
-                            valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
-                        )
-                    }
-
-                    row {
-                        DemoStatView(
-                            viewModel,
-                            title: "PUBLISH RESOLUTION",
-                            value: "none",
-                            titleTransformer: { publishQualityFormatter($0) },
-                            valueTransformer: { resolutionFormatter(from: $0?.publisherStats) }
-                        )
-                    } _: {
-                        DemoStatView(
-                            viewModel,
-                            title: "PUBLISH QUALITY DROP REASON",
-                            value: "none",
-                            valueTransformer: { qualityLimitationReasonsFormatter(from: $0?.publisherStats) }
-                        )
-                    }
-
-                    row {
-                        DemoStatView(
-                            viewModel,
-                            title: "RECEIVING RESOLUTION",
-                            value: "none",
-                            valueTransformer: { resolutionFormatter(from: $0?.subscriberStats) }
-                        )
-                    } _: {
-                        DemoStatView(
-                            viewModel,
-                            title: "RECEIVE QUALITY DROP REASON",
-                            value: "none",
-                            valueTransformer: { qualityLimitationReasonsFormatter(from: $0?.subscriberStats) }
-                        )
-                    }
-
-                    row {
-                        DemoStatView(
-                            viewModel,
-                            title: "PUBLISH BITRATE",
-                            value: 0,
-                            valueTransformer: { $0?.publisherStats.totalBytesSent ?? 0 },
-                            presentationTransformer: { bitrateFormatter(newValue: $0, oldValue: $1) }
-                        )
-                    } _: {
-                        DemoStatView(
-                            viewModel,
-                            title: "RECEIVING BITRATE",
-                            value: 0,
-                            valueTransformer: { $0?.subscriberStats.totalBytesReceived ?? 0 },
-                            presentationTransformer: { bitrateFormatter(newValue: $0, oldValue: $1) }
-                        )
-                    }
+                    listContent
                 }
                 .padding(.vertical)
             }
@@ -137,6 +35,115 @@ struct DemoStatsView: View {
         .listStyle(.plain)
         .withModalNavigationBar(title: "Stats") { presentationBinding.wrappedValue = false }
         .withDragIndicator()
+    }
+
+    @ViewBuilder
+    private var header: some View {
+        if #available(iOS 16.0, *) {
+            DemoStatsSection(
+                iconName: "timer",
+                title: "Call Latency",
+                description: "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
+            ) {
+                DemoLatencyChartView()
+                    .frame(height: 150)
+            }
+            .withoutListSeparator()
+        }
+    }
+
+    @ViewBuilder
+    private var listContent: some View {
+        row {
+            DemoStatView(
+                viewModel,
+                title: "REGION",
+                value: "none",
+                valueTransformer: { $0?.datacenter.stringValue ?? "" }
+            )
+        } _: {
+            DemoStatView(
+                viewModel,
+                title: "LATENCY",
+                value: 0.0,
+                valueTransformer: { $0?.publisherStats.averageRoundTripTimeInMs ?? 0 },
+                presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
+                valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
+            )
+        }
+
+        row {
+            DemoStatView(
+                viewModel,
+                title: "RECEIVE JITTER",
+                value: 0.0,
+                valueTransformer: {
+                    $0?.subscriberStats.averageJitterInMs ?? 0
+                },
+                presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
+                valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
+            )
+        } _: {
+            DemoStatView(
+                viewModel,
+                title: "PUBLISH JITTER",
+                value: 0.0,
+                valueTransformer: { $0?.publisherStats.averageJitterInMs ?? 0 },
+                presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
+                valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
+            )
+        }
+
+        row {
+            DemoStatView(
+                viewModel,
+                title: "PUBLISH RESOLUTION",
+                value: "none",
+                titleTransformer: { publishQualityFormatter($0) },
+                valueTransformer: { resolutionFormatter(from: $0?.publisherStats) }
+            )
+        } _: {
+            DemoStatView(
+                viewModel,
+                title: "PUBLISH QUALITY DROP REASON",
+                value: "none",
+                valueTransformer: { qualityLimitationReasonsFormatter(from: $0?.publisherStats) }
+            )
+        }
+
+        row {
+            DemoStatView(
+                viewModel,
+                title: "RECEIVING RESOLUTION",
+                value: "none",
+                valueTransformer: { resolutionFormatter(from: $0?.subscriberStats) }
+            )
+        } _: {
+            DemoStatView(
+                viewModel,
+                title: "RECEIVE QUALITY DROP REASON",
+                value: "none",
+                valueTransformer: { qualityLimitationReasonsFormatter(from: $0?.subscriberStats) }
+            )
+        }
+
+        row {
+            DemoStatView(
+                viewModel,
+                title: "PUBLISH BITRATE",
+                value: 0,
+                valueTransformer: { $0?.publisherStats.totalBytesSent ?? 0 },
+                presentationTransformer: { bitrateFormatter(newValue: $0, oldValue: $1) }
+            )
+        } _: {
+            DemoStatView(
+                viewModel,
+                title: "RECEIVING BITRATE",
+                value: 0,
+                valueTransformer: { $0?.subscriberStats.totalBytesReceived ?? 0 },
+                presentationTransformer: { bitrateFormatter(newValue: $0, oldValue: $1) }
+            )
+        }
     }
 
     @ViewBuilder
