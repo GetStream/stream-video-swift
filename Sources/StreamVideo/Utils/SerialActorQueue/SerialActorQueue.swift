@@ -146,7 +146,7 @@ public actor SerialActorQueue {
     /// - Throws: Any error thrown by the operation.
     @discardableResult
     public nonisolated func sync<Output: Sendable>(
-        @_inheritActorContext operation: @escaping () async throws -> Output
+        @_inheritActorContext operation: @escaping @Sendable() async throws -> Output
     ) async throws -> Output {
         try await operation()
     }
@@ -157,7 +157,7 @@ public actor SerialActorQueue {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        @_inheritActorContext operation: sending @escaping @isolated(any) () async throws (Failure) -> Void
+        @_inheritActorContext operation: sending @escaping @Sendable @isolated(any) () async throws (Failure) -> Void
     ) -> QueueTask {
         let queueTask = QueueTask(
             file: file,
@@ -178,7 +178,7 @@ public actor SerialActorQueue {
     /// - Throws: Any error thrown by the operation.
     @discardableResult
     public nonisolated func sync<Failure, Output: Sendable>(
-        @_inheritActorContext operation: sending @escaping @isolated(any) () async throws (Failure) -> Output
+        @_inheritActorContext operation: sending @escaping @Sendable @isolated(any) () async throws (Failure) -> Output
     ) async throws -> Output {
         try await operation()
     }
