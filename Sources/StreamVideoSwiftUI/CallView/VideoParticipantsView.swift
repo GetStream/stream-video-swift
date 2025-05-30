@@ -337,7 +337,9 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
         lhs: VideoCallParticipantView<Factory>,
         rhs: VideoCallParticipantView<Factory>
     ) -> Bool {
-        lhs.participant == rhs.participant
+        lhs.participant.sessionId == rhs.participant.sessionId
+            && lhs.participant.hasVideo == rhs.participant.hasVideo
+            && lhs.participant.track == rhs.participant.track
             && lhs.availableFrame == rhs.availableFrame
             && lhs.contentMode == rhs.contentMode
     }
@@ -363,35 +365,36 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
     }
     
     public var body: some View {
-        withCallSettingsObservation {
-            VideoRendererView(
-                id: id,
-                size: availableFrame.size,
-                contentMode: contentMode,
-                showVideo: showVideo,
-                handleRendering: { [weak call, participant] view in
-                    guard call != nil else { return }
-                    view.handleViewRendering(for: participant) { [weak call] size, participant in
-                        Task { [weak call] in
-                            await call?.updateTrackSize(size, for: participant)
+        Group {
+            if showVideo {
+                withCallSettingsObservation {
+                    VideoRendererView(
+                        id: id,
+                        size: availableFrame.size,
+                        contentMode: contentMode,
+                        showVideo: showVideo,
+                        handleRendering: { [weak call, participant] view in
+                            guard call != nil else { return }
+                            view.handleViewRendering(for: participant) { [weak call] size, participant in
+                                Task { [weak call] in
+                                    await call?.updateTrackSize(size, for: participant)
+                                }
+                            }
                         }
-                    }
+                    )
                 }
-            )
+            } else {
+                CallParticipantImageView(
+                    viewFactory: viewFactory,
+                    id: participant.id,
+                    name: participant.name,
+                    imageURL: participant.profileImageURL
+                )
+            }
         }
-        .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
-        .overlay(
-            CallParticipantImageView(
-                viewFactory: viewFactory,
-                id: participant.id,
-                name: participant.name,
-                imageURL: participant.profileImageURL
-            )
-            .opacity(showVideo ? 0 : 1)
-        )
     }
 
     private var showVideo: Bool {
