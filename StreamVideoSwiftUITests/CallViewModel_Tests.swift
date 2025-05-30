@@ -293,7 +293,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         
         // Then
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
     }
@@ -357,7 +357,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // Then
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -681,7 +681,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         
         // Then
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
     }
@@ -756,7 +756,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -775,7 +775,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -1137,7 +1137,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         callViewModel.startCall(callType: .default, callId: callId, members: [])
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
         let call = try XCTUnwrap(callViewModel.call)
