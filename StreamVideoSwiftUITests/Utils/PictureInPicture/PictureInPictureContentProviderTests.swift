@@ -320,6 +320,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     ) async throws {
         // Given
         let call: MockCall = MockCall(.dummy(callController: .dummy(videoConfig: Self.videoConfig)))
+        await wait(for: 1.0)
         store.dispatch(.setCall(call))
         await fulfilmentInMainActor { self.store.state.call?.cId == call.cId }
 
