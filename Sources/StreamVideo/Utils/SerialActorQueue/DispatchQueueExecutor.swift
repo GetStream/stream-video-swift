@@ -27,7 +27,7 @@ import Foundation
 /// let executor = DispatchQueueExecutor()
 /// // Jobs will be automatically enqueued when used with Swift actors
 /// ```
-final class DispatchQueueExecutor: SerialExecutor, TaskExecutor, @unchecked Sendable {
+final class DispatchQueueExecutor: SerialExecutor, @unchecked Sendable {
     /// The underlying dispatch queue that executes jobs serially.
     ///
     /// This queue ensures that all jobs are executed one at a time in the
@@ -97,3 +97,7 @@ final class DispatchQueueExecutor: SerialExecutor, TaskExecutor, @unchecked Send
         dispatchPrecondition(condition: .onQueue(queue))
     }
 }
+
+#if swift(>=6.0)
+extension DispatchQueueExecutor: TaskExecutor {}
+#endif

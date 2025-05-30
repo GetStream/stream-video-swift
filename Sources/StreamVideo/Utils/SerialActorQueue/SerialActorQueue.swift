@@ -18,11 +18,11 @@ public actor SerialActorQueue {
     #if compiler(>=6.0)
     /// Type alias for a generic actor-isolated asynchronous operation.
     /// Uses `@isolated(any)` on Swift 6 or `@Sendable` fallback for older compilers.
-    typealias Operation = @isolated(any) () async throws -> Void
+    public typealias Operation = @isolated(any) () async throws -> Void
     #else
     /// Type alias for a generic actor-isolated asynchronous operation.
     /// Uses `@isolated(any)` on Swift 6 or `@Sendable` fallback for older compilers.
-    typealias Operation = @Sendable() async throws -> Void
+    public typealias Operation = @Sendable() async throws -> Void
     #endif
 
     /// A task wrapper used internally by `SerialActorQueue` to represent a unit
@@ -32,7 +32,7 @@ public actor SerialActorQueue {
         fileprivate let function: StaticString
         fileprivate let line: UInt
         fileprivate let queue = UnfairQueue()
-        let operation: Operation
+        private let operation: Operation
 
         init(
             file: StaticString,
@@ -102,9 +102,17 @@ public actor SerialActorQueue {
     /// Submit a throwing operation to the queue.
     @discardableResult
     public nonisolated func async(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         @_inheritActorContext operation: @escaping Operation
     ) -> QueueTask {
-        let queueTask = QueueTask(operation: operation)
+        let queueTask = QueueTask(
+            file: file,
+            function: function,
+            line: line,
+            operation: operation
+        )
 
         subject.send(queueTask)
 
@@ -114,13 +122,33 @@ public actor SerialActorQueue {
     /// Submit an operation to the queue.
     @discardableResult
     public nonisolated func async(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         @_inheritActorContext operation: @escaping @Sendable() async -> Void
     ) -> QueueTask {
-        let queueTask = QueueTask(operation: operation)
+        let queueTask = QueueTask(
+            file: file,
+            function: function,
+            line: line,
+            operation: operation
+        )
 
         subject.send(queueTask)
 
         return queueTask
+    }
+
+    /// Executes an actor-isolated operation and awaits its result.
+    ///
+    /// - Parameter operation: A throwing async closure isolated to any actor.
+    /// - Returns: The result of the operation.
+    /// - Throws: Any error thrown by the operation.
+    @discardableResult
+    public nonisolated func sync<Output: Sendable>(
+        @_inheritActorContext operation: @escaping () async throws -> Output
+    ) async throws -> Output {
+        try await operation()
     }
     #else
     /// Submit an operation to the queue.
@@ -142,7 +170,6 @@ public actor SerialActorQueue {
 
         return queueTask
     }
-    #endif
 
     /// Executes an actor-isolated operation and awaits its result.
     ///
@@ -155,6 +182,7 @@ public actor SerialActorQueue {
     ) async throws -> Output {
         try await operation()
     }
+    #endif
 
     /// Cancels all enqueued and executing operations in the queue.
     ///

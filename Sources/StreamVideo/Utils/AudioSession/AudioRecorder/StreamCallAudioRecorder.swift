@@ -170,6 +170,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         do {
             try await processingQueue.sync {
                 await operation()
+                return () // Explicitly return Void
             }
         } catch {
             log.error(ClientError(with: error, file, line))
