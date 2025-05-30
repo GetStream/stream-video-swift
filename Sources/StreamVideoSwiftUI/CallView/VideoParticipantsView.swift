@@ -332,13 +332,14 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
     var edgesIgnoringSafeArea: Edge.Set
     var customData: [String: RawJSON]
     var call: Call?
+    var showVideo: Bool
 
     nonisolated public static func == (
         lhs: VideoCallParticipantView<Factory>,
         rhs: VideoCallParticipantView<Factory>
     ) -> Bool {
         lhs.participant.sessionId == rhs.participant.sessionId
-            && lhs.participant.hasVideo == rhs.participant.hasVideo
+            && lhs.showVideo == rhs.showVideo
             && lhs.participant.track == rhs.participant.track
             && lhs.availableFrame == rhs.availableFrame
             && lhs.contentMode == rhs.contentMode
@@ -362,27 +363,27 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.customData = customData
         self.call = call
+        showVideo = participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
     }
     
     public var body: some View {
         Group {
             if showVideo {
-                withCallSettingsObservation {
-                    VideoRendererView(
-                        id: id,
-                        size: availableFrame.size,
-                        contentMode: contentMode,
-                        showVideo: showVideo,
-                        handleRendering: { [weak call, participant] view in
-                            guard call != nil else { return }
-                            view.handleViewRendering(for: participant) { [weak call] size, participant in
-                                Task { [weak call] in
-                                    await call?.updateTrackSize(size, for: participant)
-                                }
+                VideoRendererView(
+                    id: id,
+                    size: availableFrame.size,
+                    contentMode: contentMode,
+                    showVideo: showVideo,
+                    handleRendering: { [weak call, participant] view in
+                        guard call != nil else { return }
+                        view.handleViewRendering(for: participant) { [weak call] size, participant in
+                            Task { [weak call] in
+                                await call?.updateTrackSize(size, for: participant)
                             }
                         }
-                    )
-                }
+                    }
+                )
+                .modifier(Rotation3DEffectViewModifier(participant: participant, call: call))
             } else {
                 CallParticipantImageView(
                     viewFactory: viewFactory,
@@ -396,30 +397,30 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
     }
+}
 
-    private var showVideo: Bool {
-        participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
-    }
+struct Rotation3DEffectViewModifier: ViewModifier {
+    @Injected(\.streamVideo) private var streamVideo
+    var participant: CallParticipant
+    var call: Call?
 
-    @MainActor
-    @ViewBuilder
-    private func withCallSettingsObservation(
-        @ViewBuilder _ content: @escaping () -> some View
-    ) -> some View {
-        if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
+    func body(content: Content) -> some View {
+        if
+            call?.cId == streamVideo.state.activeCall?.cId,
+            participant.sessionId == streamVideo.state.activeCall?.state.localParticipant?.sessionId
+        {
             PublisherSubscriptionView(
                 initial: call?.state.callSettings.cameraPosition,
                 publisher: call?.state.$callSettings.map(\.cameraPosition).eraseToAnyPublisher()
             ) { isUsingFrontCameraForLocalUser in
                 if isUsingFrontCameraForLocalUser == .front {
-                    content()
-                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                    content.rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                 } else {
-                    content()
+                    content
                 }
             }
         } else {
-            content()
+            content
         }
     }
 }
