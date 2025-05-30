@@ -22,7 +22,7 @@ public final class BlurBackgroundVideoFilter: VideoFilter, @unchecked Sendable {
     override public init(
         id: String,
         name: String,
-        filter: @escaping (Input) async -> CIImage
+        filter: @escaping (Input) -> CIImage
     ) { fatalError() }
 
     init() {

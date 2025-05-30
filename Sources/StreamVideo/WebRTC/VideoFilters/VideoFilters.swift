@@ -26,7 +26,7 @@ open class VideoFilter: @unchecked Sendable {
     public let name: String
 
     /// Filter closure that takes a CIImage as input and returns a filtered CIImage as output.
-    public var filter: (Input) async -> CIImage
+    public var filter: (Input) -> CIImage
 
     /// Initializes a new VideoFilter instance with the provided parameters.
     /// - Parameters:
@@ -36,7 +36,7 @@ open class VideoFilter: @unchecked Sendable {
     public init(
         id: String,
         name: String,
-        filter: @escaping (Input) async -> CIImage
+        filter: @escaping (Input) -> CIImage
     ) {
         self.id = id
         self.name = name

@@ -68,27 +68,27 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         from frame: RTCVideoFrame,
         capturer: RTCVideoCapturer
     ) {
-        processingQueue.async { [weak self] in
-            guard let self else {
-                return
-            }
-
-            let imageBuffer = buffer.pixelBuffer
-            CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-            let inputImage = CIImage(
-                cvPixelBuffer: imageBuffer,
-                options: [CIImageOption.colorSpace: self.colorSpace]
+        let imageBuffer = buffer.pixelBuffer
+        CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+        let inputImage = CIImage(
+            cvPixelBuffer: imageBuffer,
+            options: [CIImageOption.colorSpace: colorSpace]
+        )
+        let outputImage = filter.filter(
+            VideoFilter.Input(
+                originalImage: inputImage,
+                originalPixelBuffer: imageBuffer,
+                originalImageOrientation: orientationAdapter.orientation.cgOrientation
             )
-            let outputImage = await self.filter(image: inputImage, pixelBuffer: imageBuffer)
-            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-            context.render(
-                outputImage,
-                to: imageBuffer,
-                bounds: outputImage.extent,
-                colorSpace: self.colorSpace
-            )
-            process(capturer: capturer, frame: frame, buffer: buffer)
-        }
+        )
+        CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+        context.render(
+            outputImage,
+            to: imageBuffer,
+            bounds: outputImage.extent,
+            colorSpace: colorSpace
+        )
+        process(capturer: capturer, frame: frame, buffer: buffer)
     }
 
     private func process(
@@ -140,8 +140,8 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     private func filter(
         image: CIImage,
         pixelBuffer: CVPixelBuffer
-    ) async -> CIImage {
-        await selectedFilter?.filter(
+    ) -> CIImage {
+        selectedFilter?.filter(
             VideoFilter.Input(
                 originalImage: image,
                 originalPixelBuffer: pixelBuffer,

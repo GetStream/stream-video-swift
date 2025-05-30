@@ -34,7 +34,7 @@ public final class ImageBackgroundVideoFilter: VideoFilter, @unchecked Sendable 
     override public init(
         id: String,
         name: String,
-        filter: @escaping (Input) async -> CIImage
+        filter: @escaping (Input) -> CIImage
     ) { fatalError() }
 
     /// Initializes a new `ImageBackgroundVideoFilter` instance.
