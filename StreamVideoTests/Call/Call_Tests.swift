@@ -6,7 +6,7 @@
 @preconcurrency import XCTest
 
 @MainActor
-final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
+final class Call_Tests: StreamVideoTestCase {
 
     let callType = "default"
     let callId = "123"

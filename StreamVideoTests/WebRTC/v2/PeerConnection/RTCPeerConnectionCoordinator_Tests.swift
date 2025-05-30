@@ -309,7 +309,6 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
     func test_negotiate_subjectIsPublisher_multipleRequestsExecuteSerially_callSetPublisherOnSFUWithCorrectOfferEveryTime(
     ) async throws {
-        LogConfig.level = .debug
         _ = subject
         let offerA = RTCSessionDescription(
             type: .offer,
@@ -350,7 +349,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             mockPeerConnection.recordedInputPayload(
                 RTCSessionDescription.self,
                 for: .setLocalDescription
-            )?.compactMap(\.sdp)
+            )?.compactMap { $0.sdp }
         )
         XCTAssertEqual(actual, expected)
     }

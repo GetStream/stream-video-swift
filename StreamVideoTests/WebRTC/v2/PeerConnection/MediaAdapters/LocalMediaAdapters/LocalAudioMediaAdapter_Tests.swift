@@ -396,7 +396,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - unpublish
 
     func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
-        LogConfig.level = .debug
         publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
             mockPeerConnection.stub(

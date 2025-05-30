@@ -9,7 +9,6 @@ final class SignalServer_Tests: XCTestCase, @unchecked Sendable {
     
     override func setUp() {
         super.setUp()
-        LogConfig.level = .debug
     }
 
     func test_signalServer_retryingRequest() async throws {
