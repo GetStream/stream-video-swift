@@ -42,10 +42,10 @@ extension Call {
             )
         }
 
-        func executeBarrierOperation<T>(
+        func withLock<T>(
             _ operation: (Stage, (Stage) -> Void) -> T
         ) -> T {
-            stateMachine.executeBarrierOperation(operation)
+            stateMachine.withLock(operation)
         }
     }
 }

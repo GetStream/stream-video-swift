@@ -153,7 +153,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
-        let result: Any? = stateMachine.executeBarrierOperation { currentStage, transitionHandler in
+        let result: Any? = stateMachine.withLock { currentStage, transitionHandler in
             if
                 currentStage.id == .joined,
                 case let .joined(joinResponse) = currentStage.context.output {

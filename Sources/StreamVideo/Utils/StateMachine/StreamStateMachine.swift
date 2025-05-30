@@ -46,7 +46,7 @@ public final class StreamStateMachine<StageType: StreamStateMachineStage> {
         }
     }
 
-    func executeBarrierOperation<T>(
+    func withLock<T>(
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,

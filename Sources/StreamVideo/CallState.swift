@@ -122,11 +122,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
-    @Published public internal(set) var callSettings = CallSettings() {
-        willSet {
-            _ = 0
-        }
-    }
+    @Published public internal(set) var callSettings = CallSettings()
 
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
