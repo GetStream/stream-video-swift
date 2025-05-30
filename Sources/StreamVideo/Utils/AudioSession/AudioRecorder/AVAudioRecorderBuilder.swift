@@ -5,7 +5,7 @@
 import AVFoundation
 import Foundation
 
-/// The AVAudioRecorderBuilder actor simplifies the creation and management of AVAudioRecorder
+/// The AVAudioRecorderBuilder simplifies the creation and management of AVAudioRecorder
 /// instances for audio recording. It offers:
 /// Caching: Stores created AVAudioRecorder objects for efficient reuse, avoiding redundant initialization.
 /// Customisable settings: Allows you to tailor recording parameters to your specific needs.

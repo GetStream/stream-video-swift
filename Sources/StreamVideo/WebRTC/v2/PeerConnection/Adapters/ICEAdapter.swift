@@ -250,19 +250,21 @@ actor ICEAdapter: @unchecked Sendable {
             .$connectionState
             .removeDuplicates()
             .filter { if case .connected = $0 { true } else { false } }
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingLocalCandidates() }
+            .sinkTask(on: self, storeIn: disposableBag) { executor, _ in
+                await executor.drainPendingLocalCandidates()
+            }
             .store(in: disposableBag)
 
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.DidGenerateICECandidateEvent.self)
             .log(.debug, subsystems: .iceAdapter) { [peerType] in "PeerConnection type:\(peerType) generated \($0)." }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trickle($0.candidate) }
+            .sinkTask(on: self, storeIn: disposableBag) { await $0.trickle($1.candidate) }
             .store(in: disposableBag)
 
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
             .log(.debug, subsystems: .iceAdapter)
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingSFUCandidates() }
+            .sinkTask(on: self, storeIn: disposableBag) { executor, _ in await executor.drainPendingSFUCandidates() }
             .store(in: disposableBag)
 
         let _peerType = peerType == .publisher
@@ -273,12 +275,12 @@ actor ICEAdapter: @unchecked Sendable {
             .publisher(eventType: Stream_Video_Sfu_Models_ICETrickle.self)
             .filter { [_peerType] in $0.peerType == _peerType }
             .log(.debug, subsystems: .iceAdapter)
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleICETrickle($0) }
+            .sinkTask(on: self, storeIn: disposableBag) { await $0.handleICETrickle($1) }
             .store(in: disposableBag)
 
         sfuAdapter
             .refreshPublisher
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.configure() }
+            .sinkTask(on: self, storeIn: disposableBag) { executor, _ in await executor.configure() }
             .store(in: disposableBag)
     }
 }
