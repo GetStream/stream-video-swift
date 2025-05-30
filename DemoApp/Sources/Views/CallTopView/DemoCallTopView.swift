@@ -2,10 +2,10 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import Combine
 
 struct DemoCallTopView: View {
 
@@ -70,7 +70,7 @@ struct DemoCallTopView: View {
         Publishers.combineLatest(
             viewModel.call?.state.$screenSharingSession.eraseToAnyPublisher(),
             viewModel.call?.state.$isCurrentUserScreensharing.eraseToAnyPublisher(),
-            viewModel.$callParticipants.map { $0.count }.eraseToAnyPublisher()
+            viewModel.$callParticipants.map(\.count).eraseToAnyPublisher()
         )
         .map { screenSharingSession, isCurrentUserScreensharing, participantsCount in
             screenSharingSession != nil

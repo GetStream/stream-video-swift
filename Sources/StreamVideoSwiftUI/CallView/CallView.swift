@@ -2,10 +2,10 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
-import Combine
 
 public struct CallView<Factory: ViewFactory>: View {
 
@@ -82,25 +82,25 @@ public struct CallView<Factory: ViewFactory>: View {
         PublisherSubscriptionView(
             initial: contentViewValue,
             publisher: contentViewPublisher
-        ) { contentView in
-                switch contentViewValue {
-                case .localVideo:
-                    localVideoView(bounds: availableFrame)
-                        .accessibility(identifier: "localVideoView")
-                case .screensharing:
-                    if let screenSharingSession = viewModel.call?.state.screenSharingSession {
-                        viewFactory.makeScreenSharingView(
-                            viewModel: viewModel,
-                            screensharingSession: screenSharingSession,
-                            availableFrame: availableFrame
-                        )
-                    } else {
-                        participantsView(bounds: availableFrame)
-                    }
-                case .participantsView:
+        ) { _ in
+            switch contentViewValue {
+            case .localVideo:
+                localVideoView(bounds: availableFrame)
+                    .accessibility(identifier: "localVideoView")
+            case .screensharing:
+                if let screenSharingSession = viewModel.call?.state.screenSharingSession {
+                    viewFactory.makeScreenSharingView(
+                        viewModel: viewModel,
+                        screensharingSession: screenSharingSession,
+                        availableFrame: availableFrame
+                    )
+                } else {
                     participantsView(bounds: availableFrame)
                 }
+            case .participantsView:
+                participantsView(bounds: availableFrame)
             }
+        }
     }
 
     private var contentViewValue: ContentView {
@@ -152,7 +152,7 @@ public struct CallView<Factory: ViewFactory>: View {
             call.state.$isCurrentUserScreensharing.eraseToAnyPublisher()
         )
         .map { (session: ScreenSharingSession?, isCurrentUserScreensharing: Bool) -> Bool in
-            return session == nil || isCurrentUserScreensharing == true
+            session == nil || isCurrentUserScreensharing == true
         }
 
         return Publishers.CombineLatest3(
@@ -162,8 +162,8 @@ public struct CallView<Factory: ViewFactory>: View {
         )
         .map { (nooneIsScreenSharing, participantsLayout, participantsCount) in
             nooneIsScreenSharing
-            && participantsLayout == .grid
-            && participantsCount <= 3
+                && participantsLayout == .grid
+                && participantsCount <= 3
         }
         .eraseToAnyPublisher()
     }
@@ -173,7 +173,7 @@ public struct CallView<Factory: ViewFactory>: View {
         PublisherSubscriptionView(
             initial: shouldShowDraggableView,
             publisher: shouldShowDraggablePublisher
-        ) {  shouldShowDraggableView in
+        ) { shouldShowDraggableView in
             if shouldShowDraggableView {
                 CornerDraggableView(
                     content: { cornerDraggableViewContent($0) },

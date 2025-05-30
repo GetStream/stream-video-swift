@@ -167,7 +167,6 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
             .opacity(callingState == .reconnecting ? 0 : 1)
         }
     }
-
 }
 
 @available(iOS 14.0, *)

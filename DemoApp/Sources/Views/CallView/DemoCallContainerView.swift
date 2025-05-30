@@ -21,7 +21,7 @@ internal struct DemoCallContainerView: View {
         let callViewModel = CallViewModel()
         callViewModel.participantAutoLeavePolicy = AppEnvironment.autoLeavePolicy.policy
         callViewModel.isPictureInPictureEnabled = AppEnvironment.pictureInPictureIntegration == .enabled
-        self.viewModel = callViewModel
+        viewModel = callViewModel
         _chatViewModel = StateObject(wrappedValue: .init(callViewModel))
         self.callId = callId
         self.callType = callType

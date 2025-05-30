@@ -43,7 +43,7 @@ public struct StatelessToggleCameraIconView: View {
     public var body: some View {
         PublisherSubscriptionView(
             initial: call?.state.callSettings.cameraPosition ?? .front,
-            publisher: call?.state.$callSettings.compactMap { $0.cameraPosition }.eraseToAnyPublisher()
+            publisher: call?.state.$callSettings.compactMap(\.cameraPosition).eraseToAnyPublisher()
         ) { cameraPosition in
             Button(
                 action: { actionHandler?() },

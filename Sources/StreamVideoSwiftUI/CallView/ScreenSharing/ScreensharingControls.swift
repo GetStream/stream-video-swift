@@ -2,9 +2,9 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
-import Combine
 
 public struct ScreenshareIconView: View {
     
@@ -119,7 +119,7 @@ public struct BroadcastIconView: View {
                 }
                 return isCurrentUserScreensharing == false
             }
-                .eraseToAnyPublisher()
+            .eraseToAnyPublisher()
         ) { isDisabled in
             content().disabled(isDisabled)
         }

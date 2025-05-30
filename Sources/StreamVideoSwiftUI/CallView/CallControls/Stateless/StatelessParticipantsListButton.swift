@@ -2,10 +2,10 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
-import Combine
 
 extension Publishers {
     /// Creates a CombineLatest publisher from two optional publishers.

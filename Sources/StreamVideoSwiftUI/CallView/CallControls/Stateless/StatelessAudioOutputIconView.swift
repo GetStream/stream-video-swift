@@ -44,19 +44,19 @@ public struct StatelessAudioOutputIconView: View {
     public var body: some View {
         PublisherSubscriptionView(
             initial: call?.state.callSettings.audioOutputOn ?? false,
-            publisher: call?.state.$callSettings.compactMap { $0.audioOutputOn }.eraseToAnyPublisher()
+            publisher: call?.state.$callSettings.compactMap(\.audioOutputOn).eraseToAnyPublisher()
         ) { isActive in
             Button(
                 action: { actionHandler?() },
                 label: {
                     CallIconView(
                         icon: isActive
-                        ? images.speakerOn
-                        : images.speakerOff,
+                            ? images.speakerOn
+                            : images.speakerOff,
                         size: size,
                         iconStyle: isActive
-                        ? .primary
-                        : .transparent
+                            ? .primary
+                            : .transparent
                     )
                 }
             )

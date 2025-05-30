@@ -2,9 +2,9 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
-import Combine
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
 
@@ -85,7 +85,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     private func isPresentingLabelView(hideUIElements: Bool) -> some View {
         PublisherSubscriptionView(
             initial: !hideUIElements && (orientationAdapter.orientation.isPortrait || currentDevice.deviceType == .pad),
-            publisher: orientationAdapter.$orientation.map { $0.isPortrait }.eraseToAnyPublisher()
+            publisher: orientationAdapter.$orientation.map(\.isPortrait).eraseToAnyPublisher()
         ) { isPortrait in
             if !hideUIElements, (isPortrait || currentDevice.deviceType == .pad) {
                 Text("\(screenSharing.participant.name) presenting")

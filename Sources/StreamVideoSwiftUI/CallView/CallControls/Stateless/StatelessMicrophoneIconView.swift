@@ -44,19 +44,19 @@ public struct StatelessMicrophoneIconView: View {
     public var body: some View {
         PublisherSubscriptionView(
             initial: call?.state.callSettings.audioOn ?? false,
-            publisher: call?.state.$callSettings.compactMap { $0.audioOn }.eraseToAnyPublisher()
+            publisher: call?.state.$callSettings.compactMap(\.audioOn).eraseToAnyPublisher()
         ) { isActive in
             Button(
                 action: { actionHandler?() },
                 label: {
                     CallIconView(
                         icon: isActive
-                        ? images.micTurnOn
-                        : images.micTurnOff,
+                            ? images.micTurnOn
+                            : images.micTurnOff,
                         size: size,
                         iconStyle: isActive
-                        ? .transparent
-                        : .disabled
+                            ? .transparent
+                            : .disabled
                     )
                 }
             )

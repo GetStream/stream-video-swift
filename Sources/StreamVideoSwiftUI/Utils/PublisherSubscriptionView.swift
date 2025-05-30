@@ -1,8 +1,5 @@
 //
-//  PublisherSubscriptionView.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 28/5/25.
+// Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -19,7 +16,7 @@ public struct PublisherSubscriptionView<Value: Equatable, Content: View>: View {
             initial: Value,
             publisher: AnyPublisher<Value, Never>?
         ) {
-            self.value = initial
+            value = initial
             cancellable = publisher?
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
@@ -73,7 +70,7 @@ public struct PublisherSubscriptionView<Value: Equatable, Content: View>: View {
         publisher: AnyPublisher<Value, Never>?,
         @ViewBuilder contentProvider: @escaping (Value) -> Content
     ) {
-        self.viewModel = .init(initial: initial, publisher: publisher)
+        viewModel = .init(initial: initial, publisher: publisher)
         self.contentProvider = contentProvider
     }
 

@@ -333,13 +333,13 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
     var customData: [String: RawJSON]
     var call: Call?
 
-    nonisolated public static func ==(
+    nonisolated public static func == (
         lhs: VideoCallParticipantView<Factory>,
         rhs: VideoCallParticipantView<Factory>
     ) -> Bool {
         lhs.participant == rhs.participant
-        && lhs.availableFrame == rhs.availableFrame
-        && lhs.contentMode == rhs.contentMode
+            && lhs.availableFrame == rhs.availableFrame
+            && lhs.contentMode == rhs.contentMode
     }
 
     public init(
@@ -401,7 +401,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
     @MainActor
     @ViewBuilder
     private func withCallSettingsObservation(
-        @ViewBuilder _ content: @escaping ()-> some View
+        @ViewBuilder _ content: @escaping () -> some View
     ) -> some View {
         if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
             PublisherSubscriptionView(

@@ -30,7 +30,7 @@ public struct ParticipantsListButton: View {
         PublisherSubscriptionView(
             initial: viewModel.participantsShown,
             publisher: viewModel.$participantsShown.eraseToAnyPublisher()
-        ) { participantsShown in
+        ) { _ in
             StatelessParticipantsListButton(
                 call: viewModel.call,
                 isActive: .init(get: { viewModel.participantsShown }, set: { viewModel.participantsShown = $0 })

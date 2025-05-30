@@ -57,24 +57,25 @@ public struct CallTopView: View {
     private var layoutMenuView: some View {
         PublisherSubscriptionView(
             initial: viewModel.callParticipants.count,
-            publisher: viewModel.$callParticipants.map(\.count).eraseToAnyPublisher()) { participantsCount in
-                if
-                    #available(iOS 14.0, *),
-                    participantsCount > 1
-                {
-                    LayoutMenuView(viewModel: viewModel)
-                        .opacity(hideLayoutMenu ? 0 : 1)
-                        .accessibility(identifier: "viewMenu")
-                } else {
-                    EmptyView()
-                }
+            publisher: viewModel.$callParticipants.map(\.count).eraseToAnyPublisher()
+        ) { participantsCount in
+            if
+                #available(iOS 14.0, *),
+                participantsCount > 1
+            {
+                LayoutMenuView(viewModel: viewModel)
+                    .opacity(hideLayoutMenu ? 0 : 1)
+                    .accessibility(identifier: "viewMenu")
+            } else {
+                EmptyView()
             }
+        }
     }
 
     @ViewBuilder
     private var toggleCameraIconView: some View {
         PublisherSubscriptionView(
-            initial:  call?.state.ownCapabilities ?? [],
+            initial: call?.state.ownCapabilities ?? [],
             publisher: call?.state.$ownCapabilities.eraseToAnyPublisher()
         ) { ownCapabilities in
             if ownCapabilities.contains(.sendVideo) == true {
@@ -87,7 +88,7 @@ public struct CallTopView: View {
 
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
-        && viewModel.call?.state.isCurrentUserScreensharing == false
+            && viewModel.call?.state.isCurrentUserScreensharing == false
     }
 
     private var call: Call? {
