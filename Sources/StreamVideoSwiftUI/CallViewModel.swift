@@ -987,7 +987,7 @@ open class CallViewModel: ObservableObject {
 }
 
 /// The state of the call.
-public enum CallingState: Equatable, CustomStringConvertible {
+public enum CallingState: Equatable, CustomStringConvertible, Sendable {
     /// Call is not started (idle state).
     case idle
     /// The user is in a waiting room.

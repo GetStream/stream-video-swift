@@ -7,6 +7,7 @@
 import StreamWebRTC
 import XCTest
 
+@MainActor
 final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private lazy var mockResponseBuilder: MockResponseBuilder! = MockResponseBuilder()
@@ -17,13 +18,15 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     private lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
     private lazy var callId: String! = UUID().uuidString
     private lazy var participants: [Member]! = [firstUser, secondUser]
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule.shared)
+
+    private lazy var subject: CallViewModel! = .init()
 
     private var cId: String { callCid(from: callId, callType: callType) }
 
     // MARK: - Call Events
 
-    override func tearDown() {
+    override func tearDown() async throws {
+        subject = nil
         participants = nil
         callId = nil
         eventNotificationCenter = nil
@@ -32,8 +35,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         secondUser = nil
         firstUser = nil
         mockResponseBuilder = nil
-        peerConnectionFactory = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     @MainActor
@@ -293,7 +295,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         
         // Then
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
     }
@@ -357,7 +359,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // Then
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.idle actual: \(callingState)") {
+        await fulfilmentInMainActor("CallViewModel.callingState expected:.idle actual: \(callingState)") {
             callViewModel.callingState == .idle
         }
     }
@@ -681,7 +683,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         
         // Then
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
     }
@@ -756,7 +758,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -775,7 +777,7 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
+        await fulfilmentInMainActor("CallViewModel.callingState expected:.inCall actual: \(callingState)") {
             callViewModel.callingState == .inCall
         }
 
@@ -1131,16 +1133,18 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     @MainActor
     func test_applicationDidBecomeActive_activatesAllTracksRequired() async throws {
-        // Setup call
-        let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
+        LogConfig.level = .debug
+        let mockApplicationStateAdapter: MockAppStateAdapter! = .init()
+        InjectedValues[\.applicationStateAdapter] = mockApplicationStateAdapter
+        let call = try await prepareInCall(
+            callType: callType,
+            callId: callId,
+            members: []
+        )
 
-        callViewModel.startCall(callType: .default, callId: callId, members: [])
-        nonisolated(unsafe) let callingState = callViewModel.callingState
-        await fulfilmentInMainActor(timeout: 20, "CallViewModel.callingState expected:.inCall actual: \(callingState)") {
-            callViewModel.callingState == .inCall
-        }
-        let call = try XCTUnwrap(callViewModel.call)
+        let peerConnectionFactory = PeerConnectionFactory.build(
+            audioProcessingModule: MockAudioProcessingModule.shared
+        )
         let trackA = try XCTUnwrap(
             RTCVideoTrack.dummy(
                 kind: .video,
@@ -1162,21 +1166,18 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         trackA.isEnabled = false
         trackB.isEnabled = false
         trackC.isEnabled = false
+
         call.state.participantsMap = [
             CallParticipant.dummy(id: call.state.sessionId), // Local participant
             CallParticipant.dummy(hasVideo: true, track: trackA),
             CallParticipant.dummy(hasVideo: true, track: trackB),
             CallParticipant.dummy(hasVideo: false, track: trackC)
         ].reduce(into: [String: CallParticipant]()) { $0[$1.id] = $1 }
+        await fulfilmentInMainActor { self.subject.participants.count == 4 }
 
-        NotificationCenter.default.post(.init(name: UIApplication.didEnterBackgroundNotification))
-        await fulfillment { InjectedValues[\.applicationStateAdapter].state == .background }
-
-        NotificationCenter.default.post(.init(name: UIApplication.willEnterForegroundNotification))
-        await fulfillment { InjectedValues[\.applicationStateAdapter].state == .foreground }
-
-        await fulfillment { trackA.isEnabled && trackB.isEnabled }
-        XCTAssertFalse(trackC.isEnabled)
+        mockApplicationStateAdapter.stubbedState = .background
+        mockApplicationStateAdapter.stubbedState = .foreground
+        await fulfillment { trackA.isEnabled && trackB.isEnabled && !trackC.isEnabled }
     }
 
     // MARK: - startScreensharing
@@ -1319,6 +1320,30 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         callViewModel.outgoingCallMembers = participants
         callViewModel.callingState = .outgoing
         return callViewModel
+    }
+
+    @MainActor
+    private func prepareInCall(
+        callType: String,
+        callId: String,
+        members: [Member]
+    ) async throws -> Call {
+        _ = subject
+        await fulfilmentInMainActor { self.subject.isSubscribedToCallEvents }
+
+        subject.startCall(
+            callType: callType,
+            callId: callId,
+            members: members
+        )
+
+        _ = try? await subject
+            .$callingState
+            .filter { $0 == .inCall }
+            .nextValue(timeout: defaultTimeout)
+
+        XCTAssertEqual(subject.callingState, .inCall)
+        return try XCTUnwrap(subject.call)
     }
 }
 
