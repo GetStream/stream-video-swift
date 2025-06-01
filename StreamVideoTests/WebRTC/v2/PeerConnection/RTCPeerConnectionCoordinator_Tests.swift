@@ -346,6 +346,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
 
         let expected = [offerA.sdp, offerB.sdp]
         // swiftformat:disable
+        // swiftlint:disable all
         let actual = try XCTUnwrap(
             mockPeerConnection.recordedInputPayload(
                 RTCSessionDescription.self,
@@ -353,6 +354,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             )?.compactMap(\.sdp)
         )
         // swiftformat:enable
+        // swiftlint:enable all
         XCTAssertEqual(actual, expected)
     }
 
