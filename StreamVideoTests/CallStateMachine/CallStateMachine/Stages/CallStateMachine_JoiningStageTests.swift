@@ -132,9 +132,9 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             context,
             joinResponse: JoinCallResponse.dummy(),
             expectedTransition: .joined
-        ) {
+        ) { @MainActor [call] in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
-            XCTAssertEqual(self.call.state.callSettings, context.input.join?.callSettings)
+            await self.fulfilmentInMainActor { call!.state.callSettings == context.input.join?.callSettings }
         }
     }
 

@@ -114,6 +114,6 @@ extension InjectedValues {
     /// the device type at runtime.
     public var currentDevice: CurrentDevice {
         get { Self[CurrentDevice.self] }
-        set { _ = newValue }
+        set { Self[CurrentDevice.self] = newValue }
     }
 }

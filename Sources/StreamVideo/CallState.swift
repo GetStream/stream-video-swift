@@ -31,9 +31,10 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
 
 @MainActor
 public class CallState: ObservableObject {
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+    @Injected(\.timers) var timers
+
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
     @Published public internal(set) var sessionId: String = ""
@@ -41,7 +42,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var participantsMap = [String: CallParticipant]() {
         didSet { didUpdate(Array(participantsMap.values)) }
     }
-    
+
     @Published public internal(set) var localParticipant: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
     @Published public internal(set) var remoteParticipants: [CallParticipant] = []
@@ -61,7 +62,7 @@ public class CallState: ObservableObject {
             }
         }
     }
-    
+
     @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var settings: CallSettingsResponse?
@@ -85,14 +86,14 @@ public class CallState: ObservableObject {
             )
         }
     }
-    
+
     @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
     @Published public internal(set) var createdAt: Date = .distantPast {
         didSet { if !isInitialized { isInitialized = true }}
     }
-    
+
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var startedAt: Date? {
@@ -100,7 +101,7 @@ public class CallState: ObservableObject {
             setupDurationTimer()
         }
     }
-    
+
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
     @Published public internal(set) var custom: [String: RawJSON] = [:]
@@ -116,12 +117,13 @@ public class CallState: ObservableObject {
             didUpdate(session)
         }
     }
-    
+
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings = CallSettings()
+
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
     @Published public internal(set) var statsReport: CallStatsReport?
@@ -146,14 +148,18 @@ public class CallState: ObservableObject {
     
     var sortComparators = defaultSortPreset {
         didSet {
-            Task { @MainActor in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else {
+                    return
+                }
                 didUpdate(participants)
             }
         }
     }
     
     private var localCallSettingsUpdate = false
-    private var durationTimer: Foundation.Timer?
+    private var durationCancellable: AnyCancellable?
+    private nonisolated let disposableBag = DisposableBag()
 
     /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
     /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`
@@ -497,36 +503,21 @@ public class CallState: ObservableObject {
     
     private func setupDurationTimer() {
         resetTimer()
-        durationTimer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] timer in
-            guard let self else {
-                timer.invalidate()
-                return
-            }
-            Task {
-                await MainActor.run {
-                    self.updateDuration()
+        durationCancellable = timers
+            .timer(for: 1.0)
+            .receive(on: DispatchQueue.main)
+            .compactMap { [weak self] _ in
+                if let startedAt = self?.startedAt {
+                    return Date().timeIntervalSince(startedAt)
+                } else {
+                    return 0
                 }
             }
-        })
+            .assign(to: \.duration, onWeak: self)
     }
     
     private func resetTimer() {
-        durationTimer?.invalidate()
-        durationTimer = nil
-    }
-    
-    @objc private func updateDuration() {
-        guard let startedAt else {
-            update(duration: 0)
-            return
-        }
-        let timeInterval = Date().timeIntervalSince(startedAt)
-        update(duration: timeInterval)
-    }
-    
-    private func update(duration: TimeInterval) {
-        if duration != self.duration {
-            self.duration = duration
-        }
+        durationCancellable?.cancel()
+        durationCancellable = nil
     }
 }

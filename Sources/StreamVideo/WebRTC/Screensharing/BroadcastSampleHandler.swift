@@ -16,6 +16,8 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler, @unchecked Sendable
     /// Core Foundation notification center used for broadcasting notifications.
     private let notificationCenter: CFNotificationCenter
 
+    private let disposableBag = DisposableBag()
+
     /// File path for the socket used in broadcasting.
     private var socketFilePath: String {
         guard let appGroupIdentifier = infoPlistValue(for: BroadcastConstants.broadcastAppGroupIdentifier),
@@ -77,7 +79,7 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler, @unchecked Sendable
     ) {
         switch sampleBufferType {
         case RPSampleBufferType.video:
-            Task {
+            Task(disposableBag: disposableBag) { [weak uploader] in
                 await uploader?.send(sample: sampleBuffer)
             }
         default:

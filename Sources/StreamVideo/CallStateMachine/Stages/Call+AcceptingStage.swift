@@ -59,7 +59,7 @@ extension Call.StateMachine.Stage {
 
         /// Executes the call acceptance process asynchronously.
         private func execute() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
 
                 try? Task.checkCancellation()
@@ -87,7 +87,6 @@ extension Call.StateMachine.Stage {
                     transitionErrorOrLog(error)
                 }
             }
-            .store(in: disposableBag)
         }
     }
 }

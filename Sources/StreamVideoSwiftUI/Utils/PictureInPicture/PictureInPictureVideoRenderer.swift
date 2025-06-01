@@ -87,6 +87,8 @@ final class PictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     private let isLoggingEnabled = false
 
+    private let disposableBag = DisposableBag()
+
     // MARK: - Lifecycle
 
     @available(*, unavailable)
@@ -124,14 +126,15 @@ final class PictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// This method is being called from WebRTC and asks the container to set its size to the track's size.
     nonisolated func setSize(_ size: CGSize) {
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
             trackSize = size
         }
     }
 
     nonisolated func renderFrame(_ frame: RTCVideoFrame?) {
-        Task { @MainActor in
-            guard let frame = frame else {
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self, let frame = frame else {
                 return
             }
 

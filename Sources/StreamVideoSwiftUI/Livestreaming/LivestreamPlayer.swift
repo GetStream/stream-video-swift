@@ -28,7 +28,8 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @Injected(\.colors) var colors
     
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
-    
+    @Injected(\.timers) private var timers
+
     var viewFactory: Factory
     
     /// The policy that defines how users join the livestream.
@@ -62,13 +63,13 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @State var countdown: TimeInterval
     
     @State var livestreamState: LivestreamState
-    
-    @State var cancellables = DisposableBag()
-    
+
     @State var controlsTask: Task<Void, Never>?
     
     @State var recordings: [CallRecording]?
-        
+
+    private let disposableBag = DisposableBag()
+
     /// Initializes a `LivestreamPlayer` with the specified parameters.
     ///
     /// - Parameters:
@@ -155,10 +156,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 let startsAt = state.startsAt,
                 livestreamState == .backstage,
                 timerCancellable == nil {
-                timerCancellable = Timer
-                    .publish(every: 1, on: .main, in: .default)
-                    .autoconnect()
-                    .sinkTask { @MainActor _ in
+                timerCancellable = timers
+                    .timer(for: 1)
+                    .sinkTask(storeIn: disposableBag) { @MainActor _ in
                         countdown = startsAt.timeIntervalSinceNow
                         if countdown <= 0 {
                             stopTimer()
@@ -200,7 +200,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
     
     func toggleAudioOutput() {
-        Task {
+        Task(disposableBag: disposableBag) {
             do {
                 if !muted {
                     try await call.speaker.disableAudioOutput()
@@ -212,12 +212,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 log.error(error)
             }
         }
-        .store(in: cancellables)
     }
     
     func muteLivestreamOnJoin() {
         guard !mutedOnJoin else { return }
-        Task {
+        Task(disposableBag: disposableBag) {
             do {
                 try await call.speaker.disableAudioOutput()
                 mutedOnJoin = true
@@ -225,7 +224,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 log.error(error)
             }
         }
-        .store(in: cancellables)
     }
     
     func stopTimer() {
@@ -400,7 +398,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     }
     
     func joinLivestream() {
-        Task {
+        Task(disposableBag: disposableBag) {
             do {
                 livestreamState = .joining
                 try await call.join(callSettings: CallSettings(audioOn: false, videoOn: false))
@@ -410,12 +408,11 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 log.error("Error joining livestream")
             }
         }
-        .store(in: cancellables)
     }
     
     func leaveLivestream() {
         call.leave()
-        cancellables.removeAll()
+        disposableBag.removeAll()
         livestreamState = .initial
     }
 }

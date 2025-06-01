@@ -41,5 +41,11 @@ extension Call {
                 line: line
             )
         }
+
+        func withLock<T>(
+            _ operation: (Stage, (Stage) -> Void) -> T
+        ) -> T {
+            stateMachine.withLock(operation)
+        }
     }
 }

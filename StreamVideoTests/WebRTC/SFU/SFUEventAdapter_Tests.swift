@@ -578,9 +578,12 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
                 await self.fulfillment(of: [eventExpectation], timeout: defaultTimeout)
             }
             group.addTask {
-                _ = try? await self.stateAdapter.$participants.nextValue(
-                    timeout: defaultTimeout
-                )
+                _ = try? await self
+                    .stateAdapter
+                    .$participants
+                    .nextValue(
+                        timeout: defaultTimeout
+                    )
             }
             await group.waitForAll()
         }

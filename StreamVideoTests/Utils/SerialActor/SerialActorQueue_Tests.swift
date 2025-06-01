@@ -28,6 +28,7 @@ final class SerialActorQueue_Tests: XCTestCase, @unchecked Sendable {
         }
 
         await fulfillment(timeout: defaultTimeout) { self.counter == iterations }
+        XCTAssertEqual(counter, iterations)
     }
 
     // MARK: - cancelAll

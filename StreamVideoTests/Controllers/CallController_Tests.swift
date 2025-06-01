@@ -526,7 +526,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             .transition(MockTestOnlyStage())
 
         await assertTransitionToStage(.blocked) {
-            call.onEvent(
+            await call.onEvent(
                 .coordinatorEvent(
                     .typeBlockedUserEvent(
                         .init(
@@ -550,7 +550,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         subject.call = nil
         await wait(for: 0.5)
 
-        call.onEvent(
+        await call.onEvent(
             .coordinatorEvent(
                 .typeCallSessionParticipantCountsUpdatedEvent(
                     .init(
@@ -574,7 +574,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = Call.dummy(callController: subject)
         await wait(for: 0.5)
 
-        call.onEvent(
+        await call.onEvent(
             .coordinatorEvent(
                 .typeCallSessionParticipantCountsUpdatedEvent(
                     .init(
@@ -601,7 +601,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = Call.dummy(callController: subject)
         await wait(for: 0.5)
 
-        call.onEvent(
+        await call.onEvent(
             .coordinatorEvent(
                 .typeCallSessionParticipantCountsUpdatedEvent(
                     .init(
@@ -628,7 +628,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         let call = Call.dummy(callController: subject)
         await wait(for: 0.5)
 
-        call.onEvent(
+        await call.onEvent(
             .coordinatorEvent(
                 .typeCallSessionParticipantCountsUpdatedEvent(
                     .init(

@@ -11,6 +11,7 @@ final class DemoStatsAdapter {
 
     private var activeCallCancellable: AnyCancellable?
     private var callStatsReportCancellable: AnyCancellable?
+    private let disposableBag = DisposableBag()
 
     @Published private(set) var reports: [CallStatsReport] = []
 
@@ -18,7 +19,7 @@ final class DemoStatsAdapter {
         activeCallCancellable = streamVideo
             .state
             .$activeCall
-            .sinkTask { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
     }
 
     @MainActor
