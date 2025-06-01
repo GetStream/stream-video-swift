@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+#if swift(>=6.0)
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import StreamWebRTC
@@ -1069,3 +1070,4 @@ extension User {
 extension Member {
     var userId: String { id }
 }
+#endif
