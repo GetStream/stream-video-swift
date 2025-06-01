@@ -375,7 +375,7 @@ open class CallViewModel: ObservableObject {
                 callSettings: callSettings
             )
             self.call = call
-            Task(disposableBag: disposableBag) { [weak self] in
+            Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
                 guard let self else { return }
                 do {
                     let callData = try await call.create(
@@ -665,7 +665,7 @@ open class CallViewModel: ObservableObject {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
-        enteringCallTask = Task(disposableBag: disposableBag) { [weak self] in
+        enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
                 log.debug("Starting call")
