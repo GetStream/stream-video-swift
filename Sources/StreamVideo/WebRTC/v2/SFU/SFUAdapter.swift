@@ -445,7 +445,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.tracks = tracks
 
         log.debug(request, subsystems: .sfu)
-
         subjectSendEvent.send(SetPublisherEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: .fastCheckValue { true }) { [weak self] in
             try Task.checkCancellation()

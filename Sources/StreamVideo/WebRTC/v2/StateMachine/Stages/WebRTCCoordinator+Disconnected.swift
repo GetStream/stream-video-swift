@@ -106,7 +106,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func execute() {
             context.sfuEventObserver = nil
             context.disconnectionSource = nil
-            Task(disposableBag: disposableBag) {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
                 let statsAdapter = await context
                     .coordinator?
                     .stateAdapter
