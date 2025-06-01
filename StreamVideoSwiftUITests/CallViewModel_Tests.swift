@@ -566,7 +566,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 1
             ),
-
+            
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .grid,
@@ -588,7 +588,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-
+            
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .grid,
@@ -636,7 +636,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-
+            
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .spotlight,
@@ -658,7 +658,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 3
             ),
-
+            
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .spotlight,
@@ -706,7 +706,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 2
             ),
-
+            
             .init(
                 callParticipantsCount: 3,
                 participantsLayout: .fullScreen,
@@ -728,7 +728,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 isRemoteScreenSharing: true,
                 expectedCount: 3
             ),
-
+            
             .init(
                 callParticipantsCount: 4,
                 participantsLayout: .fullScreen,
