@@ -9,7 +9,6 @@ import Foundation
 /// and proximity state observation. Only active on phone devices.
 final class ProximityManager: @unchecked Sendable {
 
-    @Injected(\.streamVideo) private var streamVideo
     @Injected(\.currentDevice) private var currentDevice
     @Injected(\.proximityMonitor) private var proximityMonitor
 
@@ -21,26 +20,28 @@ final class ProximityManager: @unchecked Sendable {
     /// Thread-safe storage for registered proximity policies
     @Atomic private var policies: [ObjectIdentifier: any ProximityPolicy] = [:]
 
-    /// Cancellable for active call observation
-    private var activeCallCancellable: AnyCancellable?
     /// Cancellable for proximity state observation
     private var observationCancellable: AnyCancellable?
+    private let disposableBag = DisposableBag()
 
     /// Creates a new proximity manager for the specified call
     /// - Parameter call: Call instance to manage proximity for
-    init(_ call: Call) {
+    init(_ call: Call, activeCallPublisher: AnyPublisher<Call?, Never>) {
         self.call = call
 
         if isSupported {
-            activeCallCancellable = streamVideo
-                .state
-                .$activeCall
-                .sinkTask { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
+            activeCallPublisher
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+                    self?.didUpdateActiveCall($0)
+                }
+                .store(in: disposableBag)
+        } else {
+            fatalError()
         }
     }
 
     deinit {
-        activeCallCancellable?.cancel()
+        disposableBag.removeAll()
         observationCancellable?.cancel()
     }
 

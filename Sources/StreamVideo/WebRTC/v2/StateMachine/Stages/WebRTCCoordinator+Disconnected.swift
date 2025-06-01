@@ -34,6 +34,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         private var internetObservationCancellable: AnyCancellable?
         private var timeInStageCancellable: AnyCancellable?
+        private var disposableBag = DisposableBag()
 
         /// Initializes a new instance of `DisconnectedStage`.
         /// - Parameter context: The context for the disconnected stage.
@@ -105,7 +106,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func execute() {
             context.sfuEventObserver = nil
             context.disconnectionSource = nil
-            Task {
+            Task(disposableBag: disposableBag) {
                 let statsAdapter = await context
                     .coordinator?
                     .stateAdapter

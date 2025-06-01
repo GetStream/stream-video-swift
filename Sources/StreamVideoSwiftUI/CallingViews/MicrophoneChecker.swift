@@ -16,7 +16,7 @@ public final class MicrophoneChecker: ObservableObject {
     private let valueLimit: Int
     private let audioNormaliser = AudioValuePercentageNormaliser()
     private let audioRecorder = InjectedValues[\.callAudioRecorder]
-    private let serialQueue = SerialActorQueue()
+    private let disposableBag = DisposableBag()
 
     private var updateMetersCancellable: AnyCancellable?
 
@@ -47,46 +47,27 @@ public final class MicrophoneChecker: ObservableObject {
     /// - ignoreActiveCall: Instructs the internal AudioRecorder to ignore the existence of an activeCall
     /// and start recording anyway.
     public func startListening(ignoreActiveCall: Bool = false) async {
-        do {
-            try await serialQueue.sync { [weak self] in
-                guard let self else {
-                    return
-                }
-                await audioRecorder.startRecording(ignoreActiveCall: ignoreActiveCall)
-                if updateMetersCancellable == nil {
-                    updateMetersCancellable = audioRecorder
-                        .metersPublisher
-                        .compactMap { [weak self] in self?.normaliseAndAppend($0) }
-                        .receive(on: DispatchQueue.main)
-                        .assign(to: \.audioLevels, onWeak: self)
-                }
-            }
-        } catch {
-            log.error(error)
+        await audioRecorder.startRecording(ignoreActiveCall: ignoreActiveCall)
+        if updateMetersCancellable == nil {
+            updateMetersCancellable = audioRecorder
+                .metersPublisher
+                .compactMap { [weak self] in self?.normaliseAndAppend($0) }
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.audioLevels, onWeak: self)
         }
     }
     
     /// Stops listening to audio updates.
     public func stopListening() async {
-        do {
-            try await
-                serialQueue.sync { [weak self] in
-                    guard let self else {
-                        return
-                    }
-                    await audioRecorder.stopRecording()
-                    updateMetersCancellable?.cancel()
-                    updateMetersCancellable = nil
-                    _ = await Task { @MainActor [weak self] in
-                        guard let self else {
-                            return
-                        }
-                        audioLevels = [Float](repeating: 0.0, count: valueLimit)
-                    }.result
-                }
-        } catch {
-            log.error(error)
-        }
+        await audioRecorder.stopRecording()
+        updateMetersCancellable?.cancel()
+        updateMetersCancellable = nil
+        _ = await Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+            audioLevels = [Float](repeating: 0.0, count: valueLimit)
+        }.result
     }
     
     // MARK: - private

@@ -39,7 +39,7 @@ final class CallsController_Tests: ControllerTestCase, @unchecked Sendable {
         streamVideo?.eventNotificationCenter.process(event)
                 
         // Then
-        try await XCTAssertWithDelay(callsController.calls.count == 3)
+        await fulfillment { callsController.calls.count == 3 }
     }
     
     func test_callsController_updatedCall() async throws {
