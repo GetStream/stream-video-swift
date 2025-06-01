@@ -23,7 +23,6 @@ final class CallViewsTests: StreamTestCase {
     }
     
     func testOneParticipantOnTheCall() throws {
-        LogConfig.level = .debug
         linkToScenario(withId: 1766)
         
         try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")

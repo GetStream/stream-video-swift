@@ -7,8 +7,12 @@ import Foundation
 @testable import StreamVideo
 
 final class MockAppStateAdapter: AppStateProviding, @unchecked Sendable {
-    var stubbedState: ApplicationState = .foreground
+    var stubbedState: ApplicationState {
+        get { subject.value }
+        set { subject.send(newValue) }
+    }
 
-    var state: ApplicationState { stubbedState }
-    var statePublisher: AnyPublisher<ApplicationState, Never> { Just(state).eraseToAnyPublisher() }
+    lazy var subject: CurrentValueSubject<ApplicationState, Never> = .init(.foreground)
+    var state: ApplicationState { subject.value }
+    var statePublisher: AnyPublisher<ApplicationState, Never> { subject.eraseToAnyPublisher() }
 }

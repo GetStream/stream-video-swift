@@ -49,8 +49,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Provides access to the speaker.
     public let speaker: SpeakerManager
     /// Provides access to device's proximity
-    private lazy var proximity: ProximityManager = .init(self)
+    private lazy var proximity: ProximityManager = .init(
+        self,
+        activeCallPublisher: streamVideo.state.$activeCall.eraseToAnyPublisher()
+    )
 
+    private let disposableBag = DisposableBag()
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
     private var cancellables = DisposableBag()
@@ -102,7 +106,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             coordinatorClient: coordinatorClient,
             callController: callController
         )
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             self?.state.update(from: response)
         }
     }
@@ -115,7 +119,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func configure(callSettings: CallSettings?) {
         /// If we received a non-nil initial callSettings, we updated them here.
         if let callSettings {
-            Task { @MainActor [weak self] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 self?.state.update(callSettings: callSettings)
             }
         }
@@ -149,19 +153,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
-        try await callOperationSerialQueue.sync { [weak self] in
-            guard let self else {
-                throw ClientError()
-            }
-            let currentStage = stateMachine.currentStage
-
+        let result: Any? = stateMachine.withLock { currentStage, transitionHandler in
             if
                 currentStage.id == .joined,
                 case let .joined(joinResponse) = currentStage.context.output {
                 return joinResponse
             } else if
                 currentStage.id == .joining {
-                return try await stateMachine
+                return stateMachine
                     .publisher
                     .tryCompactMap {
                         switch $0.id {
@@ -188,10 +187,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                             return nil
                         }
                     }
-                    .nextValue(timeout: CallConfiguration.timeout.join)
+                    .eraseToAnyPublisher()
             } else {
                 let deliverySubject = PassthroughSubject<JoinCallResponse, Error>()
-                stateMachine.transition(
+                transitionHandler(
                     .joining(
                         self,
                         input: .join(
@@ -206,8 +205,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                         )
                     )
                 )
-                return try await deliverySubject.nextValue(timeout: CallConfiguration.timeout.join)
+                return deliverySubject.eraseToAnyPublisher()
             }
+        }
+
+        if let joinResponse = result as? JoinCallResponse {
+            return joinResponse
+        } else if let publisher = result as? AnyPublisher<JoinCallResponse, Error> {
+            return try await publisher.nextValue(timeout: CallConfiguration.timeout.join)
+        } else {
+            throw ClientError("Call was unable to join call.")
         }
     }
 
@@ -234,8 +241,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            Task { @MainActor in
-                streamVideo.state.ringingCall = self
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                self?.streamVideo.state.ringingCall = self
             }
         }
         return response
@@ -336,8 +343,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            Task { @MainActor in
-                streamVideo.state.ringingCall = self
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                self?.streamVideo.state.ringingCall = self
             }
         }
         return response.call
@@ -548,7 +555,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // Reset the activeAudioFilter
         setAudioFilter(nil)
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             if streamVideo.state.ringingCall?.cId == cId {
                 streamVideo.state.ringingCall = nil
             }
@@ -656,7 +666,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             granted: [request.permission],
             revoked: []
         )
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             self.state.removePermissionRequest(request: request)
         }
@@ -1389,7 +1399,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             if reconnectionStatus != self.state.reconnectionStatus {
                 self.state.reconnectionStatus = reconnectionStatus
@@ -1398,7 +1408,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     internal func update(recordingState: RecordingState) {
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             self?.state.recordingState = recordingState
         }
     }
@@ -1410,7 +1420,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard videoEvent.forCall(cid: cId) else {
             return
         }
-        await Task { @MainActor [weak self] in
+        await Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             self.state.updateState(from: videoEvent)
         }.value
@@ -1485,13 +1495,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToOwnCapabilitiesChanges() {
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             self
                 .state
                 .$ownCapabilities
                 .removeDuplicates()
-                .sinkTask { [weak self] in await self?.callController.updateOwnCapabilities(ownCapabilities: $0) }
+                .sinkTask(storeIn: disposableBag) { [weak self] in
+                    await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
+                }
                 .store(in: cancellables)
         }
     }
@@ -1499,7 +1511,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func subscribeToLocalCallSettingsChanges() {
         speaker.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
                 let newState = self.state.callSettings.withUpdatedSpeakerState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1508,7 +1521,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
                 let newState = self.state.callSettings.withUpdatedAudioOutputState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1517,7 +1531,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         camera.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
                 let newState = self.state.callSettings.withUpdatedVideoState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1526,7 +1541,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         camera.$direction.dropFirst().sink { [weak self] position in
             guard let self else { return }
-            executeOnMain {
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
                 let newState = self.state.callSettings.withUpdatedCameraPosition(position)
                 self.state.update(callSettings: newState)
             }
@@ -1535,7 +1551,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         microphone.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
-            executeOnMain {
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
                 let newState = self.state.callSettings.withUpdatedAudioState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
@@ -1544,7 +1561,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             Publishers
                 .CombineLatest(self.state.$session, self.state.$settings)
@@ -1557,7 +1574,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToTranscriptionSettingsChanges() {
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             Publishers
                 .CombineLatest(self.state.$session, self.state.$settings)
@@ -1570,7 +1587,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToClosedCaptionsSettingsChanges() {
-        executeOnMain { [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             Publishers
                 .CombineLatest(self.state.$session, self.state.$settings)
@@ -1645,7 +1662,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 switch value.mode {
                 case .disabled where state.transcribing == true:
@@ -1671,7 +1691,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 switch mode {
                 case .disabled where state.captioning == true:

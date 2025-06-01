@@ -20,13 +20,15 @@ struct ScreenShareSession {
 /// A class that provides and manages the active screen sharing session.
 final class ScreenShareSessionProvider: @unchecked Sendable {
 
+    private let disposableBag = DisposableBag()
+
     /// The currently active screen sharing session, if any.
     ///
     /// When set to nil, it automatically stops the capture of the previous session.
     var activeSession: ScreenShareSession? {
         didSet {
             if activeSession == nil {
-                Task {
+                Task(disposableBag: disposableBag) {
                     do {
                         try await oldValue?.capturer.stopCapture()
                     } catch {

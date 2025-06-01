@@ -46,17 +46,14 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// Cancellable for the delivery subscription.
     private var deliveryCancellable: AnyCancellable?
 
-    /// The currently active task for collecting statistics.
-    private var activeCollectionTask: Task<Void, Never>?
-
-    /// The currently active task for delivering statistics.
-    private var activeDeliveryTask: Task<Void, Never>?
-
     /// A helper object for building call statistics reports.
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
     /// A subject for publishing the latest collected statistics report.
     private let latestReportSubject = CurrentValueSubject<CallStatsReport?, Never>(nil)
+
+    private let disposableBag = DisposableBag()
+    private let processingQueue = SerialActorQueue()
 
     /// A publisher for the latest statistics report.
     var latestReportPublisher: AnyPublisher<CallStatsReport, Never> {
@@ -85,10 +82,9 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     deinit {
         sfuAdapter = nil
         // Cancel all active tasks and subscriptions
-        activeCollectionTask?.cancel()
         collectionCancellable?.cancel()
         deliveryCancellable?.cancel()
-        activeDeliveryTask?.cancel()
+        disposableBag.removeAll()
     }
 
     // MARK: - Private helpers
@@ -98,10 +94,9 @@ final class WebRTCStatsReporter: @unchecked Sendable {
     /// This method cancels any existing tasks and subscriptions, and sets up new ones if an adapter
     /// is provided.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
-        activeDeliveryTask?.cancel()
         deliveryCancellable?.cancel()
-        activeCollectionTask?.cancel()
         collectionCancellable?.cancel()
+        disposableBag.removeAll()
 
         guard sfuAdapter != nil else {
             return
@@ -125,7 +120,7 @@ final class WebRTCStatsReporter: @unchecked Sendable {
         collectionCancellable = timers
             .timer(for: interval)
             .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
-            .sink { [weak self] _ in self?.collectStats() }
+            .sinkTask(queue: processingQueue) { [weak self] _ in await self?.collectStats() }
 
         log.debug(
             "Stats collection is now scheduled with interval:\(interval).",
@@ -147,61 +142,48 @@ final class WebRTCStatsReporter: @unchecked Sendable {
             .log(.debug, subsystems: .webRTC) { [weak self] in
                 "Will deliver stats report (timestamp:\($0.timestamp)) on \(self?.sfuAdapter?.hostname ?? "-")."
             }
-            .sink { [weak self] in self?.deliverStats(report: $0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.deliverStats(report: $0) }
     }
 
     /// Collects statistics from the publisher and subscriber peer connections.
     ///
     /// This method creates a new task for collecting stats, cancelling any existing collection task.
-    private func collectStats() {
-        activeCollectionTask?.cancel()
-        activeCollectionTask = Task { [weak self] in
-            guard
-                let self,
-                let hostname = sfuAdapter?.hostname
-            else {
-                return
-            }
+    private func collectStats() async {
+        guard
+            let hostname = sfuAdapter?.hostname
+        else {
+            return
+        }
 
-            do {
-                async let statsPublisher = publisher?.statsReport() ?? .init(nil)
-                async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
+        do {
+            try Task.checkCancellation()
 
-                try Task.checkCancellation()
-                let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
+            let report = callStatisticsReporter.buildReport(
+                publisherReport: try await publisher?.statsReport() ?? .init(nil),
+                subscriberReport: try await subscriber?.statsReport() ?? .init(nil),
+                datacenter: hostname
+            )
 
-                let report = callStatisticsReporter.buildReport(
-                    publisherReport: result.first ?? .init(nil),
-                    subscriberReport: result.last ?? .init(nil),
-                    datacenter: hostname
-                )
-
-                try Task.checkCancellation()
-                latestReportSubject.send(report)
-            } catch {
-                log.error(error, subsystems: .webRTC)
-            }
+            try Task.checkCancellation()
+            latestReportSubject.send(report)
+        } catch {
+            log.error(error, subsystems: .webRTC)
         }
     }
 
     /// Delivers the collected statistics to the SFU adapter.
     ///
     /// - Parameter report: The statistics report to deliver.
-    private func deliverStats(report: CallStatsReport) {
-        activeDeliveryTask?.cancel()
-        activeDeliveryTask = Task { [weak self] in
-            do {
-                guard let self else { return }
-
-                try Task.checkCancellation()
-                try await sfuAdapter?.sendStats(
-                    report,
-                    for: sessionID,
-                    thermalState: thermalStateObserver.state
-                )
-            } catch {
-                log.error(error, subsystems: .webRTC)
-            }
+    private func deliverStats(report: CallStatsReport) async {
+        do {
+            try Task.checkCancellation()
+            try await sfuAdapter?.sendStats(
+                report,
+                for: sessionID,
+                thermalState: thermalStateObserver.state
+            )
+        } catch {
+            log.error(error, subsystems: .webRTC)
         }
     }
 }

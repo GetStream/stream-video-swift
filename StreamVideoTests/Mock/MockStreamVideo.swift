@@ -20,7 +20,7 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
 
     override var state: StreamVideo.State {
         get { self[dynamicMember: \.state] }
-        set { _ = newValue }
+        set { stub(for: \.state, with: newValue) }
     }
 
     init(
@@ -74,5 +74,17 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
         if let error = stubbedFunction[.connect] as? Error {
             throw error
         }
+    }
+
+    func process(
+        _ event: WrappedEvent,
+        postNotification: Bool = true,
+        completion: (@Sendable() -> Void)? = nil
+    ) {
+        eventNotificationCenter.process(
+            event,
+            postNotification: postNotification,
+            completion: completion
+        )
     }
 }

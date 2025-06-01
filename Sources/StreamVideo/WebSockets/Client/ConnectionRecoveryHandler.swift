@@ -26,6 +26,7 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler, @unchec
     private let internetConnection: InternetConnection
     private let reconnectionTimerType: Timer.Type
     private let keepConnectionAliveInBackground: Bool
+    private let disposableBag = DisposableBag()
     nonisolated(unsafe) private var reconnectionStrategy: RetryStrategy
     nonisolated(unsafe) private var reconnectionTimer: TimerControl?
     nonisolated(unsafe) private var reconnectionPolicies: [AutomaticReconnectionPolicy]
@@ -92,7 +93,8 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler, @unchec
 
 private extension DefaultConnectionRecoveryHandler {
     func subscribeOnNotifications() {
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
             backgroundTaskScheduler?.startListeningForAppStateUpdates(
                 onEnteringBackground: { [weak self] in self?.appDidEnterBackground() },
                 onEnteringForeground: { [weak self] in self?.appDidBecomeActive() }
@@ -108,7 +110,7 @@ private extension DefaultConnectionRecoveryHandler {
     }
     
     func unsubscribeFromNotifications() {
-        Task { @MainActor [backgroundTaskScheduler] in
+        Task(disposableBag: disposableBag) { @MainActor [backgroundTaskScheduler] in
             backgroundTaskScheduler?.stopListeningForAppStateUpdates()
         }
 
@@ -124,12 +126,12 @@ private extension DefaultConnectionRecoveryHandler {
 
 extension DefaultConnectionRecoveryHandler {
     private func appDidBecomeActive() {
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             log.debug("App -> ✅", subsystems: .webSocket)
 
-            backgroundTaskScheduler?.endTask()
+            self?.backgroundTaskScheduler?.endTask()
 
-            reconnectIfNeeded()
+            self?.reconnectIfNeeded()
         }
     }
     
@@ -149,7 +151,7 @@ extension DefaultConnectionRecoveryHandler {
         
         guard let scheduler = backgroundTaskScheduler else { return }
                 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             let succeed = scheduler.beginTask { [weak self] in
                 log.debug("Background task -> ❌", subsystems: .webSocket)
 
@@ -160,7 +162,7 @@ extension DefaultConnectionRecoveryHandler {
                 log.debug("Background task -> ✅", subsystems: .webSocket)
             } else {
                 // Can't initiate a background task, close the connection
-                disconnectIfNeeded()
+                self?.disconnectIfNeeded()
             }
         }
     }

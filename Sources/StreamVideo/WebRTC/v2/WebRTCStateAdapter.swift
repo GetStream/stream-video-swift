@@ -83,8 +83,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
 
-    /// Subject to handle participant updates.
-    private var previousParticipantOperation: Task<Void, Never>?
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
+//    /// Subject to handle participant updates.
+//    private var previousParticipantOperation: Task<Void, Never>?
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -118,8 +121,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
 
-        Task {
-            await configureAudioSession()
+        Task(disposableBag: disposableBag) { [weak self] in
+            await self?.configureAudioSession()
         }
     }
 
@@ -162,7 +165,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
         self.sfuAdapter = value
-        statsReporter?.sfuAdapter = sfuAdapter
+        statsReporter?.sfuAdapter = value
     }
 
     /// Sets the number of participants in the call.
@@ -257,17 +260,17 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         publisher
             .trackPublisher
             .log(.debug, subsystems: .peerConnectionPublisher)
-            .sinkTask(storeIn: peerConnectionsDisposableBag) { [weak self] in
-                await self?.peerConnectionReceivedTrackEvent(.publisher, event: $0)
-            }
+            .sinkTask(on: self, storeIn: disposableBag, handler: { executor, event in
+                await executor.peerConnectionReceivedTrackEvent(.publisher, event: event)
+            })
             .store(in: peerConnectionsDisposableBag)
 
         subscriber
             .trackPublisher
             .log(.debug, subsystems: .peerConnectionSubscriber)
-            .sinkTask(storeIn: peerConnectionsDisposableBag) { [weak self] in
-                await self?.peerConnectionReceivedTrackEvent(.subscriber, event: $0)
-            }
+            .sinkTask(on: self, storeIn: disposableBag, handler: { executor, event in
+                await executor.peerConnectionReceivedTrackEvent(.subscriber, event: event)
+            })
             .store(in: peerConnectionsDisposableBag)
 
         /// We setUp and restoreScreenSharing on  the publisher in order to prepare all required tracks
@@ -473,32 +476,32 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         lineNumber: UInt = #line
     ) {
         /// Creates a new asynchronous task for the operation.
-        let newTask = Task { [previousParticipantOperation] in
-            /// Awaits the result of the previous participant operation.
-            _ = await previousParticipantOperation?.result
+//        let newTask = Task { [previousParticipantOperation] in
+//            /// Awaits the result of the previous participant operation.
+//            _ = await previousParticipantOperation?.result
 
-            /// Retrieves the current participants.
-            let current = participants
-            /// Applies the operation to get the next state of participants.
-            let next = operation(current)
-            /// Assigns media tracks to the participants.
-            let updated = assignTracks(on: next)
-            /// Sends the updated participants to observers while helping publishing streamlined updates.
-            set(participants: updated)
-            /// Updates the call settings from the participants update.
-            updateCallSettingsFromParticipants(Array(updated.values))
+        /// Retrieves the current participants.
+        let current = participants
+        /// Applies the operation to get the next state of participants.
+        let next = operation(current)
+        /// Assigns media tracks to the participants.
+        let updated = assignTracks(on: next)
+        /// Sends the updated participants to observers while helping publishing streamlined updates.
+        set(participants: updated)
+        /// Updates the call settings from the participants update.
+        updateCallSettingsFromParticipants(Array(updated.values))
 
-            /// Logs the completion of the participant operation.
-            log.debug(
-                "Participant operation completed.",
-                functionName: functionName,
-                fileName: fileName,
-                lineNumber: lineNumber
-            )
-        }
-
-        /// Stores the new task as the previous operation for chaining.
-        previousParticipantOperation = newTask
+        /// Logs the completion of the participant operation.
+        log.debug(
+            "Participant operation completed.",
+            functionName: functionName,
+            fileName: fileName,
+            lineNumber: lineNumber
+        )
+//        }
+//
+//        /// Stores the new task as the previous operation for chaining.
+//        previousParticipantOperation = newTask
     }
 
     /// Assigns media tracks to participants based on their media type.
@@ -611,7 +614,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
         $callSettings
             .removeDuplicates()
-            .sinkTask { [weak audioSession] in
+            .sinkTask(storeIn: disposableBag) { [weak audioSession] in
                 do {
                     try await audioSession?.didUpdateCallSettings($0)
                 } catch {
@@ -622,7 +625,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
         $ownCapabilities
             .removeDuplicates()
-            .sinkTask { [weak audioSession] in
+            .sinkTask(storeIn: disposableBag) { [weak audioSession] in
                 do {
                     try await audioSession?.didUpdateOwnCapabilities($0)
                 } catch {
@@ -638,7 +641,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         _ adapter: StreamAudioSession,
         callSettings: CallSettings
     ) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
             await self.set(callSettings: callSettings)
             log.debug(
                 "AudioSession delegated updated call settings: \(callSettings)",

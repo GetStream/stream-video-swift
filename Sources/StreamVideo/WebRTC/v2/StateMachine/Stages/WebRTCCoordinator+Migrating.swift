@@ -47,7 +47,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .disconnected:
-                Task {
+                Task(disposableBag: disposableBag) { [weak self] in
+                    guard let self else { return }
                     do {
                         guard context.coordinator != nil else {
                             throw ClientError(
@@ -93,7 +94,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         transitionDisconnectOrError(error)
                     }
                 }
-                .store(in: disposableBag)
                 return self
             default:
                 return nil
