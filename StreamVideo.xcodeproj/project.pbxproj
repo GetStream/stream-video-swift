@@ -352,6 +352,10 @@
 		408D29A42B6D251600885473 /* UIView+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29A32B6D251600885473 /* UIView+Snapshot.swift */; };
 		408D29AD2B6D680D00885473 /* SnapshotTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29AB2B6D638100885473 /* SnapshotTrigger.swift */; };
 		408D29AE2B6D681000885473 /* SnapshotTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29AB2B6D638100885473 /* SnapshotTrigger.swift */; };
+		408F62BE2DEC3B3E00D534FA /* JoinCallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */; };
+		408F62BF2DEC3BC100D534FA /* Credentials+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */; };
+		408F62C02DEC3BFF00D534FA /* SFUResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B62BCD941600ACF18F /* SFUResponse+Dummy.swift */; };
+		408F62C12DEC57BD00D534FA /* GetCallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097B37D2BF4B06A0057992D /* GetCallResponse+Dummy.swift */; };
 		40901A692AE8018900B6831D /* mock-profile-image.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 40901A682AE8018900B6831D /* mock-profile-image.jpg */; };
 		409145EB2B68FDD2007F3C17 /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409145EA2B68FDD2007F3C17 /* ReadableContentGuide.swift */; };
 		409145FA2B68FEF0007F3C17 /* ThermalStateViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409145EE2B68FEF0007F3C17 /* ThermalStateViewModifier.swift */; };
@@ -8178,6 +8182,7 @@
 				40B48C572D1588DB002C4EAB /* Stream_Video_Sfu_Models_TrackInfo+Dummy.swift in Sources */,
 				82FF40B72A17C6CD00B4D95E /* ReconnectionView_Tests.swift in Sources */,
 				843061012D38203D000E14D5 /* SessionSettingsResponse+Dummy.swift in Sources */,
+				408F62C12DEC57BD00D534FA /* GetCallResponse+Dummy.swift in Sources */,
 				829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */,
 				829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */,
 				82E3BA4A2A0BAE33001AB93E /* UniqueValues.swift in Sources */,
@@ -8189,6 +8194,7 @@
 				82E3BA372A0BAD59001AB93E /* StreamVideo_Mock.swift in Sources */,
 				40F0C3AC2BC8138A00AB75AD /* ReusePool_Tests.swift in Sources */,
 				82E3BA442A0BAE0F001AB93E /* EventDecoder_Mock.swift in Sources */,
+				408F62BF2DEC3BC100D534FA /* Credentials+Dummy.swift in Sources */,
 				409AF6F32DAFF19900EE7BF6 /* PictureInPictureReconnectionViewTests.swift in Sources */,
 				82FF40B52A17C6C200B4D95E /* CallControlsView_Tests.swift in Sources */,
 				409AF6EE2DAFE5D400EE7BF6 /* MockInternetConnection.swift in Sources */,
@@ -8214,6 +8220,7 @@
 				40245F4E2BE2746300FCF075 /* CallSettingsResponse+Dummy.swift in Sources */,
 				40245F4F2BE2746300FCF075 /* RTMPIngress+Dummy.swift in Sources */,
 				403CA9BC2CCA548D001A88C2 /* Stream_Video_Sfu_Event_VideoLayerSetting+Dummy.swift in Sources */,
+				408F62BE2DEC3B3E00D534FA /* JoinCallResponse+Dummy.swift in Sources */,
 				40245F502BE2746300FCF075 /* VideoSettings+Dummy.swift in Sources */,
 				40245F512BE2746300FCF075 /* HLSSettingsResponse+Dummy.swift in Sources */,
 				40245F522BE2746300FCF075 /* TargetResolution+Dummy.swift in Sources */,
@@ -8249,6 +8256,7 @@
 				40B31AA82D10594F005FB448 /* PublishOptions+Dummy.swift in Sources */,
 				40AAD1982D2EFED200D10330 /* Stream_Video_Sfu_Event_VideoSender+Dummy.swift in Sources */,
 				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
+				408F62C02DEC3BFF00D534FA /* SFUResponse+Dummy.swift in Sources */,
 				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
 				82FF40CA2A17C76400B4D95E /* MicrophoneCheckView_Tests.swift in Sources */,
 				8251E6302A17BEEF00E7257A /* ImageFactory.swift in Sources */,

@@ -103,11 +103,7 @@ open class CallViewModel: ObservableObject {
     @Published public var moreControlsShown = false
 
     /// List of the outgoing call members.
-    @Published public var outgoingCallMembers = [Member]() {
-        willSet {
-            _ = 0
-        }
-    }
+    @Published public var outgoingCallMembers = [Member]()
 
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
@@ -644,6 +640,7 @@ open class CallViewModel: ObservableObject {
         setCallingState(.idle)
         isMinimized = false
         localVideoPrimary = false
+        hasAcceptedCall = false
         Task { await audioRecorder.stopRecording() }
 
         // Reset the CallSettings so that the next Call will be joined
@@ -832,9 +829,14 @@ open class CallViewModel: ObservableObject {
         }
 
         switch callingState {
-        case let .incoming(incomingCall)
-            where event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type) && event.user?.id == streamVideo.user
-            .id && !hasAcceptedCall:
+        case let .incoming(incomingCall):
+            guard
+                event.callCid == callCid(from: incomingCall.id, callType: incomingCall.type),
+                event.user?.id == streamVideo.user.id,
+                hasAcceptedCall == false
+            else {
+                break
+            }
             /// If the call that was accepted is the incoming call we are presenting, then we reject
             /// and set the activeCall to the current one in order to reset the callingState to
             /// inCall or idle.
