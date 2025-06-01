@@ -403,7 +403,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         mockPeerConnection.stub(
             for: .offer,
             with: StubVariantResultProvider { iteration in
-                iteration == 1 ? offerA : offerB
+                iteration == 0 ? offerA : offerB
             }
         )
 
@@ -425,20 +425,19 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             mockPeerConnection?.timesCalled(.setLocalDescription) == 2
         }
 
-        XCTAssertEqual(
+        let expected = [offerA.sdp, offerB.sdp]
+        let recordedInput = try XCTUnwrap(
             mockPeerConnection.recordedInputPayload(
                 RTCSessionDescription.self,
                 for: .setLocalDescription
-            )?.first?.sdp,
-            offerA.sdp
+            )?.filter { $0.sdp.isEmpty == false }
         )
-        XCTAssertEqual(
-            mockPeerConnection.recordedInputPayload(
-                RTCSessionDescription.self,
-                for: .setLocalDescription
-            )?.last?.sdp,
-            offerB.sdp
-        )
+        var actual: [String] = []
+        for item in recordedInput {
+            actual.append(item.sdp)
+        }
+
+        XCTAssertEqual(actual, expected)
     }
 
     // MARK: subscriber

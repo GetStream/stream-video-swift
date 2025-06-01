@@ -65,7 +65,7 @@ extension Call.StateMachine.Stage {
 
         /// Executes the call rejection process asynchronously.
         private func execute() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
 
                 try? Task.checkCancellation()
@@ -90,7 +90,7 @@ extension Call.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     if streamVideo.state.ringingCall?.cId == call.cId {
-                        await Task { @MainActor [weak streamVideo] in
+                        await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
                             streamVideo?.state.ringingCall = nil
                         }.value
                     }
@@ -107,7 +107,6 @@ extension Call.StateMachine.Stage {
                     transitionErrorOrLog(error)
                 }
             }
-            .store(in: disposableBag)
         }
     }
 }

@@ -12,8 +12,8 @@ import SnapshotTesting
 final class ParticipantsGridLayout_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
     private var mockedOrientation: StreamDeviceOrientation! = .portrait(isUpsideDown: false)
-    private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init {
-        await self.mockedOrientation
+    private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init { @MainActor in
+        self.mockedOrientation
     }
 
     private lazy var callController: CallController_Mock! = CallController_Mock(

@@ -253,6 +253,12 @@ struct DebugMenu: View {
                 label: "Performance Tracker"
             ) { self.performanceTrackerVisibility = $0 }
 
+            makeMenu(
+                for: [.debug, .info, .warning, .error],
+                currentValue: LogConfig.level,
+                label: "Log Level"
+            ) { LogConfig.level = $0 }
+
             Button {
                 isLogsViewerVisible = true
             } label: {
@@ -497,6 +503,24 @@ struct DebugMenu: View {
             }
         } label: {
             Text(label)
+        }
+    }
+}
+
+extension LogLevel: Debuggable {
+    var title: String {
+        switch self {
+        case .debug:
+            return "Debug"
+
+        case .info:
+            return "Info"
+
+        case .warning:
+            return "Warning"
+
+        case .error:
+            return "Error"
         }
     }
 }

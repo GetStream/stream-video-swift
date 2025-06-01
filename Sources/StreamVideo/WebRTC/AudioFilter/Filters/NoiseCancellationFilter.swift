@@ -22,6 +22,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     private let releaseClosure: () -> Void
     private var activeCallCancellable: AnyCancellable?
     private let serialQueue = SerialActorQueue()
+    private let disposableBag = DisposableBag()
     private weak var activeCall: Call? {
         didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) }
     }
@@ -58,7 +59,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     ///   - sampleRate: The sample rate in Hz.
     ///   - channels: The number of audio channels.
     public func initialize(sampleRate: Int, channels: Int) {
-        serialQueue.async { [weak self] in
+        serialQueue.async { @MainActor [weak self] in
             guard let self, !isActive else { return }
             self.initializeClosure(sampleRate, channels)
             self.isActive = true
@@ -127,8 +128,8 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     }
 
     private func stopNoiseCancellation(for call: Call?) async {
-        Task { @MainActor in
-            isActive = false
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            self?.isActive = false
         }
         releaseClosure() // Invoke the release closure.
         log.debug("AudioFilter:\(id) is now inactive 🔴.")
