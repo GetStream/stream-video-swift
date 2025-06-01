@@ -962,7 +962,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
             members: participants
         )
 
-        await assertCallingState(.inCall)
+        await assertCallingState(.inCall, file: file, line: line)
     }
 
     private struct ParticipantsScenario {
