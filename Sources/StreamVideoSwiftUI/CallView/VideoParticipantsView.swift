@@ -382,19 +382,25 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
                     }
                 )
                 .modifier(Rotation3DEffectViewModifier(participant: participant, call: call))
+                .overlay(participantAvatarView)
             } else {
-                CallParticipantImageView(
-                    viewFactory: viewFactory,
-                    id: participant.id,
-                    name: participant.name,
-                    imageURL: participant.profileImageURL
-                )
-                .frame(width: availableFrame.width, height: availableFrame.height)
+                Color.clear
             }
         }
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
+        .overlay(participantAvatarView)
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
+    }
+
+    @ViewBuilder
+    private var participantAvatarView: some View {
+        CallParticipantImageView(
+            viewFactory: viewFactory,
+            id: participant.id,
+            name: participant.name,
+            imageURL: participant.profileImageURL
+        )
     }
 }
 
