@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.24.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.24.0)
+_June 02, 2025_
+
 ### ✅ Added
 - `CallViewController` was updated to accept the `video` flag when starting a call. [#811](https://github.com/GetStream/stream-video-swift/pull/811)
 - `team` property when creating calls through `CallViewModel` and/or `CallViewController` [#817](https://github.com/GetStream/stream-video-swift/pull/817)
