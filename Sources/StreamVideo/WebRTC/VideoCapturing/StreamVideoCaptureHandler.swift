@@ -24,7 +24,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
 
     init(
         source: RTCVideoCapturerDelegate,
-        handleRotation: Bool = false
+        handleRotation: Bool = true
     ) {
         self.source = source
         self.handleRotation = handleRotation
