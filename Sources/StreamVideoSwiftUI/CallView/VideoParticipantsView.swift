@@ -395,12 +395,16 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
 
     @ViewBuilder
     private var participantAvatarView: some View {
-        CallParticipantImageView(
-            viewFactory: viewFactory,
-            id: participant.id,
-            name: participant.name,
-            imageURL: participant.profileImageURL
-        )
+        if showVideo {
+            EmptyView()
+        } else {
+            CallParticipantImageView(
+                viewFactory: viewFactory,
+                id: participant.id,
+                name: participant.name,
+                imageURL: participant.profileImageURL
+            )
+        }
     }
 }
 
