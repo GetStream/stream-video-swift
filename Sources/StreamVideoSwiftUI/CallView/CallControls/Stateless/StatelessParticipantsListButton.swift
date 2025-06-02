@@ -25,7 +25,7 @@ extension Publishers {
     public static func combineLatest<A, B, C>(
         _ a: AnyPublisher<A, Never>?,
         _ b: AnyPublisher<B, Never>?,
-        _ c: AnyPublisher<C, Never>?,
+        _ c: AnyPublisher<C, Never>?
     ) -> AnyPublisher<(A, B, C), Never> {
         guard let a, let b, let c else {
             return Empty(completeImmediately: true).eraseToAnyPublisher()
