@@ -646,7 +646,6 @@
 		40D2873B2DB12CAD006AD8C7 /* DefaultAudioSessionPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D2873A2DB12CAD006AD8C7 /* DefaultAudioSessionPolicyTests.swift */; };
 		40D2873D2DB12E46006AD8C7 /* OwnCapabilitiesAudioSessionPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D2873C2DB12E46006AD8C7 /* OwnCapabilitiesAudioSessionPolicyTests.swift */; };
 		40D3A02D2DE3437700260532 /* TimerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D3A02C2DE3437700260532 /* TimerStorage.swift */; };
-		40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */; };
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
 		40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */; };
@@ -2104,7 +2103,6 @@
 		40D2873A2DB12CAD006AD8C7 /* DefaultAudioSessionPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultAudioSessionPolicyTests.swift; sourceTree = "<group>"; };
 		40D2873C2DB12E46006AD8C7 /* OwnCapabilitiesAudioSessionPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnCapabilitiesAudioSessionPolicyTests.swift; sourceTree = "<group>"; };
 		40D3A02C2DE3437700260532 /* TimerStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerStorage.swift; sourceTree = "<group>"; };
-		40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer_Tests.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
 		40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingTopView.swift; sourceTree = "<group>"; };
@@ -5213,7 +5211,6 @@
 				82FF40B62A17C6CD00B4D95E /* ReconnectionView_Tests.swift */,
 				82FF40B82A17C6D600B4D95E /* RecordingView_Tests.swift */,
 				82FF40BA2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift */,
-				40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */,
 				407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */,
 				407AF7132B615D3300E9E3E7 /* CallDurationView_Tests.swift */,
 				407AF7152B61602B00E9E3E7 /* ControlBadgeView_Tests.swift */,
@@ -8276,7 +8273,6 @@
 				40AAD1822D2816ED00D10330 /* Stream_Video_Sfu_Event_ChangePublishQuality+Dummy.swift in Sources */,
 				40382F452C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */,
 				82E3BA382A0BADB8001AB93E /* CallController_Mock.swift in Sources */,
-				40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */,
 				40245F652BE27B2000FCF075 /* StatelessAudioOutputIconView_Tests.swift in Sources */,
 				407AF7142B615D3300E9E3E7 /* CallDurationView_Tests.swift in Sources */,
 				82FF40B92A17C6D600B4D95E /* RecordingView_Tests.swift in Sources */,
