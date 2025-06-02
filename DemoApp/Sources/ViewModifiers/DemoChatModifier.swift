@@ -13,7 +13,7 @@ struct ChatModifier: ViewModifier {
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject var chatViewModel: DemoChatViewModel
 
     func body(content: Content) -> some View {

@@ -9,37 +9,39 @@ import SwiftUI
 public struct CallControlsView: View {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.colors) var colors
 
-    @ObservedObject var viewModel: CallViewModel
-    @State var ownCapabilities: [OwnCapability]
+    var viewModel: CallViewModel
 
     /// Initializes the call controls view with a view model.
     /// - Parameter viewModel: The view model for the call controls.
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
-        ownCapabilities = viewModel.call?.state.ownCapabilities ?? []
     }
 
     public var body: some View {
-        HStack {
-            if ownCapabilities.contains(.sendVideo) == true {
-                VideoIconView(viewModel: viewModel)
-            }
-            if ownCapabilities.contains(.sendAudio) == true {
-                MicrophoneIconView(viewModel: viewModel)
-            }
+        PublisherSubscriptionView(
+            initial: call?.state.ownCapabilities ?? [],
+            publisher: call?.state.$ownCapabilities.eraseToAnyPublisher(),
+            contentProvider: { ownCapabilities in
+                HStack {
+                    if ownCapabilities.contains(.sendVideo) == true {
+                        VideoIconView(viewModel: viewModel)
+                    }
+                    if ownCapabilities.contains(.sendAudio) == true {
+                        MicrophoneIconView(viewModel: viewModel)
+                    }
 
-            Spacer()
+                    Spacer()
 
-            if viewModel.callingState == .inCall {
-                ParticipantsListButton(viewModel: viewModel)
+                    if viewModel.callingState == .inCall {
+                        ParticipantsListButton(viewModel: viewModel)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical)
+                .frame(maxWidth: .infinity)
             }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical)
-        .frame(maxWidth: .infinity)
-        .onReceive(call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
+        )
     }
 
     private var call: Call? {
@@ -55,9 +57,7 @@ public struct CallControlsView: View {
 /// A view displaying the video toggle button for a call.
 public struct VideoIconView: View {
 
-    @Injected(\.images) var images
-
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
 
     /// Initializes the video icon view with a view model and optional size.
@@ -79,9 +79,7 @@ public struct VideoIconView: View {
 /// A view displaying the microphone toggle button for a call.
 public struct MicrophoneIconView: View {
 
-    @Injected(\.images) var images
-
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
 
     /// Initializes the microphone icon view with a view model and optional size.
@@ -103,9 +101,7 @@ public struct MicrophoneIconView: View {
 /// A view displaying the toggle camera position button for a call.
 public struct ToggleCameraIconView: View {
 
-    @Injected(\.images) var images
-
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
 
     /// Initializes the toggle camera icon view with a view model and optional size.
@@ -127,10 +123,7 @@ public struct ToggleCameraIconView: View {
 /// A view displaying the hang-up button for a call.
 public struct HangUpIconView: View {
 
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
 
     /// Initializes the hang-up icon view with a view model and optional size.
@@ -152,9 +145,7 @@ public struct HangUpIconView: View {
 /// A view displaying the audio output toggle button for a call.
 public struct AudioOutputIconView: View {
 
-    @Injected(\.images) var images
-
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
 
     /// Initializes the audio output icon view with a view model and optional size.
@@ -176,9 +167,7 @@ public struct AudioOutputIconView: View {
 /// A view displaying the speaker toggle button for a call.
 public struct SpeakerIconView: View {
 
-    @Injected(\.images) var images
-
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
 
     /// Initializes the speaker icon view with a view model and optional size.

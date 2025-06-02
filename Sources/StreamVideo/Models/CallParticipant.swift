@@ -123,8 +123,6 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.sessionId == rhs.sessionId &&
             lhs.connectionQuality == rhs.connectionQuality &&
             lhs.joinedAt == rhs.joinedAt &&
-            lhs.audioLevel == rhs.audioLevel &&
-            lhs.audioLevels == rhs.audioLevels &&
             lhs.pin == rhs.pin &&
             lhs.track === rhs.track &&
             lhs.screenshareTrack === rhs.screenshareTrack

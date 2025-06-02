@@ -14,16 +14,11 @@ public struct StatelessHangUpIconView: View {
 
     @Injected(\.images) private var images
 
-    /// The associated call for the hang-up icon.
-    public weak var call: Call?
-
     /// The size of the hang-up icon.
     public var size: CGFloat
 
     /// The action handler for the hang-up icon button.
     public var actionHandler: ActionHandler?
-
-    @ObservedObject private var callSettings: CallSettings
 
     /// Initializes a stateless hang-up icon view.
     ///
@@ -37,9 +32,7 @@ public struct StatelessHangUpIconView: View {
         size: CGFloat = 44,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
         self.actionHandler = actionHandler
     }
 

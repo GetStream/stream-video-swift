@@ -11,16 +11,18 @@ struct DemoClosedCaptionsView: View {
 
     @Injected(\.colors) private var colors
 
-    @ObservedObject var viewModel: CallViewModel
-    @State private var items: [CallClosedCaption] = []
+    var viewModel: CallViewModel
 
     init(_ viewModel: CallViewModel) {
-        _viewModel = .init(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     var body: some View {
         if AppEnvironment.closedCaptionsIntegration == .enabled {
-            Group {
+            PublisherSubscriptionView(
+                initial: viewModel.call?.state.closedCaptions ?? [],
+                publisher: viewModel.call?.state.$closedCaptions.eraseToAnyPublisher()
+            ) { items in
                 if items.isEmpty {
                     EmptyView()
                 } else {
@@ -44,7 +46,6 @@ struct DemoClosedCaptionsView: View {
                     .animation(.default, value: items)
                 }
             }
-            .onReceive(viewModel.call?.state.$closedCaptions) { items = $0 }
         }
     }
 }

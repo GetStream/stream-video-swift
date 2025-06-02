@@ -2,7 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-#if swift(>=6.0)
+#if compiler(>=6.0)
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import StreamWebRTC

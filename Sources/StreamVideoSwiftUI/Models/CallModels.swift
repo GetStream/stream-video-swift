@@ -6,7 +6,7 @@ import AVFoundation
 import SwiftUI
 
 /// Represents a participant event during a call.
-public struct ParticipantEvent: Sendable {
+public struct ParticipantEvent: Equatable, Sendable {
     public let id: String
     public let action: ParticipantAction
     public let user: String
@@ -14,7 +14,7 @@ public struct ParticipantEvent: Sendable {
 }
 
 /// Represents a participant action (joining / leaving a call).
-public enum ParticipantAction: Sendable {
+public enum ParticipantAction: Equatable, Sendable {
     case join
     case leave
     
