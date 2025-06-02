@@ -49,6 +49,7 @@ public struct CallDurationView: View {
 
     // MARK: - Private Helpers
 
+    @MainActor
     private var foregroundColor: Color {
         viewModel.recordingState == .recording
             ? colors.inactiveCallControl
@@ -67,6 +68,7 @@ public struct CallDurationView: View {
         }
     }
 
+    @MainActor
     private var accessibilityIdentifier: String {
         viewModel.recordingState == .recording
             ? "recordingView"

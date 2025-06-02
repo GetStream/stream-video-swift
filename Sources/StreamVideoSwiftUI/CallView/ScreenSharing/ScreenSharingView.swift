@@ -98,6 +98,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         }
     }
 
+    @ViewBuilder
     private var screensharingView: some View {
         VideoRendererView(
             id: "\(screenSharing.participant.id)-screenshare",
@@ -116,6 +117,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         .accessibility(identifier: "screenSharingView")
     }
 
+    @MainActor
     private var videoSize: CGSize {
         let height = frame.width * 9 / 16
 

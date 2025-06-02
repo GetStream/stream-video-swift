@@ -43,7 +43,7 @@ public struct StatelessVideoIconView: View {
     public var body: some View {
         PublisherSubscriptionView(
             initial: call?.state.callSettings.videoOn ?? false,
-            publisher: call?.state.$callSettings.compactMap(\.videoOn).eraseToAnyPublisher()
+            publisher: call?.state.$callSettings.compactMap { $0.videoOn }.eraseToAnyPublisher()
         ) { isActive in
             Button(
                 action: { actionHandler?() },
