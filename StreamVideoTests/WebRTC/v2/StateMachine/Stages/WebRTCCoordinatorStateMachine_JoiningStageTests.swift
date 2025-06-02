@@ -161,6 +161,32 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         }
     }
 
+    func test_transition_fromConnected_updatesReconnectAttemptsOnStatsAdapter() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        let statsAdapter = MockWebRTCStatsAdapter()
+        await subject
+            .context
+            .coordinator?
+            .stateAdapter
+            .set(statsAdapter: statsAdapter)
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { target in
+            XCTAssertEqual(
+                statsAdapter.reconnectAttempts,
+                target.context.reconnectAttempts
+            )
+        }
+    }
+
     func test_transition_fromConnected_joinResponseReceiveTimeouts() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
@@ -358,6 +384,10 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
     func test_transition_fromConnectedSFUConnected_reportsTelemetry() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -379,6 +409,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
         await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
         let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+        XCTAssertEqual(mockSignalService.sendStatsWasCalledWithRequest?.unifiedSessionID, unifiedSessionId)
 
         switch telemetry.data {
         case .connectionTimeSeconds:
@@ -536,6 +567,36 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             )
             XCTAssertTrue(
                 target.context.sfuEventObserver?.sfuAdapter === mockCoordinatorStack?.sfuStack.adapter
+            )
+        }
+    }
+
+    func test_transition_fromConnectedWithRejoin_updatesReconnectAttemptsOnStatsAdapter() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.isRejoiningFromSessionID = .unique
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        subject.context.sfuEventObserver = SFUEventAdapter(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter,
+            stateAdapter: mockCoordinatorStack.coordinator.stateAdapter
+        )
+        let statsAdapter = MockWebRTCStatsAdapter()
+        await subject
+            .context
+            .coordinator?
+            .stateAdapter
+            .set(statsAdapter: statsAdapter)
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { target in
+            XCTAssertEqual(
+                statsAdapter.reconnectAttempts,
+                target.context.reconnectAttempts
             )
         }
     }
@@ -744,6 +805,10 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
     func test_transition_fromConnectedWithRejoinSFUConnected_reportsTelemetry() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.isRejoiningFromSessionID = .unique
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -765,6 +830,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
         await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
         let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+        XCTAssertEqual(mockSignalService.sendStatsWasCalledWithRequest?.unifiedSessionID, unifiedSessionId)
 
         switch telemetry.data {
         case .connectionTimeSeconds:
@@ -944,6 +1010,10 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
     func test_transition_fromFastReconnectedWithSFUConnected_reportsTelemetry() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -965,6 +1035,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
         await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
         let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+        XCTAssertEqual(mockSignalService.sendStatsWasCalledWithRequest?.unifiedSessionID, unifiedSessionId)
 
         switch telemetry.data {
         case .connectionTimeSeconds:
@@ -1121,6 +1192,37 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             )
             XCTAssertTrue(
                 target.context.sfuEventObserver?.sfuAdapter === mockCoordinatorStack?.sfuStack.adapter
+            )
+        }
+    }
+
+    func test_transition_fromMigrated_updatesReconnectAttemptsOnStatsAdapter() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        subject.context.migratingFromSFU = "test-sfu"
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        subject.context.sfuEventObserver = SFUEventAdapter(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter,
+            stateAdapter: mockCoordinatorStack.coordinator.stateAdapter
+        )
+        let statsAdapter = MockWebRTCStatsAdapter()
+        await subject
+            .context
+            .coordinator?
+            .stateAdapter
+            .set(statsAdapter: statsAdapter)
+
+        try await assertTransition(
+            from: .migrated,
+            expectedTarget: .disconnected,
+            subject: subject
+        ) { target in
+            XCTAssertEqual(
+                statsAdapter.reconnectAttempts,
+                target.context.reconnectAttempts
             )
         }
     }
@@ -1330,6 +1432,10 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
         subject.context.migratingFromSFU = "test-sfu"
+        let unifiedSessionId = await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .unifiedSessionId
         await mockCoordinatorStack
             .coordinator
             .stateAdapter
@@ -1351,6 +1457,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         let mockSignalService = try XCTUnwrap(mockCoordinatorStack?.sfuStack.service)
         await fulfillment { mockSignalService.sendStatsWasCalledWithRequest?.telemetry != nil }
         let telemetry = try XCTUnwrap(mockSignalService.sendStatsWasCalledWithRequest?.telemetry)
+        XCTAssertEqual(mockSignalService.sendStatsWasCalledWithRequest?.unifiedSessionID, unifiedSessionId)
 
         switch telemetry.data {
         case .connectionTimeSeconds:

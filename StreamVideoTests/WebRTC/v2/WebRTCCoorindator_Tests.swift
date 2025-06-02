@@ -112,7 +112,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockSFUStack.webSocket.timesCalled(.disconnectAsync), 1)
         await assertNilAsync(await subject.stateAdapter.publisher)
         await assertNilAsync(await subject.stateAdapter.subscriber)
-        await assertNilAsync(await subject.stateAdapter.statsReporter)
+        await assertNilAsync(await subject.stateAdapter.statsAdapter)
         await assertNilAsync(await subject.stateAdapter.sfuAdapter)
         await assertEqualAsync(await subject.stateAdapter.token, "")
         await assertEqualAsync(await subject.stateAdapter.sessionID, "")
@@ -643,6 +643,12 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         await subject.stateAdapter.set(participantPins: [PinInfo(isLocal: true, pinnedAt: .init())])
         await subject.stateAdapter.enqueue { _ in [self.user.id: CallParticipant.dummy(id: self.user.id)] }
         try await subject.stateAdapter.configurePeerConnections()
-        await subject.stateAdapter.set(statsReporter: WebRTCStatsReporter(sessionID: .unique))
+        let statsAdapter = WebRTCStatsAdapter(
+            sessionID: .unique,
+            unifiedSessionID: .unique,
+            isTracingEnabled: true,
+            trackStorage: await subject.stateAdapter.trackStorage
+        )
+        await subject.stateAdapter.set(statsAdapter: statsAdapter)
     }
 }

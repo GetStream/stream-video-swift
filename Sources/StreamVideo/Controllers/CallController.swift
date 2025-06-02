@@ -697,7 +697,7 @@ class CallController: @unchecked Sendable {
     private func observeStatsReporterUpdates() async {
         await webRTCCoordinator
             .stateAdapter
-            .$statsReporter
+            .$statsAdapter
             .compactMap { $0 }
             .sink { [weak self] statsReporter in
                 guard let self else {

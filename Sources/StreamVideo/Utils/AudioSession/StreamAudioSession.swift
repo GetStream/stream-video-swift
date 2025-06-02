@@ -409,6 +409,27 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     }
 }
 
+extension StreamAudioSession: Encodable {
+    // MARK: - Codable
+
+    enum CodingKeys: String, CodingKey {
+        case speakerOn
+        case device
+        case deviceIsExternal = "device.isExternal"
+        case deviceIsSpeaker = "device.isSpeaker"
+        case deviceIsReceiver = "device.isReceiver"
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(activeCallSettings.speakerOn, forKey: .speakerOn)
+        try container.encode("\(audioSession.currentRoute)", forKey: .device)
+        try container.encode(audioSession.currentRoute.isExternal, forKey: .deviceIsExternal)
+        try container.encode(audioSession.currentRoute.isSpeaker, forKey: .deviceIsSpeaker)
+        try container.encode(audioSession.currentRoute.isReceiver, forKey: .deviceIsReceiver)
+    }
+}
+
 /// A key for dependency injection of an `AudioSessionProtocol` instance
 /// that represents the active call audio session.
 extension StreamAudioSession: InjectionKey {

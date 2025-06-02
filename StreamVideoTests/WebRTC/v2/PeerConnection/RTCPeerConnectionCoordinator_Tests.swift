@@ -111,6 +111,23 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 
+    func test_createOffer_eventWasPublished() async throws {
+        let offer = RTCSessionDescription(type: .offer, sdp: .unique)
+        mockPeerConnection.stub(for: .offer, with: offer)
+
+        let expectation = self.expectation(description: "CreateOfferEvent was not received.")
+        let cancellable: AnyCancellable? = mockPeerConnection
+            .publisher
+            .compactMap { $0 as? StreamRTCPeerConnection.CreateOfferEvent }
+            .filter { $0.sessionDescription.sdp == offer.sdp }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable?.cancel() }
+
+        _ = try await subject.createOffer()
+
+        await safeFulfillment(of: [expectation])
+    }
+
     // MARK: - createAnswer(constraints:)
 
     func test_createAnswer_peerConnectionWasCalled() async throws {
@@ -119,6 +136,23 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         await fulfillment { [mockPeerConnection] in
             mockPeerConnection?.timesCalled(.answer) == 1
         }
+    }
+
+    func test_createAnswer_eventWasPublished() async throws {
+        let answer = RTCSessionDescription(type: .offer, sdp: .unique)
+        mockPeerConnection.stub(for: .answer, with: answer)
+
+        let expectation = self.expectation(description: "CreateAnswerEvent was not received.")
+        let cancellable: AnyCancellable? = mockPeerConnection
+            .publisher
+            .compactMap { $0 as? StreamRTCPeerConnection.CreateAnswerEvent }
+            .filter { $0.sessionDescription.sdp == answer.sdp }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable?.cancel() }
+
+        _ = try await subject.createAnswer()
+
+        await safeFulfillment(of: [expectation])
     }
 
     // MARK: - setLocalDescription(_:)
@@ -131,6 +165,23 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 
+    func test_setLocalDescription_eventWasPublished() async throws {
+        let value = RTCSessionDescription(type: .offer, sdp: .unique)
+        mockPeerConnection.stub(for: .setLocalDescription, with: value)
+
+        let expectation = self.expectation(description: "setLocalDescription was not received.")
+        let cancellable: AnyCancellable? = mockPeerConnection
+            .publisher
+            .compactMap { $0 as? StreamRTCPeerConnection.SetLocalDescriptionEvent }
+            .filter { $0.sessionDescription.sdp == value.sdp }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable?.cancel() }
+
+        _ = try await subject.setLocalDescription(value)
+
+        await safeFulfillment(of: [expectation])
+    }
+
     // MARK: - setRemoteDescription(_:)
 
     func test_setRemoteDescription_peerConnectionWasCalled() async throws {
@@ -141,12 +192,42 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
     }
 
+    func test_setRemoteDescription_eventWasPublished() async throws {
+        let value = RTCSessionDescription(type: .offer, sdp: .unique)
+        mockPeerConnection.stub(for: .setRemoteDescription, with: value)
+
+        let expectation = self.expectation(description: "setRemoteDescription was not received.")
+        let cancellable: AnyCancellable? = mockPeerConnection
+            .publisher
+            .compactMap { $0 as? StreamRTCPeerConnection.SetRemoteDescriptionEvent }
+            .filter { $0.sessionDescription.sdp == value.sdp }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable?.cancel() }
+
+        _ = try await subject.setRemoteDescription(value)
+
+        await safeFulfillment(of: [expectation])
+    }
+
     // MARK: - close
 
     func test_close_peerConnectionWasCalled() async throws {
         await subject.close()
 
         XCTAssertEqual(mockPeerConnection?.timesCalled(.close), 1)
+    }
+
+    func test_close_eventWasPublished() async throws {
+        let expectation = self.expectation(description: "CloseEvent was not received.")
+        let cancellable: AnyCancellable? = mockPeerConnection
+            .publisher
+            .compactMap { $0 as? StreamRTCPeerConnection.CloseEvent }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable?.cancel() }
+
+        await subject.close()
+
+        await safeFulfillment(of: [expectation])
     }
 
     // MARK: - negotiate
@@ -508,6 +589,20 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertEqual(mockPeerConnection?.timesCalled(.offer), 0)
     }
 
+    func test_restartICE_subjectIsPublisher_eventWasPublished() async throws {
+        _ = subject
+        let expectation = self.expectation(description: "RestartICEEvent was not received.")
+        let cancellable: AnyCancellable? = mockPeerConnection
+            .publisher
+            .compactMap { $0 as? StreamRTCPeerConnection.RestartICEEvent }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable?.cancel() }
+
+        subject.restartICE()
+
+        await safeFulfillment(of: [expectation])
+    }
+
     // MARK: subscriber
 
     func test_restartICE_subjectIsSubscriber_callsRestartICEOnSFU() async throws {
@@ -521,6 +616,21 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         }
 
         XCTAssertEqual(mockSFUStack?.service.iceRestartWasCalledWithRequest?.peerType, .subscriber)
+    }
+
+    func test_restartICE_subjectIsSubscriber_eventWasPublished() async throws {
+        peerType = .subscriber
+        _ = subject
+        let expectation = self.expectation(description: "RestartICEEvent was not received.")
+        let cancellable: AnyCancellable? = mockPeerConnection
+            .publisher
+            .compactMap { $0 as? StreamRTCPeerConnection.RestartICEEvent }
+            .sink { _ in expectation.fulfill() }
+        defer { cancellable?.cancel() }
+
+        subject.restartICE()
+
+        await safeFulfillment(of: [expectation])
     }
 
     // MARK: - restartICE SFU Event

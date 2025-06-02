@@ -194,7 +194,7 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
             policy: mockPolicy,
             audioSession: mockAudioSession
         )
-        
+
         try await assertConfigurationWasCalledOnPolicy({
             try await self.subject.prepareForRecording()
         }, expectedInput: [

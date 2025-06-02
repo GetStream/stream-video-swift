@@ -64,6 +64,12 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     var connectURL: URL { webSocket.connectURL }
     /// The hostname of the SFU service.
     var hostname: String { signalService.hostname }
+
+    /// The host of the SFU service.
+    var host: String {
+        URL(string: signalService.hostname)?.host ?? signalService.hostname
+    }
+
     /// A Combine publisher that allows observation of *all events* received by the adapter.
     var publisher: AnyPublisher<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, Never> {
         webSocket
@@ -78,6 +84,9 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             }
             .eraseToAnyPublisher()
     }
+
+    private let subjectSendEvent: PassthroughSubject<SFUAdapterEvent, Never> = .init()
+    var publisherSendEvent: AnyPublisher<SFUAdapterEvent, Never> { subjectSendEvent.eraseToAnyPublisher() }
 
     // MARK: - CustomStringConvertible
 
@@ -172,6 +181,8 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     func connect() {
         log.debug("Will connect \(self)", subsystems: .sfu)
         webSocket.connect()
+
+        subjectSendEvent.send(ConnectEvent(hostname: host))
     }
 
     /// Disconnects from the WebSocket server and clears all disposables.
@@ -182,6 +193,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         log.debug("Will disconnect \(self)", subsystems: .sfu)
         requestDisposableBag.removeAll()
         await webSocket.disconnect()
+        subjectSendEvent.send(DisconnectEvent(hostname: host))
     }
 
     /// Sends a health check request to the WebSocket server.
@@ -238,6 +250,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         var event = Stream_Video_Sfu_Event_SfuRequest()
         event.requestPayload = .joinRequest(payload)
         send(message: event)
+        subjectSendEvent.send(JoinEvent(hostname: host, payload: payload))
     }
 
     func sendLeaveRequest(
@@ -252,7 +265,9 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         var event = Stream_Video_Sfu_Event_SfuRequest()
         event.requestPayload = .leaveCallRequest(payload)
 
-        webSocket.engine?.send(message: event)
+        send(message: event)
+
+        subjectSendEvent.send(LeaveEvent(hostname: host, payload: payload))
     }
 
     /// Consumes events of a specified type from the given event bucket.
@@ -265,9 +280,11 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     ///   - bucket: The `SFUEventBucket` from which to consume events.
     func consume<EventType>(
         _ eventType: EventType.Type,
-        bucket: SFUEventBucket
+        bucket: ConsumableBucket<Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload>
     ) {
-        let events = bucket.consume(eventType)
+        let events = bucket
+            .consume(flush: true)
+            .filter { $0.payload(EventType.self) != nil }
 
         guard !events.isEmpty else {
             log.debug(
@@ -314,6 +331,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
         signalService.subject.send(request)
 
+        subjectSendEvent.send(UpdateTrackMuteStateEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: retryPolicy) {
             try Task.checkCancellation()
             return try await signalService.updateMuteStates(updateMuteStatesRequest: request)
@@ -334,10 +352,14 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     ///   - sessionId: The ID of the current session.
     /// - Throws: An error if sending the stats fails.
     func sendStats(
-        _ report: CallStatsReport?,
+        _ report: CallStatsReport? = nil,
         for sessionId: String,
+        unifiedSessionId: String,
+        traces: String? = nil,
         thermalState: ProcessInfo.ThermalState? = nil,
-        telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil
+        telemetry: Stream_Video_Sfu_Signal_Telemetry? = nil,
+        encodeStats: [Stream_Video_Sfu_Models_PerformanceStats]? = nil,
+        decodeStats: [Stream_Video_Sfu_Models_PerformanceStats]? = nil
     ) async throws {
         statusCheck()
         var statsRequest = Stream_Video_Sfu_Signal_SendStatsRequest()
@@ -348,7 +370,11 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         statsRequest.publisherStats = report?.publisherRawStats?.jsonString ?? ""
         statsRequest.subscriberStats = report?.subscriberRawStats?.jsonString ?? ""
         statsRequest.deviceState = .init(thermalState)
+        statsRequest.encodeStats = encodeStats ?? []
+        statsRequest.decodeStats = decodeStats ?? []
+        statsRequest.rtcStats = traces ?? ""
         statsRequest.telemetry = telemetry ?? .init()
+        statsRequest.unifiedSessionID = unifiedSessionId
 
         let response = try await signalService.sendStats(sendStatsRequest: statsRequest)
         signalService.subject.send(response)
@@ -374,6 +400,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         if isEnabled {
             var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
             request.sessionID = sessionId
+            subjectSendEvent.send(StartNoiseCancellationEvent(hostname: host, payload: request))
             let response = try await signalService.startNoiseCancellation(
                 startNoiseCancellationRequest: request
             )
@@ -382,6 +409,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
             var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
             request.sessionID = sessionId
 
+            subjectSendEvent.send(StopNoiseCancellationEvent(hostname: host, payload: request))
             let response = try await signalService.stopNoiseCancellation(
                 stopNoiseCancellationRequest: request
             )
@@ -418,6 +446,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
         log.debug(request, subsystems: .sfu)
 
+        subjectSendEvent.send(SetPublisherEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: .fastCheckValue { true }) { [weak self] in
             try Task.checkCancellation()
             guard let self, isConnected == true else {
@@ -461,7 +490,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 "Request sessionId:\(sessionId) tracks:\(tracks.map { "\($0.userID):\($0.sessionID):\($0.trackType.rawValue):\($0.dimension.width)x\($0.dimension.height)" }.sorted())",
                 subsystems: .sfu
             )
-
+        subjectSendEvent.send(UpdateSubscriptionsEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {
             try Task.checkCancellation()
             return try await signalService.updateSubscriptions(updateSubscriptionsRequest: request)
@@ -496,6 +525,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.sdp = sessionDescription
 
         log.debug(request, subsystems: .sfu)
+        subjectSendEvent.send(SendAnswerEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: .fastCheckValue { true }) {
             try Task.checkCancellation()
             return try await signalService.sendAnswer(sendAnswerRequest: request)
@@ -534,6 +564,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.sessionID = sessionId
         request.peerType = peerType
 
+        subjectSendEvent.send(ICETrickleEvent(hostname: host, payload: request))
         let response = try await signalService.iceTrickle(iCETrickle: request)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
@@ -546,7 +577,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
     /// network connection when connectivity issues are detected.
     ///
     /// - Parameters:
-    ///   - sessionId: The unique identifier of the session for which to restart
+    ///   - sessionId: The unique identifier of the session for which to restarts
     ///     the ICE connection
     ///   - peerType: The type of peer (e.g., publisher, subscriber) for which to
     ///     restart the ICE connection
@@ -562,6 +593,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.peerType = peerType
 
         log.debug(request, subsystems: .sfu)
+        subjectSendEvent.send(RestartICEEvent(hostname: host, payload: request))
         let response = try await executeTask(retryPolicy: .fastCheckValue { true }) {
             try Task.checkCancellation()
             return try await signalService.iceRestart(iCERestartRequest: request)

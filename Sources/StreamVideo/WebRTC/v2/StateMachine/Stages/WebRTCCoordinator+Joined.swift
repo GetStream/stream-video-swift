@@ -333,9 +333,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .$callSettings
                 .compactMap { $0 }
                 .removeDuplicates()
-                .log(.debug, subsystems: .webRTC) { "Updated \($0)" }
                 .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
                     guard let self else { return }
+
+                    if let statsAdapter = await context.coordinator?.stateAdapter.statsAdapter {
+                        statsAdapter.callSettings = callSettings
+                    }
 
                     do {
                         guard
@@ -417,25 +420,28 @@ extension WebRTCCoordinator.StateMachine.Stage {
             let sessionId = await stateAdapter.sessionID
 
             /// Check if the stats reporter is already associated with the current session.
-            if await stateAdapter.statsReporter?.sessionID != sessionId {
+            if await stateAdapter.statsAdapter?.sessionID != sessionId {
                 /// Create a new stats reporter if the session ID does not match.
-                let statsReporter = WebRTCStatsReporter(
-                    sessionID: await stateAdapter.sessionID
+                let statsReporter = WebRTCStatsAdapter(
+                    sessionID: await stateAdapter.sessionID,
+                    unifiedSessionID: stateAdapter.unifiedSessionId,
+                    isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled,
+                    trackStorage: coordinator.stateAdapter.trackStorage
                 )
 
                 /// Set the stats reporting interval and associate the reporter with the publisher,
                 /// subscriber, and SFU adapter.
-                statsReporter.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+                statsReporter.deliveryInterval = await stateAdapter.statsAdapter?.deliveryInterval ?? 0
                 statsReporter.publisher = await stateAdapter.publisher
                 statsReporter.subscriber = await stateAdapter.subscriber
                 statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
 
                 /// Update the state adapter with the new stats reporter.
-                await stateAdapter.set(statsReporter: statsReporter)
+                await stateAdapter.set(statsAdapter: statsReporter)
             } else {
                 /// If the session ID matches, update the existing stats reporter.
-                let statsReporter = await stateAdapter.statsReporter
-                statsReporter?.deliveryInterval = await stateAdapter.statsReporter?.deliveryInterval ?? 0
+                let statsReporter = await stateAdapter.statsAdapter
+                statsReporter?.deliveryInterval = await stateAdapter.statsAdapter?.deliveryInterval ?? 0
                 statsReporter?.publisher = await stateAdapter.publisher
                 statsReporter?.subscriber = await stateAdapter.subscriber
                 statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
@@ -454,8 +460,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .filter { !$0.isAvailable }
                 .removeDuplicates()
-                .sink { [weak self] _ in
+                .sinkTask { [weak self] in
                     guard let self else { return }
+
+                    /// Trace internet connection changes
+                    await context
+                        .coordinator?
+                        .stateAdapter
+                        .statsAdapter?
+                        .trace(.init(status: $0))
 
                     /// Set the reconnection strategy to a fast reconnection attempt.
                     context.reconnectionStrategy = .fast(
@@ -497,7 +510,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             }
 
             updateSubscriptionsAdapter = .init(
-                participantsPublisher: await stateAdapter.$participants.eraseToAnyPublisher(),
+                participantsPublisher: await stateAdapter
+                    .$participants
+                    .eraseToAnyPublisher(),
                 incomingVideoQualitySettingsPublisher: await stateAdapter
                     .$incomingVideoQualitySettings
                     .eraseToAnyPublisher(),

@@ -122,7 +122,7 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
 
         mockPeerConnection
             .subject
-            .send(StreamRTCPeerConnection.HasRemoteDescription())
+            .send(StreamRTCPeerConnection.HasRemoteDescription(sessionDescription: .init(type: .answer, sdp: .unique)))
 
         await fulfillment { self.mockPeerConnection.timesCalled(.addCandidate) == 1 }
     }
