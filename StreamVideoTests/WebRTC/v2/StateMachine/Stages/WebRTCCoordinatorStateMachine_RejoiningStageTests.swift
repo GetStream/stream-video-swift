@@ -187,7 +187,7 @@ final class WebRTCCoordinatorStateMachine_RejoiningStageTests: XCTestCase, @unch
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.sfuAdapter)
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.publisher)
         await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.subscriber)
-        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.statsReporter)
+        await assertNilAsync(await mockCoordinatorStack.coordinator.stateAdapter.statsAdapter)
         await assertEqualAsync(await mockCoordinatorStack.coordinator.stateAdapter.token, "")
         XCTAssertEqual(subject.context.isRejoiningFromSessionID, sessionId)
     }

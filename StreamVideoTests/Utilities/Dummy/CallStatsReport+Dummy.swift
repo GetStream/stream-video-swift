@@ -15,7 +15,8 @@ extension CallStatsReport {
         subscriberStats: AggregatedStatsReport = .dummy(),
         subscriberRawStats: RTCStatisticsReport? = nil,
         participantsStats: ParticipantsStats = .dummy(),
-        timestamp: Double = 0.0
+        timestamp: Double = 0.0,
+        trackToKindMap: [String: TrackType] = [:]
     ) -> CallStatsReport {
         CallStatsReport(
             datacenter: datacenter,
@@ -25,7 +26,8 @@ extension CallStatsReport {
             subscriberStats: subscriberStats,
             subscriberRawStats: subscriberRawStats,
             participantsStats: participantsStats,
-            timestamp: timestamp
+            timestamp: timestamp,
+            trackToKindMap: trackToKindMap
         )
     }
 }

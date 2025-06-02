@@ -308,10 +308,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             try Task.checkCancellation()
 
+            /// We update the reconnectAttempts on the adapter so that we can correctly
+            /// create the trace prefixes for peerConnections.
+            if let statsAdapter = await coordinator.stateAdapter.statsAdapter {
+                statsAdapter.reconnectAttempts = context.reconnectAttempts
+            }
+
+            try Task.checkCancellation()
+
             // We create an event bucket in which we collect all SFU events
             // that will be received until the moment our PeerConnections have
             // been setup.
-            let subscriberEventBucket = SFUEventBucket(sfuAdapter)
+            let subscriberEventBucket = ConsumableBucket(
+                sfuAdapter
+                    .publisher
+                    .eraseToAnyPublisher()
+            )
 
             let joinResponse = try await sfuAdapter
                 .publisher(eventType: Stream_Video_Sfu_Event_JoinResponse.self)
@@ -380,6 +392,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             reportTelemetry(
                 sessionId: await coordinator.stateAdapter.sessionID,
+                unifiedSessionId: coordinator.stateAdapter.unifiedSessionId,
                 sfuAdapter: sfuAdapter
             )
         }
@@ -397,6 +410,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         /// - Reconnection strategies (e.g., fast reconnect, rejoin, or migration) and their duration.
         private func reportTelemetry(
             sessionId: String,
+            unifiedSessionId: String,
             sfuAdapter: SFUAdapter
         ) {
             Task {
@@ -424,8 +438,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                 do {
                     try await sfuAdapter.sendStats(
-                        nil,
                         for: sessionId,
+                        unifiedSessionId: unifiedSessionId,
                         telemetry: telemetry
                     )
                     log.debug("Join call completed in \(duration) seconds.")

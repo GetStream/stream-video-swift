@@ -12,6 +12,12 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// A dictionary groups transceivers based on the type of their carrying track.
     @Atomic private var transceiversMap: [TrackType: [RTCRtpTransceiver]] = [:]
 
+    /// The configuration used to initialize the peer connection.
+    ///
+    /// Contains settings such as ICE servers, SDP semantics, bundle policy,
+    /// and other connection-related options.
+    var configuration: RTCConfiguration { source.configuration }
+
     /// The remote session description of the peer connection.
     var remoteDescription: RTCSessionDescription? { source.remoteDescription }
 
@@ -53,7 +59,9 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         )
     }
 
-    private init(source: RTCPeerConnection) {
+    private init(
+        source: RTCPeerConnection
+    ) {
         self.source = source
         source.delegate = delegatePublisher
     }
@@ -106,7 +114,7 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else {
-                    self.subject.send(HasRemoteDescription())
+                    self.subject.send(HasRemoteDescription(sessionDescription: sessionDescription))
                     continuation.resume(returning: ())
                 }
             }

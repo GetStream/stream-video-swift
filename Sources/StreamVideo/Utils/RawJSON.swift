@@ -14,7 +14,7 @@ public indirect enum RawJSON: Codable, Hashable, Sendable {
     case dictionary([String: RawJSON])
     case array([RawJSON])
     case `nil`
-    
+
     public init(from decoder: Decoder) throws {
         let singleValueContainer = try decoder.singleValueContainer()
         if let value = try? singleValueContainer.decode(Bool.self) {
@@ -42,7 +42,7 @@ public indirect enum RawJSON: Codable, Hashable, Sendable {
                     .Context(codingPath: decoder.codingPath, debugDescription: "Could not find reasonable type to map to JSONValue")
             )
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
@@ -184,6 +184,63 @@ public extension RawJSON {
         default:
             return false
         }
+    }
+
+    /// Extracts the wrapped value as the specified type, if possible.
+    ///
+    /// This method tries to cast the underlying RawJSON value to the requested
+    /// generic type `T`. Returns `nil` if the wrapped value does not match the
+    /// requested type.
+    ///
+    /// Example:
+    /// ```
+    /// let json: RawJSON = .string("hello")
+    /// let value: String? = json.value()
+    /// ```
+    ///
+    /// - Returns: The value as type `T` if compatible, otherwise `nil`.
+    func value<T>() -> T? {
+        switch self {
+        case let .number(double):
+            // Handle all integer and floating-point conversions
+            if T.self == Int.self { return Int(double) as? T }
+            if T.self == Int32.self { return Int32(double) as? T }
+            if T.self == Int64.self { return Int64(double) as? T }
+            if T.self == UInt.self { return UInt(double) as? T }
+            if T.self == UInt32.self { return UInt32(double) as? T }
+            if T.self == UInt64.self { return UInt64(double) as? T }
+            if T.self == Double.self { return double as? T }
+            if T.self == Float.self { return Float(double) as? T }
+            // Fall back to cast (may work for NSNumber, etc)
+            return double as? T
+        case let .string(string):
+            return string as? T
+        case let .bool(bool):
+            return bool as? T
+        case let .dictionary(dictionary):
+            return dictionary as? T
+        case let .array(array):
+            return array as? T
+        case .nil:
+            return nil
+        }
+    }
+
+    /// Extracts the wrapped value as the specified type, or returns a fallback.
+    ///
+    /// This method tries to cast the underlying RawJSON value to the requested
+    /// generic type `T`. If the cast fails, the `fallback` value is returned.
+    ///
+    /// Example:
+    /// ```
+    /// let json: RawJSON = .number(42.0)
+    /// let value: Int = json.value(fallback: 0) // returns 0, as the value is a Double
+    /// ```
+    ///
+    /// - Parameter fallback: The value to return if the cast fails.
+    /// - Returns: The value as type `T` if compatible, otherwise the fallback.
+    func value<T>(fallback: T) -> T {
+        value() ?? fallback
     }
 }
 
@@ -333,6 +390,42 @@ extension RawJSON {
 
             array[index] = newValue
             self = .array(array)
+        }
+    }
+}
+
+extension RawJSON {
+    /// Initializes a `RawJSON` value from an `NSObject`.
+    ///
+    /// This is useful for converting Foundation types (e.g., from `NSDictionary`,
+    /// `NSArray`, `NSNumber`) into strongly typed `RawJSON` enums.
+    init(_ object: NSObject) {
+        switch object {
+        /// Converts NSString into a `.string` RawJSON value.
+        case let str as NSString:
+            self = .string(str as String)
+        /// Converts NSNumber into a `.number` RawJSON value.
+        case let num as NSNumber:
+            self = .number(num.doubleValue)
+        /// Converts NSArray into a `.array` of recursively converted RawJSON.
+        case let arr as NSArray:
+            let mappedArray = arr.compactMap { elem -> RawJSON? in
+                guard let elem = elem as? NSObject else { return nil }
+                return .init(elem)
+            }
+            self = .array(mappedArray)
+        /// Converts NSDictionary into a `.dictionary` of recursively converted RawJSON.
+        case let dict as NSDictionary:
+            var mappedDict = [String: RawJSON]()
+            dict.forEach { key, value in
+                if let keyStr = key as? String, let valueObj = value as? NSObject {
+                    mappedDict[keyStr] = .init(valueObj)
+                }
+            }
+            self = .dictionary(mappedDict)
+        /// Fallback: uses the object's description as a `.string`.
+        default:
+            self = .string(object.description)
         }
     }
 }

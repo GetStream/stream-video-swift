@@ -21,13 +21,13 @@ extension RTCSignalingState {
         case .stable:
             return "stable"
         case .haveLocalOffer:
-            return "haveLocalOffer"
+            return "have-local-offer"
         case .haveLocalPrAnswer:
-            return "haveLocalPrAnswer"
+            return "have-local-pr-answer"
         case .haveRemoteOffer:
-            return "haveRemoteOffer"
+            return "have-remote-offer"
         case .haveRemotePrAnswer:
-            return "haveRemotePrAnswer"
+            return "have-remote-pr-answer"
         case .closed:
             return "closed"
         @unknown default:
