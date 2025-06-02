@@ -341,6 +341,9 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
             && lhs.participant.track == rhs.participant.track
             && lhs.availableFrame == rhs.availableFrame
             && lhs.contentMode == rhs.contentMode
+            && lhs.edgesIgnoringSafeArea == rhs.edgesIgnoringSafeArea
+            && lhs.customData == rhs.customData
+            && lhs.call?.cId == rhs.call?.cId
     }
 
     public init(
@@ -359,19 +362,31 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
         self.availableFrame = availableFrame
         self.contentMode = contentMode
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
-        self.customData = customData
         self.call = call
+        self.customData = customData
         showVideo = participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
+
+        log.debug("Creating participant:\(participant.name)")
     }
     
     public var body: some View {
+        PublisherSubscriptionView(
+            initial: participant,
+            publisher: call?.state.$participantsMap.compactMap { $0[participant.sessionId] }.eraseToAnyPublisher()
+        ) { participant in
+            contentView(for: participant)
+        }
+    }
+
+    @ViewBuilder
+    private func contentView(for participant: CallParticipant) -> some View {
         Group {
-            if showVideo {
+            if participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true {
                 VideoRendererView(
                     id: id,
                     size: availableFrame.size,
                     contentMode: contentMode,
-                    showVideo: showVideo,
+                    showVideo: true,
                     handleRendering: { [weak call, participant] view in
                         guard call != nil else { return }
                         view.handleViewRendering(for: participant) { [weak call] size, participant in
@@ -382,19 +397,26 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
                     }
                 )
                 .modifier(Rotation3DEffectViewModifier(participant: participant, call: call))
-                .overlay(participantAvatarView)
             } else {
                 Color.clear
             }
         }
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
-        .overlay(participantAvatarView)
+        .overlay(
+            participantAvatarView(
+                for: participant,
+                showVideo:  participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
+            )
+        )
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
     }
 
     @ViewBuilder
-    private var participantAvatarView: some View {
+    private func participantAvatarView(
+        for participant: CallParticipant,
+        showVideo: Bool
+    ) -> some View {
         if showVideo {
             EmptyView()
         } else {
