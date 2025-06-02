@@ -99,23 +99,21 @@ public struct VideoCallParticipantModifier: ViewModifier {
         content
             .adjustVideoFrame(to: availableFrame.size.width, ratio: ratio)
             .overlay(
-                ZStack {
-                    BottomView(content: {
-                        HStack {
-                            ParticipantInfoView(
-                                participant: participant,
-                                isPinned: participant.isPinned
-                            )
-                            
-                            Spacer()
+                BottomView {
+                    HStack {
+                        ParticipantInfoView(
+                            participant: participant,
+                            isPinned: participant.isPinned
+                        )
 
-                            if showAllInfo {
-                                ConnectionQualityIndicator(
-                                    connectionQuality: participant.connectionQuality
-                                )
-                            }
+                        Spacer()
+
+                        if showAllInfo {
+                            ConnectionQualityIndicator(
+                                connectionQuality: participant.connectionQuality
+                            )
                         }
-                    })
+                    }
                 }
             )
             .applyDecorationModifierIfRequired(
@@ -391,6 +389,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View, Equatable {
                     name: participant.name,
                     imageURL: participant.profileImageURL
                 )
+                .frame(width: availableFrame.width, height: availableFrame.height)
             }
         }
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
@@ -425,7 +424,7 @@ struct Rotation3DEffectViewModifier: ViewModifier {
     }
 }
 
-public struct ParticipantInfoView: View {
+public struct ParticipantInfoView: View, Equatable {
     @Injected(\.images) var images
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
@@ -443,7 +442,18 @@ public struct ParticipantInfoView: View {
         self.isPinned = isPinned
         self.maxHeight = CGFloat(maxHeight)
     }
-    
+
+    public nonisolated static func == (
+        lhs: ParticipantInfoView,
+        rhs: ParticipantInfoView
+    ) -> Bool {
+        lhs.participant.id == rhs.participant.id
+            && lhs.participant.name == rhs.participant.name
+            && lhs.isPinned == rhs.isPinned
+            && lhs.maxHeight == rhs.maxHeight
+            && lhs.participant.hasAudio == rhs.participant.hasAudio
+    }
+
     public var body: some View {
         HStack(spacing: 4) {
             if isPinned {
