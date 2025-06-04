@@ -48,7 +48,7 @@ jobs:
             setup_runtime: false
           - ios: 17.5
             xcode: 15.4
-            os: macos-15
+            os: macos-14
             device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
@@ -131,7 +131,7 @@ jobs:
             setup_runtime: false
           - ios: 17.5
             xcode: 15.4
-            os: macos-15
+            os: macos-14
             device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
@@ -197,7 +197,7 @@ jobs:
 
   build-old-xcode:
     name: Build SDKs (Xcode 15)
-    runs-on: macos-15
+    runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.snapshots != 'true' }}
     env:
       XCODE_VERSION: "15.4"
@@ -227,7 +227,7 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-15
+    runs-on: macos-14
     env:
       XCODE_VERSION: "15.4"
     steps:
