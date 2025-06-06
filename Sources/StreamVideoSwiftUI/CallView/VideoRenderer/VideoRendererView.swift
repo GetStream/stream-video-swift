@@ -11,7 +11,7 @@ import SwiftUI
 public struct VideoRendererView: UIViewRepresentable {
 
     /// The type of the `UIView` being represented.
-    public typealias UIViewType = VideoRenderer
+    public typealias UIViewType = UIView
 
     /// Injected dependency for accessing color configurations.
     @Injected(\.colors) var colors
@@ -57,7 +57,7 @@ public struct VideoRendererView: UIViewRepresentable {
     ///   - uiView: The `VideoRenderer` to dismantle.
     ///   - coordinator: The coordinator associated with the view.
     public static func dismantleUIView(
-        _ uiView: VideoRenderer,
+        _ uiView: UIView,
         coordinator: Coordinator
     ) {
         coordinator.dismantle()
@@ -66,34 +66,27 @@ public struct VideoRendererView: UIViewRepresentable {
     /// Creates the `VideoRenderer` view.
     /// - Parameter context: The context containing information about the current state of the system.
     /// - Returns: A configured `VideoRenderer` instance.
-    public func makeUIView(context: Context) -> VideoRenderer {
-        context.coordinator.renderer.frame = .init(
-            origin: context.coordinator.renderer.frame.origin,
-            size: size
-        )
-        context.coordinator.renderer.videoContentMode = contentMode
-        context.coordinator.renderer.backgroundColor = colors.participantBackground
-
-        if showVideo {
-            handleRendering(context.coordinator.renderer)
-        }
-        return context.coordinator.renderer
+    public func makeUIView(context: Context) -> UIView {
+        return context.coordinator.containerView
     }
 
     /// Updates the `VideoRenderer` view when the state changes.
     /// - Parameters:
     ///   - uiView: The `VideoRenderer` to update.
     ///   - context: The context containing information about the current state of the system.
-    public func updateUIView(_ uiView: VideoRenderer, context: Context) {
-        if showVideo {
-            handleRendering(uiView)
-        }
+    public func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.updateContainerContents(showVideo: showVideo)
     }
 
     /// Creates the coordinator for managing the view.
     /// - Returns: A new `Coordinator` instance.
     public func makeCoordinator() -> Coordinator {
-        Coordinator(handleRendering: handleRendering)
+        Coordinator(
+            size: size,
+            showVideo: showVideo,
+            colors: colors,
+            handleRendering: handleRendering
+        )
     }
 }
 
@@ -108,30 +101,106 @@ extension VideoRendererView {
         private let handleRendering: ((VideoRenderer) -> Void)?
         /// A disposable bag to manage cancellable subscriptions.
         private let disposableBag = DisposableBag()
+        private let size: CGSize
+        private let showVideo: Bool
+        private let colors: Colors
 
         /// The video renderer managed by this coordinator.
-        fileprivate let renderer: VideoRenderer
+        fileprivate var renderer: VideoRenderer?
+
+        /// Placeholder until real renderer is ready
+        lazy var placeholderRenderer: VideoRenderer = {
+            let placeholder = VideoRenderer(frame: .init(origin: .zero, size: size))
+            placeholder.backgroundColor = colors.participantBackground
+            return placeholder
+        }()
+        
+        lazy var containerView: UIView = {
+            let container = UIView(frame: .init(origin: .zero, size: size))
+            container.backgroundColor = colors.participantBackground
+            container.clipsToBounds = true
+            
+            // Start with placeholder
+            container.addSubview(placeholderRenderer)
+            placeholderRenderer.frame = container.bounds
+            placeholderRenderer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            
+            return container
+        }()
+        private var hasSwappedToRealRenderer = false
+
+        // Task to track async renderer acquisition
+        private var rendererTask: Task<Void, Never>?
 
         /// Initializes a new instance of the coordinator.
         /// - Parameter handleRendering: A closure to handle the rendering of the video.
         @MainActor
-        init(handleRendering: ((VideoRenderer) -> Void)?) {
+        init(
+            size: CGSize,
+            showVideo: Bool,
+            colors: Colors,
+            handleRendering: ((VideoRenderer) -> Void)?
+        ) {
+            self.size = size
+            self.showVideo = showVideo
+            self.colors = colors
             self.handleRendering = handleRendering
-            renderer = VideoRendererPool
-                .currentValue
-                .acquireRenderer(size: .zero)
-            setupRendererObservation()
+
+            // Acquire renderer asynchronously to not block UI
+            rendererTask = Task { @MainActor in
+                // Acquire the renderer (this might take 100-300ms)
+                let renderer = VideoRendererPool
+                    .currentValue
+                    .acquireRenderer(size: size)
+                
+                // Store it
+                self.renderer = renderer
+
+                // Set up observation
+                self.setupRendererObservation()
+                
+                // Configure the renderer
+                renderer.frame = .init(origin: .zero, size: size)
+                renderer.videoContentMode = .scaleAspectFill
+                renderer.backgroundColor = colors.participantBackground
+                
+                self.updateContainerContents(showVideo: self.showVideo)
+            }
         }
 
         deinit {
+            rendererTask?.cancel()
             dismantle()
         }
 
         /// Dismantles the video renderer and releases resources.
         func dismantle() {
-            renderer.track?.remove(renderer)
             disposableBag.removeAll()
-            videoRendererPool.releaseRenderer(renderer)
+            if let renderer {
+                renderer.track?.remove(renderer)
+                videoRendererPool.releaseRenderer(renderer)
+            }
+        }
+        
+        func updateContainerContents(showVideo: Bool) {
+            // Swap to real renderer when ready
+            if let renderer = renderer, !hasSwappedToRealRenderer {
+                placeholderRenderer.removeFromSuperview()
+                containerView.addSubview(renderer)
+                renderer.frame = containerView.bounds
+                renderer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                hasSwappedToRealRenderer = true
+                
+                // Call handleRendering if showVideo is true
+                if showVideo {
+                    // Delay handleRendering to ensure view hierarchy is settled
+                    DispatchQueue.main.async { [weak self] in
+                        self?.handleRendering?(renderer)
+                    }
+                }
+            } else if let renderer = renderer, hasSwappedToRealRenderer && showVideo {
+                handleRendering?(renderer)
+            }
         }
 
         // MARK: Private API
@@ -139,6 +208,8 @@ extension VideoRendererView {
         /// Sets up observation for the renderer's window and superview.
         @MainActor
         private func setupRendererObservation() {
+            guard let renderer else { return }
+
             renderer
                 .windowPublisher
                 .map { $0 != nil }
