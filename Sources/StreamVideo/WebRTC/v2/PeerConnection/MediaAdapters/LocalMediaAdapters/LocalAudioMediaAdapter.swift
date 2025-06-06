@@ -88,7 +88,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        Task { @MainActor [transceiverStorage] in
+        Task { [transceiverStorage] in
             transceiverStorage.removeAll()
         }
         log.debug(
@@ -126,7 +126,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// This enables the primary track and creates additional transceivers based
     /// on the current publish options. It also starts the audio recorder.
     func publish() {
-        processingQueue.async { @MainActor [weak self] in
+        processingQueue.async { [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled

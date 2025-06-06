@@ -125,7 +125,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Removes all transceivers from storage and logs details about the
     /// deallocation process.
     deinit {
-        Task { @MainActor [transceiverStorage] in
+        Task { [transceiverStorage] in
             transceiverStorage.removeAll()
         }
 
@@ -207,7 +207,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Starts publishing the local video track.
     func publish() {
-        processingQueue.async { @MainActor [weak self] in
+        processingQueue.async { [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
@@ -215,27 +215,44 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 return
             }
             primaryTrack.isEnabled = true
-
-            do {
-                try await startVideoCapturingSession()
-            } catch {
-                log.error(error)
-            }
-
-            publishOptions
-                .forEach {
-                    self.addTransceiverIfRequired(
-                        for: $0,
-                        with: self
-                            .primaryTrack
-                            .clone(from: self.peerConnectionFactory)
-                    )
+            
+            // Don't wait for camera to start - do it in parallel
+            Task { [weak self] in
+                do {
+                    try await self?.startVideoCapturingSession()
+                } catch {
+                    log.error("Failed to start video capturing session: \(error)")
                 }
-
-            let activePublishOptions = Set(self.publishOptions)
-
-            transceiverStorage
-                .forEach {
+            }
+            
+            // Clone tracks and setup transceivers (don't block UI thread)
+            Task { [weak self] in
+                guard let self else { return }
+                
+                // Clone tracks in parallel
+                await withTaskGroup(of: (PublishOptions.VideoPublishOptions, RTCVideoTrack)?.self) { group in
+                    for option in self.publishOptions {
+                        group.addTask { [weak self] in
+                            guard let self else { return nil }
+                            
+                            let clonedTrack = await Task.detached {
+                                self.primaryTrack.clone(from: self.peerConnectionFactory)
+                            }.value
+                            
+                            return (option, clonedTrack)
+                        }
+                    }
+                    
+                    // Add transceivers as clones complete (off main thread - thread safe!)
+                    for await result in group {
+                        guard let (option, track) = result else { continue }
+                        self.addTransceiverIfRequired(for: option, with: track)
+                    }
+                }
+                
+                // Update transceiver states (off main thread - thread safe!)
+                let activePublishOptions = Set(self.publishOptions)
+                self.transceiverStorage.forEach {
                     if activePublishOptions.contains($0.key) {
                         $0.value.track.isEnabled = true
                         $0.value.transceiver.sender.track = $0.value.track
@@ -244,15 +261,16 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                         $0.value.transceiver.sender.track = nil
                     }
                 }
-
-            log.debug(
-                """
-                Local videoTracks are now published
-                    primary: \(primaryTrack.trackId) isEnabled:\(primaryTrack.isEnabled)
-                    clones: \(transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
-                """,
-                subsystems: .webRTC
-            )
+                
+                log.debug(
+                    """
+                    Local videoTracks are now published
+                        primary: \(self.primaryTrack.trackId) isEnabled:\(self.primaryTrack.isEnabled)
+                        clones: \(self.transceiverStorage.map(\.value.track.trackId).joined(separator: ","))
+                    """,
+                    subsystems: .webRTC
+                )
+            }
         }
     }
 
@@ -271,7 +289,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
 
-            Task { @MainActor [weak self] in
+            Task { [weak self] in
                 do {
                     try await self?.stopVideoCapturingSession()
                 } catch {
