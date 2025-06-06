@@ -215,11 +215,14 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 return
             }
             primaryTrack.isEnabled = true
-
-            do {
-                try await startVideoCapturingSession()
-            } catch {
-                log.error(error)
+            
+            // Don't wait for camera to start - do it in parallel
+            Task.detached { [weak self] in
+                do {
+                    try await self?.startVideoCapturingSession()
+                } catch {
+                    log.error("Failed to start video capturing session: \(error)")
+                }
             }
 
             publishOptions
