@@ -488,24 +488,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         } else {
             throw ClientError.Unknown()
         }
-        var connected = false
-        var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 30, queue: .sdk) {
-            timeout = true
-        }
         log.debug("Listening for WS connection")
-        webSocketClient?.onConnected = {
-            control.cancel()
-            connected = true
+        let subject = PassthroughSubject<Void, Error>()
+        webSocketClient?.onConnected = { subject.send(()) }
+        do {
+            try await subject.nextValue(timeout: 30)
             log.debug("WS connected")
-        }
-
-        while (!connected && !timeout) {
-            try await Task.sleep(nanoseconds: 100_000)
-        }
-        
-        if timeout {
-            log.debug("Timeout while waiting for WS connection opening")
+        } catch {
             throw ClientError.NetworkError()
         }
     }
