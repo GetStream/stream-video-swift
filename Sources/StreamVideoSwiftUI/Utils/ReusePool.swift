@@ -30,10 +30,12 @@ final class ReusePool<Element: AnyObject & Hashable> {
         self.initialCapacity = initialCapacity
         self.factory = factory
 
-        // Initialize the pool with a set number of elements
-        for _ in 0..<initialCapacity {
-            let element = factory()
-            available.append(element)
+        // Initialize the pool with a set number of elements (thread-safe)
+        queue.sync {
+            for _ in 0..<initialCapacity {
+                let element = factory()
+                available.append(element)
+            }
         }
     }
 
@@ -92,6 +94,17 @@ final class ReusePool<Element: AnyObject & Hashable> {
                 log.debug("Will release \(inUse.count) \(String(describing: type(of: Element.self))) instances.")
                 inUse.removeAll()
             }
+        }
+    }
+
+    /// Adds a pre-created element to the available pool.
+    /// Used for prewarming to add elements beyond initial capacity.
+    ///
+    /// - Parameter element: The pre-created element to add to the pool.
+    func addToAvailable(_ element: Element) {
+        queue.sync {
+            available.append(element)
+            log.debug("Added prewarmed \(type(of: element)):\(String(describing: element)) to available pool.")
         }
     }
 }
