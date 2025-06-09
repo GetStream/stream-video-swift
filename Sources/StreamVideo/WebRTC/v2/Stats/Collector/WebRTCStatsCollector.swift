@@ -18,6 +18,8 @@ import StreamWebRTC
 /// will start periodic collection upon setting it.
 final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
 
+    @Injected(\.timers) private var timers
+
     /// The most recent `CallStatsReport` generated from collected stats.
     ///
     /// Observers can subscribe to this publisher to receive updates.
@@ -47,14 +49,10 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
 
     private let trackStorage: WebRTCTrackStorage
 
-    /// Cancellable for the collection timer.
-    private var collectionCancellable: AnyCancellable?
-
-    /// The currently active task for collecting statistics.
-    private var activeCollectionTask: Task<Void, Never>?
-
     /// A helper object for building call statistics reports.
     private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
+
+    private let disposableBag = DisposableBag()
 
     init(
         interval: TimeInterval = 2,
@@ -71,17 +69,15 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
     private func scheduleCollection(with interval: TimeInterval) {
         guard interval > 0 else {
             log.warning("Collection interval should be greater than 0.", subsystems: .webRTC)
-            collectionCancellable?.cancel()
+            disposableBag.removeAll()
             return
         }
 
-        collectionCancellable?.cancel()
-        collectionCancellable = Foundation
-            .Timer
-            .publish(every: interval, on: .main, in: .default)
-            .autoconnect()
+        timers
+            .timer(for: interval)
             .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
-            .sink { [weak self] _ in self?.collectStats() }
+            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.collectStats() }
+            .store(in: disposableBag)
 
         log.debug(
             "Stats collection is now scheduled with interval:\(interval).",
@@ -93,35 +89,31 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
     ///
     /// Cancels any existing task before starting a new one. If both connections
     /// are available, the task gathers stats, generates a report, and publishes it.
-    private func collectStats() {
-        activeCollectionTask?.cancel()
-        activeCollectionTask = Task { [weak self] in
-            guard
-                let self,
-                let hostname = sfuAdapter?.hostname
-            else {
-                return
-            }
+    private func collectStats() async {
+        guard
+            let hostname = sfuAdapter?.hostname
+        else {
+            return
+        }
 
-            do {
-                async let statsPublisher = publisher?.statsReport() ?? .init(nil)
-                async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
+        do {
+            async let statsPublisher = publisher?.statsReport() ?? .init(nil)
+            async let statsSubscriber = subscriber?.statsReport() ?? .init(nil)
 
-                try Task.checkCancellation()
-                let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
+            try Task.checkCancellation()
+            let result: [StreamRTCStatisticsReport] = try await [statsPublisher, statsSubscriber]
 
-                let report = callStatisticsReporter.buildReport(
-                    publisherReport: result.first ?? .init(nil),
-                    subscriberReport: result.last ?? .init(nil),
-                    datacenter: hostname,
-                    trackToKindMap: trackStorage.snapshot
-                )
+            let report = callStatisticsReporter.buildReport(
+                publisherReport: result.first ?? .init(nil),
+                subscriberReport: result.last ?? .init(nil),
+                datacenter: hostname,
+                trackToKindMap: trackStorage.snapshot
+            )
 
-                try Task.checkCancellation()
-                self.report = report
-            } catch {
-                log.error(error, subsystems: .webRTC)
-            }
+            try Task.checkCancellation()
+            self.report = report
+        } catch {
+            log.error(error, subsystems: .webRTC)
         }
     }
 
@@ -129,8 +121,7 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
     ///
     /// Cancels existing tasks and timers, then restarts collection if needed.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
-        activeCollectionTask?.cancel()
-        collectionCancellable?.cancel()
+        disposableBag.removeAll()
 
         guard sfuAdapter != nil else {
             return

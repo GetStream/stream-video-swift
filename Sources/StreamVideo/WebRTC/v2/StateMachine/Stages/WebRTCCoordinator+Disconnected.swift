@@ -170,7 +170,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .removeDuplicates()
-                .sinkTask { [weak self] in
+                .sinkTask(storeIn: disposableBag) { [weak self] in
                     /// Trace internet connection changes
                     await self?
                         .context

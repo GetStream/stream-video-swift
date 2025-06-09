@@ -14,6 +14,7 @@ import StreamWebRTC
 final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
+    @Injected(\.timers) private var timers
 
     struct Input: @unchecked Sendable {
         var sessionID: String
@@ -37,11 +38,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
 
     private let provider: () -> Input?
 
-    /// Cancellable for the delivery subscription.
-    private var deliveryCancellable: AnyCancellable?
-
-    /// The currently active task for delivering statistics.
-    private var activeDeliveryTask: Task<Void, Never>?
+    private let disposableBag = DisposableBag()
 
     /// Initializes a new WebRTCStatsReporter.
     ///
@@ -61,9 +58,6 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
 
     deinit {
         sfuAdapter = nil
-        // Cancel all active tasks and subscriptions
-        deliveryCancellable?.cancel()
-        activeDeliveryTask?.cancel()
     }
 
     // MARK: - Manual trigger
@@ -74,7 +68,9 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
         else {
             return
         }
-        deliverStats(input)
+        Task(disposableBag: disposableBag) { [weak self] in
+            await self?.deliverStats(input)
+        }
     }
 
     // MARK: - Private helpers
@@ -84,8 +80,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     /// This method cancels any existing tasks and subscriptions, and sets up new ones if an adapter
     /// is provided.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
-        activeDeliveryTask?.cancel()
-        deliveryCancellable?.cancel()
+        disposableBag.removeAll()
 
         guard sfuAdapter != nil else {
             return
@@ -95,64 +90,55 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     }
 
     private func scheduleDelivery(with interval: TimeInterval) {
+        disposableBag.removeAll()
+
         guard interval > 0 else {
             log.warning("Delivery interval should be greater than 0.", subsystems: .webRTC)
-            deliveryCancellable?.cancel()
             return
         }
 
-        deliveryCancellable?.cancel()
-        deliveryCancellable = Foundation
-            .Timer
-            .publish(every: interval, on: .main, in: .default)
-            .autoconnect()
+        timers
+            .timer(for: interval)
             .compactMap { [weak self] _ in self?.provider() }
-            .sink { [weak self] in self?.deliverStats($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.deliverStats($0) }
+            .store(in: disposableBag)
     }
 
     /// Delivers the collected statistics to the SFU adapter.
     ///
     /// - Parameter report: The statistics report to deliver.
-    private func deliverStats(_ input: Input) {
-        guard activeDeliveryTask == nil else {
+    private func deliverStats(_ input: Input) async {
+        guard let sfuAdapter else {
             return
         }
 
         log.debug(
-            "Will deliver stats report timestamp:\(input.report.timestamp) on hostname: \(sfuAdapter?.host)",
+            "Will deliver stats report timestamp:\(input.report.timestamp) on hostname: \(sfuAdapter.host)",
             subsystems: .webRTC
         )
 
-        activeDeliveryTask?.cancel()
-        activeDeliveryTask = Task { [weak self] in
-            do {
-                guard let self, let sfuAdapter else {
-                    throw ClientError("Unable to deliver stats while SFU is unavailable.")
-                }
+        do {
+            try Task.checkCancellation()
 
-                try Task.checkCancellation()
+            let tracesData = try JSONEncoder
+                .stream
+                .encode(input.peerConnectionTraces)
+            let traces = String(data: tracesData, encoding: .utf8)
 
-                let tracesData = try JSONEncoder
-                    .stream
-                    .encode(input.peerConnectionTraces)
-                let traces = String(data: tracesData, encoding: .utf8)
+            try Task.checkCancellation()
 
-                try Task.checkCancellation()
-
-                try await sfuAdapter.sendStats(
-                    input.report,
-                    for: input.sessionID,
-                    unifiedSessionId: input.unifiedSessionID,
-                    traces: traces,
-                    thermalState: thermalStateObserver.state,
-                    encodeStats: input.encoderPerformanceStats,
-                    decodeStats: input.decoderPerformanceStats
-                )
-            } catch {
-                input.onError(error)
-                log.error(error, subsystems: .webRTC)
-            }
-            self?.activeDeliveryTask = nil
+            try await sfuAdapter.sendStats(
+                input.report,
+                for: input.sessionID,
+                unifiedSessionId: input.unifiedSessionID,
+                traces: traces,
+                thermalState: thermalStateObserver.state,
+                encodeStats: input.encoderPerformanceStats,
+                decodeStats: input.decoderPerformanceStats
+            )
+        } catch {
+            input.onError(error)
+            log.error(error, subsystems: .webRTC)
         }
     }
 }
