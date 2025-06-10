@@ -97,6 +97,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var startedAt: Date? {
         didSet {
+            _cachedStartedAt = startedAt
             setupDurationTimer()
         }
     }
@@ -153,7 +154,9 @@ public class CallState: ObservableObject {
     }
     
     private var localCallSettingsUpdate = false
-    private var durationTimer: Foundation.Timer?
+    private var durationTimer: DispatchSourceTimer?
+    /// Cache to avoid @Published access
+    private var _cachedStartedAt: Date?
 
     /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
     /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`
@@ -497,31 +500,35 @@ public class CallState: ObservableObject {
     
     private func setupDurationTimer() {
         resetTimer()
-        durationTimer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] timer in
-            guard let self else {
-                timer.invalidate()
-                return
+        
+        // Create timer on background queue
+        let timer = DispatchSource.makeTimerSource(queue: .global(qos: .utility))
+        timer.schedule(deadline: .now() + 1, repeating: 1.0)
+        
+        timer.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            
+            // Calculate duration using cached value
+            let duration: TimeInterval
+            if let startedAt = self._cachedStartedAt {
+                duration = Date().timeIntervalSince(startedAt)
+            } else {
+                duration = 0
             }
-            Task {
-                await MainActor.run {
-                    self.updateDuration()
-                }
+            
+            // Update on main thread
+            DispatchQueue.main.async {
+                self.update(duration: duration)
             }
-        })
+        }
+        
+        timer.resume()
+        self.durationTimer = timer
     }
     
     private func resetTimer() {
-        durationTimer?.invalidate()
+        durationTimer?.cancel()
         durationTimer = nil
-    }
-    
-    @objc private func updateDuration() {
-        guard let startedAt else {
-            update(duration: 0)
-            return
-        }
-        let timeInterval = Date().timeIntervalSince(startedAt)
-        update(duration: timeInterval)
     }
     
     private func update(duration: TimeInterval) {
