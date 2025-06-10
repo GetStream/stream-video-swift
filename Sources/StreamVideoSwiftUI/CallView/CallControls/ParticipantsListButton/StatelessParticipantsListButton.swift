@@ -7,7 +7,7 @@ import StreamVideo
 import SwiftUI
 
 /// A view representing a stateless participants list button.
-public struct StatelessParticipantsListButton: View {
+public struct StatelessParticipantsListButton: View, Equatable {
 
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
@@ -15,9 +15,6 @@ public struct StatelessParticipantsListButton: View {
     @Injected(\.images) private var images
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
-
-    /// The associated call for the participants list button.
-    public weak var call: Call?
 
     /// The size of the participants list button.
     public var size: CGFloat
@@ -28,7 +25,7 @@ public struct StatelessParticipantsListButton: View {
     /// The action handler for the participants list button.
     public var actionHandler: ActionHandler?
 
-    @State private var count: Int
+    private var count: Int
 
     /// Initializes a stateless participants list button view.
     ///
@@ -37,18 +34,41 @@ public struct StatelessParticipantsListButton: View {
     ///   - size: The size of the participants list button.
     ///   - isActive: A binding that indicates whether the button is active.
     ///   - actionHandler: An optional closure to handle button tap actions.
-    @MainActor
+
     public init(
         call: Call?,
         size: CGFloat = 44,
         isActive: Binding<Bool>,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
+        self.init(
+            count: call?.state.participants.endIndex ?? 0,
+            size: size,
+            isActive: isActive,
+            actionHandler: actionHandler
+        )
+    }
+
+    init(
+        count: Int,
+        size: CGFloat = 44,
+        isActive: Binding<Bool>,
+        actionHandler: ActionHandler? = nil
+    ) {
+        self.count = count
         self.size = size
         self.isActive = isActive
-        _count = .init(initialValue: call?.state.participants.endIndex ?? 0)
+
         self.actionHandler = actionHandler
+    }
+
+    nonisolated public static func == (
+        lhs: StatelessParticipantsListButton,
+        rhs: StatelessParticipantsListButton
+    ) -> Bool {
+        lhs.size == rhs.size
+            && lhs.isActive.wrappedValue == rhs.isActive.wrappedValue
+            && lhs.count == rhs.count
     }
 
     /// The body of the participants list button view.
@@ -65,12 +85,9 @@ public struct StatelessParticipantsListButton: View {
         )
         .overlay(
             ControlBadgeView("\(count)")
+                .equatable()
                 .opacity(count > 1 ? 1 : 0)
         )
         .accessibility(identifier: "participantMenu")
-        .onReceive(call?.state.$participants) {
-            // Update the count based on the number of participants in the call.
-            count = $0.endIndex
-        }
     }
 }

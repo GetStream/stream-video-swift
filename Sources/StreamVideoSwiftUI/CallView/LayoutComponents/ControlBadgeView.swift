@@ -7,7 +7,7 @@ import StreamVideo
 import SwiftUI
 
 /// A view representing a control badge displaying a value.
-public struct ControlBadgeView: View {
+public struct ControlBadgeView: View, Equatable {
     @Injected(\.colors) private var colors
 
     /// The value to be displayed within the badge.
@@ -17,6 +17,13 @@ public struct ControlBadgeView: View {
     /// - Parameter value: The value to display within the badge.
     public init(_ value: String) {
         self.value = value
+    }
+
+    nonisolated public static func == (
+        lhs: ControlBadgeView,
+        rhs: ControlBadgeView
+    ) -> Bool {
+        lhs.value == rhs.value
     }
 
     public var body: some View {

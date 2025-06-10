@@ -14,13 +14,11 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     var microphoneChecker: MicrophoneChecker
 
-    @ObservedObject var appState: AppState = .shared
-    @ObservedObject var viewModel: CallViewModel
-    @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
+    var viewModel: CallViewModel
 
     @State var mutedIndicatorShown = false
+    @State var showFireworks = false
     @StateObject var snapshotViewModel: DemoSnapshotViewModel
-    @StateObject var sessionTimer: SessionTimer
     
     private let viewFactory: ViewFactory
 
@@ -33,7 +31,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
         self.microphoneChecker = microphoneChecker
         self.viewModel = viewModel
         _snapshotViewModel = .init(wrappedValue: .init(viewModel))
-        _sessionTimer = .init(wrappedValue: .init(call: viewModel.call, alertInterval: 60))
     }
 
     var body: some View {
@@ -64,18 +61,39 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
                     }
                     : nil
             )
-            .overlay(
-                ZStack {
-                    reactionsAdapter.showFireworks
-                        ? FireworksView(config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast))
-                        : nil
-                }
-            )
-            .overlay(
-                sessionTimer.showTimerAlert ? DemoSessionTimerView(sessionTimer: sessionTimer) : nil
-            )
+            .overlay(FireworksReactionView())
+            .overlay(SessionTimerView(call: viewModel.call))
             .presentsMoreControls(viewModel: viewModel)
-            .chat(viewModel: viewModel, chatViewModel: chatViewModel)
+            .chat(chatViewModel: chatViewModel)
             .toastView(toast: $snapshotViewModel.toast)
+    }
+}
+
+struct FireworksReactionView: View {
+    @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
+
+    var body: some View {
+        if reactionsAdapter.showFireworks {
+            FireworksView(config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast))
+        }
+    }
+}
+
+struct SessionTimerView: View {
+    @StateObject var sessionTimer: SessionTimer
+
+    init(call: Call?, alertInterval: TimeInterval = 60) {
+        _sessionTimer = .init(
+            wrappedValue: .init(
+                call: call,
+                alertInterval: alertInterval
+            )
+        )
+    }
+
+    var body: some View {
+        if sessionTimer.showTimerAlert {
+            DemoSessionTimerView(sessionTimer: sessionTimer)
+        }
     }
 }
