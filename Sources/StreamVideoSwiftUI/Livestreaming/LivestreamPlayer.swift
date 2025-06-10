@@ -316,9 +316,9 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     private var videoRenderer: some View {
         GeometryReader { reader in
             if let participant = state.participants.first(where: { $0.track != nil }) {
-                VideoCallParticipantView(
-                    viewFactory: viewFactory,
+                viewFactory.makeVideoParticipantView(
                     participant: participant,
+                    id: participant.sessionId,
                     availableFrame: reader.frame(in: .global),
                     contentMode: .scaleAspectFit,
                     customData: [:],
