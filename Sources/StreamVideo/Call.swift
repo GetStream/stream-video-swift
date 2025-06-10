@@ -1508,7 +1508,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     private func subscribeToLocalCallSettingsChanges() {
-        speaker.$status.dropFirst().sink { [weak self] status in
+        speaker.$status.receive(on: DispatchQueue.main).dropFirst().sink { [weak self] status in
             guard let self else { return }
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 guard let self else { return }
@@ -1518,7 +1518,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         .store(in: cancellables)
 
-        speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
+        speaker.$audioOutputStatus.receive(on: DispatchQueue.main).dropFirst().sink { [weak self] status in
             guard let self else { return }
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 guard let self else { return }
@@ -1528,7 +1528,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         .store(in: cancellables)
 
-        camera.$status.dropFirst().sink { [weak self] status in
+        camera.$status.receive(on: DispatchQueue.main).dropFirst().sink { [weak self] status in
             guard let self else { return }
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 guard let self else { return }
@@ -1538,7 +1538,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         .store(in: cancellables)
 
-        camera.$direction.dropFirst().sink { [weak self] position in
+        camera.$direction.receive(on: DispatchQueue.main).dropFirst().sink { [weak self] position in
             guard let self else { return }
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 guard let self else { return }
@@ -1548,7 +1548,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         .store(in: cancellables)
 
-        microphone.$status.dropFirst().sink { [weak self] status in
+        microphone.$status.receive(on: DispatchQueue.main).dropFirst().sink { [weak self] status in
             guard let self else { return }
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 guard let self else { return }
