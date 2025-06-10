@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- The CallViewModel will now respecting the dashboard's `CallSettings` when starting a `Call` with `ring:true` and without provided `CallSettings`. [#841](https://github.com/GetStream/stream-video-swift/pull/841)
 
 # [1.24.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.24.0)
 _June 02, 2025_
