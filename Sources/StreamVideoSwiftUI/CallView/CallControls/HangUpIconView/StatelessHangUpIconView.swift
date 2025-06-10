@@ -7,15 +7,12 @@ import StreamVideo
 import SwiftUI
 
 /// A view representing a stateless hang-up icon button.
-public struct StatelessHangUpIconView: View {
+public struct StatelessHangUpIconView: View, Equatable {
 
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
     @Injected(\.images) private var images
-
-    /// The associated call for the hang-up icon.
-    public weak var call: Call?
 
     /// The size of the hang-up icon.
     public var size: CGFloat
@@ -23,24 +20,35 @@ public struct StatelessHangUpIconView: View {
     /// The action handler for the hang-up icon button.
     public var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
-
     /// Initializes a stateless hang-up icon view.
     ///
     /// - Parameters:
     ///   - call: The associated call for the hang-up icon.
     ///   - size: The size of the hang-up icon.
     ///   - actionHandler: An optional closure to handle button tap actions.
-    @MainActor
+
     public init(
         call: Call?,
         size: CGFloat = 44,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
+        self.init(size: size, actionHandler: actionHandler)
+    }
+
+    public init(
+        size: CGFloat = 44,
+        actionHandler: ActionHandler? = nil
+    ) {
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
+
         self.actionHandler = actionHandler
+    }
+
+    nonisolated public static func == (
+        lhs: StatelessHangUpIconView,
+        rhs: StatelessHangUpIconView
+    ) -> Bool {
+        lhs.size == rhs.size
     }
 
     /// The body of the hang-up icon view.

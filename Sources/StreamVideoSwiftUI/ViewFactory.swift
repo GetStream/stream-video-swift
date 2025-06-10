@@ -292,7 +292,7 @@ extension ViewFactory {
     }
 
     public func makeCallTopView(viewModel: CallViewModel) -> some View {
-        CallTopView(viewModel: viewModel)
+        CallTopView(viewModel: viewModel).equatable()
     }
 
     public func makeParticipantsListView(

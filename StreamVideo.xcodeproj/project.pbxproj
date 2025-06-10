@@ -65,6 +65,8 @@
 		401C1EF02D493DCA00304609 /* OrderedCapacityQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */; };
 		401C1EF22D4945BE00304609 /* ClosedCaptionsAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */; };
 		401E042B2DF870FC00136E57 /* VideoCallParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401E042A2DF870FC00136E57 /* VideoCallParticipantView.swift */; };
+		401E042D2DF8749000136E57 /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401E042C2DF8749000136E57 /* TimeView.swift */; };
+		401E042F2DF874D400136E57 /* SharingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401E042E2DF874D400136E57 /* SharingIndicator.swift */; };
 		401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */; };
 		40245F322BE269E300FCF075 /* StatelessVideoIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */; };
 		40245F342BE26BC900FCF075 /* StatelessMicrophoneIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */; };
@@ -335,6 +337,8 @@
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		40802AE92DD2A7C700B9F970 /* AVAudioSessionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */; };
 		40802AEB2DD2A92E00B9F970 /* MockAVAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */; };
+		408347C22DF8752300C80068 /* ToggleCameraIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347C12DF8752300C80068 /* ToggleCameraIconView.swift */; };
+		408347C62DF8756F00C80068 /* HangUpIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347C52DF8756F00C80068 /* HangUpIconView.swift */; };
 		408521E52D661C7600F012B8 /* RawJSON+Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E42D661C7500F012B8 /* RawJSON+Double.swift */; };
 		408521E72D661CA700F012B8 /* ThermalState+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */; };
 		408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408679F62BD12F1000D027E0 /* AudioFilter.swift */; };
@@ -1661,6 +1665,8 @@
 		401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderedCapacityQueueTests.swift; sourceTree = "<group>"; };
 		401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedCaptionsAdapterTests.swift; sourceTree = "<group>"; };
 		401E042A2DF870FC00136E57 /* VideoCallParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCallParticipantView.swift; sourceTree = "<group>"; };
+		401E042C2DF8749000136E57 /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
+		401E042E2DF874D400136E57 /* SharingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingIndicator.swift; sourceTree = "<group>"; };
 		401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier.swift; sourceTree = "<group>"; };
 		40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessVideoIconView.swift; sourceTree = "<group>"; };
 		40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessMicrophoneIconView.swift; sourceTree = "<group>"; };
@@ -1853,6 +1859,8 @@
 		407E67582DC101DF00878FFC /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
 		40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioSessionProtocol.swift; sourceTree = "<group>"; };
 		40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVAudioSession.swift; sourceTree = "<group>"; };
+		408347C12DF8752300C80068 /* ToggleCameraIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCameraIconView.swift; sourceTree = "<group>"; };
+		408347C52DF8756F00C80068 /* HangUpIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HangUpIconView.swift; sourceTree = "<group>"; };
 		408521E42D661C7500F012B8 /* RawJSON+Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RawJSON+Double.swift"; sourceTree = "<group>"; };
 		408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThermalState+Comparable.swift"; sourceTree = "<group>"; };
 		408679F62BD12F1000D027E0 /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
@@ -3089,6 +3097,8 @@
 		40245F2E2BE269B400FCF075 /* CallControls */ = {
 			isa = PBXGroup;
 			children = (
+				408347C42DF8756B00C80068 /* HangUpIconView */,
+				408347C32DF8752D00C80068 /* ToggleCameraIconView */,
 				40245F302BE269C300FCF075 /* Stateful */,
 				40245F2F2BE269BE00FCF075 /* Stateless */,
 			);
@@ -3099,9 +3109,7 @@
 			isa = PBXGroup;
 			children = (
 				40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */,
-				40245F352BE26D6700FCF075 /* StatelessToggleCameraIconView.swift */,
 				40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */,
-				40245F372BE26F2200FCF075 /* StatelessHangUpIconView.swift */,
 				40245F392BE26F7200FCF075 /* StatelessAudioOutputIconView.swift */,
 				40245F3B2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift */,
 				40245F3D2BE2709800FCF075 /* StatelessParticipantsListButton.swift */,
@@ -3762,6 +3770,24 @@
 				40802AE82DD2A7C700B9F970 /* AVAudioSessionProtocol.swift */,
 			);
 			path = Protocols;
+			sourceTree = "<group>";
+		};
+		408347C32DF8752D00C80068 /* ToggleCameraIconView */ = {
+			isa = PBXGroup;
+			children = (
+				40245F352BE26D6700FCF075 /* StatelessToggleCameraIconView.swift */,
+				408347C12DF8752300C80068 /* ToggleCameraIconView.swift */,
+			);
+			path = ToggleCameraIconView;
+			sourceTree = "<group>";
+		};
+		408347C42DF8756B00C80068 /* HangUpIconView */ = {
+			isa = PBXGroup;
+			children = (
+				40245F372BE26F2200FCF075 /* StatelessHangUpIconView.swift */,
+				408347C52DF8756F00C80068 /* HangUpIconView.swift */,
+			);
+			path = HangUpIconView;
 			sourceTree = "<group>";
 		};
 		408679F52BD12EFC00D027E0 /* AudioFilter */ = {
@@ -5431,6 +5457,7 @@
 				401480352A5447C50029166A /* LocalParticipantViewModifier.swift */,
 				8457CF9028BB835F00E8CF50 /* CallView.swift */,
 				846E4AFE29D236EA003733AB /* CallTopView.swift */,
+				401E042E2DF874D400136E57 /* SharingIndicator.swift */,
 				84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */,
 				840425B528D0A96F0084C637 /* VideoParticipantsView.swift */,
 				401E042A2DF870FC00136E57 /* VideoCallParticipantView.swift */,
@@ -5448,6 +5475,7 @@
 				8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */,
 				401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */,
 				40E110462B5A9DF4007DF492 /* CallDurationView.swift */,
+				401E042C2DF8749000136E57 /* TimeView.swift */,
 			);
 			path = CallView;
 			sourceTree = "<group>";
@@ -8029,6 +8057,7 @@
 				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */,
 				40B575D82DCCF00200F489B8 /* StreamPictureInPictureControllerProtocol.swift in Sources */,
+				401E042D2DF8749000136E57 /* TimeView.swift in Sources */,
 				84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */,
 				4072A5922DAEB41500108E8F /* PictureInPictureDelegateProxy.swift in Sources */,
 				40A941742B4D97A1006D6965 /* PictureInPictureVideoRenderer.swift in Sources */,
@@ -8077,6 +8106,7 @@
 				4045D9D52DAD35790077A660 /* Resource.swift in Sources */,
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
+				408347C22DF8752300C80068 /* ToggleCameraIconView.swift in Sources */,
 				40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
@@ -8116,6 +8146,7 @@
 				844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */,
 				8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */,
 				4072A5862DAE821C00108E8F /* PictureInPictureVideoRendererView.swift in Sources */,
+				408347C62DF8756F00C80068 /* HangUpIconView.swift in Sources */,
 				84B57D39297FFF8300E4E709 /* PreJoiningView_iOS13.swift in Sources */,
 				8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* CallingGroupView.swift in Sources */,
@@ -8138,6 +8169,7 @@
 				847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */,
 				403FF3F52BA1DC6C0092CE8A /* YpCbCrPixelRange+Default.swift in Sources */,
 				403FF3F32BA1DC650092CE8A /* StreamRTCYUVBuffer.swift in Sources */,
+				401E042F2DF874D400136E57 /* SharingIndicator.swift in Sources */,
 				84B57D37297F406400E4E709 /* MicrophoneCheckView.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */,
 				8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */,
