@@ -103,8 +103,8 @@ class Camera: NSObject, @unchecked Sendable {
         
     override init() {
         let stream = AsyncStream<CIImage>.makeStream()
-        self.previewStream = stream.stream
-        self.previewStreamContinuation = stream.continuation
+        previewStream = stream.stream
+        previewStreamContinuation = stream.continuation
         super.init()
 
         initialize()

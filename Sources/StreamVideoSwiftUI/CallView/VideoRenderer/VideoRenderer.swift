@@ -172,7 +172,7 @@ final class RTCVideoTrackAdapter {
     func updateTrack(_ newTrack: RTCVideoTrack?) {
         guard let newTrack else {
             removeAll()
-            self.track = nil
+            track = nil
             return
         }
 
@@ -181,7 +181,7 @@ final class RTCVideoTrackAdapter {
         }
 
         removeAll()
-        self.track = newTrack
+        track = newTrack
     }
 
     func addRenderer(_ renderer: RTCVideoRenderer) {
@@ -214,4 +214,3 @@ final class RTCVideoTrackAdapter {
         oldRenderers.forEach { self.track?.remove($0) }
     }
 }
-

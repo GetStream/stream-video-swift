@@ -68,8 +68,8 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
         .onAppear {
             Task {
                 callSettings.audioOn
-                ? await callAudioRecorder.startRecording(ignoreActiveCall: true)
-                : await callAudioRecorder.stopRecording()
+                    ? await callAudioRecorder.startRecording(ignoreActiveCall: true)
+                    : await callAudioRecorder.stopRecording()
             }
         }
     }
