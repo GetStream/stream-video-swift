@@ -14,7 +14,7 @@ public struct ParticipantsListButton: View {
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @State private var count: Int = 0
     let size: CGFloat
 
@@ -27,9 +27,14 @@ public struct ParticipantsListButton: View {
     }
 
     public var body: some View {
-        StatelessParticipantsListButton(
-            call: viewModel.call,
-            isActive: $viewModel.participantsShown
-        ) { [weak viewModel] in viewModel?.participantsShown = true }
+        PublisherSubscriptionView(
+            initial: viewModel.participantsShown,
+            publisher: viewModel.$participantsShown.eraseToAnyPublisher()
+        ) { _ in
+            StatelessParticipantsListButton(
+                call: viewModel.call,
+                isActive: .init(get: { viewModel.participantsShown }, set: { viewModel.participantsShown = $0 })
+            ) { [weak viewModel] in viewModel?.participantsShown = true }
+        }
     }
 }

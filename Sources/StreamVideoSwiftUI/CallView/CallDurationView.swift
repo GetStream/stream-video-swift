@@ -15,7 +15,7 @@ public struct CallDurationView: View {
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
     @State private var duration: TimeInterval
-    @ObservedObject private var viewModel: CallViewModel
+    private var viewModel: CallViewModel
 
     @MainActor
     public init(_ viewModel: CallViewModel) {
@@ -24,7 +24,10 @@ public struct CallDurationView: View {
     }
 
     public var body: some View {
-        Group {
+        PublisherSubscriptionView(
+            initial: viewModel.call?.state.duration ?? 0,
+            publisher: viewModel.call?.state.$duration.eraseToAnyPublisher()
+        ) { duration in
             if duration > 0, let formattedDuration = formatter.format(duration) {
                 HStack(spacing: 4) {
                     iconView
@@ -41,12 +44,12 @@ public struct CallDurationView: View {
                 EmptyView()
             }
         }
-        .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
         .accessibility(identifier: accessibilityIdentifier)
     }
 
     // MARK: - Private Helpers
 
+    @MainActor
     private var foregroundColor: Color {
         viewModel.recordingState == .recording
             ? colors.inactiveCallControl
@@ -65,6 +68,7 @@ public struct CallDurationView: View {
         }
     }
 
+    @MainActor
     private var accessibilityIdentifier: String {
         viewModel.recordingState == .recording
             ? "recordingView"

@@ -23,8 +23,6 @@ public struct StatelessToggleCameraIconView: View {
     /// The action handler for the toggle camera icon button.
     public var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
-
     /// Initializes a stateless toggle camera icon view.
     ///
     /// - Parameters:
@@ -38,23 +36,27 @@ public struct StatelessToggleCameraIconView: View {
     ) {
         self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
         self.actionHandler = actionHandler
     }
 
     /// The body of the toggle camera icon view.
     public var body: some View {
-        Button(
-            action: { actionHandler?() },
-            label: {
-                CallIconView(
-                    icon: images.toggleCamera,
-                    size: size,
-                    iconStyle: .secondary
-                )
-            }
-        )
-        .accessibility(identifier: "cameraPositionToggle")
-        .streamAccessibility(value: callSettings.cameraPosition == .front ? "1" : "0")
+        PublisherSubscriptionView(
+            initial: call?.state.callSettings.cameraPosition ?? .front,
+            publisher: call?.state.$callSettings.compactMap(\.cameraPosition).eraseToAnyPublisher()
+        ) { cameraPosition in
+            Button(
+                action: { actionHandler?() },
+                label: {
+                    CallIconView(
+                        icon: images.toggleCamera,
+                        size: size,
+                        iconStyle: .secondary
+                    )
+                }
+            )
+            .accessibility(identifier: "cameraPositionToggle")
+            .streamAccessibility(value: cameraPosition == .front ? "1" : "0")
+        }
     }
 }

@@ -21,7 +21,7 @@ struct AppControlsWithChat: View {
     private let size: CGFloat = 50
     private let cornerRadius: CGFloat = 24
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, canOpenChat: Bool = true) {
         self.viewModel = viewModel
@@ -58,7 +58,7 @@ struct AppControlsWithChat: View {
 
 struct MoreControlsIconView: View {
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
 
     init(viewModel: CallViewModel, size: CGFloat = 44) {
@@ -67,20 +67,25 @@ struct MoreControlsIconView: View {
     }
 
     var body: some View {
-        Button(
-            action: {
-                viewModel.moreControlsShown.toggle()
-            },
-            label: {
-                CallIconView(
-                    icon: Image(systemName: "ellipsis"),
-                    size: size,
-                    iconStyle: viewModel.moreControlsShown ? .secondaryActive : .secondary
-                )
-                .rotationEffect(.degrees(90))
-            }
-        )
-        .accessibility(identifier: "moreControlsToggle")
+        PublisherSubscriptionView(
+            initial: viewModel.moreControlsShown,
+            publisher: viewModel.$moreControlsShown.eraseToAnyPublisher()
+        ) { moreControlsShown in
+            Button(
+                action: {
+                    viewModel.moreControlsShown.toggle()
+                },
+                label: {
+                    CallIconView(
+                        icon: Image(systemName: "ellipsis"),
+                        size: size,
+                        iconStyle: moreControlsShown ? .secondaryActive : .secondary
+                    )
+                    .rotationEffect(.degrees(90))
+                }
+            )
+            .accessibility(identifier: "moreControlsToggle")
+        }
     }
 }
 
@@ -93,7 +98,7 @@ struct ChatControlsHeader: View {
 
     private let size: CGFloat = 50
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel

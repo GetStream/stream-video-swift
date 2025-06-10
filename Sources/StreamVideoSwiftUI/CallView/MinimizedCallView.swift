@@ -7,7 +7,7 @@ import SwiftUI
 
 public struct MinimizedCallView<Factory: ViewFactory>: View {
     var viewFactory: Factory
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     @State var callViewPlacement = CallViewPlacement.topTrailing
     

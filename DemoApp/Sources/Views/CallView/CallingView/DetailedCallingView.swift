@@ -22,7 +22,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
 
     private var viewFactory: Factory
@@ -184,9 +184,21 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                 viewModel: viewModel
             )
         )
-        .onReceive(appState.$currentUser) { currentUser in
-            self.callAction = currentUser?.type == .regular ? callAction : .joinCall
-            self.callFlow = currentUser?.type == .regular ? callFlow : .joinImmediately
+        .background(appStateObserverView)
+    }
+
+    @ViewBuilder
+    private var appStateObserverView: some View {
+        PublisherSubscriptionView(
+            initial: appState.currentUser,
+            publisher: appState.$currentUser.eraseToAnyPublisher()
+        ) { currentUser in
+            Color
+                .clear
+                .onAppear {
+                    callAction = currentUser?.type == .regular ? callAction : .joinCall
+                    callFlow = currentUser?.type == .regular ? callFlow : .joinImmediately
+                }
         }
     }
 

@@ -15,8 +15,8 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     var microphoneChecker: MicrophoneChecker
 
     @ObservedObject var appState: AppState = .shared
-    @ObservedObject var viewModel: CallViewModel
     @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
+    var viewModel: CallViewModel
 
     @State var mutedIndicatorShown = false
     @StateObject var snapshotViewModel: DemoSnapshotViewModel
@@ -39,21 +39,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     var body: some View {
         viewFactory
             .makeInnerCallView(viewModel: viewModel)
-            .onReceive(viewModel.callSettingsPublisher) { _ in
-                Task { await updateMicrophoneChecker() }
-            }
-            .onReceive(microphoneChecker.decibelsPublisher, perform: { values in
-                guard !viewModel.callSettings.audioOn else { return }
-                for value in values {
-                    if (value > -50 && value < 0) && !mutedIndicatorShown {
-                        mutedIndicatorShown = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                            mutedIndicatorShown = false
-                        }
-                        return
-                    }
-                }
-            })
             .overlay(
                 mutedIndicatorShown ?
                     VStack {
@@ -80,6 +65,28 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
             .toastView(toast: $snapshotViewModel.toast)
+            .background(microphoneControllerBackground)
+    }
+
+    @ViewBuilder
+    private var microphoneControllerBackground: some View {
+        Color
+            .clear
+            .onReceive(viewModel.callSettingsPublisher) { _ in
+                Task { await updateMicrophoneChecker() }
+            }
+            .onReceive(microphoneChecker.decibelsPublisher, perform: { values in
+                guard !viewModel.callSettings.audioOn else { return }
+                for value in values {
+                    if (value > -50 && value < 0) && !mutedIndicatorShown {
+                        mutedIndicatorShown = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            mutedIndicatorShown = false
+                        }
+                        return
+                    }
+                }
+            })
     }
 
     private func updateMicrophoneChecker() async {

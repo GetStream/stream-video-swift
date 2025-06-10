@@ -7,14 +7,14 @@ import StreamWebRTC
 import SwiftUI
 
 public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
-    
+
+    @Injected(\.orientationAdapter) private var orientationAdapter
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-
-    @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -31,8 +31,11 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     }
     
     public var body: some View {
-        ZStack {
-            if orientationAdapter.orientation.isPortrait {
+        PublisherSubscriptionView(
+            initial: orientationAdapter.orientation,
+            publisher: orientationAdapter.$orientation.eraseToAnyPublisher()
+        ) { orientation in
+            if orientation.isPortrait {
                 VideoParticipantsViewPortrait(
                     viewFactory: viewFactory,
                     call: call,
