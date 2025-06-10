@@ -29,7 +29,6 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
         }
     }
 
-
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
     @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey.allCases

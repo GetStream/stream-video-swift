@@ -56,7 +56,14 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // Then
         XCTAssertEqual(mockStreamVideo.timesCalled(.call), 1)
-        let (recordedCallType, recordedCallId, recordedCallSettings) = try XCTUnwrap(mockStreamVideo.recordedInputPayload((String, String, CallSettings?).self, for: .call)?.first)
+        let (
+            recordedCallType,
+            recordedCallId,
+            recordedCallSettings
+        ) = try XCTUnwrap(
+            mockStreamVideo
+                .recordedInputPayload((String, String, CallSettings?).self, for: .call)?.first
+        )
         XCTAssertEqual(recordedCallType, callType)
         XCTAssertEqual(recordedCallId, callId)
         XCTAssertNil(recordedCallSettings)
@@ -82,7 +89,14 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         // Then
         XCTAssertEqual(mockStreamVideo.timesCalled(.call), 1)
-        let (recordedCallType, recordedCallId, recordedCallSettings) = try XCTUnwrap(mockStreamVideo.recordedInputPayload((String, String, CallSettings?).self, for: .call)?.first)
+        let (
+            recordedCallType,
+            recordedCallId,
+            recordedCallSettings
+        ) = try XCTUnwrap(
+            mockStreamVideo
+                .recordedInputPayload((String, String, CallSettings?).self, for: .call)?.first
+        )
         XCTAssertEqual(recordedCallType, callType)
         XCTAssertEqual(recordedCallId, callId)
         XCTAssertFalse(recordedCallSettings?.audioOn ?? true)
