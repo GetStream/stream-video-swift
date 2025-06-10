@@ -146,7 +146,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
         activeConfiguration = configuration
 
         log.debug(
-            "\(type(of: self)) started capturing with configuration position:\(configuration.position) dimensions:\(configuration.dimensions) frameRate:\(configuration.frameRate).",
+            "\(type(of: self)) started capturing with configuration position:\(configuration.position) dimensions:\(configuration.dimensions) frameRate:\(configuration.frameRate) format:\(outputFormat).",
             subsystems: .videoCapturer
         )
     }
