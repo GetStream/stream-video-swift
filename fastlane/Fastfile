@@ -198,7 +198,9 @@ private_lane :upload_beta do |options|
     app_version: app_version,
     app_identifier: options[:app_identifier],
     configuration: configuration,
-    extensions: ['CallIntent', 'ScreenSharing']
+    extensions: ['CallIntent', 'ScreenSharing'],
+    use_changelog: true,
+    is_manual_upload: is_manual_upload
   )
 end
 

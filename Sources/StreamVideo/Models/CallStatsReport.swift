@@ -22,6 +22,8 @@ public struct CallStatsReport: Sendable {
     public let participantsStats: ParticipantsStats
     /// The timestamp when the call stats report was generated.
     public let timestamp: Double
+
+    let trackToKindMap: [String: TrackType]
 }
 
 /// A struct representing statistics for participants in the call.

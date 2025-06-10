@@ -35,6 +35,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     }
 
     // Properties for user, API key, call ID, video configuration, and factories.
+    let unifiedSessionId: String = UUID().uuidString
     let user: User
     let apiKey: String
     let callCid: String
@@ -43,6 +44,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
     let audioSession: StreamAudioSession = .init()
+    let trackStorage: WebRTCTrackStorage = .init()
 
     /// Published properties that represent different parts of the WebRTC state.
     @Published private(set) var sessionID: String = UUID().uuidString
@@ -65,18 +67,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     @Published private(set) var sfuAdapter: SFUAdapter?
     @Published private(set) var publisher: RTCPeerConnectionCoordinator?
     @Published private(set) var subscriber: RTCPeerConnectionCoordinator?
-    @Published private(set) var statsReporter: WebRTCStatsReporter?
+    @Published private(set) var statsCollector: WebRTCStatsCollector?
+    @Published private(set) var statsAdapter: WebRTCStatsAdapting?
     @Published private(set) var participants: ParticipantsStorage = [:]
     @Published private(set) var participantsCount: UInt32 = 0
     @Published private(set) var anonymousCount: UInt32 = 0
     @Published private(set) var participantPins: [PinInfo] = []
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
+    @Published private(set) var isTracingEnabled: Bool = false
 
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
-    private var audioTracks: [String: RTCAudioTrack] = [:]
-    private var videoTracks: [String: RTCVideoTrack] = [:]
-    private var screenShareTracks: [String: RTCVideoTrack] = [:]
+
     private var videoFilter: VideoFilter?
 
     private let rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding
@@ -157,15 +159,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func set(ownCapabilities value: Set<OwnCapability>) { self.ownCapabilities = value }
 
     /// Sets the WebRTC stats reporter.
-    func set(statsReporter value: WebRTCStatsReporter?) {
-        self.statsReporter = value
+    func set(statsAdapter value: WebRTCStatsAdapting?) {
+        self.statsAdapter = value
+        value?.audioSession = audioSession
     }
 
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
     /// reporter.
     func set(sfuAdapter value: SFUAdapter?) {
         self.sfuAdapter = value
-        statsReporter?.sfuAdapter = value
+        statsAdapter?.sfuAdapter = value
     }
 
     /// Sets the number of participants in the call.
@@ -189,6 +192,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// Sets the manual trackSize that will be used when updating subscriptions with the SFU.
     func set(incomingVideoQualitySettings value: IncomingVideoQualitySettings) {
         self.incomingVideoQualitySettings = value
+    }
+
+    func set(isTracingEnabled value: Bool) {
+        self.isTracingEnabled = value
+        statsAdapter?.isTracingEnabled = value
     }
 
     // MARK: - Session Management
@@ -307,7 +315,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         await subscriber?.close()
         self.publisher = nil
         self.subscriber = nil
-        self.statsReporter = nil
+        self.statsAdapter = nil
         await sfuAdapter?.disconnect()
         enqueue { _ in [:] }
         set(sfuAdapter: nil)
@@ -317,9 +325,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         set(participantsCount: 0)
         set(anonymousCount: 0)
         set(participantPins: [])
-        audioTracks = [:]
-        videoTracks = [:]
-        screenShareTracks = [:]
+        trackStorage.removeAll()
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
@@ -338,11 +344,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         publisher = nil
         subscriber = nil
         set(sfuAdapter: nil)
-        set(statsReporter: nil)
+        set(statsAdapter: nil)
         set(token: "")
-        audioTracks = [:]
-        videoTracks = [:]
-        screenShareTracks = [:]
+        trackStorage.removeAll()
 
         /// We set the initialCallSettings to the last activated CallSettings, in order to maintain the state
         /// during reconnects.
@@ -376,23 +380,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         type: TrackType,
         for id: String
     ) {
-        switch type {
-        case .audio:
-            if let audioTrack = track as? RTCAudioTrack {
-                audioTracks[id] = audioTrack
-            }
-        case .video:
-            if let videoTrack = track as? RTCVideoTrack {
-                videoTracks[id] = videoTrack
-            }
-        case .screenshare:
-            if let videoTrack = track as? RTCVideoTrack {
-                screenShareTracks[id] = videoTrack
-            }
-        default:
-            break
-        }
-
+        trackStorage.addTrack(track, type: type, for: id)
         enqueue { $0 }
     }
 
@@ -402,46 +390,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     ///   - id: The participant ID whose track should be removed.
     ///   - type: The type of track (audio, video, screenshare) or `nil` to remove all.
     func didRemoveTrack(for id: String, type: TrackType? = nil) {
-        if let type {
-            switch type {
-            case .audio:
-                audioTracks[id] = nil
-            case .video:
-                videoTracks[id] = nil
-            case .screenshare:
-                screenShareTracks[id] = nil
-            default:
-                break
-            }
-        } else {
-            audioTracks[id] = nil
-            videoTracks[id] = nil
-            screenShareTracks[id] = nil
-        }
+        trackStorage.removeTrack(for: id, type: type)
 
         enqueue { $0 }
-    }
-
-    /// Retrieves a track by ID and track type.
-    ///
-    /// - Parameters:
-    ///   - id: The participant ID.
-    ///   - trackType: The type of track (audio, video, screenshare).
-    /// - Returns: The associated media stream track, or `nil` if not found.
-    func track(
-        for id: String,
-        of trackType: TrackType
-    ) -> RTCMediaStreamTrack? {
-        switch trackType {
-        case .audio:
-            return audioTracks[id]
-        case .video:
-            return videoTracks[id]
-        case .screenshare:
-            return screenShareTracks[id]
-        default:
-            return nil
-        }
     }
 
     /// Retrieves a track by (trackLookUpPrefix or sessionId) and track type.
@@ -455,10 +406,26 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         of trackType: TrackType
     ) -> RTCMediaStreamTrack? {
         if let trackLookupPrefix = participant.trackLookupPrefix {
-            return track(for: trackLookupPrefix, of: trackType) ?? track(for: participant.sessionId, of: trackType)
+            return trackStorage.track(
+                for: trackLookupPrefix,
+                of: trackType
+            ) ?? trackStorage.track(for: participant.sessionId, of: trackType)
         } else {
-            return track(for: participant.sessionId, of: trackType)
+            return trackStorage.track(for: participant.sessionId, of: trackType)
         }
+    }
+
+    /// Retrieves a track by lookup and track type.
+    ///
+    /// - Parameters:
+    ///   - lookup: The participant trackLookUpPrefix or sessionId for which we want to fetch the track.
+    ///   - trackType: The type of track (audio, video, screenshare).
+    /// - Returns: The associated media stream track, or `nil` if not found.
+    func track(
+        for lookup: String,
+        of trackType: TrackType
+    ) -> RTCMediaStreamTrack? {
+        trackStorage.track(for: lookup, of: trackType)
     }
 
     // MARK: - Participant Operations

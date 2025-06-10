@@ -75,6 +75,8 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
 
     // MARK: - Implementation
 
+    var configuration: RTCConfiguration = .init()
+
     var remoteDescription: RTCSessionDescription? {
         get { self[dynamicMember: \.remoteDescription] }
         set { _ = newValue }
