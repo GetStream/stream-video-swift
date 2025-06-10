@@ -10,7 +10,7 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     
     var rootView: RootView
     var viewFactory: Factory
-    @StateObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     
     public init(
         rootView: RootView,
@@ -19,7 +19,7 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     ) {
         self.rootView = rootView
         self.viewFactory = viewFactory
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
     
     public var body: some View {
@@ -35,14 +35,14 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
     @Injected(\.appearance) private var appearance
     
     var viewFactory: Factory
-    @StateObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
     
     public var body: some View {
@@ -67,7 +67,7 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
                         onFullScreenStateChange: { [weak viewModel] in viewModel?.hideUIElements = $0 }
                     )
                 }
-                .toastView(toast: $viewModel.toast)
+                .toastView(toast: .init(get: { viewModel.toast }, set: { viewModel.toast = $0 }))
                 .background(appearance.colors.lobbyBackground)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {

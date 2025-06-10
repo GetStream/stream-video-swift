@@ -146,7 +146,7 @@ public struct CallView<Factory: ViewFactory>: View {
             )
             .modifier(viewFactory.makeLocalParticipantViewModifier(
                 localParticipant: localParticipant,
-                callSettings: $viewModel.callSettings,
+                callSettings: .init(get: { viewModel.callSettings }, set: { viewModel.callSettings = $0 }),
                 call: viewModel.call
             ))
         } else {

@@ -7,15 +7,14 @@ import StreamVideo
 import SwiftUI
 
 /// A view representing a stateless audio output icon button.
-public struct StatelessAudioOutputIconView: View {
+public struct StatelessAudioOutputIconView: View, Equatable {
 
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
     @Injected(\.images) private var images
 
-    /// The associated call for the audio output icon.
-    public weak var call: Call?
+    var isEnabled: Bool
 
     /// The size of the audio output icon.
     public var size: CGFloat
@@ -23,24 +22,42 @@ public struct StatelessAudioOutputIconView: View {
     /// The action handler for the audio output icon button.
     public var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
-
     /// Initializes a stateless audio output icon view.
     ///
     /// - Parameters:
     ///   - call: The associated call for the audio output icon.
     ///   - size: The size of the audio output icon.
     ///   - actionHandler: An optional closure to handle button tap actions.
-    @MainActor
+
     public init(
         call: Call?,
         size: CGFloat = 44,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
+        self.init(
+            isEnabled: call?.state.callSettings.audioOutputOn ?? true,
+            size: size,
+            actionHandler: actionHandler
+        )
+    }
+
+    init(
+        isEnabled: Bool,
+        size: CGFloat = 44,
+        actionHandler: ActionHandler? = nil
+    ) {
+        self.isEnabled = isEnabled
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
+
         self.actionHandler = actionHandler
+    }
+
+    nonisolated public static func == (
+        lhs: StatelessAudioOutputIconView,
+        rhs: StatelessAudioOutputIconView
+    ) -> Bool {
+        lhs.isEnabled == rhs.isEnabled
+            && lhs.size == rhs.size
     }
 
     /// The body of the audio output icon view.
@@ -49,11 +66,11 @@ public struct StatelessAudioOutputIconView: View {
             action: { actionHandler?() },
             label: {
                 CallIconView(
-                    icon: callSettings.audioOutputOn
+                    icon: isEnabled
                         ? images.speakerOn
                         : images.speakerOff,
                     size: size,
-                    iconStyle: callSettings.audioOutputOn
+                    iconStyle: isEnabled
                         ? .primary
                         : .transparent
                 )

@@ -11,11 +11,11 @@ struct DemoClosedCaptionsView: View {
 
     @Injected(\.colors) private var colors
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @State private var items: [CallClosedCaption] = []
 
     init(_ viewModel: CallViewModel) {
-        _viewModel = .init(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     var body: some View {

@@ -8,7 +8,7 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
-struct AppControlsWithChat: View {
+struct DemoControlsView: View {
 
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images
@@ -16,142 +16,116 @@ struct AppControlsWithChat: View {
     @Injected(\.chatViewModel) var chatViewModel
     @Injected(\.currentDevice) var currentDevice
 
+    // VideoIconView
+    var hasVideoCapability: Bool
+    var isVideoEnabled: Bool
+
+    // MicrophoneIconView
+    var hasAudioCapability: Bool
+    var isAudioEnabled: Bool
+
+    // ParticipantsListButton
+    var showParticipantsList: Bool
+    var participantsCount: Int
+    var participantsShown: Binding<Bool>
+
     private var canOpenChat: Bool
 
     private let size: CGFloat = 50
     private let cornerRadius: CGFloat = 24
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, canOpenChat: Bool = true) {
+        let streamVideo = InjectedValues[\.streamVideo]
+        let call = viewModel.call ?? streamVideo.state.ringingCall
+        let ownCapabilities = Set(call?.state.ownCapabilities ?? [])
+
+        self.hasVideoCapability = ownCapabilities.contains(.sendVideo)
+        self.isVideoEnabled = call?.state.callSettings.videoOn ?? false
+
+        self.hasAudioCapability = ownCapabilities.contains(.sendAudio)
+        self.isAudioEnabled = call?.state.callSettings.audioOn ?? false
+
+        self.showParticipantsList = viewModel.callingState == .inCall
+        self.participantsCount = call?.state.participants.endIndex ?? 0
+        self.participantsShown = .init(get: { viewModel.participantsShown }, set: { viewModel.participantsShown = $0 })
+
         self.viewModel = viewModel
         self.canOpenChat = canOpenChat
     }
 
     var body: some View {
         HStack {
-            MoreControlsIconView(viewModel: viewModel)
-
-            #if !targetEnvironment(simulator)
-            if !ProcessInfo.processInfo.isiOSAppOnMac, currentDevice.deviceType == .pad {
-                BroadcastIconView(
-                    viewModel: viewModel,
-                    preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
-                )
-            }
-            #endif
-            VideoIconView(viewModel: viewModel)
-            MicrophoneIconView(viewModel: viewModel)
+            moreControlsView
+            broadcastView
+            videoView
+            microphoneView
 
             Spacer()
 
-            ParticipantsListButton(viewModel: viewModel)
-            
-            if let chatViewModel, chatViewModel.isChatEnabled {
-                ChatIconView(viewModel: chatViewModel)
-            }
+            participantsInfoView
+            chatView
         }
         .padding(.horizontal, 16)
         .padding(.bottom)
     }
-}
 
-struct MoreControlsIconView: View {
-
-    @ObservedObject var viewModel: CallViewModel
-    let size: CGFloat
-
-    init(viewModel: CallViewModel, size: CGFloat = 44) {
-        self.viewModel = viewModel
-        self.size = size
+    @ViewBuilder
+    private var moreControlsView: some View {
+        MoreControlsIconView(viewModel: viewModel)
     }
 
-    var body: some View {
-        Button(
-            action: {
-                viewModel.moreControlsShown.toggle()
-            },
-            label: {
-                CallIconView(
-                    icon: Image(systemName: "ellipsis"),
-                    size: size,
-                    iconStyle: viewModel.moreControlsShown ? .secondaryActive : .secondary
-                )
-                .rotationEffect(.degrees(90))
-            }
-        )
-        .accessibility(identifier: "moreControlsToggle")
-    }
-}
-
-struct ChatControlsHeader: View {
-
-    @Injected(\.streamVideo) var streamVideo
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-    @Injected(\.chatViewModel) var chatViewModel
-
-    private let size: CGFloat = 50
-
-    @ObservedObject var viewModel: CallViewModel
-
-    init(viewModel: CallViewModel) {
-        self.viewModel = viewModel
-    }
-
-    var body: some View {
-        AppControlsWithChat(viewModel: viewModel, canOpenChat: false)
-    }
-}
-
-struct ChatIconView: View {
-
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-
-    @ObservedObject var viewModel: DemoChatViewModel
-    let size: CGFloat
-
-    init(viewModel: DemoChatViewModel, size: CGFloat = 44) {
-        self.viewModel = viewModel
-        self.size = size
-    }
-
-    var body: some View {
-        Button(
-            action: {
-                viewModel.isChatVisible.toggle()
-            },
-            label: {
-                CallIconView(
-                    icon: .init(systemName: "bubble.left.and.bubble.right.fill"),
-                    size: size,
-                    iconStyle: viewModel.isChatVisible ? .secondaryActive : .secondary
-                ).overlay(
-                    ControlBadgeView("\(viewModel.unreadCount)")
-                        .opacity(viewModel.unreadCount > 0 ? 1 : 0)
-                )
-            }
-        )
-        .accessibility(identifier: "chatToggle")
-    }
-}
-
-struct ChatView: View {
-
-    var channelController: ChatChannelController
-    var chatViewModel: DemoChatViewModel
-    var callViewModel: CallViewModel
-
-    var body: some View {
-        NavigationView {
-            ChatChannelView(
-                viewFactory: DemoChatViewFactory.shared,
-                channelController: channelController
+    @ViewBuilder
+    private var broadcastView: some View {
+        #if !targetEnvironment(simulator)
+        if currentDevice.deviceType == .pad {
+            BroadcastIconView(
+                viewModel: viewModel,
+                preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
             )
-            .onAppear { chatViewModel.markAsRead() }
-            .onDisappear { chatViewModel.channelDisappeared() }
-            .navigationBarHidden(true)
+        }
+        #endif
+    }
+
+    @ViewBuilder
+    private var videoView: some View {
+        if hasVideoCapability {
+            VideoIconView(
+                isEnabled: isVideoEnabled,
+                actionHandler: { [weak viewModel] in viewModel?.toggleCameraEnabled() }
+            )
+            .equatable()
+        }
+    }
+
+    @ViewBuilder
+    private var microphoneView: some View {
+        if hasAudioCapability {
+            MicrophoneIconView(
+                isEnabled: isAudioEnabled,
+                actionHandler: { [weak viewModel] in viewModel?.toggleMicrophoneEnabled() }
+            )
+            .equatable()
+        }
+    }
+
+    @ViewBuilder
+    private var participantsInfoView: some View {
+        if showParticipantsList {
+            ParticipantsListButton(
+                count: participantsCount,
+                isActive: participantsShown,
+                actionHandler: { [weak viewModel] in viewModel?.participantsShown = true }
+            )
+            .equatable()
+        }
+    }
+
+    @ViewBuilder
+    private var chatView: some View {
+        if let chatViewModel, chatViewModel.isChatEnabled {
+            ChatIconView(viewModel: chatViewModel)
         }
     }
 }

@@ -50,7 +50,7 @@ final class DemoAppViewFactory: ViewFactory {
     }
 
     func makeCallControlsView(viewModel: CallViewModel) -> some View {
-        AppControlsWithChat(viewModel: viewModel)
+        DemoControlsView(viewModel: viewModel)
     }
 
     func makeVideoCallParticipantModifier(

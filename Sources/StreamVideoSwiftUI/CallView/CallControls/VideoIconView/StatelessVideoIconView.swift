@@ -7,23 +7,20 @@ import StreamVideo
 import SwiftUI
 
 /// A view representing a stateless video icon button.
-public struct StatelessVideoIconView: View {
+public struct StatelessVideoIconView: View, Equatable {
 
     /// Defines a closure type for action handling.
     public typealias ActionHandler = () -> Void
 
     @Injected(\.images) private var images
 
-    /// The associated call for the video icon.
-    public weak var call: Call?
+    var isEnabled: Bool
 
     /// The size of the video icon.
     public var size: CGFloat
 
     /// The action handler for the video icon button.
     public var actionHandler: ActionHandler?
-
-    @ObservedObject private var callSettings: CallSettings
 
     /// Initializes a stateless video icon view.
     ///
@@ -36,10 +33,30 @@ public struct StatelessVideoIconView: View {
         size: CGFloat = 44,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
+        self.init(
+            isEnabled: call?.state.callSettings.videoOn ?? false,
+            size: size,
+            actionHandler: actionHandler
+        )
+    }
+
+    init(
+        isEnabled: Bool,
+        size: CGFloat = 44,
+        actionHandler: ActionHandler? = nil
+    ) {
+        self.isEnabled = isEnabled
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
+
         self.actionHandler = actionHandler
+    }
+
+    nonisolated public static func == (
+        lhs: StatelessVideoIconView,
+        rhs: StatelessVideoIconView
+    ) -> Bool {
+        lhs.isEnabled == rhs.isEnabled
+            && lhs.size == rhs.size
     }
 
     /// The body of the video icon view.
@@ -48,17 +65,17 @@ public struct StatelessVideoIconView: View {
             action: { actionHandler?() },
             label: {
                 CallIconView(
-                    icon: callSettings.videoOn
+                    icon: isEnabled
                         ? images.videoTurnOn
                         : images.videoTurnOff,
                     size: size,
-                    iconStyle: callSettings.videoOn
+                    iconStyle: isEnabled
                         ? .transparent
                         : .disabled
                 )
             }
         )
         .accessibility(identifier: "cameraToggle")
-        .streamAccessibility(value: callSettings.videoOn ? "1" : "0")
+        .streamAccessibility(value: isEnabled ? "1" : "0")
     }
 }

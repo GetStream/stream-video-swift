@@ -68,13 +68,8 @@
 		401E042D2DF8749000136E57 /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401E042C2DF8749000136E57 /* TimeView.swift */; };
 		401E042F2DF874D400136E57 /* SharingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401E042E2DF874D400136E57 /* SharingIndicator.swift */; };
 		401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */; };
-		40245F322BE269E300FCF075 /* StatelessVideoIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */; };
-		40245F342BE26BC900FCF075 /* StatelessMicrophoneIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */; };
 		40245F362BE26D6700FCF075 /* StatelessToggleCameraIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F352BE26D6700FCF075 /* StatelessToggleCameraIconView.swift */; };
 		40245F382BE26F2200FCF075 /* StatelessHangUpIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F372BE26F2200FCF075 /* StatelessHangUpIconView.swift */; };
-		40245F3A2BE26F7200FCF075 /* StatelessAudioOutputIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F392BE26F7200FCF075 /* StatelessAudioOutputIconView.swift */; };
-		40245F3C2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F3B2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift */; };
-		40245F3E2BE2709800FCF075 /* StatelessParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F3D2BE2709800FCF075 /* StatelessParticipantsListButton.swift */; };
 		40245F432BE2730700FCF075 /* StatelessVideoIconView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40245F422BE2730700FCF075 /* StatelessVideoIconView_Tests.swift */; };
 		40245F442BE2745600FCF075 /* CallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F0176E2BBEF22D00E89FD1 /* CallResponse+Dummy.swift */; };
 		40245F452BE2746300FCF075 /* CallIngressResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017662BBEF1B700E89FD1 /* CallIngressResponse+Dummy.swift */; };
@@ -356,6 +351,24 @@
 		40802AEB2DD2A92E00B9F970 /* MockAVAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */; };
 		408347C22DF8752300C80068 /* ToggleCameraIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347C12DF8752300C80068 /* ToggleCameraIconView.swift */; };
 		408347C62DF8756F00C80068 /* HangUpIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347C52DF8756F00C80068 /* HangUpIconView.swift */; };
+		408347C92DF8830C00C80068 /* VideoIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347C82DF8830C00C80068 /* VideoIconView.swift */; };
+		408347CB2DF8831200C80068 /* StatelessVideoIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347CA2DF8831200C80068 /* StatelessVideoIconView.swift */; };
+		408347CE2DF8835000C80068 /* MicrophoneIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347CD2DF8835000C80068 /* MicrophoneIconView.swift */; };
+		408347D02DF8835800C80068 /* StatelessMicrophoneIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347CF2DF8835800C80068 /* StatelessMicrophoneIconView.swift */; };
+		408347D32DF8837900C80068 /* SpeakerIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347D22DF8837900C80068 /* SpeakerIconView.swift */; };
+		408347D52DF8838100C80068 /* StatelessSpeakerIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347D42DF8838100C80068 /* StatelessSpeakerIconView.swift */; };
+		408347D82DF883BA00C80068 /* AudioOutputIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347D72DF883BA00C80068 /* AudioOutputIconView.swift */; };
+		408347DA2DF883C100C80068 /* StatelessAudioOutputIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347D92DF883C100C80068 /* StatelessAudioOutputIconView.swift */; };
+		408347DD2DF883E900C80068 /* ParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347DC2DF883E900C80068 /* ParticipantsListButton.swift */; };
+		408347DF2DF883F000C80068 /* StatelessParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347DE2DF883F000C80068 /* StatelessParticipantsListButton.swift */; };
+		408347E12DF8848900C80068 /* MoreControlsIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E02DF8848900C80068 /* MoreControlsIconView.swift */; };
+		408347E22DF8848900C80068 /* MoreControlsIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E02DF8848900C80068 /* MoreControlsIconView.swift */; };
+		408347E42DF8849F00C80068 /* ChatIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E32DF8849F00C80068 /* ChatIconView.swift */; };
+		408347E52DF8849F00C80068 /* ChatIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E32DF8849F00C80068 /* ChatIconView.swift */; };
+		408347E72DF884B100C80068 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E62DF884B100C80068 /* ChatView.swift */; };
+		408347E82DF884B100C80068 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E62DF884B100C80068 /* ChatView.swift */; };
+		408347EA2DF889D600C80068 /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E92DF889D600C80068 /* DemoMoreThermalStateButtonView.swift */; };
+		408347EB2DF889D600C80068 /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408347E92DF889D600C80068 /* DemoMoreThermalStateButtonView.swift */; };
 		408521E52D661C7600F012B8 /* RawJSON+Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E42D661C7500F012B8 /* RawJSON+Double.swift */; };
 		408521E72D661CA700F012B8 /* ThermalState+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */; };
 		408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408679F62BD12F1000D027E0 /* AudioFilter.swift */; };
@@ -650,7 +663,6 @@
 		40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */; };
 		40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8312B61325500FB9DB2 /* ModalButton.swift */; };
 		40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */; };
-		40C7B8362B613C7800FB9DB2 /* ParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */; };
 		40C9E4422C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */; };
 		40C9E4442C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */; };
 		40C9E4462C94742900802B28 /* CallParticipant+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */; };
@@ -1729,13 +1741,8 @@
 		401E042C2DF8749000136E57 /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
 		401E042E2DF874D400136E57 /* SharingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingIndicator.swift; sourceTree = "<group>"; };
 		401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier.swift; sourceTree = "<group>"; };
-		40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessVideoIconView.swift; sourceTree = "<group>"; };
-		40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessMicrophoneIconView.swift; sourceTree = "<group>"; };
 		40245F352BE26D6700FCF075 /* StatelessToggleCameraIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessToggleCameraIconView.swift; sourceTree = "<group>"; };
 		40245F372BE26F2200FCF075 /* StatelessHangUpIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessHangUpIconView.swift; sourceTree = "<group>"; };
-		40245F392BE26F7200FCF075 /* StatelessAudioOutputIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessAudioOutputIconView.swift; sourceTree = "<group>"; };
-		40245F3B2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessSpeakerIconView.swift; sourceTree = "<group>"; };
-		40245F3D2BE2709800FCF075 /* StatelessParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessParticipantsListButton.swift; sourceTree = "<group>"; };
 		40245F422BE2730700FCF075 /* StatelessVideoIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessVideoIconView_Tests.swift; sourceTree = "<group>"; };
 		40245F5E2BE279D300FCF075 /* StatelessToggleCameraIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessToggleCameraIconView_Tests.swift; sourceTree = "<group>"; };
 		40245F602BE27A8D00FCF075 /* StatelessMicrophoneIconView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessMicrophoneIconView_Tests.swift; sourceTree = "<group>"; };
@@ -1938,6 +1945,20 @@
 		40802AEA2DD2A92E00B9F970 /* MockAVAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVAudioSession.swift; sourceTree = "<group>"; };
 		408347C12DF8752300C80068 /* ToggleCameraIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCameraIconView.swift; sourceTree = "<group>"; };
 		408347C52DF8756F00C80068 /* HangUpIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HangUpIconView.swift; sourceTree = "<group>"; };
+		408347C82DF8830C00C80068 /* VideoIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoIconView.swift; sourceTree = "<group>"; };
+		408347CA2DF8831200C80068 /* StatelessVideoIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessVideoIconView.swift; sourceTree = "<group>"; };
+		408347CD2DF8835000C80068 /* MicrophoneIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneIconView.swift; sourceTree = "<group>"; };
+		408347CF2DF8835800C80068 /* StatelessMicrophoneIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessMicrophoneIconView.swift; sourceTree = "<group>"; };
+		408347D22DF8837900C80068 /* SpeakerIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerIconView.swift; sourceTree = "<group>"; };
+		408347D42DF8838100C80068 /* StatelessSpeakerIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessSpeakerIconView.swift; sourceTree = "<group>"; };
+		408347D72DF883BA00C80068 /* AudioOutputIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioOutputIconView.swift; sourceTree = "<group>"; };
+		408347D92DF883C100C80068 /* StatelessAudioOutputIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessAudioOutputIconView.swift; sourceTree = "<group>"; };
+		408347DC2DF883E900C80068 /* ParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListButton.swift; sourceTree = "<group>"; };
+		408347DE2DF883F000C80068 /* StatelessParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatelessParticipantsListButton.swift; sourceTree = "<group>"; };
+		408347E02DF8848900C80068 /* MoreControlsIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreControlsIconView.swift; sourceTree = "<group>"; };
+		408347E32DF8849F00C80068 /* ChatIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatIconView.swift; sourceTree = "<group>"; };
+		408347E62DF884B100C80068 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		408347E92DF889D600C80068 /* DemoMoreThermalStateButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMoreThermalStateButtonView.swift; sourceTree = "<group>"; };
 		408521E42D661C7500F012B8 /* RawJSON+Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RawJSON+Double.swift"; sourceTree = "<group>"; };
 		408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThermalState+Comparable.swift"; sourceTree = "<group>"; };
 		408679F62BD12F1000D027E0 /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
@@ -2173,7 +2194,6 @@
 		40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListViewModifier.swift; sourceTree = "<group>"; };
 		40C7B8312B61325500FB9DB2 /* ModalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalButton.swift; sourceTree = "<group>"; };
 		40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView.swift; sourceTree = "<group>"; };
-		40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListButton.swift; sourceTree = "<group>"; };
 		40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_ErrorStageTests.swift; sourceTree = "<group>"; };
 		40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_VideoLayer+Convenience.swift"; sourceTree = "<group>"; };
 		40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallParticipant+Convenience.swift"; sourceTree = "<group>"; };
@@ -3216,32 +3236,16 @@
 		40245F2E2BE269B400FCF075 /* CallControls */ = {
 			isa = PBXGroup;
 			children = (
+				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
+				408347DB2DF883E100C80068 /* ParticipantsListButton */,
+				408347D62DF883AF00C80068 /* AudioOutputIconView */,
+				408347D12DF8836C00C80068 /* SpeakerIconView */,
+				408347CC2DF8834000C80068 /* MicrophoneIconView */,
+				408347C72DF882F000C80068 /* VideoIconView */,
 				408347C42DF8756B00C80068 /* HangUpIconView */,
 				408347C32DF8752D00C80068 /* ToggleCameraIconView */,
-				40245F302BE269C300FCF075 /* Stateful */,
-				40245F2F2BE269BE00FCF075 /* Stateless */,
 			);
 			path = CallControls;
-			sourceTree = "<group>";
-		};
-		40245F2F2BE269BE00FCF075 /* Stateless */ = {
-			isa = PBXGroup;
-			children = (
-				40245F312BE269E300FCF075 /* StatelessVideoIconView.swift */,
-				40245F332BE26BC900FCF075 /* StatelessMicrophoneIconView.swift */,
-				40245F392BE26F7200FCF075 /* StatelessAudioOutputIconView.swift */,
-				40245F3B2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift */,
-				40245F3D2BE2709800FCF075 /* StatelessParticipantsListButton.swift */,
-			);
-			path = Stateless;
-			sourceTree = "<group>";
-		};
-		40245F302BE269C300FCF075 /* Stateful */ = {
-			isa = PBXGroup;
-			children = (
-				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
-			);
-			path = Stateful;
 			sourceTree = "<group>";
 		};
 		40245F3F2BE272E400FCF075 /* CallControls */ = {
@@ -3992,6 +3996,51 @@
 			path = HangUpIconView;
 			sourceTree = "<group>";
 		};
+		408347C72DF882F000C80068 /* VideoIconView */ = {
+			isa = PBXGroup;
+			children = (
+				408347CA2DF8831200C80068 /* StatelessVideoIconView.swift */,
+				408347C82DF8830C00C80068 /* VideoIconView.swift */,
+			);
+			path = VideoIconView;
+			sourceTree = "<group>";
+		};
+		408347CC2DF8834000C80068 /* MicrophoneIconView */ = {
+			isa = PBXGroup;
+			children = (
+				408347CF2DF8835800C80068 /* StatelessMicrophoneIconView.swift */,
+				408347CD2DF8835000C80068 /* MicrophoneIconView.swift */,
+			);
+			path = MicrophoneIconView;
+			sourceTree = "<group>";
+		};
+		408347D12DF8836C00C80068 /* SpeakerIconView */ = {
+			isa = PBXGroup;
+			children = (
+				408347D42DF8838100C80068 /* StatelessSpeakerIconView.swift */,
+				408347D22DF8837900C80068 /* SpeakerIconView.swift */,
+			);
+			path = SpeakerIconView;
+			sourceTree = "<group>";
+		};
+		408347D62DF883AF00C80068 /* AudioOutputIconView */ = {
+			isa = PBXGroup;
+			children = (
+				408347D92DF883C100C80068 /* StatelessAudioOutputIconView.swift */,
+				408347D72DF883BA00C80068 /* AudioOutputIconView.swift */,
+			);
+			path = AudioOutputIconView;
+			sourceTree = "<group>";
+		};
+		408347DB2DF883E100C80068 /* ParticipantsListButton */ = {
+			isa = PBXGroup;
+			children = (
+				408347DE2DF883F000C80068 /* StatelessParticipantsListButton.swift */,
+				408347DC2DF883E900C80068 /* ParticipantsListButton.swift */,
+			);
+			path = ParticipantsListButton;
+			sourceTree = "<group>";
+		};
 		408679F52BD12EFC00D027E0 /* AudioFilter */ = {
 			isa = PBXGroup;
 			children = (
@@ -4137,6 +4186,9 @@
 			children = (
 				409146032B68FF4B007F3C17 /* DemoMoreControls */,
 				409146022B68FF4B007F3C17 /* DemoControls.swift */,
+				408347E62DF884B100C80068 /* ChatView.swift */,
+				408347E32DF8849F00C80068 /* ChatIconView.swift */,
+				408347E02DF8848900C80068 /* MoreControlsIconView.swift */,
 				4091460A2B690AA4007F3C17 /* CallButtonView.swift */,
 				4091460C2B690AC9007F3C17 /* DemoParticipantOptionsButton.swift */,
 			);
@@ -4146,6 +4198,7 @@
 		409146032B68FF4B007F3C17 /* DemoMoreControls */ = {
 			isa = PBXGroup;
 			children = (
+				408347E92DF889D600C80068 /* DemoMoreThermalStateButtonView.swift */,
 				409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */,
 				409146042B68FF4B007F3C17 /* DemoMoreControlListButtonView.swift */,
 				409146052B68FF4B007F3C17 /* DemoReactionButton.swift */,
@@ -4826,7 +4879,6 @@
 		40C7B8372B613CBE00FB9DB2 /* Controls */ = {
 			isa = PBXGroup;
 			children = (
-				40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */,
 				40C7B8312B61325500FB9DB2 /* ModalButton.swift */,
 			);
 			path = Controls;
@@ -7341,8 +7393,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				40AB353B2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */,
+				408347E52DF8849F00C80068 /* ChatIconView.swift in Sources */,
 				4091460D2B690AC9007F3C17 /* DemoParticipantOptionsButton.swift in Sources */,
 				8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */,
+				408347E82DF884B100C80068 /* ChatView.swift in Sources */,
 				40F445FA2A9E2B0D004BE3DA /* ShareActivityView.swift in Sources */,
 				40F445F32A9E2A87004BE3DA /* ReactionIcon.swift in Sources */,
 				4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */,
@@ -7374,6 +7428,7 @@
 				4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */,
 				401C1EDA2D48DCF300304609 /* DemoTranscriptionAndClosedCaptionsButtonView.swift in Sources */,
 				40F445BE2A9E0823004BE3DA /* RobotVoiceFilter.swift in Sources */,
+				408347EB2DF889D600C80068 /* DemoMoreThermalStateButtonView.swift in Sources */,
 				84093811288A90390089A35B /* DetailedCallingView.swift in Sources */,
 				84ED240D286C9515002A3186 /* DemoCallContainerView.swift in Sources */,
 				40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */,
@@ -7429,6 +7484,7 @@
 				40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */,
 				409146102B6913BA007F3C17 /* DemoStatsView.swift in Sources */,
 				40BBC47C2C6227F1002AEF92 /* View+PresentDemoMoreMenu.swift in Sources */,
+				408347E12DF8848900C80068 /* MoreControlsIconView.swift in Sources */,
 				402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */,
 				40CB9FA72B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
@@ -7463,6 +7519,7 @@
 				40AB353E2B738C1300E465CC /* OSLogDestination.swift in Sources */,
 				40AB35482B738C4C00E465CC /* DragIndicatorViewModifier.swift in Sources */,
 				40AB355C2B738C7700E465CC /* DemoCallsViewModel.swift in Sources */,
+				408347E42DF8849F00C80068 /* ChatIconView.swift in Sources */,
 				405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */,
 				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,
 				40AB354A2B738C5100E465CC /* ThermalStateViewModifier.swift in Sources */,
@@ -7496,6 +7553,7 @@
 				40382F252C889EB200C2D00F /* View+PresentDemoMoreMenu.swift in Sources */,
 				4014F1072D8C2F07004E7EFD /* GleapAdapter.swift in Sources */,
 				406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */,
+				408347EA2DF889D600C80068 /* DemoMoreThermalStateButtonView.swift in Sources */,
 				406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */,
 				40AB35602B738C7D00E465CC /* ReactionIcon.swift in Sources */,
 				40382F232C889E6500C2D00F /* DemoReconnectionButtonView.swift in Sources */,
@@ -7519,6 +7577,7 @@
 				40AB35532B738C6A00E465CC /* LinkInfoView.swift in Sources */,
 				845C09942C0E1BFF00F725B3 /* DemoSessionTimerView.swift in Sources */,
 				40AB35612B738C7D00E465CC /* ReactionOverlayView.swift in Sources */,
+				408347E22DF8848900C80068 /* MoreControlsIconView.swift in Sources */,
 				406A8E932AA1D7BF001F598A /* LoginViewModel.swift in Sources */,
 				402C544B2B6B9FF000672BFB /* CallButtonView.swift in Sources */,
 				406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */,
@@ -7531,6 +7590,7 @@
 				40AB35572B738C7100E465CC /* CallsViewModel.swift in Sources */,
 				408D29AE2B6D681000885473 /* SnapshotTrigger.swift in Sources */,
 				406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */,
+				408347E72DF884B100C80068 /* ChatView.swift in Sources */,
 				40AB35442B738C4100E465CC /* DemoReactionButton.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
 				40AB35622B738C8100E465CC /* CustomCallView.swift in Sources */,
@@ -8442,6 +8502,7 @@
 				4072A58A2DAE845800108E8F /* PictureInPictureContentView.swift in Sources */,
 				4072A5942DAF992400108E8F /* PictureInPictureParticipantModifier.swift in Sources */,
 				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
+				408347D02DF8835800C80068 /* StatelessMicrophoneIconView.swift in Sources */,
 				40914C9A2B56A85B00F6A13E /* PictureInPictureBufferTransformer.swift in Sources */,
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,
 				40149DC32B7E202600473176 /* ParticipantEventViewModifier.swift in Sources */,
@@ -8449,7 +8510,9 @@
 				403FF3E82BA1D2D70092CE8A /* StreamPixelBufferPool.swift in Sources */,
 				8430FD222AB1AB4C007AA3E6 /* ParticipantPopoverView.swift in Sources */,
 				843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */,
+				408347D82DF883BA00C80068 /* AudioOutputIconView.swift in Sources */,
 				40AA2EDE2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift in Sources */,
+				408347CB2DF8831200C80068 /* StatelessVideoIconView.swift in Sources */,
 				401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */,
 				8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
@@ -8463,15 +8526,14 @@
 				848A73C229269E7D0089AA6E /* CornerDraggableView.swift in Sources */,
 				84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */,
 				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,
+				408347DA2DF883C100C80068 /* StatelessAudioOutputIconView.swift in Sources */,
 				409AF6E82DAFC80200EE7BF6 /* PictureInPictureContent.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
-				40245F3C2BE26FBF00FCF075 /* StatelessSpeakerIconView.swift in Sources */,
 				4066B0332DB788A000E92C20 /* PictureInPictureViewFactory.swift in Sources */,
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
 				840042CF2A70212D00917B30 /* ScreensharingControls.swift in Sources */,
 				40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */,
 				8406269A2A37A5E2004B8748 /* CallEvents.swift in Sources */,
-				40C7B8362B613C7800FB9DB2 /* ParticipantsListButton.swift in Sources */,
 				40AA2EE22AE0137E000DCA5C /* ClipCorners.swift in Sources */,
 				8415D3E3290BC882006E53CB /* Sounds.swift in Sources */,
 				403FF3E72BA1D2D40092CE8A /* StreamPixelBufferRepository.swift in Sources */,
@@ -8482,6 +8544,7 @@
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
 				408347C22DF8752300C80068 /* ToggleCameraIconView.swift in Sources */,
 				40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */,
+				408347DD2DF883E900C80068 /* ParticipantsListButton.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
 				844299412942394C0037232A /* VideoView_iOS13.swift in Sources */,
@@ -8490,7 +8553,6 @@
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
-				40245F3A2BE26F7200FCF075 /* StatelessAudioOutputIconView.swift in Sources */,
 				8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */,
 				846E4AFD29D1DDE8003733AB /* LayoutMenuView.swift in Sources */,
 				40245F382BE26F2200FCF075 /* StatelessHangUpIconView.swift in Sources */,
@@ -8508,13 +8570,11 @@
 				4072A5812DAE81CF00108E8F /* PictureInPictureVideoParticipantView.swift in Sources */,
 				40D1657F2B5FE8AB00C6D951 /* (null) in Sources */,
 				848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */,
-				40245F342BE26BC900FCF075 /* StatelessMicrophoneIconView.swift in Sources */,
 				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
 				40D1657E2B5FE82200C6D951 /* HalfSheetView.swift in Sources */,
 				8479F83429C09EF1009ECE37 /* UserAvatar.swift in Sources */,
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
 				846FBE8D28AAEBBC00147F6E /* SearchBar.swift in Sources */,
-				40245F3E2BE2709800FCF075 /* StatelessParticipantsListButton.swift in Sources */,
 				846E4B0529D2D3D3003733AB /* ModifiedContent.swift in Sources */,
 				849EDA8D297AFD840072A12D /* Camera.swift in Sources */,
 				844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */,
@@ -8524,6 +8584,7 @@
 				84B57D39297FFF8300E4E709 /* PreJoiningView_iOS13.swift in Sources */,
 				8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* CallingGroupView.swift in Sources */,
+				408347C92DF8830C00C80068 /* VideoIconView.swift in Sources */,
 				8406266D2A37A27D004B8748 /* CallViewModel.swift in Sources */,
 				84B57D33297F278500E4E709 /* MicrophoneChecker.swift in Sources */,
 				8458B704290ACF2A00F8E487 /* CallSoundsPlayer.swift in Sources */,
@@ -8541,7 +8602,10 @@
 				403FF3F42BA1DC690092CE8A /* StreamYUVToARGBConversion.swift in Sources */,
 				409145EB2B68FDD2007F3C17 /* ReadableContentGuide.swift in Sources */,
 				847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */,
+				408347D32DF8837900C80068 /* SpeakerIconView.swift in Sources */,
 				403FF3F52BA1DC6C0092CE8A /* YpCbCrPixelRange+Default.swift in Sources */,
+				408347DF2DF883F000C80068 /* StatelessParticipantsListButton.swift in Sources */,
+				408347D52DF8838100C80068 /* StatelessSpeakerIconView.swift in Sources */,
 				403FF3F32BA1DC650092CE8A /* StreamRTCYUVBuffer.swift in Sources */,
 				401E042F2DF874D400136E57 /* SharingIndicator.swift in Sources */,
 				84B57D37297F406400E4E709 /* MicrophoneCheckView.swift in Sources */,
@@ -8551,7 +8615,6 @@
 				40F0C3A72BC7FAA400AB75AD /* VideoRendererPool.swift in Sources */,
 				4049CE842BBBF8EF003D07D2 /* StreamAsyncImage.swift in Sources */,
 				40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */,
-				40245F322BE269E300FCF075 /* StatelessVideoIconView.swift in Sources */,
 				4072A5962DAF99E000108E8F /* PictureInPictureContentProvider.swift in Sources */,
 				84429933293FA48B0037232A /* ScreenSharingView.swift in Sources */,
 				84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */,
@@ -8563,6 +8626,7 @@
 				40E110492B5A9F03007DF492 /* Formatters.swift in Sources */,
 				40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */,
 				8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */,
+				408347CE2DF8835000C80068 /* MicrophoneIconView.swift in Sources */,
 				401E042B2DF870FC00136E57 /* VideoCallParticipantView.swift in Sources */,
 				840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */,
 				40A941782B4DC576006D6965 /* PictureInPictureTrackStateAdapter.swift in Sources */,

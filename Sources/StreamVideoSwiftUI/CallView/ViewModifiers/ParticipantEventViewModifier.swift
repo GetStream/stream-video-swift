@@ -10,15 +10,18 @@ struct ParticipantEventsNotificationViewModifier: ViewModifier {
 
     @Injected(\.colors) private var colors
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
+    @State private var event: ParticipantEvent?
 
     func body(content: Content) -> some View {
-        content.overlay(overlayContent)
+        content
+            .overlay(overlayContent)
+            .onReceive(viewModel.$participantEvent) { event = $0 }
     }
 
     @ViewBuilder
     private var overlayContent: some View {
-        if let event = viewModel.participantEvent {
+        if let event {
             Text("\(event.user) \(event.action.display) the call.")
                 .padding(8)
                 .background(Color(UIColor.systemBackground))
