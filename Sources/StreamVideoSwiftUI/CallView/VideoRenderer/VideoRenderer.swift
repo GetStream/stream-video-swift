@@ -22,7 +22,7 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
     var framePublisher: AnyPublisher<CGRect, Never> { _frameSubject.eraseToAnyPublisher() }
 
     /// DispatchQueue for synchronizing access to the video track.
-    let queue = DispatchQueue(label: "video-track")
+    let rendererAdapter: RTCVideoTrackAdapter = .init(track: nil)
 
     /// The associated RTCVideoTrack being rendered.
     nonisolated(unsafe) weak var track: RTCVideoTrack?
@@ -90,13 +90,8 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
     /// Adds the specified RTCVideoTrack to the renderer.
     /// - Parameter track: The RTCVideoTrack to render.
     public func add(track: RTCVideoTrack) {
-        queue.sync {
-            self.track?.remove(self)
-            self.track = nil
-            self.track = track
-            track.add(self)
-            log.info("\(type(of: self)):\(identifier) was added on track:\(track.trackId)", subsystems: .other)
-        }
+        rendererAdapter.updateTrack(track)
+        rendererAdapter.addRenderer(self)
     }
 
     /// Overrides the layoutSubviews method to update the viewSize property.
@@ -118,6 +113,7 @@ public class VideoRenderer: RTCMTLVideoView, @unchecked Sendable {
         if newSuperview == nil {
             // Clean up any rendered frames.
             setSize(.zero)
+            rendererAdapter.removeRenderer(self)
         }
     }
 }
@@ -158,3 +154,64 @@ extension VideoRenderer {
         }
     }
 }
+
+final class RTCVideoTrackAdapter {
+
+    private let queue = UnfairQueue()
+    private var track: RTCVideoTrack?
+    private var renderers: [RTCVideoRenderer] = []
+
+    init(track: RTCVideoTrack?) {
+        self.track = track
+    }
+
+    deinit {
+        removeAll()
+    }
+
+    func updateTrack(_ newTrack: RTCVideoTrack?) {
+        guard let newTrack else {
+            removeAll()
+            self.track = nil
+            return
+        }
+
+        guard newTrack.trackId != track?.trackId else {
+            return
+        }
+
+        removeAll()
+        self.track = newTrack
+    }
+
+    func addRenderer(_ renderer: RTCVideoRenderer) {
+        queue.sync {
+            guard
+                let track,
+                !renderers.contains(where: { $0 === renderer })
+            else {
+                return
+            }
+            track.add(renderer)
+            renderers.append(renderer)
+        }
+    }
+
+    func removeRenderer(_ renderer: RTCVideoRenderer) {
+        queue.sync {
+            guard let track else { return }
+            track.remove(renderer)
+            renderers = renderers.filter { $0 !== renderer }
+        }
+    }
+
+    private func removeAll() {
+        let oldRenderers = queue.sync {
+            let result = self.renderers
+            self.renderers = []
+            return result
+        }
+        oldRenderers.forEach { self.track?.remove($0) }
+    }
+}
+
