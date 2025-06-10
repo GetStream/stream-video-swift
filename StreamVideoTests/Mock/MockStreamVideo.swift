@@ -7,16 +7,33 @@ import Foundation
 
 final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
     typealias FunctionKey = MockStreamVideoFunctionKey
-    typealias FunctionInputKey = EmptyPayloadable
+    typealias FunctionInputKey = MockFunctionInputKey
 
     enum MockStreamVideoFunctionKey: Hashable, CaseIterable {
         case call
         case connect
     }
 
+    enum MockFunctionInputKey: Payloadable {
+        case call(
+            callType: String,
+            callId: String,
+            callSettings: CallSettings?
+        )
+
+        var payload: Any {
+            switch self {
+            case let .call(callType, callId, callSettings):
+                return (callType, callId, callSettings)
+            }
+        }
+    }
+
+
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
-    var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = [:]
+    @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey.allCases
+        .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
 
     override var state: StreamVideo.State {
         get { self[dynamicMember: \.state] }
@@ -67,7 +84,14 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
         callId: String,
         callSettings: CallSettings? = nil
     ) -> Call {
-        stubbedFunction[.call] as! Call
+        stubbedFunctionInput[.call]?.append(
+            .call(
+                callType: callType,
+                callId: callId,
+                callSettings: callSettings
+            )
+        )
+        return stubbedFunction[.call] as! Call
     }
 
     override func connect() async throws {
