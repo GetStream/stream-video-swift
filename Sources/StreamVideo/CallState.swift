@@ -409,6 +409,9 @@ public class CallState: ObservableObject {
     }
     
     internal func update(callSettings: CallSettings) {
+        guard callSettings != callSettings else {
+            return
+        }
         self.callSettings = callSettings
         localCallSettingsUpdate = true
     }
