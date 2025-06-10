@@ -264,6 +264,7 @@ extension ViewFactory {
             customData: customData,
             call: call
         )
+        .equatable()
     }
 
     public func makeVideoCallParticipantModifier(

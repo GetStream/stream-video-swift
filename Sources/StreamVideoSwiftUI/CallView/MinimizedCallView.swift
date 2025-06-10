@@ -36,11 +36,11 @@ public struct MinimizedCallView<Factory: ViewFactory>: View {
     func content(for availableFrame: CGRect) -> some View {
         Group {
             if !viewModel.participants.isEmpty {
-                VideoCallParticipantView(
-                    viewFactory: viewFactory,
+                viewFactory.makeVideoParticipantView(
                     participant: viewModel.participants[0],
+                    id: viewModel.participants[0].sessionId,
                     availableFrame: availableFrame,
-                    contentMode: .scaleAspectFill,
+                    contentMode: .scaleToFill,
                     customData: [:],
                     call: viewModel.call
                 )
