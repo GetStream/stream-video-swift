@@ -8,6 +8,8 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct LobbyView<Factory: ViewFactory>: View {
 
+    @Injected(\.callAudioRecorder) private var callAudioRecorder
+
     @StateObject var viewModel: LobbyViewModel
     @StateObject var microphoneChecker = MicrophoneChecker()
 
@@ -41,12 +43,6 @@ public struct LobbyView<Factory: ViewFactory>: View {
         )
         let microphoneCheckerInstance = MicrophoneChecker()
         _microphoneChecker = .init(wrappedValue: microphoneCheckerInstance)
-
-        Task {
-            callSettings.wrappedValue.audioOn
-                ? await microphoneCheckerInstance.startListening(ignoreActiveCall: true)
-                : await microphoneCheckerInstance.stopListening()
-        }
     }
     
     public var body: some View {
@@ -63,8 +59,15 @@ public struct LobbyView<Factory: ViewFactory>: View {
         .onChange(of: callSettings) { newValue in
             Task {
                 newValue.audioOn
-                    ? await microphoneChecker.startListening(ignoreActiveCall: true)
-                    : await microphoneChecker.stopListening()
+                    ? await callAudioRecorder.startRecording(ignoreActiveCall: true)
+                    : await callAudioRecorder.stopRecording()
+            }
+        }
+        .onAppear {
+            Task {
+                callSettings.audioOn
+                ? await callAudioRecorder.startRecording(ignoreActiveCall: true)
+                : await callAudioRecorder.stopRecording()
             }
         }
     }
@@ -75,7 +78,8 @@ struct LobbyContentView<Factory: ViewFactory>: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
-    
+    @Injected(\.callAudioRecorder) private var callAudioRecorder
+
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
 
@@ -92,7 +96,7 @@ struct LobbyContentView<Factory: ViewFactory>: View {
                 HStack {
                     Spacer()
                     Button {
-                        Task { await microphoneChecker.stopListening() }
+                        Task { await callAudioRecorder.stopRecording() }
                         onCloseLobby()
                     } label: {
                         Image(systemName: "xmark")

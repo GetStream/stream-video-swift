@@ -8,6 +8,8 @@ import SwiftUI
 @available(iOS, introduced: 13, obsoleted: 14)
 public struct LobbyView_iOS13<Factory: ViewFactory>: View {
 
+    @Injected(\.callAudioRecorder) private var callAudioRecorder
+
     @ObservedObject var callViewModel: CallViewModel
     @BackportStateObject var viewModel: LobbyViewModel
     @BackportStateObject var microphoneChecker: MicrophoneChecker
@@ -43,12 +45,6 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
         self.callType = callType
         self.onJoinCallTap = onJoinCallTap
         self.onCloseLobby = onCloseLobby
-
-        Task {
-            callSettings.wrappedValue.audioOn
-                ? await microphoneCheckerInstance.startListening(ignoreActiveCall: true)
-                : await microphoneCheckerInstance.stopListening()
-        }
     }
     
     public var body: some View {
@@ -65,8 +61,15 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
         .onReceive(callViewModel.$callSettings) { newValue in
             Task {
                 newValue.audioOn
-                    ? await microphoneChecker.startListening(ignoreActiveCall: true)
-                    : await microphoneChecker.stopListening()
+                    ? await callAudioRecorder.startRecording(ignoreActiveCall: true)
+                    : await callAudioRecorder.stopRecording()
+            }
+        }
+        .onAppear {
+            Task {
+                callSettings.audioOn
+                ? await callAudioRecorder.startRecording(ignoreActiveCall: true)
+                : await callAudioRecorder.stopRecording()
             }
         }
     }

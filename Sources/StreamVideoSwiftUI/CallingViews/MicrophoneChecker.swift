@@ -25,6 +25,12 @@ public final class MicrophoneChecker: ObservableObject {
     ) {
         self.valueLimit = valueLimit
         audioLevels = [Float](repeating: 0.0, count: valueLimit)
+
+        updateMetersCancellable = audioRecorder
+            .metersPublisher
+            .compactMap { [weak self] in self?.normaliseAndAppend($0) }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.audioLevels, onWeak: self)
     }
 
     deinit {
@@ -40,34 +46,6 @@ public final class MicrophoneChecker: ObservableObject {
             }
         }
         return true
-    }
-    
-    /// Starts listening to audio updates.
-    /// - Parameters:
-    /// - ignoreActiveCall: Instructs the internal AudioRecorder to ignore the existence of an activeCall
-    /// and start recording anyway.
-    public func startListening(ignoreActiveCall: Bool = false) async {
-        await audioRecorder.startRecording(ignoreActiveCall: ignoreActiveCall)
-        if updateMetersCancellable == nil {
-            updateMetersCancellable = audioRecorder
-                .metersPublisher
-                .compactMap { [weak self] in self?.normaliseAndAppend($0) }
-                .receive(on: DispatchQueue.main)
-                .assign(to: \.audioLevels, onWeak: self)
-        }
-    }
-    
-    /// Stops listening to audio updates.
-    public func stopListening() async {
-        await audioRecorder.stopRecording()
-        updateMetersCancellable?.cancel()
-        updateMetersCancellable = nil
-        _ = await Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            audioLevels = [Float](repeating: 0.0, count: valueLimit)
-        }.result
     }
     
     // MARK: - private
