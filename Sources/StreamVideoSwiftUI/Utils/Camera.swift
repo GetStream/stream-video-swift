@@ -152,7 +152,7 @@ class Camera: NSObject, @unchecked Sendable {
             return
         }
 
-        captureSession.sessionPreset = AVCaptureSession.Preset.medium
+        captureSession.sessionPreset = AVCaptureSession.Preset.vga640x480
 
         let videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(self, queue: frameProcessingQueue)
