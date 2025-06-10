@@ -47,19 +47,21 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         _ capturer: RTCVideoCapturer,
         didCapture frame: RTCVideoFrame
     ) {
-        guard
-            let selectedFilter,
-            let buffer = frame.buffer as? RTCCVPixelBuffer
-        else {
-            return process(capturer: capturer, frame: frame, buffer: nil)
-        }
+        autoreleasepool {
+            guard
+                let selectedFilter,
+                let buffer = frame.buffer as? RTCCVPixelBuffer
+            else {
+                return process(capturer: capturer, frame: frame, buffer: nil)
+            }
 
-        apply(
-            filter: selectedFilter,
-            with: buffer,
-            from: frame,
-            capturer: capturer
-        )
+            apply(
+                filter: selectedFilter,
+                with: buffer,
+                from: frame,
+                capturer: capturer
+            )
+        }
     }
 
     private func apply(
