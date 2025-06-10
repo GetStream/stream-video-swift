@@ -2,30 +2,57 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
 
 /// A view that presents the call's duration and recording state.
-public struct CallDurationView: View {
+public struct CallDurationView: View, @preconcurrency Equatable {
 
     @Injected(\.colors) private var colors: Colors
     @Injected(\.fonts) private var fonts: Fonts
     @Injected(\.images) private var images: Images
+    @Injected(\.timers) private var timers
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
-    @State private var duration: TimeInterval
-    @ObservedObject private var viewModel: CallViewModel
+    @State var duration: TimeInterval
+    var recordingState: RecordingState
 
     @MainActor
     public init(_ viewModel: CallViewModel) {
-        self.viewModel = viewModel
-        _duration = .init(initialValue: viewModel.call?.state.duration ?? 0)
+        if let startedAt = viewModel.call?.state.startedAt {
+            self.init(
+                duration: Date().timeIntervalSince(startedAt),
+                recordingState: viewModel.recordingState
+            )
+        } else {
+            self.init(
+                duration: 0,
+                recordingState: viewModel.recordingState
+            )
+        }
+    }
+
+    init(
+        duration: TimeInterval,
+        recordingState: RecordingState
+    ) {
+        self.duration = duration
+        self.recordingState = recordingState
+    }
+
+    public static func == (
+        lhs: CallDurationView,
+        rhs: CallDurationView
+    ) -> Bool {
+        lhs.duration == rhs.duration
+            && lhs.recordingState == rhs.recordingState
     }
 
     public var body: some View {
         Group {
-            if duration > 0, let formattedDuration = formatter.format(duration) {
+            if let formattedDuration = formatter.format(duration) {
                 HStack(spacing: 4) {
                     iconView
                         .foregroundColor(foregroundColor)
@@ -41,70 +68,31 @@ public struct CallDurationView: View {
                 EmptyView()
             }
         }
-        .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
+        .onReceive(timers.timer(for: 1)) { _ in duration += 1 }
         .accessibility(identifier: accessibilityIdentifier)
     }
 
     // MARK: - Private Helpers
 
     private var foregroundColor: Color {
-        viewModel.recordingState == .recording
+        recordingState == .recording
             ? colors.inactiveCallControl
             : colors.onlineIndicatorColor
     }
 
     @ViewBuilder
     private var iconView: some View {
-        if viewModel.recordingState == .recording {
+        if recordingState == .recording {
             images.recordIcon
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 12)
-        } else {
-            EmptyView()
         }
     }
 
     private var accessibilityIdentifier: String {
-        viewModel.recordingState == .recording
+        recordingState == .recording
             ? "recordingView"
             : "callDurationView"
-    }
-}
-
-private struct TimeView: View {
-
-    @Injected(\.fonts) private var fonts: Fonts
-    @Injected(\.colors) private var colors: Colors
-
-    var value: NSMutableAttributedString
-
-    fileprivate init(_ value: String) {
-        let attributed = NSMutableAttributedString(string: value)
-        self.value = attributed
-        self.value.addAttribute(
-            .foregroundColor,
-            value: colors.callDurationColor.withAlphaComponent(0.6),
-            range: .init(location: 0, length: attributed.length - 3)
-        )
-        self.value.addAttribute(
-            .foregroundColor,
-            value: colors.callDurationColor,
-            range: .init(location: attributed.length - 3, length: 3)
-        )
-    }
-
-    fileprivate var body: some View {
-        Group {
-            if #available(iOS 15.0, *) {
-                Text(AttributedString(value))
-            } else {
-                Text(value.string)
-                    .foregroundColor(Color.white.opacity(0.6))
-            }
-        }
-        .font(fonts.bodyBold.monospacedDigit())
-        .minimumScaleFactor(0.2)
-        .lineLimit(1)
     }
 }

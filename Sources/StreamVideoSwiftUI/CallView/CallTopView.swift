@@ -5,49 +5,81 @@
 import StreamVideo
 import SwiftUI
 
-public struct CallTopView: View {
-            
-    @Injected(\.streamVideo) var streamVideo
-    @Injected(\.colors) var colors
-    @Injected(\.images) var images
-    
-    @ObservedObject var viewModel: CallViewModel
+public struct CallTopView: View, @preconcurrency Equatable {
+    // LayoutMenuView
+    var participantsCount: Int
+    var isAnotherUserScreenSharing: Bool
+    var participantsLayout: ParticipantsLayout
+
+    // ToggleCameraIconView
+    var hasVideoCapability: Bool
+    var cameraPosition: CameraPosition
+
+    // CallDurationView
+    var recordingState: RecordingState
+
+    // SharingIndicator
+    var isCurrentUserScreenSharing: Bool
     @State var sharingPopupDismissed = false
-    
+
+    private let viewModel: CallViewModel
+
     public init(viewModel: CallViewModel) {
+        let streamVideo = viewModel.streamVideo
+        let call = viewModel.call ?? streamVideo.state.ringingCall
+
+        // LayoutMenu
+        participantsCount = viewModel.callParticipants.count
+        isAnotherUserScreenSharing = viewModel.call?.state.isCurrentUserScreensharing == false
+            && viewModel.call?.state.screenSharingSession != nil
+        participantsLayout = viewModel.participantsLayout
+
+        // ToggleCameraIconView
+        hasVideoCapability = call?.state.ownCapabilities.contains(.sendVideo) == true
+        cameraPosition = call?.state.callSettings.cameraPosition ?? .front
+
+        // CallDurationView
+        recordingState = viewModel.recordingState
+
+        // SharingIndicator
+        isCurrentUserScreenSharing = viewModel.call?.state.isCurrentUserScreensharing ?? false
+
         self.viewModel = viewModel
     }
-    
+
+    public static func == (
+        lhs: CallTopView,
+        rhs: CallTopView
+    ) -> Bool {
+        lhs.participantsCount == rhs.participantsCount
+            && lhs.isAnotherUserScreenSharing == rhs.isAnotherUserScreenSharing
+            && lhs.participantsLayout == rhs.participantsLayout
+            && lhs.hasVideoCapability == rhs.hasVideoCapability
+            && lhs.cameraPosition == rhs.cameraPosition
+            && lhs.recordingState == rhs.recordingState
+            && lhs.isCurrentUserScreenSharing == rhs.isCurrentUserScreenSharing
+            && lhs.sharingPopupDismissed == rhs.sharingPopupDismissed
+    }
+
     public var body: some View {
         Group {
             HStack(spacing: 0) {
                 HStack {
-                    if
-                        #available(iOS 14.0, *),
-                        viewModel.callParticipants.count > 1
-                    {
-                        LayoutMenuView(viewModel: viewModel)
-                            .opacity(hideLayoutMenu ? 0 : 1)
-                            .accessibility(identifier: "viewMenu")
-                    }
-
-                    if call?.state.ownCapabilities.contains(.sendVideo) == true {
-                        ToggleCameraIconView(viewModel: viewModel)
-                    }
-
+                    layoutMenuView
+                    toggleCameraView
                     Spacer()
                 }
                 .frame(maxWidth: .infinity)
 
                 HStack(alignment: .center) {
-                    CallDurationView(viewModel)
+                    callDurationView
                 }
                 .frame(height: 44)
                 .frame(maxWidth: .infinity)
 
                 HStack {
                     Spacer()
-                    HangUpIconView(viewModel: viewModel)
+                    hangUpIconView
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -55,64 +87,58 @@ public struct CallTopView: View {
             .padding(.vertical)
             .frame(maxWidth: .infinity)
         }
-        .overlay(
-            viewModel.call?.state.isCurrentUserScreensharing == true ?
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-                .opacity(sharingPopupDismissed ? 0 : 1)
-                : nil
-        )
-    }
-    
-    private var hideLayoutMenu: Bool {
-        viewModel.call?.state.screenSharingSession != nil
-            && viewModel.call?.state.isCurrentUserScreensharing == false
+        .overlay(sharingIndicatorView)
     }
 
-    private var call: Call? {
-        switch viewModel.callingState {
-        case .incoming, .outgoing:
-            return streamVideo.state.ringingCall
-        default:
-            return viewModel.call
-        }
-    }
-}
+    // MARK: - Subviews
 
-public struct SharingIndicator: View {
-            
-    @ObservedObject var viewModel: CallViewModel
-    @Binding var sharingPopupDismissed: Bool
-    
-    public init(viewModel: CallViewModel, sharingPopupDismissed: Binding<Bool>) {
-        _viewModel = ObservedObject(initialValue: viewModel)
-        _sharingPopupDismissed = sharingPopupDismissed
-    }
-    
-    public var body: some View {
-        HStack {
-            Text(L10n.Call.Current.sharing)
-                .font(.headline)
-            Divider()
-            Button {
-                viewModel.stopScreensharing()
-            } label: {
-                Text(L10n.Call.Current.stopSharing)
-                    .font(.headline)
-            }
-            Button {
-                sharingPopupDismissed = true
-            } label: {
-                Image(systemName: "xmark")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 14)
-            }
-            .padding(.leading, 4)
+    @ViewBuilder
+    private var layoutMenuView: some View {
+        if
+            #available(iOS 14.0, *),
+            participantsCount > 1,
+            !isAnotherUserScreenSharing
+        {
+            LayoutMenuView(
+                participantsLayout: participantsLayout,
+                actionHandler: { [weak viewModel] in viewModel?.update(participantsLayout: $0) }
+            )
+            .equatable()
+            .accessibility(identifier: "viewMenu")
         }
-        .padding(.all, 8)
-        .modifier(ShadowViewModifier())
+    }
+
+    @ViewBuilder
+    private var toggleCameraView: some View {
+        if hasVideoCapability {
+            ToggleCameraIconView(
+                cameraPosition: cameraPosition,
+                actionHandler: { [weak viewModel] in viewModel?.toggleCameraPosition() }
+            )
+            .equatable()
+        }
+    }
+
+    @ViewBuilder
+    private var callDurationView: some View {
+        CallDurationView(viewModel).equatable()
+    }
+
+    @ViewBuilder
+    private var hangUpIconView: some View {
+        HangUpIconView(viewModel: viewModel)
+            .equatable()
+    }
+
+    @ViewBuilder
+    private var sharingIndicatorView: some View {
+        if isCurrentUserScreenSharing {
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed,
+            )
+            .equatable()
+            .opacity(sharingPopupDismissed ? 0 : 1)
+        }
     }
 }

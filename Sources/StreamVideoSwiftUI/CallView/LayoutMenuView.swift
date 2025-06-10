@@ -6,41 +6,60 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct LayoutMenuView: View {
-    
+public struct LayoutMenuView: View, @preconcurrency Equatable {
     @Injected(\.images) var images
 
-    @ObservedObject var viewModel: CallViewModel
+    var participantsLayout: ParticipantsLayout
     var size: CGFloat
+    var actionHandler: (ParticipantsLayout) -> Void
 
-    public init(viewModel: CallViewModel, size: CGFloat = 44) {
-        _viewModel = ObservedObject(initialValue: viewModel)
+    public init(
+        viewModel: CallViewModel,
+        size: CGFloat = 44
+    ) {
+        participantsLayout = viewModel.participantsLayout
         self.size = size
+        actionHandler = { [weak viewModel] in viewModel?.update(participantsLayout: $0) }
     }
-    
+
+    init(
+        participantsLayout: ParticipantsLayout,
+        size: CGFloat = 44,
+        actionHandler: @escaping (ParticipantsLayout) -> Void
+    ) {
+        self.participantsLayout = participantsLayout
+        self.size = size
+        self.actionHandler = actionHandler
+    }
+
+    public static func == (
+        lhs: LayoutMenuView,
+        rhs: LayoutMenuView
+    ) -> Bool {
+        lhs.participantsLayout == rhs.participantsLayout
+            && lhs.size == rhs.size
+    }
+
     public var body: some View {
         Menu {
             LayoutMenuItem(
                 title: L10n.Call.Current.layoutGrid,
                 layout: .grid,
-                selectedLayout: viewModel.participantsLayout
-            ) { layout in
-                viewModel.update(participantsLayout: layout)
-            }
+                selectedLayout: participantsLayout,
+                selectLayout: actionHandler
+            )
             LayoutMenuItem(
                 title: L10n.Call.Current.layoutFullScreen,
                 layout: .fullScreen,
-                selectedLayout: viewModel.participantsLayout
-            ) { layout in
-                viewModel.update(participantsLayout: layout)
-            }
+                selectedLayout: participantsLayout,
+                selectLayout: actionHandler
+            )
             LayoutMenuItem(
                 title: L10n.Call.Current.layoutSpotlight,
                 layout: .spotlight,
-                selectedLayout: viewModel.participantsLayout
-            ) { layout in
-                viewModel.update(participantsLayout: layout)
-            }
+                selectedLayout: participantsLayout,
+                selectLayout: actionHandler
+            )
         } label: {
             CallIconView(
                 icon: images.layoutSelectorIcon,
