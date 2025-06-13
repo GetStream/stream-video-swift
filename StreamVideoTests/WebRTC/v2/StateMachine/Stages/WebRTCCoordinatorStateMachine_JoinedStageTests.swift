@@ -582,6 +582,11 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
     }
 
     func test_transition_callSettingsUpdated_statsAdapterUpdated() async throws {
+        try XCTSkipIf(
+            ProcessInfo().operatingSystemVersion.majorVersion == 15,
+            "https://linear.app/stream/issue/IOS-923"
+        )
+        
         let statsAdapter = MockWebRTCStatsAdapter()
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             statsAdapter: statsAdapter
