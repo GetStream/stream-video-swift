@@ -143,7 +143,7 @@ jobs:
     - name: Public Interface Validation
       run: bundle exec fastlane validate_public_interface
     - name: Run Danger
-      run: bundle exec danger
+      run: bundle exec fastlane lint_pr
     - name: Run Fastlane Linting
       run: bundle exec fastlane rubocop
     - name: Run SwiftFormat Linting
