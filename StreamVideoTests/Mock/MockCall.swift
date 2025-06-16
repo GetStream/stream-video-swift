@@ -8,6 +8,7 @@ import Foundation
 final class MockCall: Call, Mockable, @unchecked Sendable {
 
     typealias FunctionKey = MockCallFunctionKey
+    typealias FunctionInputKey = MockCallFunctionInputKey
 
     enum MockCallFunctionKey: Hashable, CaseIterable {
         case get
@@ -52,9 +53,8 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
     var stubbedProperty: [String: Any]
     var stubbedFunction: [FunctionKey: Any] = [:]
-    @Atomic var stubbedFunctionInput: [FunctionKey: [MockCallFunctionInputKey]] = MockCallFunctionKey
-        .allCases
-        .reduce(into: [FunctionKey: [MockCallFunctionInputKey]]()) { $0[$1] = [] }
+    @Atomic var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey.allCases
+        .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
 
     override var state: CallState {
         get { self[dynamicMember: \.state] }

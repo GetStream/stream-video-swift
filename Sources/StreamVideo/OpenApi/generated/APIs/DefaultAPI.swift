@@ -337,14 +337,13 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             try self.jsonDecoder.decode(SendEventResponse.self, from: $0)
         }
     }
-
+    
     open func collectUserFeedback(
         type: String,
         id: String,
-        session: String,
         collectUserFeedbackRequest: CollectUserFeedbackRequest
     ) async throws -> CollectUserFeedbackResponse {
-        var path = "/video/call/{type}/{id}/feedback/{session}"
+        var path = "/video/call/{type}/{id}/feedback"
         
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -352,14 +351,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
-        let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
-        let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        path = path.replacingOccurrences(
-            of: String(format: "{%@}", "session"),
-            with: sessionPostEscape,
-            options: .literal,
-            range: nil
-        )
         
         let urlRequest = try makeRequest(
             uriPath: path,
@@ -1146,7 +1137,6 @@ protocol DefaultAPIEndpoints {
     func collectUserFeedback(
         type: String,
         id: String,
-        session: String,
         collectUserFeedbackRequest: CollectUserFeedbackRequest
     ) async throws -> CollectUserFeedbackResponse
         

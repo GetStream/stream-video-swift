@@ -37,6 +37,73 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     @MainActor
+    func test_startCall_withoutLocalCallSettingsAndRingTrue_respectsDashboardSettings() async throws {
+        // Given
+        let mockCall = MockCall(.dummy(callType: .default, callId: callId))
+        await streamVideo?.disconnect()
+        streamVideo = nil
+        let mockStreamVideo = MockStreamVideo()
+        mockStreamVideo.stub(for: .call, with: mockCall)
+        let callViewModel = CallViewModel()
+
+        // When
+        callViewModel.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+
+        // Then
+        XCTAssertEqual(mockStreamVideo.timesCalled(.call), 1)
+        let (
+            recordedCallType,
+            recordedCallId,
+            recordedCallSettings
+        ) = try XCTUnwrap(
+            mockStreamVideo
+                .recordedInputPayload((String, String, CallSettings?).self, for: .call)?.first
+        )
+        XCTAssertEqual(recordedCallType, callType)
+        XCTAssertEqual(recordedCallId, callId)
+        XCTAssertNil(recordedCallSettings)
+    }
+
+    @MainActor
+    func test_startCall_withLocalCallSettingsAndRingTrue_respectsLocalSettings() async throws {
+        // Given
+        let mockCall = MockCall(.dummy(callType: .default, callId: callId))
+        await streamVideo?.disconnect()
+        streamVideo = nil
+        let mockStreamVideo = MockStreamVideo()
+        mockStreamVideo.stub(for: .call, with: mockCall)
+        let callViewModel = CallViewModel(callSettings: .init(audioOn: false, audioOutputOn: false))
+
+        // When
+        callViewModel.startCall(
+            callType: .default,
+            callId: callId,
+            members: participants,
+            ring: true
+        )
+
+        // Then
+        XCTAssertEqual(mockStreamVideo.timesCalled(.call), 1)
+        let (
+            recordedCallType,
+            recordedCallId,
+            recordedCallSettings
+        ) = try XCTUnwrap(
+            mockStreamVideo
+                .recordedInputPayload((String, String, CallSettings?).self, for: .call)?.first
+        )
+        XCTAssertEqual(recordedCallType, callType)
+        XCTAssertEqual(recordedCallId, callId)
+        XCTAssertFalse(recordedCallSettings?.audioOn ?? true)
+        XCTAssertFalse(recordedCallSettings?.audioOutputOn ?? true)
+    }
+
+    @MainActor
     func test_startCall_joiningState() {
         // Given
         let callViewModel = CallViewModel()

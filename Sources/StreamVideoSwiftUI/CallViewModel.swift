@@ -363,6 +363,9 @@ open class CallViewModel: ObservableObject {
                 customData: customData
             )
         } else {
+            /// If no CallSettings have been provided, we skip passing the default ones, in order to
+            /// respect any dashboard changes.
+            let callSettings = localCallSettingsChange ? callSettings : nil
             let call = streamVideo.call(
                 callType: callType,
                 callId: callId,

@@ -1195,7 +1195,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         custom: [String: RawJSON]? = nil
     ) async throws -> CollectUserFeedbackResponse {
         try await callController.collectUserFeedback(
-            sessionID: state.sessionId,
             custom: custom,
             rating: rating,
             reason: reason
