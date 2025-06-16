@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.25.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.25.0)
+_June 16, 2025_
+
 ### 🐞 Fixed
 - The CallViewModel will now respect the dashboard's `CallSettings` when starting a `Call` with `ring:true` and without provided `CallSettings`. [#841](https://github.com/GetStream/stream-video-swift/pull/841)
 
