@@ -10,26 +10,19 @@ public struct CallParticipantsInfoView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
     @StateObject var viewModel: CallParticipantsInfoViewModel
-    @ObservedObject var callViewModel: CallViewModel
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         callViewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        self.callViewModel = callViewModel
-        _viewModel = StateObject(
-            wrappedValue: CallParticipantsInfoViewModel(
-                call: callViewModel.call
-            )
-        )
+        _viewModel = StateObject(wrappedValue: CallParticipantsInfoViewModel(callViewModel))
     }
     
     public var body: some View {
         CallParticipantsView(
             viewFactory: viewFactory,
-            viewModel: viewModel,
-            callViewModel: callViewModel
+            viewModel: viewModel
         )
     }
 }
@@ -38,17 +31,14 @@ public struct CallParticipantsInfoView<Factory: ViewFactory>: View {
 struct CallParticipantsView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
-    @ObservedObject var viewModel: CallParticipantsInfoViewModel
-    @ObservedObject var callViewModel: CallViewModel
+    var viewModel: CallParticipantsInfoViewModel
 
     init(
         viewFactory: Factory,
-        viewModel: CallParticipantsInfoViewModel,
-        callViewModel: CallViewModel
+        viewModel: CallParticipantsInfoViewModel
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
-        self.callViewModel = callViewModel
     }
 
     var body: some View {
@@ -56,24 +46,27 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
             viewFactory: viewFactory,
             viewModel: viewModel,
             participants: participants,
-            call: callViewModel.call,
-            blockedUsers: callViewModel.blockedUsers,
-            callSettings: callViewModel.callSettings,
-            inviteParticipantsShown: $viewModel.inviteParticipantsShown,
+            call: viewModel.callViewModel.call,
+            blockedUsers: viewModel.callViewModel.blockedUsers,
+            callSettings: viewModel.callViewModel.callSettings,
+            inviteParticipantsShown: .init(
+                get: { viewModel.inviteParticipantsShown },
+                set: { viewModel.inviteParticipantsShown = $0 }
+            ),
             inviteTapped: {
                 viewModel.inviteParticipantsShown = true
             },
             muteTapped: {
-                callViewModel.toggleMicrophoneEnabled()
+                viewModel.callViewModel.toggleMicrophoneEnabled()
             },
             closeTapped: {
-                callViewModel.participantsShown = false
+                viewModel.callViewModel.participantsShown = false
             }
         )
     }
     
     private var participants: [CallParticipant] {
-        callViewModel.callParticipants
+        viewModel.participants
             .map(\.value)
             .sorted(by: { $0.name < $1.name })
     }

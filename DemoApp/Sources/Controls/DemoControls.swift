@@ -16,18 +16,7 @@ struct DemoControlsView: View {
     @Injected(\.chatViewModel) var chatViewModel
     @Injected(\.currentDevice) var currentDevice
 
-    // VideoIconView
-    var hasVideoCapability: Bool
-    var isVideoEnabled: Bool
-
-    // MicrophoneIconView
-    var hasAudioCapability: Bool
-    var isAudioEnabled: Bool
-
-    // ParticipantsListButton
-    var showParticipantsList: Bool
-    var participantsCount: Int
-    var participantsShown: Binding<Bool>
+    @State var showParticipantsList: Bool
 
     private var canOpenChat: Bool
 
@@ -37,19 +26,7 @@ struct DemoControlsView: View {
     var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, canOpenChat: Bool = true) {
-        let streamVideo = InjectedValues[\.streamVideo]
-        let call = viewModel.call ?? streamVideo.state.ringingCall
-        let ownCapabilities = Set(call?.state.ownCapabilities ?? [])
-
-        self.hasVideoCapability = ownCapabilities.contains(.sendVideo)
-        self.isVideoEnabled = call?.state.callSettings.videoOn ?? false
-
-        self.hasAudioCapability = ownCapabilities.contains(.sendAudio)
-        self.isAudioEnabled = call?.state.callSettings.audioOn ?? false
-
-        self.showParticipantsList = viewModel.callingState == .inCall
-        self.participantsCount = call?.state.participants.endIndex ?? 0
-        self.participantsShown = .init(get: { viewModel.participantsShown }, set: { viewModel.participantsShown = $0 })
+        showParticipantsList = viewModel.callingState == .inCall
 
         self.viewModel = viewModel
         self.canOpenChat = canOpenChat
@@ -69,6 +46,12 @@ struct DemoControlsView: View {
         }
         .padding(.horizontal, 16)
         .padding(.bottom)
+        .onReceive(
+            viewModel
+                .$callingState
+                .removeDuplicates()
+                .map { $0 == .inCall }
+        ) { showParticipantsList = $0 }
     }
 
     @ViewBuilder
@@ -90,35 +73,20 @@ struct DemoControlsView: View {
 
     @ViewBuilder
     private var videoView: some View {
-        if hasVideoCapability {
-            VideoIconView(
-                isEnabled: isVideoEnabled,
-                actionHandler: { [weak viewModel] in viewModel?.toggleCameraEnabled() }
-            )
-            .equatable()
-        }
+        VideoIconView(viewModel: viewModel)
     }
 
     @ViewBuilder
     private var microphoneView: some View {
-        if hasAudioCapability {
-            MicrophoneIconView(
-                isEnabled: isAudioEnabled,
-                actionHandler: { [weak viewModel] in viewModel?.toggleMicrophoneEnabled() }
-            )
-            .equatable()
-        }
+        MicrophoneIconView(viewModel: viewModel)
     }
 
     @ViewBuilder
     private var participantsInfoView: some View {
         if showParticipantsList {
             ParticipantsListButton(
-                count: participantsCount,
-                isActive: participantsShown,
-                actionHandler: { [weak viewModel] in viewModel?.participantsShown = true }
+                viewModel: viewModel
             )
-            .equatable()
         }
     }
 

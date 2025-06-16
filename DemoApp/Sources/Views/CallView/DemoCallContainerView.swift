@@ -13,7 +13,7 @@ internal struct DemoCallContainerView: View {
     private var callType: String
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
-    var viewModel: CallViewModel
+    @StateObject var viewModel: CallViewModel
     @StateObject var chatViewModel: DemoChatViewModel
     @ObservedObject var appState = AppState.shared
 
@@ -21,7 +21,7 @@ internal struct DemoCallContainerView: View {
         let callViewModel = CallViewModel()
         callViewModel.participantAutoLeavePolicy = AppEnvironment.autoLeavePolicy.policy
         callViewModel.isPictureInPictureEnabled = AppEnvironment.pictureInPictureIntegration == .enabled
-        viewModel = callViewModel
+        _viewModel = .init(wrappedValue: callViewModel)
         _chatViewModel = StateObject(wrappedValue: .init(callViewModel))
         self.callId = callId
         self.callType = callType

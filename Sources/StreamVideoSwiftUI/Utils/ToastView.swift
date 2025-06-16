@@ -125,8 +125,84 @@ public struct ToastModifier: ViewModifier {
     }
 }
 
+struct ToastCombineModifier: ViewModifier {
+
+    var viewModel: CallViewModel
+    @State var toast: Toast?
+    @State private var workItem: Task<Void, Never>?
+
+    init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        toast = viewModel.toast
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onReceive(viewModel.$toast) { toast = $0 }
+            .overlay(
+                ZStack {
+                    toastView()
+                        .offset(y: toast?.placement == .bottom ? -16 : 16)
+                }
+                .animation(.spring(), value: toast)
+            )
+            .onChange(of: toast) { _ in
+                showToast()
+            }
+    }
+
+    @ViewBuilder func toastView() -> some View {
+        if let toast = toast {
+            VStack {
+                if toast.placement == .bottom {
+                    Spacer()
+                }
+                ToastView(
+                    style: toast.style,
+                    message: toast.message
+                ) {
+                    dismissToast()
+                }
+                if toast.placement == .top {
+                    Spacer()
+                }
+            }
+        }
+    }
+
+    private func showToast() {
+        guard let toast = toast else { return }
+
+        UIImpactFeedbackGenerator(style: .light)
+            .impactOccurred()
+
+        if toast.duration > 0 {
+            workItem?.cancel()
+
+            workItem = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(toast.duration * Double(1_000_000_000)))
+                dismissToast()
+            }
+        }
+    }
+
+    private func dismissToast() {
+        withAnimation {
+            toast = nil
+        }
+
+        workItem?.cancel()
+        workItem = nil
+    }
+}
+
 extension View {
     public func toastView(toast: Binding<Toast?>) -> some View {
         modifier(ToastModifier(toast: toast))
+    }
+
+    public func toastView(on viewModel: CallViewModel) -> some View {
+        modifier(ToastCombineModifier(viewModel: viewModel))
     }
 }

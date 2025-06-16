@@ -264,7 +264,6 @@ extension ViewFactory {
             customData: customData,
             call: call
         )
-        .equatable()
     }
 
     public func makeVideoCallParticipantModifier(
@@ -292,7 +291,7 @@ extension ViewFactory {
     }
 
     public func makeCallTopView(viewModel: CallViewModel) -> some View {
-        CallTopView(viewModel: viewModel).equatable()
+        CallTopView(viewModel: viewModel)
     }
 
     public func makeParticipantsListView(

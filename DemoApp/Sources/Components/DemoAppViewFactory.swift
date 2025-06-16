@@ -13,9 +13,9 @@ final class DemoAppViewFactory: ViewFactory {
     @Injected(\.colors) var colors
     @Injected(\.snapshotTrigger) var snapshotTrigger
 
-    func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
-        DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
-    }
+//    func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
+//        DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
+//    }
 
     func makeLobbyView(
         viewModel: CallViewModel,
@@ -33,20 +33,12 @@ final class DemoAppViewFactory: ViewFactory {
             .background(Appearance.default.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
     }
 
-    func makeInnerWaitingLocalUserView(viewModel: CallViewModel) -> AnyView {
-        .init(WaitingLocalUserView(viewModel: viewModel, viewFactory: self))
-    }
-
     func makeCallView(viewModel: CallViewModel) -> DemoCallView<DemoAppViewFactory> {
         DemoCallView(
             viewFactory: self,
             microphoneChecker: MicrophoneChecker(),
             viewModel: viewModel
         )
-    }
-
-    func makeInnerCallView(viewModel: CallViewModel) -> AnyView {
-        .init(StreamVideoSwiftUI.CallView(viewFactory: self, viewModel: viewModel))
     }
 
     func makeCallControlsView(viewModel: CallViewModel) -> some View {

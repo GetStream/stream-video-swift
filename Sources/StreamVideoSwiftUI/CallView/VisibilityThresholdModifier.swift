@@ -18,11 +18,6 @@ import SwiftUI
 /// By default, the threshold is set to 30%, meaning 30% of the view's dimensions must be within the parent's
 /// bounds for it to be considered visible.
 struct VisibilityThresholdModifier: ViewModifier {
-    /// State to track if the content view is on screen.
-    @State private var isOnScreen: Bool? {
-        didSet { if isOnScreen != oldValue, let isOnScreen { changeHandler(isOnScreen) } }
-    }
-
     /// The bounds of the parent view or viewport.
     var bounds: CGRect
     /// The threshold percentage of the view that must be visible.
@@ -50,9 +45,7 @@ struct VisibilityThresholdModifier: ViewModifier {
                     let (verticalVisible, horizontalVisible) = calculateVisibilityInBothAxis(in: geometryInGlobal)
 
                     /// Update the isOnScreen state based on visibility calculations.
-                    Task { @MainActor in
-                        self.isOnScreen = verticalVisible && horizontalVisible
-                    }
+                    changeHandler(verticalVisible && horizontalVisible)
 
                     /// Use a clear color for the background to not affect the appearance.
                     return Color.clear

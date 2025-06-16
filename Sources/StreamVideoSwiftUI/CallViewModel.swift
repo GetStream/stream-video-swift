@@ -785,13 +785,16 @@ open class CallViewModel: ObservableObject {
                     switch callEvent {
                     case let .incoming(incomingCall):
                         if incomingCall.caller.id != streamVideo.user.id {
-                            let isAppActive = UIApplication.shared.applicationState == .active
-                            // TODO: implement holding a call.
-                            if callingState == .idle && isAppActive {
-                                setCallingState(.incoming(incomingCall))
-                                /// We start the ringing timer, so we can cancel when the timeout
-                                /// is over.
-                                startTimer(timeout: incomingCall.timeout)
+                            Task { @MainActor [weak self] in
+                                guard let self else { return }
+                                let isAppActive = UIApplication.shared.applicationState == .active
+                                // TODO: implement holding a call.
+                                if callingState == .idle && isAppActive {
+                                    setCallingState(.incoming(incomingCall))
+                                    /// We start the ringing timer, so we can cancel when the timeout
+                                    /// is over.
+                                    startTimer(timeout: incomingCall.timeout)
+                                }
                             }
                         }
                     case .accepted:
@@ -1028,7 +1031,7 @@ public enum CallingState: Equatable, CustomStringConvertible, Sendable {
     }
 }
 
-public struct LobbyInfo: Equatable {
+public struct LobbyInfo: Equatable, Sendable {
     public let callId: String
     public let callType: String
     public let participants: [Member]

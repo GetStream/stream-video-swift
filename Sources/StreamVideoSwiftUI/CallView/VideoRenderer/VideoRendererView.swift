@@ -73,10 +73,10 @@ public struct VideoRendererView: UIViewRepresentable {
         )
         context.coordinator.renderer.videoContentMode = contentMode
         context.coordinator.renderer.backgroundColor = colors.participantBackground
-
-        if showVideo {
-            handleRendering(context.coordinator.renderer)
-        }
+//
+//        if showVideo {
+//            handleRendering(context.coordinator.renderer)
+//        }
         return context.coordinator.renderer
     }
 
@@ -84,16 +84,15 @@ public struct VideoRendererView: UIViewRepresentable {
     /// - Parameters:
     ///   - uiView: The `VideoRenderer` to update.
     ///   - context: The context containing information about the current state of the system.
-    public func updateUIView(_ uiView: VideoRenderer, context: Context) {
-        if showVideo {
-            handleRendering(uiView)
-        }
-    }
+    public func updateUIView(_ uiView: VideoRenderer, context: Context) {}
 
     /// Creates the coordinator for managing the view.
     /// - Returns: A new `Coordinator` instance.
     public func makeCoordinator() -> Coordinator {
-        Coordinator(handleRendering: handleRendering)
+        Coordinator(
+            showVideo: showVideo,
+            handleRendering: handleRendering
+        )
     }
 }
 
@@ -109,13 +108,16 @@ extension VideoRendererView {
         /// A disposable bag to manage cancellable subscriptions.
         private let disposableBag = DisposableBag()
 
+        private let showVideo: Bool
+
         /// The video renderer managed by this coordinator.
         fileprivate let renderer: VideoRenderer
 
         /// Initializes a new instance of the coordinator.
         /// - Parameter handleRendering: A closure to handle the rendering of the video.
         @MainActor
-        init(handleRendering: ((VideoRenderer) -> Void)?) {
+        init(showVideo: Bool, handleRendering: ((VideoRenderer) -> Void)?) {
+            self.showVideo = showVideo
             self.handleRendering = handleRendering
             renderer = VideoRendererPool
                 .currentValue
@@ -141,6 +143,7 @@ extension VideoRendererView {
         private func setupRendererObservation() {
             renderer
                 .windowPublisher
+                .filter { [weak self] _ in self?.showVideo == true }
                 .map { $0 != nil }
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
@@ -152,6 +155,7 @@ extension VideoRendererView {
 
             renderer
                 .superviewPublisher
+                .filter { [weak self] _ in self?.showVideo == true }
                 .map { $0 != nil }
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)

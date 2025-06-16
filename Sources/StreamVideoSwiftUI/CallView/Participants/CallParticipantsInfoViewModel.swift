@@ -11,7 +11,8 @@ final class CallParticipantsInfoViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     
     @Published var inviteParticipantsShown = false
-    
+    @Published var participants: [String: CallParticipant]
+
     private lazy var muteAudioAction = CallParticipantMenuAction(
         id: "mute-audio-user",
         title: "Mute user",
@@ -51,19 +52,27 @@ final class CallParticipantsInfoViewModel: ObservableObject {
         confirmationPopup: nil,
         isDestructive: false
     )
-    
-    private weak var call: Call?
-    
+
+    let callViewModel: CallViewModel
+    private let disposableBag = DisposableBag()
+
     var inviteParticipantsButtonShown: Bool {
-        call?.currentUserHasCapability(.updateCallMember) == true
+        callViewModel.call?.currentUserHasCapability(.updateCallMember) == true
     }
             
-    init(call: Call?) {
-        self.call = call
+    init(_ callViewModel: CallViewModel) {
+        self.callViewModel = callViewModel
+        participants = callViewModel.callParticipants
+
+        callViewModel
+            .$callParticipants
+            .removeDuplicates()
+            .assign(to: \.participants, onWeak: self)
+            .store(in: disposableBag)
     }
     
     func menuActions(for participant: CallParticipant) -> [CallParticipantMenuAction] {
-        guard let call else { return [] }
+        guard let call = callViewModel.call else { return [] }
         var actions = [CallParticipantMenuAction]()
         guard call.currentUserHasCapability(.blockUsers) else { return actions }
         if participant.hasAudio {
@@ -78,7 +87,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     func unblockActions(for user: User) -> [CallParticipantMenuAction] {
-        guard let call else { return [] }
+        guard let call = callViewModel.call else { return [] }
         if call.currentUserHasCapability(.blockUsers) {
             return [unblockAction]
         } else {
@@ -95,7 +104,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     private func block(userId: String) {
-        guard let call else { return }
+        guard let call = callViewModel.call else { return }
         Task {
             do {
                 try await call.blockUser(with: userId)
@@ -106,7 +115,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     private func unblock(userId: String) {
-        guard let call else { return }
+        guard let call = callViewModel.call else { return }
         Task {
             do {
                 try await call.unblockUser(with: userId)
@@ -117,7 +126,7 @@ final class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     private func executeMute(userId: String, audio: Bool = true, video: Bool = true) {
-        guard let call else { return }
+        guard let call = callViewModel.call else { return }
         Task {
             do {
                 try await call.mute(userId: userId, audio: audio, video: video)
