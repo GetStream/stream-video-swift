@@ -673,6 +673,11 @@ lane :rubocop do
   sh('bundle exec rubocop')
 end
 
+desc 'Run PR linting'
+lane :lint_pr do
+  danger(dangerfile: 'Dangerfile') if is_ci
+end
+
 desc 'Run source code formatting/linting'
 lane :run_swift_format do |options|
   Dir.chdir('..') do
