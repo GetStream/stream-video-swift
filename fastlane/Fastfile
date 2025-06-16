@@ -27,7 +27,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     setup_git_config
-    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :pod_lint, :stop_e2e_helpers].include?(lane)
+    select_xcode(version: xcode_version) unless [:sonar_upload, :allure_launch, :allure_upload, :pod_lint, :stop_e2e_helpers, :merge_main].include?(lane)
   elsif lane == :test_e2e
     stop_e2e_helpers
   end
