@@ -74,16 +74,30 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
             )
         )
 
-        /// Always apply either the provided callSettings or the ones from the dashboard.
-        if let callSettings = await coordinator.stateAdapter.initialCallSettings {
-            await coordinator.stateAdapter.set(
-                callSettings: callSettings
-            )
-        } else {
-            await coordinator.stateAdapter.set(
-                callSettings: .init(response.call.settings)
-            )
+        /// Sets the initial call settings for the coordinator's state adapter.
+        ///
+        /// - First, retrieves the initial call settings, if any, that may have been
+        ///   stored previously on the coordinator.
+        /// - Then, constructs new call settings based on the remote values received
+        ///   from the backend.
+        /// - If there are no locally stored settings, defaults to the remote settings.
+        /// - If the current audio route is external (e.g., Bluetooth, AirPlay),
+        ///   and the settings indicate that the speaker should be on, updates
+        ///   the settings to turn the speaker off. This prevents external
+        ///   devices from mistakenly having the speaker route enabled.
+        /// - Finally, applies the determined call settings to the state adapter.
+        let initialCallSettings = await coordinator.stateAdapter.initialCallSettings
+        let remoteCallSettings = CallSettings(response.call.settings)
+        var callSettings = initialCallSettings ?? remoteCallSettings
+        if
+            coordinator.stateAdapter.audioSession.currentRoute.isExternal,
+            callSettings.speakerOn
+        {
+            callSettings = callSettings.withUpdatedSpeakerState(false)
         }
+        await coordinator.stateAdapter.set(
+            callSettings: callSettings
+        )
 
         await coordinator.stateAdapter.set(
             videoOptions: .init(preferredCameraPosition: {
@@ -98,6 +112,10 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
                     return .front
                 }
             }())
+        )
+
+        await coordinator.stateAdapter.set(
+            isTracingEnabled: response.statsOptions.enableRtcStats
         )
 
         let sfuAdapter = SFUAdapter(
@@ -119,14 +137,17 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         )
 
         let statsReportingInterval = response.statsOptions.reportingIntervalMs / 1000
-        if let statsReporter = await coordinator.stateAdapter.statsReporter {
+        if let statsReporter = await coordinator.stateAdapter.statsAdapter {
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
         } else {
-            let statsReporter = WebRTCStatsReporter(
-                sessionID: await coordinator.stateAdapter.sessionID
+            let statsReporter = WebRTCStatsAdapter(
+                sessionID: await coordinator.stateAdapter.sessionID,
+                unifiedSessionID: coordinator.stateAdapter.unifiedSessionId,
+                isTracingEnabled: await coordinator.stateAdapter.isTracingEnabled,
+                trackStorage: coordinator.stateAdapter.trackStorage
             )
             statsReporter.deliveryInterval = TimeInterval(statsReportingInterval)
-            await coordinator.stateAdapter.set(statsReporter: statsReporter)
+            await coordinator.stateAdapter.set(statsAdapter: statsReporter)
         }
 
         return (sfuAdapter, response)

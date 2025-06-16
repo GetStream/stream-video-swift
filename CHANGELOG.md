@@ -4,11 +4,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🐞 Fixed
+- The CallViewModel will now respect the dashboard's `CallSettings` when starting a `Call` with `ring:true` and without provided `CallSettings`. [#841](https://github.com/GetStream/stream-video-swift/pull/841)
+
+# [1.24.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.24.0)
+_June 02, 2025_
+
 ### ✅ Added
+- Stats V2 reporting. [#806](https://github.com/GetStream/stream-video-swift/pull/806)
 - `CallViewController` was updated to accept the `video` flag when starting a call. [#811](https://github.com/GetStream/stream-video-swift/pull/811)
+- `team` property when creating calls through `CallViewModel` and/or `CallViewController` [#817](https://github.com/GetStream/stream-video-swift/pull/817)
+
+### 🔄 Changed
+- When joining a Call, if the user has an external audio device connected, we will ignore the remote `CallSettings.speakerOn = true`. [#819](https://github.com/GetStream/stream-video-swift/pull/819)
+- CallKit will report correctly the rejection reason when ringing timeout is reached. [#820](https://github.com/GetStream/stream-video-swift/pull/820)
 
 ### 🐞 Fixed
 - Fix a retain cycle that was causing StreamVideo to leak in projects using NoiseCancellation. [#814](https://github.com/GetStream/stream-video-swift/pull/814)
+- Fix occasional crash caused inside `MicrophoneChecker`. [#813](https://github.com/GetStream/stream-video-swift/pull/813)
+- Fix `video` parameter wasn't respected when creating Calls, causing CallKit notifications to always show a call as `audio`. [#818](https://github.com/GetStream/stream-video-swift/pull/818)
 
 # [1.22.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.22.2)
 _May 13, 2025_

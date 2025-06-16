@@ -118,3 +118,5 @@ Credentials.xcconfig
 
 # Cursor/VS Code Settings
 .vscode/settings.json
+.vscode/launch.json
+buildServer.json

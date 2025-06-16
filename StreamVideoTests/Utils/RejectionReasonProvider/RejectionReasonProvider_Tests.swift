@@ -32,7 +32,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     }
 
     @MainActor
-    func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsRejectingOutgoingCall_thenReturnsTimeoutReason(
+    func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsRejectingOutgoingCall_thenReturnsCancelReason(
     ) async {
         let ringingCall = MockCall(.dummy())
         mockStreamVideo.state.ringingCall = ringingCall
@@ -43,7 +43,7 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
             ringTimeout: true
         )
 
-        XCTAssertEqual(reason, RejectCallRequest.Reason.timeout)
+        XCTAssertEqual(reason, RejectCallRequest.Reason.cancel)
     }
 
     @MainActor
@@ -74,6 +74,21 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
         )
 
         XCTAssertEqual(reason, RejectCallRequest.Reason.decline)
+    }
+
+    @MainActor
+    func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsNotBusyAndNotRejectingOutgoingCall_thenReturnsTimeoutReason(
+    ) async {
+        let ringingCall = MockCall(.dummy())
+        mockStreamVideo.state.ringingCall = ringingCall
+        ringingCall.state.createdBy = .dummy()
+
+        let reason = await subject.reason(
+            for: ringingCall.cId,
+            ringTimeout: true
+        )
+
+        XCTAssertEqual(reason, RejectCallRequest.Reason.timeout)
     }
 
     @MainActor

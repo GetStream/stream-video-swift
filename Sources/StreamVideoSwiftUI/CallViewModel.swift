@@ -335,6 +335,7 @@ open class CallViewModel: ObservableObject {
         callType: String,
         callId: String,
         members: [Member],
+        team: String? = nil,
         ring: Bool = false,
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
@@ -353,6 +354,7 @@ open class CallViewModel: ObservableObject {
                 callType: callType,
                 callId: callId,
                 members: membersRequest ?? [],
+                team: team,
                 ring: ring,
                 maxDuration: maxDuration,
                 maxParticipants: maxParticipants,
@@ -361,6 +363,9 @@ open class CallViewModel: ObservableObject {
                 customData: customData
             )
         } else {
+            /// If no CallSettings have been provided, we skip passing the default ones, in order to
+            /// respect any dashboard changes.
+            let callSettings = localCallSettingsChange ? callSettings : nil
             let call = streamVideo.call(
                 callType: callType,
                 callId: callId,
@@ -372,6 +377,7 @@ open class CallViewModel: ObservableObject {
                     let callData = try await call.create(
                         members: membersRequest,
                         custom: customData,
+                        team: team,
                         ring: ring,
                         maxDuration: maxDuration,
                         maxParticipants: maxParticipants,
@@ -636,6 +642,7 @@ open class CallViewModel: ObservableObject {
         callType: String,
         callId: String,
         members: [MemberRequest],
+        team: String? = nil,
         ring: Bool = false,
         maxDuration: Int? = nil,
         maxParticipants: Int? = nil,
@@ -664,7 +671,8 @@ open class CallViewModel: ObservableObject {
                     members: members,
                     custom: customData,
                     settings: settingsRequest,
-                    startsAt: startsAt
+                    startsAt: startsAt,
+                    team: team
                 )
                 let settings = localCallSettingsChange ? callSettings : nil
 

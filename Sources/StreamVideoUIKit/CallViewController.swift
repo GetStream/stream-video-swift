@@ -58,6 +58,7 @@ open class CallViewController: UIViewController {
         callType: String,
         callId: String,
         members: [Member],
+        team: String? = nil,
         ring: Bool = false,
         video: Bool? = nil
     ) {
@@ -65,6 +66,7 @@ open class CallViewController: UIViewController {
             callType: callType,
             callId: callId,
             members: members,
+            team: team,
             ring: ring,
             video: video
         )

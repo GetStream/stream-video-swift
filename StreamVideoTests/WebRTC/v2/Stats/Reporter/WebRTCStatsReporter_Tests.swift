@@ -18,17 +18,22 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     )
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var sessionID: String! = .unique
-    private lazy var collectionInterval: TimeInterval! = 1
+    private lazy var input: WebRTCStatsReporter.Input! = .init(
+        sessionID: sessionID,
+        unifiedSessionID: .unique,
+        report: .dummy(),
+        peerConnectionTraces: [],
+        encoderPerformanceStats: [],
+        decoderPerformanceStats: [],
+        onError: { _ in }
+    )
     private lazy var subject: WebRTCStatsReporter! = .init(
-        collectionInterval: collectionInterval,
-        deliveryInterval: 1,
-        sessionID: sessionID
+        interval: 1,
+        provider: { self.input }
     )
 
     override func setUp() {
         super.setUp()
-        subject.publisher = mockPublisher
-        subject.subscriber = mockSubscriber
         mockSFUStack
             .setConnectionState(to: .connected(healthCheckInfo: .init()))
     }
@@ -42,45 +47,10 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    // MARK: - collection
-
-    func test_sfuAdapterNil_reportWasNotCollectedCorrectly() async throws {
-        await wait(for: collectionInterval + 1)
-
-        XCTAssertEqual(mockPublisher.timesCalled(.statsReport), 0)
-        XCTAssertEqual(mockSubscriber.timesCalled(.statsReport), 0)
-    }
-
-    func test_sfuAdapterNotNil_reportWasCollectedCorrectly() async throws {
-        subject.sfuAdapter = mockSFUStack.adapter
-
-        await fulfillment {
-            self.mockPublisher.timesCalled(.statsReport) == 1 && self.mockSubscriber.timesCalled(.statsReport) == 1
-        }
-    }
-
-    func test_sfuAdapterNotNil_publisherIsNil_reportWasCollectedCorrectly() async throws {
-        subject.publisher = nil
-        subject.sfuAdapter = mockSFUStack.adapter
-
-        await fulfillment {
-            self.mockPublisher.timesCalled(.statsReport) == 0 && self.mockSubscriber.timesCalled(.statsReport) == 1
-        }
-    }
-
-    func test_sfuAdapterNotNil_subscriberIsNil_reportWasCollectedCorrectly() async throws {
-        subject.subscriber = nil
-        subject.sfuAdapter = mockSFUStack.adapter
-
-        await fulfillment {
-            self.mockPublisher.timesCalled(.statsReport) == 1 && self.mockSubscriber.timesCalled(.statsReport) == 0
-        }
-    }
-
     // MARK: - delivery
 
     func test_sfuAdapterNil_reportWasNotSentCorrectly() async throws {
-        await wait(for: subject.deliveryInterval + 1)
+        await wait(for: subject.interval + 1)
 
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
     }
@@ -113,13 +83,13 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
         subject.sfuAdapter = mockSFUStack.adapter
-        await wait(for: subject.deliveryInterval - 1)
-        
+        await wait(for: subject.interval - 0.5)
+
         let sfuStack = MockSFUStack()
         subject.sfuAdapter = sfuStack.adapter
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
 
-        await wait(for: 1)
+        await wait(for: 0.5)
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
         XCTAssertNil(sfuStack.service.sendStatsWasCalledWithRequest)
 
@@ -132,7 +102,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_setInterval_withSFUAdapterIntervalMoreThanZero_reportWasCollectedAndSentCorrectly() async throws {
         subject.sfuAdapter = mockSFUStack.adapter
-        subject.deliveryInterval = 1
+        subject.interval = 1
 
         await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
 
@@ -145,12 +115,12 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_setInterval_withSFUAdapterIntervalMoreThanZeroThenResetsToZero_secondReportWasNotCollectedAndSentCorrectly(
     ) async throws {
         subject.sfuAdapter = mockSFUStack.adapter
-        subject.deliveryInterval = 1
+        subject.interval = 1
         await fulfillment { self.mockSFUStack.service.sendStatsWasCalledWithRequest != nil }
-        subject.deliveryInterval = 0
+        subject.interval = 0
         mockSFUStack.service.sendStatsWasCalledWithRequest = nil
 
-        await wait(for: subject.deliveryInterval + 0.5)
+        await wait(for: subject.interval + 0.5)
 
         XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
     }

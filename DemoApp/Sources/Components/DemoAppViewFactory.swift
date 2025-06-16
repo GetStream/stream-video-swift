@@ -90,24 +90,23 @@ final class DemoAppViewFactory: ViewFactory {
         availableFrame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
-        DefaultViewFactory
-            .shared
-            .makeVideoParticipantsView(
-                viewModel: viewModel,
-                availableFrame: availableFrame,
-                onChangeTrackVisibility: onChangeTrackVisibility
-            )
-            .snapshot(trigger: snapshotTrigger) { [weak viewModel] snapshot in
-                Task { @MainActor [weak viewModel] in
-                    viewModel?.sendSnapshot(snapshot)
-                }
+        VideoParticipantsView(
+            viewFactory: self,
+            viewModel: viewModel,
+            availableFrame: availableFrame,
+            onChangeTrackVisibility: onChangeTrackVisibility
+        )
+        .snapshot(trigger: snapshotTrigger) { [weak viewModel] snapshot in
+            Task { @MainActor [weak viewModel] in
+                viewModel?.sendSnapshot(snapshot)
             }
-            .overlay(
-                VStack {
-                    Spacer()
-                    DemoClosedCaptionsView(viewModel)
-                        .padding(.bottom, 30)
-                }
-            )
+        }
+        .overlay(
+            VStack {
+                Spacer()
+                DemoClosedCaptionsView(viewModel)
+                    .padding(.bottom, 30)
+            }
+        )
     }
 }

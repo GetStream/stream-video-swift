@@ -13,7 +13,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockStreamVideo: MockStreamVideo! = .init()
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
-    private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = MockStreamCallAudioRecorder(filename: "test.wav")
+    private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = .init(filename: "test.wav")
 
     override func setUp() {
         super.setUp()
@@ -23,7 +23,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         await subject.stopListening()
-        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorderKey.currentValue
+        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorder(filename: "test.wav")
         mockAudioRecorder = nil
         mockStreamVideo = nil
         subject = nil
@@ -49,7 +49,6 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - audioLevels
 
     func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async throws {
-        LogConfig.level = .debug
         await subject.startListening()
 
         let inputs = [
@@ -61,7 +60,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
         for value in inputs {
             mockAudioRecorder.mockMetersPublisher.send(Float(value))
-            try? await Task.sleep(nanoseconds: 100_000)
+            await wait(for: 0.1)
         }
 
         let values = try await subject

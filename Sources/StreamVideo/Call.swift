@@ -324,7 +324,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 video: video
             ),
             notify: notify,
-            ring: ring
+            ring: ring,
+            // This parameter is required for setting the video/audio in the
+            // CallKit VoIP notifications.
+            video: video
         )
         let response = try await coordinatorClient.getOrCreateCall(
             type: callType,
@@ -1192,7 +1195,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         custom: [String: RawJSON]? = nil
     ) async throws -> CollectUserFeedbackResponse {
         try await callController.collectUserFeedback(
-            sessionID: state.sessionId,
             custom: custom,
             rating: rating,
             reason: reason
