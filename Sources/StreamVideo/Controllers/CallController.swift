@@ -402,7 +402,6 @@ class CallController: @unchecked Sendable {
     /// - Returns: An instance of `CollectUserFeedbackResponse` representing the result of collecting feedback.
     /// - Throws: An error if the feedback collection process encounters an issue.
     func collectUserFeedback(
-        sessionID: String,
         custom: [String: RawJSON]? = nil,
         rating: Int,
         reason: String? = nil
@@ -410,14 +409,12 @@ class CallController: @unchecked Sendable {
         try await defaultAPI.collectUserFeedback(
             type: callType,
             id: callId,
-            session: sessionID,
             collectUserFeedbackRequest: .init(
                 custom: custom,
                 rating: rating,
                 reason: reason,
                 sdk: SystemEnvironment.sdkName,
-                sdkVersion: SystemEnvironment.version,
-                userSessionId: sessionID
+                sdkVersion: SystemEnvironment.version
             )
         )
     }

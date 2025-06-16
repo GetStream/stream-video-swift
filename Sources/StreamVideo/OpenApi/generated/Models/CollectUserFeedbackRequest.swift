@@ -11,7 +11,7 @@ public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSO
     public var reason: String?
     public var sdk: String
     public var sdkVersion: String
-    public var userSessionId: String
+    public var userSessionId: String?
 
     public init(
         custom: [String: RawJSON]? = nil,
@@ -19,7 +19,7 @@ public final class CollectUserFeedbackRequest: @unchecked Sendable, Codable, JSO
         reason: String? = nil,
         sdk: String,
         sdkVersion: String,
-        userSessionId: String
+        userSessionId: String? = nil
     ) {
         self.custom = custom
         self.rating = rating
