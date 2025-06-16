@@ -460,7 +460,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .filter { !$0.isAvailable }
                 .removeDuplicates()
-                .sinkTask { [weak self] in
+                .sinkTask(storeIn: disposableBag) { [weak self] in
                     guard let self else { return }
 
                     /// Trace internet connection changes

@@ -106,7 +106,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func execute() {
             context.sfuEventObserver = nil
             context.disconnectionSource = nil
-            Task(disposableBag: disposableBag) {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
                 let statsAdapter = await context
                     .coordinator?
                     .stateAdapter
@@ -169,7 +170,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .removeDuplicates()
-                .sinkTask { [weak self] in
+                .sinkTask(storeIn: disposableBag) { [weak self] in
                     /// Trace internet connection changes
                     await self?
                         .context
