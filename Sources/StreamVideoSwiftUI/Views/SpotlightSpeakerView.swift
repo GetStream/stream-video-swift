@@ -93,5 +93,6 @@ public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
                 )
             }
         }
+        .debugViewRendering()
     }
 }

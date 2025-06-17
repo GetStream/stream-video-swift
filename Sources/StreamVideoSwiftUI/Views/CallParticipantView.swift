@@ -71,5 +71,6 @@ struct CallParticipantView<Factory: ViewFactory>: View {
                 }
             }
         }
+        .debugViewRendering()
     }
 }

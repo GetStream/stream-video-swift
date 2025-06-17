@@ -49,6 +49,7 @@ struct JoinCallView<Factory: ViewFactory>: View {
         .padding()
         .background(colors.lobbySecondaryBackground)
         .cornerRadius(16)
+        .debugViewRendering()
     }
     
     private var waitingRoomDescription: String {

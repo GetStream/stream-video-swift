@@ -17,6 +17,7 @@ struct CircledTitleView: View {
         ZStack {
             Circle()
                 .foregroundColor(colors.tintColor)
+
             Text(title)
                 .foregroundColor(.white)
                 .font(fonts.title)
@@ -25,5 +26,6 @@ struct CircledTitleView: View {
         }
         .frame(maxWidth: size, maxHeight: size)
         .modifier(ShadowModifier())
+        .debugViewRendering()
     }
 }

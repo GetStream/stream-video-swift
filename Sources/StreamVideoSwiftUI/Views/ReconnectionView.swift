@@ -36,5 +36,6 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
                 )
                 .cornerRadius(16)
             )
+            .debugViewRendering()
     }
 }

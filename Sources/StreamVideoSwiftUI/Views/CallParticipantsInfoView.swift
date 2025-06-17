@@ -10,26 +10,21 @@ public struct CallParticipantsInfoView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
     @StateObject var viewModel: CallParticipantsInfoViewModel
-    @ObservedObject var callViewModel: CallViewModel
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         callViewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        self.callViewModel = callViewModel
         _viewModel = StateObject(
-            wrappedValue: CallParticipantsInfoViewModel(
-                call: callViewModel.call
-            )
+            wrappedValue: CallParticipantsInfoViewModel(callViewModel)
         )
     }
     
     public var body: some View {
         CallParticipantsView(
             viewFactory: viewFactory,
-            viewModel: viewModel,
-            callViewModel: callViewModel
+            viewModel: viewModel
         )
     }
 }

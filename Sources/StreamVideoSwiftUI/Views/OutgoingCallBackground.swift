@@ -19,5 +19,6 @@ struct OutgoingCallBackground: View {
                 FallbackBackground()
             }
         }
+        .debugViewRendering()
     }
 }

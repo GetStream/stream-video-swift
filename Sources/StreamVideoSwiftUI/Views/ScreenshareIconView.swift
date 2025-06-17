@@ -28,5 +28,6 @@ public struct ScreenshareIconView: View {
                 iconStyle: (viewModel.call?.state.isCurrentUserScreensharing == false ? .transparent : .primary)
             )
         }
+        .debugViewRendering()
     }
 }

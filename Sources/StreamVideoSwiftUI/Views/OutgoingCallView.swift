@@ -45,5 +45,6 @@ public struct OutgoingCallView<CallControls: View, CallTopView: View, Factory: V
         .onDisappear {
             utils.callSoundsPlayer.stopOngoingSound()
         }
+        .debugViewRendering()
     }
 }

@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
@@ -14,16 +15,15 @@ public struct StatelessToggleCameraIconView: View {
 
     @Injected(\.images) private var images
 
-    /// The associated call for the toggle camera icon.
-    public weak var call: Call?
-
     /// The size of the toggle camera icon.
-    public var size: CGFloat
+    var size: CGFloat
 
     /// The action handler for the toggle camera icon button.
-    public var actionHandler: ActionHandler?
+    var actionHandler: ActionHandler?
 
-    @ObservedObject private var callSettings: CallSettings
+    var publisher: AnyPublisher<CameraPosition, Never>?
+
+    @State var position: CameraPosition
 
     /// Initializes a stateless toggle camera icon view.
     ///
@@ -36,9 +36,9 @@ public struct StatelessToggleCameraIconView: View {
         size: CGFloat = 44,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
+        position = call?.state.callSettings.cameraPosition ?? .front
+        publisher = call?.state.$callSettings.compactMap(\.cameraPosition).eraseToAnyPublisher()
         self.actionHandler = actionHandler
     }
 
@@ -55,6 +55,7 @@ public struct StatelessToggleCameraIconView: View {
             }
         )
         .accessibility(identifier: "cameraPositionToggle")
-        .streamAccessibility(value: callSettings.cameraPosition == .front ? "1" : "0")
+        .streamAccessibility(value: position == .front ? "1" : "0")
+        .onReceive(publisher) { position = $0 }
     }
 }

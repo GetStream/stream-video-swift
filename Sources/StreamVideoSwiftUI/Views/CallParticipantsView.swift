@@ -10,43 +10,34 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
-    @ObservedObject var callViewModel: CallViewModel
 
     init(
         viewFactory: Factory,
-        viewModel: CallParticipantsInfoViewModel,
-        callViewModel: CallViewModel
+        viewModel: CallParticipantsInfoViewModel
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
-        self.callViewModel = callViewModel
     }
 
     var body: some View {
         CallParticipantsViewContainer(
             viewFactory: viewFactory,
             viewModel: viewModel,
-            participants: participants,
-            call: callViewModel.call,
-            blockedUsers: callViewModel.blockedUsers,
-            callSettings: callViewModel.callSettings,
+            participants: viewModel.participants,
+            call: viewModel.callViewModel.call,
+            blockedUsers: viewModel.callViewModel.blockedUsers,
+            callSettings: viewModel.callViewModel.callSettings,
             inviteParticipantsShown: $viewModel.inviteParticipantsShown,
             inviteTapped: {
                 viewModel.inviteParticipantsShown = true
             },
             muteTapped: {
-                callViewModel.toggleMicrophoneEnabled()
+                viewModel.callViewModel.toggleMicrophoneEnabled()
             },
             closeTapped: {
-                callViewModel.participantsShown = false
+                viewModel.callViewModel.participantsShown = false
             }
         )
-    }
-    
-    private var participants: [CallParticipant] {
-        callViewModel.callParticipants
-            .map(\.value)
-            .sorted(by: { $0.name < $1.name })
     }
 }
 
@@ -111,8 +102,8 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                         }
                         if !blockedUsers.isEmpty {
                             BlockedUsersView(
-                                blockedUsers: blockedUsers,
-                                unblockActions: viewModel.unblockActions(for:)
+                                viewModel: viewModel,
+                                blockedUsers: blockedUsers
                             )
                         }
                     }

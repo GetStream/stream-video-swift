@@ -71,6 +71,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
             )
             .opacity(showVideo ? 0 : 1)
         )
+        .debugViewRendering()
     }
 
     private var showVideo: Bool {

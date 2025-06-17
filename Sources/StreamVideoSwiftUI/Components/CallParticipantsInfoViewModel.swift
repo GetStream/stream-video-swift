@@ -11,7 +11,8 @@ final class CallParticipantsInfoViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     
     @Published var inviteParticipantsShown = false
-    
+    @Published private(set) var participants: [CallParticipant]
+
     private lazy var muteAudioAction = CallParticipantMenuAction(
         id: "mute-audio-user",
         title: "Mute user",
@@ -52,14 +53,25 @@ final class CallParticipantsInfoViewModel: ObservableObject {
         isDestructive: false
     )
     
-    private weak var call: Call?
-    
+    let callViewModel: CallViewModel
+
+    var call: Call? { callViewModel.call }
     var inviteParticipantsButtonShown: Bool {
-        call?.currentUserHasCapability(.updateCallMember) == true
+        callViewModel.call?.currentUserHasCapability(.updateCallMember) == true
     }
-            
-    init(call: Call?) {
-        self.call = call
+
+    private let disposableBag = DisposableBag()
+
+    init(_ callViewModel: CallViewModel) {
+        self.callViewModel = callViewModel
+        participants = Array(callViewModel.callParticipants.values)
+
+        callViewModel
+            .$callParticipants
+            .map { Array($0.values).sorted(by: { $0.name < $1.name }) }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.participants, onWeak: self)
+            .store(in: disposableBag)
     }
     
     func menuActions(for participant: CallParticipant) -> [CallParticipantMenuAction] {

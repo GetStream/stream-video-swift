@@ -55,5 +55,6 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
             }
             .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
         }
+        .debugViewRendering()
     }
 }

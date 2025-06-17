@@ -29,5 +29,6 @@ public struct JoiningCallView<CallControls: View, CallTopView: View, Factory: Vi
             callControls: callControls,
             callTopView: callTopView
         )
+        .debugViewRendering()
     }
 }

@@ -51,5 +51,6 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
             }
         }
         .edgesIgnoringSafeArea(participants.count > 1 ? .bottom : .all)
+        .debugViewRendering()
     }
 }

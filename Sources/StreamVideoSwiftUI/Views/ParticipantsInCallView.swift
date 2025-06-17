@@ -62,5 +62,6 @@ struct ParticipantsInCallView<Factory: ViewFactory>: View {
             }
         }
         .frame(height: viewSize)
+        .debugViewRendering()
     }
 }

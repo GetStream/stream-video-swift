@@ -20,5 +20,6 @@ struct ParticipantMicrophoneCheckView: View {
             isPinned: isPinned
         )
         .accessibility(identifier: "microphoneCheckView")
+        .debugViewRendering()
     }
 }

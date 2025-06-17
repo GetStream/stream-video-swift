@@ -27,5 +27,6 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
             rootView
             CallContainer(viewFactory: viewFactory, viewModel: viewModel)
         }
+        .debugViewRendering()
     }
 }

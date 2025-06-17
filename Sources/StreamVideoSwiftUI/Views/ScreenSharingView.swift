@@ -77,6 +77,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                 )
             }
         }
+        .debugViewRendering()
     }
 
     private var screensharingView: some View {

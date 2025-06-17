@@ -40,6 +40,7 @@ public struct CallControlsView: View {
         .padding(.vertical)
         .frame(maxWidth: .infinity)
         .onReceive(call?.state.$ownCapabilities.receive(on: DispatchQueue.main)) { ownCapabilities = $0 }
+        .debugViewRendering()
     }
 
     private var call: Call? {
@@ -73,6 +74,7 @@ public struct VideoIconView: View {
         StatelessVideoIconView(call: viewModel.call) { [weak viewModel] in
             viewModel?.toggleCameraEnabled()
         }
+        .debugViewRendering()
     }
 }
 
@@ -97,55 +99,7 @@ public struct MicrophoneIconView: View {
         StatelessMicrophoneIconView(call: viewModel.call) { [weak viewModel] in
             viewModel?.toggleMicrophoneEnabled()
         }
-    }
-}
-
-/// A view displaying the toggle camera position button for a call.
-public struct ToggleCameraIconView: View {
-
-    @Injected(\.images) var images
-
-    @ObservedObject var viewModel: CallViewModel
-    let size: CGFloat
-
-    /// Initializes the toggle camera icon view with a view model and optional size.
-    /// - Parameters:
-    ///   - viewModel: The view model for the toggle camera icon.
-    ///   - size: The size of the toggle camera icon (default is 44).
-    public init(viewModel: CallViewModel, size: CGFloat = 44) {
-        self.viewModel = viewModel
-        self.size = size
-    }
-
-    public var body: some View {
-        StatelessToggleCameraIconView(call: viewModel.call) { [weak viewModel] in
-            viewModel?.toggleCameraPosition()
-        }
-    }
-}
-
-/// A view displaying the hang-up button for a call.
-public struct HangUpIconView: View {
-
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-
-    @ObservedObject var viewModel: CallViewModel
-    let size: CGFloat
-
-    /// Initializes the hang-up icon view with a view model and optional size.
-    /// - Parameters:
-    ///   - viewModel: The view model for the hang-up icon.
-    ///   - size: The size of the hang-up icon (default is 44).
-    public init(viewModel: CallViewModel, size: CGFloat = 44) {
-        self.viewModel = viewModel
-        self.size = size
-    }
-
-    public var body: some View {
-        StatelessHangUpIconView(call: viewModel.call) { [weak viewModel] in
-            viewModel?.hangUp()
-        }
+        .debugViewRendering()
     }
 }
 
@@ -170,6 +124,7 @@ public struct AudioOutputIconView: View {
         StatelessAudioOutputIconView(call: viewModel.call) { [weak viewModel] in
             viewModel?.toggleAudioOutput()
         }
+        .debugViewRendering()
     }
 }
 
@@ -194,5 +149,6 @@ public struct SpeakerIconView: View {
         StatelessSpeakerIconView(call: viewModel.call) { [weak viewModel] in
             viewModel?.toggleSpeaker()
         }
+        .debugViewRendering()
     }
 }

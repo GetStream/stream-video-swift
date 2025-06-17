@@ -19,5 +19,6 @@ public struct RecordingView: View {
             Spacer()
         }
         .padding(.horizontal, 8)
+        .debugViewRendering()
     }
 }

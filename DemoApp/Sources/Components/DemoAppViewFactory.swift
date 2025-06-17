@@ -53,9 +53,9 @@ final class DemoAppViewFactory: ViewFactory {
         AppControlsWithChat(viewModel: viewModel)
     }
 
-    func makeCallTopView(viewModel: CallViewModel) -> DemoCallTopView {
-        DemoCallTopView(viewModel: viewModel)
-    }
+//    func makeCallTopView(viewModel: CallViewModel) -> DemoCallTopView {
+//        DemoCallTopView(viewModel: viewModel)
+//    }
 
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,

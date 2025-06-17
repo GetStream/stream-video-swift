@@ -51,6 +51,7 @@ public struct CallView<Factory: ViewFactory>: View {
         }
         .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
         .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
+        .debugViewRendering()
     }
 
     @ViewBuilder

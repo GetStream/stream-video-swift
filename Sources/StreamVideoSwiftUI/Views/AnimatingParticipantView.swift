@@ -8,13 +8,13 @@ import SwiftUI
 struct AnimatingParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.colors) var colors
-    
-    @State var isCalling = false
 
     var viewFactory: Factory
     var participant: Member?
     var caller: String = ""
-    
+
+    @State var isCalling = false
+
     var body: some View {
         CallingParticipantView(
             viewFactory: viewFactory,

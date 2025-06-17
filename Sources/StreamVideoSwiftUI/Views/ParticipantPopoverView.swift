@@ -102,6 +102,7 @@ public struct ParticipantPopoverView<CustomView: View>: View {
         }
         .padding()
         .modifier(ShadowViewModifier())
+        .debugViewRendering()
     }
     
     private var pinTitle: String {

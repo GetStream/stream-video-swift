@@ -23,5 +23,6 @@ struct UsersHeaderView: View {
             Spacer()
         }
         .background(Color(colors.background1))
+        .debugViewRendering()
     }
 }

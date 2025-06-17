@@ -35,5 +35,6 @@ struct ParticipantsButton: View {
                 )
                 .cornerRadius(cornerRadius)
         }
+        .debugViewRendering()
     }
 }

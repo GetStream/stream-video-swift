@@ -15,14 +15,20 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
 
     @Published public var viewfinderImage: Image?
     @Published public var participants = [User]()
-    
+    @Published public var audioOn: Bool
+    @Published public var videoOn: Bool
+
     private let call: Call
     
     public init(callType: String, callId: String) {
-        call = InjectedValues[\.streamVideo].call(
+        let call = InjectedValues[\.streamVideo].call(
             callType: callType,
             callId: callId
         )
+        self.call = call
+        audioOn = call.state.callSettings.audioOn
+        videoOn = call.state.callSettings.videoOn
+
         if #available(iOS 14, *) {
             camera = Camera()
             imagesTask = Task {
@@ -34,6 +40,24 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
         loadCurrentMembers()
         subscribeForCallJoinUpdates()
         subscribeForCallLeaveUpdates()
+
+        call
+            .state
+            .$callSettings
+            .map(\.audioOn)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.audioOn, onWeak: self)
+            .store(in: disposableBag)
+
+        call
+            .state
+            .$callSettings
+            .map(\.videoOn)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.videoOn, onWeak: self)
+            .store(in: disposableBag)
     }
     
     @available(iOS 14, *)

@@ -45,6 +45,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                     .frame(maxHeight: .infinity)
             }
         }
+        .debugViewRendering()
     }
     
     private var ratio: CGFloat {

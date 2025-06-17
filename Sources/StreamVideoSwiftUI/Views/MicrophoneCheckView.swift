@@ -73,5 +73,6 @@ public struct MicrophoneCheckView: View {
             corners: [.topRight],
             backgroundColor: colors.participantInfoBackgroundColor
         )
+        .debugViewRendering()
     }
 }

@@ -115,5 +115,6 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
             .cornerRadius(8)
         }
         .accessibility(identifier: "horizontalParticipantsList")
+        .debugViewRendering()
     }
 }

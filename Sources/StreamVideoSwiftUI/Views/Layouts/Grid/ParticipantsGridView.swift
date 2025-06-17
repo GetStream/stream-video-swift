@@ -72,6 +72,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
         }
         .frame(width: availableFrame.width)
         .accessibility(identifier: "gridScrollView")
+        .debugViewRendering()
     }
 
     @ViewBuilder

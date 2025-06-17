@@ -53,5 +53,6 @@ public struct ParticipantInfoView: View {
             corners: [.topRight],
             backgroundColor: colors.participantInfoBackgroundColor
         )
+        .debugViewRendering()
     }
 }

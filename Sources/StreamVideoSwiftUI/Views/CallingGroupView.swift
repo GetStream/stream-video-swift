@@ -76,9 +76,8 @@ struct CallingGroupView<Factory: ViewFactory>: View {
                 }
             }
         }
-        .onAppear {
-            isCalling.toggle()
-        }
+        .onAppear { isCalling.toggle() }
+        .debugViewRendering()
     }
 
     @ViewBuilder

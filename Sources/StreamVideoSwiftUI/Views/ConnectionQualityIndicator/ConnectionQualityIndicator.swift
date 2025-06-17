@@ -47,6 +47,7 @@ public struct ConnectionQualityIndicator: View {
             backgroundColor: connectionQuality == .unknown ? .clear : colors.participantInfoBackgroundColor
         )
         .accessibility(identifier: "connectionQualityIndicator")
+        .debugViewRendering()
     }
 
     /// Determines the color for a specific indicator part based on the connection quality.

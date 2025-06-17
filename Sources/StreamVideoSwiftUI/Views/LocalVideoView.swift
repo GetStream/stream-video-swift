@@ -43,5 +43,6 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
             call: call
         )
         .adjustVideoFrame(to: availableFrame.width, ratio: availableFrame.width / availableFrame.height)
+        .debugViewRendering()
     }
 }

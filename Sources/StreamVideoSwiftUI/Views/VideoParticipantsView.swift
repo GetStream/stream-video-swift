@@ -54,5 +54,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                 )
             }
         }
+        .debugViewRendering()
     }
 }

@@ -23,5 +23,6 @@ public struct SoundIndicator: View {
             .foregroundColor(participant.hasAudio ? .white : colors.inactiveCallControl)
             .accessibility(identifier: "participantMic")
             .streamAccessibility(value: participant.hasAudio ? "1" : "0")
+            .debugViewRendering()
     }
 }

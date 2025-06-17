@@ -8,6 +8,7 @@ import SwiftUI
 struct PulsatingCircle: View {
     
     @Injected(\.colors) var colors
+
     var scaleEffect: CGFloat
     var opacity: CGFloat
     var isCalling: Bool
@@ -21,5 +22,6 @@ struct PulsatingCircle: View {
             .opacity(opacity)
             .scaleEffect(scaleEffect)
             .animation(animation, value: isCalling)
+            .debugViewRendering()
     }
 }

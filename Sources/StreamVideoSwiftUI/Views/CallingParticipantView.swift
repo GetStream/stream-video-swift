@@ -12,15 +12,13 @@ struct CallingParticipantView<Factory: ViewFactory>: View {
     var caller: String = ""
     
     var body: some View {
-        ZStack {
-            if let participant = participant {
-                IncomingCallParticipantView(
-                    viewFactory: viewFactory,
-                    participant: participant
-                )
-            } else {
-                CircledTitleView(title: caller.isEmpty ? "" : String(caller.uppercased().first!))
-            }
+        if let participant = participant {
+            IncomingCallParticipantView(
+                viewFactory: viewFactory,
+                participant: participant
+            )
+        } else {
+            CircledTitleView(title: caller.isEmpty ? "" : String(caller.uppercased().first!))
         }
     }
 }

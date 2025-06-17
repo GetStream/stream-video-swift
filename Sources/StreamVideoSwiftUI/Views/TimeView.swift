@@ -39,5 +39,6 @@ struct TimeView: View {
         .font(fonts.bodyBold.monospacedDigit())
         .minimumScaleFactor(0.2)
         .lineLimit(1)
+        .debugViewRendering()
     }
 }

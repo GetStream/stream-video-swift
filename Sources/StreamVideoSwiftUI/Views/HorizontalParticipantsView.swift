@@ -39,6 +39,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
                 }
             }
         }
+        .debugViewRendering()
     }
     
     private var bounds: CGRect {

@@ -7,11 +7,11 @@ import SwiftUI
 
 public struct SharingIndicator: View {
             
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @Binding var sharingPopupDismissed: Bool
     
     public init(viewModel: CallViewModel, sharingPopupDismissed: Binding<Bool>) {
-        _viewModel = ObservedObject(initialValue: viewModel)
+        self.viewModel = viewModel
         _sharingPopupDismissed = sharingPopupDismissed
     }
     
@@ -38,5 +38,6 @@ public struct SharingIndicator: View {
         }
         .padding(.all, 8)
         .modifier(ShadowViewModifier())
+        .debugViewRendering()
     }
 }

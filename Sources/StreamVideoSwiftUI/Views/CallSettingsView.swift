@@ -48,5 +48,6 @@ struct CallSettingsView: View {
             }
         }
         .padding()
+        .debugViewRendering()
     }
 }

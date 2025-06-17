@@ -9,18 +9,20 @@ import SwiftUI
 /// A view that presents the call's duration and recording state.
 public struct CallDurationView: View {
 
-    @Injected(\.colors) private var colors: Colors
-    @Injected(\.fonts) private var fonts: Fonts
-    @Injected(\.images) private var images: Images
+    @Injected(\.colors) var colors: Colors
+    @Injected(\.fonts) var fonts: Fonts
+    @Injected(\.images) var images: Images
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
 
-    @State private var duration: TimeInterval
-    @ObservedObject private var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
-    @MainActor
+    @State var duration: TimeInterval
+    @State var recordingState: RecordingState
+
     public init(_ viewModel: CallViewModel) {
         self.viewModel = viewModel
-        _duration = .init(initialValue: viewModel.call?.state.duration ?? 0)
+        duration = viewModel.call?.state.duration ?? 0
+        recordingState = viewModel.call?.state.recordingState ?? .noRecording
     }
 
     public var body: some View {
@@ -42,7 +44,9 @@ public struct CallDurationView: View {
             }
         }
         .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
+        .onReceive(viewModel.call?.state.$recordingState.removeDuplicates()) { self.recordingState = $0 }
         .accessibility(identifier: accessibilityIdentifier)
+        .debugViewRendering()
     }
 
     // MARK: - Private Helpers

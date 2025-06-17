@@ -18,6 +18,7 @@ struct CallingParticipantsView: View {
             .font(participants.count > 1 ? fonts.title2 : fonts.title)
             .foregroundColor(.white)
             .padding(.horizontal, 32)
+            .debugViewRendering()
     }
     
     private var text: String {

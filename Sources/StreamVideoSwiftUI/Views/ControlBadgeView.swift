@@ -29,5 +29,6 @@ public struct ControlBadgeView: View {
                 .foregroundColor(colors.textInverted)
                 .background(Circle().fill(colors.onlineIndicatorColor))
         }
+        .debugViewRendering()
     }
 }

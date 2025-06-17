@@ -141,6 +141,7 @@ struct LobbyContentView<Factory: ViewFactory>: View {
                     callParticipants: viewModel.participants,
                     onJoinCallTap: onJoinCallTap
                 )
+                .layoutPriority(2)
             }
             .padding()
         }

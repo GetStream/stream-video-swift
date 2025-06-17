@@ -31,5 +31,6 @@ public struct ParticipantsListButton: View {
             call: viewModel.call,
             isActive: $viewModel.participantsShown
         ) { [weak viewModel] in viewModel?.participantsShown = true }
+            .debugViewRendering()
     }
 }

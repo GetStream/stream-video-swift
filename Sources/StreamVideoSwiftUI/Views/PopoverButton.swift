@@ -25,5 +25,6 @@ public struct PopoverButton: View {
                 .padding(.horizontal)
                 .foregroundColor(.primary)
         }
+        .debugViewRendering()
     }
 }

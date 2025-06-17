@@ -37,6 +37,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
         }
         .frame(maxWidth: availableFrame.width, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
+        .debugViewRendering()
     }
     
     private var bounds: CGRect {

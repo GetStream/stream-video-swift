@@ -54,5 +54,6 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
                 )
             }
         }
+        .debugViewRendering()
     }
 }

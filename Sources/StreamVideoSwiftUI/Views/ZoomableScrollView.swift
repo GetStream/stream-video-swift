@@ -24,6 +24,7 @@ struct ZoomableScrollView<Content: View>: View {
         .onTapGesture(count: 2) {
             doubleTap.send()
         }
+        .debugViewRendering()
     }
 }
 

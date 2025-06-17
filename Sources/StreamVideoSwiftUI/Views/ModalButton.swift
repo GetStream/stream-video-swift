@@ -29,6 +29,7 @@ public struct ModalButton: View {
                 .padding(8)
         }
         .buttonStyle(.modal)
+        .debugViewRendering()
     }
 }
 

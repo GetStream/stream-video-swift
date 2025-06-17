@@ -31,6 +31,7 @@ struct IncomingCallParticipantView<Factory: ViewFactory>: View {
         .frame(width: size, height: size)
         .modifier(ShadowModifier())
         .animation(nil)
+        .debugViewRendering()
     }
 
     private var title: String {

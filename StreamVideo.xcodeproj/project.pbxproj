@@ -433,7 +433,6 @@
 		409C6F1A2E0181BF00F0224E /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F192E0181BF00F0224E /* JoinCallView.swift */; };
 		409C6F1C2E0181C700F0224E /* CallSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F1B2E0181C700F0224E /* CallSettingsView.swift */; };
 		409C6F1F2E0181FE00F0224E /* MicrophoneCheckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F1E2E0181FE00F0224E /* MicrophoneCheckView.swift */; };
-		409C6F212E01821600F0224E /* AudioLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F202E01821600F0224E /* AudioLevel.swift */; };
 		409C6F242E01827B00F0224E /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F232E01827B00F0224E /* TimeView.swift */; };
 		409C6F272E0182DD00F0224E /* LayoutMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F262E0182DD00F0224E /* LayoutMenuItem.swift */; };
 		409C6F2A2E01831500F0224E /* IndicatorPart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F292E01831500F0224E /* IndicatorPart.swift */; };
@@ -468,6 +467,9 @@
 		409C6F672E01865C00F0224E /* BroadcastIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F662E01865C00F0224E /* BroadcastIconView.swift */; };
 		409C6F6A2E0187D100F0224E /* DefaultViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F692E0187D100F0224E /* DefaultViewFactory.swift */; };
 		409C6F6D2E018C9200F0224E /* ImageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F6C2E018C9200F0224E /* ImageRepository.swift */; };
+		409C6F722E01A34600F0224E /* ToggleCameraIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F712E01A34600F0224E /* ToggleCameraIconView.swift */; };
+		409C6F742E01A6B800F0224E /* HangUpIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F732E01A6B800F0224E /* HangUpIconView.swift */; };
+		409C6F772E01CC0A00F0224E /* RenderingObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C6F762E01CC0A00F0224E /* RenderingObserver.swift */; };
 		409CA7992BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		409D2A522D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
 		409D2A532D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */; };
@@ -2030,7 +2032,6 @@
 		409C6F192E0181BF00F0224E /* JoinCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinCallView.swift; sourceTree = "<group>"; };
 		409C6F1B2E0181C700F0224E /* CallSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettingsView.swift; sourceTree = "<group>"; };
 		409C6F1E2E0181FE00F0224E /* MicrophoneCheckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCheckView.swift; sourceTree = "<group>"; };
-		409C6F202E01821600F0224E /* AudioLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLevel.swift; sourceTree = "<group>"; };
 		409C6F232E01827B00F0224E /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
 		409C6F262E0182DD00F0224E /* LayoutMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutMenuItem.swift; sourceTree = "<group>"; };
 		409C6F292E01831500F0224E /* IndicatorPart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorPart.swift; sourceTree = "<group>"; };
@@ -2065,6 +2066,9 @@
 		409C6F662E01865C00F0224E /* BroadcastIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastIconView.swift; sourceTree = "<group>"; };
 		409C6F692E0187D100F0224E /* DefaultViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultViewFactory.swift; sourceTree = "<group>"; };
 		409C6F6C2E018C9200F0224E /* ImageRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRepository.swift; sourceTree = "<group>"; };
+		409C6F712E01A34600F0224E /* ToggleCameraIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCameraIconView.swift; sourceTree = "<group>"; };
+		409C6F732E01A6B800F0224E /* HangUpIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HangUpIconView.swift; sourceTree = "<group>"; };
+		409C6F762E01CC0A00F0224E /* RenderingObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderingObserver.swift; sourceTree = "<group>"; };
 		409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+PredicateFulfillment.swift"; sourceTree = "<group>"; };
 		409D2A512D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBroadcastMoreControlsListButtonView.swift; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
@@ -4276,79 +4280,79 @@
 		409C6EF92E01801B00F0224E /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				409C6F682E0186F300F0224E /* Livestream */,
-				40073B862C458240006A2867 /* VideoRenderer */,
-				40245F2E2BE269B400FCF075 /* CallControls */,
-				40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */,
-				40C7B8312B61325500FB9DB2 /* ModalButton.swift */,
-				40AA2EDB2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift */,
-				40AA2EDD2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift */,
-				40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */,
-				840042CE2A70212D00917B30 /* ScreenshareIconView.swift */,
-				409C6F662E01865C00F0224E /* BroadcastIconView.swift */,
-				840042CC2A7020FD00917B30 /* BroadcastPickerView.swift */,
-				844299342940A16F0037232A /* ZoomableScrollView.swift */,
-				84429931293FA4850037232A /* ScreenSharingView.swift */,
-				409C6F642E01863300F0224E /* HorizontalContainer.swift */,
-				409C6F612E0185D800F0224E /* InviteParticipantsView */,
-				409C6F5F2E0185BB00F0224E /* UsersHeaderView.swift */,
-				409C6F5D2E0185AE00F0224E /* VideoUserView.swift */,
-				84F3B0E128916FF20088751D /* CallParticipantsView.swift */,
-				409C6F5B2E01857900F0224E /* CallParticipantsInfoView.swift */,
-				409C6F592E01856500F0224E /* ParticipantsButton.swift */,
-				409C6F572E01855A00F0224E /* BlockedUsersView.swift */,
-				409C6F552E01854E00F0224E /* CallParticipantView.swift */,
-				409C6F512E01851B00F0224E /* ParticipantMicrophoneCheckView.swift */,
-				8457CF9028BB835F00E8CF50 /* CallView.swift */,
-				846E4AFE29D236EA003733AB /* CallTopView.swift */,
-				409C6F4F2E0184F700F0224E /* SharingIndicator.swift */,
-				84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */,
-				840425B528D0A96F0084C637 /* VideoParticipantsView.swift */,
-				409C6F4D2E0184D300F0224E /* VideoCallParticipantView.swift */,
-				409C6F412E01845500F0224E /* ParticipantInfoView.swift */,
-				409C6F3F2E01844500F0224E /* SoundIndicator.swift */,
-				409C6F3D2E01843500F0224E /* PopoverButton.swift */,
-				409C6F3B2E01842000F0224E /* HorizontalParticipantsView.swift */,
-				409C6F392E01841000F0224E /* VerticalParticipantsView.swift */,
-				409C6F372E01840100F0224E /* TwoRowParticipantsView.swift */,
-				409C6F352E0183DF00F0224E /* TwoColumnParticipantsView.swift */,
-				409C6F332E0183CA00F0224E /* VideoParticipantsViewLandscape.swift */,
-				409C6F312E0183BB00F0224E /* VideoParticipantsViewPortrait.swift */,
-				409C6F2D2E01838200F0224E /* Layouts */,
-				848A73BF2926314F0089AA6E /* MinimizedCallView.swift */,
-				848A73C129269E7D0089AA6E /* CornerDraggableView.swift */,
-				409C6F282E01830C00F0224E /* ConnectionQualityIndicator */,
-				843B707429C270C300AB0573 /* ReconnectionView.swift */,
-				847D001F29C8AB1E00DD0A50 /* RecordingView.swift */,
-				409C6F252E0182D800F0224E /* LayoutMenuView */,
-				8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */,
-				40E110462B5A9DF4007DF492 /* CallDurationView.swift */,
-				409C6F232E01827B00F0224E /* TimeView.swift */,
-				8490032A29D4769700AD9BB4 /* CallConnectingView.swift */,
-				84B57D36297F406400E4E709 /* AudioVolumeIndicator.swift */,
-				409C6F1E2E0181FE00F0224E /* MicrophoneCheckView.swift */,
-				849EDA8A297AFCC80072A12D /* ParticipantsInCallView.swift */,
-				409C6F1B2E0181C700F0224E /* CallSettingsView.swift */,
-				409C6F192E0181BF00F0224E /* JoinCallView.swift */,
-				409C6F172E0181B300F0224E /* CameraCheckView.swift */,
-				409C6F1D2E0181DB00F0224E /* LobbyView */,
-				84E7CD3628D64609009F3542 /* CallingIndicator.swift */,
-				409C6F102E01815B00F0224E /* Backgrounds */,
-				8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */,
-				842C7EBB28A2A86700C2AB7F /* PulsatingCircle.swift */,
+				409C6F702E019AB400F0224E /* UIViewRepresentable */,
+				409C6F6E2E01982F00F0224E /* Controls */,
 				409C6F0B2E01811200F0224E /* AnimatingParticipantView.swift */,
-				409C6F092E01810800F0224E /* CallingParticipantView.swift */,
-				842C7EB928A2A85C00C2AB7F /* CircledTitleView.swift */,
-				409C6F072E0180F700F0224E /* IncomingCallParticipantView.swift */,
+				84B57D36297F406400E4E709 /* AudioVolumeIndicator.swift */,
+				409C6F572E01855A00F0224E /* BlockedUsersView.swift */,
+				8490032A29D4769700AD9BB4 /* CallConnectingView.swift */,
+				40E110462B5A9DF4007DF492 /* CallDurationView.swift */,
 				409C6F052E0180EC00F0224E /* CallingGroupView.swift */,
+				84E7CD3628D64609009F3542 /* CallingIndicator.swift */,
+				8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */,
+				409C6F092E01810800F0224E /* CallingParticipantView.swift */,
+				84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */,
+				409C6F5B2E01857900F0224E /* CallParticipantsInfoView.swift */,
+				84F3B0E128916FF20088751D /* CallParticipantsView.swift */,
+				409C6F552E01854E00F0224E /* CallParticipantView.swift */,
+				409C6F1B2E0181C700F0224E /* CallSettingsView.swift */,
+				846E4AFE29D236EA003733AB /* CallTopView.swift */,
+				8457CF9028BB835F00E8CF50 /* CallView.swift */,
+				409C6F172E0181B300F0224E /* CameraCheckView.swift */,
+				842C7EB928A2A85C00C2AB7F /* CircledTitleView.swift */,
+				40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */,
+				848A73C129269E7D0089AA6E /* CornerDraggableView.swift */,
+				409C6F642E01863300F0224E /* HorizontalContainer.swift */,
+				40AA2EDB2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift */,
+				409C6F3B2E01842000F0224E /* HorizontalParticipantsView.swift */,
+				409C6F072E0180F700F0224E /* IncomingCallParticipantView.swift */,
+				409C6F192E0181BF00F0224E /* JoinCallView.swift */,
 				8490032C29D4774500AD9BB4 /* JoiningCallView.swift */,
-				409C6F042E0180D500F0224E /* IncomingCallView */,
+				40073B892C458259006A2867 /* LocalVideoView.swift */,
+				409C6F1E2E0181FE00F0224E /* MicrophoneCheckView.swift */,
+				848A73BF2926314F0089AA6E /* MinimizedCallView.swift */,
+				40C7B8312B61325500FB9DB2 /* ModalButton.swift */,
 				8458872928A3F935002A81BF /* OutgoingCallBackground.swift */,
 				409C6F022E01808C00F0224E /* OutgoingCallView.swift */,
-				409C6EFE2E01803F00F0224E /* WaitingLocalUserView.swift */,
-				409C6F222E01824C00F0224E /* CallContainer */,
+				409C6F412E01845500F0224E /* ParticipantInfoView.swift */,
+				409C6F512E01851B00F0224E /* ParticipantMicrophoneCheckView.swift */,
+				8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */,
+				409C6F592E01856500F0224E /* ParticipantsButton.swift */,
+				40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */,
+				849EDA8A297AFCC80072A12D /* ParticipantsInCallView.swift */,
+				409C6F3D2E01843500F0224E /* PopoverButton.swift */,
+				842C7EBB28A2A86700C2AB7F /* PulsatingCircle.swift */,
+				843B707429C270C300AB0573 /* ReconnectionView.swift */,
+				847D001F29C8AB1E00DD0A50 /* RecordingView.swift */,
+				840042CE2A70212D00917B30 /* ScreenshareIconView.swift */,
+				84429931293FA4850037232A /* ScreenSharingView.swift */,
+				409C6F4F2E0184F700F0224E /* SharingIndicator.swift */,
+				409C6F3F2E01844500F0224E /* SoundIndicator.swift */,
+				40AA2EDD2ADFF5E8000DCA5C /* SpotlightSpeakerView.swift */,
+				409C6F232E01827B00F0224E /* TimeView.swift */,
+				409C6F352E0183DF00F0224E /* TwoColumnParticipantsView.swift */,
+				409C6F372E01840100F0224E /* TwoRowParticipantsView.swift */,
+				409C6F5F2E0185BB00F0224E /* UsersHeaderView.swift */,
+				409C6F392E01841000F0224E /* VerticalParticipantsView.swift */,
+				409C6F4D2E0184D300F0224E /* VideoCallParticipantView.swift */,
+				840425B528D0A96F0084C637 /* VideoParticipantsView.swift */,
+				409C6F332E0183CA00F0224E /* VideoParticipantsViewLandscape.swift */,
+				409C6F312E0183BB00F0224E /* VideoParticipantsViewPortrait.swift */,
+				409C6F5D2E0185AE00F0224E /* VideoUserView.swift */,
 				409C6EFA2E01802D00F0224E /* VideoViewOverlay.swift */,
-				40073B892C458259006A2867 /* LocalVideoView.swift */,
+				409C6EFE2E01803F00F0224E /* WaitingLocalUserView.swift */,
+				844299342940A16F0037232A /* ZoomableScrollView.swift */,
+				409C6F102E01815B00F0224E /* Backgrounds */,
+				409C6F222E01824C00F0224E /* CallContainer */,
+				40245F2E2BE269B400FCF075 /* CallControls */,
+				409C6F282E01830C00F0224E /* ConnectionQualityIndicator */,
+				409C6F042E0180D500F0224E /* IncomingCallView */,
+				409C6F612E0185D800F0224E /* InviteParticipantsView */,
+				409C6F252E0182D800F0224E /* LayoutMenuView */,
+				409C6F2D2E01838200F0224E /* Layouts */,
+				409C6F682E0186F300F0224E /* Livestream */,
+				409C6F1D2E0181DB00F0224E /* LobbyView */,
+				40073B862C458240006A2867 /* VideoRenderer */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -4375,6 +4379,7 @@
 		409C6F012E01807600F0224E /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				409C6F752E01CC0600F0224E /* RenderingObserver */,
 				4051A26D2D665AF5000C3167 /* Swinft6Migration */,
 				4097B3812BF4E36C0057992D /* Backports */,
 				40F0C3A42BC7F8CB00AB75AD /* VideoRendererPool */,
@@ -4411,7 +4416,6 @@
 				409C6F2B2E01832D00F0224E /* CallViewPlacement.swift */,
 				846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */,
 				8442993929422BEA0037232A /* BackportStateObject.swift */,
-				409C6F202E01821600F0224E /* AudioLevel.swift */,
 				409C6F0D2E01812600F0224E /* Extension */,
 				8434C530289AA8770001490A /* StreamVideoUI.swift */,
 				8434C52A289AA3150001490A /* Appearance.swift */,
@@ -4536,6 +4540,32 @@
 				409C6F692E0187D100F0224E /* DefaultViewFactory.swift */,
 			);
 			path = ViewFactories;
+			sourceTree = "<group>";
+		};
+		409C6F6E2E01982F00F0224E /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				409C6F732E01A6B800F0224E /* HangUpIconView.swift */,
+				409C6F712E01A34600F0224E /* ToggleCameraIconView.swift */,
+				409C6F662E01865C00F0224E /* BroadcastIconView.swift */,
+			);
+			path = Controls;
+			sourceTree = "<group>";
+		};
+		409C6F702E019AB400F0224E /* UIViewRepresentable */ = {
+			isa = PBXGroup;
+			children = (
+				840042CC2A7020FD00917B30 /* BroadcastPickerView.swift */,
+			);
+			path = UIViewRepresentable;
+			sourceTree = "<group>";
+		};
+		409C6F752E01CC0600F0224E /* RenderingObserver */ = {
+			isa = PBXGroup;
+			children = (
+				409C6F762E01CC0A00F0224E /* RenderingObserver.swift */,
+			);
+			path = RenderingObserver;
 			sourceTree = "<group>";
 		};
 		409CA7972BEE21660045F7AA /* Extensions */ = {
@@ -8543,6 +8573,7 @@
 				409C6F322E0183BB00F0224E /* VideoParticipantsViewPortrait.swift in Sources */,
 				409C6F632E01860700F0224E /* CallParticipantMenuAction.swift in Sources */,
 				84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */,
+				409C6F722E01A34600F0224E /* ToggleCameraIconView.swift in Sources */,
 				408D29A22B6D209700885473 /* SnapshotViewModifier.swift in Sources */,
 				409C6F6D2E018C9200F0224E /* ImageRepository.swift in Sources */,
 				409C6F672E01865C00F0224E /* BroadcastIconView.swift in Sources */,
@@ -8583,7 +8614,6 @@
 				84DC382D29A8B9EC00946713 /* ConfirmationPopup.swift in Sources */,
 				409C6F462E01848200F0224E /* VideoCallParticipantOptionsModifier.swift in Sources */,
 				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,
-				409C6F212E01821600F0224E /* AudioLevel.swift in Sources */,
 				409C6F442E01846E00F0224E /* VideoCallParticipantSpeakingModifier.swift in Sources */,
 				409AF6E82DAFC80200EE7BF6 /* PictureInPictureContent.swift in Sources */,
 				409C6F6A2E0187D100F0224E /* DefaultViewFactory.swift in Sources */,
@@ -8609,6 +8639,7 @@
 				84D419B828E7155100F574F9 /* CallModifier.swift in Sources */,
 				40073B8A2C458259006A2867 /* LocalVideoView.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
+				409C6F742E01A6B800F0224E /* HangUpIconView.swift in Sources */,
 				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
 				844299412942394C0037232A /* CallContainer_iOS13.swift in Sources */,
 				846E4AFF29D236EA003733AB /* CallTopView.swift in Sources */,
@@ -8681,6 +8712,7 @@
 				403FF3F42BA1DC690092CE8A /* StreamYUVToARGBConversion.swift in Sources */,
 				409145EB2B68FDD2007F3C17 /* ReadableContentGuide.swift in Sources */,
 				409C6F1C2E0181C700F0224E /* CallSettingsView.swift in Sources */,
+				409C6F772E01CC0A00F0224E /* RenderingObserver.swift in Sources */,
 				847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */,
 				403FF3F52BA1DC6C0092CE8A /* YpCbCrPixelRange+Default.swift in Sources */,
 				409C6F3A2E01841000F0224E /* VerticalParticipantsView.swift in Sources */,

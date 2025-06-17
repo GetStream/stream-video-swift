@@ -42,5 +42,6 @@ struct VideoUserView<Factory: ViewFactory>: View {
                     .foregroundColor(colors.tintColor)
             }
         }
+        .debugViewRendering()
     }
 }

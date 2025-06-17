@@ -8,13 +8,12 @@ import SwiftUI
 public struct CallParticipantImageView<Factory: ViewFactory>: View {
 
     @Injected(\.colors) var colors
-    
-    private let size: CGFloat = 138
 
     var viewFactory: Factory
     var id: String
     var name: String
     var imageURL: URL?
+    var size: CGFloat = 138
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,

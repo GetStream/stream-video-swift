@@ -31,6 +31,7 @@ public struct MinimizedCallView<Factory: ViewFactory>: View {
                 }
             )
         }
+        .debugViewRendering()
     }
     
     func content(for availableFrame: CGRect) -> some View {

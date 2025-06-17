@@ -26,5 +26,6 @@ struct LayoutMenuItem: View {
                 }
             }
         }
+        .debugViewRendering()
     }
 }
