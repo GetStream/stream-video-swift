@@ -46,7 +46,6 @@ public struct CallDurationView: View {
         .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
         .onReceive(viewModel.call?.state.$recordingState.removeDuplicates()) { self.recordingState = $0 }
         .accessibility(identifier: accessibilityIdentifier)
-        .debugViewRendering()
     }
 
     // MARK: - Private Helpers

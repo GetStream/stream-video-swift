@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
@@ -12,27 +13,27 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
     // MARK: - Properties
 
     /// Factory for creating views.
-    public var viewFactory: Factory
-
-    /// List of participants to display.
-    public var participants: [CallParticipant]
+    var viewFactory: Factory
 
     /// Frame in which the component will be laid out.
-    public var frame: CGRect
+    var frame: CGRect
 
     /// Information about the call (if available).
-    public var call: Call?
+    var call: Call?
 
     /// The space between items
-    public var innerItemSpace: CGFloat
+    var innerItemSpace: CGFloat
 
     /// Flag to determine if all participant information should be shown.
-    public var showAllInfo: Bool
+    var showAllInfo: Bool
 
     /// Private computed properties for laying out the view.
-    private let barFrame: CGRect
-    
-    private let itemFrame: CGRect
+    var barFrame: CGRect
+
+    var itemFrame: CGRect
+
+    /// List of participants to display.
+    var participants: [CallParticipant]
 
     // MARK: - Initialization
 
@@ -46,11 +47,11 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
         showAllInfo: Bool = false
     ) {
         self.viewFactory = viewFactory
-        self.participants = participants
         self.frame = frame
         self.call = call
         self.innerItemSpace = innerItemSpace
         self.showAllInfo = showAllInfo
+        self.participants = participants
 
         // Calculate the frame for the bar at the bottom.
         let barFrame = CGRect(

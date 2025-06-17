@@ -33,13 +33,15 @@ struct CameraCheckView<Factory: ViewFactory>: View {
                 .accessibility(identifier: "cameraCheckView")
                 .streamAccessibility(value: "1")
         } else {
-            Rectangle()
-                .fill(colors.lobbySecondaryBackground)
-
-            viewFactory.makeUserAvatar(
-                streamVideo.user,
-                with: .init(size: 80)
-            )
+            ZStack {
+                Rectangle()
+                    .fill(colors.lobbySecondaryBackground)
+                
+                viewFactory.makeUserAvatar(
+                    streamVideo.user,
+                    with: .init(size: 80)
+                )
+            }
             .accessibility(identifier: "cameraCheckView")
             .streamAccessibility(value: "0")
         }

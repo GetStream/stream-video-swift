@@ -2,18 +2,20 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
 public struct CallView<Factory: ViewFactory>: View {
 
-    @Injected(\.streamVideo) var streamVideo
-    @Injected(\.images) var images
     @Injected(\.colors) var colors
 
     var viewFactory: Factory
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
+
+    @State var hideUIElements: Bool
+    var hideUIElementsPublisher: AnyPublisher<Bool, Never>
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -21,149 +23,71 @@ public struct CallView<Factory: ViewFactory>: View {
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
+        hideUIElements = viewModel.hideUIElements
+        hideUIElementsPublisher = viewModel
+            .$hideUIElements
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     public var body: some View {
         VStack {
-            viewFactory
-                .makeCallTopView(viewModel: viewModel)
-                .presentParticipantEventsNotification(viewModel: viewModel)
-
-            GeometryReader { videoFeedProxy in
-                ZStack {
-                    contentView(videoFeedProxy.frame(in: .global))
-
-                    cornerDraggableView(videoFeedProxy)
-                }
-            }
-            .padding([.leading, .trailing], 8)
-
-            viewFactory.makeCallControlsView(viewModel: viewModel)
-                .opacity(viewModel.hideUIElements ? 0 : 1)
+            headerView
+            middleView
+            footerView
         }
-        .background(Color(colors.callBackground).edgesIgnoringSafeArea(.all))
+        .onReceive(hideUIElementsPublisher) { hideUIElements = $0 }
+        .background(backgroundView)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            UIApplication.shared.isIdleTimerDisabled = true
-        }
-        .onDisappear {
-            UIApplication.shared.isIdleTimerDisabled = false
-        }
         .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
-        .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
+        .presentParticipantListView(viewFactory: viewFactory, viewModel: viewModel)
         .debugViewRendering()
     }
 
     @ViewBuilder
-    private func contentView(_ availableFrame: CGRect) -> some View {
-        if viewModel.localVideoPrimary, viewModel.participantsLayout == .grid {
-            localVideoView(bounds: availableFrame)
-                .accessibility(identifier: "localVideoView")
-        } else if
-            let screenSharingSession = viewModel.call?.state.screenSharingSession,
-            viewModel.call?.state.isCurrentUserScreensharing == false {
-            viewFactory.makeScreenSharingView(
-                viewModel: viewModel,
-                screensharingSession: screenSharingSession,
-                availableFrame: availableFrame
-            )
-        } else {
-            participantsView(bounds: availableFrame)
-        }
-    }
-
-    private var shouldShowDraggableView: Bool {
-        (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true)
-            && viewModel.participantsLayout == .grid
-            && viewModel.participants.count <= 3
+    var headerView: some View {
+        viewFactory
+            .makeCallTopView(viewModel: viewModel)
+            .presentParticipantEventsNotification(viewModel: viewModel)
     }
 
     @ViewBuilder
-    private func cornerDraggableView(_ proxy: GeometryProxy) -> some View {
-        if shouldShowDraggableView {
-            CornerDraggableView(
-                content: { cornerDraggableViewContent($0) },
-                proxy: proxy,
-                onTap: {
-                    withAnimation {
-                        if participants.count == 1 {
-                            viewModel.localVideoPrimary.toggle()
-                        }
-                    }
-                }
-            )
-            .accessibility(identifier: "cornerDraggableView")
-            .opacity(viewModel.hideUIElements ? 0 : 1)
-            .padding()
-        } else {
-            EmptyView()
+    var middleView: some View {
+        GeometryReader { proxy in
+            contentView(in: proxy.frame(in: .global))
+                .overlay(overlayView(with: proxy))
+        }
+        .padding([.leading, .trailing], 8)
+    }
+
+    @ViewBuilder
+    var footerView: some View {
+        if !hideUIElements {
+            viewFactory.makeCallControlsView(viewModel: viewModel)
         }
     }
 
     @ViewBuilder
-    private func cornerDraggableViewContent(_ bounds: CGRect) -> some View {
-        if viewModel.localVideoPrimary {
-            minimizedView(bounds: bounds)
-        } else {
-            localVideoView(bounds: bounds)
-        }
+    var backgroundView: some View {
+        Color(colors.callBackground).edgesIgnoringSafeArea(.all)
     }
 
     @ViewBuilder
-    private func minimizedView(bounds: CGRect) -> some View {
-        if let firstParticipant = viewModel.participants.first {
-            viewFactory.makeVideoParticipantView(
-                participant: firstParticipant,
-                id: firstParticipant.id,
-                availableFrame: bounds,
-                contentMode: .scaleAspectFill,
-                customData: [:],
-                call: viewModel.call
-            )
-            .modifier(
-                viewFactory.makeVideoCallParticipantModifier(
-                    participant: firstParticipant,
-                    call: viewModel.call,
-                    availableFrame: bounds,
-                    ratio: bounds.width / bounds.height,
-                    showAllInfo: true
-                )
-            )
-            .accessibility(identifier: "minimizedParticipantView")
-        } else {
-            EmptyView()
-        }
-    }
-
-    @ViewBuilder
-    private func localVideoView(bounds: CGRect) -> some View {
-        if let localParticipant = viewModel.localParticipant {
-            LocalVideoView(
-                viewFactory: viewFactory,
-                participant: localParticipant,
-                callSettings: viewModel.callSettings,
-                call: viewModel.call,
-                availableFrame: bounds
-            )
-            .modifier(viewFactory.makeLocalParticipantViewModifier(
-                localParticipant: localParticipant,
-                callSettings: $viewModel.callSettings,
-                call: viewModel.call
-            ))
-        } else {
-            EmptyView()
-        }
-    }
-
-    private func participantsView(bounds: CGRect) -> some View {
-        viewFactory.makeVideoParticipantsView(
+    private func contentView(in bounds: CGRect) -> some View {
+        CallContentView(
+            viewFactory: viewFactory,
             viewModel: viewModel,
-            availableFrame: bounds,
-            onChangeTrackVisibility: viewModel.changeTrackVisibility(for:isVisible:)
+            bounds: bounds
         )
     }
 
-    private var participants: [CallParticipant] {
-        viewModel.participants
+    @ViewBuilder
+    private func overlayView(with proxy: GeometryProxy) -> some View {
+        CallOverlayContentView(
+            viewFactory: viewFactory,
+            viewModel: viewModel,
+            proxy: proxy
+        )
     }
 }

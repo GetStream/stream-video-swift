@@ -5,7 +5,6 @@
 import StreamVideo
 import SwiftUI
 
-@available(iOS 14.0, *)
 public struct CallModifier<Factory: ViewFactory>: ViewModifier {
     
     var viewFactory: Factory

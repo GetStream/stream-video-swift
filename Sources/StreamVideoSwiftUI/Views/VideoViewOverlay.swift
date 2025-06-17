@@ -5,12 +5,11 @@
 import StreamVideo
 import SwiftUI
 
-@available(iOS 14.0, *)
 public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     
     var rootView: RootView
     var viewFactory: Factory
-    @StateObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     
     public init(
         rootView: RootView,
@@ -19,7 +18,7 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     ) {
         self.rootView = rootView
         self.viewFactory = viewFactory
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
     
     public var body: some View {

@@ -5,31 +5,25 @@
 import Combine
 import Foundation
 import StreamVideo
+import StreamWebRTC
 import SwiftUI
 
 /// A view that wraps a `VideoRenderer` and integrates with SwiftUI.
-public struct VideoRendererView: UIViewRepresentable {
-
+public struct TrackVideoRendererView: UIViewRepresentable, Equatable {
     /// The type of the `UIView` being represented.
-    public typealias UIViewType = VideoRenderer
+    public typealias UIViewType = TrackVideoRenderer
+
+    public typealias SizeUpdater = (CGSize) -> Void
 
     /// Injected dependency for accessing color configurations.
     @Injected(\.colors) var colors
 
-    /// The identifier for the video renderer.
-    var id: String
-
-    /// The size of the video renderer view.
-    var size: CGSize
+    var track: RTCVideoTrack
 
     /// The content mode for the video renderer.
     var contentMode: UIView.ContentMode
 
-    /// A flag to determine whether video should be shown. Optimizes rendering by using a dummy renderer when false.
-    var showVideo: Bool
-
-    /// A closure to handle the rendering of the video.
-    var handleRendering: (VideoRenderer) -> Void
+    var sizeUpdater: SizeUpdater
 
     /// Initializes a new instance of `VideoRendererView`.
     /// - Parameters:
@@ -39,17 +33,13 @@ public struct VideoRendererView: UIViewRepresentable {
     ///   - showVideo: A flag to determine whether video should be shown. Default is `true`.
     ///   - handleRendering: A closure to handle the rendering of the video.
     public init(
-        id: String,
-        size: CGSize,
+        track: RTCVideoTrack,
         contentMode: UIView.ContentMode = .scaleAspectFill,
-        showVideo: Bool = true,
-        handleRendering: @escaping (VideoRenderer) -> Void
+        sizeUpdater: @escaping SizeUpdater
     ) {
-        self.id = id
-        self.size = size
-        self.handleRendering = handleRendering
-        self.showVideo = showVideo
+        self.track = track
         self.contentMode = contentMode
+        self.sizeUpdater = sizeUpdater
     }
 
     /// Dismantles the `UIView` when it is no longer needed.
@@ -57,21 +47,25 @@ public struct VideoRendererView: UIViewRepresentable {
     ///   - uiView: The `VideoRenderer` to dismantle.
     ///   - coordinator: The coordinator associated with the view.
     public static func dismantleUIView(
-        _ uiView: VideoRenderer,
+        _ uiView: UIViewType,
         coordinator: Coordinator
     ) {
         coordinator.dismantle()
     }
 
+    nonisolated public static func == (
+        lhs: TrackVideoRendererView,
+        rhs: TrackVideoRendererView
+    ) -> Bool {
+        lhs.track.trackId == rhs.track.trackId
+    }
+
     /// Creates the `VideoRenderer` view.
     /// - Parameter context: The context containing information about the current state of the system.
     /// - Returns: A configured `VideoRenderer` instance.
-    public func makeUIView(context: Context) -> VideoRenderer {
-        context.coordinator.renderer.frame = .init(
-            origin: context.coordinator.renderer.frame.origin,
-            size: size
-        )
+    public func makeUIView(context: Context) -> UIViewType {
         context.coordinator.renderer.videoContentMode = contentMode
+        context.coordinator.renderer.contentMode = contentMode
         context.coordinator.renderer.backgroundColor = colors.participantBackground
         return context.coordinator.renderer
     }
@@ -80,38 +74,34 @@ public struct VideoRendererView: UIViewRepresentable {
     /// - Parameters:
     ///   - uiView: The `VideoRenderer` to update.
     ///   - context: The context containing information about the current state of the system.
-    public func updateUIView(_ uiView: VideoRenderer, context: Context) {}
+    public func updateUIView(_ uiView: UIViewType, context: Context) {}
 
     /// Creates the coordinator for managing the view.
     /// - Returns: A new `Coordinator` instance.
     public func makeCoordinator() -> Coordinator {
-        Coordinator(handleRendering: handleRendering)
+        Coordinator(track: track, sizeUpdater: sizeUpdater)
     }
 }
 
 /// Extension for `VideoRendererView` to define the `Coordinator` class.
-extension VideoRendererView {
+extension TrackVideoRendererView {
     /// A class to coordinate the `VideoRendererView` and manage its lifecycle.
     public final class Coordinator: @unchecked Sendable {
-        /// Injected dependency for accessing the video renderer pool.
-        @Injected(\.videoRendererPool) private var videoRendererPool
 
         /// A closure to handle the rendering of the video.
-        private let handleRendering: ((VideoRenderer) -> Void)?
+        private let sizeUpdater: SizeUpdater
         /// A disposable bag to manage cancellable subscriptions.
         private let disposableBag = DisposableBag()
 
         /// The video renderer managed by this coordinator.
-        fileprivate let renderer: VideoRenderer
+        fileprivate let renderer: TrackVideoRenderer
 
         /// Initializes a new instance of the coordinator.
         /// - Parameter handleRendering: A closure to handle the rendering of the video.
         @MainActor
-        init(handleRendering: ((VideoRenderer) -> Void)?) {
-            self.handleRendering = handleRendering
-            renderer = VideoRendererPool
-                .currentValue
-                .acquireRenderer(size: .zero)
+        init(track: RTCVideoTrack, sizeUpdater: @escaping SizeUpdater) {
+            self.sizeUpdater = sizeUpdater
+            renderer = .init(track: track)
             setupRendererObservation()
         }
 
@@ -121,9 +111,7 @@ extension VideoRendererView {
 
         /// Dismantles the video renderer and releases resources.
         func dismantle() {
-            renderer.track?.remove(renderer)
             disposableBag.removeAll()
-            videoRendererPool.releaseRenderer(renderer)
         }
 
         // MARK: Private API
@@ -132,14 +120,11 @@ extension VideoRendererView {
         @MainActor
         private func setupRendererObservation() {
             renderer
-                .superviewPublisher
-                .map { $0 != nil }
+                .framePublisher
+                .map(\.size)
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    guard let self else { return }
-                    if $0 { handleRendering?(renderer) }
-                }
+                .sinkTask(storeIn: disposableBag) { [weak self] in self?.sizeUpdater($0) }
                 .store(in: disposableBag)
         }
     }

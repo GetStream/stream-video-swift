@@ -2,18 +2,21 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
 public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     var viewFactory: Factory
     var participant: CallParticipant
-    var participants: [CallParticipant]
     var frame: CGRect
     var call: Call?
     var innerItemSpace: CGFloat
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
+    @State var participants: [CallParticipant]
+    var participantsPublisher: AnyPublisher<[CallParticipant], Never>?
+
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         participant: CallParticipant,
@@ -30,6 +33,19 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         self.call = call
         self.innerItemSpace = innerItemSpace
         self.onChangeTrackVisibility = onChangeTrackVisibility
+
+        participantsPublisher = call?
+            .state
+            .$participants
+            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .map { value in value.filter { $0.sessionId != participant.sessionId } }
+            .removeDuplicates(by: { lhs, rhs in
+                let lhsSessionIds = lhs.map(\.sessionId)
+                let rhsSessionIds = rhs.map(\.sessionId)
+                return lhsSessionIds == rhsSessionIds
+            })
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     public var body: some View {
@@ -51,6 +67,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 call: call,
                 showAllInfo: true
             )
+            .onReceive(participantsPublisher) { participants = $0 }
         }
     }
     

@@ -64,6 +64,10 @@ extension View {
     /// - Note:The View itself won't be used as sourceView.
     @ViewBuilder
     public func enablePictureInPicture(_ isActive: Bool) -> some View {
-        modifier(PictureInPictureModifier(isActive: isActive))
+        if isActive {
+            modifier(PictureInPictureModifier(isActive: isActive))
+        } else {
+            self
+        }
     }
 }

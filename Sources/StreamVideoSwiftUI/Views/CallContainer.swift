@@ -2,31 +2,52 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
-@available(iOS 14.0, *)
 public struct CallContainer<Factory: ViewFactory>: View {
     
     @Injected(\.utils) var utils
     
     var viewFactory: Factory
-    @StateObject var viewModel: CallViewModel
-    
-    private let padding: CGFloat = 16
-    
+    var viewModel: CallViewModel
+    var padding: CGFloat = 16
+
+    @State var callingState: CallingState
+    var callingStatePublisher: AnyPublisher<CallingState, Never>
+
+    @State var hasParticipants: Bool
+    var hasParticipantsPublisher: AnyPublisher<Bool, Never>
+
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
+
+        callingState = viewModel.callingState
+        callingStatePublisher = viewModel
+            .$callingState
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        hasParticipants = viewModel.callParticipants.count > 1
+        hasParticipantsPublisher = viewModel
+            .$callParticipants
+            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .map(\.count)
+            .map { $0 > 1 }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
     
     public var body: some View {
         Group {
             if shouldShowCallView {
-                if viewModel.callParticipants.count > 1 {
+                if hasParticipants {
                     if viewModel.isMinimized {
                         viewFactory.makeMinimizedCallView(viewModel: viewModel)
                     } else {
@@ -35,33 +56,36 @@ public struct CallContainer<Factory: ViewFactory>: View {
                 } else {
                     viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
                 }
-            } else if viewModel.callingState == .reconnecting {
+            } else if callingState == .reconnecting {
                 viewFactory.makeReconnectionView(viewModel: viewModel)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .toastView(toast: $viewModel.toast)
+        .toastView(toast: .init(get: { viewModel.toast }, set: { viewModel.toast = $0 }))
         .overlay(overlayView)
-        .onReceive(viewModel.$callingState) { _ in
-            if viewModel.callingState == .idle || viewModel.callingState == .inCall {
+        .onReceive(callingStatePublisher) {
+            if $0 == .idle || $0 == .inCall {
                 utils.callSoundsPlayer.stopOngoingSound()
             }
+            callingState = $0
         }
+        .onReceive(hasParticipantsPublisher) { hasParticipants = $0 }
+        .debugViewRendering()
     }
     
     @ViewBuilder
     private var overlayView: some View {
-        if case let .incoming(callInfo) = viewModel.callingState {
+        if case let .incoming(callInfo) = callingState {
             viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
-        } else if viewModel.callingState == .outgoing {
+        } else if callingState == .outgoing {
             viewFactory.makeOutgoingCallView(viewModel: viewModel)
-        } else if viewModel.callingState == .joining {
+        } else if callingState == .joining {
             viewFactory.makeJoiningCallView(viewModel: viewModel)
-        } else if case let .lobby(lobbyInfo) = viewModel.callingState {
+        } else if case let .lobby(lobbyInfo) = callingState {
             viewFactory.makeLobbyView(
                 viewModel: viewModel,
                 lobbyInfo: lobbyInfo,
-                callSettings: $viewModel.callSettings
+                callSettings: .init(get: { viewModel.callSettings }, set: { viewModel.callSettings = $0 })
             )
         } else {
             EmptyView()
@@ -69,7 +93,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     }
     
     private var shouldShowCallView: Bool {
-        switch viewModel.callingState {
+        switch callingState {
         case .outgoing, .incoming(_), .inCall, .joining, .lobby:
             return true
         default:

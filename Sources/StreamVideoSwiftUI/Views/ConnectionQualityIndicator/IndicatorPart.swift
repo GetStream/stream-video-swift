@@ -14,6 +14,5 @@ struct IndicatorPart: View {
         RoundedRectangle(cornerSize: .init(width: 2, height: 2))
             .fill(color)
             .frame(width: width, height: height)
-            .debugViewRendering()
     }
 }

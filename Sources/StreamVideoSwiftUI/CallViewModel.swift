@@ -28,6 +28,10 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] participants in
                     self?.callParticipants = participants
                 })
+            sortedParticipantUpdates = call?
+                .state
+                .$participants
+                .sink { [weak self] in self?.didUpdate(callParticipants: $0) }
 
             blockedUserUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
@@ -158,6 +162,7 @@ open class CallViewModel: ObservableObject {
     public var noiseCancellationAudioFilter: AudioFilter? { streamVideo.videoConfig.noiseCancellationFilter }
 
     private var participantUpdates: AnyCancellable?
+    private var sortedParticipantUpdates: AnyCancellable?
     private var blockedUserUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?
     private var recordingUpdates: AnyCancellable?
@@ -180,23 +185,7 @@ open class CallViewModel: ObservableObject {
 
     private var hasAcceptedCall = false
 
-    public var participants: [CallParticipant] {
-        let updateParticipants = call?.state.participants ?? []
-        return updateParticipants.filter {
-            // In Grid layout with less than 3 participants the local user
-            // will be presented on the floating video track view. For this
-            // reason we filter out the participant to avoid showing them twice.
-            if
-                participantsLayout == .grid,
-                updateParticipants.count <= 3,
-                (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true)
-            {
-                return $0.id != call?.state.sessionId
-            } else {
-                return true
-            }
-        }
-    }
+    @Published public var participants: [CallParticipant] = []
 
     private var automaticLayoutHandling = true
 
@@ -623,6 +612,8 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = nil
         participantUpdates?.cancel()
         participantUpdates = nil
+        sortedParticipantUpdates?.cancel()
+        sortedParticipantUpdates = nil
         blockedUserUpdates?.cancel()
         blockedUserUpdates = nil
         automaticLayoutHandling = true
@@ -956,6 +947,24 @@ open class CallViewModel: ObservableObject {
         )
 
         tracksToBeActivated.forEach { $0.track?.isEnabled = true }
+    }
+
+    private func didUpdate(callParticipants: [CallParticipant]) {
+        guard
+            participantsLayout == .grid,
+            callParticipants.endIndex <= 3,
+            (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true),
+            let sessionId = call?.state.sessionId
+        else {
+            Task { @MainActor in
+                self.participants = callParticipants
+            }
+            return
+        }
+
+        Task { @MainActor in
+            self.participants = callParticipants.filter { $0.sessionId != sessionId }
+        }
     }
 
     /// Disables Picture-in-Picture mode when in-app screen sharing is initiated.

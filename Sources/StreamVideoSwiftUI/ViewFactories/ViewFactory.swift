@@ -368,21 +368,12 @@ extension ViewFactory {
         callSettings: Binding<CallSettings>,
         call: Call?
     ) -> some ViewModifier {
-        if #available(iOS 14.0, *) {
-            return LocalParticipantViewModifier(
-                localParticipant: localParticipant,
-                call: call,
-                callSettings: callSettings,
-                showAllInfo: true
-            )
-        } else {
-            return LocalParticipantViewModifier_iOS13(
-                localParticipant: localParticipant,
-                call: call,
-                callSettings: callSettings,
-                showAllInfo: true
-            )
-        }
+        LocalParticipantViewModifier(
+            localParticipant: localParticipant,
+            call: call,
+            callSettings: callSettings,
+            showAllInfo: true
+        )
     }
 
     public func makeUserAvatar(

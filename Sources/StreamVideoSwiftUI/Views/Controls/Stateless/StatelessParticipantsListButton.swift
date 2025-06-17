@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
@@ -16,17 +17,16 @@ public struct StatelessParticipantsListButton: View {
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
 
-    /// The associated call for the participants list button.
-    public weak var call: Call?
-
     /// The size of the participants list button.
-    public var size: CGFloat
+    var size: CGFloat
 
     /// A binding that indicates whether the participants list button is active.
-    public var isActive: Binding<Bool>
+    var isActive: Binding<Bool>
 
     /// The action handler for the participants list button.
-    public var actionHandler: ActionHandler?
+    var actionHandler: ActionHandler?
+
+    var publisher: AnyPublisher<Int, Never>?
 
     @State private var count: Int
 
@@ -44,10 +44,18 @@ public struct StatelessParticipantsListButton: View {
         isActive: Binding<Bool>,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
         self.size = size
         self.isActive = isActive
-        _count = .init(initialValue: call?.state.participants.endIndex ?? 0)
+
+        count = call?.state.participants.endIndex ?? 0
+        publisher = call?
+            .state
+            .$participants
+            .map(\.endIndex)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
         self.actionHandler = actionHandler
     }
 
@@ -68,9 +76,6 @@ public struct StatelessParticipantsListButton: View {
                 .opacity(count > 1 ? 1 : 0)
         )
         .accessibility(identifier: "participantMenu")
-        .onReceive(call?.state.$participants) {
-            // Update the count based on the number of participants in the call.
-            count = $0.endIndex
-        }
+        .onReceive(publisher) { count = $0 }
     }
 }

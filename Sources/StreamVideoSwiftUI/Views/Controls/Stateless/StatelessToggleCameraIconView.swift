@@ -38,7 +38,13 @@ public struct StatelessToggleCameraIconView: View {
     ) {
         self.size = size
         position = call?.state.callSettings.cameraPosition ?? .front
-        publisher = call?.state.$callSettings.compactMap(\.cameraPosition).eraseToAnyPublisher()
+        publisher = call?
+            .state
+            .$callSettings
+            .compactMap(\.cameraPosition)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
         self.actionHandler = actionHandler
     }
 

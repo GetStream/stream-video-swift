@@ -2,19 +2,29 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
 
-@available(iOS 14.0, *)
 public struct LocalParticipantViewModifier: ViewModifier {
 
-    private let localParticipant: CallParticipant
-    private var call: Call?
-    private var showAllInfo: Bool
-    @StateObject private var microphoneChecker: MicrophoneChecker
-    @Binding private var callSettings: CallSettings
-    private var decorations: Set<VideoCallParticipantDecoration>
+    var call: Call?
+    var showAllInfo: Bool
+    var decorations: Set<VideoCallParticipantDecoration>
+    var microphoneChecker: MicrophoneChecker
+
+    @State var participant: CallParticipant
+    var participantPublisher: AnyPublisher<CallParticipant, Never>?
+
+    @State var hasAudio: Bool
+    var hasAudioPublisher: AnyPublisher<Bool, Never>?
+
+    @State var participantsCount: Int
+    var participantsCountPublisher: AnyPublisher<Int, Never>?
+
+    @State var audioLevels: [Float]
+    var audioLevelsPublisher: AnyPublisher<[Float], Never>?
 
     public init(
         localParticipant: CallParticipant,
@@ -23,120 +33,101 @@ public struct LocalParticipantViewModifier: ViewModifier {
         showAllInfo: Bool = false,
         decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
     ) {
-        self.localParticipant = localParticipant
-        self.call = call
-        let microphoneCheckerInstance = MicrophoneChecker()
-        _microphoneChecker = .init(wrappedValue: microphoneCheckerInstance)
-        _callSettings = callSettings
-        self.showAllInfo = showAllInfo
-        self.decorations = .init(decorations)
+        self.init(
+            participant: localParticipant,
+            call: call,
+            showAllInfo: showAllInfo,
+            decorations: decorations
+        )
     }
 
-    public func body(content: Content) -> some View {
-        content
-            .overlay(
-                BottomView {
-                    HStack {
-                        ParticipantMicrophoneCheckView(
-                            audioLevels: microphoneChecker.audioLevels,
-                            microphoneOn: callSettings.audioOn,
-                            isSilent: microphoneChecker.isSilent,
-                            isPinned: localParticipant.isPinned
-                        )
-
-                        if showAllInfo {
-                            Spacer()
-                            ConnectionQualityIndicator(
-                                connectionQuality: localParticipant.connectionQuality
-                            )
-                        }
-                    }
-                }
-            )
-            .applyDecorationModifierIfRequired(
-                VideoCallParticipantOptionsModifier(participant: localParticipant, call: call),
-                decoration: .options,
-                availableDecorations: decorations
-            )
-            .applyDecorationModifierIfRequired(
-                VideoCallParticipantSpeakingModifier(participant: localParticipant, participantCount: participantCount),
-                decoration: .speaking,
-                availableDecorations: decorations
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .clipped()
-    }
-
-    @MainActor
-    private var participantCount: Int {
-        call?.state.participants.count ?? 0
-    }
-}
-
-@available(iOS, introduced: 13, obsoleted: 14)
-public struct LocalParticipantViewModifier_iOS13: ViewModifier {
-
-    private let localParticipant: CallParticipant
-    private var call: Call?
-    private var showAllInfo: Bool
-    @BackportStateObject private var microphoneChecker: MicrophoneChecker
-    @Binding private var callSettings: CallSettings
-    private var decorations: Set<VideoCallParticipantDecoration>
-
-    init(
-        localParticipant: CallParticipant,
+    public init(
+        participant: CallParticipant,
         call: Call?,
-        callSettings: Binding<CallSettings>,
-        showAllInfo: Bool = false,
+        showAllInfo: Bool,
         decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
     ) {
-        self.localParticipant = localParticipant
         self.call = call
-        _microphoneChecker = .init(wrappedValue: .init())
-        _callSettings = callSettings
         self.showAllInfo = showAllInfo
         self.decorations = .init(decorations)
+        let microphoneChecker = MicrophoneChecker()
+        self.microphoneChecker = microphoneChecker
+
+        self.participant = participant
+        participantPublisher = call?
+            .state
+            .$participantsMap
+            .compactMap { $0[participant.sessionId] }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        hasAudio = call?.state.callSettings.audioOn ?? false
+        hasAudioPublisher = call?
+            .state
+            .$callSettings
+            .map(\.audioOn)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        participantsCount = call?.state.participants.endIndex ?? 0
+        participantsCountPublisher = call?
+            .state
+            .$participants
+            .map(\.endIndex)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        audioLevels = microphoneChecker.audioLevels
+        audioLevelsPublisher = microphoneChecker
+            .$audioLevels
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     public func body(content: Content) -> some View {
         content
-            .overlay(
-                BottomView {
-                    HStack {
-                        ParticipantMicrophoneCheckView(
-                            audioLevels: microphoneChecker.audioLevels,
-                            microphoneOn: callSettings.audioOn,
-                            isSilent: microphoneChecker.isSilent,
-                            isPinned: localParticipant.isPinned
-                        )
-
-                        if showAllInfo {
-                            Spacer()
-                            ConnectionQualityIndicator(
-                                connectionQuality: localParticipant.connectionQuality
-                            )
-                        }
-                    }
-                    .padding(.bottom, 2)
-                }
-                .padding(.all, showAllInfo ? 16 : 8)
-            )
+            .overlay(participantInfoView)
             .applyDecorationModifierIfRequired(
-                VideoCallParticipantOptionsModifier(participant: localParticipant, call: call),
+                VideoCallParticipantOptionsModifier(participant: participant, call: call),
                 decoration: .options,
                 availableDecorations: decorations
             )
             .applyDecorationModifierIfRequired(
-                VideoCallParticipantSpeakingModifier(participant: localParticipant, participantCount: participantCount),
+                VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantsCount),
                 decoration: .speaking,
                 availableDecorations: decorations
             )
+            .onReceive(participantPublisher) { participant = $0 }
+            .onReceive(participantsCountPublisher) { participantsCount = $0 }
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .clipped()
     }
 
-    @MainActor
-    private var participantCount: Int {
-        call?.state.participants.count ?? 0
+    @ViewBuilder
+    var participantInfoView: some View {
+        BottomView {
+            HStack {
+                MicrophoneCheckView(
+                    audioLevels: microphoneChecker.audioLevels,
+                    microphoneOn: hasAudio,
+                    isSilent: microphoneChecker.isSilent,
+                    isPinned: participant.isPinned
+                )
+                .accessibility(identifier: "microphoneCheckView")
+                .onReceive(hasAudioPublisher) { hasAudio = $0 }
+                .onReceive(audioLevelsPublisher) { audioLevels = $0 }
+
+                Spacer()
+
+                if showAllInfo {
+                    ConnectionQualityIndicator(
+                        connectionQuality: participant.connectionQuality
+                    )
+                }
+            }
+        }
     }
 }
