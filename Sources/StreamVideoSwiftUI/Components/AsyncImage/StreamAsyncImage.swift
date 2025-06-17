@@ -3,13 +3,18 @@
 //
 
 import Foundation
+import StreamVideo
 import SwiftUI
 
 struct StreamAsyncImage<Content: View>: View {
 
+    @Injected(\.imagesRepository) private var imagesRepository
+
     var url: URL?
     var scale: CGFloat
     var conditionalContent: ((Image?) -> Content)
+
+    @State var taskState: ImagesRepository.TaskState = .idle
 
     init<I, P>(
         url: URL?,
@@ -26,23 +31,33 @@ struct StreamAsyncImage<Content: View>: View {
                 return ViewBuilder.buildEither(second: placeholder())
             }
         }
+
+        if let url {
+            imagesRepository.image(for: url)
+        }
     }
 
     var body: some View {
-        if #available(iOS 16.0, *) {
-            AsyncImage(
-                url: url,
-                scale: scale,
-                content: { conditionalContent($0) },
-                placeholder: { conditionalContent(nil) }
-            )
-        } else {
-            LegacyAsyncImage(
-                url: url,
-                scale: scale,
-                content: { conditionalContent($0) },
-                placeholder: { conditionalContent(nil) }
-            )
+        if let url {
+            Group {
+                switch taskState {
+                case .idle:
+                    conditionalContent(nil)
+                case .loading:
+                    if #available(iOS 14.0, *) {
+                        ProgressView()
+                    }
+                case let .loaded(data):
+                    if let image = UIImage(data: data) {
+                        conditionalContent(Image(uiImage: image))
+                    } else {
+                        conditionalContent(nil)
+                    }
+                case .failed:
+                    conditionalContent(nil)
+                }
+            }
+            .onReceive(imagesRepository.$storage.compactMap { $0[url] }.receive(on: DispatchQueue.main)) { taskState = $0 }
         }
     }
 }

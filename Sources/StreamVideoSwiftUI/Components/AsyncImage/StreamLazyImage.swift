@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import StreamVideo
 import SwiftUI
 
 public struct StreamLazyImage<Placeholder: View>: View {
@@ -13,36 +14,37 @@ public struct StreamLazyImage<Placeholder: View>: View {
     public init(
         imageURL: URL?,
         contentMode: ContentMode = .fill,
-        placeholder: @escaping () -> Placeholder
+        @ViewBuilder placeholder: @escaping () -> Placeholder
     ) {
         self.imageURL = imageURL
         self.contentMode = contentMode
         self.placeholder = placeholder
     }
 
+    public init(
+        imageURL: URL?,
+        contentMode: ContentMode = .fill
+    ) where Placeholder == EmptyView {
+        self.init(
+            imageURL: imageURL,
+            contentMode: contentMode,
+            placeholder: { EmptyView() }
+        )
+    }
+
     public var body: some View {
-        if let localImage = localImage {
-            applyResizingMode { localImage }
-        } else {
+        if let imageURL {
             StreamAsyncImage(
                 url: imageURL,
                 content: { image in applyResizingMode { image } },
                 placeholder: placeholder
             )
+        } else {
+            placeholder()
         }
     }
 
     // MARK: - Private Helpers
-
-    private var localImage: Image? {
-        guard
-            let imageURL = imageURL,
-            let image = UIImage(contentsOfFile: imageURL.path)
-        else {
-            return nil
-        }
-        return Image(uiImage: image)
-    }
 
     @ViewBuilder
     private func applyResizingMode(
@@ -58,19 +60,5 @@ public struct StreamLazyImage<Placeholder: View>: View {
                 .resizable()
                 .scaledToFill()
         }
-    }
-}
-
-extension StreamLazyImage where Placeholder == EmptyView {
-
-    public init(
-        imageURL: URL?,
-        contentMode: ContentMode = .fill
-    ) {
-        self.init(
-            imageURL: imageURL,
-            contentMode: contentMode,
-            placeholder: { EmptyView() }
-        )
     }
 }
