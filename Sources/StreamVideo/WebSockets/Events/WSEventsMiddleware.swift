@@ -4,21 +4,26 @@
 
 import Foundation
 
-final class WSEventsMiddleware: EventMiddleware {
-    
+final class WSEventsMiddleware: EventMiddleware, @unchecked Sendable {
+
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
+    private let processingQueue = SerialActorQueue()
 
     func handle(event: WrappedEvent) -> WrappedEvent? {
-        var streamVideo: StreamVideo?
-        for subscriber in subscribers.allObjects {
-            if let subscriber = subscriber as? StreamVideo {
-                streamVideo = subscriber
-            } else {
-                (subscriber as? WSEventsSubscriber)?.onEvent(event)
+        processingQueue.async { [weak self] in
+            guard let self else { return }
+            let allObjects = subscribers.allObjects
+            var streamVideo: StreamVideo?
+            for subscriber in allObjects {
+                if let subscriber = subscriber as? StreamVideo {
+                    streamVideo = subscriber
+                } else {
+                    await(subscriber as? WSEventsSubscriber)?.onEvent(event)
+                }
             }
+            await streamVideo?.onEvent(event)
         }
-        streamVideo?.onEvent(event)
-        
+
         return event
     }
     
@@ -37,5 +42,5 @@ final class WSEventsMiddleware: EventMiddleware {
 
 protocol WSEventsSubscriber: AnyObject {
     
-    func onEvent(_ event: WrappedEvent)
+    func onEvent(_ event: WrappedEvent) async
 }

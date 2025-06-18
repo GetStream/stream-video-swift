@@ -13,6 +13,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
+    @Injected(\.timers) private var timers
+    private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
@@ -88,7 +90,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private var active: UUID?
     var callCount: Int { storageAccessQueue.sync { _storage.count } }
 
-    private var callEventsSubscription: Task<Void, Error>?
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
@@ -156,11 +157,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return
         }
 
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 if streamVideo.state.connection != .connected {
-                    let result = await Task {
-                        try await streamVideo.connect()
+                    let result = await Task(disposableBag: disposableBag) { [weak self] in
+                        try await self?.streamVideo?.connect()
                     }.result
 
                     switch result {
@@ -172,8 +176,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 }
 
                 if streamVideo.state.ringingCall?.cId != callEntry.call.cId {
-                    Task {
-                        streamVideo.state.ringingCall = callEntry.call
+                    Task(disposableBag: disposableBag) { [weak self] in
+                        self?.streamVideo?.state.ringingCall = callEntry.call
                     }
                 }
 
@@ -273,10 +277,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
         callEndedEntry.ringingTimedOut = ringingTimedOut
         set(callEndedEntry, for: callEndedEntry.callUUID)
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
             do {
                 // End the call.
-                try await requestTransaction(
+                try await self?.requestTransaction(
                     CXEndCallAction(
                         call: callEndedEntry.callUUID
                     )
@@ -295,7 +299,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ) {
         /// We listen for the event so in the case we are the only ones remaining
         /// in the call, we leave.
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             if let call = callEntry(for: response.callCid)?.call,
                call.state.participants.count == 1 {
                 callEnded(response.callCid, ringingTimedOut: false)
@@ -378,7 +385,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimerCancellable = nil
         active = action.callUUID
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             log
                 .debug(
                     "Answering VoIP incoming call with callId:\(callToJoinEntry.call.callId) callType:\(callToJoinEntry.call.callType) callerId:\(callToJoinEntry.createdBy?.id)."
@@ -437,7 +447,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
         let actionCallUUID = action.callUUID
 
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
             log.debug(
                 """
                 Ending VoIP call with
@@ -484,7 +497,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             action.fail()
             return
         }
-        Task {
+        Task(disposableBag: disposableBag) {
             do {
                 if action.isMuted {
                     try await stackEntry.call.microphone.disable()
@@ -541,20 +554,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Parameter callState: The state of the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
         let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
-        ringingTimerCancellable = Foundation.Timer.publish(
-            every: timeout,
-            on: .main,
-            in: .default
-        )
-        .autoconnect()
-        .sink { [weak self] _ in
-            log.debug(
-                "Detected ringing timeout, hanging up...",
-                subsystems: .callKit
-            )
-            self?.callEnded(callState.call.cid, ringingTimedOut: true)
-            self?.ringingTimerCancellable = nil
-        }
+        ringingTimerCancellable = timers
+            .timer(for: timeout)
+            .sink { [weak self] _ in
+                log.debug(
+                    "Detected ringing timeout, hanging up...",
+                    subsystems: .callKit
+                )
+                self?.callEnded(callState.call.cid, ringingTimedOut: true)
+                self?.ringingTimerCancellable = nil
+            }
     }
 
     /// A method that's being called every time the StreamVideo instance is getting updated.
@@ -570,8 +579,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Subscribing to events is being used to reject/stop calls that have been accepted/rejected
     /// on other devices or components (e.g. incoming callScreen, CallKitService)
     private func subscribeToCallEvents() {
-        callEventsSubscription?.cancel()
-        callEventsSubscription = nil
+        disposableBag.removeAll()
 
         guard let streamVideo else {
             log.warning(
@@ -584,8 +592,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return
         }
 
-        callEventsSubscription = Task {
-            for await event in streamVideo.subscribe() {
+        streamVideo
+            .eventPublisher()
+            .sink { [weak self] event in
+                guard let self else { return }
                 switch event {
                 case let .typeCallEndedEvent(response):
                     callEnded(response.callCid, ringingTimedOut: false)
@@ -599,7 +609,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     break
                 }
             }
-        }
+            .store(in: disposableBag)
 
         log.debug(
             "\(type(of: self)) is now subscribed to CallEvent updates.",

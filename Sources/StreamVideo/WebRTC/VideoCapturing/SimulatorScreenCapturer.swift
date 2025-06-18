@@ -11,6 +11,7 @@ final class SimulatorScreenCapturer: RTCVideoCapturer, @unchecked Sendable {
     private let queue = DispatchQueue(label: "org.webrtc.RTCFileVideoCapturer")
     private var assetReader: AVAssetReader?
     private var videoTrackOutput: AVAssetReaderTrackOutput?
+    private let disposableBag = DisposableBag()
 
     init(delegate: RTCVideoCapturerDelegate, videoURL: URL) {
         self.videoURL = videoURL
@@ -83,7 +84,7 @@ final class SimulatorScreenCapturer: RTCVideoCapturer, @unchecked Sendable {
                 timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9)
             )
 
-            Task { @MainActor [weak self] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 guard let self else {
                     return
                 }

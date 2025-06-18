@@ -96,26 +96,31 @@ class Camera: NSObject, @unchecked Sendable {
         return backCaptureDevices.contains(captureDevice)
     }
     
-    private var addToPreviewStream: ((CIImage) -> Void)?
-    
     var isPreviewPaused = false
     
-    lazy var previewStream: AsyncStream<CIImage> = {
-        AsyncStream { continuation in
-            addToPreviewStream = { [weak self] ciImage in
-                guard let self else { return }
-                if !self.isPreviewPaused {
-                    continuation.yield(ciImage)
-                }
-            }
-        }
-    }()
+    let previewStream: AsyncStream<CIImage>
+    let previewStreamContinuation: AsyncStream<CIImage>.Continuation
         
     override init() {
+        let stream = AsyncStream<CIImage>.makeStream()
+        previewStream = stream.stream
+        previewStreamContinuation = stream.continuation
         super.init()
+
         initialize()
     }
-    
+
+    deinit {
+        previewStreamContinuation.finish()
+        if let deviceInput {
+            captureSession.removeInput(deviceInput)
+        }
+
+        if let videoOutput {
+            captureSession.removeOutput(videoOutput)
+        }
+    }
+
     private func initialize() {
         sessionQueue = DispatchQueue(label: "session queue")
 
@@ -147,7 +152,7 @@ class Camera: NSObject, @unchecked Sendable {
             return
         }
 
-        captureSession.sessionPreset = AVCaptureSession.Preset.high
+        captureSession.sessionPreset = AVCaptureSession.Preset.medium
 
         let videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(self, queue: frameProcessingQueue)
@@ -302,6 +307,7 @@ extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
             connection.videoOrientation = currentOrientation
         }
 
-        addToPreviewStream?(CIImage(cvPixelBuffer: pixelBuffer))
+        let image = CIImage(cvPixelBuffer: pixelBuffer)
+        previewStreamContinuation.yield(image)
     }
 }

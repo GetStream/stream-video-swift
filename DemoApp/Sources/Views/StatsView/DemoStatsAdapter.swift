@@ -11,6 +11,8 @@ final class DemoStatsAdapter {
 
     private var activeCallCancellable: AnyCancellable?
     private var callStatsReportCancellable: AnyCancellable?
+    private let disposableBag = DisposableBag()
+    private let maxValues: Int = 5
 
     @Published private(set) var reports: [CallStatsReport] = []
 
@@ -18,7 +20,7 @@ final class DemoStatsAdapter {
         activeCallCancellable = streamVideo
             .state
             .$activeCall
-            .sinkTask { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdateActiveCall($0) }
     }
 
     @MainActor
@@ -29,7 +31,17 @@ final class DemoStatsAdapter {
             .state
             .$statsReport
             .sink { [weak self] in
-                if let report = $0 { self?.reports.append(report) }
+                guard let self, let report = $0 else {
+                    return
+                }
+
+                if reports.endIndex >= maxValues {
+                    var newReports = Array(reports.dropFirst())
+                    newReports.append(report)
+                    reports = newReports
+                } else {
+                    reports.append(report)
+                }
             }
     }
 }

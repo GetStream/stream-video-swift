@@ -39,9 +39,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     var body: some View {
         viewFactory
             .makeInnerCallView(viewModel: viewModel)
-            .onReceive(viewModel.callSettingsPublisher) { _ in
-                Task { await updateMicrophoneChecker() }
-            }
             .onReceive(microphoneChecker.decibelsPublisher, perform: { values in
                 guard !viewModel.callSettings.audioOn else { return }
                 for value in values {
@@ -80,13 +77,5 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
             .toastView(toast: $snapshotViewModel.toast)
-    }
-
-    private func updateMicrophoneChecker() async {
-        if viewModel.call != nil, viewModel.callSettings.audioOn {
-            await microphoneChecker.startListening()
-        } else if viewModel.call != nil, !viewModel.callSettings.audioOn {
-            await microphoneChecker.stopListening()
-        }
     }
 }

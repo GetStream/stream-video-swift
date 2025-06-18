@@ -31,10 +31,9 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     
     private let callsQuery: CallsQuery
     private let streamVideo: StreamVideo
-    
-    private var watchTask: Task<Void, Error>?
+
     private var socketDisconnected = false
-    private var cancellables = DisposableBag()
+    private var disposableBag = DisposableBag()
 
     init(streamVideo: StreamVideo, callsQuery: CallsQuery) {
         self.callsQuery = callsQuery
@@ -49,9 +48,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     }
     
     public func cleanUp() {
-        watchTask?.cancel()
-        watchTask = nil
-        cancellables.removeAll()
+        disposableBag.removeAll()
     }
     
     // MARK: - private
@@ -67,7 +64,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
                 self.reWatchCalls()
             }
         }
-        .store(in: cancellables)
+        .store(in: disposableBag)
     }
     
     private func loadCalls(shouldRefresh: Bool = false) async throws {
@@ -143,7 +140,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
         guard let callEvent = event.rawValue as? WSCallEvent else { return }
         for (index, call) in calls.enumerated() {
             if call.cId == callEvent.callCid {
-                executeOnMain { [weak self] in
+                Task(disposableBag: disposableBag) { @MainActor [weak self] in
                     call.state.updateState(from: event)
                     self?.calls[index] = call
                 }
@@ -155,7 +152,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
                 callType: callCreated.call.type,
                 callId: callCreated.call.id
             )
-            executeOnMain { [weak self] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 call.state.update(from: callCreated)
                 self?.calls.insert(call, at: 0)
             }
@@ -167,7 +164,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
             callType: callResponse.call.type,
             callId: callResponse.call.id
         )
-        executeOnMain {
+        Task(disposableBag: disposableBag) { @MainActor in
             call.state.update(from: callResponse)
         }
         return call
@@ -179,7 +176,8 @@ public class CallsController: ObservableObject, @unchecked Sendable {
         // Clean up and re-watch the calls
         prev = nil
         next = nil
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 await state.update(loadedAllCalls: false)
                 try await loadCalls(shouldRefresh: true)
@@ -190,11 +188,10 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     }
     
     private func subscribeToWatchEvents() {
-        watchTask = Task {
-            for await event in streamVideo.subscribe() {
-                handle(event: event)
-            }
-        }
+        streamVideo
+            .eventPublisher()
+            .sink { [weak self] in self?.handle(event: $0) }
+            .store(in: disposableBag)
     }
     
     deinit {

@@ -40,6 +40,10 @@ final class OSLogDestination: BaseLogDestination, @unchecked Sendable {
             extendedDetails += "[\(logDetails.functionName)] "
         }
 
+        if showThreadName {
+            extendedDetails += logDetails.threadName
+        }
+
         var extendedMessage = "\(extendedDetails)> \(logDetails.message)"
         if let error = logDetails.error {
             extendedMessage += "[Error: \(error)]"

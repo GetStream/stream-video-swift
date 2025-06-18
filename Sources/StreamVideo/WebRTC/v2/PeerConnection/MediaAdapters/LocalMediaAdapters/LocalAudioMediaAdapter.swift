@@ -180,6 +180,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
 
+            await audioRecorder.stopRecording()
+
             log.debug(
                 """
                 Local audio tracks are now unpublished:

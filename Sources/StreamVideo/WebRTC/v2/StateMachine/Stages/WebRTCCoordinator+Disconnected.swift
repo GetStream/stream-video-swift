@@ -30,9 +30,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
+        @Injected(\.timers) private var timers
 
         private var internetObservationCancellable: AnyCancellable?
         private var timeInStageCancellable: AnyCancellable?
+        private var disposableBag = DisposableBag()
 
         /// Initializes a new instance of `DisconnectedStage`.
         /// - Parameter context: The context for the disconnected stage.
@@ -104,7 +106,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func execute() {
             context.sfuEventObserver = nil
             context.disconnectionSource = nil
-            Task {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
                 let statsAdapter = await context
                     .coordinator?
                     .stateAdapter
@@ -167,7 +170,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .filter { $0 != .unknown }
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .removeDuplicates()
-                .sinkTask { [weak self] in
+                .sinkTask(storeIn: disposableBag) { [weak self] in
                     /// Trace internet connection changes
                     await self?
                         .context
@@ -204,10 +207,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             guard context.disconnectionTimeout > 0 else {
                 return
             }
-            timeInStageCancellable = Foundation
-                .Timer
-                .publish(every: context.disconnectionTimeout, on: .main, in: .default)
-                .autoconnect()
+            timeInStageCancellable = timers
+                .timer(for: context.disconnectionTimeout)
                 .sink { [weak self] _ in self?.didTimeInStageExpired() }
         }
 

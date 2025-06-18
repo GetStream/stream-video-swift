@@ -18,9 +18,6 @@ struct CustomCallView<Factory: ViewFactory>: View {
     
     var body: some View {
         StreamVideoSwiftUI.CallView(viewFactory: viewFactory, viewModel: viewModel)
-            .onReceive(viewModel.$callSettings) { _ in
-                Task { await updateMicrophoneChecker() }
-            }
             .onReceive(microphoneChecker.$audioLevels, perform: { values in
                 guard !viewModel.callSettings.audioOn else { return }
                 for value in values {
@@ -46,13 +43,5 @@ struct CustomCallView<Factory: ViewFactory>: View {
                     }
                     : nil
             )
-    }
-    
-    private func updateMicrophoneChecker() async {
-        if !viewModel.callSettings.audioOn {
-            await microphoneChecker.startListening()
-        } else {
-            await microphoneChecker.stopListening()
-        }
     }
 }

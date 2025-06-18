@@ -19,51 +19,46 @@ extension Publisher where Output: Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async throws -> Output {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withThrowingTaskGroup(of: Output.self) { group in
             var cancellable: AnyCancellable?
-            var receivedValue = false // Track whether a value has been received
-            var timeoutWorkItem: DispatchWorkItem?
+            let dropFirstPublisher = self.dropFirst(dropFirst).eraseToAnyPublisher()
 
-            if let timeout = timeout {
-                let workItem = DispatchWorkItem {
-                    if !receivedValue {
-                        continuation.resume(
-                            throwing: ClientError(
-                                "Operation timed out",
-                                file,
-                                line
-                            )
-                        )
-                        cancellable?.cancel()
-                    }
+            group.addTask { [dropFirstPublisher] in
+                try await withCheckedThrowingContinuation { continuation in
+                    var receivedValue = false
+                    cancellable = dropFirstPublisher.sink(
+                        receiveCompletion: { completion in
+                            if case let .failure(error) = completion {
+                                if !receivedValue {
+                                    continuation.resume(throwing: error)
+                                }
+                            }
+                        },
+                        receiveValue: { value in
+                            if !receivedValue {
+                                receivedValue = true
+                                if let error = value as? Error {
+                                    continuation.resume(throwing: error)
+                                } else {
+                                    continuation.resume(returning: value)
+                                }
+                            }
+                        }
+                    )
                 }
-                timeoutWorkItem = workItem
-                DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: workItem)
             }
 
-            cancellable = self.dropFirst(dropFirst).sink(
-                receiveCompletion: { completion in
-                    timeoutWorkItem?.cancel()
-                    if case let .failure(error) = completion {
-                        if !receivedValue {
-                            continuation.resume(throwing: error) // Resume only if value hasn't been received
-                        }
-                        cancellable?.cancel()
-                    }
-                },
-                receiveValue: { value in
-                    timeoutWorkItem?.cancel()
-                    if !receivedValue {
-                        if let error = value as? Error {
-                            continuation.resume(throwing: error)
-                        } else {
-                            continuation.resume(returning: value) // Resume only if value hasn't been received
-                        }
-                        receivedValue = true
-                    }
-                    cancellable?.cancel()
+            if let timeout = timeout {
+                group.addTask {
+                    try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                    throw ClientError("Operation timed out", file, line)
                 }
-            )
+            }
+
+            let result = try await group.next()!
+            group.cancelAll()
+            cancellable?.cancel()
+            return result
         }
     }
 }

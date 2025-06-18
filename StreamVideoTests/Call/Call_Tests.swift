@@ -6,7 +6,7 @@
 @preconcurrency import XCTest
 
 @MainActor
-final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
+final class Call_Tests: StreamVideoTestCase {
 
     let callType = "default"
     let callId = "123"
@@ -460,18 +460,18 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
         let executionExpectation = expectation(description: "Iteration expectation")
         executionExpectation.expectedFulfillmentCount = 10
 
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for _ in (0..<executionExpectation.expectedFulfillmentCount) {
-                group.addTask {
+        for _ in (0..<executionExpectation.expectedFulfillmentCount) {
+            Task {
+                do {
                     _ = try await call.join()
                     executionExpectation.fulfill()
+                } catch {
+                    XCTFail()
                 }
             }
-
-            try await group.waitForAll()
         }
 
-        await safeFulfillment(of: [executionExpectation], timeout: defaultTimeout)
+        await safeFulfillment(of: [executionExpectation], timeout: 2)
 
         XCTAssertEqual(mockCallController.timesCalled(.join), 1)
     }
@@ -552,7 +552,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         for step in steps {
             if step.onEventUpdate {
-                call.onEvent(.coordinatorEvent(step.event))
+                await call.onEvent(.coordinatorEvent(step.event))
                 await fulfillment(timeout: 2) { step.validation(call) }
             } else {
                 call.state.updateState(from: step.event)

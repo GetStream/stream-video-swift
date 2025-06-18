@@ -60,7 +60,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the fast reconnecting process.
         private func execute() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
                     guard
@@ -95,7 +95,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
-            .store(in: disposableBag)
         }
     }
 }
