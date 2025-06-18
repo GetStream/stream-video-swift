@@ -98,6 +98,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
+                    await configureAudioSession()
+
+                    try Task.checkCancellation()
+
                     await observeConnection()
 
                     try Task.checkCancellation()
@@ -520,6 +524,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 sfuAdapter: sfuAdapter,
                 sessionID: await stateAdapter.sessionID
             )
+        }
+
+        private func configureAudioSession() async {
+            guard
+                let stateAdapter = context.coordinator?.stateAdapter
+            else {
+                return
+            }
+
+            await stateAdapter.configureAudioSession()
         }
     }
 }

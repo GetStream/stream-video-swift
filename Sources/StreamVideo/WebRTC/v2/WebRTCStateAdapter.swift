@@ -119,10 +119,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-
-        Task {
-            await configureAudioSession()
-        }
     }
 
     deinit {
@@ -308,6 +304,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         screenShareSessionProvider.activeSession = nil
         videoCaptureSessionProvider.activeSession = nil
         peerConnectionsDisposableBag.removeAll()
+        disposableBag.removeAll()
         await publisher?.close()
         await subscriber?.close()
         self.publisher = nil
@@ -520,6 +517,32 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.set(callSettings: participantCallSettings)
     }
 
+    func configureAudioSession() {
+        audioSession.delegate = self
+
+        $callSettings
+            .removeDuplicates()
+            .sinkTask { [weak audioSession] in
+                do {
+                    try await audioSession?.didUpdateCallSettings($0)
+                } catch {
+                    log.error(error)
+                }
+            }
+            .store(in: disposableBag)
+
+        $ownCapabilities
+            .removeDuplicates()
+            .sinkTask { [weak audioSession] in
+                do {
+                    try await audioSession?.didUpdateOwnCapabilities($0)
+                } catch {
+                    log.error(error)
+                }
+            }
+            .store(in: disposableBag)
+    }
+
     // MARK: - Private Helpers
 
     /// Handles track events when they are added or removed from peer connections.
@@ -571,32 +594,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 subsystems: .webRTC
             )
         }
-    }
-
-    private func configureAudioSession() {
-        audioSession.delegate = self
-
-        $callSettings
-            .removeDuplicates()
-            .sinkTask { [weak audioSession] in
-                do {
-                    try await audioSession?.didUpdateCallSettings($0)
-                } catch {
-                    log.error(error)
-                }
-            }
-            .store(in: disposableBag)
-
-        $ownCapabilities
-            .removeDuplicates()
-            .sinkTask { [weak audioSession] in
-                do {
-                    try await audioSession?.didUpdateOwnCapabilities($0)
-                } catch {
-                    log.error(error)
-                }
-            }
-            .store(in: disposableBag)
     }
 
     // MARK: - AudioSessionDelegate
