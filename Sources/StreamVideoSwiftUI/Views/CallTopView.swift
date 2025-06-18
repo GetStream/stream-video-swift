@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
@@ -14,11 +15,23 @@ public struct CallTopView: View {
     var viewModel: CallViewModel
 
     @State var isCurrentUserScreensharing: Bool
+    var isCurrentUserScreensharingPublisher: AnyPublisher<Bool, Never>?
+
     @State var sharingPopupDismissed = false
     
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
-        isCurrentUserScreensharing = viewModel.call?.state.isCurrentUserScreensharing ?? false
+
+        isCurrentUserScreensharing = viewModel
+            .call?
+            .state
+            .isCurrentUserScreensharing ?? false
+        isCurrentUserScreensharingPublisher = viewModel
+            .call?
+            .state
+            .$isCurrentUserScreensharing
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     public var body: some View {
@@ -36,6 +49,7 @@ public struct CallTopView: View {
         .padding(.vertical)
         .frame(maxWidth: .infinity)
         .overlay(overlayView)
+        .onReceive(isCurrentUserScreensharingPublisher) { isCurrentUserScreensharing = $0 }
         .debugViewRendering()
     }
 
@@ -66,16 +80,11 @@ public struct CallTopView: View {
 
     @ViewBuilder
     private var overlayView: some View {
-        Group {
-            if isCurrentUserScreensharing {
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-            }
-        }
-        .onReceive(viewModel.call?.state.$isCurrentUserScreensharing.removeDuplicates().eraseToAnyPublisher()) {
-            isCurrentUserScreensharing = $0
+        if isCurrentUserScreensharing {
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed
+            )
         }
     }
 }

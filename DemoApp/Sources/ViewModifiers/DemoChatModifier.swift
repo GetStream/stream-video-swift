@@ -24,8 +24,7 @@ struct ChatModifier: ViewModifier {
                 if let channelController = chatViewModel.channelController {
                     ChatView(
                         channelController: channelController,
-                        chatViewModel: chatViewModel,
-                        callViewModel: viewModel
+                        chatViewModel: chatViewModel
                     )
                     .withModalNavigationBar(title: "Chat") { chatViewModel.isChatVisible = false }
                     .withDragIndicator()

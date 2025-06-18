@@ -12,10 +12,10 @@ struct DemoVideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     var rootView: RootView
     var viewFactory: Factory
     var viewModel: CallViewModel
-    
+
     public init(
         rootView: RootView,
-        viewFactory: Factory = DefaultViewFactory.shared,
+        viewFactory: Factory,
         viewModel: CallViewModel
     ) {
         self.rootView = rootView
@@ -42,7 +42,7 @@ struct DemoCallContainer<Factory: ViewFactory>: View {
     var callPublisher: AnyPublisher<Call?, Never>
 
     public init(
-        viewFactory: Factory = DefaultViewFactory.shared,
+        viewFactory: Factory,
         viewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory

@@ -36,6 +36,7 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
                 )
                 .cornerRadius(16)
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .debugViewRendering()
     }
 }
