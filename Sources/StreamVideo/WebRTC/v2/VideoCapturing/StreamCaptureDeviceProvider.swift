@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// A protocol defining methods for providing capture devices.
-protocol CaptureDeviceProviding {
+public protocol CaptureDeviceProviding {
     /// Returns a capture device for the specified AVCaptureDevice position.
     /// - Parameter position: The position of the AVCaptureDevice.
     /// - Returns: A capture device conforming to CaptureDeviceProtocol.
@@ -64,7 +64,7 @@ enum CaptureDeviceProviderKey: InjectionKey {
 /// An extension to manage injected values.
 extension InjectedValues {
     /// The capture device provider.
-    var captureDeviceProvider: CaptureDeviceProviding {
+    public var captureDeviceProvider: CaptureDeviceProviding {
         get { Self[CaptureDeviceProviderKey.self] }
         set { Self[CaptureDeviceProviderKey.self] = newValue }
     }

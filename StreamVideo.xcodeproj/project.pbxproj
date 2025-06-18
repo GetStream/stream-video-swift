@@ -854,6 +854,9 @@
 		40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
 		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
+		40F5F93B2E02B82300562B26 /* SilentMicrophoneIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F93A2E02B82300562B26 /* SilentMicrophoneIndicator.swift */; };
+		40F5F93E2E02C05D00562B26 /* CameraAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F93D2E02C05D00562B26 /* CameraAdapter.swift */; };
+		40F5F9402E02CE2D00562B26 /* CameraFeedPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F93F2E02CE2D00562B26 /* CameraFeedPreviewView.swift */; };
 		40F646242C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */; };
 		40FA12F22B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA12F12B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift */; };
 		40FA32892CC1C1FD008B62C7 /* DemoStatsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA32882CC1C1FD008B62C7 /* DemoStatsAdapter.swift */; };
@@ -1321,7 +1324,6 @@
 		849A04DE2D198A0C004C33F2 /* StopLiveRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849A04DA2D198A0C004C33F2 /* StopLiveRequest.swift */; };
 		849A05122D199EE2004C33F2 /* StreamAppStateAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C0F2D14B901002C4EAB /* StreamAppStateAdapter_Tests.swift */; };
 		849EDA8B297AFCC80072A12D /* ParticipantsInCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8A297AFCC80072A12D /* ParticipantsInCallView.swift */; };
-		849EDA8D297AFD840072A12D /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8C297AFD840072A12D /* Camera.swift */; };
 		849EDA8F297AFE1C0072A12D /* LobbyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8E297AFE1C0072A12D /* LobbyViewModel.swift */; };
 		84A4DCBB2A41DC6E00B1D1BF /* AsyncAssert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */; };
 		84A4DDBD2A3B35030097F3E9 /* LocationFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */; };
@@ -1351,7 +1353,6 @@
 		84B0091B2A4C521100CF1FA7 /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B0091A2A4C521000CF1FA7 /* Retries.swift */; };
 		84B57D33297F278500E4E709 /* MicrophoneChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D32297F278500E4E709 /* MicrophoneChecker.swift */; };
 		84B57D37297F406400E4E709 /* AudioVolumeIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D36297F406400E4E709 /* AudioVolumeIndicator.swift */; };
-		84B57D39297FFF8300E4E709 /* LobbyView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D38297FFF8300E4E709 /* LobbyView_iOS13.swift */; };
 		84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9A56C29112F39004DE31A /* EndpointConfig.swift */; };
 		84BAD7712A6AE33700733156 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84BAD7782A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7772A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift */; };
@@ -2401,6 +2402,9 @@
 		40F446012A9E2C23004BE3DA /* DemoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallView.swift; sourceTree = "<group>"; };
 		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
 		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
+		40F5F93A2E02B82300562B26 /* SilentMicrophoneIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentMicrophoneIndicator.swift; sourceTree = "<group>"; };
+		40F5F93D2E02C05D00562B26 /* CameraAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAdapter.swift; sourceTree = "<group>"; };
+		40F5F93F2E02CE2D00562B26 /* CameraFeedPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFeedPreviewView.swift; sourceTree = "<group>"; };
 		40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDelayedUpdateObserver.swift; sourceTree = "<group>"; };
 		40FA12F12B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCCVPixelBuffer+Convenience.swift"; sourceTree = "<group>"; };
 		40FA32882CC1C1FD008B62C7 /* DemoStatsAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoStatsAdapter.swift; sourceTree = "<group>"; };
@@ -2806,7 +2810,6 @@
 		849A04DA2D198A0C004C33F2 /* StopLiveRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopLiveRequest.swift; sourceTree = "<group>"; };
 		849A04DB2D198A0C004C33F2 /* StopTranscriptionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopTranscriptionRequest.swift; sourceTree = "<group>"; };
 		849EDA8A297AFCC80072A12D /* ParticipantsInCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsInCallView.swift; sourceTree = "<group>"; };
-		849EDA8C297AFD840072A12D /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		849EDA8E297AFE1C0072A12D /* LobbyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyViewModel.swift; sourceTree = "<group>"; };
 		84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncAssert.swift; sourceTree = "<group>"; };
 		84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationFetcher.swift; sourceTree = "<group>"; };
@@ -2839,7 +2842,6 @@
 		84B0091A2A4C521000CF1FA7 /* Retries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries.swift; sourceTree = "<group>"; };
 		84B57D32297F278500E4E709 /* MicrophoneChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker.swift; sourceTree = "<group>"; };
 		84B57D36297F406400E4E709 /* AudioVolumeIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioVolumeIndicator.swift; sourceTree = "<group>"; };
-		84B57D38297FFF8300E4E709 /* LobbyView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView_iOS13.swift; sourceTree = "<group>"; };
 		84B9A56C29112F39004DE31A /* EndpointConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointConfig.swift; sourceTree = "<group>"; };
 		84BAD7772A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferUploadConnection.swift; sourceTree = "<group>"; };
 		84BAD7792A6BFEF900733156 /* BroadcastBufferUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferUploader.swift; sourceTree = "<group>"; };
@@ -4287,11 +4289,9 @@
 				409C6F5B2E01857900F0224E /* CallParticipantsInfoView.swift */,
 				84F3B0E128916FF20088751D /* CallParticipantsView.swift */,
 				409C6F552E01854E00F0224E /* CallParticipantView.swift */,
-				409C6F1B2E0181C700F0224E /* CallSettingsView.swift */,
 				846E4AFE29D236EA003733AB /* CallTopView.swift */,
 				8457CF9028BB835F00E8CF50 /* CallView.swift */,
 				409C6F7E2E01F74500F0224E /* CallOverlayContentView.swift */,
-				409C6F172E0181B300F0224E /* CameraCheckView.swift */,
 				842C7EB928A2A85C00C2AB7F /* CircledTitleView.swift */,
 				40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */,
 				848A73C129269E7D0089AA6E /* CornerDraggableView.swift */,
@@ -4369,6 +4369,7 @@
 		409C6F012E01807600F0224E /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				40F5F93C2E02C05400562B26 /* CameraAdapter */,
 				409C6F752E01CC0600F0224E /* RenderingObserver */,
 				4051A26D2D665AF5000C3167 /* Swinft6Migration */,
 				4097B3812BF4E36C0057992D /* Backports */,
@@ -4389,7 +4390,6 @@
 				846FBE8C28AAEBBC00147F6E /* SearchBar.swift */,
 				846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */,
 				8458B703290ACF2A00F8E487 /* CallSoundsPlayer.swift */,
-				849EDA8C297AFD840072A12D /* Camera.swift */,
 				846E4B0429D2D3D3003733AB /* ModifiedContent.swift */,
 				8479F83329C09EF1009ECE37 /* UserAvatar.swift */,
 				4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */,
@@ -4452,9 +4452,12 @@
 		409C6F1D2E0181DB00F0224E /* LobbyView */ = {
 			isa = PBXGroup;
 			children = (
-				84B57D38297FFF8300E4E709 /* LobbyView_iOS13.swift */,
-				849EDA8E297AFE1C0072A12D /* LobbyViewModel.swift */,
+				40F5F93F2E02CE2D00562B26 /* CameraFeedPreviewView.swift */,
+				409C6F1B2E0181C700F0224E /* CallSettingsView.swift */,
+				409C6F172E0181B300F0224E /* CameraCheckView.swift */,
 				409C6F152E0181A900F0224E /* LobbyView.swift */,
+				849EDA8E297AFE1C0072A12D /* LobbyViewModel.swift */,
+				40F5F93A2E02B82300562B26 /* SilentMicrophoneIndicator.swift */,
 			);
 			path = LobbyView;
 			sourceTree = "<group>";
@@ -5572,6 +5575,14 @@
 				40F445FD2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift */,
 			);
 			path = WaitingLocalUserView;
+			sourceTree = "<group>";
+		};
+		40F5F93C2E02C05400562B26 /* CameraAdapter */ = {
+			isa = PBXGroup;
+			children = (
+				40F5F93D2E02C05D00562B26 /* CameraAdapter.swift */,
+			);
+			path = CameraAdapter;
 			sourceTree = "<group>";
 		};
 		40FA12EE2B76AC4B00CE3EC9 /* Extensions */ = {
@@ -8613,6 +8624,7 @@
 				849EDA8B297AFCC80072A12D /* ParticipantsInCallView.swift in Sources */,
 				84D425082AA61E9900473150 /* LivestreamPlayer.swift in Sources */,
 				40A941762B4D9F16006D6965 /* PictureInPictureSourceView.swift in Sources */,
+				40F5F93E2E02C05D00562B26 /* CameraAdapter.swift in Sources */,
 				409C6F852E0205DA00F0224E /* AudioOutputIconView.swift in Sources */,
 				848A73C229269E7D0089AA6E /* CornerDraggableView.swift in Sources */,
 				409C6F582E01855A00F0224E /* BlockedUsersView.swift in Sources */,
@@ -8684,19 +8696,18 @@
 				40245F342BE26BC900FCF075 /* StatelessMicrophoneIconView.swift in Sources */,
 				409C6F562E01854E00F0224E /* CallParticipantView.swift in Sources */,
 				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
+				40F5F93B2E02B82300562B26 /* SilentMicrophoneIndicator.swift in Sources */,
 				40D1657E2B5FE82200C6D951 /* HalfSheetView.swift in Sources */,
 				8479F83429C09EF1009ECE37 /* UserAvatar.swift in Sources */,
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
 				846FBE8D28AAEBBC00147F6E /* SearchBar.swift in Sources */,
 				40245F3E2BE2709800FCF075 /* StatelessParticipantsListButton.swift in Sources */,
 				846E4B0529D2D3D3003733AB /* ModifiedContent.swift in Sources */,
-				849EDA8D297AFD840072A12D /* Camera.swift in Sources */,
 				844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */,
 				8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */,
 				4072A5862DAE821C00108E8F /* PictureInPictureVideoRendererView.swift in Sources */,
 				409C6EFB2E01802D00F0224E /* VideoViewOverlay.swift in Sources */,
 				409C6F362E0183DF00F0224E /* TwoColumnParticipantsView.swift in Sources */,
-				84B57D39297FFF8300E4E709 /* LobbyView_iOS13.swift in Sources */,
 				8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* CircledTitleView.swift in Sources */,
 				409C6F4C2E0184C000F0224E /* VideoCallParticipantDecoration.swift in Sources */,
@@ -8707,6 +8718,7 @@
 				409C6F602E0185BB00F0224E /* UsersHeaderView.swift in Sources */,
 				8458B704290ACF2A00F8E487 /* CallSoundsPlayer.swift in Sources */,
 				849EDA8F297AFE1C0072A12D /* LobbyViewModel.swift in Sources */,
+				40F5F9402E02CE2D00562B26 /* CameraFeedPreviewView.swift in Sources */,
 				8458872728A3F34D002A81BF /* HelperViews.swift in Sources */,
 				409C6F382E01840100F0224E /* TwoRowParticipantsView.swift in Sources */,
 				84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */,

@@ -6,6 +6,9 @@ import AVFoundation
 import Foundation
 import StreamWebRTC
 
+/// Extend `AVCaptureDevice` to conform to `CaptureDeviceProtocol`.
+extension AVCaptureDevice: CaptureDeviceProtocol {}
+
 extension AVCaptureDevice {
     /// Selects an optimal output format for the capture device based on preferred dimensions and frame rate.
     ///
@@ -22,7 +25,7 @@ extension AVCaptureDevice {
     ///
     /// - Note: The formats are sorted by their area difference relative to the preferred dimensions
     ///   before applying the selection criteria.
-    func outputFormat(
+    public func outputFormat(
         preferredDimensions: CMVideoDimensions,
         preferredFrameRate: Int
     ) -> AVCaptureDevice.Format? {

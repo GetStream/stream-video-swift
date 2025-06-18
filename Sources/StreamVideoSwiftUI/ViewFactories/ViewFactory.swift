@@ -320,6 +320,7 @@ extension ViewFactory {
         )
     }
 
+    // TODO: CallSettings are being ignored.
     public func makeLobbyView(
         viewModel: CallViewModel,
         lobbyInfo: LobbyInfo,
@@ -337,26 +338,16 @@ extension ViewFactory {
         let handleCloseLobby = {
             viewModel.setCallingState(.idle)
         }
-        if #available(iOS 14.0, *) {
-            return LobbyView(
-                viewFactory: self,
-                callId: lobbyInfo.callId,
-                callType: lobbyInfo.callType,
-                callSettings: callSettings,
-                onJoinCallTap: handleJoinCall,
-                onCloseLobby: handleCloseLobby
-            )
-        } else {
-            return LobbyView_iOS13(
-                viewFactory: self,
-                callViewModel: viewModel,
-                callId: lobbyInfo.callId,
-                callType: lobbyInfo.callType,
-                callSettings: callSettings,
-                onJoinCallTap: handleJoinCall,
-                onCloseLobby: handleCloseLobby
-            )
-        }
+
+        return LobbyView(
+            viewFactory: self,
+            callViewModel: viewModel,
+            callId: lobbyInfo.callId,
+            callType: lobbyInfo.callType,
+            callSettings: callSettings,
+            onJoinCallTap: handleJoinCall,
+            onCloseLobby: handleCloseLobby
+        )
     }
 
     public func makeReconnectionView(viewModel: CallViewModel) -> some View {

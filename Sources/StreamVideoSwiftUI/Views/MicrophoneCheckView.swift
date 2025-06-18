@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
@@ -11,12 +12,36 @@ public struct MicrophoneCheckView: View {
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     
-    var audioLevels: [Float]
-    var microphoneOn: Bool
-    var isSilent: Bool
+    @State var audioLevels: [Float]
+    var audioLevelsPublisher: AnyPublisher<[Float], Never>
+
+    @State var audioOn: Bool
+    var audioOnPublisher: AnyPublisher<Bool, Never>
+
+    @State var isSilent: Bool
+    var isSilentPublisher: AnyPublisher<Bool, Never>
+
     var isPinned: Bool
+
     var maxHeight: Float = 14
-    
+
+    public init(
+        viewModel: LobbyViewModel,
+        isPinned: Bool,
+        maxHeight: Float = 14,
+    ) {
+        self.init(
+            audioLevels: viewModel.audioLevels,
+            audioLevelsPublisher: viewModel.$audioLevels.eraseToAnyPublisher(),
+            audioOn: viewModel.audioOn,
+            audioOnPublisher: viewModel.$audioOn.eraseToAnyPublisher(),
+            isSilent: viewModel.isSilent,
+            isSilentPublisher: viewModel.$isSilent.eraseToAnyPublisher(),
+            isPinned: isPinned,
+            maxHeight: maxHeight
+        )
+    }
+
     public init(
         audioLevels: [Float],
         microphoneOn: Bool,
@@ -24,46 +49,43 @@ public struct MicrophoneCheckView: View {
         isPinned: Bool,
         maxHeight: Float = 14
     ) {
+        self.init(
+            audioLevels: audioLevels,
+            audioLevelsPublisher: Just(audioLevels).eraseToAnyPublisher(),
+            audioOn: microphoneOn,
+            audioOnPublisher: Just(microphoneOn).eraseToAnyPublisher(),
+            isSilent: isSilent,
+            isSilentPublisher: Just(isSilent).eraseToAnyPublisher(),
+            isPinned: isPinned,
+            maxHeight: maxHeight
+        )
+    }
+
+    init(
+        audioLevels: [Float],
+        audioLevelsPublisher: AnyPublisher<[Float], Never>,
+        audioOn: Bool,
+        audioOnPublisher: AnyPublisher<Bool, Never>,
+        isSilent: Bool,
+        isSilentPublisher: AnyPublisher<Bool, Never>,
+        isPinned: Bool,
+        maxHeight: Float = 14
+    ) {
         self.audioLevels = audioLevels
-        self.microphoneOn = microphoneOn
+        self.audioLevelsPublisher = audioLevelsPublisher
+        self.audioOn = audioOn
+        self.audioOnPublisher = audioOnPublisher
         self.isSilent = isSilent
+        self.isSilentPublisher = isSilentPublisher
         self.isPinned = isPinned
         self.maxHeight = maxHeight
     }
-    
+
     public var body: some View {
         HStack(spacing: 4) {
-            if isPinned {
-                Image(systemName: "pin.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: CGFloat(maxHeight))
-                    .foregroundColor(.white)
-                    .padding(.trailing, 4)
-            }
-
-            Text(streamVideo.user.name)
-                .foregroundColor(.white)
-                .multilineTextAlignment(.leading)
-                .lineLimit(1)
-                .font(fonts.caption1)
-                .minimumScaleFactor(0.7)
-                .accessibility(identifier: "participantName")
-
-            if microphoneOn && !isSilent {
-                AudioVolumeIndicator(
-                    audioLevels: audioLevels,
-                    maxHeight: maxHeight,
-                    minValue: 0,
-                    maxValue: 1
-                )
-            } else {
-                images.micTurnOff
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: CGFloat(maxHeight))
-                    .foregroundColor(colors.inactiveCallControl)
-            }
+            leadingView
+            middleView
+            trailingView
         }
         .padding(.all, 2)
         .padding(.horizontal, 4)
@@ -73,6 +95,50 @@ public struct MicrophoneCheckView: View {
             corners: [.topRight],
             backgroundColor: colors.participantInfoBackgroundColor
         )
+        .onReceive(audioLevelsPublisher) { audioLevels = $0 }
+        .onReceive(audioOnPublisher) { audioOn = $0 }
+        .onReceive(isSilentPublisher) { isSilent = $0 }
         .debugViewRendering()
+    }
+
+    @ViewBuilder
+    var leadingView: some View {
+        if isPinned {
+            Image(systemName: "pin.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: CGFloat(maxHeight))
+                .foregroundColor(.white)
+                .padding(.trailing, 4)
+        }
+    }
+
+    @ViewBuilder
+    var middleView: some View {
+        Text(streamVideo.user.name)
+            .foregroundColor(.white)
+            .multilineTextAlignment(.leading)
+            .lineLimit(1)
+            .font(fonts.caption1)
+            .minimumScaleFactor(0.7)
+            .accessibility(identifier: "participantName")
+    }
+
+    @ViewBuilder
+    var trailingView: some View {
+        if audioOn, !isSilent {
+            AudioVolumeIndicator(
+                audioLevels: audioLevels,
+                maxHeight: maxHeight,
+                minValue: 0,
+                maxValue: 1
+            )
+        } else {
+            images.micTurnOff
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: CGFloat(maxHeight))
+                .foregroundColor(colors.inactiveCallControl)
+        }
     }
 }

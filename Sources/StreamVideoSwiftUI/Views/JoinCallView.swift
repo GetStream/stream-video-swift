@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
@@ -10,11 +11,22 @@ struct JoinCallView<Factory: ViewFactory>: View {
     @Injected(\.colors) var colors
 
     var viewFactory: Factory
-    var callId: String
-    var callType: String
-    var callParticipants: [User]
-    var onJoinCallTap: () -> Void
-    
+    var viewModel: LobbyViewModel
+
+    @State var participants: [User]
+    var participantsPublisher: AnyPublisher<[User], Never>
+
+    init(
+        viewFactory: Factory,
+        viewModel: LobbyViewModel
+    ) {
+        self.viewFactory = viewFactory
+        self.viewModel = viewModel
+
+        participants = viewModel.participants
+        participantsPublisher = viewModel.$participants.eraseToAnyPublisher()
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(waitingRoomDescription)
@@ -22,19 +34,19 @@ struct JoinCallView<Factory: ViewFactory>: View {
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibility(identifier: "callParticipantsCount")
-                .streamAccessibility(value: "\(callParticipants.count)")
-            
+                .streamAccessibility(value: "\(participants.count)")
+
             if #available(iOS 14, *) {
-                if !callParticipants.isEmpty {
+                if !participants.isEmpty {
                     ParticipantsInCallView(
                         viewFactory: viewFactory,
-                        callParticipants: callParticipants
+                        callParticipants: participants
                     )
                 }
             }
             
             Button {
-                onJoinCallTap()
+                viewModel.didTapJoin()
             } label: {
                 Text(L10n.WaitingRoom.join)
                     .bold()
@@ -49,15 +61,16 @@ struct JoinCallView<Factory: ViewFactory>: View {
         .padding()
         .background(colors.lobbySecondaryBackground)
         .cornerRadius(16)
+        .onReceive(participantsPublisher) { participants = $0 }
         .debugViewRendering()
     }
     
     private var waitingRoomDescription: String {
-        "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(callParticipants.count))"
+        "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(participants.count))"
     }
     
     private var otherParticipantsCount: Int {
-        let count = callParticipants.count - 1
+        let count = participants.count - 1
         if count > 0 {
             return count
         } else {
