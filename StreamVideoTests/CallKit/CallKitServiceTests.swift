@@ -201,6 +201,31 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         try await assertCallWasHandled(wasRejectedByEveryoneElse: true)
     }
 
+    func test_reportIncomingCall_streamVideoReconnectsCallerDidNotReject_callWasNotEnded() async throws {
+        stubConnectionState(to: .disconnected(error: nil))
+        await stubCall(
+            response: .dummy(
+                call: .dummy(
+                    session: .dummy(
+                        acceptedBy: [:],
+                        rejectedBy: [:]
+                    )
+                ),
+                members: [.dummy(userId: user.id)]
+            )
+        )
+        subject.streamVideo = mockedStreamVideo
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
+            subject.reportIncomingCall(
+                cid,
+                localizedCallerName: localizedCallerName,
+                callerId: callerId,
+                hasVideo: false
+            ) { _ in }
+        }
+    }
+
     func test_reportIncomingCall_streamVideoConnectedAndCallIsAccepted_callWasEnded() async throws {
         stubConnectionState(to: .connected)
 

@@ -527,12 +527,21 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return false
         }
 
+        var allMembers = callState.members.map(\.user.toUser)
+        let creator = callState.call.createdBy.toUser
+        let isUserInMembersArray = allMembers.filter { $0.id == creator.id }.isEmpty == false
+        if !isUserInMembersArray {
+            allMembers.append(creator)
+        }
+        let allCallees = allMembers.filter { $0.id != creator.id }
+
         let currentUserId = streamVideo.user.id
         let acceptedBy = callState.call.session?.acceptedBy ?? [:]
         let rejectedBy = callState.call.session?.rejectedBy ?? [:]
         let isAccepted = acceptedBy[currentUserId] != nil
         let isRejected = rejectedBy[currentUserId] != nil
-        let isRejectedByEveryoneElse = rejectedBy.keys.filter { $0 != currentUserId }.count == (callState.members.count - 1)
+        let isRejectedByEveryoneElse = (allCallees.endIndex > 1)
+            && rejectedBy.keys.filter { $0 != currentUserId }.count == (allCallees.endIndex - 1)
         return isAccepted || isRejected || isRejectedByEveryoneElse
     }
 
