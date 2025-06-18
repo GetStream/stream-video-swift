@@ -865,6 +865,8 @@
 		40F5F9492E02DCF300562B26 /* ChatIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F9472E02DCF300562B26 /* ChatIconView.swift */; };
 		40F5F94B2E02DDA400562B26 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F94A2E02DDA400562B26 /* ChatView.swift */; };
 		40F5F94C2E02DDA400562B26 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F94A2E02DDA400562B26 /* ChatView.swift */; };
+		40F5F94E2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F94D2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift */; };
+		40F5F94F2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5F94D2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift */; };
 		40F646242C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */; };
 		40FA12F22B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA12F12B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift */; };
 		40FA32892CC1C1FD008B62C7 /* DemoStatsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA32882CC1C1FD008B62C7 /* DemoStatsAdapter.swift */; };
@@ -2417,6 +2419,7 @@
 		40F5F9442E02DC9F00562B26 /* MoreControlsIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreControlsIconView.swift; sourceTree = "<group>"; };
 		40F5F9472E02DCF300562B26 /* ChatIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatIconView.swift; sourceTree = "<group>"; };
 		40F5F94A2E02DDA400562B26 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		40F5F94D2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMoreThermalStateButtonView.swift; sourceTree = "<group>"; };
 		40F646232C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDelayedUpdateObserver.swift; sourceTree = "<group>"; };
 		40FA12F12B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCCVPixelBuffer+Convenience.swift"; sourceTree = "<group>"; };
 		40FA32882CC1C1FD008B62C7 /* DemoStatsAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoStatsAdapter.swift; sourceTree = "<group>"; };
@@ -4180,6 +4183,7 @@
 				409146042B68FF4B007F3C17 /* DemoMoreControlListButtonView.swift */,
 				409146052B68FF4B007F3C17 /* DemoReactionButton.swift */,
 				40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */,
+				40F5F94D2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift */,
 			);
 			path = DemoMoreControls;
 			sourceTree = "<group>";
@@ -7533,6 +7537,7 @@
 				409145FC2B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
 				40F5F9432E02D91D00562B26 /* DemoLivestreamTopView.swift in Sources */,
+				40F5F94F2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift in Sources */,
 				40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
 				844ADA6B2AD4439D00769F6A /* DemoCallsView.swift in Sources */,
@@ -7713,6 +7718,7 @@
 				406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */,
 				406A8E992AA1D7E9001F598A /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
 				40382F242C889EA000C2D00F /* DemoNoiseCancellationButtonView.swift in Sources */,
+				40F5F94E2E02E8D300562B26 /* DemoMoreThermalStateButtonView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
