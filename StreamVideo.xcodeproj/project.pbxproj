@@ -680,6 +680,7 @@
 		40D36AE02DDE019F00972D75 /* MockWebRTCStatsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36ADF2DDE019F00972D75 /* MockWebRTCStatsReporter.swift */; };
 		40D36AE22DDE023800972D75 /* WebRTCStatsCollecting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36AE12DDE023800972D75 /* WebRTCStatsCollecting.swift */; };
 		40D36AE42DDE02D100972D75 /* MockWebRTCStatsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36AE32DDE02D100972D75 /* MockWebRTCStatsCollector.swift */; };
+		40D3A02D2DE3437700260532 /* TimerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D3A02C2DE3437700260532 /* TimerStorage.swift */; };
 		40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */; };
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
@@ -1285,7 +1286,7 @@
 		84A7E1922883647200526C98 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E18F2883647200526C98 /* Event.swift */; };
 		84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1932883652000526C98 /* EventMiddleware.swift */; };
 		84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */; };
-		84A7E1A82883E46200526C98 /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A72883E46200526C98 /* Timers.swift */; };
+		84A7E1A82883E46200526C98 /* Timer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A72883E46200526C98 /* Timer.swift */; };
 		84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AD2883E6B300526C98 /* HTTPUtils.swift */; };
 		84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AF2883E73100526C98 /* EventBatcher.swift */; };
 		84AF64D2287C78E70012A503 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64D1287C78E70012A503 /* User.swift */; };
@@ -2181,6 +2182,7 @@
 		40D36ADF2DDE019F00972D75 /* MockWebRTCStatsReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebRTCStatsReporter.swift; sourceTree = "<group>"; };
 		40D36AE12DDE023800972D75 /* WebRTCStatsCollecting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsCollecting.swift; sourceTree = "<group>"; };
 		40D36AE32DDE02D100972D75 /* MockWebRTCStatsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebRTCStatsCollector.swift; sourceTree = "<group>"; };
+		40D3A02C2DE3437700260532 /* TimerStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerStorage.swift; sourceTree = "<group>"; };
 		40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer_Tests.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
@@ -2718,7 +2720,7 @@
 		84A7E18F2883647200526C98 /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		84A7E1932883652000526C98 /* EventMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMiddleware.swift; sourceTree = "<group>"; };
 		84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskScheduler.swift; sourceTree = "<group>"; };
-		84A7E1A72883E46200526C98 /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
+		84A7E1A72883E46200526C98 /* Timer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timer.swift; sourceTree = "<group>"; };
 		84A7E1A92883E4AD00526C98 /* APIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKey.swift; sourceTree = "<group>"; };
 		84A7E1AD2883E6B300526C98 /* HTTPUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPUtils.swift; sourceTree = "<group>"; };
 		84A7E1AF2883E73100526C98 /* EventBatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBatcher.swift; sourceTree = "<group>"; };
@@ -3642,6 +3644,15 @@
 				404098C82DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift */,
 			);
 			path = SelectiveEncodable;
+			sourceTree = "<group>";
+		};
+		404780412DE61EAD0085AE05 /* Timers */ = {
+			isa = PBXGroup;
+			children = (
+				40D3A02C2DE3437700260532 /* TimerStorage.swift */,
+				84A7E1A72883E46200526C98 /* Timer.swift */,
+			);
+			path = Timers;
 			sourceTree = "<group>";
 		};
 		4049CE802BBBF73A003D07D2 /* AsyncImage */ = {
@@ -6117,6 +6128,7 @@
 				404098C72DDF45DA00D7BEC5 /* SelectiveEncodable */,
 				4028FEA72DC536BB001F9DC3 /* AnyEncodable.swift */,
 				4028FE962DC4F62A001F9DC3 /* ConsumableBucket */,
+				404780412DE61EAD0085AE05 /* Timers */,
 				40AD64C32DC269E60077AE15 /* Proximity */,
 				40FF825B2D63523C0029AA80 /* Sorting */,
 				403A4FE92D660E3E00ECD46A /* Swift6Migration */,
@@ -6144,7 +6156,6 @@
 				8268615F290A7556005BFFED /* SystemEnvironment.swift */,
 				841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */,
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
-				84A7E1A72883E46200526C98 /* Timers.swift */,
 				40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */,
 				84C2997C28784BB30034B735 /* Utils.swift */,
 				4067F3062CDA32F0002E28BD /* AudioSession */,
@@ -7606,6 +7617,7 @@
 				84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */,
 				40034C312CFE168D00A318B1 /* StreamLocaleProvider.swift in Sources */,
 				40916E782DA94A150061D860 /* Publisher+AsyncStream.swift in Sources */,
+				40D3A02D2DE3437700260532 /* TimerStorage.swift in Sources */,
 				84D91E9C2C7CB0AA00B163A0 /* CallSessionParticipantCountsUpdatedEvent.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,
@@ -7883,7 +7895,7 @@
 				841BAA312BD15CDE000C73E4 /* VideoQuality.swift in Sources */,
 				4067F30F2CDA3394002E28BD /* AVAudioSessionCategoryOptions+Convenience.swift in Sources */,
 				40BBC4A32C623D03002AEF92 /* RTCIceGatheringState+CustomStringConvertible.swift in Sources */,
-				84A7E1A82883E46200526C98 /* Timers.swift in Sources */,
+				84A7E1A82883E46200526C98 /* Timer.swift in Sources */,
 				40B284E12D52422A0064C1FE /* AVAudioSessionPortOverride+Convenience.swift in Sources */,
 				84DC38B129ADFCFD00946713 /* AudioSettings.swift in Sources */,
 				848CCCED2AB8ED8F002E83A2 /* CallHLSBroadcastingStartedEvent.swift in Sources */,
