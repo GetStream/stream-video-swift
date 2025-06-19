@@ -109,11 +109,13 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler, @unchecked Sendable {
     }
 
     deinit {
+        // swiftlint:disable discourage_task_init
         Task { @MainActor [activeBackgroundTask, app] in
             if let activeTask = activeBackgroundTask {
                 app?.endBackgroundTask(activeTask)
             }
         }
+        // swiftlint:enable discourage_task_init
     }
 }
 

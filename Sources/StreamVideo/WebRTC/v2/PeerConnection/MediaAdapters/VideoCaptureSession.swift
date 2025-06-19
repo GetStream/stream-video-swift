@@ -43,6 +43,7 @@ final class VideoCaptureSessionProvider: @unchecked Sendable {
     ///
     /// This deinitializer ensures that any active capture is stopped when the provider is destroyed.
     deinit {
+        // swiftlint:disable discourage_task_init
         Task { [activeSession] in
             do {
                 try await activeSession?.capturer.stopCapture()
@@ -50,5 +51,6 @@ final class VideoCaptureSessionProvider: @unchecked Sendable {
                 log.error(error)
             }
         }
+        // swiftlint:enable discourage_task_init
     }
 }

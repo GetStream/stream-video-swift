@@ -46,7 +46,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ) -> Self? {
             switch previousStage.id {
             case .fastReconnecting:
+                // swiftlint:disable discourage_task_init
                 Task { transitionOrDisconnect(.joining(context)) }
+                // swiftlint:enable discourage_task_init
                 return self
             default:
                 return nil

@@ -94,6 +94,7 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
     /// are available, the task gathers stats, generates a report, and publishes it.
     private func collectStats() {
         activeCollectionTask?.cancel()
+        // swiftlint:disable discourage_task_init
         activeCollectionTask = Task { [weak self] in
             guard
                 let self,
@@ -122,6 +123,7 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
                 log.error(error, subsystems: .webRTC)
             }
         }
+        // swiftlint:enable discourage_task_init
     }
 
     /// Resets collection when the SFU adapter is updated.

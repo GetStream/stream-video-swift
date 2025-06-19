@@ -595,7 +595,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         for user: User,
         apiKey: String
     ) async throws -> (user: User, token: UserToken, tokenProvider: UserTokenProvider) {
-        let guestUserResponse = try await Self.createGuestUser(
+        let guestUserResponse = try await createGuestUser(
             id: user.id,
             apiKey: apiKey,
             environment: environment
@@ -615,8 +615,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 customData: updatedUser.customData
             )
         }
-        let tokenProvider = { @Sendable [environment = self.environment] result in
-            Self.loadGuestToken(
+        let tokenProvider: UserTokenProvider = { @Sendable [weak self] result in
+            guard let self else {
+                result(.failure(ClientError("StreamVideo instance has been invalidated.")))
+                return
+            }
+            loadGuestToken(
                 userId: user.id,
                 apiKey: apiKey,
                 environment: environment,
@@ -674,7 +678,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         try await connectWebSocketClient()
     }
     
-    private static func createGuestUser(
+    private func createGuestUser(
         id: String,
         apiKey: String,
         environment: Environment
@@ -689,21 +693,30 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         return try await defaultAPI.createGuest(createGuestRequest: request)
     }
     
-    private static func loadGuestToken(
+    private func loadGuestToken(
         userId: String,
         apiKey: String,
         environment: Environment,
         result: @Sendable @escaping (Result<UserToken, Error>) -> Void
     ) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return result(.failure(ClientError("StreamVideo has been invalidated.")))
+            }
             do {
+                try Task.checkCancellation()
+
                 let response = try await createGuestUser(
                     id: userId,
                     apiKey: apiKey,
                     environment: environment
                 )
+
+                try Task.checkCancellation()
+
                 let tokenValue = response.accessToken
                 let token = UserToken(rawValue: tokenValue)
+
                 result(.success(token))
             } catch {
                 result(.failure(error))

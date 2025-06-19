@@ -242,7 +242,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
+        // swiftlint:disable discourage_task_init
         Task { [peerConnection] in await peerConnection.close() }
+        // swiftlint:enable discourage_task_init
     }
 
     func prepareForClosing() async {
