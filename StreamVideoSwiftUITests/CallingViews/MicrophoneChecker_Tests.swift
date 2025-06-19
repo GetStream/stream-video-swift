@@ -11,14 +11,14 @@ import XCTest
 
 final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
-    private lazy var mockStreamVideo: MockStreamVideo! = .init()
+    private var mockStreamVideo: MockStreamVideo! = .init()
+    private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
-    private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = .init(filename: "test.wav")
 
     override func setUp() {
         super.setUp()
-        _ = mockStreamVideo
-        InjectedValues[\.callAudioRecorder] = mockAudioRecorder
+        _ = mockAudioRecorder
+        _ = subject
     }
 
     override func tearDown() async throws {
@@ -32,24 +32,8 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - init
 
-    func test_startListening_startListeningWasCalledOnAudioRecorder() async {
-        await subject.startListening()
-
-        XCTAssertTrue(mockAudioRecorder.startRecordingWasCalled)
-    }
-
-    // MARK: - stopListening
-
-    func test_stopListening_stopListeningWasCalledOnAudioRecorder() async {
-        await subject.stopListening()
-
-        XCTAssertTrue(mockAudioRecorder.stopRecordingWasCalled)
-    }
-
-    // MARK: - audioLevels
-
     func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async throws {
-        await subject.startListening()
+        await mockAudioRecorder.startRecording(ignoreActiveCall: true)
 
         let inputs = [
             -100,
@@ -59,7 +43,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
         ]
 
         for value in inputs {
-            mockAudioRecorder.mockMetersPublisher.send(Float(value))
+            mockAudioRecorder.metersSubject.send(Float(value))
             await wait(for: 0.1)
         }
 
@@ -69,22 +53,5 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
             .nextValue(timeout: defaultTimeout)
 
         XCTAssertEqual(values, [0.5, 0.8, 0.0])
-    }
-}
-
-private final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sendable {
-
-    private(set) var startRecordingWasCalled = false
-    private(set) var stopRecordingWasCalled = false
-
-    private(set) var mockMetersPublisher: PassthroughSubject<Float, Never> = .init()
-    override var metersPublisher: AnyPublisher<Float, Never> { mockMetersPublisher.eraseToAnyPublisher() }
-
-    override func startRecording(ignoreActiveCall: Bool) async {
-        startRecordingWasCalled = true
-    }
-
-    override func stopRecording() async {
-        stopRecordingWasCalled = true
     }
 }
