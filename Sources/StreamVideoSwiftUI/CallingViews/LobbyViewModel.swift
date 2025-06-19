@@ -9,6 +9,8 @@ import SwiftUI
 
 @MainActor
 public class LobbyViewModel: ObservableObject, @unchecked Sendable {
+    @Injected(\.callAudioRecorder) private var callAudioRecorder
+
     private let camera: Any
     private var imagesTask: Task<Void, Never>?
     private let disposableBag = DisposableBag()
@@ -71,8 +73,19 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     
     public func cleanUp() {
         disposableBag.removeAll()
+        Task {
+            await callAudioRecorder.stopRecording()
+        }
     }
-    
+
+    public func didUpdate(callSettings: CallSettings) async {
+        if callSettings.audioOn {
+            await callAudioRecorder.startRecording(ignoreActiveCall: true)
+        } else {
+            await callAudioRecorder.stopRecording()
+        }
+    }
+
     // MARK: - private
     
     private func loadCurrentMembers() {

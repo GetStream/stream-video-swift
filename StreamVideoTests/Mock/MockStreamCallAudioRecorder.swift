@@ -39,6 +39,8 @@ final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sen
         }
     }
 
+    var metersSubject: CurrentValueSubject<Float, Never> = .init(0.0)
+
     init() {
         super.init(filename: "mock_file")
         InjectedValues[\.callAudioRecorder] = self
@@ -55,6 +57,6 @@ final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sen
 
     // Mock the metersPublisher
     override var metersPublisher: AnyPublisher<Float, Never> {
-        Just(0.0).eraseToAnyPublisher()
+        metersSubject.eraseToAnyPublisher()
     }
 }

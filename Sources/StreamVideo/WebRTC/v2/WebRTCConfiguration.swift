@@ -16,9 +16,9 @@ enum WebRTCConfiguration {
 
         /// Timeout for authentication in production environment.
         static let production = Timeout(
-            authenticate: 10,
-            connect: 10,
-            join: 10,
+            authenticate: 30,
+            connect: 30,
+            join: 30,
             migrationCompletion: 10,
             publisherSetUpBeforeNegotiation: 2
         )

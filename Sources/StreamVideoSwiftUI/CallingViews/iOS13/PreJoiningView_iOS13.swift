@@ -43,12 +43,6 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
         self.callType = callType
         self.onJoinCallTap = onJoinCallTap
         self.onCloseLobby = onCloseLobby
-
-        Task {
-            callSettings.wrappedValue.audioOn
-                ? await microphoneCheckerInstance.startListening(ignoreActiveCall: true)
-                : await microphoneCheckerInstance.stopListening()
-        }
     }
     
     public var body: some View {
@@ -62,12 +56,8 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
-        .onReceive(callViewModel.$callSettings) { newValue in
-            Task {
-                newValue.audioOn
-                    ? await microphoneChecker.startListening(ignoreActiveCall: true)
-                    : await microphoneChecker.stopListening()
-            }
+        .onChange(of: callSettings) { newValue in
+            Task { await viewModel.didUpdate(callSettings: newValue) }
         }
     }
 }
