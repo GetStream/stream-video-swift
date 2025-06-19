@@ -88,9 +88,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let executor = DispatchQueueExecutor()
     nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
 
-//    /// Subject to handle participant updates.
-//    private var previousParticipantOperation: Task<Void, Never>?
-
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
     ///

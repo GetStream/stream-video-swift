@@ -18,6 +18,9 @@ actor BroadcastBufferUploader {
     private let compressionQuality: Float = 0.7
     private let disposableBag = DisposableBag()
 
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     init(connection: BroadcastBufferUploadConnection) {
         self.connection = connection
         Task(disposableBag: disposableBag) { [weak self] in
