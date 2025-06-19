@@ -434,6 +434,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_configurePeerConnections_audioSessionWasConfigured() async throws {
+        let sfuStack = MockSFUStack()
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
+        await subject.set(ownCapabilities: ownCapabilities)
+
         try await subject.configurePeerConnections()
 
         await fulfillment {

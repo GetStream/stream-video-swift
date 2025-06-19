@@ -4,8 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+- Improved behavior in bad-network conditions. [#852](https://github.com/GetStream/stream-video-swift/pull/852)
+
 ### 🐞 Fixed
 - CallKit ending 1:1 calls prematurely. [#850](https://github.com/GetStream/stream-video-swift/pull/850)
+- Fixed an issue that was causing confusion to the shared AudioSession object when multiple Call instances are in memory. [#852](https://github.com/GetStream/stream-video-swift/pull/852)
 
 # [1.25.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.25.0)
 _June 16, 2025_
