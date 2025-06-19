@@ -517,6 +517,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.set(callSettings: participantCallSettings)
     }
 
+    /// Configures the audio session to react to changes in call settings
+    /// and own capabilities. Registers the `WebRTCStateAdapter` as the
+    /// delegate and sets up subscriptions to update the audio session when
+    /// call settings or user capabilities change.
+    ///
+    /// This function ensures the audio session is in sync with the current
+    /// call context, reacting to changes such as microphone muting, audio
+    /// device switching, or permissions.
     func configureAudioSession() {
         audioSession.delegate = self
 

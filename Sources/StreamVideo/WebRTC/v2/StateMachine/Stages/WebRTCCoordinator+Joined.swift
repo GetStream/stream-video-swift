@@ -526,6 +526,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
             )
         }
 
+        /// Configures the audio session for the current WebRTC session.
+        ///
+        /// This method delegates the configuration of the audio session to the
+        /// state adapter, ensuring the session reflects the current call context,
+        /// such as preferred input/output routes, audio permissions, and other
+        /// session-specific settings.
+        ///
+        /// This setup is essential after joining to guarantee correct behavior for
+        /// media routing and device management.
         private func configureAudioSession() async {
             guard
                 let stateAdapter = context.coordinator?.stateAdapter
