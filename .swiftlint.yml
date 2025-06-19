@@ -3,8 +3,6 @@ included:
   - Sources
   - DemoApp
   - DemoAppUIKit
-  - StreamVideoTests
-  - StreamVideoUIKitTests
 excluded:
   - Tests/SwiftLintFrameworkTests/Resources
   - Sources/StreamVideo/Generated
@@ -12,6 +10,15 @@ excluded:
   - Sources/StreamVideo/protobuf
   - Sources/StreamVideoSwiftUI/Generated
 
+# Custom Rules
+custom_rules:
+  discourage_timer_publish:
+    name: "Discouraged Timer.publish usage"
+    regex: '\bTimer\s*(\.\s*)?publish\b'
+    message: "Avoid using Timer.publish. User the TimerStorage instead."
+    severity: error
+
 # Enabled/disabled rules
 only_rules:
   - unhandled_throwing_task
+  - custom_rules

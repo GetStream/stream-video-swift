@@ -2,6 +2,11 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+// swiftlint:disable discourage_timer_publish
+//
+// Copyright © 2025 Stream.io Inc. All rights reserved.
+//
+
 import Combine
 import Foundation
 
