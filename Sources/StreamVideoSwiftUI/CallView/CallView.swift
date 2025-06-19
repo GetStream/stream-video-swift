@@ -43,12 +43,6 @@ public struct CallView<Factory: ViewFactory>: View {
         }
         .background(Color(colors.callBackground).edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            UIApplication.shared.isIdleTimerDisabled = true
-        }
-        .onDisappear {
-            UIApplication.shared.isIdleTimerDisabled = false
-        }
         .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
         .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
     }

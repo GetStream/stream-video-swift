@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- `UIApplication.shared.isIdleTimerDisabled` handling is now happening on the SDK, removing the need to do it on UI level. [#853](https://github.com/GetStream/stream-video-swift/pull/853)
+
 ### 🐞 Fixed
 - CallKit ending 1:1 calls prematurely. [#850](https://github.com/GetStream/stream-video-swift/pull/850)
 

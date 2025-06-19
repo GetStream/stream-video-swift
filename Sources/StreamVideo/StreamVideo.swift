@@ -102,6 +102,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
 
+    private lazy var idleTimerAdapter = IdleTimerAdapter(self)
+
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
     ///   - apiKey: The API key.
@@ -195,6 +197,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         // Warm up
         _ = eventNotificationCenter
+        _ = idleTimerAdapter
 
         if user.type != .anonymous {
             let userAuth = UserAuth { [weak self] in
