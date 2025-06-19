@@ -28,7 +28,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         onError: { _ in }
     )
     private lazy var subject: WebRTCStatsReporter! = .init(
-        interval: 1,
+        interval: 2,
         provider: { self.input }
     )
 
@@ -83,7 +83,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
         subject.sfuAdapter = mockSFUStack.adapter
-        await wait(for: subject.interval - 0.5)
+        await wait(for: subject.interval / 2)
 
         let sfuStack = MockSFUStack()
         subject.sfuAdapter = sfuStack.adapter
