@@ -781,6 +781,50 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: - updateCallSettings
+
+    func test_updateCallSettings_noChanges_callSettingsDoNotChange() async {
+        let sessionID = await subject.sessionID
+        await subject.set(callSettings: .init(audioOn: true, videoOn: true))
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.participant = Stream_Video_Sfu_Models_Participant()
+        event.participant.sessionID = sessionID
+        event.type = .screenShare
+
+        await subject.updateCallSettings(from: event)
+
+        await assertTrueAsync(await subject.callSettings.audioOn)
+        await assertTrueAsync(await subject.callSettings.videoOn)
+    }
+
+    func test_updateCallSettings_withChangesInAudio_callSettingsDidUpdate() async {
+        let sessionID = await subject.sessionID
+        await subject.set(callSettings: .init(audioOn: true, videoOn: true))
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.participant = Stream_Video_Sfu_Models_Participant()
+        event.participant.sessionID = sessionID
+        event.type = .audio
+
+        await subject.updateCallSettings(from: event)
+
+        await assertFalseAsync(await subject.callSettings.audioOn)
+        await assertTrueAsync(await subject.callSettings.videoOn)
+    }
+
+    func test_updateCallSettings_withChangesInVideo_callSettingsDidUpdate() async {
+        let sessionID = await subject.sessionID
+        await subject.set(callSettings: .init(audioOn: true, videoOn: true))
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.participant = Stream_Video_Sfu_Models_Participant()
+        event.participant.sessionID = sessionID
+        event.type = .video
+
+        await subject.updateCallSettings(from: event)
+
+        await assertTrueAsync(await subject.callSettings.audioOn)
+        await assertFalseAsync(await subject.callSettings.videoOn)
+    }
+
     // MARK: - Private helpers
 
     private func assertNilAsync<T>(

@@ -514,6 +514,39 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         }
     }
 
+    func updateCallSettings(
+        from event: Stream_Video_Sfu_Event_TrackUnpublished
+    ) {
+        guard
+            event.participant.sessionID == sessionID,
+            event.type == .audio || event.type == .video
+        else {
+            return
+        }
+
+        let participant = event.participant.toCallParticipant()
+
+        let currentCallSettings = self.callSettings
+        let possibleNewCallSettings = {
+            switch event.type {
+            case .audio:
+                return currentCallSettings.withUpdatedAudioState(false)
+            case .video:
+                return currentCallSettings.withUpdatedVideoState(false)
+            default:
+                return currentCallSettings
+            }
+        }()
+
+        guard
+            currentCallSettings != possibleNewCallSettings
+        else {
+            return
+        }
+
+        set(callSettings: possibleNewCallSettings)
+    }
+
     // MARK: - Private Helpers
 
     /// Handles track events when they are added or removed from peer connections.
