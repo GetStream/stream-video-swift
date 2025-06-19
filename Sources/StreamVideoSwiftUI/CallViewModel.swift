@@ -102,11 +102,7 @@ open class CallViewModel: ObservableObject {
     @Published public var moreControlsShown = false
 
     /// List of the outgoing call members.
-    @Published public var outgoingCallMembers = [Member]() {
-        willSet {
-            _ = 0
-        }
-    }
+    @Published public var outgoingCallMembers = [Member]()
 
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
