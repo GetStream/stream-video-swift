@@ -41,12 +41,6 @@ public struct LobbyView<Factory: ViewFactory>: View {
         )
         let microphoneCheckerInstance = MicrophoneChecker()
         _microphoneChecker = .init(wrappedValue: microphoneCheckerInstance)
-
-        Task {
-            callSettings.wrappedValue.audioOn
-                ? await microphoneCheckerInstance.startListening(ignoreActiveCall: true)
-                : await microphoneCheckerInstance.stopListening()
-        }
     }
     
     public var body: some View {
@@ -60,13 +54,8 @@ public struct LobbyView<Factory: ViewFactory>: View {
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
-        .onChange(of: callSettings) { newValue in
-            Task {
-                newValue.audioOn
-                    ? await microphoneChecker.startListening(ignoreActiveCall: true)
-                    : await microphoneChecker.stopListening()
-            }
-        }
+        .onChange(of: callSettings) { newValue in Task { await viewModel.didUpdate(callSettings: newValue) } }
+        .onAppear { Task { await viewModel.didUpdate(callSettings: callSettings) } }
     }
 }
 
@@ -92,7 +81,6 @@ struct LobbyContentView<Factory: ViewFactory>: View {
                 HStack {
                     Spacer()
                     Button {
-                        Task { await microphoneChecker.stopListening() }
                         onCloseLobby()
                     } label: {
                         Image(systemName: "xmark")

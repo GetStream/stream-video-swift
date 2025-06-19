@@ -199,10 +199,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 log.error(
                     """
                     Failed to report incoming call with 
-                    callId:\(callId)
-                    callType:\(callType)
+                    cid: \(cid)
+                    localizedCallerName: \(localizedCallerName)
+                    hasVideo: \(hasVideo)
                     """,
-                    subsystems: .callKit
+                    subsystems: .callKit,
+                    error: error
                 )
                 callEnded(cid, ringingTimedOut: false)
             }

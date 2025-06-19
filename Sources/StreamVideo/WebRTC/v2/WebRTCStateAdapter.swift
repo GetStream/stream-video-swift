@@ -119,10 +119,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-
-        Task {
-            await configureAudioSession()
-        }
     }
 
     deinit {
@@ -135,7 +131,28 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     }
 
     /// Sets the call settings.
-    func set(callSettings value: CallSettings) { self.callSettings = value }
+    func set(
+        callSettings value: CallSettings,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        guard value != callSettings else {
+            return
+        }
+        log.debug(
+            """
+            Updating CallSettings
+            From: \(callSettings)
+            To: \(value)
+            """,
+            subsystems: .webRTC,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
+        self.callSettings = value
+    }
 
     /// Sets the initial call settings.
     func set(initialCallSettings value: CallSettings?) { self.initialCallSettings = value }
@@ -225,7 +242,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             subsystems: .webRTC
         )
 
-        peerConnectionsDisposableBag.removeAll()
         let publisher = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
             sessionId: sessionID,
             peerType: .publisher,
@@ -278,6 +294,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             }
             .store(in: peerConnectionsDisposableBag)
 
+        configureAudioSession()
+
         /// We setUp and restoreScreenSharing on  the publisher in order to prepare all required tracks
         /// for publication. In that way, negotiation will wait until ``completeSetUp`` has been called.
         /// Then, with all the tracks prepared, will continue the negotiation flow.
@@ -308,6 +326,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         screenShareSessionProvider.activeSession = nil
         videoCaptureSessionProvider.activeSession = nil
         peerConnectionsDisposableBag.removeAll()
+        disposableBag.removeAll()
         await publisher?.close()
         await subscriber?.close()
         self.publisher = nil
@@ -336,6 +355,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         )
 
         peerConnectionsDisposableBag.removeAll()
+        disposableBag.removeAll()
         await publisher?.prepareForClosing()
         await subscriber?.prepareForClosing()
         publisher = nil
@@ -452,8 +472,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             let updated = assignTracks(on: next)
             /// Sends the updated participants to observers while helping publishing streamlined updates.
             set(participants: updated)
-            /// Updates the call settings from the participants update.
-            updateCallSettingsFromParticipants(Array(updated.values))
 
             /// Logs the completion of the participant operation.
             log.debug(
@@ -494,30 +512,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
             partialResult[entry.key] = newParticipant
         }
-    }
-
-    /// Updates the call settings from the participants update.
-    /// - Parameter participants: The participants to update the call settings from.
-    /// - Note: This is used when the localParticipant gets muted remotely by someone else.
-    func updateCallSettingsFromParticipants(_ participants: [CallParticipant]) {
-        guard
-            let localParticipant = participants.first(where: { $0.sessionId == sessionID }),
-            /// Skip updates for the initial period while the connection is established.
-            Date().timeIntervalSince(localParticipant.joinedAt) > 5.0
-        else {
-            return
-        }
-
-        let currentCallSettings = self.callSettings
-        let participantCallSettings = currentCallSettings
-            .withUpdatedAudioState(localParticipant.hasAudio)
-            .withUpdatedVideoState(localParticipant.hasVideo)
-
-        guard participantCallSettings != currentCallSettings else {
-            return
-        }
-
-        self.set(callSettings: participantCallSettings)
     }
 
     // MARK: - Private Helpers

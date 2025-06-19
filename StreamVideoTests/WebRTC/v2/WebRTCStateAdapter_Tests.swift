@@ -433,6 +433,14 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
     }
 
+    func test_configurePeerConnections_audioSessionWasConfigured() async throws {
+        try await subject.configurePeerConnections()
+
+        await fulfillment {
+            await self.subject.audioSession.delegate === self.subject
+        }
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_shouldResetProperties() async throws {
