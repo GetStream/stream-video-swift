@@ -102,11 +102,7 @@ open class CallViewModel: ObservableObject {
     @Published public var moreControlsShown = false
 
     /// List of the outgoing call members.
-    @Published public var outgoingCallMembers = [Member]() {
-        willSet {
-            _ = 0
-        }
-    }
+    @Published public var outgoingCallMembers = [Member]()
 
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
@@ -603,7 +599,9 @@ open class CallViewModel: ObservableObject {
             fileName: file,
             lineNumber: line
         )
-        callingState = newValue
+        Task { @MainActor in
+            callingState = newValue
+        }
     }
 
     /// Leaves the current call.
@@ -771,14 +769,17 @@ open class CallViewModel: ObservableObject {
                 if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
                     switch callEvent {
                     case let .incoming(incomingCall):
-                        if incomingCall.caller.id != streamVideo.user.id {
-                            let isAppActive = UIApplication.shared.applicationState == .active
-                            // TODO: implement holding a call.
-                            if callingState == .idle && isAppActive {
-                                setCallingState(.incoming(incomingCall))
-                                /// We start the ringing timer, so we can cancel when the timeout
-                                /// is over.
-                                startTimer(timeout: incomingCall.timeout)
+                        let currentUserId = streamVideo.user.id
+                        Task { @MainActor [weak self] in
+                            if incomingCall.caller.id != currentUserId {
+                                let isAppActive = UIApplication.shared.applicationState == .active
+                                // TODO: implement holding a call.
+                                if self?.callingState == .idle && isAppActive {
+                                    self?.setCallingState(.incoming(incomingCall))
+                                    /// We start the ringing timer, so we can cancel when the timeout
+                                    /// is over.
+                                    self?.startTimer(timeout: incomingCall.timeout)
+                                }
                             }
                         }
                     case .accepted:

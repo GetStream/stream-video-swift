@@ -516,7 +516,6 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
     }
 
-    @MainActor
     private func adaptCaptureDimensions(
         for layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) async {
