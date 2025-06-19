@@ -79,7 +79,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         private func execute(
             isFastReconnecting: Bool
         ) {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
 
                 do {
@@ -138,12 +138,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
-            .store(in: disposableBag)
         }
 
         /// Executes the migration process.
         private func executeMigration() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
 
                 do {
@@ -196,12 +195,11 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
-            .store(in: disposableBag)
         }
 
         /// Executes the rejoining process.
         private func executeRejoining() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
 
                 do {
@@ -253,7 +251,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
-            .store(in: disposableBag)
         }
 
         /// Builds the subscriber session description.
@@ -413,14 +410,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
             unifiedSessionId: String,
             sfuAdapter: SFUAdapter
         ) {
-            Task {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
                 var telemetry = Stream_Video_Sfu_Signal_Telemetry()
                 let duration = Float(Date().timeIntervalSince(startTime))
                 var reconnection = Stream_Video_Sfu_Signal_Reconnection()
                 reconnection.timeSeconds = duration
 
                 telemetry.data = {
-                    switch flowType {
+                    switch self.flowType {
                     case .regular:
                         return .connectionTimeSeconds(duration)
                     case .fast:

@@ -29,6 +29,7 @@ final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Senda
         try await super.setUp()
         _ = subject
         store.dispatch(.setCall(mockCall))
+        await wait(for: 1.0)
     }
 
     override func tearDown() async throws {

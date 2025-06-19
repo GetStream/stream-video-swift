@@ -67,7 +67,7 @@ extension Call.StateMachine.Stage {
 
         /// Executes the call joining process asynchronously.
         private func execute() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
 
                 try? Task.checkCancellation()
@@ -103,7 +103,6 @@ extension Call.StateMachine.Stage {
                     }
                 }
             }
-            .store(in: disposableBag)
         }
 
         /// Executes the join call operation with retry logic.
@@ -144,7 +143,7 @@ extension Call.StateMachine.Stage {
 
             try Task.checkCancellation()
 
-            await Task { @MainActor [weak streamVideo] in
+            await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
                 streamVideo?.state.activeCall = call
             }.value
 

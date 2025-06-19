@@ -36,7 +36,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         store
             .publisher(for: \.isActive)
             .removeDuplicates()
-            .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdate($0) }
             .store(in: disposableBag)
 
         store

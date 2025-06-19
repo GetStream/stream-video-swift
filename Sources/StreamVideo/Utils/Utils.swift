@@ -35,12 +35,6 @@ struct EventHandler {
     var cancel: () -> Void
 }
 
-func executeOnMain(_ task: @Sendable @escaping @MainActor() -> Void) {
-    Task {
-        await task()
-    }
-}
-
 func infoPlistValue(for key: String) -> String? {
     Bundle.main.infoDictionary?[key] as? String
 }

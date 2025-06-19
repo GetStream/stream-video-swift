@@ -16,6 +16,7 @@ final class WebRTCMigrationStatusObserver: @unchecked Sendable {
 
     private let connectURL: URL
     private var task: Task<Void, Never>?
+    private let disposableBag = DisposableBag()
 
     @Published private var state: State = .running
 
@@ -24,7 +25,10 @@ final class WebRTCMigrationStatusObserver: @unchecked Sendable {
         deadline: TimeInterval = WebRTCConfiguration.timeout.migrationCompletion
     ) {
         connectURL = sfuAdapter.connectURL
-        task = Task {
+        task = Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 _ = try await sfuAdapter
                     .publisher(eventType: Stream_Video_Sfu_Event_ParticipantMigrationComplete.self)

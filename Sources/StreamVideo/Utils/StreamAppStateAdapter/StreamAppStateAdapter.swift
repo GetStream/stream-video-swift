@@ -39,7 +39,8 @@ final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @uncheck
     /// Sets up observers for app state changes.
     private func setUp() {
         #if canImport(UIKit)
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
             /// Observes app state changes to update the `state` property.
             notificationCenter
                 .publisher(for: UIApplication.willEnterForegroundNotification)
