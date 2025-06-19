@@ -253,6 +253,7 @@
 		406303472AD943B60091AE77 /* GoogleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA682AD3F78F00769F6A /* GoogleHelper.swift */; };
 		406568872E0426FD00A67EAC /* IdleTimerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406568862E0426FD00A67EAC /* IdleTimerAdapter.swift */; };
 		4065688A2E04275F00A67EAC /* IdleTimerAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406568892E04275F00A67EAC /* IdleTimerAdapter_Tests.swift */; };
+		4065688B2E042B2E00A67EAC /* MockStreamCallAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C0D2C8F865F00FC93A1 /* MockStreamCallAudioRecorder.swift */; };
 		4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406583852B87694B00B4F979 /* BlurBackgroundVideoFilter.swift */; };
 		4065838B2B87695500B4F979 /* VideoFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406583872B87694B00B4F979 /* VideoFilters.swift */; };
 		406583902B877A0500B4F979 /* ImageBackgroundVideoFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4065838E2B877A0000B4F979 /* ImageBackgroundVideoFilter.swift */; };
@@ -8569,6 +8570,7 @@
 				409AF6F92DAFF67200EE7BF6 /* PictureInPictureContentViewTests.swift in Sources */,
 				40245F592BE2746300FCF075 /* BackstageSettings+Dummy.swift in Sources */,
 				40245F5A2BE2746300FCF075 /* CallAcceptedEvent+Dummy.swift in Sources */,
+				4065688B2E042B2E00A67EAC /* MockStreamCallAudioRecorder.swift in Sources */,
 				40245F5B2BE2746300FCF075 /* RingSettings+Dummy.swift in Sources */,
 				40245F5C2BE2746300FCF075 /* ThumbnailResponse+Dummy.swift in Sources */,
 				40245F5D2BE2746300FCF075 /* ThumbnailsSettings+Dummy.swift in Sources */,

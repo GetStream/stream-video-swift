@@ -37,14 +37,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    // MARK: - audioSession
-
-    func test_audioSession_delegateWasSetAsExpected() async throws {
-        await fulfillment {
-            await self.subject.audioSession.delegate === self.subject
-        }
-    }
-
     // MARK: - setSessionID
 
     func test_sessionID_shouldNotBeEmptyOnInit() async throws {
@@ -433,6 +425,20 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
     }
 
+    func test_configurePeerConnections_audioSessionWasConfigured() async throws {
+        let sfuStack = MockSFUStack()
+        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
+        await subject.set(ownCapabilities: ownCapabilities)
+
+        try await subject.configurePeerConnections()
+
+        await fulfillment {
+            await self.subject.audioSession.delegate === self.subject
+        }
+    }
+
     // MARK: - cleanUp
 
     func test_cleanUp_shouldResetProperties() async throws {
@@ -775,72 +781,46 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
-    // MARK: - updateCallSettingsFromParticipants
+    // MARK: - updateCallSettings
 
-    func test_updateCallSettingsFromParticipants_localParticipantHasNoChanges_callSettingsNotChange() async {
+    func test_updateCallSettings_noChanges_callSettingsDoNotChange() async {
         let sessionID = await subject.sessionID
         await subject.set(callSettings: .init(audioOn: true, videoOn: true))
-        let initialParticipants: [String: CallParticipant] = [
-            sessionID: .dummy(id: sessionID, hasVideo: true, hasAudio: true),
-            "2": .dummy(id: "2"),
-            "3": .dummy(id: "3")
-        ]
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.participant = Stream_Video_Sfu_Models_Participant()
+        event.participant.sessionID = sessionID
+        event.type = .screenShare
 
-        await subject.enqueue { _ in initialParticipants }
+        await subject.updateCallSettings(from: event)
 
-        await subject.enqueue { _ in
-            [sessionID: .dummy(id: sessionID, hasVideo: true, hasAudio: true)]
-        }
-
-        await fulfillment {
-            let participants = await self.subject.participants
-            return participants.count == 1
-        }
         await assertTrueAsync(await subject.callSettings.audioOn)
         await assertTrueAsync(await subject.callSettings.videoOn)
     }
 
-    func test_updateCallSettingsFromParticipants_localParticipantHasChanges_before5Seconds_callSettingsNotChange() async {
+    func test_updateCallSettings_withChangesInAudio_callSettingsDidUpdate() async {
         let sessionID = await subject.sessionID
         await subject.set(callSettings: .init(audioOn: true, videoOn: true))
-        let initialParticipants: [String: CallParticipant] = [
-            sessionID: .dummy(id: sessionID, hasVideo: true, hasAudio: true),
-            "2": .dummy(id: "2"),
-            "3": .dummy(id: "3")
-        ]
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.participant = Stream_Video_Sfu_Models_Participant()
+        event.participant.sessionID = sessionID
+        event.type = .audio
 
-        await subject.enqueue { _ in initialParticipants }
-        await subject.enqueue { _ in
-            [sessionID: .dummy(id: sessionID, hasVideo: false, hasAudio: true)]
-        }
+        await subject.updateCallSettings(from: event)
 
-        await fulfillment {
-            let participants = await self.subject.participants
-            return participants.count == 1
-        }
-        await assertTrueAsync(await subject.callSettings.audioOn)
-        await assertFalseAsync(await subject.callSettings.videoOn)
+        await assertFalseAsync(await subject.callSettings.audioOn)
+        await assertTrueAsync(await subject.callSettings.videoOn)
     }
 
-    func test_updateCallSettingsFromParticipants_localParticipantHasChanges_after5Seconds_callSettingsWereChanged() async {
+    func test_updateCallSettings_withChangesInVideo_callSettingsDidUpdate() async {
         let sessionID = await subject.sessionID
         await subject.set(callSettings: .init(audioOn: true, videoOn: true))
-        let initialParticipants: [String: CallParticipant] = [
-            sessionID: .dummy(id: sessionID, hasVideo: true, hasAudio: true),
-            "2": .dummy(id: "2"),
-            "3": .dummy(id: "3")
-        ]
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.participant = Stream_Video_Sfu_Models_Participant()
+        event.participant.sessionID = sessionID
+        event.type = .video
 
-        await subject.enqueue { _ in initialParticipants }
-        await wait(for: 5)
-        await subject.enqueue { _ in
-            [sessionID: .dummy(id: sessionID, hasVideo: false, hasAudio: true)]
-        }
+        await subject.updateCallSettings(from: event)
 
-        await fulfillment {
-            let participants = await self.subject.participants
-            return participants.count == 1
-        }
         await assertTrueAsync(await subject.callSettings.audioOn)
         await assertFalseAsync(await subject.callSettings.videoOn)
     }

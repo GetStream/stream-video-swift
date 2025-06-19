@@ -427,6 +427,8 @@ final class SFUEventAdapter: @unchecked Sendable {
 
             return updatedParticipants
         }
+
+        await stateAdapter.updateCallSettings(from: event)
     }
 
     /// Handles a PinsChanged event.
