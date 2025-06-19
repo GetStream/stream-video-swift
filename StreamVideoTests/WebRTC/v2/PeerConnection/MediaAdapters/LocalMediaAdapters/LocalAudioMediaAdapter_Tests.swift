@@ -409,10 +409,11 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
             ownCapabilities: [.sendAudio]
         )
         subject.publish()
+        await fulfilmentInMainActor { self.subject.primaryTrack.isEnabled == true }
 
         subject.unpublish()
 
-        await fulfillment { self.subject.primaryTrack.isEnabled == false }
+        await fulfilmentInMainActor { self.subject.primaryTrack.isEnabled == false }
         let transceiver = try XCTUnwrap(
             mockPeerConnection.stubbedFunction[.addTransceiver] as? RTCRtpTransceiver
         )

@@ -12,6 +12,8 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
     /// Injected dependency for accessing the stream video service.
     @Injected(\.streamVideo) private var streamVideo
 
+    private let disposableBag = DisposableBag()
+
     /// Subscription for observing changes to the ringing call.
     private var ringingCallCancellable: AnyCancellable?
 
@@ -39,8 +41,8 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
             let currentCount = currentParticipantsCount
             let maxCount = maxAggregatedParticipantsCount
             // Check if the policy trigger conditions are met.
-            Task { @MainActor in
-                checkTrigger(currentCount: currentCount, maxCount: maxCount)
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                self?.checkTrigger(currentCount: currentCount, maxCount: maxCount)
             }
         }
     }
@@ -68,7 +70,10 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
     private var call: Call? {
         didSet {
             // Handle updates to the current call.
-            Task { @MainActor in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else {
+                    return
+                }
                 didUpdateCall(call, oldValue: oldValue)
             }
         }
@@ -94,7 +99,10 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
         guard let call, call.cId == latestRingingCallCid else { return }
 
         // Observe changes to the participants map in the new call.
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
             callParticipantsObservation = call
                 .state
                 .$participantsMap

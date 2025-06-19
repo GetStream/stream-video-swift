@@ -65,7 +65,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the joined stage logic.
         private func execute() {
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
                     guard
@@ -136,7 +136,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     transitionDisconnectOrError(error)
                 }
             }
-            .store(in: disposableBag)
         }
 
         /// Cleans up the previous WebRTC session, including closing and removing the
@@ -167,7 +166,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             previousSFUAdapter: SFUAdapter?
         ) async throws {
             if let migrationStatusObserver = migrationStatusObserver {
-                let task = Task {
+                let task = Task(disposableBag: disposableBag) { [weak self] in
+                    guard let self else { return }
                     do {
                         try Task.checkCancellation()
                         try await migrationStatusObserver
@@ -181,7 +181,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         throw error
                     }
                 }
-                task.store(in: disposableBag)
                 _ = try await task.value
             } else {
                 await previousSFUAdapter?.disconnect()
@@ -461,7 +460,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .log(.debug, subsystems: .webRTC) { "Internet connection status updated to \($0)" }
                 .filter { !$0.isAvailable }
                 .removeDuplicates()
-                .sinkTask { [weak self] in
+                .sinkTask(storeIn: disposableBag) { [weak self] in
                     guard let self else { return }
 
                     /// Trace internet connection changes

@@ -59,9 +59,12 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
         /// Executes the rejoining process.
         private func execute() {
-            Task {
+            Task(disposableBag: disposableBag) { [weak self] in
                 do {
-                    guard let coordinator = context.coordinator else {
+                    guard
+                        let self,
+                        let coordinator = context.coordinator
+                    else {
                         throw ClientError(
                             "WebRCTCoordinator instance not available."
                         )
@@ -121,10 +124,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         )
                     )
                 } catch {
-                    transitionDisconnectOrError(error)
+                    self?.transitionDisconnectOrError(error)
                 }
             }
-            .store(in: disposableBag)
         }
     }
 }

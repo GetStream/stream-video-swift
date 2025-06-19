@@ -115,7 +115,17 @@ class Camera: NSObject, @unchecked Sendable {
         super.init()
         initialize()
     }
-    
+
+    deinit {
+        if let deviceInput {
+            captureSession.removeInput(deviceInput)
+        }
+
+        if let videoOutput {
+            captureSession.removeOutput(videoOutput)
+        }
+    }
+
     private func initialize() {
         sessionQueue = DispatchQueue(label: "session queue")
 
@@ -147,7 +157,7 @@ class Camera: NSObject, @unchecked Sendable {
             return
         }
 
-        captureSession.sessionPreset = AVCaptureSession.Preset.high
+        captureSession.sessionPreset = AVCaptureSession.Preset.medium
 
         let videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(self, queue: frameProcessingQueue)
