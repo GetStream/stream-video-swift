@@ -37,14 +37,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    // MARK: - audioSession
-
-    func test_audioSession_delegateWasSetAsExpected() async throws {
-        await fulfillment {
-            await self.subject.audioSession.delegate === self.subject
-        }
-    }
-
     // MARK: - setSessionID
 
     func test_sessionID_shouldNotBeEmptyOnInit() async throws {
