@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- CallKit ending 1:1 calls prematurely. [#850](https://github.com/GetStream/stream-video-swift/pull/850)
 
 # [1.25.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.25.0)
 _June 16, 2025_

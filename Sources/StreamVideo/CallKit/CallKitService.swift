@@ -21,6 +21,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         var createdBy: User?
         var isActive: Bool = false
         var ringingTimedOut: Bool = false
+        var isEndedElsewhere: Bool = false
 
         init(
             call: Call,
@@ -215,12 +216,24 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         /// The call was accepted somewhere else (e.g the incoming call on the same device or another
         /// device). No action is required.
         guard
-            response.user.id == streamVideo?.user.id,
             let newCallEntry = callEntry(for: response.callCid),
-            newCallEntry.callUUID != active // Ensure that the new call isn't the currently active one.
+            newCallEntry.callUUID != active, // Ensure that the new call isn't the currently active one.
+            response.user.id == streamVideo?.user.id
         else {
             return
         }
+        log.debug(
+            """
+            Call rejected
+            callId:\(newCallEntry.call.callId)
+            callType:\(newCallEntry.call.callType)
+            callerId:\(newCallEntry.createdBy?.id)
+            ringingTimedOut:\(newCallEntry.ringingTimedOut)
+            isEndedElsewhere:\(newCallEntry.isEndedElsewhere)
+            """,
+            subsystems: .callKit
+        )
+
         callProvider.reportCall(
             with: newCallEntry.callUUID,
             endedAt: nil,
@@ -252,6 +265,20 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         else {
             return
         }
+        log.debug(
+            """
+            Call rejected
+            callId:\(newCallEntry.call.callId)
+            callType:\(newCallEntry.call.callType)
+            callerId:\(newCallEntry.createdBy?.id)
+            ringingTimedOut:\(newCallEntry.ringingTimedOut)
+            isEndedElsewhere:\(newCallEntry.isEndedElsewhere)
+            isCurrentUserRejection:\(isCurrentUserRejection)
+            isCallCreatorRejection:\(isCallCreatorRejection)
+            """,
+            subsystems: .callKit
+        )
+
         callProvider.reportCall(
             with: newCallEntry.callUUID,
             endedAt: nil,
@@ -271,8 +298,24 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         guard let callEndedEntry = callEntry(for: cId) else {
             return
         }
-        callEndedEntry.ringingTimedOut = ringingTimedOut
+        if ringingTimedOut {
+            callEndedEntry.ringingTimedOut = ringingTimedOut
+        } else {
+            callEndedEntry.isEndedElsewhere = true
+        }
         set(callEndedEntry, for: callEndedEntry.callUUID)
+
+        log.debug(
+            """
+            CallEnded
+            callId:\(callEndedEntry.call.callId)
+            callType:\(callEndedEntry.call.callType)
+            callerId:\(callEndedEntry.createdBy?.id)
+            ringingTimedOut:\(callEndedEntry.ringingTimedOut)
+            isEndedElsewhere:\(callEndedEntry.isEndedElsewhere)
+            """,
+            subsystems: .callKit
+        )
         Task {
             do {
                 // End the call.
@@ -298,6 +341,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         Task { @MainActor in
             if let call = callEntry(for: response.callCid)?.call,
                call.state.participants.count == 1 {
+                log.debug(
+                    "Call will end as only one participant left in the call",
+                    subsystems: .callKit
+                )
                 callEnded(response.callCid, ringingTimedOut: false)
             }
         }
@@ -527,12 +574,21 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return false
         }
 
+        var allMembers = callState.members.map(\.user.toUser)
+        let creator = callState.call.createdBy.toUser
+        let isUserInMembersArray = allMembers.filter { $0.id == creator.id }.isEmpty == false
+        if !isUserInMembersArray {
+            allMembers.append(creator)
+        }
+        let allCallees = allMembers.filter { $0.id != creator.id }
+
         let currentUserId = streamVideo.user.id
         let acceptedBy = callState.call.session?.acceptedBy ?? [:]
         let rejectedBy = callState.call.session?.rejectedBy ?? [:]
         let isAccepted = acceptedBy[currentUserId] != nil
         let isRejected = rejectedBy[currentUserId] != nil
-        let isRejectedByEveryoneElse = rejectedBy.keys.filter { $0 != currentUserId }.count == (callState.members.count - 1)
+        let isRejectedByEveryoneElse = (allCallees.endIndex > 1)
+            && rejectedBy.keys.filter { $0 != currentUserId }.count == (allCallees.endIndex - 1)
         return isAccepted || isRejected || isRejectedByEveryoneElse
     }
 
