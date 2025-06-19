@@ -391,11 +391,12 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNotEqual(transceiverCall.track.trackId, subject.primaryTrack.trackId)
         XCTAssertEqual(transceiverCall.track.kind, subject.primaryTrack.kind)
         XCTAssertEqual(transceiverCall.trackType, .audio)
+        XCTAssertFalse(mockAudioRecorder.isRecording)
     }
 
     // MARK: - unpublish
 
-    func test_publish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
+    func test_unpublish_enabledLocalTrack_enablesAndAddsTrackAndTransceiver() async throws {
         publishOptions = [.dummy(codec: .opus)]
         try publishOptions.forEach { publishOption in
             mockPeerConnection.stub(
@@ -418,6 +419,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertNotEqual(transceiver.sender.track?.trackId, subject.primaryTrack.trackId)
         XCTAssertEqual(transceiver.sender.track?.kind, subject.primaryTrack.kind)
         XCTAssertFalse(transceiver.sender.track?.isEnabled ?? true)
+        XCTAssertFalse(mockAudioRecorder.isRecording)
     }
 
     // MARK: - Private
