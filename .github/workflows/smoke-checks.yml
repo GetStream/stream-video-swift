@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
       with:
-        fetch-depth: 100
+        fetch-depth: 0
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_YEETD: true
@@ -138,7 +138,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
       with:
-        fetch-depth: 100
+        fetch-depth: 0
     - uses: ./.github/actions/bootstrap
     - name: Public Interface Validation
       run: bundle exec fastlane validate_public_interface
