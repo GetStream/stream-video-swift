@@ -125,10 +125,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Removes all transceivers from storage and logs details about the
     /// deallocation process.
     deinit {
-        Task { @MainActor [transceiverStorage] in
-            transceiverStorage.removeAll()
-        }
-
+        transceiverStorage.removeAll()
         log.debug(
             """
             Local video tracks will be deallocated:

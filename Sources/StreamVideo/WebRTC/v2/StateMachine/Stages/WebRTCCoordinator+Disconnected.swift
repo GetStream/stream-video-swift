@@ -122,7 +122,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 /// We add a small delay of 100ms in oder to ensure that the internet connection state
                 /// has been updated, so that when we start observing it will receive the latest and
                 /// updated value.
-                try? await Task.sleep(nanoseconds: 100_000_000)
+                _ = try? await timers
+                    .timer(for: ScreenPropertiesAdapter.currentValue.refreshRate)
+                    .nextValue()
 
                 statsAdapter?.sfuAdapter = nil
 

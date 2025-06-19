@@ -57,7 +57,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private let disposableBag = DisposableBag()
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
-    private var cancellables = DisposableBag()
 
     /// A serialQueueActor ensuring that call operations (e.g. join) will happen in a serial manner.
     private let callOperationSerialQueue = SerialActorQueue()
@@ -65,6 +64,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// This adapter is used to manage closed captions for the
     /// call.
     private lazy var closedCaptionsAdapter = ClosedCaptionsAdapter(self)
+
+    @Atomic private var hasSubscribedToRequiredAdapters = false
 
     internal init(
         callType: String,
@@ -113,7 +114,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     deinit {
         log.debug("Call cID:\(cId) is deallocating...")
-        cancellables.removeAll()
+        disposableBag.removeAll()
     }
 
     private func configure(callSettings: CallSettings?) {
@@ -132,9 +133,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         _ = stateMachine
         subscribeToOwnCapabilitiesChanges()
         subscribeToLocalCallSettingsChanges()
-        subscribeToNoiseCancellationSettingsChanges()
-        subscribeToTranscriptionSettingsChanges()
-        subscribeToClosedCaptionsSettingsChanges()
     }
 
     /// Joins the current call.
@@ -543,7 +541,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func leave() {
         postNotification(with: CallNotification.callEnded, object: self)
 
-        cancellables.removeAll()
+        disposableBag.removeAll()
         callController.leave()
         closedCaptionsAdapter.stop()
         stateMachine.transition(.idle(.init(call: self)))
@@ -1404,6 +1402,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.reconnectionStatus = reconnectionStatus
             }
         }
+
+        guard
+            reconnectionStatus == .connected,
+            !hasSubscribedToRequiredAdapters
+        else {
+            return
+        }
+        hasSubscribedToRequiredAdapters = true
+        subscribeToNoiseCancellationSettingsChanges()
+        subscribeToTranscriptionSettingsChanges()
+        subscribeToClosedCaptionsSettingsChanges()
     }
 
     internal func update(recordingState: RecordingState) {
@@ -1503,7 +1512,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .sinkTask(storeIn: disposableBag) { [weak self] in
                     await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
                 }
-                .store(in: cancellables)
+                .store(in: disposableBag)
         }
     }
 
@@ -1516,7 +1525,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: cancellables)
+        .store(in: disposableBag)
 
         speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
             guard let self else { return }
@@ -1526,7 +1535,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: cancellables)
+        .store(in: disposableBag)
 
         camera.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
@@ -1536,7 +1545,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: cancellables)
+        .store(in: disposableBag)
 
         camera.$direction.dropFirst().sink { [weak self] position in
             guard let self else { return }
@@ -1546,7 +1555,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: cancellables)
+        .store(in: disposableBag)
 
         microphone.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
@@ -1556,7 +1565,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 self.state.update(callSettings: newState)
             }
         }
-        .store(in: cancellables)
+        .store(in: disposableBag)
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
@@ -1568,7 +1577,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .map { $0.1?.audio.noiseCancellation }
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: cancellables)
+                .store(in: disposableBag)
         }
     }
 
@@ -1581,7 +1590,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .map { $0.1?.transcription }
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: cancellables)
+                .store(in: disposableBag)
         }
     }
 
@@ -1594,7 +1603,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .map { $0.1?.transcription.closedCaptionMode }
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: cancellables)
+                .store(in: disposableBag)
         }
     }
 
