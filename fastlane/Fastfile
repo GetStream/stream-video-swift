@@ -729,11 +729,16 @@ lane :validate_public_interface do
   sh("wget -P . https://github.com/GetStream/stream-module-interface-analyser/releases/download/v1.0.7/interface-analyser")
   sh("chmod +x #{analyser}")
 
+  # Run the analysis on the current branch
+  original_branch = current_branch
   sh("./#{analyser} analysis ../Sources/ ../public_interface_current.json")
 
-  target_branch = current_branch.include?('release/') ? 'main' : 'develop'
+  # Checkout the target branch
+  target_branch = original_branch.include?('release/') ? 'main' : 'develop'
   sh("git fetch origin #{target_branch}")
   sh("git checkout #{target_branch}")
+
+  # Run the analysis on the target branch
   sh("./#{analyser} analysis ../Sources/ ../public_interface_previous.json")
 
   # Run diff
@@ -754,6 +759,9 @@ lane :validate_public_interface do
 
   # Post PR comment if running in CI
   pr_comment(text: content, edit_last_comment_with_text: header) if is_ci
+
+  # Checkout the original branch
+  sh("git checkout #{original_branch}")
 end
 
 lane :show_frameworks_sizes do |options|
