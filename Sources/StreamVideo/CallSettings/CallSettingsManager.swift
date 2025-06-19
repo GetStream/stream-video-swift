@@ -37,6 +37,9 @@ extension CallSettingsManager {
 }
 
 actor CallSettingsState {
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     var updatingState: Bool?
     func setUpdatingState(_ state: Bool?) {
         self.updatingState = state

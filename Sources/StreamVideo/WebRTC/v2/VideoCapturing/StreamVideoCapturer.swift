@@ -11,6 +11,9 @@ protocol StreamVideoCapturerActionHandler: Sendable {
 
 actor StreamVideoCapturer: StreamVideoCapturing {
 
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     enum Action: @unchecked Sendable, CustomStringConvertible {
     case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
          case startCapture(
