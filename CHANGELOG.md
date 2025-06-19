@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.26.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.26.0)
+_June 19, 2025_
+
 ### ✅ Added
 - `UIApplication.shared.isIdleTimerDisabled` handling is now happening on the SDK, removing the need to do it on UI level. [#853](https://github.com/GetStream/stream-video-swift/pull/853)
 
