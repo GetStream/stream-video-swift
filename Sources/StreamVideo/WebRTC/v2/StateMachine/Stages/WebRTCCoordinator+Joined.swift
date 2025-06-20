@@ -29,6 +29,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
+        @Injected(\.timers) private var timers
 
         private let disposableBag = DisposableBag()
         private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
@@ -123,6 +124,14 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     await observePeerConnectionState()
+
+                    try Task.checkCancellation()
+
+                    await observeParticipantSignalLostEvent()
+
+                    try Task.checkCancellation()
+
+                    await observeHealthCheckResponses()
 
                     try Task.checkCancellation()
 
@@ -303,6 +312,60 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .store(in: disposableBag)
         }
 
+        /// Observes the SFU errors looking for the `PARTICIPANT_SIGNAL_LOST`. Once found
+        /// triggers fast reconnection based on this: https://www.notion.so/stream-wiki/Improved-Reconnects-and-ICE-connection-handling-2186a5d7f9f680c29236c2c37cfa11a3?source=copy_link#2186a5d7f9f68090bd0ec38594902805
+        private func observeParticipantSignalLostEvent() async {
+            let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
+            sfuAdapter?
+                .publisher(eventType: Stream_Video_Sfu_Event_Error.self)
+                .filter { $0.error.code == .participantSignalLost }
+                .sink { [weak self] _ in
+                    guard let self else { return }
+                    context.reconnectionStrategy = .fast(
+                        disconnectedSince: .init(),
+                        deadline: context.fastReconnectDeadlineSeconds
+                    )
+                    transitionOrError(.disconnected(context))
+                }
+                .store(in: disposableBag)
+        }
+
+        /// Observes the frequency the HealthCheck responses are flowing via the SFU webSocket. If
+        /// at any point we haven't received a HealthCheck response for the `webSocketHealthTimeout`
+        /// we consider the WS connection disconnected and try a fast reconnenction.
+        private func observeHealthCheckResponses() async {
+            let sfuAdapter = await context.coordinator?.stateAdapter.sfuAdapter
+            sfuAdapter?
+                .publisher(eventType: Stream_Video_Sfu_Event_HealthCheckResponse.self)
+                .sink { [weak self] _ in
+                    self?.context.lastHealthCheckReceivedAt = .init()
+                }
+                .store(in: disposableBag)
+
+            timers
+                .timer(for: 1)
+                .compactMap { [weak self] _ in self?.context.lastHealthCheckReceivedAt }
+                .filter { [weak self] in
+                    guard
+                        let timeout = self?.context.webSocketHealthTimeout
+                    else {
+                        return false
+                    }
+                    return abs($0.timeIntervalSinceNow) > timeout
+                }
+                .sink { [weak self] lastHealthCheckReceivedAt in
+                    guard let self else {
+                        return
+                    }
+                    context.reconnectionStrategy = .fast(
+                        disconnectedSince: lastHealthCheckReceivedAt,
+                        deadline: context.fastReconnectDeadlineSeconds
+                    )
+                    transitionOrDisconnect(.disconnected(context))
+                }
+                .store(in: disposableBag)
+        }
+
         /// Observes the preferred reconnection strategy based on error events from the
         /// SFU (Selective Forwarding Unit) adapter. When an error event with a
         /// reconnection strategy is published, the method updates the reconnection
@@ -378,28 +441,21 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
             publisher
                 .disconnectedPublisher
-                .log(.debug, subsystems: .webRTC) {
-                    """
-                    PeerConnection of type: .publisher was disconnected. Will attempt 
-                    restarting ICE.
-                    """
-                }
-                .sink { [weak publisher] in
-                    // Restart ICE on the publisher when disconnected.
-                    publisher?.restartICE()
+                .log(.debug, subsystems: .webRTC) { "PeerConnection of type: .publisher was disconnected. Will attempt rejoin." }
+                .sink { [weak self] in
+                    guard let self else { return }
+                    context.reconnectionStrategy = .rejoin
+                    transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
 
             subscriber
                 .disconnectedPublisher
-                .log(.debug, subsystems: .webRTC) {
-                    """
-                    PeerConnection of type: .subscriber was disconnected. Will attempt 
-                    restarting ICE.
-                    """
-                }
-                .sink { [weak subscriber] in
-                    subscriber?.restartICE()
+                .log(.debug, subsystems: .webRTC) { "PeerConnection of type: .subscriber was disconnected. Will attempt rejoin." }
+                .sink { [weak self] in
+                    guard let self else { return }
+                    context.reconnectionStrategy = .rejoin
+                    transitionOrDisconnect(.disconnected(context))
                 }
                 .store(in: disposableBag)
         }

@@ -21,6 +21,8 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
     let videoMediaAdapter: VideoMediaAdapter
     let screenShareMediaAdapter: ScreenShareMediaAdapter
     let mediaAdapter: MediaAdapter
+    let iceAdapter: ICEAdapter
+    let iceConnectionStateAdapter: ICEConnectionStateAdapter
     let coordinator: RTCPeerConnectionCoordinator
 
     init(
@@ -83,6 +85,18 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
             screenShareMediaAdapter: screenShareMediaAdapter
         )
         self.mediaAdapter = mediaAdapter
+
+        let iceAdapter = ICEAdapter(
+            sessionID: sessionId,
+            peerType: peerType,
+            peerConnection: peerConnection,
+            sfuAdapter: mockSFUStack.adapter
+        )
+        self.iceAdapter = iceAdapter
+
+        let iceConnectionStateAdapter = ICEConnectionStateAdapter()
+        self.iceConnectionStateAdapter = iceConnectionStateAdapter
+
         coordinator = .init(
             sessionId: sessionId,
             peerType: peerType,
@@ -92,7 +106,9 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
             audioSettings: audioSettings,
             publishOptions: publishOptions,
             sfuAdapter: mockSFUStack.adapter,
-            mediaAdapter: mediaAdapter
+            mediaAdapter: mediaAdapter,
+            iceAdapter: iceAdapter,
+            iceConnectionStateAdapter: iceConnectionStateAdapter
         )
     }
 }

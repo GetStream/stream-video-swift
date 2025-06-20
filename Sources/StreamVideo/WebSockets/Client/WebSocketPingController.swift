@@ -28,7 +28,9 @@ protocol HealthCheck: Event, Equatable {}
 /// After ping is sent, a pong waiting timer is started, and if pong does not come, a forced disconnect is called.
 class WebSocketPingController {
     /// The time interval to ping connection to keep it alive.
-    static let pingTimeInterval: TimeInterval = 25
+    /// - Note:
+    /// Updated to 5 seconds based on https://www.notion.so/stream-wiki/Improved-Reconnects-and-ICE-connection-handling-2186a5d7f9f680c29236c2c37cfa11a3?source=copy_link#2186a5d7f9f68043968df9453ef5fa88
+    static let pingTimeInterval: TimeInterval = 5
     /// The time interval for pong timeout.
     static let pongTimeoutTimeInterval: TimeInterval = 3
     

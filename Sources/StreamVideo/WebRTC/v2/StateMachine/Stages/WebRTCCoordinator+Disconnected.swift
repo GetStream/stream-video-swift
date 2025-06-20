@@ -143,14 +143,22 @@ extension WebRTCCoordinator.StateMachine.Stage {
         }
 
         /// Attempts to reconnect based on the current reconnection strategy.
-        private func reconnect() {
+        private func reconnect() async {
             do {
                 switch context.reconnectionStrategy {
-                case let .fast(disconnectedSince, deadline) where abs(disconnectedSince.timeIntervalSinceNow) <= deadline:
-                    try transition?(.fastReconnecting(context))
-                case .fast, .rejoin:
+                case let .fast(disconnectedSince, deadline):
+                    if await isFastReconnectPossible(disconnectedSince: disconnectedSince, deadline: deadline) {
+                        context.fastReconnectionAttempts += 1
+                        try transition?(.fastReconnecting(context))
+                    } else {
+                        context.fastReconnectionAttempts = 0
+                        try transition?(.rejoining(context))
+                    }
+                case .rejoin:
+                    context.fastReconnectionAttempts = 0
                     try transition?(.rejoining(context))
                 case .migrate:
+                    context.fastReconnectionAttempts = 0
                     try transition?(.migrating(context))
                 case .unknown:
                     if let error = context.flowError {
@@ -191,7 +199,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                         .trace(.init(status: $0))
 
                     if $0.isAvailable {
-                        self?.reconnect()
+                        await self?.reconnect()
                     }
                 }
         }
@@ -238,6 +246,41 @@ extension WebRTCCoordinator.StateMachine.Stage {
         ///              them from staying in an unrecoverable state indefinitely.
         private func didTimeInStageExpired() {
             transitionErrorOrLog(ClientError.NetworkNotAvailable())
+        }
+
+        /// Checks if a fast reconnect is possible based on several conditions.
+        ///
+        /// A fast reconnect is a lightweight process to restore a connection without
+        /// going through the full rejoin flow. This method evaluates whether the current
+        /// state of the coordinator allows for such a reconnection.
+        ///
+        /// - Parameters:
+        ///   - disconnectedSince: The `Date` when the disconnection occurred.
+        ///   - deadline: The `TimeInterval` within which a fast reconnect must be
+        ///               initiated.
+        /// - Returns: `true` if a fast reconnect is possible, `false` otherwise.
+        private func isFastReconnectPossible(
+            disconnectedSince: Date,
+            deadline: TimeInterval
+        ) async -> Bool {
+            guard
+                // Ensure we haven't exceeded the maximum number of fast reconnection attempts.
+                context.fastReconnectionAttempts < context.fastReconnectionMaxAttempts,
+                // Check if the time since disconnection is within the allowed deadline.
+                abs(disconnectedSince.timeIntervalSinceNow) <= deadline,
+                // Verify that the WebRTC publisher is available and in a healthy state.
+                let publisher = await context.coordinator?.stateAdapter.publisher,
+                publisher.isHealthy,
+                // Verify that the WebRTC subscriber is available and in a healthy state.
+                let subscriber = await context.coordinator?.stateAdapter.subscriber,
+                subscriber.isHealthy
+            else {
+                // If any of the conditions are not met, fast reconnect is not possible.
+                return false
+            }
+
+            // All conditions are met, so a fast reconnect is possible.
+            return true
         }
     }
 }

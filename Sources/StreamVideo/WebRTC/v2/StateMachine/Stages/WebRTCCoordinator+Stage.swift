@@ -29,6 +29,14 @@ extension WebRTCCoordinator.StateMachine {
             var previousSessionSubscriber: RTCPeerConnectionCoordinator?
             var previousSFUAdapter: SFUAdapter?
 
+            // https://www.notion.so/stream-wiki/Improved-Reconnects-and-ICE-connection-handling-2186a5d7f9f680c29236c2c37cfa11a3?source=copy_link#2186a5d7f9f68088a9b1d6ecf67e5aad
+            var fastReconnectionMaxAttempts: Int = 3
+            var fastReconnectionAttempts: Int = 0
+
+            var healthCheckInterval: TimeInterval = 5
+            var webSocketHealthTimeout: TimeInterval = 15
+            var lastHealthCheckReceivedAt: Date?
+
             /// Determines the next reconnection strategy based on the current one.
             /// - Returns: The next reconnection strategy.
             func nextReconnectionStrategy() -> ReconnectionStrategy {

@@ -214,11 +214,78 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         ) { _ in }
     }
 
-    func test_transition_connectionRestoresWithFastStrategyWithoutExpiredDeadline_landsOnFastReconnectin() async {
+    func test_transition_connectionRestoresWithFastStrategyWithoutExpiredDeadline_landsOnFastReconnection() async throws {
         subject.context.reconnectionStrategy = .fast(disconnectedSince: .init(), deadline: 10)
+        let publisher =
+            try XCTUnwrap(MockRTCPeerConnectionCoordinator(peerType: .publisher, sfuAdapter: mockCoordinatorStack.sfuStack.adapter))
+        publisher.stub(for: \.isHealthy, with: true)
+        let subscriber =
+            try XCTUnwrap(MockRTCPeerConnectionCoordinator(
+                peerType: .subscriber,
+                sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+            ))
+        subscriber.stub(for: \.isHealthy, with: true)
+        await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.rtcPeerConnectionCoordinatorFactory.stubbedBuildCoordinatorResult[.publisher] = publisher
+        mockCoordinatorStack.rtcPeerConnectionCoordinatorFactory.stubbedBuildCoordinatorResult[.subscriber] = subscriber
+        try await mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
 
         await assertTransitionAfterTrigger(
             expectedTarget: .fastReconnecting,
+            trigger: { [mockCoordinatorStack] in
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.available(.great))
+            }
+        ) { _ in }
+    }
+
+    func test_transition_connectionRestoresWithFastStrategyPublisherNotHealthy_landsOnRejoin() async throws {
+        subject.context.reconnectionStrategy = .fast(disconnectedSince: .init(), deadline: 10)
+        let publisher =
+            try XCTUnwrap(MockRTCPeerConnectionCoordinator(peerType: .publisher, sfuAdapter: mockCoordinatorStack.sfuStack.adapter))
+        publisher.stub(for: \.isHealthy, with: false)
+        let subscriber =
+            try XCTUnwrap(MockRTCPeerConnectionCoordinator(
+                peerType: .subscriber,
+                sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+            ))
+        subscriber.stub(for: \.isHealthy, with: true)
+        await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.rtcPeerConnectionCoordinatorFactory.stubbedBuildCoordinatorResult[.publisher] = publisher
+        mockCoordinatorStack.rtcPeerConnectionCoordinatorFactory.stubbedBuildCoordinatorResult[.subscriber] = subscriber
+        try await mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .rejoining,
+            trigger: { [mockCoordinatorStack] in
+                mockCoordinatorStack?
+                    .internetConnection
+                    .subject
+                    .send(.available(.great))
+            }
+        ) { _ in }
+    }
+
+    func test_transition_connectionRestoresWithFastStrategySubscriberNotHealthy_landsOnRejoin() async throws {
+        subject.context.reconnectionStrategy = .fast(disconnectedSince: .init(), deadline: 10)
+        let publisher =
+            try XCTUnwrap(MockRTCPeerConnectionCoordinator(peerType: .publisher, sfuAdapter: mockCoordinatorStack.sfuStack.adapter))
+        publisher.stub(for: \.isHealthy, with: true)
+        let subscriber =
+            try XCTUnwrap(MockRTCPeerConnectionCoordinator(
+                peerType: .subscriber,
+                sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+            ))
+        subscriber.stub(for: \.isHealthy, with: false)
+        await mockCoordinatorStack.coordinator.stateAdapter.set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.rtcPeerConnectionCoordinatorFactory.stubbedBuildCoordinatorResult[.publisher] = publisher
+        mockCoordinatorStack.rtcPeerConnectionCoordinatorFactory.stubbedBuildCoordinatorResult[.subscriber] = subscriber
+        try await mockCoordinatorStack.coordinator.stateAdapter.configurePeerConnections()
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .rejoining,
             trigger: { [mockCoordinatorStack] in
                 mockCoordinatorStack?
                     .internetConnection
