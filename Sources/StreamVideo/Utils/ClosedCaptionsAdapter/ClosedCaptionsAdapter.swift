@@ -74,7 +74,8 @@ final class ClosedCaptionsAdapter {
      - Parameter call: The call instance to subscribe for closed caption events.
      */
     private func configure(with call: Call) {
-        cancellable = AsyncStreamPublisher(call.subscribe(for: ClosedCaptionEvent.self))
+        cancellable = call
+            .eventPublisher(for: ClosedCaptionEvent.self)
             .map(\.closedCaption)
             .removeDuplicates()
             .log(.debug) { "Processing closedCaption for speakerId:\($0.speakerId) text:\($0.text)." }

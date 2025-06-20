@@ -552,7 +552,7 @@ final class Call_Tests: StreamVideoTestCase, @unchecked Sendable {
 
         for step in steps {
             if step.onEventUpdate {
-                call.onEvent(.coordinatorEvent(step.event))
+                await call.onEvent(.coordinatorEvent(step.event))
                 await fulfillment(timeout: 2) { step.validation(call) }
             } else {
                 call.state.updateState(from: step.event)

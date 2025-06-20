@@ -6,7 +6,6 @@ import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-@MainActor
 final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private struct TestError: Error {}
@@ -132,12 +131,13 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             context,
             joinResponse: JoinCallResponse.dummy(),
             expectedTransition: .joined
-        ) {
+        ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
             XCTAssertEqual(self.call.state.callSettings, context.input.join?.callSettings)
         }
     }
 
+    @MainActor
     func test_execute_withoutRetries_callStateUpdatedWithInput() async throws {
         let context = Call.StateMachine.Stage.Context(
             call: call,
@@ -157,7 +157,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             context,
             joinResponse: JoinCallResponse.dummy(ownCapabilities: [.changeMaxDuration]),
             expectedTransition: .joined
-        ) {
+        ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
             XCTAssertEqual(self.call.state.ownCapabilities, [.changeMaxDuration])
         }
@@ -182,7 +182,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             context,
             joinResponse: JoinCallResponse.dummy(ownCapabilities: [.changeMaxDuration]),
             expectedTransition: .joined
-        ) {
+        ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
             XCTAssertEqual(self.call.microphone.status, .disabled)
         }
@@ -207,7 +207,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             context,
             joinResponse: JoinCallResponse.dummy(ownCapabilities: [.changeMaxDuration]),
             expectedTransition: .joined
-        ) {
+        ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
             XCTAssertEqual(self.streamVideo.state.activeCall?.cId, self.call.cId)
         }
@@ -240,7 +240,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             context,
             joinResponse: joinCallResponse,
             expectedTransition: .joined
-        ) {
+        ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
             XCTAssertEqual(self.streamVideo.state.activeCall?.cId, self.call.cId)
         }
@@ -268,7 +268,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             context,
             joinResponse: JoinCallResponse.dummy(ownCapabilities: [.changeMaxDuration]),
             expectedTransition: .joined
-        ) {
+        ) { @MainActor in
             XCTAssertEqual(self.callController.timesCalled(.join), 1)
             XCTAssertEqual(self.callController.timesCalled(.observeWebRTCStateUpdated), 1)
         }

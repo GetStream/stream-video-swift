@@ -17,9 +17,9 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
         mockStreamVideo = nil
         try await super.tearDown()
     }
-    
+
     // MARK: - Join Events Tests
-    
+
     func test_subscribeForCallJoinUpdates_addsNewParticipant() async throws {
         let mockCall = MockCall()
         mockCall.stub(
@@ -36,7 +36,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
         // we wait for loadCurrentMembers to complete
         try await Task.sleep(nanoseconds: 500_000_000)
 
-        mockCall.onEvent(
+        await mockCall.onEvent(
             .coordinatorEvent(
                 .typeCallSessionParticipantJoinedEvent(
                     .init(
@@ -51,9 +51,9 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
 
         await fulfilmentInMainActor { self.subject.participants.count == 1 }
     }
-    
+
     // MARK: - Leave Events Tests
-    
+
     func test_subscribeForCallLeaveUpdates_removesParticipant() async throws {
         let mockCall = MockCall()
         mockCall.stub(
@@ -69,7 +69,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
         _ = subject
         await fulfilmentInMainActor { self.subject.participants.count == 1 }
 
-        mockCall.onEvent(
+        await mockCall.onEvent(
             .coordinatorEvent(
                 .typeCallSessionParticipantLeftEvent(
                     .init(
@@ -85,7 +85,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
 
         await fulfilmentInMainActor { self.subject.participants.isEmpty }
     }
-    
+
     func test_subscribeForCallLeaveUpdates_doesNotRemoveWrongParticipant() async throws {
         let mockCall = MockCall()
         mockCall.stub(
@@ -108,7 +108,7 @@ final class LobbyViewModelTests: XCTestCase, @unchecked Sendable {
         _ = subject
         await fulfilmentInMainActor { self.subject.participants.count == 2 }
 
-        mockCall.onEvent(
+        await mockCall.onEvent(
             .coordinatorEvent(
                 .typeCallSessionParticipantLeftEvent(
                     .init(

@@ -133,7 +133,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_outgoingCall_rejectedEvent() async throws {
         // Given
         let callViewModel = await callViewModelWithRingingCall(participants: participants)
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let eventNotificationCenter = try XCTUnwrap(eventNotificationCenter)
@@ -165,7 +164,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         // Given
         let threeParticipants: [Member] = participants + [thirdUser]
         let callViewModel = await callViewModelWithRingingCall(participants: threeParticipants)
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let firstCallResponse = mockResponseBuilder.makeCallResponse(
@@ -213,7 +211,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_outgoingCall_callEndedEvent() async throws {
         // Given
         let callViewModel = await callViewModelWithRingingCall(participants: participants)
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let event = CallEndedEvent(
@@ -235,7 +232,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_outgoingCall_blockEventCurrentUser() async throws {
         // Given
         let callViewModel = await callViewModelWithRingingCall(participants: participants)
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let event = BlockedUserEvent(
@@ -257,7 +253,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_outgoingCall_blockEventOtherUser() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(
@@ -288,7 +283,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_outgoingCall_hangUp() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(
@@ -310,7 +304,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_incomingCall_acceptCall() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         let acceptResponse = AcceptCallResponse(duration: "1.0")
         let data = try JSONEncoder.default.encode(acceptResponse)
@@ -369,7 +362,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_incomingCall_acceptedFromSameUserElsewhere_callingStateChangesToIdle() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let event = CallRingEvent(
@@ -433,7 +425,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_incomingCall_sameUserAcceptedAnotherCall_callingStateShouldRemainIncoming() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let event = CallRingEvent(
@@ -503,7 +494,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_incomingCall_anotherUserAcceptedThisCall_callingStateShouldRemainIncoming() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let event = CallRingEvent(
@@ -573,7 +563,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_incomingCall_acceptedAnotherCallElsewhere_callingStateShouldRemainInCall() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let event = CallRingEvent(
@@ -643,7 +632,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_incomingCall_rejectCall() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         let event = CallRingEvent(
@@ -715,7 +703,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_enterLobby_joinCall() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.enterLobby(
@@ -757,7 +744,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_enterLobby_leaveCall() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.enterLobby(
@@ -799,7 +785,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_callSettings_toggleCamera() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
@@ -818,7 +803,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_callSettings_toggleAudio() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
@@ -837,7 +821,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_callSettings_toggleCameraPosition() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
@@ -858,7 +841,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_inCall_participantEvents() async throws {
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
@@ -892,7 +874,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         throw XCTSkip()
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
@@ -927,7 +908,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         throw XCTSkip()
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
@@ -956,7 +936,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
         throw XCTSkip()
         // Given
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
@@ -1200,7 +1179,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     func test_applicationDidBecomeActive_activatesAllTracksRequired() async throws {
         // Setup call
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         callViewModel.startCall(callType: .default, callId: callId, members: [])
         nonisolated(unsafe) let callingState = callViewModel.callingState
@@ -1337,7 +1315,6 @@ final class CallViewModel_Tests: StreamVideoTestCase, @unchecked Sendable {
     ) async throws {
         // Setup call
         let callViewModel = CallViewModel()
-        await fulfilmentInMainActor { callViewModel.isSubscribedToCallEvents }
 
         callViewModel.startCall(callType: .default, callId: callId, members: [])
         nonisolated(unsafe) let callingState = callViewModel.callingState

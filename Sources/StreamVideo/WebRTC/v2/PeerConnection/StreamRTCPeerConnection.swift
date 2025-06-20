@@ -72,7 +72,6 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     ///
     /// - Parameter sessionDescription: The RTCSessionDescription to set as the local description.
     /// - Throws: An error if setting the local description fails.
-    @MainActor
     func setLocalDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
@@ -98,7 +97,6 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     ///
     /// - Parameter sessionDescription: The RTCSessionDescription to set as the remote description.
     /// - Throws: An error if setting the remote description fails.
-    @MainActor
     func setRemoteDescription(
         _ sessionDescription: RTCSessionDescription
     ) async throws {
