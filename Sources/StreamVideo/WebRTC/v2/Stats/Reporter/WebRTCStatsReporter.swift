@@ -14,6 +14,7 @@ import StreamWebRTC
 final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
+    @Injected(\.timers) private var timers
 
     struct Input: @unchecked Sendable {
         var sessionID: String
@@ -102,10 +103,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
         }
 
         deliveryCancellable?.cancel()
-        deliveryCancellable = Foundation
-            .Timer
-            .publish(every: interval, on: .main, in: .default)
-            .autoconnect()
+        deliveryCancellable = timers.timer(for: interval)
             .compactMap { [weak self] _ in self?.provider() }
             .sink { [weak self] in self?.deliverStats($0) }
     }

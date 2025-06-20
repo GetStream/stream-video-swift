@@ -16,6 +16,8 @@ import StreamWebRTC
 /// restoration in the event of network errors or reconnects.
 final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
 
+    @Injected(\.timers) private var timers
+
     /// Identifiers for the different Combine subscriptions/disposables in use.
     private enum DisposableKey: String {
         case publisherUpdated
@@ -291,10 +293,7 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
     /// - Parameter key: The disposable key to manage the reporting timer.
     private func scheduleStatsReporting(for key: DisposableKey) {
         disposableBag.remove(key.rawValue)
-        Foundation
-            .Timer
-            .publish(every: 3, on: .main, in: .default)
-            .autoconnect()
+        timers.timer(for: 3)
             .sink { [weak self] _ in
                 self?.reporter.triggerDelivery()
                 self?.disposableBag.remove(key.rawValue)
