@@ -5,7 +5,7 @@
 import AVFoundation
 
 /// A protocol that defines the properties and methods for a capture device.
-protocol CaptureDeviceProtocol: Sendable {
+public protocol CaptureDeviceProtocol: Sendable {
     /// The position of the capture device.
     var position: AVCaptureDevice.Position { get }
 

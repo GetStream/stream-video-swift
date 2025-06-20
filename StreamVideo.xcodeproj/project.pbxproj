@@ -1278,7 +1278,7 @@
 		849A04DE2D198A0C004C33F2 /* StopLiveRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849A04DA2D198A0C004C33F2 /* StopLiveRequest.swift */; };
 		849A05122D199EE2004C33F2 /* StreamAppStateAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B48C0F2D14B901002C4EAB /* StreamAppStateAdapter_Tests.swift */; };
 		849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8A297AFCC80072A12D /* PreJoiningView.swift */; };
-		849EDA8D297AFD840072A12D /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8C297AFD840072A12D /* Camera.swift */; };
+		849EDA8D297AFD840072A12D /* CameraAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8C297AFD840072A12D /* CameraAdapter.swift */; };
 		849EDA8F297AFE1C0072A12D /* LobbyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8E297AFE1C0072A12D /* LobbyViewModel.swift */; };
 		84A4DCBB2A41DC6E00B1D1BF /* AsyncAssert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */; };
 		84A4DDBD2A3B35030097F3E9 /* LocationFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */; };
@@ -2719,7 +2719,7 @@
 		849A04DA2D198A0C004C33F2 /* StopLiveRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopLiveRequest.swift; sourceTree = "<group>"; };
 		849A04DB2D198A0C004C33F2 /* StopTranscriptionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopTranscriptionRequest.swift; sourceTree = "<group>"; };
 		849EDA8A297AFCC80072A12D /* PreJoiningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreJoiningView.swift; sourceTree = "<group>"; };
-		849EDA8C297AFD840072A12D /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		849EDA8C297AFD840072A12D /* CameraAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAdapter.swift; sourceTree = "<group>"; };
 		849EDA8E297AFE1C0072A12D /* LobbyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyViewModel.swift; sourceTree = "<group>"; };
 		84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncAssert.swift; sourceTree = "<group>"; };
 		84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationFetcher.swift; sourceTree = "<group>"; };
@@ -6626,7 +6626,7 @@
 				846FBE8C28AAEBBC00147F6E /* SearchBar.swift */,
 				846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */,
 				8458B703290ACF2A00F8E487 /* CallSoundsPlayer.swift */,
-				849EDA8C297AFD840072A12D /* Camera.swift */,
+				849EDA8C297AFD840072A12D /* CameraAdapter.swift */,
 				8469593D29BF214700134EA0 /* ViewExtensions.swift */,
 				846E4B0429D2D3D3003733AB /* ModifiedContent.swift */,
 				8479F83329C09EF1009ECE37 /* UserAvatar.swift */,
@@ -8569,7 +8569,7 @@
 				846FBE8D28AAEBBC00147F6E /* SearchBar.swift in Sources */,
 				40245F3E2BE2709800FCF075 /* StatelessParticipantsListButton.swift in Sources */,
 				846E4B0529D2D3D3003733AB /* ModifiedContent.swift in Sources */,
-				849EDA8D297AFD840072A12D /* Camera.swift in Sources */,
+				849EDA8D297AFD840072A12D /* CameraAdapter.swift in Sources */,
 				844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */,
 				8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */,
 				4072A5862DAE821C00108E8F /* PictureInPictureVideoRendererView.swift in Sources */,
