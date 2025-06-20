@@ -14,6 +14,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.timers) private var timers
+    private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
     final class CallEntry: Equatable, @unchecked Sendable {
@@ -90,7 +91,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private var active: UUID?
     var callCount: Int { storageAccessQueue.sync { _storage.count } }
 
-    private var callEventsSubscription: Task<Void, Error>?
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
@@ -625,8 +625,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Subscribing to events is being used to reject/stop calls that have been accepted/rejected
     /// on other devices or components (e.g. incoming callScreen, CallKitService)
     private func subscribeToCallEvents() {
-        callEventsSubscription?.cancel()
-        callEventsSubscription = nil
+        disposableBag.removeAll()
 
         guard let streamVideo else {
             log.warning(
@@ -639,8 +638,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             return
         }
 
-        callEventsSubscription = Task {
-            for await event in streamVideo.subscribe() {
+        streamVideo
+            .eventPublisher()
+            .sink { [weak self] event in
+                guard let self else { return }
                 switch event {
                 case let .typeCallEndedEvent(response):
                     callEnded(response.callCid, ringingTimedOut: false)
@@ -654,7 +655,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     break
                 }
             }
-        }
+            .store(in: disposableBag)
 
         log.debug(
             "\(type(of: self)) is now subscribed to CallEvent updates.",
