@@ -22,7 +22,7 @@ extension AVCaptureDevice {
     ///
     /// - Note: The formats are sorted by their area difference relative to the preferred dimensions
     ///   before applying the selection criteria.
-    func outputFormat(
+    public func outputFormat(
         preferredDimensions: CMVideoDimensions,
         preferredFrameRate: Int
     ) -> AVCaptureDevice.Format? {
