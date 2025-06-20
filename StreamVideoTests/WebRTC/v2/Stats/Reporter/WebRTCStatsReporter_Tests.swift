@@ -28,7 +28,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
         onError: { _ in }
     )
     private lazy var subject: WebRTCStatsReporter! = .init(
-        interval: 2,
+        interval: 1,
         provider: { self.input }
     )
 
@@ -82,20 +82,29 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
-        subject.sfuAdapter = mockSFUStack.adapter
-        await wait(for: subject.interval / 2)
-
         let sfuStack = MockSFUStack()
-        subject.sfuAdapter = sfuStack.adapter
-        sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
 
-        await wait(for: 0.5)
-        XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
-        XCTAssertNil(sfuStack.service.sendStatsWasCalledWithRequest)
+        await withTaskGroup { group in
+            group.addTask {
+                self.subject.sfuAdapter = self.mockSFUStack.adapter
+                await self.wait(for: self.subject.interval / 2)
 
-        await fulfillment { sfuStack.service.sendStatsWasCalledWithRequest != nil }
-        XCTAssertNil(mockSFUStack.service.sendStatsWasCalledWithRequest)
-        XCTAssertNotNil(sfuStack.service.sendStatsWasCalledWithRequest)
+                self.subject.sfuAdapter = sfuStack.adapter
+                sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+            }
+
+            group.addTask {
+                await self.wait(for: self.subject.interval)
+                XCTAssertNil(self.mockSFUStack.service.sendStatsWasCalledWithRequest)
+                XCTAssertNil(sfuStack.service.sendStatsWasCalledWithRequest)
+
+                await self.fulfillment { sfuStack.service.sendStatsWasCalledWithRequest != nil }
+                XCTAssertNil(self.mockSFUStack.service.sendStatsWasCalledWithRequest)
+                XCTAssertNotNil(sfuStack.service.sendStatsWasCalledWithRequest)
+            }
+
+            await group.waitForAll()
+        }
     }
 
     // MARK: - setInterval

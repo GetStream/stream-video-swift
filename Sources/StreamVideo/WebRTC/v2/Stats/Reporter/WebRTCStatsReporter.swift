@@ -34,7 +34,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     /// The SFU adapter used to send collected statistics.
     ///
     /// Setting this property triggers a reset of the collection and delivery processes.
-    var sfuAdapter: SFUAdapter? { didSet { didUpdate(sfuAdapter) } }
+    var sfuAdapter: SFUAdapter? { willSet { didUpdate(newValue) } }
 
     private let provider: () -> Input?
 
@@ -86,23 +86,25 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
     /// is provided.
     private func didUpdate(_ sfuAdapter: SFUAdapter?) {
         activeDeliveryTask?.cancel()
-        deliveryCancellable?.cancel()
+        activeDeliveryTask = nil
 
         guard sfuAdapter != nil else {
             return
         }
 
         scheduleDelivery(with: interval)
+        log.debug("Delivery scheduled on hostname:\(sfuAdapter?.hostname) with interval:\(interval) seconds.")
     }
 
     private func scheduleDelivery(with interval: TimeInterval) {
+        deliveryCancellable?.cancel()
+        deliveryCancellable = nil
+
         guard interval > 0 else {
             log.warning("Delivery interval should be greater than 0.", subsystems: .webRTC)
-            deliveryCancellable?.cancel()
             return
         }
 
-        deliveryCancellable?.cancel()
         deliveryCancellable = timers.timer(for: interval)
             .compactMap { [weak self] _ in self?.provider() }
             .sink { [weak self] in self?.deliverStats($0) }
