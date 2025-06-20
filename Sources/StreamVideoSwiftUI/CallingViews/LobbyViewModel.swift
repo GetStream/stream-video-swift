@@ -58,7 +58,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
                 (camera as? Camera)?.switchCaptureDevice()
             }
             Task {
-                await(camera as? Camera)?.start()
+                await (camera as? Camera)?.start()
             }
         }
     }
