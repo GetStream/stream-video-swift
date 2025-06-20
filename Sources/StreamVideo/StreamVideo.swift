@@ -27,7 +27,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
 
         @Published public internal(set) var ringingCall: Call?
-        
+
+        private nonisolated let disposableBag = DisposableBag()
+
         init(user: User) {
             self.user = user
             connection = .initialized
@@ -41,8 +43,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             }
 
             if ringingCall != nil {
-                Task { @MainActor in
-                    ringingCall = nil
+                Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                    self?.ringingCall = nil
                 }
             }
         }
@@ -82,7 +84,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
-    private let disposableBag = DisposableBag()
 
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -106,6 +107,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
+    private let disposableBag = DisposableBag()
 
     private lazy var idleTimerAdapter = IdleTimerAdapter(self)
 
@@ -453,7 +455,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             return
         }
 
-        connectTask = Task {
+        connectTask = Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
             if user.type == .guest {
                 do {
                     try Task.checkCancellation()
@@ -476,6 +481,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     log.error(error)
                 }
             }
+
+            connectTask = nil
         }
     }
 
@@ -588,7 +595,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         for user: User,
         apiKey: String
     ) async throws -> (user: User, token: UserToken, tokenProvider: UserTokenProvider) {
-        let guestUserResponse = try await Self.createGuestUser(
+        let guestUserResponse = try await createGuestUser(
             id: user.id,
             apiKey: apiKey,
             environment: environment
@@ -608,8 +615,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 customData: updatedUser.customData
             )
         }
-        let tokenProvider = { @Sendable [environment = self.environment] result in
-            Self.loadGuestToken(
+        let tokenProvider: UserTokenProvider = { @Sendable [weak self] result in
+            guard let self else {
+                result(.failure(ClientError("StreamVideo instance has been invalidated.")))
+                return
+            }
+            loadGuestToken(
                 userId: user.id,
                 apiKey: apiKey,
                 environment: environment,
@@ -667,7 +678,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         try await connectWebSocketClient()
     }
     
-    private static func createGuestUser(
+    private func createGuestUser(
         id: String,
         apiKey: String,
         environment: Environment
@@ -682,21 +693,30 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         return try await defaultAPI.createGuest(createGuestRequest: request)
     }
     
-    private static func loadGuestToken(
+    private func loadGuestToken(
         userId: String,
         apiKey: String,
         environment: Environment,
         result: @Sendable @escaping (Result<UserToken, Error>) -> Void
     ) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return result(.failure(ClientError("StreamVideo has been invalidated.")))
+            }
             do {
+                try Task.checkCancellation()
+
                 let response = try await createGuestUser(
                     id: userId,
                     apiKey: apiKey,
                     environment: environment
                 )
+
+                try Task.checkCancellation()
+
                 let tokenValue = response.accessToken
                 let token = UserToken(rawValue: tokenValue)
+
                 result(.success(token))
             } catch {
                 result(.failure(error))
@@ -705,7 +725,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     }
     
     private func prefetchLocation() {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
             do {
                 self.cachedLocation = try await LocationFetcher.getLocation()
             } catch {
@@ -726,7 +749,10 @@ extension StreamVideo: ConnectionStateDelegate {
         case let .disconnected(source):
             if let serverError = source.serverError {
                 if serverError.isInvalidTokenError {
-                    Task {
+                    Task(disposableBag: disposableBag) { [weak self] in
+                        guard let self else {
+                            return
+                        }
                         do {
                             guard let apiTransport = apiTransport as? URLSessionTransport else { return }
                             self.token = try await apiTransport.refreshToken()
@@ -797,7 +823,7 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            executeOnMain { [weak self, call] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
                 guard let self else { return }
                 call.state.update(from: ringEvent)
                 self.state.ringingCall = call

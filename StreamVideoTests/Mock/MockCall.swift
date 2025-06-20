@@ -11,6 +11,7 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
     typealias FunctionInputKey = MockCallFunctionInputKey
 
     enum MockCallFunctionKey: Hashable, CaseIterable {
+        case create
         case get
         case accept
         case reject
@@ -83,6 +84,23 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
 
     func stub<T>(for function: FunctionKey, with value: T) {
         stubbedFunction[function] = value
+    }
+
+    override func create(
+        members: [MemberRequest]? = nil,
+        memberIds: [String]? = nil,
+        custom: [String: RawJSON]? = nil,
+        startsAt: Date? = nil,
+        team: String? = nil,
+        ring: Bool = false,
+        notify: Bool = false,
+        maxDuration: Int? = nil,
+        maxParticipants: Int? = nil,
+        backstage: BackstageSettingsRequest? = nil,
+        video: Bool? = nil,
+        transcription: TranscriptionSettingsRequest? = nil
+    ) async throws -> CallResponse {
+        stubbedFunction[.create] as! CallResponse
     }
 
     override func get(

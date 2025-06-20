@@ -52,6 +52,7 @@ final class OrderedCapacityQueue<Element> {
         self.removalTime = removalTime
         removalTimerCancellable = timers
             .timer(for: ScreenPropertiesAdapter.currentValue.refreshRate)
+            .receive(on: DispatchQueue.global(qos: .userInteractive))
             .sink { [weak self] _ in self?.removeItemsIfRequired() }
     }
     

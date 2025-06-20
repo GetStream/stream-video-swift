@@ -101,10 +101,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     ///
     /// This method removes all transceivers from storage and logs deallocation details.
     deinit {
-        Task { @MainActor [transceiverStorage] in
-            transceiverStorage.removeAll()
-        }
-
+        transceiverStorage.removeAll()
         log.debug(
             """
             Local screenShareTracks will be deallocated

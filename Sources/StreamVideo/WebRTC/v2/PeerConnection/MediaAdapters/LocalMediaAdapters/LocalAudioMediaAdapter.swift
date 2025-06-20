@@ -88,9 +88,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Cleans up resources when the instance is deallocated.
     deinit {
-        Task { @MainActor [transceiverStorage] in
-            transceiverStorage.removeAll()
-        }
+        transceiverStorage.removeAll()
         log.debug(
             """
             Local audio tracks will be deallocated:

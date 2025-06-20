@@ -16,6 +16,9 @@ final class VideoProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
     override func setUp() async throws {
         try await super.setUp()
         _ = mockCall
+        /// We need to wait for all observations in CallController/WebRTCCoordinator and Call have been
+        /// completed, in order to avoid unwanted changes to CallSettings.
+        await wait(for: 1)
     }
 
     override func tearDown() async throws {

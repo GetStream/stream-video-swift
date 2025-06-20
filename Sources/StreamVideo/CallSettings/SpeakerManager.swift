@@ -22,7 +22,14 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
     @Published public internal(set) var audioOutputStatus: CallSettingsStatus
 
     weak var call: Call? {
-        didSet { Task { await didUpdateCall(call) } }
+        didSet {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else {
+                    return
+                }
+                await didUpdateCall(call)
+            }
+        }
     }
 
     internal let callController: CallController

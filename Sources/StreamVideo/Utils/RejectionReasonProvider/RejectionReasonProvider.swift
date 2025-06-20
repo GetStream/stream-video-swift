@@ -29,7 +29,7 @@ final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked 
     nonisolated(unsafe) private weak var streamVideo: StreamVideo?
 
     /// A container for managing cancellable subscriptions.
-    private let cancellables: DisposableBag = .init()
+    private let disposableBag: DisposableBag = .init()
 
     init(_ streamVideo: StreamVideo) {
         self.streamVideo = streamVideo
@@ -52,7 +52,7 @@ final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked 
 
         let isUserBusy = activeCall != nil
         let userId = streamVideo?.user.id
-        let isUserRejectingOutgoingCall = await Task { @MainActor in
+        let isUserRejectingOutgoingCall = await Task(disposableBag: disposableBag) { @MainActor in
             rejectingCall.state.createdBy?.id == userId
         }.value
 

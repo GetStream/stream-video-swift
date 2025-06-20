@@ -11,6 +11,9 @@ protocol StreamVideoCapturerActionHandler: Sendable {
 
 actor StreamVideoCapturer: StreamVideoCapturing {
 
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     enum Action: @unchecked Sendable, CustomStringConvertible {
     case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
          case startCapture(
@@ -102,6 +105,7 @@ actor StreamVideoCapturer: StreamVideoCapturing {
     private let videoCapturer: RTCVideoCapturer
     private let videoCapturerDelegate: RTCVideoCapturerDelegate
     private let actionHandlers: [StreamVideoCapturerActionHandler]
+    private let disposableBag = DisposableBag()
 
     private var videoCaptureSession: AVCaptureSession? {
         guard
@@ -353,7 +357,10 @@ actor StreamVideoCapturer: StreamVideoCapturing {
     private func enqueueOperation(
         for action: Action
     ) -> Task<Void, Error> {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
             let actionHandlers = self.actionHandlers
             for actionHandler in actionHandlers {
                 try await actionHandler.handle(action)

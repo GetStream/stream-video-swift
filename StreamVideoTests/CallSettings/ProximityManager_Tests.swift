@@ -9,83 +9,76 @@ import XCTest
 
 @MainActor
 final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
-    private nonisolated(unsafe) static var mockStreamVideo: MockStreamVideo! = .init()
 
     private var mockCurrentDevice: CurrentDevice! = .dummy { .phone }
+    private lazy var mockProximityMonitor: MockProximityMonitor! = .init()
     private lazy var mockCall: MockCall! = .init(.dummy())
-    private lazy var subject: ProximityManager! = .init(mockCall)
-
-    override class func setUp() {
-        super.setUp()
-        _ = mockStreamVideo
-    }
+    private lazy var mockActiveCallSubject: PassthroughSubject<Call?, Never>! = .init()
+    private lazy var subject: ProximityManager! = .init(
+        mockCall,
+        activeCallPublisher: mockActiveCallSubject.eraseToAnyPublisher()
+    )
 
     override func setUp() async throws {
         try await super.setUp()
+        CurrentDevice.currentValue = mockCurrentDevice
+        await fulfillment { CurrentDevice.currentValue.deviceType == .phone }
+        _ = mockProximityMonitor
         _ = mockCurrentDevice
         _ = mockCall
-        CurrentDevice.currentValue = mockCurrentDevice
+        _ = subject
     }
 
     override func tearDown() async throws {
         subject = nil
         mockCall = nil
+        mockActiveCallSubject = nil
         mockCurrentDevice = nil
+        mockProximityMonitor = nil
         CurrentDevice.currentValue = .init()
         try await super.tearDown()
-    }
-
-    override class func tearDown() {
-        Self.mockStreamVideo = nil
-        super.tearDown()
     }
 
     // MARK: - didUpdateActiveCall
 
     func test_didUpdateActiveCall_anotherCallIsNowActive_noPolicies_startObservationWasNotCalledOnProximityMonitor() async throws {
-        let mockProximityMonitor = MockProximityMonitor()
-        Self.mockStreamVideo.state.activeCall = MockCall(.dummy())
+        mockActiveCallSubject.send(mockCall)
 
         await wait(for: 0.25)
         XCTAssertEqual(mockProximityMonitor.timesCalled(.startObservation), 0)
     }
 
     func test_didUpdateActiveCall_ownCallIsNowActive_noPolicies_startObservationWasNotCalledOnProximityMonitor() async throws {
-        let mockProximityMonitor = MockProximityMonitor()
-        Self.mockStreamVideo.state.activeCall = mockCall
+        mockActiveCallSubject.send(mockCall)
 
         await wait(for: 0.25)
         XCTAssertEqual(mockProximityMonitor.timesCalled(.startObservation), 0)
     }
 
     func test_didUpdateActiveCall_anotherCallIsNowActive_withPolicies_startObservationWastCalledOnProximityMonitor() async throws {
-        let mockProximityMonitor = MockProximityMonitor()
-        await fulfillment { StreamVideoProviderKey.currentValue != nil }
         try subject.add(MockProximityPolicy())
 
-        Self.mockStreamVideo.state.activeCall = MockCall(.dummy())
+        mockActiveCallSubject.send(MockCall(.dummy()))
+        await wait(for: 0.5)
 
         XCTAssertEqual(mockProximityMonitor.timesCalled(.startObservation), 0)
     }
 
+    @MainActor
     func test_didUpdateActiveCall_ownCallIsNowActive_withPolicies_startObservationWastCalledOnProximityMonitor() async throws {
-        let mockProximityMonitor = MockProximityMonitor()
-        _ = subject
         try subject.add(MockProximityPolicy())
+        mockActiveCallSubject.send(mockCall)
 
-        Self.mockStreamVideo.state.activeCall = mockCall
-
-        await fulfilmentInMainActor { mockProximityMonitor.timesCalled(.startObservation) == 1 }
+        await fulfilmentInMainActor { self.mockProximityMonitor.timesCalled(.startObservation) == 1 }
     }
 
     func test_didUpdateActiveCall_ownCallIsNowInactiveAfterBeingActive_withoutPolicies_stopObservationWastNotCalledOnProximityMonitor(
     ) async throws {
-        let mockProximityMonitor = MockProximityMonitor()
         _ = subject
-        Self.mockStreamVideo.state.activeCall = mockCall
+        mockActiveCallSubject.send(mockCall)
         await wait(for: 0.25)
 
-        Self.mockStreamVideo.state.activeCall = nil
+        mockActiveCallSubject.send(nil)
 
         await wait(for: 0.25)
         XCTAssertEqual(mockProximityMonitor.timesCalled(.stopObservation), 0)
@@ -93,21 +86,18 @@ final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didUpdateActiveCall_ownCallIsNowInactiveAfterBeingActive_withPolicies_stopObservationWastCalledOnProximityMonitor(
     ) async throws {
-        let mockProximityMonitor = MockProximityMonitor()
-        _ = subject
         try subject.add(MockProximityPolicy())
-        Self.mockStreamVideo.state.activeCall = mockCall
-        await fulfilmentInMainActor { mockProximityMonitor.timesCalled(.startObservation) == 1 }
+        mockActiveCallSubject.send(mockCall)
+        await fulfilmentInMainActor { self.mockProximityMonitor.timesCalled(.startObservation) == 1 }
 
-        Self.mockStreamVideo.state.activeCall = nil
+        mockActiveCallSubject.send(nil)
 
-        await fulfilmentInMainActor { mockProximityMonitor.timesCalled(.stopObservation) == 1 }
+        await fulfilmentInMainActor { self.mockProximityMonitor.timesCalled(.stopObservation) == 1 }
     }
 
     // MARK: - didUpdateProximity
 
     func test_didUpdateProximity_ownCallIsInactive_didUpdateProximityWasNotCalledOnPolicy() async throws {
-        let mockProximityMonitor = MockProximityMonitor()
         let mockSubject = PassthroughSubject<ProximityState, Never>()
         mockProximityMonitor.stub(for: \.statePublisher, with: mockSubject.eraseToAnyPublisher())
         _ = subject
@@ -121,14 +111,13 @@ final class ProximityManager_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_didUpdateProximity_ownCallIsActive_didUpdateProximityWasCalledOnPolicies() async throws {
-        let mockProximityMonitor = MockProximityMonitor()
         let mockSubject = PassthroughSubject<ProximityState, Never>()
         mockProximityMonitor.stub(for: \.statePublisher, with: mockSubject.eraseToAnyPublisher())
         _ = subject
         let policyA = MockProximityPolicy()
         try subject.add(policyA)
-        Self.mockStreamVideo.state.activeCall = mockCall
-        await fulfilmentInMainActor { mockProximityMonitor.timesCalled(.startObservation) == 1 }
+        mockActiveCallSubject.send(mockCall)
+        await fulfilmentInMainActor { self.mockProximityMonitor.timesCalled(.startObservation) == 1 }
 
         mockSubject.send(.near)
 

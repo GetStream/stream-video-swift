@@ -5,13 +5,13 @@
 import AVFoundation
 import Foundation
 
-/// The AVAudioRecorderBuilder actor simplifies the creation and management of AVAudioRecorder
+/// The AVAudioRecorderBuilder simplifies the creation and management of AVAudioRecorder
 /// instances for audio recording. It offers:
 /// Caching: Stores created AVAudioRecorder objects for efficient reuse, avoiding redundant initialization.
 /// Customisable settings: Allows you to tailor recording parameters to your specific needs.
 ///
 /// - Important: You need to call `.build()` before trying to access the `result` property.
-actor AVAudioRecorderBuilder {
+final class AVAudioRecorderBuilder {
 
     // `kAudioFormatLinearPCM` is being used to be able to support multiple
     // instances of AVAudioRecorders. (useful when using MicrophoneChecker
@@ -30,6 +30,7 @@ actor AVAudioRecorderBuilder {
     /// A dictionary containing audio format, sample rate, number of channels, and quality configurations.
     let settings: [String: Any]
 
+    private let queue = UnfairQueue()
     /// A property storing the built AVAudioRecorder instance.
     private var cachedResult: AVAudioRecorder?
 
@@ -43,7 +44,7 @@ actor AVAudioRecorderBuilder {
             for: .cachesDirectory,
             in: .userDomainMask
         )[0]
-        self.fileURL = documentPath.appendingPathComponent(filename)
+        fileURL = documentPath.appendingPathComponent(filename)
         self.settings = settings
     }
 
@@ -51,14 +52,17 @@ actor AVAudioRecorderBuilder {
         cachedResult: AVAudioRecorder
     ) {
         self.cachedResult = cachedResult
-        self.fileURL = cachedResult.url
-        self.settings = cachedResult.settings
+        fileURL = cachedResult.url
+        settings = cachedResult.settings
     }
 
     /// Instructs the `AVAudioRecorderBuilder` to build and cache an instance of AVAudioRecorder.
     func build() throws {
-        guard cachedResult == nil else { return }
-        let audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
-        self.cachedResult = audioRecorder
+        try queue.sync {
+            if cachedResult == nil {
+                let audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
+                self.cachedResult = audioRecorder
+            }
+        }
     }
 }

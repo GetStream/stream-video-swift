@@ -125,10 +125,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// Removes all transceivers from storage and logs details about the
     /// deallocation process.
     deinit {
-        Task { @MainActor [transceiverStorage] in
-            transceiverStorage.removeAll()
-        }
-
+        transceiverStorage.removeAll()
         log.debug(
             """
             Local video tracks will be deallocated:
@@ -271,7 +268,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
 
-            Task { @MainActor [weak self] in
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 do {
                     try await self?.stopVideoCapturingSession()
                 } catch {
@@ -558,9 +555,9 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// - Parameter videoFilter: The video filter to apply.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
-        Task { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             await self?.capturer?.setVideoFilter(videoFilter)
-        }.store(in: disposableBag, key: "\(#function)")
+        }
     }
 
     /// Zooms the camera by a given factor.

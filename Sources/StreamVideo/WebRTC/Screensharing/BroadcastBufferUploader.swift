@@ -12,15 +12,19 @@ actor BroadcastBufferUploader {
     
     private var isReady = false
     private var connection: BroadcastBufferUploadConnection
-    
+
     private var dataToSend: Data?
     private var byteIndex = 0
     private let compressionQuality: Float = 0.7
-        
+    private let disposableBag = DisposableBag()
+
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     init(connection: BroadcastBufferUploadConnection) {
         self.connection = connection
-        Task {
-            await setupConnection()
+        Task(disposableBag: disposableBag) { [weak self] in
+            await self?.setupConnection()
         }
     }
     
@@ -45,13 +49,14 @@ actor BroadcastBufferUploader {
     func setupConnection() {
         connection.onOpen = { [weak self] in
             guard let self else { return }
-            Task {
-                await self.update(isReady: true)
+            Task(disposableBag: disposableBag) { [weak self] in
+                await self?.update(isReady: true)
             }
         }
         connection.hasSpaceAvailable = { [weak self] in
             guard let self else { return }
-            Task {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
                 let success = await self.sendDataChunk()
                 await self.update(isReady: !success)
             }

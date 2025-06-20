@@ -73,7 +73,9 @@ final class RTCTemporaryPeerConnection {
     /// Cleans up resources when the instance is being deallocated.
     deinit {
         peerConnection.transceivers.forEach { $0.stopInternal() }
+        // swiftlint:disable discourage_task_init
         Task { [peerConnection] in await peerConnection.close() }
+        // swiftlint:enable discourage_task_init
     }
 
     /// Creates an offer for the temporary peer connection.

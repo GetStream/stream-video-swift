@@ -22,6 +22,8 @@ final class SFUEventAdapter: @unchecked Sendable {
     /// The threshold of participants above which certain behaviors change.
     private let participantsThreshold = 10
 
+    private let processingQueue = SerialActorQueue()
+
     var isActive: Bool { !disposableBag.isEmpty }
 
     /// Initializes a new instance of SFUEventAdapter.
@@ -52,7 +54,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) for userIds:\($0.connectionQualityUpdates.map(\.userID).joined(separator: ","))."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleConnectionQualityChanged($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleConnectionQualityChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -60,7 +62,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) for userIds:\($0.audioLevels.map(\.userID).joined(separator: ","))."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleAudioLevelChanged($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleAudioLevelChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -68,7 +70,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) with \($0.audioSenders.endIndex) audioRenders and \($0.videoSenders.endIndex) videoRenderers."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleChangePublishQuality($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleChangePublishQuality($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -76,7 +78,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) on callCid:\($0.callCid) for participant:\($0.participant.name)."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleParticipantJoined($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleParticipantJoined($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -84,13 +86,13 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) on callCid:\($0.callCid) for participant:\($0.participant.name)."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleParticipantLeft($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleParticipantLeft($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_DominantSpeakerChanged.self)
             .log(.debug, subsystems: .sfu) { "Processing SFU event of type:\($0.name) for userId:\($0.userID)." }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleDominantSpeakerChanged($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleDominantSpeakerChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -98,7 +100,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) with anonymous:\($0.participantCount.anonymous) total:\($0.participantCount.total)."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleHealthCheckResponse($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleHealthCheckResponse($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -106,7 +108,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) for userID:\($0.userID) trackType:\($0.type.rawValue)."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleTrackPublished($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleTrackPublished($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -114,13 +116,13 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\($0.name) for userID:\($0.userID) trackType:\($0.type.rawValue)."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleTrackUnpublished($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleTrackUnpublished($0) }
             .store(in: disposableBag)
 
         sfuAdapter
             .publisher(eventType: Stream_Video_Sfu_Event_PinsChanged.self)
             .log(.debug, subsystems: .sfu) { "Processing SFU event of type:\(type(of: $0))." }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handlePinsChanged($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handlePinsChanged($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -128,7 +130,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\(type(of: $0)) on callCid:\($0.callCid) participant:\($0.participant.name)."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleParticipantUpdated($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleParticipantUpdated($0) }
             .store(in: disposableBag)
 
         sfuAdapter
@@ -136,7 +138,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             .log(.debug, subsystems: .sfu) {
                 "Processing SFU event of type:\(type(of: $0)) on callCid:\($0.publishOptions.map(\.trackType.description).joined(separator: ",")) reason:\($0.reason)."
             }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleChangePublishOptions($0) }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleChangePublishOptions($0) }
             .store(in: disposableBag)
     }
 
@@ -222,13 +224,16 @@ final class SFUEventAdapter: @unchecked Sendable {
         guard
             event.participant.userID != recordingUserId
         else {
+            log.debug("enqueue participant invalid")
             return
         }
 
+        log.debug("Will enqueue participant joined event: \(event.participant.name)")
         await stateAdapter.enqueue { [participantsThreshold] participants in
             var updatedParticipants = participants
 
             guard updatedParticipants[event.participant.sessionID] == nil else {
+                log.debug("enqueue participant failed, already exist: \(event.participant.name)")
                 return participants
             }
 
@@ -236,6 +241,7 @@ final class SFUEventAdapter: @unchecked Sendable {
             let participant = event.participant.toCallParticipant()
                 .withUpdated(showTrack: showTrack)
             updatedParticipants[event.participant.sessionID] = participant
+            log.debug("Enqueue participant joined event: \(event.participant.name) success!")
 
             return updatedParticipants
         }

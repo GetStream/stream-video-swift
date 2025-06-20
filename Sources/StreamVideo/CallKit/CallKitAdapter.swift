@@ -11,6 +11,7 @@ open class CallKitAdapter {
 
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
     @Injected(\.callKitService) private var callKitService
+    @Injected(\.currentDevice) private var currentDevice
 
     private var loggedInStateCancellable: AnyCancellable?
 
@@ -48,11 +49,17 @@ open class CallKitAdapter {
 
     /// Registers for incoming calls.
     open func registerForIncomingCalls() {
+        guard currentDevice.deviceType != .simulator else {
+            return
+        }
         callKitPushNotificationAdapter.register()
     }
 
     /// Unregisters for incoming calls.
     open func unregisterForIncomingCalls() {
+        guard currentDevice.deviceType != .simulator else {
+            return
+        }
         callKitPushNotificationAdapter.unregister()
     }
 

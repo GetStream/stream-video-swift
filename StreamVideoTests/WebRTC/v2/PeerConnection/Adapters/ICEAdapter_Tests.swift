@@ -118,6 +118,7 @@ final class ICEAdapterTests: XCTestCase, @unchecked Sendable {
         var candidate = Stream_Video_Sfu_Models_ICETrickle()
         candidate.iceCandidate = iceCandidate.sdp
         mockSFUStack.receiveEvent(.sfuEvent(.iceTrickle(candidate)))
+        await wait(for: 1.0) // Wait until the event has been processed from the ICEAdapter
 
         mockPeerConnection
             .subject

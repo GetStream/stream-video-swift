@@ -11,6 +11,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     @Atomic private var isRecording: Bool = false
     private var activeSession: Session?
     private let recorder: RPScreenRecorder
+    private let disposableBag = DisposableBag()
 
     private struct Session {
         var videoCapturer: RTCVideoCapturer
@@ -39,7 +40,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     ) {
         if let error {
             log.error(error, subsystems: .videoCapturer)
-            Task { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 do {
                     try await self?.stop()
                 } catch {

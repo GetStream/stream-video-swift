@@ -19,6 +19,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
     private var participantUpdateCancellable: AnyCancellable?
     private var connectionStatusCancellable: AnyCancellable?
     private var internetStatusCancellable: AnyCancellable?
+    private let disposableBag = DisposableBag()
 
     /// Creates a new content provider for Picture-in-Picture.
     ///
@@ -41,7 +42,8 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
             return
         }
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
             participantUpdateCancellable = call
                 .state
                 .$participants
@@ -74,7 +76,7 @@ final class PictureInPictureContentProvider: @unchecked Sendable {
         guard let call = store.state.call else {
             return
         }
-        Task { @MainActor [weak self] in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else {
                 return
             }

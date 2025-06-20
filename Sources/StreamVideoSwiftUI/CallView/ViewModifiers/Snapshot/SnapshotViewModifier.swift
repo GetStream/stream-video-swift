@@ -19,6 +19,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
         private var trigger: SnapshotTriggering
         private let snapshotHandler: @Sendable(UIImage) -> Void
         private var cancellable: AnyCancellable?
+        private let disposableBag = DisposableBag()
 
         /// Weak reference to the contained `UIView`.
         nonisolated(unsafe) weak var content: UIViewType? {
@@ -38,7 +39,7 @@ struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
             // Set up publisher to capture snapshots based on trigger events
             cancellable = trigger.publisher
                 .removeDuplicates()
-                .sinkTask { @MainActor [weak self] triggered in
+                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] triggered in
                     guard triggered == true else { return }
                     self?.captureSnapshot()
                 }
