@@ -84,7 +84,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
     ) async throws {
         let sfuStack = MockSFUStack()
 
-        await withTaskGroup { group in
+        await withTaskGroup(of: Void.self) { group in
             group.addTask {
                 self.subject.sfuAdapter = self.mockSFUStack.adapter
                 await self.wait(for: self.subject.interval / 2)
