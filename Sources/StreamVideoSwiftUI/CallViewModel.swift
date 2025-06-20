@@ -599,8 +599,17 @@ open class CallViewModel: ObservableObject {
             fileName: file,
             lineNumber: line
         )
-        Task { @MainActor in
+        guard !Thread.isMainThread else {
             callingState = newValue
+            return
+        }
+        Task { @MainActor in
+            setCallingState(
+                newValue,
+                file: file,
+                function: function,
+                line: line
+            )
         }
     }
 
@@ -811,7 +820,6 @@ open class CallViewModel: ObservableObject {
                 }
             }
             .store(in: disposableBag)
-        isSubscribedToCallEvents = true
     }
 
     private func handleAcceptedEvent(_ callEvent: CallEvent) {
