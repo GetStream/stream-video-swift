@@ -11,7 +11,7 @@ import SwiftUI
 public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     @Injected(\.callAudioRecorder) private var callAudioRecorder
 
-    private let camera: Any
+    private let camera: CameraAdapter
     private var imagesTask: Task<Void, Never>?
     private let disposableBag = DisposableBag()
 
@@ -25,54 +25,35 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
             callType: callType,
             callId: callId
         )
-        if #available(iOS 14, *) {
-            camera = Camera()
-            imagesTask = Task {
-                await handleCameraPreviews()
-            }
-        } else {
-            camera = NSObject()
-        }
+        camera = .init(cameraPosition: call.state.callSettings.cameraPosition)
         loadCurrentMembers()
         subscribeForCallJoinUpdates()
         subscribeForCallLeaveUpdates()
-    }
-    
-    @available(iOS 14, *)
-    func handleCameraPreviews() async {
-        let imageStream = (camera as? Camera)?.previewStream.dropFirst()
-            .map(\.image)
-        
-        guard let imageStream = imageStream else { return }
 
-        for await image in imageStream {
-            await MainActor.run {
-                viewfinderImage = image
-            }
-        }
+        camera
+            .$image
+            .map(\.?.image)
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.viewfinderImage, onWeak: self)
+            .store(in: disposableBag)
     }
-    
+
     public func startCamera(front: Bool) {
-        if #available(iOS 14, *) {
-            if front {
-                (camera as? Camera)?.switchCaptureDevice()
-            }
-            Task {
-                await(camera as? Camera)?.start()
-            }
+        Task {
+            await self.camera.start()
         }
     }
     
     public func stopCamera() {
-        imagesTask?.cancel()
-        imagesTask = nil
-        if #available(iOS 14, *) {
-            (camera as? Camera)?.stop()
+        camera.stop()
+        Task { @MainActor in
+            viewfinderImage = nil
         }
     }
     
     public func cleanUp() {
         disposableBag.removeAll()
+        camera.stop()
         Task {
             await callAudioRecorder.stopRecording()
         }
@@ -83,6 +64,12 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
             await callAudioRecorder.startRecording(ignoreActiveCall: true)
         } else {
             await callAudioRecorder.stopRecording()
+        }
+
+        if callSettings.videoOn {
+            startCamera(front: callSettings.cameraPosition == .front)
+        } else {
+            stopCamera()
         }
     }
 
