@@ -35,8 +35,6 @@ final class ProximityManager: @unchecked Sendable {
                     self?.didUpdateActiveCall($0)
                 }
                 .store(in: disposableBag)
-        } else {
-            fatalError()
         }
     }
 

@@ -29,6 +29,9 @@ extension Publisher where Output: Sendable {
     public func sinkTask(
         storeIn disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         receiveCompletion: @escaping (@Sendable(Subscribers.Completion<Failure>) -> Void) = { _ in },
         receiveValue: @escaping (@Sendable(Output) async throws -> Void)
     ) -> AnyCancellable {
@@ -41,7 +44,13 @@ extension Publisher where Output: Sendable {
                 return
             }
             // Create a new task to handle the received value.
-            Task(disposableBag: disposableBag, identifier: identifier) {
+            Task(
+                disposableBag: disposableBag,
+                identifier: identifier,
+                file: file,
+                function: function,
+                line: line
+            ) {
                 do {
                     // Check for task cancellation and process the value.
                     try Task.checkCancellation()
@@ -125,13 +134,21 @@ extension Publisher where Output: Sendable {
     func sinkTask<ActorType: Actor>(
         on actor: ActorType,
         storeIn disposableBag: DisposableBag,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         handler: @escaping @Sendable(ActorType, Output) async -> Void
     ) -> AnyCancellable {
         sink(receiveCompletion: { _ in }) { @Sendable [weak actor] input in
             guard let actor else {
                 return
             }
-            Task(disposableBag: disposableBag) {
+            Task(
+                disposableBag: disposableBag,
+                file: file,
+                function: function,
+                line: line
+            ) {
                 do {
                     try Task.checkCancellation()
                     await handler(actor, input)

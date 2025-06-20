@@ -68,7 +68,31 @@ public actor SerialActorQueue {
     public init(file: StaticString = #file) {
         self.executor = .init(file: file)
         subscriptionCancellable = subject
-            .sinkTask(on: self, storeIn: disposableBag) { await $0.execute($1) }
+            .sink { [weak self] task in
+                guard let self else {
+                    return
+                }
+                Task(
+                    disposableBag: disposableBag,
+                    file: task.file,
+                    function: task.function,
+                    line: task.line
+                ) {
+                    do {
+                        try Task.checkCancellation()
+                        await self.execute(task)
+                    } catch is CancellationError {
+                        return
+                    } catch {
+                        log.error(
+                            error,
+                            functionName: task.function,
+                            fileName: task.file,
+                            lineNumber: task.line
+                        )
+                    }
+                }
+            }
     }
 
     /// Cleans up task references and finalizes the task stream.

@@ -174,6 +174,8 @@ open class CallViewModel: ObservableObject {
     private let callEventsHandler = CallEventsHandler()
     private let disposableBag = DisposableBag()
 
+    private lazy var participantEventResetAdapter = ParticipantEventResetAdapter(self)
+
     /// The variable is `true` if CallSettings have been set on the CallViewModel instance (directly or indirectly).
     /// The variable will be reset to `false` when `leaveCall` will be invoked.
     private(set) var localCallSettingsChange = false
@@ -229,6 +231,8 @@ open class CallViewModel: ObservableObject {
         // we are firing it manually.
         // For any subsequent changes, `didSet` will trigger as expected.
         participantAutoLeavePolicy.onPolicyTriggered = { [weak self] in self?.participantAutoLeavePolicyTriggered() }
+
+        _ = participantEventResetAdapter
     }
 
     deinit {
@@ -831,8 +835,6 @@ open class CallViewModel: ObservableObject {
 
                     Task(disposableBag: disposableBag, priority: .userInitiated) { @MainActor [weak self] in
                         self?.participantEvent = participantEvent
-                        try? await Task.sleep(nanoseconds: 2_000_000_000)
-                        self?.participantEvent = nil
                     }
                 }
             }
@@ -1051,4 +1053,67 @@ public enum ParticipantsLayout {
     case grid
     case spotlight
     case fullScreen
+}
+
+final class ParticipantEventResetAdapter: @unchecked Sendable {
+
+    @Injected(\.timers) private var timers
+
+    private var observationCancellable: AnyCancellable?
+    private weak var viewModel: CallViewModel?
+    private let processingQueue = UnfairQueue()
+    private let interval: TimeInterval
+
+    private var timerCancellable: AnyCancellable?
+    private var lastEventReceivedAt: Date?
+
+    init(
+        _ viewModel: CallViewModel,
+        interval: TimeInterval = 2
+    ) {
+        self.viewModel = viewModel
+        self.interval = interval
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            observationCancellable = viewModel
+                .$participantEvent
+                .sink { [weak self] in self?.execute($0) }
+        }
+    }
+
+    private func execute(_ event: ParticipantEvent?) {
+        processingQueue.sync {
+            guard event != nil else {
+                timerCancellable?.cancel()
+                timerCancellable = nil
+                lastEventReceivedAt = nil
+                return
+            }
+
+            lastEventReceivedAt = Date()
+
+            guard timerCancellable == nil else {
+                return
+            }
+
+            timerCancellable = timers
+                .timer(for: 1)
+                .sink { [weak self] _ in self?.timerFired() }
+        }
+    }
+
+    private func timerFired() {
+        processingQueue.sync {
+            guard
+                let lastEventReceivedAt,
+                Date().timeIntervalSince(lastEventReceivedAt) >= interval
+            else {
+                return
+            }
+
+            Task { @MainActor in
+                viewModel?.participantEvent = nil
+            }
+        }
+    }
 }
