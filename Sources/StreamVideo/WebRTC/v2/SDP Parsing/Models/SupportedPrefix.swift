@@ -18,6 +18,12 @@ enum SupportedPrefix: String, Hashable, CaseIterable {
     /// Represents the `a=rtpmap:` prefix, commonly used in SDP to describe RTP payload formats.
     case rtmap = "a=rtpmap:"
 
+    case media = "m="
+
+    case mid = "a=mid:"
+
+    case fmtp = "a=fmtp:"
+
     /// Determines if a line contains a supported prefix.
     ///
     /// - Parameter line: A `String` representing an SDP line.
