@@ -15,7 +15,7 @@ final class SDPParser {
     func registerVisitor(_ visitor: SDPLineVisitor) {
         visitors.append(visitor)
     }
-    
+
     /// Parses the provided SDP string asynchronously.
     /// - Parameter sdp: The SDP string to parse.
     func parse(sdp: String) async {
