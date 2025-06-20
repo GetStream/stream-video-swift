@@ -14,6 +14,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.timers) private var timers
+    @Injected(\.currentDevice) private var currentDevice
     private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
@@ -627,6 +628,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// A method that's being called every time the StreamVideo instance is getting updated.
     /// - Parameter streamVideo: The new StreamVideo instance (nil if none)
     open func didUpdate(_ streamVideo: StreamVideo?) {
+        guard currentDevice.deviceType != .simulator else {
+            return
+        }
         subscribeToCallEvents()
     }
 
