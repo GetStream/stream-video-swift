@@ -30,7 +30,7 @@ extension Task {
     public init(
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
-        priority: TaskPriority? = .background,
+        priority: TaskPriority? = nil,
         subsystem: LogSubsystem = .other,
         file: StaticString = #file,
         function: StaticString = #function,
@@ -63,7 +63,7 @@ extension Task {
     public init(
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
-        priority: TaskPriority? = .background,
+        priority: TaskPriority? = nil,
         subsystem: LogSubsystem = .other,
         file: StaticString = #file,
         function: StaticString = #function,
