@@ -31,11 +31,20 @@ extension Task {
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
         priority: TaskPriority? = .background,
+        subsystem: LogSubsystem = .other,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         @_inheritActorContext block: @Sendable @escaping () async -> Success
     ) where Failure == Never {
         self.init(priority: priority) { [weak disposableBag] in
             defer { disposableBag?.completed(identifier) }
-            return await block()
+            return await trace.trace(
+                subsystem: subsystem,
+                file: file,
+                function: function,
+                line: line
+            ) { await block() }
         }
         store(in: disposableBag, identifier: identifier)
     }
@@ -55,11 +64,20 @@ extension Task {
         disposableBag: DisposableBag,
         identifier: String = UUIDProviderKey.currentValue.get().uuidString,
         priority: TaskPriority? = .background,
+        subsystem: LogSubsystem = .other,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         @_inheritActorContext block: @Sendable @escaping () async throws -> Success
     ) where Failure == Error {
         self.init(priority: priority) { [weak disposableBag] in
             defer { disposableBag?.completed(identifier) }
-            return try await block()
+            return try await trace.trace(
+                subsystem: subsystem,
+                file: file,
+                function: function,
+                line: line
+            ) { try await block() }
         }
         store(in: disposableBag, identifier: identifier)
     }
