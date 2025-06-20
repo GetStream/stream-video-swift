@@ -67,6 +67,7 @@ final class Signposter: Signposting {
     ) rethrows -> T {
         let signposter = signposter(for: subsystem)
         let signpostID = signposter.makeSignpostID()
+        let file = URL(fileURLWithPath: "\(file)").lastPathComponent.split(separator: ".")[0]
         let state = signposter.beginInterval(function, id: signpostID, "\(file):\(line)")
         defer { signposter.endInterval(function, state) }
         return try block()
@@ -81,6 +82,7 @@ final class Signposter: Signposting {
     ) async rethrows -> T {
         let signposter = signposter(for: subsystem)
         let signpostID = signposter.makeSignpostID()
+        let file = URL(fileURLWithPath: "\(file)").lastPathComponent.split(separator: ".")[0]
         let state = signposter.beginInterval(function, id: signpostID, "\(file):\(line)")
         defer { signposter.endInterval(function, state) }
         return try await block()

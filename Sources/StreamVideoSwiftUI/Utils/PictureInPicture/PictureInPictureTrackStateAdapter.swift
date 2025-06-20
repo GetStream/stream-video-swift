@@ -75,6 +75,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
 
         timers
             .timer(for: screenProperties.refreshRate)
+            .receive(on: DispatchQueue.global(qos: .userInteractive))
             .sink { [weak self] _ in self?.checkTracksState() }
             .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
 
