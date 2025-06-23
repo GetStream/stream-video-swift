@@ -21,18 +21,14 @@ extension Publisher where Output: Sendable {
     ) async throws -> Output {
         try await withCheckedThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
-            var receivedValue = false // Track whether a value has been received
+            var receivedValue = false
             var timeoutWorkItem: DispatchWorkItem?
 
             if let timeout = timeout {
                 let workItem = DispatchWorkItem {
                     if !receivedValue {
                         continuation.resume(
-                            throwing: ClientError(
-                                "Operation timed out",
-                                file,
-                                line
-                            )
+                            throwing: ClientError("Operation timed out", file, line)
                         )
                         cancellable?.cancel()
                     }
@@ -44,23 +40,25 @@ extension Publisher where Output: Sendable {
             cancellable = self.dropFirst(dropFirst).sink(
                 receiveCompletion: { completion in
                     timeoutWorkItem?.cancel()
-                    if case let .failure(error) = completion {
+                    switch completion {
+                    case .finished:
                         if !receivedValue {
-                            continuation.resume(throwing: error) // Resume only if value hasn't been received
+                            continuation.resume(
+                                throwing: ClientError("Publisher completed with no value", file, line)
+                            )
                         }
-                        cancellable?.cancel()
+                    case let .failure(error):
+                        if !receivedValue {
+                            continuation.resume(throwing: error)
+                        }
                     }
+                    cancellable?.cancel()
                 },
                 receiveValue: { value in
                     timeoutWorkItem?.cancel()
-                    if !receivedValue {
-                        if let error = value as? Error {
-                            continuation.resume(throwing: error)
-                        } else {
-                            continuation.resume(returning: value) // Resume only if value hasn't been received
-                        }
-                        receivedValue = true
-                    }
+                    guard !receivedValue else { return }
+                    receivedValue = true
+                    continuation.resume(returning: value)
                     cancellable?.cancel()
                 }
             )
