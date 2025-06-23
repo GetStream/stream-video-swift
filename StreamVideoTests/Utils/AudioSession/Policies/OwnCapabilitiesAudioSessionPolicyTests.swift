@@ -10,11 +10,13 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     private lazy var stubbedAppStateAdapter: MockAppStateAdapter! = .init()
     private lazy var subject: OwnCapabilitiesAudioSessionPolicy! = .init()
-    private var currentDevice: CurrentDevice! = .currentValue
+    private lazy var currentDeviceType: CurrentDevice.DeviceType! = CurrentDevice.DeviceType.phone
+    private lazy var currentDevice: CurrentDevice! = .init { self.currentDeviceType }
 
     override func setUp() {
         super.setUp()
         AppStateProviderKey.currentValue = stubbedAppStateAdapter
+        InjectedValues[\.currentDevice] = currentDevice
         _ = subject
     }
 
@@ -22,6 +24,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         subject = nil
         stubbedAppStateAdapter = nil
         currentDevice = nil
+        InjectedValues[\.currentDevice] = CurrentDevice.currentValue
         super.tearDown()
     }
 
@@ -74,7 +77,6 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithEarpiece_ReturnsPlayAndRecordConfiguration() {
         // Given
-        currentDevice.deviceType = .phone
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -98,9 +100,9 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(configuration.overrideOutputAudioPort, .speaker)
     }
 
-    func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithoutEarpiece_ReturnsPlaybackConfiguration() {
+    func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithoutEarpiece_ReturnsPlaybackAndRecordConfiguration() {
         // Given
-        currentDevice.deviceType = .pad
+        currentDeviceType = .pad
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
