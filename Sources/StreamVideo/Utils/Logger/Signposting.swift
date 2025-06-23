@@ -6,6 +6,15 @@ import Foundation
 import OSLog
 
 public protocol Signposting {
+    /// Measures the execution time of a synchronous block using signposts.
+    ///
+    /// - Parameters:
+    ///   - subsystem: The log subsystem used for categorizing the trace.
+    ///   - file: The file where the trace is initiated.
+    ///   - function: The function where the trace is initiated.
+    ///   - line: The line number where the trace is initiated.
+    ///   - block: A closure whose execution will be measured.
+    /// - Returns: The result of the closure.
     func trace<T>(
         subsystem: LogSubsystem,
         file: StaticString,
@@ -14,6 +23,15 @@ public protocol Signposting {
         block: () throws -> T
     ) rethrows -> T
 
+    /// Measures the execution time of an asynchronous block using signposts.
+    ///
+    /// - Parameters:
+    ///   - subsystem: The log subsystem used for categorizing the trace.
+    ///   - file: The file where the trace is initiated.
+    ///   - function: The function where the trace is initiated.
+    ///   - line: The line number where the trace is initiated.
+    ///   - block: An async closure whose execution will be measured.
+    /// - Returns: The result of the async closure.
     func trace<T>(
         subsystem: LogSubsystem,
         file: StaticString,
@@ -27,12 +45,12 @@ public var trace: Signposting {
     if #available(iOS 15.0, *) {
         Signposter.shared
     } else {
-        DummySignposter.shared
+        NoopSignposter.shared
     }
 }
 
-final class DummySignposter: Signposting {
-    fileprivate nonisolated(unsafe) static let shared = DummySignposter()
+final class NoopSignposter: Signposting {
+    fileprivate nonisolated(unsafe) static let shared = NoopSignposter()
 
     func trace<T>(
         subsystem: LogSubsystem,

@@ -435,6 +435,8 @@
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */; };
 		40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */; };
+		40A7C5B52E099B4600EEDF9C /* ParticipantEventResetAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */; };
+		40A7C5B82E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */; };
 		40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */; };
 		40A941702B4D96E6006D6965 /* PictureInPictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416F2B4D96E6006D6965 /* PictureInPictureController.swift */; };
 		40A941722B4D9750006D6965 /* PictureInPictureVideoCallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A941712B4D9750006D6965 /* PictureInPictureVideoCallViewController.swift */; };
@@ -1992,6 +1994,8 @@
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
 		40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIInterfaceOrientation+CGOrientation.swift"; sourceTree = "<group>"; };
 		40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIImage_Resize_Tests.swift; sourceTree = "<group>"; };
+		40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter.swift; sourceTree = "<group>"; };
+		40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter_Tests.swift; sourceTree = "<group>"; };
 		40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapter.swift; sourceTree = "<group>"; };
 		40A9416F2B4D96E6006D6965 /* PictureInPictureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureController.swift; sourceTree = "<group>"; };
 		40A941712B4D9750006D6965 /* PictureInPictureVideoCallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureVideoCallViewController.swift; sourceTree = "<group>"; };
@@ -3093,6 +3097,7 @@
 		401480332A5423C70029166A /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40A7C5B62E099D5B00EEDF9C /* ParticipantEventResetAdapter */,
 				4045D9DC2DAD5B110077A660 /* Resource_Tests.swift */,
 				40B48C0E2D14B8F6002C4EAB /* StreamAppStateAdapter */,
 				40914C962B567B6B00F6A13E /* PictureInPicture */,
@@ -4308,6 +4313,22 @@
 				40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		40A7C5B42E099B1600EEDF9C /* ParticipantEventResetAdapter */ = {
+			isa = PBXGroup;
+			children = (
+				40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */,
+			);
+			path = ParticipantEventResetAdapter;
+			sourceTree = "<group>";
+		};
+		40A7C5B62E099D5B00EEDF9C /* ParticipantEventResetAdapter */ = {
+			isa = PBXGroup;
+			children = (
+				40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */,
+			);
+			path = ParticipantEventResetAdapter;
 			sourceTree = "<group>";
 		};
 		40A9416C2B4D958A006D6965 /* PictureInPicture */ = {
@@ -6613,6 +6634,7 @@
 				8457BF7B2A5BF9E0000AE567 /* ToastView.swift */,
 				40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */,
 				40D1657D2B5FE82200C6D951 /* HalfSheetView.swift */,
+				40A7C5B42E099B1600EEDF9C /* ParticipantEventResetAdapter */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -8593,6 +8615,7 @@
 				40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */,
 				8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */,
 				840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */,
+				40A7C5B52E099B4600EEDF9C /* ParticipantEventResetAdapter.swift in Sources */,
 				40A941782B4DC576006D6965 /* PictureInPictureTrackStateAdapter.swift in Sources */,
 				408D29A42B6D251600885473 /* UIView+Snapshot.swift in Sources */,
 				4072A5902DAEADFF00108E8F /* PictureInPictureStore.swift in Sources */,
@@ -8666,6 +8689,7 @@
 				40245F672BE27B8400FCF075 /* StatelessSpeakerIconView_Tests.swift in Sources */,
 				40245F692BE27CCB00FCF075 /* StatelessParticipantsListButton_Tests.swift in Sources */,
 				40245F532BE2746300FCF075 /* TranscriptionSettings+Dummy.swift in Sources */,
+				40A7C5B82E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift in Sources */,
 				409AF6F72DAFF3D500EE7BF6 /* PictureInPictureVideoCallViewControllerTests.swift in Sources */,
 				40C75BB82CB4045100C167C3 /* MockThermalStateObserver.swift in Sources */,
 				40245F542BE2746300FCF075 /* BroadcastSettingsResponse+Dummy.swift in Sources */,

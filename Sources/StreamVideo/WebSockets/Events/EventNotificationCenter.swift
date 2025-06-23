@@ -8,8 +8,8 @@ import Foundation
 class EventNotificationCenter: NotificationCenter, @unchecked Sendable {
     private(set) var middlewares: [EventMiddleware] = []
 
-    var eventPostingQueue = DispatchQueue(label: "io.getstream.event-notification-center", qos: .background)
-    
+    var eventPostingQueue = DispatchQueue(label: "io.getstream.event-notification-center", qos: .default)
+
     func add(middlewares: [EventMiddleware]) {
         self.middlewares.append(contentsOf: middlewares)
     }

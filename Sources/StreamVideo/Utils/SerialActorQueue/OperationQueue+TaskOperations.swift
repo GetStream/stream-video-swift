@@ -6,6 +6,14 @@ import Combine
 import Foundation
 
 extension OperationQueue {
+    /// Adds an asynchronous task operation to the queue without expecting a
+    /// return value. Errors thrown by the operation are logged.
+    ///
+    /// - Parameters:
+    ///   - file: The file where the operation was initiated.
+    ///   - function: The function where the operation was initiated.
+    ///   - line: The line number where the operation was initiated.
+    ///   - operation: The async operation to be executed.
     public func addTaskOperation<Failure>(
         file: StaticString = #file,
         function: StaticString = #function,
@@ -22,6 +30,16 @@ extension OperationQueue {
         )
     }
 
+    /// Adds an asynchronous task operation to the queue and awaits its result.
+    ///
+    /// - Parameters:
+    ///   - file: The file where the operation was initiated.
+    ///   - function: The function where the operation was initiated.
+    ///   - line: The line number where the operation was initiated.
+    ///   - timeout: The time to wait for the operation result.
+    ///   - operation: The async operation returning a value.
+    /// - Returns: The result produced by the operation.
+    /// - Throws: An error if the operation fails or times out.
     public func addSynchronousTaskOperation<Output: Sendable, Failure: Error>(
         file: StaticString = #file,
         function: StaticString = #function,

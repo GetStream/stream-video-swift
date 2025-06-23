@@ -3,9 +3,6 @@
 //
 
 // swiftlint:disable discourage_task_init
-//
-// Copyright © 2025 Stream.io Inc. All rights reserved.
-//
 
 import Combine
 import Foundation

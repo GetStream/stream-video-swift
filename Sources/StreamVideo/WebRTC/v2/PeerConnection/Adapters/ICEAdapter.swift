@@ -24,7 +24,7 @@ actor ICEAdapter: @unchecked Sendable {
     private var pendingLocalCandidates: [RTCIceCandidate] = []
 
     private let executor = DispatchQueueExecutor()
-//    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
 
     /// Initializes the ICEAdapter.
     ///
