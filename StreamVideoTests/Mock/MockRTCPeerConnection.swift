@@ -73,6 +73,12 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         }
     }
 
+    private let operationQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
+
     // MARK: - Implementation
 
     var configuration: RTCConfiguration = .init()
@@ -112,12 +118,14 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
             stubbedFunctionInput[.offer]?
                 .append(.offer(constraints: constraints))
         }
-        if let result = stubbedFunction[.offer] as? RTCSessionDescription {
-            return result
-        } else if let result = stubbedFunction[.offer] as? StubVariantResultProvider<RTCSessionDescription> {
-            return result.getResult(for: timesCalled(.offer))
-        } else {
-            return RTCSessionDescription(type: .offer, sdp: .unique)
+        return try await operationQueue.addSynchronousTaskOperation {
+            if let result = self.stubbedFunction[.offer] as? RTCSessionDescription {
+                return result
+            } else if let result = self.stubbedFunction[.offer] as? StubVariantResultProvider<RTCSessionDescription> {
+                return result.getResult(for: self.timesCalled(.offer))
+            } else {
+                return RTCSessionDescription(type: .offer, sdp: .unique)
+            }
         }
     }
 

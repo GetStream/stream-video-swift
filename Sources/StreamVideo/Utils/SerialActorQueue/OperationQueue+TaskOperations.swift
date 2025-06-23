@@ -98,6 +98,11 @@ private final class TaskOperation<Output: Sendable, Failure: Error>: Operation, 
         self.operation = operation
     }
 
+    deinit {
+        task?.cancel()
+        task = nil
+    }
+
     override func start() {
         guard !isCancelled else {
             isFinished = true
