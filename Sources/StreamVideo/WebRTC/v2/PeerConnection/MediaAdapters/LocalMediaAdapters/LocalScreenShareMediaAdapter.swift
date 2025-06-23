@@ -41,7 +41,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// Storage for managing transceivers associated with the screen sharing session.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .screenshare)
 
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
 
     /// The primary video track used for screen sharing.
     let primaryTrack: RTCVideoTrack
@@ -131,7 +131,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// This method enables the primary screen sharing track and creates
     /// transceivers based on the specified publish options.
     func publish() {
-        processingQueue.async { @MainActor [weak self] in
+        processingQueue.addTaskOperation { @MainActor [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled,
@@ -179,7 +179,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// This method disables the primary screen sharing track and all associated
     /// transceivers, and stops the screen sharing capturing session.
     func unpublish() {
-        processingQueue.async { @MainActor [weak self] in
+        processingQueue.addTaskOperation { @MainActor [weak self] in
             do {
                 guard
                     let self,
@@ -224,7 +224,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self else { return }
 
             self.publishOptions = publishOptions.screenShare

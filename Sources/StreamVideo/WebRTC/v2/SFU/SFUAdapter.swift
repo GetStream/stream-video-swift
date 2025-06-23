@@ -185,7 +185,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         subjectSendEvent.send(ConnectEvent(hostname: host))
     }
 
-    /// Disconnects from the WebSocket server and clears all disposables.
+    /// Disconnects from the WebSocket server and cl≥ears all disposables.
     ///
     /// - Note: the disconnection will send the `.userInitiated` DisconnectionSource.
     func disconnect() async {

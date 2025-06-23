@@ -65,7 +65,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
 
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
     private let backgroundMuteAdapter: ApplicationLifecycleVideoMuteAdapter
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []
@@ -171,7 +171,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self, ownCapabilities.contains(.sendVideo) else { return }
             callSettings = settings
             registerPrimaryTrackIfPossible(settings)
@@ -204,7 +204,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Starts publishing the local video track.
     func publish() {
-        processingQueue.async { @MainActor [weak self] in
+        processingQueue.addTaskOperation { @MainActor [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
@@ -255,7 +255,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Stops publishing the local video track.
     func unpublish() {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard
                 let self,
                 primaryTrack.isEnabled
@@ -293,7 +293,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self else { return }
 
             self.publishOptions = publishOptions.video
@@ -384,7 +384,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func changePublishQuality(
         with layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self else { return }
             for videoSender in layerSettings {
                 let key = PublishOptions.VideoPublishOptions(

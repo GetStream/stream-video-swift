@@ -20,7 +20,8 @@ final class PublisherTaskSinkTests: XCTestCase, @unchecked Sendable {
 
     func test_sinkTask_withSuccessfulCompletion() {
         let expectation = XCTestExpectation(description: "Publisher completes successfully")
-        let queue = SerialActorQueue()
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
         let publisher = Just("Test")
             .setFailureType(to: Error.self)
 
@@ -41,7 +42,8 @@ final class PublisherTaskSinkTests: XCTestCase, @unchecked Sendable {
         }
 
         let expectation = XCTestExpectation(description: "Publisher completes with failure")
-        let queue = SerialActorQueue()
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
         let publisher = Fail<String, TestError>(error: .test)
 
         publisher.sinkTask(queue: queue, receiveCompletion: { completion in
@@ -58,7 +60,8 @@ final class PublisherTaskSinkTests: XCTestCase, @unchecked Sendable {
 
     func test_sinkTask_withCancellation() {
         let expectation = XCTestExpectation(description: "Task is cancelled")
-        let queue = SerialActorQueue()
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
         let publisher = Just("Test")
             .setFailureType(to: Error.self)
 

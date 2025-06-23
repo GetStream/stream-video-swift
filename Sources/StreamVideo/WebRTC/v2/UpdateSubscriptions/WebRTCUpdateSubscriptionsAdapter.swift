@@ -17,7 +17,7 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     /// The adapter used to communicate with the SFU for updates.
     private let sfuAdapter: SFUAdapter
     /// A serial queue used to process update tasks in order.
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
     /// A factory that builds subscription details for WebRTC tracks.
     private let tracksFactory: WebRTCJoinRequestFactory = .init()
     /// A container for cancellable Combine subscriptions.
@@ -60,7 +60,7 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     }
 
     deinit {
-        processingQueue.cancelAll()
+        processingQueue.cancelAllOperations()
     }
 
     // MARK: - Private Helpers
@@ -77,7 +77,7 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
         participants: WebRTCStateAdapter.ParticipantsStorage,
         incomingVideoQualitySettings: IncomingVideoQualitySettings
     ) {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self else {
                 return
             }

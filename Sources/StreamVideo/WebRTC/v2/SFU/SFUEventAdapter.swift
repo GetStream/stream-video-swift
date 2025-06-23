@@ -22,7 +22,7 @@ final class SFUEventAdapter: @unchecked Sendable {
     /// The threshold of participants above which certain behaviors change.
     private let participantsThreshold = 10
 
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
 
     var isActive: Bool { !disposableBag.isEmpty }
 

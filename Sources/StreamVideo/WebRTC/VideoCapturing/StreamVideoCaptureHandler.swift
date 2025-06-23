@@ -18,7 +18,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
 
-    private lazy var processingQueue = SerialActorQueue()
+    private lazy var processingQueue = OperationQueue()
     private let disposableBag = DisposableBag()
     private var orientationCancellable: AnyCancellable?
 
@@ -68,7 +68,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         from frame: RTCVideoFrame,
         capturer: RTCVideoCapturer
     ) {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self else {
                 return
             }
@@ -79,7 +79,13 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
                 cvPixelBuffer: imageBuffer,
                 options: [CIImageOption.colorSpace: self.colorSpace]
             )
-            let outputImage = await self.filter(image: inputImage, pixelBuffer: imageBuffer)
+            let outputImage = await filter.filter(
+                VideoFilter.Input(
+                    originalImage: inputImage,
+                    originalPixelBuffer: imageBuffer,
+                    originalImageOrientation: sceneOrientation.cgOrientation
+                )
+            )
             CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
             context.render(
                 outputImage,

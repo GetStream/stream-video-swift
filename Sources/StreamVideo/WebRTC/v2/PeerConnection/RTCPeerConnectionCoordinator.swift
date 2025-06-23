@@ -40,8 +40,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// `SetPublisher` and `HandleSubscriberOffer` are expected from the SFU to be sent/handled
     /// in a serial manner. The processing queues below ensure that the respective tasks are being executed
     /// serially.
-    private let setPublisherProcessingQueue = SerialActorQueue()
-    private let subscriberOfferProcessingQueue = SerialActorQueue()
+    private let setPublisherProcessingQueue = OperationQueue()
+    private let subscriberOfferProcessingQueue = OperationQueue()
 
     // MARK: Adapters
 
@@ -517,7 +517,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 }
             }
         case .publisher:
-            setPublisherProcessingQueue.async { [weak self] in
+            setPublisherProcessingQueue.addTaskOperation { [weak self] in
                 guard let self else { return }
 
                 let trackInfo = WebRTCJoinRequestFactory()

@@ -71,23 +71,8 @@ extension Publisher where Output: Sendable {
         }
     }
 
-    /// Creates a task to handle the publisher's output asynchronously, using a
-    /// `SerialActorQueue` for serial execution.
-    ///
-    /// - Parameters:
-    ///   - queue: A `SerialActorQueue` to ensure the task executes serially.
-    ///   - receiveCompletion: A closure called upon completion of the publisher
-    ///     with either a success or failure. Defaults to a no-op closure.
-    ///   - receiveValue: A closure to asynchronously process the publisher's
-    ///     output. The closure supports throwing errors.
-    /// - Returns: An `AnyCancellable` to manage the subscription to the publisher.
-    ///
-    /// - Note:
-    ///   - If the `SerialActorQueue` is unavailable (e.g., deallocated), the task
-    ///     is skipped.
-    ///   - Task cancellation and errors are handled similarly to `sinkTask(storeIn:identifier:receiveCompletion:receiveValue:)`.
-    public func sinkTask(
-        queue: SerialActorQueue,
+    func sinkTask(
+        queue: OperationQueue,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
@@ -102,7 +87,7 @@ extension Publisher where Output: Sendable {
             }
             let capturedInput = input
             // Schedule the task on the provided serial actor queue.
-            queue.async(file: file, function: function, line: line) {
+            queue.addTaskOperation(file: file, function: function, line: line) {
                 do {
                     // Check for task cancellation and process the value.
                     try Task.checkCancellation()

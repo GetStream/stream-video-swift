@@ -41,7 +41,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The last applied audio call settings.
     private var lastUpdatedCallSettings: CallSettings.Audio?
 
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
 
     /// The primary audio track for this adapter.
     let primaryTrack: RTCAudioTrack
@@ -124,7 +124,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// This enables the primary track and creates additional transceivers based
     /// on the current publish options. It also starts the audio recorder.
     func publish() {
-        processingQueue.async { @MainActor [weak self] in
+        processingQueue.addTaskOperation { @MainActor [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
@@ -170,7 +170,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// This disables the primary track and all associated transceivers.
     func unpublish() {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self, primaryTrack.isEnabled else { return }
 
             primaryTrack.isEnabled = false
@@ -197,7 +197,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self, ownCapabilities.contains(.sendAudio) else { return }
             registerPrimaryTrackIfPossible(settings)
 
@@ -230,7 +230,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) async throws {
-        processingQueue.async { [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard let self else { return }
 
             self.publishOptions = publishOptions.audio

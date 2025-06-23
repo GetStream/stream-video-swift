@@ -58,9 +58,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal let callController: CallController
     internal let coordinatorClient: DefaultAPI
 
-    /// A serialQueueActor ensuring that call operations (e.g. join) will happen in a serial manner.
-    private let callOperationSerialQueue = SerialActorQueue()
-
     /// This adapter is used to manage closed captions for the
     /// call.
     private lazy var closedCaptionsAdapter = ClosedCaptionsAdapter(self)
