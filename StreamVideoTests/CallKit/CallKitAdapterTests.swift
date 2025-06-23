@@ -15,12 +15,14 @@ final class CallKitAdapterTests: XCTestCase, @unchecked Sendable {
         super.setUp()
         InjectedValues[\.callKitPushNotificationAdapter] = callKitPushNotificationAdapter
         InjectedValues[\.callKitService] = callKitService
+        InjectedValues[\.currentDevice] = CurrentDevice(currentDeviceProvider: { .phone })
     }
 
     override func tearDown() {
         callKitPushNotificationAdapter = nil
         callKitService = nil
         subject = nil
+        InjectedValues[\.currentDevice] = CurrentDevice.currentValue
         super.tearDown()
     }
 

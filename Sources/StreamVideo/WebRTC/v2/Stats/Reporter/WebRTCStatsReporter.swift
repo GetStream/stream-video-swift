@@ -124,6 +124,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
         )
 
         activeDeliveryTask?.cancel()
+        // swiftlint:disable discourage_task_init
         activeDeliveryTask = Task { [weak self] in
             do {
                 guard let self, let sfuAdapter else {
@@ -154,5 +155,6 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
             }
             self?.activeDeliveryTask = nil
         }
+        // swiftlint:enable discourage_task_init
     }
 }

@@ -36,7 +36,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
         store
             .publisher(for: \.isActive)
             .removeDuplicates()
-            .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdate($0) }
             .store(in: disposableBag)
 
         store
@@ -75,6 +75,7 @@ final class PictureInPictureTrackStateAdapter: @unchecked Sendable {
 
         timers
             .timer(for: screenProperties.refreshRate)
+            .receive(on: DispatchQueue.global(qos: .userInteractive))
             .sink { [weak self] _ in self?.checkTracksState() }
             .store(in: disposableBag, key: DisposableKey.timePublisher.rawValue)
 

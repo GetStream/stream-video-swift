@@ -18,7 +18,8 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
 
-    private lazy var serialActor = SerialActor()
+    private lazy var processingQueue = OperationQueue()
+    private let disposableBag = DisposableBag()
     private var orientationCancellable: AnyCancellable?
 
     init(
@@ -31,7 +32,8 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
 
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
             orientationCancellable = orientationAdapter
                 .$orientation
                 .removeDuplicates()
@@ -45,37 +47,69 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         _ capturer: RTCVideoCapturer,
         didCapture frame: RTCVideoFrame
     ) {
-        Task { [serialActor, weak self] in
-            do {
-                try await serialActor.execute { [weak self] in
-                    guard let self else { return }
+        guard
+            let selectedFilter,
+            let buffer = frame.buffer as? RTCCVPixelBuffer
+        else {
+            return process(capturer: capturer, frame: frame, buffer: nil)
+        }
 
-                    var _buffer: RTCCVPixelBuffer?
+        apply(
+            filter: selectedFilter,
+            with: buffer,
+            from: frame,
+            capturer: capturer
+        )
+    }
 
-                    if self.selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
-                        _buffer = buffer
-                        let imageBuffer = buffer.pixelBuffer
-                        CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-                        let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: self.colorSpace])
-                        let outputImage = await self.filter(image: inputImage, pixelBuffer: imageBuffer)
-                        CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-                        self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: self.colorSpace)
-                    }
-
-                    let updatedFrame = self.handleRotation
-                        ? self.adjustRotation(capturer, for: _buffer, frame: frame)
-                        : frame
-
-                    self.source.capturer(capturer, didCapture: updatedFrame)
-                }
-            } catch {
-                log.error(error)
+    private func apply(
+        filter: VideoFilter,
+        with buffer: RTCCVPixelBuffer,
+        from frame: RTCVideoFrame,
+        capturer: RTCVideoCapturer
+    ) {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else {
+                return
             }
+
+            let imageBuffer = buffer.pixelBuffer
+            CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+            let inputImage = CIImage(
+                cvPixelBuffer: imageBuffer,
+                options: [CIImageOption.colorSpace: self.colorSpace]
+            )
+            let outputImage = await filter.filter(
+                VideoFilter.Input(
+                    originalImage: inputImage,
+                    originalPixelBuffer: imageBuffer,
+                    originalImageOrientation: sceneOrientation.cgOrientation
+                )
+            )
+            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+            context.render(
+                outputImage,
+                to: imageBuffer,
+                bounds: outputImage.extent,
+                colorSpace: self.colorSpace
+            )
+            process(capturer: capturer, frame: frame, buffer: buffer)
         }
     }
 
+    private func process(
+        capturer: RTCVideoCapturer,
+        frame: RTCVideoFrame,
+        buffer: RTCCVPixelBuffer?
+    ) {
+        guard handleRotation else {
+            return source.capturer(capturer, didCapture: frame)
+        }
+        let updatedFrame = adjustRotation(for: buffer, frame: frame)
+        source.capturer(capturer, didCapture: updatedFrame)
+    }
+
     private func adjustRotation(
-        _ capturer: RTCVideoCapturer,
         for buffer: RTCCVPixelBuffer?,
         frame: RTCVideoFrame
     ) -> RTCVideoFrame {

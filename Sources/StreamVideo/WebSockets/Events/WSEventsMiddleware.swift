@@ -7,10 +7,12 @@ import Foundation
 final class WSEventsMiddleware: EventMiddleware, @unchecked Sendable {
 
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
+    private let processingQueue = OperationQueue()
 
     func handle(event: WrappedEvent) -> WrappedEvent? {
-        let allObjects = subscribers.allObjects
-        Task {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else { return }
+            let allObjects = subscribers.allObjects
             var streamVideo: StreamVideo?
             for subscriber in allObjects {
                 if let subscriber = subscriber as? StreamVideo {

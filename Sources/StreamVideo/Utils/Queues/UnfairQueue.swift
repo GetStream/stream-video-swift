@@ -38,6 +38,7 @@ public final class UnfairQueue: LockQueuing, @unchecked Sendable {
 
     /// Deinitializes the instance, deallocating the unfair lock.
     deinit {
+        lock.deinitialize(count: 1)
         lock.deallocate()
     }
 

@@ -69,7 +69,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
     @Published private(set) var state: State
 
     /// A queue for processing audio session operations asynchronously.
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
 
     /// The shared instance of `RTCAudioSession` used for WebRTC audio
     /// configuration and management.
@@ -222,7 +222,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
     private func performOperation(
         _ operation: @Sendable @escaping () async throws -> Void
     ) async throws {
-        try await processingQueue.sync { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else { return }
             source.lockForConfiguration()
             defer { source.unlockForConfiguration() }

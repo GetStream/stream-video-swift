@@ -20,13 +20,15 @@ struct ScreenShareSession {
 /// A class that provides and manages the active screen sharing session.
 final class ScreenShareSessionProvider: @unchecked Sendable {
 
+    private let disposableBag = DisposableBag()
+
     /// The currently active screen sharing session, if any.
     ///
     /// When set to nil, it automatically stops the capture of the previous session.
     var activeSession: ScreenShareSession? {
         didSet {
             if activeSession == nil {
-                Task {
+                Task(disposableBag: disposableBag) {
                     do {
                         try await oldValue?.capturer.stopCapture()
                     } catch {
@@ -41,6 +43,7 @@ final class ScreenShareSessionProvider: @unchecked Sendable {
     ///
     /// This deinitializer ensures that any active capture is stopped when the provider is destroyed.
     deinit {
+        // swiftlint:disable discourage_task_init
         Task { [activeSession] in
             do {
                 try await activeSession?.capturer.stopCapture()
@@ -48,5 +51,6 @@ final class ScreenShareSessionProvider: @unchecked Sendable {
                 log.error(error)
             }
         }
+        // swiftlint:enable discourage_task_init
     }
 }

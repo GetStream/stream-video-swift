@@ -67,7 +67,7 @@ final class PictureInPictureController: @unchecked Sendable {
         store
             .publisher(for: \.sourceView)
             .removeDuplicates()
-            .sinkTask { @MainActor [weak self] in self?.didUpdate($0) }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdate($0) }
             .store(in: disposableBag)
 
         proxyDelegate

@@ -23,6 +23,9 @@ actor ICEAdapter: @unchecked Sendable {
     private var pendingSFUCandidates: [RTCIceCandidate] = []
     private var pendingLocalCandidates: [RTCIceCandidate] = []
 
+    private let executor = DispatchQueueExecutor()
+    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+
     /// Initializes the ICEAdapter.
     ///
     /// - Parameters:
@@ -41,8 +44,8 @@ actor ICEAdapter: @unchecked Sendable {
         self.peerConnection = peerConnection
         self.sfuAdapter = sfuAdapter
 
-        Task {
-            await configure()
+        Task(disposableBag: disposableBag) { [weak self] in
+            await self?.configure()
         }
     }
 
@@ -59,7 +62,6 @@ actor ICEAdapter: @unchecked Sendable {
             return
         }
         trickleTask(for: candidate)
-            .store(in: disposableBag)
     }
 
     /// Adds an ICE candidate to the peer connection.
@@ -88,7 +90,6 @@ actor ICEAdapter: @unchecked Sendable {
             subsystems: .iceAdapter
         )
         task(for: candidate)
-            .store(in: disposableBag)
     }
 
     // MARK: - Private helpers
@@ -99,8 +100,9 @@ actor ICEAdapter: @unchecked Sendable {
     /// - Returns: A task that performs the trickle operation.
     private func trickleTask(
         for candidate: RTCIceCandidate
-    ) -> Task<Void, Never> {
-        Task {
+    ) {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else { return }
             do {
                 let iceCandidate = ICECandidate(from: candidate)
                 let json = try encoder.encode(iceCandidate)
@@ -157,7 +159,6 @@ actor ICEAdapter: @unchecked Sendable {
             }
 
             task(for: iceCandidate)
-                .store(in: disposableBag)
 
         } catch {
             log.error(
@@ -175,8 +176,8 @@ actor ICEAdapter: @unchecked Sendable {
     /// - Returns: A task that adds the candidate to the peer connection.
     private func task(
         for candidate: RTCIceCandidate
-    ) -> Task<Void, Never> {
-        Task { @MainActor [weak peerConnection] in
+    ) {
+        Task(disposableBag: disposableBag) { @MainActor [weak peerConnection, peerType] in
             guard let peerConnection else { return }
             do {
                 try Task.checkCancellation()
@@ -204,7 +205,7 @@ actor ICEAdapter: @unchecked Sendable {
     ///   change handling in the configure() method.
     private func drainPendingLocalCandidates() async {
         for candidate in pendingLocalCandidates {
-            trickleTask(for: candidate).store(in: disposableBag)
+            trickleTask(for: candidate)
         }
         pendingLocalCandidates = []
     }
@@ -222,25 +223,22 @@ actor ICEAdapter: @unchecked Sendable {
     ///   regardless of success or failure of individual additions.
     private func drainPendingSFUCandidates() async {
         let candidates = pendingSFUCandidates
-        await withTaskGroup(of: Void.self) { [weak self] group in
-            guard let self else { return }
-            for candidate in candidates {
-                group.addTask { [weak self] in
-                    guard let self else { return }
-                    do {
+        for candidate in candidates {
+            Task(disposableBag: disposableBag) { [weak self] in
+                guard let self else { return }
+                do {
+                    try Task.checkCancellation()
+                    try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
                         try Task.checkCancellation()
-                        try await executeTask(retryPolicy: .fastAndSimple) { [weak self] in
-                            try Task.checkCancellation()
-                            try await self?.peerConnection.add(candidate)
-                        }
-                    } catch {
-                        log.error(
-                            error,
-                            subsystems: peerType == .publisher
-                                ? .peerConnectionPublisher
-                                : .peerConnectionSubscriber
-                        )
+                        try await self?.peerConnection.add(candidate)
                     }
+                } catch {
+                    log.error(
+                        error,
+                        subsystems: peerType == .publisher
+                            ? .peerConnectionPublisher
+                            : .peerConnectionSubscriber
+                    )
                 }
             }
         }
@@ -255,19 +253,21 @@ actor ICEAdapter: @unchecked Sendable {
             .$connectionState
             .removeDuplicates()
             .filter { if case .connected = $0 { true } else { false } }
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingLocalCandidates() }
+            .sinkTask(on: self, storeIn: disposableBag) { executor, _ in
+                await executor.drainPendingLocalCandidates()
+            }
             .store(in: disposableBag)
 
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.DidGenerateICECandidateEvent.self)
             .log(.debug, subsystems: .iceAdapter) { [peerType] in "PeerConnection type:\(peerType) generated \($0)." }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trickle($0.candidate) }
+            .sinkTask(on: self, storeIn: disposableBag) { await $0.trickle($1.candidate) }
             .store(in: disposableBag)
 
         peerConnection
             .publisher(eventType: StreamRTCPeerConnection.HasRemoteDescription.self)
             .log(.debug, subsystems: .iceAdapter)
-            .sinkTask(storeIn: disposableBag) { [weak self] _ in await self?.drainPendingSFUCandidates() }
+            .sinkTask(on: self, storeIn: disposableBag) { executor, _ in await executor.drainPendingSFUCandidates() }
             .store(in: disposableBag)
 
         let _peerType = peerType == .publisher
@@ -278,12 +278,12 @@ actor ICEAdapter: @unchecked Sendable {
             .publisher(eventType: Stream_Video_Sfu_Models_ICETrickle.self)
             .filter { [_peerType] in $0.peerType == _peerType }
             .log(.debug, subsystems: .iceAdapter)
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.handleICETrickle($0) }
+            .sinkTask(on: self, storeIn: disposableBag) { await $0.handleICETrickle($1) }
             .store(in: disposableBag)
 
         sfuAdapter
             .refreshPublisher
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.configure() }
+            .sinkTask(on: self, storeIn: disposableBag) { executor, _ in await executor.configure() }
             .store(in: disposableBag)
     }
 }

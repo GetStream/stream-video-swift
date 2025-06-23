@@ -30,6 +30,8 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
     /// A dispatch queue for handling peer connection operations.
     let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection")
 
+    private let disposableBag = DisposableBag()
+
     /// A publisher for RTCPeerConnectionEvents.
     lazy var publisher: AnyPublisher<RTCPeerConnectionEvent, Never> = delegatePublisher
         .publisher
@@ -200,13 +202,13 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
 
     /// Closes the peer connection.
     func close() async {
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
             /// It's very important to close any transceivers **before** we close the connection, to make
             /// sure that access to `RTCVideoTrack` properties, will be handled correctly. Otherwise
             /// if we try to access any property/method on a `RTCVideoTrack` instance whose
             /// peerConnection has closed, we will get blocked on the Main Thread.
-            source.transceivers.forEach { $0.stopInternal() }
-            source.close()
+            self?.source.transceivers.forEach { $0.stopInternal() }
+            self?.source.close()
         }
     }
 

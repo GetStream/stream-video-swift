@@ -16,7 +16,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
     public static let identifier: ObjectIdentifier = .init("speaker-proximity-policy" as NSString)
 
     /// Queue for processing proximity state changes
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
     /// Stores call settings before proximity change for restoration
     private var callSettingsBeforeProximityChange: CallSettings?
 
@@ -32,7 +32,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
         _ proximity: ProximityState,
         on call: Call
     ) {
-        processingQueue.async { @MainActor [weak self, weak call] in
+        processingQueue.addTaskOperation { @MainActor [weak self, weak call] in
             guard
                 let self,
                 let call,

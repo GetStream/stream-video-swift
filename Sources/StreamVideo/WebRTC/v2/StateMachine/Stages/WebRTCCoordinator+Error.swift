@@ -31,6 +31,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         let error: Error
+        private let disposableBag = DisposableBag()
 
         /// Initializes a new error stage with the provided call and error.
         ///
@@ -54,9 +55,16 @@ extension WebRTCCoordinator.StateMachine.Stage {
         override func transition(
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
-            Task { [error] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 do {
+                    guard let self else {
+                        throw ClientError()
+                    }
+
+                    try Task.checkCancellation()
                     log.error(error, subsystems: .webRTC)
+
+                    try Task.checkCancellation()
                     try transition?(.cleanUp(context))
                 } catch let transitionError {
                     log.error(transitionError, subsystems: .webRTC)

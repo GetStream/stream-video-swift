@@ -2,6 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+// swiftlint:disable discourage_task_init
+
 import Foundation
 #if canImport(UIKit)
 import UIKit

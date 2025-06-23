@@ -40,8 +40,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// `SetPublisher` and `HandleSubscriberOffer` are expected from the SFU to be sent/handled
     /// in a serial manner. The processing queues below ensure that the respective tasks are being executed
     /// serially.
-    private let setPublisherProcessingQueue = SerialActorQueue()
-    private let subscriberOfferProcessingQueue = SerialActorQueue()
+    private let setPublisherProcessingQueue = OperationQueue()
+    private let subscriberOfferProcessingQueue = OperationQueue()
 
     // MARK: Adapters
 
@@ -242,7 +242,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             subsystems: subsystem
         )
         disposableBag.removeAll()
+        // swiftlint:disable discourage_task_init
         Task { [peerConnection] in await peerConnection.close() }
+        // swiftlint:enable discourage_task_init
     }
 
     func prepareForClosing() async {
@@ -352,9 +354,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     func didUpdatePublishOptions(
         _ publishOptions: PublishOptions
     ) {
-        Task {
+        Task(disposableBag: disposableBag) { [weak self] in
             do {
-                try await mediaAdapter.didUpdatePublishOptions(publishOptions)
+                try await self?.mediaAdapter.didUpdatePublishOptions(publishOptions)
             } catch {
                 log.error(error)
             }
@@ -504,7 +506,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         )
         switch peerType {
         case .subscriber:
-            Task { [weak self] in
+            Task(disposableBag: disposableBag, identifier: "subscriber-ice-restart") { [weak self] in
                 guard let self else {
                     return
                 }
@@ -514,9 +516,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                     log.error(error, subsystems: subsystem)
                 }
             }
-            .store(in: disposableBag, key: "subscriber-ice-restart")
         case .publisher:
-            setPublisherProcessingQueue.async { [weak self] in
+            setPublisherProcessingQueue.addTaskOperation { [weak self] in
                 guard let self else { return }
 
                 let trackInfo = WebRTCJoinRequestFactory()
@@ -647,8 +648,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     func changePublishQuality(
         with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
-        Task {
-            await mediaAdapter.changePublishQuality(with: event)
+        Task(disposableBag: disposableBag) { [weak self] in
+            await self?.mediaAdapter.changePublishQuality(with: event)
         }
     }
 

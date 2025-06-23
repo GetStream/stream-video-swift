@@ -17,7 +17,7 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     /// The adapter used to communicate with the SFU for updates.
     private let sfuAdapter: SFUAdapter
     /// A serial queue used to process update tasks in order.
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
     /// A factory that builds subscription details for WebRTC tracks.
     private let tracksFactory: WebRTCJoinRequestFactory = .init()
     /// A container for cancellable Combine subscriptions.
@@ -53,14 +53,16 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
             participantsPublisher,
             incomingVideoQualitySettingsPublisher
         )
-        .sink { [weak self] in self?.didUpdate(
-            participants: $0,
-            incomingVideoQualitySettings: $1
-        ) }
+        .sinkTask(queue: processingQueue) { [weak self] in
+            try await self?.didUpdate(
+                participants: $0,
+                incomingVideoQualitySettings: $1
+            )
+        }
     }
 
     deinit {
-        processingQueue.cancelAll()
+        processingQueue.cancelAllOperations()
     }
 
     // MARK: - Private Helpers
@@ -76,41 +78,35 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     private func didUpdate(
         participants: WebRTCStateAdapter.ParticipantsStorage,
         incomingVideoQualitySettings: IncomingVideoQualitySettings
-    ) {
-        processingQueue.async { [weak self] in
-            guard let self else {
-                return
-            }
+    ) async throws {
+        let tracks = tracksFactory.buildSubscriptionDetails(
+            nil,
+            sessionID: sessionID,
+            participants: Array(participants.values),
+            incomingVideoQualitySettings: incomingVideoQualitySettings
+        )
+        .filter { $0.trackType != .audio }
 
-            let tracks = tracksFactory.buildSubscriptionDetails(
-                nil,
-                sessionID: sessionID,
-                participants: Array(participants.values),
-                incomingVideoQualitySettings: incomingVideoQualitySettings
+        let setTracks = Set(tracks)
+        let setLastTrackSubscriptionDetails =
+            Set(lastTrackSubscriptionDetails)
+
+        guard setTracks != setLastTrackSubscriptionDetails else {
+            return
+        }
+
+        do {
+            try Task.checkCancellation()
+            try await sfuAdapter.updateSubscriptions(
+                tracks: tracks,
+                for: sessionID
             )
-            .filter { $0.trackType != .audio }
-
-            let setTracks = Set(tracks)
-            let setLastTrackSubscriptionDetails =
-                Set(lastTrackSubscriptionDetails)
-
-            guard setTracks != setLastTrackSubscriptionDetails else {
-                return
-            }
-
-            do {
-                try Task.checkCancellation()
-                try await sfuAdapter.updateSubscriptions(
-                    tracks: tracks,
-                    for: sessionID
-                )
-                lastTrackSubscriptionDetails = tracks
-            } catch {
-                log.warning(
-                    "UpdateSubscriptions failed with error:\(error).",
-                    subsystems: .webRTC
-                )
-            }
+            lastTrackSubscriptionDetails = tracks
+        } catch {
+            log.warning(
+                "UpdateSubscriptions failed with error:\(error).",
+                subsystems: .webRTC
+            )
         }
     }
 }

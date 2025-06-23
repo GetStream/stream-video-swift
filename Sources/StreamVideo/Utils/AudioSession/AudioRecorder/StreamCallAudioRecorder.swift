@@ -12,7 +12,7 @@ import StreamWebRTC
 /// publishing the average power of the audio signal. Additionally, it adjusts its behavior based on the
 /// presence of an active call, automatically stopping recording if needed.
 open class StreamCallAudioRecorder: @unchecked Sendable {
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
 
     @Injected(\.activeCallProvider) private var activeCallProvider
     @Injected(\.activeCallAudioSession) private var activeCallAudioSession
@@ -25,9 +25,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     var isRecordingPublisher: AnyPublisher<Bool, Never> {
         _isRecordingSubject.eraseToAnyPublisher()
     }
-
-    /// A private task responsible for setting up the recorder in the background.
-    private var setUpTask: Task<Void, Error>?
 
     private var hasActiveCallCancellable: AnyCancellable?
 
@@ -53,7 +50,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             guard hasActiveCall != oldValue else { return }
             log.debug("🎙️updated with hasActiveCall:\(hasActiveCall).")
             if !hasActiveCall {
-                Task { await stopRecording() }
+                Task(disposableBag: disposableBag) { [weak self] in await self?.stopRecording() }
             }
         }
     }
@@ -82,8 +79,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     deinit {
         removeRecodingFile()
-        setUpTask?.cancel()
-        setUpTask = nil
         hasActiveCallCancellable?.cancel()
         hasActiveCallCancellable = nil
     }
@@ -145,7 +140,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
             guard
                 let self,
                 isRecording,
-                let audioRecorder = await audioRecorderBuilder.result
+                let audioRecorder = audioRecorderBuilder.result
             else {
                 return
             }
@@ -173,8 +168,9 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         _ operation: @Sendable @escaping () async -> Void
     ) async {
         do {
-            try await processingQueue.sync {
+            try await processingQueue.addSynchronousTaskOperation {
                 await operation()
+                return () // Explicitly return Void
             }
         } catch {
             log.error(ClientError(with: error, file, line))
@@ -182,14 +178,11 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     }
 
     private func setUp() {
-        setUpTask?.cancel()
-        setUpTask = Task {
-            do {
-                try await audioRecorderBuilder.build()
-            } catch {
-                if type(of: error) != CancellationError.self {
-                    log.error("🎙️Failed to create AVAudioRecorder.", error: error)
-                }
+        do {
+            try audioRecorderBuilder.build()
+        } catch {
+            if type(of: error) != CancellationError.self {
+                log.error("🎙️Failed to create AVAudioRecorder.", error: error)
             }
         }
 
@@ -208,7 +201,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         }
 
         guard
-            let audioRecorder = await audioRecorderBuilder.result
+            let audioRecorder = audioRecorderBuilder.result
         else {
             throw ClientError("🎙️Unable to fetch AVAudioRecorder instance.")
         }

@@ -2,6 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+// swiftlint:disable discourage_task_init
+
 import Combine
 import Foundation
 
@@ -25,9 +27,11 @@ public final class DisposableBag: @unchecked Sendable {
             }
         }
 
-        func remove(_ key: String) {
+        func remove(_ key: String, cancel: Bool) {
             queue.sync {
-                storage[key]?.cancel()
+                if cancel {
+                    storage[key]?.cancel()
+                }
                 storage[key] = nil
             }
         }
@@ -54,7 +58,7 @@ public final class DisposableBag: @unchecked Sendable {
     }
 
     public func remove(_ key: String) {
-        storage.remove(key)
+        storage.remove(key, cancel: true)
     }
 
     public func removeAll() {
@@ -62,6 +66,10 @@ public final class DisposableBag: @unchecked Sendable {
     }
 
     public var isEmpty: Bool { storage.isEmpty }
+
+    public func completed(_ key: String) {
+        storage.remove(key, cancel: false)
+    }
 }
 
 extension AnyCancellable {
@@ -72,11 +80,5 @@ extension AnyCancellable {
 }
 
 extension Task {
-    
     func eraseToAnyCancellable() -> AnyCancellable { .init(cancel) }
-
-    public func store(
-        in disposableBag: DisposableBag,
-        key: String = UUID().uuidString
-    ) { disposableBag.insert(.init(cancel), with: key) }
 }

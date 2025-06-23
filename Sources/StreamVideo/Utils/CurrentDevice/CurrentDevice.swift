@@ -2,6 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+// swiftlint:disable discourage_task_init
+
 import Foundation
 
 #if canImport(UIKit)
@@ -41,6 +43,8 @@ public final class CurrentDevice: @unchecked Sendable {
         case mac
         /// The current device is Vision Pro.
         case vision
+
+        case simulator
     }
 
     /// The identified `DeviceType` for the current environment.
@@ -63,7 +67,9 @@ public final class CurrentDevice: @unchecked Sendable {
     convenience init() {
         self.init(
             currentDeviceProvider: {
-                #if canImport(UIKit)
+                #if targetEnvironment(simulator)
+                return .simulator
+                #elseif canImport(UIKit)
                 switch UIDevice.current.userInterfaceIdiom {
                 case .unspecified:
                     return .unspecified
@@ -83,9 +89,9 @@ public final class CurrentDevice: @unchecked Sendable {
                     return .unspecified
                 }
                 #elseif canImport(AppKit)
-                deviceType = .mac
+                return .mac
                 #else
-                deviceType = .unspecified
+                return .unspecified
                 #endif
             }
         )
@@ -114,6 +120,6 @@ extension InjectedValues {
     /// the device type at runtime.
     public var currentDevice: CurrentDevice {
         get { Self[CurrentDevice.self] }
-        set { _ = newValue }
+        set { Self[CurrentDevice.self] = newValue }
     }
 }

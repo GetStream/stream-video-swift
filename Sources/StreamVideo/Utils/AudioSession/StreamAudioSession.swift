@@ -21,7 +21,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     private let audioSession: AudioSessionProtocol
 
     /// Serial execution queue for processing session updates.
-    private let processingQueue = SerialActorQueue()
+    private let processingQueue = OperationQueue()
 
     /// A disposable bag holding all observation cancellable.
     private let disposableBag = DisposableBag()
@@ -321,7 +321,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         functionName: StaticString = #function,
         line: UInt = #line
     ) async throws {
-        try await processingQueue.sync { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else {
                 return
             }

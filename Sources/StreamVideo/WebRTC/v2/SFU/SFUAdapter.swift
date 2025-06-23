@@ -185,7 +185,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         subjectSendEvent.send(ConnectEvent(hostname: host))
     }
 
-    /// Disconnects from the WebSocket server and clears all disposables.
+    /// Disconnects from the WebSocket server and cl≥ears all disposables.
     ///
     /// - Note: the disconnection will send the `.userInitiated` DisconnectionSource.
     func disconnect() async {
@@ -332,15 +332,10 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         signalService.subject.send(request)
 
         subjectSendEvent.send(UpdateTrackMuteStateEvent(hostname: host, payload: request))
-
-        let task = Task { [request, signalService, retryPolicy] in
-            try await executeTask(retryPolicy: retryPolicy) {
-                try Task.checkCancellation()
-                return try await signalService.updateMuteStates(updateMuteStatesRequest: request)
-            }
+        let response = try await executeTask(retryPolicy: retryPolicy) {
+            try Task.checkCancellation()
+            return try await signalService.updateMuteStates(updateMuteStatesRequest: request)
         }
-        task.store(in: requestDisposableBag)
-        let response = try await task.value
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
         }
@@ -381,12 +376,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         statsRequest.telemetry = telemetry ?? .init()
         statsRequest.unifiedSessionID = unifiedSessionId
 
-        let task = Task { [statsRequest, signalService] in
-            try Task.checkCancellation()
-            return try await signalService.sendStats(sendStatsRequest: statsRequest)
-        }
-        task.store(in: requestDisposableBag)
-        let response = try await task.value
+        let response = try await signalService.sendStats(sendStatsRequest: statsRequest)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
@@ -410,32 +400,19 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         if isEnabled {
             var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
             request.sessionID = sessionId
-            let task = Task { [request, signalService] in
-                try Task.checkCancellation()
-                return try await signalService.startNoiseCancellation(
-                    startNoiseCancellationRequest: request
-                )
-            }
-            task.store(in: requestDisposableBag)
-
             subjectSendEvent.send(StartNoiseCancellationEvent(hostname: host, payload: request))
-
-            let response = try await task.value
+            let response = try await signalService.startNoiseCancellation(
+                startNoiseCancellationRequest: request
+            )
             signalService.subject.send(response)
         } else {
             var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
             request.sessionID = sessionId
-            let task = Task { [request, signalService] in
-                try Task.checkCancellation()
-                return try await signalService.stopNoiseCancellation(
-                    stopNoiseCancellationRequest: request
-                )
-            }
-            task.store(in: requestDisposableBag)
 
             subjectSendEvent.send(StopNoiseCancellationEvent(hostname: host, payload: request))
-
-            let response = try await task.value
+            let response = try await signalService.stopNoiseCancellation(
+                stopNoiseCancellationRequest: request
+            )
             signalService.subject.send(response)
             if response.error.code != .unspecified && !response.error.message.isEmpty {
                 throw response.error
@@ -466,21 +443,17 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.sdp = sessionDescription
         request.sessionID = sessionId
         request.tracks = tracks
-        let task = Task { [request, signalService] in
-            try await executeTask(retryPolicy: .fastCheckValue { true }) { [weak self] in
-                try Task.checkCancellation()
-                guard self?.isConnected == true else {
-                    throw ClientError("Not connected.")
-                }
-                return try await signalService.setPublisher(setPublisherRequest: request)
-            }
-        }
+
         log.debug(request, subsystems: .sfu)
-        task.store(in: requestDisposableBag)
 
         subjectSendEvent.send(SetPublisherEvent(hostname: host, payload: request))
-
-        let response = try await task.value
+        let response = try await executeTask(retryPolicy: .fastCheckValue { true }) { [weak self] in
+            try Task.checkCancellation()
+            guard let self, isConnected == true else {
+                throw ClientError("Not connected.")
+            }
+            return try await signalService.setPublisher(setPublisherRequest: request)
+        }
         log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
@@ -517,18 +490,12 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
                 "Request sessionId:\(sessionId) tracks:\(tracks.map { "\($0.userID):\($0.sessionID):\($0.trackType.rawValue):\($0.dimension.width)x\($0.dimension.height)" }.sorted())",
                 subsystems: .sfu
             )
-        let task = Task { [request, signalService] in
-            try Task.checkCancellation()
-            return try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {
-                try Task.checkCancellation()
-                return try await signalService.updateSubscriptions(updateSubscriptionsRequest: request)
-            }
-        }
-        task.store(in: requestDisposableBag)
 
         subjectSendEvent.send(UpdateSubscriptionsEvent(hostname: host, payload: request))
-
-        let response = try await task.value
+        let response = try await executeTask(retryPolicy: .neverGonnaGiveYouUp { true }) {
+            try Task.checkCancellation()
+            return try await signalService.updateSubscriptions(updateSubscriptionsRequest: request)
+        }
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
@@ -557,18 +524,13 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.sessionID = sessionId
         request.peerType = peerType
         request.sdp = sessionDescription
-        let task = Task { [request, signalService] in
-            try await executeTask(retryPolicy: .fastCheckValue { true }) {
-                try Task.checkCancellation()
-                return try await signalService.sendAnswer(sendAnswerRequest: request)
-            }
-        }
+
         log.debug(request, subsystems: .sfu)
-        task.store(in: requestDisposableBag)
-
         subjectSendEvent.send(SendAnswerEvent(hostname: host, payload: request))
-
-        let response = try await task.value
+        let response = try await executeTask(retryPolicy: .fastCheckValue { true }) {
+            try Task.checkCancellation()
+            return try await signalService.sendAnswer(sendAnswerRequest: request)
+        }
         log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
@@ -602,15 +564,9 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         request.iceCandidate = candidate
         request.sessionID = sessionId
         request.peerType = peerType
-        let task = Task { [request, signalService] in
-            try Task.checkCancellation()
-            return try await signalService.iceTrickle(iCETrickle: request)
-        }
-        task.store(in: requestDisposableBag)
 
         subjectSendEvent.send(ICETrickleEvent(hostname: host, payload: request))
-
-        let response = try await task.value
+        let response = try await signalService.iceTrickle(iCETrickle: request)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {
             throw response.error
@@ -636,18 +592,13 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         var request = Stream_Video_Sfu_Signal_ICERestartRequest()
         request.sessionID = sessionId
         request.peerType = peerType
-        let task = Task { [request, signalService] in
-            try await executeTask(retryPolicy: .fastCheckValue { true }) {
-                try Task.checkCancellation()
-                return try await signalService.iceRestart(iCERestartRequest: request)
-            }
-        }
+
         log.debug(request, subsystems: .sfu)
-        task.store(in: requestDisposableBag)
-
         subjectSendEvent.send(RestartICEEvent(hostname: host, payload: request))
-
-        let response = try await task.value
+        let response = try await executeTask(retryPolicy: .fastCheckValue { true }) {
+            try Task.checkCancellation()
+            return try await signalService.iceRestart(iCERestartRequest: request)
+        }
         log.debug(response, subsystems: .sfu)
         signalService.subject.send(response)
         if response.error.code != .unspecified && !response.error.message.isEmpty {

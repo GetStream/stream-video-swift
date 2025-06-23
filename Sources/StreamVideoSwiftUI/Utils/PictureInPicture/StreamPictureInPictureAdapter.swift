@@ -30,7 +30,8 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
 
     /// Creates a new Picture-in-Picture adapter.
     init() {
-        Task { @MainActor in
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
             let store = PictureInPictureStore()
             guard
                 #available(iOS 15.0, *)

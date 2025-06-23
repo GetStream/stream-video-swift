@@ -19,16 +19,12 @@ class StreamVideoUITestCase: XCTestCase, @unchecked Sendable {
     var callCid: String { "\(callType):\(callId)" }
     let sizeThatFits = CGSize(width: 100, height: 100)
     let snapshotVariants: [SnapshotVariant] = [.defaultLight, .defaultDark]
-    
-    override func setUpWithError() throws {
+
+    override func setUp() async throws {
         try super.setUpWithError()
-        
+
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
-    }
-    
-    override func tearDownWithError() throws {
-        try super.tearDownWithError()
     }
     
     override func tearDown() async throws {

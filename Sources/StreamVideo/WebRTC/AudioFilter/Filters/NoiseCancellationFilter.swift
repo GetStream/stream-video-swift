@@ -21,7 +21,8 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     private let processClosure: (Int, Int, Int, UnsafeMutablePointer<Float>) -> Void
     private let releaseClosure: () -> Void
     private var activeCallCancellable: AnyCancellable?
-    private let serialQueue = SerialActorQueue()
+    private let serialQueue = OperationQueue()
+    private let disposableBag = DisposableBag()
     private weak var activeCall: Call? {
         didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) }
     }
@@ -58,7 +59,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     ///   - sampleRate: The sample rate in Hz.
     ///   - channels: The number of audio channels.
     public func initialize(sampleRate: Int, channels: Int) {
-        serialQueue.async { [weak self] in
+        serialQueue.addTaskOperation { @MainActor [weak self] in
             guard let self, !isActive else { return }
             self.initializeClosure(sampleRate, channels)
             self.isActive = true
@@ -83,7 +84,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
 
     /// Releases the filter by stopping noise cancellation for the active call.
     public func release() {
-        serialQueue.async { [weak self] in
+        serialQueue.addTaskOperation { [weak self] in
             guard let self, let activeCall = self.activeCall else {
                 return
             }
@@ -109,7 +110,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     }
 
     private func didUpdateActiveCall(_ call: Call?, oldValue: Call?) {
-        serialQueue.async { [weak self] in
+        serialQueue.addTaskOperation { [weak self] in
             guard let self else { return }
 
             if let call, isActive {
@@ -127,8 +128,8 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     }
 
     private func stopNoiseCancellation(for call: Call?) async {
-        Task { @MainActor in
-            isActive = false
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            self?.isActive = false
         }
         releaseClosure() // Invoke the release closure.
         log.debug("AudioFilter:\(id) is now inactive 🔴.")

@@ -28,6 +28,7 @@ extension Call.StateMachine.Stage {
     /// A class representing the error stage in the `StreamCallStateMachine`.
     final class ErrorStage: Call.StateMachine.Stage, @unchecked Sendable {
         let error: Error
+        private let disposableBag = DisposableBag()
 
         /// Initializes a new error stage with the provided call and error.
         ///
@@ -51,8 +52,11 @@ extension Call.StateMachine.Stage {
         override func transition(
             from previousStage: Call.StateMachine.Stage
         ) -> Self? {
-            Task { [error] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 do {
+                    guard let self else {
+                        throw ClientError()
+                    }
                     log.error(error)
                     try transition?(.idle(context))
                 } catch let transitionError {

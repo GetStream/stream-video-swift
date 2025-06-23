@@ -73,6 +73,12 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         }
     }
 
+    private let operationQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
+
     // MARK: - Implementation
 
     var configuration: RTCConfiguration = .init()
@@ -108,14 +114,18 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     func offer(
         for constraints: RTCMediaConstraints
     ) async throws -> RTCSessionDescription {
-        stubbedFunctionInput[.offer]?
-            .append(.offer(constraints: constraints))
-        if let result = stubbedFunction[.offer] as? RTCSessionDescription {
-            return result
-        } else if let result = stubbedFunction[.offer] as? StubVariantResultProvider<RTCSessionDescription> {
-            return result.getResult(for: timesCalled(.offer))
-        } else {
-            return RTCSessionDescription(type: .offer, sdp: .unique)
+        defer {
+            stubbedFunctionInput[.offer]?
+                .append(.offer(constraints: constraints))
+        }
+        return try await operationQueue.addSynchronousTaskOperation {
+            if let result = self.stubbedFunction[.offer] as? RTCSessionDescription {
+                return result
+            } else if let result = self.stubbedFunction[.offer] as? StubVariantResultProvider<RTCSessionDescription> {
+                return result.getResult(for: self.timesCalled(.offer))
+            } else {
+                return RTCSessionDescription(type: .offer, sdp: .unique)
+            }
         }
     }
 

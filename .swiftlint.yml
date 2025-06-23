@@ -17,6 +17,16 @@ custom_rules:
     regex: '\bTimer\s*(\.\s*)?publish\b'
     message: "Avoid using Timer.publish. User the TimerStorage instead."
     severity: error
+  discourage_task_init:
+    name: "Discouraged Task { usage"
+    regex: '\bTask\s*\{'
+    message: "Avoid using Task { directly. Prefer adding the Task in a disposable bag to offer some basic lifecycle management."
+    severity: error
+    excluded:
+      - DemoApp
+      - DemoAppUIKit
+      - Sources/StreamVideoSwiftUI
+      - Sources/StreamVideoUIKit
 
 # Enabled/disabled rules
 only_rules:

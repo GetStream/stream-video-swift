@@ -55,8 +55,8 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
             "3": .dummy(id: "3", isScreenSharing: true),
             "4": .dummy(id: "4", isScreenSharing: true)
         ])
-
         await fulfillment { self.mockSFUStack.service.updateSubscriptionsWasCalledWithRequest != nil }
+
         let request = try XCTUnwrap(mockSFUStack.service.updateSubscriptionsWasCalledWithRequest)
         XCTAssertEqual(request.tracks.filter { $0.trackType == .video }.count, 2)
         XCTAssertEqual(request.tracks.filter { $0.trackType == .screenShare }.count, 2)
@@ -69,6 +69,7 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
             "3": .dummy(id: "3", isScreenSharing: true),
             "4": .dummy(id: "4", isScreenSharing: true)
         ])
+        await fulfillment { self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 1 }
 
         incomingVideoQualitySettingsSubject.send(.disabled(group: .all))
 
@@ -92,7 +93,6 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
             "4": .dummy(id: "4", isScreenSharing: true)
         ])
 
-        await wait(for: 0.5)
-        XCTAssertEqual(mockSFUStack.service.timesCalled(.updateSubscriptions), 1)
+        await fulfillment { self.mockSFUStack.service.timesCalled(.updateSubscriptions) == 1 }
     }
 }
