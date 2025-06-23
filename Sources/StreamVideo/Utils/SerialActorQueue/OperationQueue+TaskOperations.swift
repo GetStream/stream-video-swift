@@ -14,11 +14,12 @@ extension OperationQueue {
     ///   - function: The function where the operation was initiated.
     ///   - line: The line number where the operation was initiated.
     ///   - operation: The async operation to be executed.
-    public func addTaskOperation<Failure>(
+    #if compiler(>=6.0)
+    public func addTaskOperation(
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        operation: sending @escaping @Sendable @isolated(any) () async throws (Failure) -> Void
+        operation: sending @escaping @Sendable @isolated(any) () async throws -> Void
     ) {
         addOperation(
             TaskOperation(
@@ -29,6 +30,23 @@ extension OperationQueue {
             )
         )
     }
+    #else
+    public func addTaskOperation(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
+        operation: @escaping @Sendable() async throws -> Void
+    ) {
+        addOperation(
+            TaskOperation<Void>(
+                file: file,
+                function: function,
+                line: line,
+                operation: operation
+            )
+        )
+    }
+    #endif
 
     /// Adds an asynchronous task operation to the queue and awaits its result.
     ///
@@ -40,12 +58,13 @@ extension OperationQueue {
     ///   - operation: The async operation returning a value.
     /// - Returns: The result produced by the operation.
     /// - Throws: An error if the operation fails or times out.
-    public func addSynchronousTaskOperation<Output: Sendable, Failure: Error>(
+    #if compiler(>=6.0)
+    public func addSynchronousTaskOperation<Output: Sendable>(
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
         timeout: TimeInterval = 5,
-        operation: sending @escaping @Sendable @isolated(any) () async throws (Failure) -> Output
+        operation: sending @escaping @Sendable @isolated(any) () async throws -> Output
     ) async throws -> Output {
         let subject = PassthroughSubject<Output, Error>()
         addOperation(
@@ -59,17 +78,42 @@ extension OperationQueue {
         )
         return try await subject.nextValue(timeout: timeout)
     }
+    #else
+    public func addSynchronousTaskOperation<Output: Sendable>(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
+        timeout: TimeInterval = 5,
+        operation: @escaping @Sendable() async throws -> Output
+    ) async throws -> Output {
+        let subject = PassthroughSubject<Output, Error>()
+        addOperation(
+            TaskOperation<Output>(
+                file: file,
+                function: function,
+                line: line,
+                resultSubject: subject,
+                operation: operation
+            )
+        )
+        return try await subject.nextValue(timeout: timeout)
+    }
+    #endif
 }
 
-private final class TaskOperation<Output: Sendable, Failure: Error>: Operation, @unchecked Sendable {
-    typealias Block = @Sendable @isolated(any) () async throws (Failure) -> Output
+private final class TaskOperation<Output: Sendable>: Operation, @unchecked Sendable {
+    #if compiler(>=6.0)
+    typealias Block = @Sendable @isolated(any) () async throws -> Output
+    #else
+    typealias Block = @Sendable() async throws -> Output
+    #endif
 
     private let file: StaticString
     private let function: StaticString
     private let line: UInt
 
     private let operation: Block
-    private let resultSubject: PassthroughSubject<Output, Failure>?
+    private let resultSubject: PassthroughSubject<Output, Error>?
     private var task: Task<Void, Never>?
 
     @Atomic private var _isExecuting: Bool = false
@@ -102,11 +146,12 @@ private final class TaskOperation<Output: Sendable, Failure: Error>: Operation, 
         }
     }
 
+    #if compiler(>=6.0)
     init(
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        resultSubject: PassthroughSubject<Output, Failure>? = nil,
+        resultSubject: PassthroughSubject<Output, Error>? = nil,
         operation: sending @escaping Block
     ) {
         self.file = file
@@ -115,6 +160,21 @@ private final class TaskOperation<Output: Sendable, Failure: Error>: Operation, 
         self.resultSubject = resultSubject
         self.operation = operation
     }
+    #else
+    init(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
+        resultSubject: PassthroughSubject<Output, Error>? = nil,
+        operation: @escaping Block
+    ) {
+        self.file = file
+        self.function = function
+        self.line = line
+        self.resultSubject = resultSubject
+        self.operation = operation
+    }
+    #endif
 
     deinit {
         task?.cancel()
@@ -140,7 +200,7 @@ private final class TaskOperation<Output: Sendable, Failure: Error>: Operation, 
                     resultSubject.send(completion: .finished)
                 }
             } catch {
-                if let resultSubject, let error = error as? Failure {
+                if let resultSubject {
                     resultSubject.send(completion: .failure(error))
                 }
                 log.error(

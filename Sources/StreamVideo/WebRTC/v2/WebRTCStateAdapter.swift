@@ -515,8 +515,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             return
         }
 
-        let participant = event.participant.toCallParticipant()
-
         let currentCallSettings = self.callSettings
         let possibleNewCallSettings = {
             switch event.type {
