@@ -26,7 +26,7 @@ extension OperationQueue {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        timeout: TimeInterval = 10,
+        timeout: TimeInterval = 5,
         operation: sending @escaping @Sendable @isolated(any) () async throws (Failure) -> Output
     ) async throws -> Output {
         let subject = PassthroughSubject<Output, Error>()

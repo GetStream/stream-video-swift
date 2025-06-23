@@ -30,8 +30,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     // MARK: - Tests for users without sendAudio capability
 
-    func testConfiguration_WhenUserCannotSendAudio_ReturnsPlaybackConfiguration() {
+    func testConfiguration_WhenUserCannotSendAudio_ReturnsPlaybackConfiguration() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: true, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendVideo]
 
@@ -50,8 +52,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     // MARK: - Tests for users with sendAudio capability
 
-    func testConfiguration_WhenUserCanSendAudioAndAudioOn_ReturnsPlayAndRecordConfiguration() {
+    func testConfiguration_WhenUserCanSendAudioAndAudioOn_ReturnsPlayAndRecordConfiguration() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: true, videoOn: true, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -75,8 +79,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(configuration.overrideOutputAudioPort, AVAudioSession.PortOverride.none)
     }
 
-    func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithEarpiece_ReturnsPlayAndRecordConfiguration() {
+    func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithEarpiece_ReturnsPlayAndRecordConfiguration() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -100,9 +106,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(configuration.overrideOutputAudioPort, .speaker)
     }
 
-    func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithoutEarpiece_ReturnsPlaybackAndRecordConfiguration() {
+    func testConfiguration_WhenUserCanSendAudioAndSpeakerOnWithoutEarpiece_ReturnsPlaybackAndRecordConfiguration() async {
         // Given
         currentDeviceType = .pad
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -119,8 +126,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertNil(configuration.overrideOutputAudioPort)
     }
 
-    func testConfiguration_WhenUserCanSendAudioAndAudioOff_ReturnsPlaybackConfiguration() {
+    func testConfiguration_WhenUserCanSendAudioAndAudioOff_ReturnsPlaybackConfiguration() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: false, videoOn: true, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -139,8 +148,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
 
     // MARK: - Tests for different video settings
 
-    func testConfiguration_WhenVideoOnSpeakerOn_ReturnsVideoChatMode() {
+    func testConfiguration_WhenVideoOnSpeakerOn_ReturnsVideoChatMode() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: true, videoOn: true, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -154,8 +165,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(configuration.mode, .videoChat)
     }
 
-    func testConfiguration_WhenVideoOffSpeakerOnBackgroundFalse_ReturnsVoiceChatMode() {
+    func testConfiguration_WhenVideoOffSpeakerOnBackgroundFalse_ReturnsVoiceChatMode() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -178,8 +191,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         )
     }
 
-    func testConfiguration_WhenVideoOffSpeakerFalseBackgroundFalse_ReturnsVoiceChatMode() {
+    func testConfiguration_WhenVideoOffSpeakerFalseBackgroundFalse_ReturnsVoiceChatMode() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
 
@@ -201,8 +216,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         )
     }
 
-    func testConfiguration_WhenVideoOffSpeakerOnBackgroundTrue_ReturnsVoiceChatMode() {
+    func testConfiguration_WhenVideoOffSpeakerOnBackgroundTrue_ReturnsVoiceChatMode() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         stubbedAppStateAdapter.stubbedState = .background
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: true)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
@@ -225,8 +242,10 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         )
     }
 
-    func testConfiguration_WhenVideoOffSpeakerFalseBackgroundTrue_ReturnsVoiceChatMode() {
+    func testConfiguration_WhenVideoOffSpeakerFalseBackgroundTrue_ReturnsVoiceChatMode() async {
         // Given
+        currentDeviceType = .phone
+        await fulfilmentInMainActor { self.currentDevice.deviceType == self.currentDeviceType }
         stubbedAppStateAdapter.stubbedState = .background
         let callSettings = CallSettings(audioOn: true, videoOn: false, speakerOn: false)
         let ownCapabilities: Set<OwnCapability> = [.sendAudio, .sendVideo]
