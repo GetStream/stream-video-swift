@@ -770,7 +770,27 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 )
             )
 
-            let answer = try await createAnswer()
+            var answer = try await createAnswer()
+
+            // Enable Stereo - Begin
+            let sdpParser = SDPParser()
+            let stereoEnableVisitor = StereoEnableVisitor()
+            sdpParser.registerVisitor(stereoEnableVisitor)
+            await sdpParser.parse(sdp: offerSdp)
+
+            if !stereoEnableVisitor.found.isEmpty {
+                let sdpWriter = SDPWriter()
+                let stereoEnableWriter = StereoEnableWriter(stereoEnableVisitor.found)
+                sdpWriter.registerWriter(stereoEnableWriter)
+                let modifiedAnswerSDP = await sdpWriter.write(sdp: answer.sdp)
+                answer = .init(type: answer.type, sdp: modifiedAnswerSDP)
+                log.debug(
+                    "Answer SDP has been modifier with enabled stereo for mid values:\(stereoEnableVisitor.found.keys.joined(separator: ","))",
+                    subsystems: .webRTC
+                )
+            }
+            // Enable Stereo - End
+
             try await setLocalDescription(answer)
 
             try await sfuAdapter.sendAnswer(

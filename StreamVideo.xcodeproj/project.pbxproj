@@ -392,6 +392,13 @@
 		40914C9A2B56A85B00F6A13E /* PictureInPictureBufferTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C992B56A85B00F6A13E /* PictureInPictureBufferTransformer.swift */; };
 		40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */; };
 		40916E782DA94A150061D860 /* Publisher+AsyncStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40916E752DA94A150061D860 /* Publisher+AsyncStream.swift */; };
+		409251772E05A75800DC0FB3 /* StereoEnableVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409251762E05A75800DC0FB3 /* StereoEnableVisitor.swift */; };
+		4092517E2E05AFF000DC0FB3 /* MidStereoInformation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4092517C2E05AFBF00DC0FB3 /* MidStereoInformation.swift */; };
+		4092517F2E05AFF500DC0FB3 /* StereoEnableWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409251792E05AFB700DC0FB3 /* StereoEnableWriter.swift */; };
+		409251812E05B00300DC0FB3 /* SDPLineWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409251802E05B00300DC0FB3 /* SDPLineWriter.swift */; };
+		409251852E05B03500DC0FB3 /* SDPWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409251842E05B03500DC0FB3 /* SDPWriter.swift */; };
+		4092518A2E05B11F00DC0FB3 /* StereoEnableVisitor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409251892E05B11F00DC0FB3 /* StereoEnableVisitor_Tests.swift */; };
+		4092518D2E05B40C00DC0FB3 /* StereoEnableWriter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4092518C2E05B40C00DC0FB3 /* StereoEnableWriter_Tests.swift */; };
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
@@ -1948,6 +1955,13 @@
 		40914C992B56A85B00F6A13E /* PictureInPictureBufferTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureInPictureBufferTransformer.swift; sourceTree = "<group>"; };
 		40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBufferTransformerTests.swift; sourceTree = "<group>"; };
 		40916E752DA94A150061D860 /* Publisher+AsyncStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+AsyncStream.swift"; sourceTree = "<group>"; };
+		409251762E05A75800DC0FB3 /* StereoEnableVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StereoEnableVisitor.swift; sourceTree = "<group>"; };
+		409251792E05AFB700DC0FB3 /* StereoEnableWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StereoEnableWriter.swift; sourceTree = "<group>"; };
+		4092517C2E05AFBF00DC0FB3 /* MidStereoInformation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MidStereoInformation.swift; sourceTree = "<group>"; };
+		409251802E05B00300DC0FB3 /* SDPLineWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineWriter.swift; sourceTree = "<group>"; };
+		409251842E05B03500DC0FB3 /* SDPWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPWriter.swift; sourceTree = "<group>"; };
+		409251892E05B11F00DC0FB3 /* StereoEnableVisitor_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StereoEnableVisitor_Tests.swift; sourceTree = "<group>"; };
+		4092518C2E05B40C00DC0FB3 /* StereoEnableWriter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StereoEnableWriter_Tests.swift; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
@@ -3684,9 +3698,9 @@
 		4061287F2CF32FE4007F5CDC /* SDP Parsing */ = {
 			isa = PBXGroup;
 			children = (
-				406128842CF33018007F5CDC /* Visitors */,
-				4061288A2CF33088007F5CDC /* SupportedPrefix.swift */,
-				406128822CF33000007F5CDC /* SDPParser.swift */,
+				409251832E05B02900DC0FB3 /* Writer */,
+				409251822E05B02100DC0FB3 /* Parser */,
+				4092517B2E05AFBD00DC0FB3 /* Models */,
 			);
 			path = "SDP Parsing";
 			sourceTree = "<group>";
@@ -3694,6 +3708,7 @@
 		406128842CF33018007F5CDC /* Visitors */ = {
 			isa = PBXGroup;
 			children = (
+				409251762E05A75800DC0FB3 /* StereoEnableVisitor.swift */,
 				406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */,
 				406128872CF33029007F5CDC /* RTPMapVisitor.swift */,
 			);
@@ -4157,6 +4172,75 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		409251782E05AFB100DC0FB3 /* Writers */ = {
+			isa = PBXGroup;
+			children = (
+				409251802E05B00300DC0FB3 /* SDPLineWriter.swift */,
+				409251792E05AFB700DC0FB3 /* StereoEnableWriter.swift */,
+			);
+			path = Writers;
+			sourceTree = "<group>";
+		};
+		4092517B2E05AFBD00DC0FB3 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				4092517C2E05AFBF00DC0FB3 /* MidStereoInformation.swift */,
+				4061288A2CF33088007F5CDC /* SupportedPrefix.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		409251822E05B02100DC0FB3 /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				406128822CF33000007F5CDC /* SDPParser.swift */,
+				406128842CF33018007F5CDC /* Visitors */,
+			);
+			path = Parser;
+			sourceTree = "<group>";
+		};
+		409251832E05B02900DC0FB3 /* Writer */ = {
+			isa = PBXGroup;
+			children = (
+				409251842E05B03500DC0FB3 /* SDPWriter.swift */,
+				409251782E05AFB100DC0FB3 /* Writers */,
+			);
+			path = Writer;
+			sourceTree = "<group>";
+		};
+		409251862E05B08000DC0FB3 /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C4D2D14F76A002C4EAB /* Visitors */,
+				40B48C502D14F7AE002C4EAB /* SDPParser_Tests.swift */,
+			);
+			path = Parser;
+			sourceTree = "<group>";
+		};
+		409251872E05B08500DC0FB3 /* Writer */ = {
+			isa = PBXGroup;
+			children = (
+				4092518B2E05B3FE00DC0FB3 /* Writers */,
+			);
+			path = Writer;
+			sourceTree = "<group>";
+		};
+		409251882E05B09300DC0FB3 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				40B48C4E2D14F77B002C4EAB /* SupportedPrefix_Tests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		4092518B2E05B3FE00DC0FB3 /* Writers */ = {
+			isa = PBXGroup;
+			children = (
+				4092518C2E05B40C00DC0FB3 /* StereoEnableWriter_Tests.swift */,
+			);
+			path = Writers;
+			sourceTree = "<group>";
+		};
 		409386182AA09E3900FF5AF4 /* MemoryLogDestination */ = {
 			isa = PBXGroup;
 			children = (
@@ -4534,9 +4618,9 @@
 		40B48C4A2D14F718002C4EAB /* SDP Parsing */ = {
 			isa = PBXGroup;
 			children = (
-				40B48C4D2D14F76A002C4EAB /* Visitors */,
-				40B48C502D14F7AE002C4EAB /* SDPParser_Tests.swift */,
-				40B48C4E2D14F77B002C4EAB /* SupportedPrefix_Tests.swift */,
+				409251882E05B09300DC0FB3 /* Models */,
+				409251872E05B08500DC0FB3 /* Writer */,
+				409251862E05B08000DC0FB3 /* Parser */,
 			);
 			path = "SDP Parsing";
 			sourceTree = "<group>";
@@ -4544,6 +4628,7 @@
 		40B48C4D2D14F76A002C4EAB /* Visitors */ = {
 			isa = PBXGroup;
 			children = (
+				409251892E05B11F00DC0FB3 /* StereoEnableVisitor_Tests.swift */,
 				40B48C4B2D14F721002C4EAB /* RTPMapVisitorTests.swift */,
 			);
 			path = Visitors;
@@ -7522,6 +7607,7 @@
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				40382F2E2C88B87D00C2D00F /* ReflectiveStringConvertible.swift in Sources */,
 				40BBC48F2C623C6E002AEF92 /* StreamRTCPeerConnection+Events.swift in Sources */,
+				409251852E05B03500DC0FB3 /* SDPWriter.swift in Sources */,
 				40FF825F2D63532C0029AA80 /* Participants.swift in Sources */,
 				4013A8ED2D81E43E00F81C15 /* WebRTCCoordinator+Blocked.swift in Sources */,
 				40034C2C2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift in Sources */,
@@ -7608,9 +7694,11 @@
 				84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */,
 				841BAA3E2BD15CDE000C73E4 /* CollectUserFeedbackResponse.swift in Sources */,
 				402F04A92B70ED8600CA1986 /* StreamCallStatisticsReporter.swift in Sources */,
+				409251772E05A75800DC0FB3 /* StereoEnableVisitor.swift in Sources */,
 				8490DD1F298D39D9007E53D2 /* JsonEventDecoder.swift in Sources */,
 				40FB15192BF77EE700D5E580 /* Call+Idle.swift in Sources */,
 				40ADB85C2D64B00E00B06AAF /* CGSize+Hashable.swift in Sources */,
+				4092517F2E05AFF500DC0FB3 /* StereoEnableWriter.swift in Sources */,
 				40E3633E2D09EF560028C52A /* CMVideoDimensions+DefaultValues.swift in Sources */,
 				40382F2B2C88B84800C2D00F /* Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload+Payload.swift in Sources */,
 				40FB8FF82D661E2000F4390A /* String+OpenApiExtensions.swift in Sources */,
@@ -7770,6 +7858,7 @@
 				84DCA2152A38A79E000C3411 /* Token.swift in Sources */,
 				40FB151B2BF77EEE00D5E580 /* Call+JoiningStage.swift in Sources */,
 				402B34C02DCDEE9000574663 /* WebRTCUpdateSubscriptionsAdapter.swift in Sources */,
+				409251812E05B00300DC0FB3 /* SDPLineWriter.swift in Sources */,
 				40AB34E22C5E742400B5B6B3 /* Publisher+Logger.swift in Sources */,
 				40382F352C89A6C500C2D00F /* AudioSettings+Convenience.swift in Sources */,
 				840F59902A77FDCB00EF3EB2 /* UnpinRequest.swift in Sources */,
@@ -8036,6 +8125,7 @@
 				841FF51B2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift in Sources */,
 				84DC38A329ADFCFD00946713 /* MuteUsersResponse.swift in Sources */,
 				84DC38BF29ADFCFD00946713 /* ScreensharingSettings.swift in Sources */,
+				4092517E2E05AFF000DC0FB3 /* MidStereoInformation.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
@@ -8246,6 +8336,7 @@
 				4065688A2E04275F00A67EAC /* IdleTimerAdapter_Tests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
 				40B3E5492DBBD2CA00DE8F50 /* SpeakerProximityPolicy_Tests.swift in Sources */,
+				4092518A2E05B11F00DC0FB3 /* StereoEnableVisitor_Tests.swift in Sources */,
 				40F0173E2BBEB86800E89FD1 /* TestsAuthenticationProvider.swift in Sources */,
 				401338762BF2489C007318BD /* MockCXCallController.swift in Sources */,
 				842747FC29EEECBA00E063AD /* AssertTestQueue.swift in Sources */,
@@ -8348,6 +8439,7 @@
 				40B48C2C2D14D0FF002C4EAB /* StreamVideoSfuModelsPublishOption_ConvenienceTests.swift in Sources */,
 				406B3C1C2C903A2B00FC93A1 /* MockVideoCapturerFactory.swift in Sources */,
 				84BB570E2A20D7BB0002C123 /* Mapping_Tests.swift in Sources */,
+				4092518D2E05B40C00DC0FB3 /* StereoEnableWriter_Tests.swift in Sources */,
 				8251E62F2A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				401C1EF02D493DCA00304609 /* OrderedCapacityQueueTests.swift in Sources */,
 				40E9B3B32BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift in Sources */,
