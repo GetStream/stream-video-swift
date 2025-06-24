@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- When receiving calls while the app is not running, the Call layout may appear wrong for 1:1 calls. [#863](https://github.com/GetStream/stream-video-swift/pull/863)
 
 # [1.27.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.27.0)
 _June 23, 2025_

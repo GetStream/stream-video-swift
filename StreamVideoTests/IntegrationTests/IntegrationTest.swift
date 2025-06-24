@@ -26,6 +26,10 @@ class IntegrationTest: XCTestCase, @unchecked Sendable {
         try await super.setUp()
         client = try await makeClient(for: userId)
         #endif
+
+        // We configure the production timeouts as we hit real endpoints
+        WebRTCConfiguration.timeout = WebRTCConfiguration.Timeout.production
+        CallConfiguration.timeout = CallConfiguration.Timeout.production
     }
 
     override class func tearDown() {
@@ -39,6 +43,12 @@ class IntegrationTest: XCTestCase, @unchecked Sendable {
         baseURL = nil
         authenticationProvider = nil
         client = nil
+
+        #if STREAM_TESTS
+        WebRTCConfiguration.timeout = WebRTCConfiguration.Timeout.testing
+        CallConfiguration.timeout = CallConfiguration.Timeout.testing
+        #endif
+
         super.tearDown()
     }
 

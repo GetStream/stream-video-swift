@@ -37,9 +37,7 @@ final class ParticipantEventResetAdapter_Tests: XCTestCase, @unchecked Sendable 
         )
         XCTAssertNotNil(viewModel.participantEvent)
 
-        await wait(for: interval)
-
-        XCTAssertNil(viewModel.participantEvent)
+        await fulfilmentInMainActor { self.viewModel.participantEvent == nil }
     }
 
     func test_participantEventReceived_thenAnotherOne_participantEventBecomesNilAfterIntervalFromTheSecondEventPassed(
