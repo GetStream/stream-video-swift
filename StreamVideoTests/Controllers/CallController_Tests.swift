@@ -54,6 +54,16 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - setCall
+
+    func test_setCall_updatesSessionIdCorrectly() async throws {
+        let call = await MockCall(.dummy())
+        _ = subject
+        subject.call = call
+
+        await fulfilmentInMainActor { call.state.sessionId.isEmpty == false }
+    }
+
     // MARK: - joinCall
 
     func test_joinCall_coordinatorTransitionsToConnecting() async throws {

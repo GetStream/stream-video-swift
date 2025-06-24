@@ -35,6 +35,7 @@ class CallController: @unchecked Sendable {
 
     weak var call: Call? {
         didSet {
+            updateSessionId(on: call)
             subscribeToParticipantsCountUpdatesEvent(call)
             subscribeToCurrentUserBlockedState(call)
         }
@@ -81,6 +82,7 @@ class CallController: @unchecked Sendable {
 
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
+
             await handleParticipantCountUpdated()
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
             self.participants = CollectionDelayedUpdateObserver(
@@ -500,6 +502,24 @@ class CallController: @unchecked Sendable {
     }
 
     // MARK: - private
+
+    private func updateSessionId(on call: Call?) {
+        guard let call else {
+            return
+        }
+
+        Task(disposableBag: disposableBag) { @MainActor [weak self, weak call] in
+            guard
+                let self,
+                let call,
+                call.state.sessionId.isEmpty
+            else {
+                return
+            }
+            let sessionId = await webRTCCoordinator.stateAdapter.sessionID
+            call.state.sessionId = sessionId
+        }
+    }
 
     private func handleParticipantsUpdated() {
         webRTCParticipantsObserver = participants?
