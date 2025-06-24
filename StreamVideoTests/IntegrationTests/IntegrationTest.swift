@@ -43,6 +43,12 @@ class IntegrationTest: XCTestCase, @unchecked Sendable {
         baseURL = nil
         authenticationProvider = nil
         client = nil
+
+        #if STREAM_TESTS
+        WebRTCConfiguration.timeout = WebRTCConfiguration.Timeout.testing
+        CallConfiguration.timeout = CallConfiguration.Timeout.testing
+        #endif
+
         super.tearDown()
     }
 

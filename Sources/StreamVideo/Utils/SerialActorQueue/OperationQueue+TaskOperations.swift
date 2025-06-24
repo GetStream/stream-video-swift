@@ -63,40 +63,38 @@ extension OperationQueue {
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        timeout: TimeInterval = 5,
         operation: sending @escaping @Sendable @isolated(any) () async throws -> Output
     ) async throws -> Output {
-        let subject = PassthroughSubject<Output, Error>()
-        addOperation(
-            TaskOperation(
-                file: file,
-                function: function,
-                line: line,
-                resultSubject: subject,
-                operation: operation
+        try await withCheckedThrowingContinuation { continuation in
+            addOperation(
+                TaskOperation(
+                    file: file,
+                    function: function,
+                    line: line,
+                    continuation: continuation,
+                    operation: operation
+                )
             )
-        )
-        return try await subject.nextValue(timeout: timeout, file: file, function: function, line: line)
+        }
     }
     #else
     public func addSynchronousTaskOperation<Output: Sendable>(
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        timeout: TimeInterval = 5,
         operation: @escaping @Sendable() async throws -> Output
     ) async throws -> Output {
-        let subject = PassthroughSubject<Output, Error>()
-        addOperation(
-            TaskOperation<Output>(
-                file: file,
-                function: function,
-                line: line,
-                resultSubject: subject,
-                operation: operation
+        try await withCheckedThrowingContinuation { continuation in
+            addOperation(
+                TaskOperation(
+                    file: file,
+                    function: function,
+                    line: line,
+                    continuation: continuation,
+                    operation: operation
+                )
             )
-        )
-        return try await subject.nextValue(timeout: timeout, file: file, function: function, line: line)
+        }
     }
     #endif
 }
@@ -113,7 +111,7 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
     private let line: UInt
 
     private let operation: Block
-    private let resultSubject: PassthroughSubject<Output, Error>?
+    private let continuation: CheckedContinuation<Output, Error>?
     private var task: Task<Void, Never>?
 
     @Atomic private var _isExecuting: Bool = false
@@ -151,13 +149,13 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        resultSubject: PassthroughSubject<Output, Error>? = nil,
+        continuation: CheckedContinuation<Output, Error>? = nil,
         operation: sending @escaping Block
     ) {
         self.file = file
         self.function = function
         self.line = line
-        self.resultSubject = resultSubject
+        self.continuation = continuation
         self.operation = operation
     }
     #else
@@ -165,13 +163,13 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line,
-        resultSubject: PassthroughSubject<Output, Error>? = nil,
+        continuation: CheckedContinuation<Output, Error>? = nil,
         operation: @escaping Block
     ) {
         self.file = file
         self.function = function
         self.line = line
-        self.resultSubject = resultSubject
+        self.continuation = continuation
         self.operation = operation
     }
     #endif
@@ -195,13 +193,12 @@ private final class TaskOperation<Output: Sendable>: Operation, @unchecked Senda
             do {
                 try Task.checkCancellation()
                 let result = try await self.operation()
-                if let resultSubject {
-                    resultSubject.send(result)
-                    resultSubject.send(completion: .finished)
+                if let continuation {
+                    continuation.resume(returning: result)
                 }
             } catch {
-                if let resultSubject {
-                    resultSubject.send(completion: .failure(error))
+                if let continuation {
+                    continuation.resume(throwing: error)
                 }
                 log.error(
                     error,

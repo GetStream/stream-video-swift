@@ -26,42 +26,52 @@ extension Publisher where Output: Sendable {
 
             if let timeout = timeout {
                 let workItem = DispatchWorkItem {
-                    if !receivedValue {
-                        continuation.resume(
-                            throwing: ClientError("Operation timed out", file, line)
-                        )
-                        cancellable?.cancel()
-                    }
+                    cancellable?.cancel()
+                    continuation.resume(
+                        throwing: ClientError("Operation timed out", file, line)
+                    )
                 }
                 timeoutWorkItem = workItem
-                DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: workItem)
+                DispatchQueue
+                    .global()
+                    .asyncAfter(deadline: .now() + timeout, execute: workItem)
             }
 
-            cancellable = self.dropFirst(dropFirst).sink(
-                receiveCompletion: { completion in
-                    timeoutWorkItem?.cancel()
-                    switch completion {
-                    case .finished:
-                        if !receivedValue {
-                            continuation.resume(
-                                throwing: ClientError("Publisher completed with no value", file, line)
-                            )
+            let publisher = dropFirst > 0
+                ? self.dropFirst(dropFirst).eraseToAnyPublisher()
+                : self.eraseToAnyPublisher()
+
+            cancellable = publisher
+                .receive(on: DispatchQueue.global(qos: .default))
+                .sink(
+                    receiveCompletion: { completion in
+                        timeoutWorkItem?.cancel()
+                        switch completion {
+                        case .finished:
+                            if !receivedValue {
+                                continuation
+                                    .resume(
+                                        throwing: ClientError(
+                                            "Publisher completed with no value",
+                                            file,
+                                            line
+                                        )
+                                    )
+                            }
+                        case let .failure(error):
+                            if !receivedValue {
+                                continuation.resume(throwing: error)
+                            }
                         }
-                    case let .failure(error):
-                        if !receivedValue {
-                            continuation.resume(throwing: error)
-                        }
+                        cancellable?.cancel()
+                    },
+                    receiveValue: { value in
+                        timeoutWorkItem?.cancel()
+                        guard !receivedValue else { return }
+                        receivedValue = true
+                        continuation.resume(returning: value)
                     }
-                    cancellable?.cancel()
-                },
-                receiveValue: { value in
-                    timeoutWorkItem?.cancel()
-                    guard !receivedValue else { return }
-                    receivedValue = true
-                    continuation.resume(returning: value)
-                    cancellable?.cancel()
-                }
-            )
+                )
         }
     }
 }

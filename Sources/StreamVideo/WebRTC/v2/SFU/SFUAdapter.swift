@@ -198,6 +198,7 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
 
     /// Sends a health check request to the WebSocket server.
     func sendHealthCheck() {
+        statusCheck()
         webSocket
             .engine?
             .send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
@@ -257,7 +258,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         reason: String = "",
         for sessionId: String
     ) {
-        statusCheck()
         var payload = Stream_Video_Sfu_Event_LeaveCallRequest()
         payload.sessionID = sessionId
         payload.reason = reason
@@ -320,7 +320,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         for sessionId: String,
         retryPolicy: RetryPolicy = .fastAndSimple
     ) async throws {
-        statusCheck()
         var muteState = Stream_Video_Sfu_Signal_TrackMuteState()
         muteState.trackType = trackType
         muteState.muted = isMuted
@@ -361,7 +360,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         encodeStats: [Stream_Video_Sfu_Models_PerformanceStats]? = nil,
         decodeStats: [Stream_Video_Sfu_Models_PerformanceStats]? = nil
     ) async throws {
-        statusCheck()
         var statsRequest = Stream_Video_Sfu_Signal_SendStatsRequest()
         statsRequest.sessionID = sessionId
         statsRequest.sdk = "stream-ios"
@@ -396,7 +394,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         _ isEnabled: Bool,
         for sessionId: String
     ) async throws {
-        statusCheck()
         if isEnabled {
             var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
             request.sessionID = sessionId
@@ -438,7 +435,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         tracks: [Stream_Video_Sfu_Models_TrackInfo],
         for sessionId: String
     ) async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
-        statusCheck()
         var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
         request.sdp = sessionDescription
         request.sessionID = sessionId
@@ -478,7 +474,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         tracks: [Stream_Video_Sfu_Signal_TrackSubscriptionDetails],
         for sessionId: String
     ) async throws {
-        statusCheck()
         var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
         request.sessionID = sessionId
         request.tracks = tracks
@@ -519,7 +514,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
-        statusCheck()
         var request = Stream_Video_Sfu_Signal_SendAnswerRequest()
         request.sessionID = sessionId
         request.peerType = peerType
@@ -555,7 +549,6 @@ final class SFUAdapter: ConnectionStateDelegate, CustomStringConvertible, @unche
         peerType: Stream_Video_Sfu_Models_PeerType,
         for sessionId: String
     ) async throws {
-        statusCheck()
         log.debug(
             "Will trickle for peerType:\(peerType) on sessionId:\(sessionId)",
             subsystems: .sfu
