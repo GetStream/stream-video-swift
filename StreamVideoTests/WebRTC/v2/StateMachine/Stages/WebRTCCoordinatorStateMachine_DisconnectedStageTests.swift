@@ -119,6 +119,23 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         }
     }
 
+    func test_transition_flowErrorIsUnrecoverable_reconnectionStrategyChangesToDisconnected() {
+        subject.context.reconnectionStrategy = .rejoin
+        subject.context.flowError = APIError(
+            code: 0,
+            details: [],
+            duration: "0",
+            message: .unique,
+            moreInfo: .unique,
+            statusCode: 401,
+            unrecoverable: true
+        )
+
+        _ = subject.transition(from: .connected(subject.context))
+
+        XCTAssertEqual(subject.context.reconnectionStrategy, .disconnected)
+    }
+
     // MARK: observeInternetConnection
 
     func test_transition_connectionRestoresWithDisconnectedStrategy_landsOnLeaving() async {

@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🐞 Fixed
+- Reconnection loop when a user tries to rejoin an ended call but they don't have permissions to join ended calls. [#864](https://github.com/GetStream/stream-video-swift/pull/864)
 - When receiving calls while the app is not running, the Call layout may appear wrong for 1:1 calls. [#863](https://github.com/GetStream/stream-video-swift/pull/863)
 
 # [1.27.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.27.0)
