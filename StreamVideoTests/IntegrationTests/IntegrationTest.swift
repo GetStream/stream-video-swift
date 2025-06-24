@@ -26,6 +26,10 @@ class IntegrationTest: XCTestCase, @unchecked Sendable {
         try await super.setUp()
         client = try await makeClient(for: userId)
         #endif
+
+        // We configure the production timeouts as we hit real endpoints
+        WebRTCConfiguration.timeout = WebRTCConfiguration.Timeout.production
+        CallConfiguration.timeout = CallConfiguration.Timeout.production
     }
 
     override class func tearDown() {

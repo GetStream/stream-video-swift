@@ -36,11 +36,11 @@ enum WebRTCConfiguration {
     }
 
     /// Timeout values for various WebRTC operations.
-    static var timeout: Timeout {
+    nonisolated(unsafe) static var timeout: Timeout = {
         #if STREAM_TESTS
         return .testing
         #else
         return .production
         #endif
-    }
+    }()
 }

@@ -76,7 +76,7 @@ extension OperationQueue {
                 operation: operation
             )
         )
-        return try await subject.nextValue(timeout: timeout)
+        return try await subject.nextValue(timeout: timeout, file: file, function: function, line: line)
     }
     #else
     public func addSynchronousTaskOperation<Output: Sendable>(
@@ -96,7 +96,7 @@ extension OperationQueue {
                 operation: operation
             )
         )
-        return try await subject.nextValue(timeout: timeout)
+        return try await subject.nextValue(timeout: timeout, file: file, function: function, line: line)
     }
     #endif
 }

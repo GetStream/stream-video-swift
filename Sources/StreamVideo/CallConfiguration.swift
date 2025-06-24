@@ -47,11 +47,11 @@ enum CallConfiguration {
     ///
     /// This property returns the appropriate timeout values based on the
     /// current build configuration (test or production).
-    static var timeout: Timeout {
+    nonisolated(unsafe) static var timeout: Timeout = {
         #if STREAM_TESTS
         return .testing
         #else
         return .production
         #endif
-    }
+    }()
 }
