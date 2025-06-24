@@ -6,10 +6,11 @@ import Foundation
 import StreamVideo
 import XCTest
 
-final class SerialActorQueue_Tests: XCTestCase, @unchecked Sendable {
+final class OperationQueue_Tests: XCTestCase, @unchecked Sendable {
 
     private var subject: OperationQueue! = .init()
     private var counter = 0
+    private var order: [Int] = []
 
     override func setUp() {
         super.setUp()
@@ -21,9 +22,9 @@ final class SerialActorQueue_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
-    // MARK: - async
+    // MARK: - addTaskOperation
 
-    func test_async_whenCalledConcurrently_tasksCompleteSerially() async throws {
+    func test_addTaskOperation_whenCalledConcurrently_tasksCompleteSerially() async throws {
         let iterations = 10
 
         DispatchQueue.concurrentPerform(iterations: iterations) { _ in
@@ -34,6 +35,48 @@ final class SerialActorQueue_Tests: XCTestCase, @unchecked Sendable {
 
         await fulfillment(timeout: defaultTimeout) { self.counter == iterations }
         XCTAssertEqual(counter, iterations)
+    }
+
+    // MARK: - sync
+
+    func test_addSynchronousTaskOperation_givenValidTask_whenExecuted_thenReturnsResult() async throws {
+        let result = try await subject.addSynchronousTaskOperation {
+            "success"
+        }
+        XCTAssertEqual(result, "success")
+    }
+
+    func test_addSynchronousTaskOperation_givenThrowingTask_whenExecuted_thenThrowsError() async {
+        enum TestError: Error { case failure }
+
+        let error = await XCTAssertThrowsErrorAsync {
+            _ = try await subject.addSynchronousTaskOperation {
+                throw TestError.failure
+            }
+        }
+        XCTAssertTrue(error is TestError)
+    }
+
+    func test_addSynchronousTaskOperation_givenConcurrentTasks_whenLimited_thenRunsSerially() async throws {
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await self.subject.addSynchronousTaskOperation {
+                    await self.wait(for: 0.2)
+                    self.order.append(1)
+                }
+            }
+
+            group.addTask {
+                await self.wait(for: 0.1)
+                try await self.subject.addSynchronousTaskOperation {
+                    self.order.append(2)
+                }
+            }
+
+            try await group.waitForAll()
+        }
+
+        XCTAssertEqual(order, [1, 2])
     }
 
     // MARK: - cancelAll
