@@ -521,11 +521,14 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         log.debug("Listening for WS connection")
 
         do {
+            var cancellable: AnyCancellable?
             log.debug("Listening for WS connection")
             _ = try await timers
                 .timer(for: 0.1)
                 .filter { [weak webSocketClient] _ in webSocketClient?.connectionState.isConnected == true }
-                .nextValue(timeout: 30)
+                .nextValue(timeout: 30) { cancellable = $0 }
+            cancellable?.cancel()
+            cancellable = nil
         } catch {
             log.debug("Timeout while waiting for WS connection opening")
             throw ClientError.NetworkError()
@@ -571,16 +574,21 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             return ""
         }
 
+        var cancellable: AnyCancellable?
         do {
             let result = try await timers
                 .timer(for: 0.1)
                 .log(.debug) { _ in "Waiting for connection id" }
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
-                .nextValue(timeout: 5)
+                .nextValue(timeout: 5) { cancellable = $0 }
             defer { log.debug("ConnectionId loaded: \(result)") }
+            cancellable?.cancel()
+            cancellable = nil
             return result
         } catch {
             log.warning("Unable to load connectionId.")
+            cancellable?.cancel()
+            cancellable = nil
             return ""
         }
     }
