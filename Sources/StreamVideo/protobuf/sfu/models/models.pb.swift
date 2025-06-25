@@ -224,7 +224,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   case participantMigrating // = 203
   case participantReconnectFailed // = 204
   case participantMediaTransportFailure // = 205
+  case participantSignalLost // = 206
   case callNotFound // = 300
+  case callParticipantLimitReached // = 301
   case requestValidationFailed // = 400
   case unauthenticated // = 401
   case permissionDenied // = 403
@@ -252,7 +254,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case 203: self = .participantMigrating
     case 204: self = .participantReconnectFailed
     case 205: self = .participantMediaTransportFailure
+    case 206: self = .participantSignalLost
     case 300: self = .callNotFound
+    case 301: self = .callParticipantLimitReached
     case 400: self = .requestValidationFailed
     case 401: self = .unauthenticated
     case 403: self = .permissionDenied
@@ -278,7 +282,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case .participantMigrating: return 203
     case .participantReconnectFailed: return 204
     case .participantMediaTransportFailure: return 205
+    case .participantSignalLost: return 206
     case .callNotFound: return 300
+    case .callParticipantLimitReached: return 301
     case .requestValidationFailed: return 400
     case .unauthenticated: return 401
     case .permissionDenied: return 403
@@ -309,7 +315,9 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
     .participantMigrating,
     .participantReconnectFailed,
     .participantMediaTransportFailure,
+    .participantSignalLost,
     .callNotFound,
+    .callParticipantLimitReached,
     .requestValidationFailed,
     .unauthenticated,
     .permissionDenied,
@@ -1015,6 +1023,11 @@ struct Stream_Video_Sfu_Models_PublishOption {
   ///   publish request without affecting others.
   var id: Int32 = 0
 
+  /// If true, instructs the publisher to send only the highest available simulcast layer,
+  /// disabling all lower layers. This applies to simulcast encodings.
+  /// For SVC codecs, prefer using the L1T3 (single spatial, 3 temporal layers) mode instead.
+  var useSingleLayer: Bool = false
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1512,7 +1525,9 @@ extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     203: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATING"),
     204: .same(proto: "ERROR_CODE_PARTICIPANT_RECONNECT_FAILED"),
     205: .same(proto: "ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE"),
+    206: .same(proto: "ERROR_CODE_PARTICIPANT_SIGNAL_LOST"),
     300: .same(proto: "ERROR_CODE_CALL_NOT_FOUND"),
+    301: .same(proto: "ERROR_CODE_CALL_PARTICIPANT_LIMIT_REACHED"),
     400: .same(proto: "ERROR_CODE_REQUEST_VALIDATION_FAILED"),
     401: .same(proto: "ERROR_CODE_UNAUTHENTICATED"),
     403: .same(proto: "ERROR_CODE_PERMISSION_DENIED"),
@@ -2021,6 +2036,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     6: .standard(proto: "max_temporal_layers"),
     7: .standard(proto: "video_dimension"),
     8: .same(proto: "id"),
+    9: .standard(proto: "use_single_layer"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2037,6 +2053,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
       case 6: try { try decoder.decodeSingularInt32Field(value: &self.maxTemporalLayers) }()
       case 7: try { try decoder.decodeSingularMessageField(value: &self._videoDimension) }()
       case 8: try { try decoder.decodeSingularInt32Field(value: &self.id) }()
+      case 9: try { try decoder.decodeSingularBoolField(value: &self.useSingleLayer) }()
       default: break
       }
     }
@@ -2071,6 +2088,9 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if self.id != 0 {
       try visitor.visitSingularInt32Field(value: self.id, fieldNumber: 8)
     }
+    if self.useSingleLayer != false {
+      try visitor.visitSingularBoolField(value: self.useSingleLayer, fieldNumber: 9)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2083,6 +2103,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if lhs.maxTemporalLayers != rhs.maxTemporalLayers {return false}
     if lhs._videoDimension != rhs._videoDimension {return false}
     if lhs.id != rhs.id {return false}
+    if lhs.useSingleLayer != rhs.useSingleLayer {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
