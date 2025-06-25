@@ -81,7 +81,11 @@ final class MockStreamVideo: StreamVideo, Mockable, @unchecked Sendable {
     override func call(
         callType: String,
         callId: String,
-        callSettings: CallSettings? = nil
+        callSettings: CallSettings? = nil,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+
     ) -> Call {
         stubbedFunctionInput[.call]?.append(
             .call(

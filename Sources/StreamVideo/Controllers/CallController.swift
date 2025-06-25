@@ -38,7 +38,8 @@ class CallController: @unchecked Sendable {
             subscribeToParticipantsCountUpdatesEvent(call)
             subscribeToCurrentUserBlockedState(call)
             if let call {
-                Task { @MainActor in
+                Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                    guard let self else { return }
                     call.state.sessionId = await webRTCCoordinator.stateAdapter.sessionID
                 }
             }
