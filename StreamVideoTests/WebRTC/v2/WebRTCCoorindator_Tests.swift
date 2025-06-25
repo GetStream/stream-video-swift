@@ -106,6 +106,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         )
 
         await subject.cleanUp()
+        await fulfillment { await self.subject.stateAdapter.participants == [:] }
 
         XCTAssertEqual(mockPublisher.timesCalled(.close), 1)
         XCTAssertEqual(mockSubscriber.timesCalled(.close), 1)
@@ -117,7 +118,6 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(await subject.stateAdapter.token, "")
         await assertEqualAsync(await subject.stateAdapter.sessionID, "")
         await assertEqualAsync(await subject.stateAdapter.ownCapabilities, [])
-        await assertEqualAsync(await subject.stateAdapter.participants, [:])
         await assertEqualAsync(await subject.stateAdapter.participantsCount, 0)
         await assertEqualAsync(await subject.stateAdapter.anonymousCount, 0)
         await assertEqualAsync(await subject.stateAdapter.participantPins, [])

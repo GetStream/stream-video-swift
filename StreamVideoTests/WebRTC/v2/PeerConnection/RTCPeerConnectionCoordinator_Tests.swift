@@ -388,6 +388,58 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         XCTAssertEqual(mockPeerConnection?.timesCalled(.setRemoteDescription), 0)
     }
 
+    func test_negotiate_subjectIsPublisher_multipleRequests_callSetPublisherOnSFUOnlyOnce(
+    ) async throws {
+        _ = subject
+        let offerA = RTCSessionDescription(
+            type: .offer,
+            sdp: "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2l;offerA"
+        )
+        let offerB = RTCSessionDescription(
+            type: .offer,
+            sdp: "useinbandfec=1;\r\n00:11 opus/;\r\n12:13: red/48000/2l;offerB"
+        )
+
+        mockPeerConnection.stub(
+            for: .offer,
+            with: StubVariantResultProvider { iteration in
+                iteration == 0 ? offerA : offerB
+            }
+        )
+
+        await withTaskGroup(of: Void.self) { [mockPeerConnection] group in
+            group.addTask {
+                mockPeerConnection?
+                    .subject
+                    .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+            }
+
+            group.addTask {
+                mockPeerConnection?
+                    .subject
+                    .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
+            }
+        }
+
+        await fulfillment { [mockPeerConnection] in
+            mockPeerConnection?.timesCalled(.setLocalDescription) == 1
+        }
+
+        let expected = [offerA.sdp]
+        let recordedInput = try XCTUnwrap(
+            mockPeerConnection.recordedInputPayload(
+                RTCSessionDescription.self,
+                for: .setLocalDescription
+            )?.filter { $0.sdp.isEmpty == false }
+        )
+        var actual: [String] = []
+        for item in recordedInput {
+            actual.append(item.sdp)
+        }
+
+        XCTAssertEqual(actual, expected)
+    }
+
     func test_negotiate_subjectIsPublisher_multipleRequestsExecuteSerially_callSetPublisherOnSFUWithCorrectOfferEveryTime(
     ) async throws {
         _ = subject
@@ -415,6 +467,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             }
 
             group.addTask {
+                await self.wait(for: 0.6)
                 mockPeerConnection?
                     .subject
                     .send(StreamRTCPeerConnection.ShouldNegotiateEvent())
