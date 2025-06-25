@@ -216,6 +216,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         if peerType == .publisher {
             peerConnection
                 .publisher(eventType: StreamRTCPeerConnection.ShouldNegotiateEvent.self)
+                .debounce(for: 0.5, scheduler: RunLoop.main)
                 .log(.debug) { _ in "Publisher will negotiate" }
                 .receive(on: dispatchQueue)
                 .map { _ in () }
