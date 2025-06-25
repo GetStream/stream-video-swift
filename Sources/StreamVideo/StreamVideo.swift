@@ -566,16 +566,19 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         
         guard webSocketClient?.connectionState == .connecting
-            || webSocketClient?.connectionState == .authenticating else {
+            || webSocketClient?.connectionState == .authenticating
+        else {
             return ""
         }
 
         do {
-            return try await timers
+            let result = try await timers
                 .timer(for: 0.1)
                 .log(.debug) { _ in "Waiting for connection id" }
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
                 .nextValue(timeout: 5)
+            defer { log.debug("ConnectionId loaded: \(result)") }
+            return result
         } catch {
             log.warning("Unable to load connectionId.")
             return ""
@@ -583,12 +586,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     }
     
     private func loadConnectionIdFromHealthcheck() -> String? {
-        if case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState {
-            if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
-                return healthCheck.connectionId
-            }
+        guard
+            case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState,
+            let connectionId = healtCheckInfo.coordinatorHealthCheck?.connectionId
+        else {
+            return nil
         }
-        return nil
+        return connectionId
     }
     
     private func loadGuestUserInfo(
