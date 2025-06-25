@@ -16,13 +16,8 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Senda
 
     override func setUp() async throws {
         try await super.setUp()
-
-        viewModel.startCall(
-            callType: .default,
-            callId: UUID().uuidString,
-            members: [],
-            ring: true
-        )
+        let call = Call.dummy()
+        viewModel.setActiveCall(call)
     }
 
     override func tearDown() async throws {
@@ -54,6 +49,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Senda
     }
 
     private func assertSubject(
+        record: Bool = false,
         @ViewBuilder _ subject: () -> some View,
         file: StaticString = #file,
         function: String = #function,
@@ -63,6 +59,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Senda
             subject(),
             variants: snapshotVariants,
             size: sizeThatFits,
+            record: record,
             line: line,
             file: file,
             function: function

@@ -82,25 +82,26 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
-        let sfuStack = MockSFUStack()
+        let sfuStackA = MockSFUStack()
+        let sfuStackB = MockSFUStack()
+        sfuStackA.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        sfuStackB.setConnectionState(to: .connected(healthCheckInfo: .init()))
+        subject.sfuAdapter = sfuStackA.adapter
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
-                self.subject.sfuAdapter = self.mockSFUStack.adapter
-                await self.wait(for: self.subject.interval / 2)
-
-                self.subject.sfuAdapter = sfuStack.adapter
-                sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
+                await self.wait(for: 0.2)
+                self.subject.sfuAdapter = sfuStackB.adapter
             }
 
             group.addTask {
                 await self.wait(for: self.subject.interval)
-                XCTAssertNil(self.mockSFUStack.service.sendStatsWasCalledWithRequest)
-                XCTAssertNil(sfuStack.service.sendStatsWasCalledWithRequest)
+                XCTAssertNil(sfuStackA.service.sendStatsWasCalledWithRequest)
+                XCTAssertNil(sfuStackB.service.sendStatsWasCalledWithRequest)
 
-                await self.fulfillment { sfuStack.service.sendStatsWasCalledWithRequest != nil }
-                XCTAssertNil(self.mockSFUStack.service.sendStatsWasCalledWithRequest)
-                XCTAssertNotNil(sfuStack.service.sendStatsWasCalledWithRequest)
+                await self.fulfillment { sfuStackB.service.sendStatsWasCalledWithRequest != nil }
+                XCTAssertNil(sfuStackA.service.sendStatsWasCalledWithRequest)
+                XCTAssertNotNil(sfuStackB.service.sendStatsWasCalledWithRequest)
             }
 
             await group.waitForAll()
