@@ -42,7 +42,6 @@ extension Publisher where Output: Sendable {
                 : self.eraseToAnyPublisher()
 
             cancellable = publisher
-                .receive(on: DispatchQueue.global(qos: .default))
                 .sink(
                     receiveCompletion: { completion in
                         timeoutWorkItem?.cancel()
