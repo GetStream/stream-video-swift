@@ -12,7 +12,7 @@ import StreamWebRTC
 /// publishing the average power of the audio signal. Additionally, it adjusts its behavior based on the
 /// presence of an active call, automatically stopping recording if needed.
 open class StreamCallAudioRecorder: @unchecked Sendable {
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     @Injected(\.activeCallProvider) private var activeCallProvider
     @Injected(\.activeCallAudioSession) private var activeCallAudioSession

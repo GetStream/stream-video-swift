@@ -23,7 +23,7 @@ public final class VideoProximityPolicy: ProximityPolicy, @unchecked Sendable {
     public static let identifier: ObjectIdentifier = .init("video-proximity-policy" as NSString)
 
     /// Queue for processing proximity state changes
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// Thread-safe storage for cached video settings
     @Atomic private var cachedValue: CachedValue?
 

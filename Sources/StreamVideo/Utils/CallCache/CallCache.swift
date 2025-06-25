@@ -19,17 +19,35 @@ final class CallCache {
     /// - Returns: A `Call` instance, either from the cache or newly created.
     func call(
         for cId: String,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line,
         factory: () -> Call
     ) -> Call {
         queue.sync {
             if let cached = storage[cId] {
-                log.debug("Will reuse call:\(cId).")
+                log.debug(
+                    "Will reuse call:\(cId).",
+                    functionName: function,
+                    fileName: file,
+                    lineNumber: line
+                )
                 return cached
             } else {
-                log.debug("Will create and cache call:\(cId)")
+                log.debug(
+                    "Will create and cache call:\(cId)",
+                    functionName: function,
+                    fileName: file,
+                    lineNumber: line
+                )
                 let call = factory()
                 storage[cId] = call
-                log.debug("CallCache count:\(storage.count).")
+                log.debug(
+                    "CallCache count:\(storage.count).",
+                    functionName: function,
+                    fileName: file,
+                    lineNumber: line
+                )
                 return call
             }
         }

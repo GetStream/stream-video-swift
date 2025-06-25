@@ -65,7 +65,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// A container for managing cancellable tasks to ensure proper cleanup.
     private let disposableBag = DisposableBag()
 
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let backgroundMuteAdapter: ApplicationLifecycleVideoMuteAdapter
     private var hasRegisteredPrimaryTrack: Bool = false
     private var ownCapabilities: [OwnCapability] = []

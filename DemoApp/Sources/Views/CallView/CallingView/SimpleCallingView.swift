@@ -247,7 +247,7 @@ struct SimpleCallingView: View {
         case let .start(callId):
             await setPreferredVideoCodec(for: callId)
             try? await setAudioSessionPolicyOverride(for: callId)
-            try? setProximityPolicies(for: text)
+            try? setProximityPolicies(for: callId)
             viewModel.startCall(
                 callType: callType,
                 callId: callId,

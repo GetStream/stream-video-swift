@@ -6,6 +6,11 @@ import Combine
 import Foundation
 
 extension OperationQueue {
+    public convenience init(maxConcurrentOperationCount: Int = 0) {
+        self.init()
+        self.maxConcurrentOperationCount = maxConcurrentOperationCount
+    }
+
     /// Adds an asynchronous task operation to the queue without expecting a
     /// return value. Errors thrown by the operation are logged.
     ///

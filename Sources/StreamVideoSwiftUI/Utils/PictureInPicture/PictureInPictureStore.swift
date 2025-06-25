@@ -59,7 +59,7 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
     private let subject: CurrentValueSubject<State, Never>
     var state: State { subject.value }
 
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     @MainActor
     init() {
@@ -70,7 +70,7 @@ final class PictureInPictureStore: ObservableObject, @unchecked Sendable {
     ///
     /// - Parameter action: The action to process
     func dispatch(_ action: Action) {
-        processingQueue.addTaskOperation { [weak self] in
+        processingQueue.addOperation { [weak self] in
             guard let self else {
                 return
             }

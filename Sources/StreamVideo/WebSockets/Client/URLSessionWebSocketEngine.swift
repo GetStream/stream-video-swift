@@ -25,7 +25,7 @@ final class URLSessionWebSocketEngine: NSObject, WebSocketEngine, @unchecked Sen
         self.request = request
         self.sessionConfiguration = sessionConfiguration
 
-        delegateOperationQueue = OperationQueue()
+        delegateOperationQueue = OperationQueue(maxConcurrentOperationCount: 1)
         delegateOperationQueue.underlyingQueue = callbackQueue
 
         super.init()

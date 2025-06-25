@@ -35,13 +35,12 @@ class CallController: @unchecked Sendable {
 
     weak var call: Call? {
         didSet {
-            handleParticipantsUpdated(call)
             subscribeToParticipantsCountUpdatesEvent(call)
             subscribeToCurrentUserBlockedState(call)
-            Task(disposableBag: disposableBag) { [weak self, weak call] in
-                await self?.observeSessionIDUpdates(call)
-                await self?.observeStatsReporterUpdates(call)
-                await self?.observeCallSettingsUpdates(call)
+            if let call {
+                Task { @MainActor in
+                    call.state.sessionId = await webRTCCoordinator.stateAdapter.sessionID
+                }
             }
         }
     }
@@ -87,13 +86,17 @@ class CallController: @unchecked Sendable {
 
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
-
+            await handleParticipantCountUpdated()
             let participantsPublisher = await webRTCCoordinator.stateAdapter.$participants
-            self.participants = CollectionDelayedUpdateObserver(
+            participants = CollectionDelayedUpdateObserver(
                 publisher: participantsPublisher.eraseToAnyPublisher(),
                 initial: [:],
                 mode: .throttle(scheduler: DispatchQueue.main, latest: true)
             )
+            handleParticipantsUpdated()
+            await observeSessionIDUpdates()
+            await observeStatsReporterUpdates()
+            await observeCallSettingsUpdates()
         }
 
         joinCallResponseFetchObserver = joinCallResponseSubject
@@ -503,12 +506,7 @@ class CallController: @unchecked Sendable {
 
     // MARK: - private
 
-    private func handleParticipantsUpdated(_ call: Call?) {
-        guard let call else {
-            webRTCParticipantsObserver?.cancel()
-            webRTCParticipantsObserver = nil
-            return
-        }
+    private func handleParticipantsUpdated() {
         webRTCParticipantsObserver = participants?
             .$value
             .removeDuplicates() // Avoid unnecessary updates when participants haven't changed.
@@ -691,30 +689,19 @@ class CallController: @unchecked Sendable {
         }
     }
 
-    private func observeSessionIDUpdates(_ call: Call?) async {
-        guard call != nil else {
-            webRTCClientSessionIDObserver?.cancel()
-            webRTCClientSessionIDObserver = nil
-            return
-        }
+    private func observeSessionIDUpdates() async {
         webRTCClientSessionIDObserver = await webRTCCoordinator
             .stateAdapter
             .$sessionID
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.sessionId = $0 }
     }
 
-    private func observeStatsReporterUpdates(_ call: Call?) async {
-        guard call != nil else {
-            return
-        }
+    private func observeStatsReporterUpdates() async {
         await webRTCCoordinator
             .stateAdapter
             .$statsAdapter
             .compactMap { $0 }
-            .sink { [weak self] statsReporter in
-                guard let self else {
-                    return
-                }
+            .sink { [disposableBag, weak self] statsReporter in
                 statsReporter
                     .latestReportPublisher
                     .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }
@@ -723,10 +710,7 @@ class CallController: @unchecked Sendable {
             .store(in: disposableBag)
     }
 
-    private func observeCallSettingsUpdates(_ call: Call?) async {
-        guard call != nil else {
-            return
-        }
+    private func observeCallSettingsUpdates() async {
         await webRTCCoordinator
             .stateAdapter
             .$callSettings
