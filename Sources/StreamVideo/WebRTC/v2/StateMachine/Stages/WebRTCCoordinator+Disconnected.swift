@@ -124,12 +124,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 /// will be delivered on the next batch of traces.
                 statsAdapter?.sfuAdapter = nil
 
+                var cancellable: AnyCancellable?
                 /// We add a small delay of 100ms in oder to ensure that the internet connection state
                 /// has been updated, so that when we start observing it will receive the latest and
                 /// updated value.
                 _ = try? await timers
                     .timer(for: ScreenPropertiesAdapter.currentValue.refreshRate)
-                    .nextValue()
+                    .nextValue { cancellable = $0 }
+                cancellable?.cancel()
+                cancellable = nil
 
                 statsAdapter?.sfuAdapter = nil
 

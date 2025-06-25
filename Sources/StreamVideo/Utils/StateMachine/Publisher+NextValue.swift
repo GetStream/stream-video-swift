@@ -12,9 +12,13 @@ extension Publisher where Output: Sendable {
     /// - Parameter dropFirst: The number of initial values to skip. Defaults to 0.
     /// - Returns: The next value emitted by the publisher.
     /// - Throws: An error if the publisher completes with a failure.
+    ///
+    /// - Important: When subscribing to a timer use the registrationHandler to receive the reference
+    /// to the cancellable, so you can effectively cancel it. Otherwise the Timer will keep posting updates
     func nextValue(
         dropFirst: Int = 0,
         timeout: TimeInterval? = nil,
+        registrationHandler: ((AnyCancellable) -> Void)? = nil,
         file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line
@@ -41,7 +45,7 @@ extension Publisher where Output: Sendable {
                 ? self.dropFirst(dropFirst).eraseToAnyPublisher()
                 : self.eraseToAnyPublisher()
 
-            cancellable = publisher
+            let _cancellable = publisher
                 .sink(
                     receiveCompletion: { completion in
                         timeoutWorkItem?.cancel()
@@ -71,6 +75,8 @@ extension Publisher where Output: Sendable {
                         continuation.resume(returning: value)
                     }
                 )
+            cancellable = _cancellable
+            registrationHandler?(_cancellable)
         }
     }
 }
