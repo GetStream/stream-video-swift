@@ -7,7 +7,7 @@ import Foundation
 final class WSEventsMiddleware: EventMiddleware, @unchecked Sendable {
 
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     func handle(event: WrappedEvent) -> WrappedEvent? {
         processingQueue.addTaskOperation { [weak self] in

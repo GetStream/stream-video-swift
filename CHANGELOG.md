@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Fix an issue causing video not showing in some scenarios. [#870](https://github.com/GetStream/stream-video-swift/pull/870)
 
 # [1.27.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.27.1)
 _June 25, 2025_

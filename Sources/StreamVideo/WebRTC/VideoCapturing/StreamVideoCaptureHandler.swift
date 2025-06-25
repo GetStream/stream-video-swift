@@ -18,7 +18,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
 
-    private lazy var processingQueue = OperationQueue()
+    private lazy var processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let disposableBag = DisposableBag()
     private var orientationCancellable: AnyCancellable?
 

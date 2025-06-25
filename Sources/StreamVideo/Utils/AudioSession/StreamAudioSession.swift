@@ -21,7 +21,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     private let audioSession: AudioSessionProtocol
 
     /// Serial execution queue for processing session updates.
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// A disposable bag holding all observation cancellable.
     private let disposableBag = DisposableBag()

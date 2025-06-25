@@ -40,8 +40,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// `SetPublisher` and `HandleSubscriberOffer` are expected from the SFU to be sent/handled
     /// in a serial manner. The processing queues below ensure that the respective tasks are being executed
     /// serially.
-    private let setPublisherProcessingQueue = OperationQueue()
-    private let subscriberOfferProcessingQueue = OperationQueue()
+    private let setPublisherProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    private let subscriberOfferProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     // MARK: Adapters
 
@@ -216,6 +216,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         if peerType == .publisher {
             peerConnection
                 .publisher(eventType: StreamRTCPeerConnection.ShouldNegotiateEvent.self)
+                .debounce(for: 0.5, scheduler: RunLoop.main)
                 .log(.debug) { _ in "Publisher will negotiate" }
                 .receive(on: dispatchQueue)
                 .map { _ in () }

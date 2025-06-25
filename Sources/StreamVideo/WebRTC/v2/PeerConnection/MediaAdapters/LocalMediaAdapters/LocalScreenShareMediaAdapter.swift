@@ -41,7 +41,7 @@ final class LocalScreenShareMediaAdapter: LocalMediaAdapting, @unchecked Sendabl
     /// Storage for managing transceivers associated with the screen sharing session.
     private let transceiverStorage = MediaTransceiverStorage<PublishOptions.VideoPublishOptions>(for: .screenshare)
 
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// The primary video track used for screen sharing.
     let primaryTrack: RTCVideoTrack

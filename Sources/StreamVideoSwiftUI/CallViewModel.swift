@@ -817,7 +817,9 @@ open class CallViewModel: ObservableObject {
                     case .rejected:
                         handleRejectedEvent(callEvent)
                     case .ended:
-                        leaveCall()
+                        Task { @MainActor [weak self] in
+                            self?.leaveCall()
+                        }
                     case let .userBlocked(callEventInfo):
                         if callEventInfo.user?.id == streamVideo.user.id {
                             leaveCall()

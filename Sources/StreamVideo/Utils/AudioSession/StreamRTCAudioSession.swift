@@ -69,7 +69,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
     @Published private(set) var state: State
 
     /// A queue for processing audio session operations asynchronously.
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// The shared instance of `RTCAudioSession` used for WebRTC audio
     /// configuration and management.

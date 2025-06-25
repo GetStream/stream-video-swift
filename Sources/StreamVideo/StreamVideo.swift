@@ -16,6 +16,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
     @Injected(\.timers) private var timers
+    @Injected(\.screenProperties) private var screenProperties
 
     private enum DisposableKey: String { case ringEventReceived }
 
@@ -250,9 +251,17 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public func call(
         callType: String,
         callId: String,
-        callSettings: CallSettings? = nil
+        callSettings: CallSettings? = nil,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
     ) -> Call {
-        callCache.call(for: callCid(from: callId, callType: callType)) {
+        callCache.call(
+            for: callCid(from: callId, callType: callType),
+            file: file,
+            function: function,
+            line: line
+        ) {
             let callController = makeCallController(callType: callType, callId: callId)
             let call = Call(
                 callType: callType,

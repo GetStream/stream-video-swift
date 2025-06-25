@@ -21,7 +21,7 @@ public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable, Ob
     private let processClosure: (Int, Int, Int, UnsafeMutablePointer<Float>) -> Void
     private let releaseClosure: () -> Void
     private var activeCallCancellable: AnyCancellable?
-    private let serialQueue = OperationQueue()
+    private let serialQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let disposableBag = DisposableBag()
     private weak var activeCall: Call? {
         didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) }

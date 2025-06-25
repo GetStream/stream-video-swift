@@ -41,7 +41,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The last applied audio call settings.
     private var lastUpdatedCallSettings: CallSettings.Audio?
 
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// The primary audio track for this adapter.
     let primaryTrack: RTCAudioTrack

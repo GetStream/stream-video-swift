@@ -16,7 +16,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
     public static let identifier: ObjectIdentifier = .init("speaker-proximity-policy" as NSString)
 
     /// Queue for processing proximity state changes
-    private let processingQueue = OperationQueue()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// Stores call settings before proximity change for restoration
     private var callSettingsBeforeProximityChange: CallSettings?
 

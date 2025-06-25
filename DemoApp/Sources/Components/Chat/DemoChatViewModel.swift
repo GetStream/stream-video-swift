@@ -27,7 +27,7 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
     var isChatEnabled: Bool { AppEnvironment.chatIntegration == .enabled && chatWrapper != nil }
 
     init(_ callViewModel: CallViewModel) {
-        callUpdateCancellable = callViewModel.$call.sink { [weak self] newCall in
+        callUpdateCancellable = callViewModel.$call.receive(on: DispatchQueue.main).sink { [weak self] newCall in
             guard let newCall, let self else {
                 self?.channelController = nil
                 return

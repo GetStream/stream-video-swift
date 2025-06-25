@@ -85,8 +85,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let disposableBag = DisposableBag()
     private let peerConnectionsDisposableBag = DisposableBag()
 
-    private let executor = DispatchQueueExecutor()
-    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -459,6 +458,22 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         fileName: StaticString = #fileID,
         lineNumber: UInt = #line
     ) {
+        processingQueue.addTaskOperation { [weak self] in
+            await self?.processEnqueuedOperation(
+                operation,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
+        }
+    }
+
+    private func processEnqueuedOperation(
+        _ operation: @escaping ParticipantOperation,
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line
+    ) {
         /// Retrieves the current participants.
         let current = participants
         /// Applies the operation to get the next state of participants.
@@ -470,7 +485,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
         /// Logs the completion of the participant operation.
         log.debug(
-            "Participant operation completed.",
+            "Participant operation completed. Participants count:\(updated.count).",
             functionName: functionName,
             fileName: fileName,
             lineNumber: lineNumber
