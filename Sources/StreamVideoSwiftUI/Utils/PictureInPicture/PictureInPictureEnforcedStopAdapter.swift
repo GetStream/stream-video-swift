@@ -17,7 +17,6 @@ final class PictureInPictureEnforcedStopAdapter {
 
     /// Adapter that provides the current application state.
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
-    @Injected(\.timers) private var timers
     @Injected(\.screenProperties) private var screenProperties
 
     /// A serial dispatch queue for background processing.
@@ -65,8 +64,10 @@ final class PictureInPictureEnforcedStopAdapter {
     ) {
         switch (applicationState, isPictureInPictureActive) {
         case (.foreground, true):
-            timers
-                .timer(for: screenProperties.refreshRate)
+            Foundation
+                .Timer
+                .publish(every: screenProperties.refreshRate, on: .main, in: .default)
+                .autoconnect()
                 .filter { [weak self] _ in self?.applicationStateAdapter.state == .foreground }
                 .log(.debug) { _ in "Will attempt to forcefully stop Picture-in-Picture." }
                 .receive(on: DispatchQueue.main)

@@ -28,7 +28,6 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
     @Injected(\.colors) var colors
     
     @Injected(\.formatters.mediaDuration) private var formatter: MediaDurationFormatter
-    @Injected(\.timers) private var timers
 
     var viewFactory: Factory
     
@@ -156,8 +155,10 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                 let startsAt = state.startsAt,
                 livestreamState == .backstage,
                 timerCancellable == nil {
-                timerCancellable = timers
-                    .timer(for: 1)
+                timerCancellable = Foundation
+                    .Timer
+                    .publish(every: 1, on: .main, in: .default)
+                    .autoconnect()
                     .sinkTask(storeIn: disposableBag) { @MainActor _ in
                         countdown = startsAt.timeIntervalSinceNow
                         if countdown <= 0 {

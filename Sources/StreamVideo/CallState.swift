@@ -33,7 +33,6 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
 public class CallState: ObservableObject {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.timers) var timers
 
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
@@ -507,8 +506,10 @@ public class CallState: ObservableObject {
     
     private func setupDurationTimer() {
         resetTimer()
-        durationCancellable = timers
-            .timer(for: 1.0)
+        durationCancellable = Foundation
+            .Timer
+            .publish(every: 1.0, on: .main, in: .default)
+            .autoconnect()
             .receive(on: DispatchQueue.main)
             .compactMap { [weak self] _ in
                 if let startedAt = self?.startedAt {
