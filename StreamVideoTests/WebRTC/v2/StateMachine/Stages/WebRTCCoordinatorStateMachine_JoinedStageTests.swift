@@ -727,14 +727,13 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             .stateAdapter
             .configurePeerConnections()
 
-        await assertResultAfterTrigger(
-            trigger: {
-                subject.send(())
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { subject.send(()) },
+            validationHandler: { stage in
+                XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
             }
-        ) { expectation in
-            XCTAssertEqual(mockPublisher?.timesCalled(.restartICE), 1)
-            expectation.fulfill()
-        }
+        )
     }
 
     func test_transition_subscriberDisconnects_restartICEWasTriggeredOnSubscriber() async throws {
@@ -755,14 +754,13 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             .stateAdapter
             .configurePeerConnections()
 
-        await assertResultAfterTrigger(
-            trigger: {
-                subject.send(())
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { subject.send(()) },
+            validationHandler: { stage in
+                XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
             }
-        ) { expectation in
-            XCTAssertEqual(mockSubscriber?.timesCalled(.restartICE), 1)
-            expectation.fulfill()
-        }
+        )
     }
 
     // MARK: configureStatsCollectionAndDelivery
