@@ -772,34 +772,32 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 )
             )
 
-            var answer = try await createAnswer()
-
-            // Enable Stereo - Begin
-            let sdpParser = SDPParser()
-            let stereoEnableVisitor = StereoEnableVisitor()
-            sdpParser.registerVisitor(stereoEnableVisitor)
-            await sdpParser.parse(sdp: offerSdp)
-
-            if !stereoEnableVisitor.found.isEmpty {
-                let sdpWriter = SDPWriter()
-                let stereoEnableWriter = StereoEnableWriter(stereoEnableVisitor.found)
-                sdpWriter.registerWriter(stereoEnableWriter)
-                let modifiedAnswerSDP = await sdpWriter.write(sdp: answer.sdp)
-                answer = .init(type: answer.type, sdp: modifiedAnswerSDP)
-                log.debug(
-                    "Answer SDP has been modifier with enabled stereo for mid values:\(stereoEnableVisitor.found.keys.joined(separator: ","))",
-                    subsystems: .webRTC
+            let answer = try await createAnswer()
+            let applyAnswer = {
+                try await self.setLocalDescription(answer)
+                try await self.sfuAdapter.sendAnswer(
+                    sessionDescription: answer.sdp,
+                    peerType: .subscriber,
+                    for: self.sessionId
                 )
             }
-            // Enable Stereo - End
 
-            try await setLocalDescription(answer)
+            if let answerWithStereoEnabled = await enableStereo(in: answer, with: offerSdp) {
+                do {
+                    try await setLocalDescription(answerWithStereoEnabled)
+                    try await sfuAdapter.sendAnswer(
+                        sessionDescription: answerWithStereoEnabled.sdp,
+                        peerType: .subscriber,
+                        for: sessionId
+                    )
+                } catch {
+                    log.error("Unable to enable stereo for subscriber offer. Falling back to regular answer.", error: error)
+                    try await applyAnswer()
+                }
+            } else {
+                try await applyAnswer()
+            }
 
-            try await sfuAdapter.sendAnswer(
-                sessionDescription: answer.sdp,
-                peerType: .subscriber,
-                for: sessionId
-            )
             log.debug("Subscriber offer was handled.", subsystems: subsystem)
         } catch {
             log.error(
@@ -808,6 +806,26 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 error: error
             )
         }
+    }
+
+    private func enableStereo(
+        in answer: RTCSessionDescription,
+        with offerSDP: String
+    ) async -> RTCSessionDescription? {
+        let sdpParser = SDPParser()
+        let stereoEnableVisitor = StereoEnableVisitor()
+        sdpParser.registerVisitor(stereoEnableVisitor)
+        await sdpParser.parse(sdp: offerSDP)
+
+        guard !stereoEnableVisitor.found.isEmpty else {
+            return nil
+        }
+
+        let sdpWriter = SDPWriter()
+        let stereoEnableWriter = StereoEnableWriter(stereoEnableVisitor.found)
+        sdpWriter.registerWriter(stereoEnableWriter)
+        let modifiedAnswerSDP = await sdpWriter.write(sdp: answer.sdp)
+        return RTCSessionDescription(type: answer.type, sdp: modifiedAnswerSDP)
     }
 
     /// Configures the subscriber offer observer.
