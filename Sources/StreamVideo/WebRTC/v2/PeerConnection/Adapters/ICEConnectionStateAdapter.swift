@@ -10,9 +10,6 @@ import StreamWebRTC
 /// connection and schedules reconnection attempts when necessary.
 final class ICEConnectionStateAdapter {
 
-    /// A timer provider used to schedule ICE restart attempts.
-    @Injected(\.timers) private var timers
-
     /// The peer connection coordinator to observe for ICE state changes.
     weak var peerConnectionCoordinator: RTCPeerConnectionCoordinator? {
         didSet { didUpdate(peerConnectionCoordinator) }
@@ -56,8 +53,10 @@ final class ICEConnectionStateAdapter {
             peerConnectionCoordinator?.restartICE()
 
         case .disconnected:
-            scheduledRestartICECancellable = timers
-                .timer(for: scheduleICERestartInterval)
+            scheduledRestartICECancellable = Foundation
+                .Timer
+                .publish(every: scheduleICERestartInterval, on: .main, in: .default)
+                .autoconnect()
                 .sink { [weak self] _ in self?.restartICE() }
 
         case .connected:

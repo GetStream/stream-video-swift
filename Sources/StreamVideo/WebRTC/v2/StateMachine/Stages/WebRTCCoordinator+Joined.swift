@@ -29,7 +29,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
-        @Injected(\.timers) private var timers
 
         private let disposableBag = DisposableBag()
         private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
@@ -342,8 +341,10 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 }
                 .store(in: disposableBag)
 
-            timers
-                .timer(for: 1)
+            Foundation
+                .Timer
+                .publish(every: 1, on: .main, in: .default)
+                .autoconnect()
                 .compactMap { [weak self] _ in self?.context.lastHealthCheckReceivedAt }
                 .filter { [weak self] in
                     guard
