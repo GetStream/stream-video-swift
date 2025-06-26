@@ -509,6 +509,7 @@ public class CallState: ObservableObject {
         durationCancellable = Foundation
             .Timer
             .publish(every: 1.0, on: .main, in: .default)
+            .autoconnect()
             .receive(on: DispatchQueue.main)
             .compactMap { [weak self] _ in
                 if let startedAt = self?.startedAt {
