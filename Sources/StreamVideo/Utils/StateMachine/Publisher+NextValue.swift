@@ -7,76 +7,89 @@ import Foundation
 
 extension Publisher where Output: Sendable {
 
-    /// Retrieves the next value from the publisher after optionally skipping the initial values.
+    /// Fetches the next value emitted by the publisher.
     ///
-    /// - Parameter dropFirst: The number of initial values to skip. Defaults to 0.
-    /// - Returns: The next value emitted by the publisher.
-    /// - Throws: An error if the publisher completes with a failure.
-    ///
-    /// - Important: When subscribing to a timer use the registrationHandler to receive the reference
-    /// to the cancellable, so you can effectively cancel it. Otherwise the Timer will keep posting updates
-    func nextValue(
-        dropFirst: Int = 0,
+    /// - Parameters:
+    ///   - dropFirst: The number of elements to drop before returning the next value.
+    ///   - timeout: The maximum time to wait for the first value.
+    ///   - scheduler: The scheduler on which to perform the timeout.
+    /// - Returns: The first `Output` value emitted by the publisher.
+    /// - Throws: A `ClientError` if the timeout occurs before a value is emitted or if the publisher completes without emitting a value.
+    func nextValue<S: Scheduler>(
+        dropFirst: Int? = nil,
         timeout: TimeInterval? = nil,
-        registrationHandler: ((AnyCancellable) -> Void)? = nil,
-        file: StaticString = #fileID,
-        function: StaticString = #function,
+        on scheduler: S = DispatchQueue.main,
+        file: StaticString = #file,
         line: UInt = #line
-    ) async throws -> Output {
-        try await withCheckedThrowingContinuation { continuation in
-            var cancellable: AnyCancellable?
-            var receivedValue = false
-            var timeoutWorkItem: DispatchWorkItem?
-
-            if let timeout = timeout {
-                let workItem = DispatchWorkItem {
-                    cancellable?.cancel()
-                    continuation.resume(
-                        throwing: ClientError("Operation timed out", file, line)
-                    )
-                }
-                timeoutWorkItem = workItem
-                DispatchQueue
-                    .global()
-                    .asyncAfter(deadline: .now() + timeout, execute: workItem)
+    ) async throws -> Output where Failure == Error {
+        let dropPublisher = {
+            if let dropFirst {
+                return self.dropFirst(dropFirst).eraseToAnyPublisher()
+            } else {
+                return self.eraseToAnyPublisher()
             }
+        }()
 
-            let publisher = dropFirst > 0
-                ? self.dropFirst(dropFirst).eraseToAnyPublisher()
-                : self.eraseToAnyPublisher()
+        let timeoutPublisher = {
+            if let timeout, timeout > 0 {
+                return dropPublisher
+                    .timeout(
+                        .seconds(timeout),
+                        scheduler: scheduler,
+                        customError: { ClientError("Operation timed out.", file, line) }
+                    )
+                    .eraseToAnyPublisher()
+            } else {
+                return dropPublisher
+            }
+        }()
 
-            let _cancellable = publisher
-                .sink(
-                    receiveCompletion: { completion in
-                        timeoutWorkItem?.cancel()
-                        switch completion {
-                        case .finished:
-                            if !receivedValue {
-                                continuation
-                                    .resume(
-                                        throwing: ClientError(
-                                            "Publisher completed with no value",
-                                            file,
-                                            line
-                                        )
-                                    )
-                            }
-                        case let .failure(error):
-                            if !receivedValue {
-                                continuation.resume(throwing: error)
-                            }
-                        }
-                        cancellable?.cancel()
-                    },
-                    receiveValue: { value in
-                        timeoutWorkItem?.cancel()
-                        guard !receivedValue else { return }
-                        receivedValue = true
-                        continuation.resume(returning: value)
-                    }
-                )
-            cancellable = _cancellable
-            registrationHandler?(_cancellable)
+        guard
+            let result = await timeoutPublisher.eraseAsAsyncStream().first(where: { _ in true })
+        else {
+            throw ClientError("Nil value found when expected non-nil.", file, line)
         }
+        return result
+    }
+
+    /// Fetches the next value emitted by the publisher.
+    ///
+    /// - Parameters:
+    ///   - dropFirst: The number of elements to drop before returning the next value.
+    ///   - timeout: The maximum time to wait for the first value.
+    ///   - scheduler: The scheduler on which to perform the timeout.
+    /// - Returns: The first `Output` value emitted by the publisher.
+    /// - Throws: A `ClientError` if the publisher completes without emitting a value.
+    func nextValue<S: Scheduler>(
+        dropFirst: Int? = nil,
+        timeout: TimeInterval? = nil,
+        on scheduler: S = DispatchQueue.main,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws -> Output where Failure == Never {
+        let dropPublisher = {
+            if let dropFirst {
+                return self.dropFirst(dropFirst).eraseToAnyPublisher()
+            } else {
+                return self.eraseToAnyPublisher()
+            }
+        }()
+
+        let timeoutPublisher = {
+            if let timeout, timeout > 0 {
+                return dropPublisher
+                    .timeout(.seconds(timeout), scheduler: scheduler)
+                    .eraseToAnyPublisher()
+            } else {
+                return dropPublisher
+            }
+        }()
+
+        guard
+            let result = await timeoutPublisher.eraseAsAsyncStream().first(where: { _ in true })
+        else {
+            throw ClientError("Nil value found when expected non-nil.", file, line)
+        }
+        return result
     }
 }

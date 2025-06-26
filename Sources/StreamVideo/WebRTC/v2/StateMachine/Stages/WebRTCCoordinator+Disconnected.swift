@@ -131,7 +131,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .Timer
                     .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
                     .autoconnect()
-                    .nextValue { cancellable = $0 }
+                    .nextValue()
                 cancellable?.cancel()
                 cancellable = nil
 
