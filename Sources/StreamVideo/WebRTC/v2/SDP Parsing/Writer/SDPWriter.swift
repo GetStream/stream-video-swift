@@ -35,6 +35,7 @@ final class SDPWriter {
 
             updatedLines.append(updatedLine)
         }
+        updatedLines.append("\n")
 
         return updatedLines.joined(separator: "\r\n")
     }
