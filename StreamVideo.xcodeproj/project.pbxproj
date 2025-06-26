@@ -657,6 +657,7 @@
 		40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8312B61325500FB9DB2 /* ModalButton.swift */; };
 		40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */; };
 		40C7B8362B613C7800FB9DB2 /* ParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */; };
+		40C95CD22E0D642D00FED711 /* Publisher+NextValue_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C95CD12E0D642D00FED711 /* Publisher+NextValue_Tests.swift */; };
 		40C9E4422C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */; };
 		40C9E4442C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */; };
 		40C9E4462C94742900802B28 /* CallParticipant+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */; };
@@ -2168,6 +2169,7 @@
 		40C7B8312B61325500FB9DB2 /* ModalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalButton.swift; sourceTree = "<group>"; };
 		40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView.swift; sourceTree = "<group>"; };
 		40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListButton.swift; sourceTree = "<group>"; };
+		40C95CD12E0D642D00FED711 /* Publisher+NextValue_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+NextValue_Tests.swift"; sourceTree = "<group>"; };
 		40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_ErrorStageTests.swift; sourceTree = "<group>"; };
 		40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_VideoLayer+Convenience.swift"; sourceTree = "<group>"; };
 		40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallParticipant+Convenience.swift"; sourceTree = "<group>"; };
@@ -5721,6 +5723,7 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C95CD12E0D642D00FED711 /* Publisher+NextValue_Tests.swift */,
 				406568882E04275700A67EAC /* IdleTimerAdapter */,
 				40FAAC872DDC9F83007BF93A /* ConsumableBucket */,
 				40FAAC852DDC9B2D007BF93A /* AnyEncodable.swift */,
@@ -8440,6 +8443,7 @@
 				8251E62B2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				40B3E5472DBBCB2A00DE8F50 /* VideoProximityPolicy_Tests.swift in Sources */,
 				406B3C3F2C919BB300FC93A1 /* MockSFUStack.swift in Sources */,
+				40C95CD22E0D642D00FED711 /* Publisher+NextValue_Tests.swift in Sources */,
 				403FB14C2BFE14760047A696 /* Publisher_NextTests.swift in Sources */,
 				84A4DCBB2A41DC6E00B1D1BF /* AsyncAssert.swift in Sources */,
 				406B3C162C90343300FC93A1 /* LocalVideoMediaAdapter_Tests.swift in Sources */,
