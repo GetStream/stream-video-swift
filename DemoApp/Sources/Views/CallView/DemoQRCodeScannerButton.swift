@@ -12,7 +12,7 @@ struct DemoQRCodeScannerButton: View {
     @Injected(\.appearance) var appearance
 
     @State private var isQRScannerPresented = false
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     private let completion: (DeeplinkInfo?) -> Void
     private let deeplinkAdapter: DeeplinkAdapter
 

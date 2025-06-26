@@ -36,7 +36,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// A public publisher that exposes the average power of the audio signal.
     open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
 
-    @Atomic private(set) var isRecording: Bool = false {
+    @Atomic public private(set) var isRecording: Bool = false {
         willSet {
             activeCallAudioSession?.isRecording = newValue
             _isRecordingSubject.send(newValue)

@@ -6,6 +6,9 @@ import AVFoundation
 import Foundation
 import StreamWebRTC
 
+/// Extend `AVCaptureDevice` to conform to `CaptureDeviceProtocol`.
+extension AVCaptureDevice: CaptureDeviceProtocol {}
+
 extension AVCaptureDevice {
     /// Selects an optimal output format for the capture device based on preferred dimensions and frame rate.
     ///

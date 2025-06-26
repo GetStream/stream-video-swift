@@ -22,6 +22,3 @@ public protocol CaptureDeviceProtocol: Sendable {
         preferredFrameRate: Int
     ) -> AVCaptureDevice.Format?
 }
-
-/// Extend `AVCaptureDevice` to conform to `CaptureDeviceProtocol`.
-extension AVCaptureDevice: CaptureDeviceProtocol {}

@@ -108,8 +108,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
     private let disposableBag = DisposableBag()
-
-    private lazy var idleTimerAdapter = IdleTimerAdapter(self)
+    private lazy var idleTimerAdapter: IdleTimerAdapter = .init(self)
 
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
