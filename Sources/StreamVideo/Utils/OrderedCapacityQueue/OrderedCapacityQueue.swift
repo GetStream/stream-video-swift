@@ -8,7 +8,6 @@ import Foundation
 /// A thread-safe queue that maintains a fixed capacity and removes elements after
 /// a specified time interval.
 final class OrderedCapacityQueue<Element> {
-    @Injected(\.timers) private var timers
 
     private let queue = UnfairQueue()
 
@@ -50,8 +49,10 @@ final class OrderedCapacityQueue<Element> {
     init(capacity: Int, removalTime: TimeInterval) {
         self.capacity = capacity
         self.removalTime = removalTime
-        removalTimerCancellable = timers
-            .timer(for: ScreenPropertiesAdapter.currentValue.refreshRate)
+        removalTimerCancellable = Foundation
+            .Timer
+            .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
+            .autoconnect()
             .receive(on: DispatchQueue.global(qos: .userInteractive))
             .sink { [weak self] _ in self?.removeItemsIfRequired() }
     }
@@ -87,8 +88,10 @@ final class OrderedCapacityQueue<Element> {
     ///   should be enabled.
     private func toggleRemovalObservation(_ isEnabled: Bool) {
         if isEnabled, removalTimerCancellable == nil {
-            removalTimerCancellable = timers
-                .timer(for: ScreenPropertiesAdapter.currentValue.refreshRate)
+            removalTimerCancellable = Foundation
+                .Timer
+                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
+                .autoconnect()
                 .sink { [weak self] _ in self?.removeItemsIfRequired() }
         } else if !isEnabled, removalTimerCancellable != nil {
             removalTimerCancellable?.cancel()

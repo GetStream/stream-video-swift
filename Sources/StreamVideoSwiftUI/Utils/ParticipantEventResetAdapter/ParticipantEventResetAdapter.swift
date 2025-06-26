@@ -8,8 +8,6 @@ import StreamVideo
 
 final class ParticipantEventResetAdapter: @unchecked Sendable {
 
-    @Injected(\.timers) private var timers
-
     private var observationCancellable: AnyCancellable?
     private weak var viewModel: CallViewModel?
     private let processingQueue = UnfairQueue()
@@ -47,8 +45,10 @@ final class ParticipantEventResetAdapter: @unchecked Sendable {
                 return
             }
 
-            timerCancellable = timers
-                .timer(for: 1)
+            timerCancellable = Foundation
+                .Timer
+                .publish(every: 1, on: .main, in: .default)
+                .autoconnect()
                 .sink { [weak self] _ in self?.timerFired() }
         }
     }

@@ -18,8 +18,6 @@ import StreamWebRTC
 /// will start periodic collection upon setting it.
 final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
 
-    @Injected(\.timers) private var timers
-
     /// The most recent `CallStatsReport` generated from collected stats.
     ///
     /// Observers can subscribe to this publisher to receive updates.
@@ -78,8 +76,10 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
         }
 
         collectionCancellable?.cancel()
-        collectionCancellable = timers
-            .timer(for: interval)
+        collectionCancellable = Foundation
+            .Timer
+            .publish(every: interval, on: .main, in: .default)
+            .autoconnect()
             .receive(on: DispatchQueue.global(qos: .utility))
             .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
             .sink { [weak self] _ in self?.collectStats() }

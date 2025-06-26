@@ -692,7 +692,6 @@
 		40D36AE02DDE019F00972D75 /* MockWebRTCStatsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36ADF2DDE019F00972D75 /* MockWebRTCStatsReporter.swift */; };
 		40D36AE22DDE023800972D75 /* WebRTCStatsCollecting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36AE12DDE023800972D75 /* WebRTCStatsCollecting.swift */; };
 		40D36AE42DDE02D100972D75 /* MockWebRTCStatsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36AE32DDE02D100972D75 /* MockWebRTCStatsCollector.swift */; };
-		40D3A02D2DE3437700260532 /* TimerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D3A02C2DE3437700260532 /* TimerStorage.swift */; };
 		40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */; };
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
@@ -2202,7 +2201,6 @@
 		40D36ADF2DDE019F00972D75 /* MockWebRTCStatsReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebRTCStatsReporter.swift; sourceTree = "<group>"; };
 		40D36AE12DDE023800972D75 /* WebRTCStatsCollecting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsCollecting.swift; sourceTree = "<group>"; };
 		40D36AE32DDE02D100972D75 /* MockWebRTCStatsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebRTCStatsCollector.swift; sourceTree = "<group>"; };
-		40D3A02C2DE3437700260532 /* TimerStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerStorage.swift; sourceTree = "<group>"; };
 		40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer_Tests.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
@@ -3669,7 +3667,6 @@
 		404780412DE61EAD0085AE05 /* Timers */ = {
 			isa = PBXGroup;
 			children = (
-				40D3A02C2DE3437700260532 /* TimerStorage.swift */,
 				84A7E1A72883E46200526C98 /* Timer.swift */,
 			);
 			path = Timers;
@@ -7731,7 +7728,6 @@
 				84BAD7842A6C01AF00733156 /* BroadcastBufferReader.swift in Sources */,
 				40034C312CFE168D00A318B1 /* StreamLocaleProvider.swift in Sources */,
 				40916E782DA94A150061D860 /* Publisher+AsyncStream.swift in Sources */,
-				40D3A02D2DE3437700260532 /* TimerStorage.swift in Sources */,
 				84D91E9C2C7CB0AA00B163A0 /* CallSessionParticipantCountsUpdatedEvent.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,

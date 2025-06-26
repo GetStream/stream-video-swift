@@ -15,7 +15,6 @@ public typealias UserTokenUpdater = @Sendable(UserToken) -> Void
 public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
-    @Injected(\.timers) private var timers
     @Injected(\.screenProperties) private var screenProperties
 
     private enum DisposableKey: String { case ringEventReceived }
@@ -532,8 +531,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         do {
             var cancellable: AnyCancellable?
             log.debug("Listening for WS connection")
-            _ = try await timers
-                .timer(for: 0.1)
+            _ = try await Foundation
+                .Timer
+                .publish(every: 0.1, on: .main, in: .default)
+                .autoconnect()
                 .filter { [weak webSocketClient] _ in webSocketClient?.connectionState.isConnected == true }
                 .nextValue(timeout: 30) { cancellable = $0 }
             cancellable?.cancel()
@@ -585,8 +586,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         var cancellable: AnyCancellable?
         do {
-            let result = try await timers
-                .timer(for: 0.1)
+            let result = try await Foundation
+                .Timer
+                .publish(every: 0.1, on: .main, in: .default)
+                .autoconnect()
                 .log(.debug) { _ in "Waiting for connection id" }
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
                 .nextValue(timeout: 5) { cancellable = $0 }

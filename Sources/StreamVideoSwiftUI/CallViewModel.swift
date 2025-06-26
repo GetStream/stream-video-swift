@@ -15,7 +15,6 @@ open class CallViewModel: ObservableObject {
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
     @Injected(\.applicationStateAdapter) var applicationStateAdapter
-    @Injected(\.timers) var timers
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -749,8 +748,10 @@ open class CallViewModel: ObservableObject {
     }
 
     private func startTimer(timeout: TimeInterval) {
-        ringingCancellable = timers
-            .timer(for: timeout)
+        ringingCancellable = Foundation
+            .Timer
+            .publish(every: timeout, on: .main, in: .default)
+            .autoconnect()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }

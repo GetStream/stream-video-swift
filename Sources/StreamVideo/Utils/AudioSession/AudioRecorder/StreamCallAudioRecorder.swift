@@ -16,7 +16,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     @Injected(\.activeCallProvider) private var activeCallProvider
     @Injected(\.activeCallAudioSession) private var activeCallAudioSession
-    @Injected(\.timers) private var timers
 
     /// The builder used to create the AVAudioRecorder instance.
     let audioRecorderBuilder: AVAudioRecorderBuilder
@@ -119,8 +118,10 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
             updateMetersTimerCancellable?.cancel()
             disposableBag.remove("update-meters")
-            updateMetersTimerCancellable = timers
-                .timer(for: ScreenPropertiesAdapter.currentValue.refreshRate)
+            updateMetersTimerCancellable = Foundation
+                .Timer
+                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
+                .autoconnect()
                 .sinkTask(storeIn: disposableBag, identifier: "update-meters") { [weak self, audioRecorder] _ in
                     audioRecorder.updateMeters()
                     self?._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))

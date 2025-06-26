@@ -13,7 +13,6 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
-    @Injected(\.timers) private var timers
     @Injected(\.currentDevice) private var currentDevice
     private let disposableBag = DisposableBag()
 
@@ -613,8 +612,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Parameter callState: The state of the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
         let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
-        ringingTimerCancellable = timers
-            .timer(for: timeout)
+        ringingTimerCancellable = Foundation
+            .Timer
+            .publish(every: timeout, on: .main, in: .default)
+            .autoconnect()
             .sink { [weak self] _ in
                 log.debug(
                     "Detected ringing timeout, hanging up...",
