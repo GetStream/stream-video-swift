@@ -8,6 +8,7 @@ import SwiftUI
 /// Represents a participant event during a call.
 public struct ParticipantEvent: Sendable {
     public let id: String
+    public let callCid: String
     public let action: ParticipantAction
     public let user: String
     public let imageURL: URL?

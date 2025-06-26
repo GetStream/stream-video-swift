@@ -83,6 +83,7 @@ public class CallEventsHandler {
         case let .typeCallSessionParticipantJoinedEvent(event):
             return ParticipantEvent(
                 id: event.participant.user.id,
+                callCid: event.callCid,
                 action: .join,
                 user: event.participant.user.name ?? event.participant.user.id,
                 imageURL: URL(string: event.participant.user.image ?? "")
@@ -90,6 +91,7 @@ public class CallEventsHandler {
         case let .typeCallSessionParticipantLeftEvent(event):
             return ParticipantEvent(
                 id: event.participant.user.id,
+                callCid: event.callCid,
                 action: .leave,
                 user: event.participant.user.name ?? event.participant.user.id,
                 imageURL: URL(string: event.participant.user.image ?? "")

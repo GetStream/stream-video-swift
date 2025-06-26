@@ -31,6 +31,7 @@ final class ParticipantEventResetAdapter_Tests: XCTestCase, @unchecked Sendable 
         _ = subject
         viewModel.participantEvent = .init(
             id: .unique,
+            callCid: .unique,
             action: .join,
             user: .unique,
             imageURL: nil
@@ -47,6 +48,7 @@ final class ParticipantEventResetAdapter_Tests: XCTestCase, @unchecked Sendable 
             group.addTask { @MainActor in
                 self.viewModel.participantEvent = .init(
                     id: .unique,
+                    callCid: .unique,
                     action: .join,
                     user: .unique,
                     imageURL: nil
@@ -57,6 +59,7 @@ final class ParticipantEventResetAdapter_Tests: XCTestCase, @unchecked Sendable 
 
                 self.viewModel.participantEvent = .init(
                     id: .unique,
+                    callCid: .unique,
                     action: .join,
                     user: .unique,
                     imageURL: nil

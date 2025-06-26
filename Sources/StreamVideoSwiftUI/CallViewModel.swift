@@ -822,7 +822,10 @@ open class CallViewModel: ObservableObject {
                             self?.leaveCall()
                         }
                     case let .userBlocked(callEventInfo):
-                        if callEventInfo.user?.id == streamVideo.user.id {
+                        if
+                            callEventInfo.user?.id == streamVideo.user.id,
+                            callEventInfo.callCid == call?.cId
+                        {
                             leaveCall()
                         }
                     case .userUnblocked:
@@ -830,7 +833,9 @@ open class CallViewModel: ObservableObject {
                     case .sessionStarted:
                         break
                     }
-                } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {
+                } else if
+                    let participantEvent = callEventsHandler.checkForParticipantEvents(from: event),
+                    participantEvent.callCid == call?.cId {
                     guard participants.count < 25 else {
                         log.debug("Skipping participant events for big calls")
                         return
