@@ -39,12 +39,6 @@ struct AudioVolumeIndicatorContainerView: View {
                 .store(in: disposableBag)
 
             audioLevelsPublisher
-                .removeDuplicates()
-                .throttle(
-                    for: .milliseconds(Int(ScreenPropertiesAdapter.currentValue.refreshRate)),
-                    scheduler: RunLoop.main,
-                    latest: true
-                )
                 .receive(on: DispatchQueue.main)
                 .assign(to: \.audioLevels, onWeak: self)
                 .store(in: disposableBag)

@@ -24,13 +24,13 @@ final class RenderingObserver {
     private let disposableBag = DisposableBag()
 
     init() {
-        Foundation
-            .Timer
-            .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
-            .autoconnect()
-            .receive(on: DispatchQueue.global(qos: .utility))
-            .sink { [weak self] _ in self?.printReport() }
-            .store(in: disposableBag)
+//        Foundation
+//            .Timer
+//            .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
+//            .autoconnect()
+//            .receive(on: DispatchQueue.global(qos: .utility))
+//            .sink { [weak self] _ in self?.printReport() }
+//            .store(in: disposableBag)
     }
 
     func addRendering(

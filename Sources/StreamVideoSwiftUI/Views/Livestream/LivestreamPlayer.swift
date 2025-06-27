@@ -159,6 +159,7 @@ public struct LivestreamPlayer<Factory: ViewFactory>: View {
                     .Timer
                     .publish(every: 1, on: .main, in: .default)
                     .autoconnect()
+                    .receive(on: DispatchQueue.global(qos: .default))
                     .sinkTask(storeIn: disposableBag) { @MainActor _ in
                         countdown = startsAt.timeIntervalSinceNow
                         if countdown <= 0 {

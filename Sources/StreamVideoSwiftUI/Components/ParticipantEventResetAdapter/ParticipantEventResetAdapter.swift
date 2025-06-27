@@ -49,6 +49,7 @@ final class ParticipantEventResetAdapter: @unchecked Sendable {
                 .Timer
                 .publish(every: 1, on: .main, in: .default)
                 .autoconnect()
+                .receive(on: DispatchQueue.global(qos: .default))
                 .sink { [weak self] _ in self?.timerFired() }
         }
     }

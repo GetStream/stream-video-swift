@@ -748,12 +748,9 @@ open class CallViewModel: ObservableObject {
             .Timer
             .publish(every: timeout, on: .main, in: .default)
             .autoconnect()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                log.debug("Detected ringing timeout, hanging up...")
-                handleCallHangUp(ringTimeout: true)
-            }
+            .receive(on: DispatchQueue.global(qos: .default))
+            .log(.debug) { _ in "Detected ringing timeout, hanging up..." }
+            .sink { [weak self] _ in self?.handleCallHangUp(ringTimeout: true) }
     }
 
     private func handleCallHangUp(ringTimeout: Bool = false) {
