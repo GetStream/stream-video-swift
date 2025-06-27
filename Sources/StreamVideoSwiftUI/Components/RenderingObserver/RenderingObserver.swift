@@ -24,10 +24,12 @@ final class RenderingObserver {
     private let disposableBag = DisposableBag()
 
     init() {
-        DefaultTimer
-            .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
-            .sink { [weak self] _ in self?.printReport() }
-            .store(in: disposableBag)
+        Task { @MainActor in
+            DefaultTimer
+                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
+                .sink { [weak self] _ in self?.printReport() }
+                .store(in: disposableBag)
+        }
     }
 
     func addRendering(
