@@ -88,6 +88,16 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
         set { _ = newValue }
     }
 
+    var iceConnectionState: RTCIceConnectionState {
+        get { self[dynamicMember: \.iceConnectionState] }
+        set { stub(for: \.iceConnectionState, with: newValue) }
+    }
+
+    var connectionState: RTCPeerConnectionState {
+        get { self[dynamicMember: \.connectionState] }
+        set { stub(for: \.connectionState, with: newValue) }
+    }
+
     var transceivers: [RTCRtpTransceiver] = []
     var subject: PassthroughSubject<any RTCPeerConnectionEvent, Never> = .init()
     var publisher: AnyPublisher<any RTCPeerConnectionEvent, Never> { subject.eraseToAnyPublisher() }
@@ -95,6 +105,8 @@ final class MockRTCPeerConnection: StreamRTCPeerConnectionProtocol, Mockable, @u
     init() {
         stub(for: .offer, with: RTCSessionDescription(type: .offer, sdp: .unique))
         stub(for: .answer, with: RTCSessionDescription(type: .answer, sdp: .unique))
+        stub(for: \.iceConnectionState, with: .connected)
+        stub(for: \.connectionState, with: .connected)
     }
 
     func setLocalDescription(

@@ -25,6 +25,18 @@ protocol StreamRTCPeerConnectionProtocol: AnyObject, Sendable {
     /// A publisher for RTCPeerConnectionEvents.
     var publisher: AnyPublisher<RTCPeerConnectionEvent, Never> { get }
 
+    /// The current ICE connection state of the peer connection.
+    ///
+    /// This property reflects the state of the ICE (Interactive Connectivity Establishment) agent,
+    /// indicating the progress and status of the connection between peers.
+    var iceConnectionState: RTCIceConnectionState { get }
+
+    /// The current signaling state of the peer connection.
+    ///
+    /// This property reflects the overall state of the peer connection, including the signaling
+    /// process and the establishment of media channels.
+    var connectionState: RTCPeerConnectionState { get }
+
     /// Sets the local description asynchronously.
     /// - Parameter sessionDescription: The RTCSessionDescription to set as the local description.
     /// - Throws: An error if setting the local description fails.

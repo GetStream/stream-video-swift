@@ -48,6 +48,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let mediaAdapter: MediaAdapter
     private let iceAdapter: ICEAdapter
     private let sfuAdapter: SFUAdapter
+    private let iceConnectionStateAdapter: ICEConnectionStateAdapter
 
     private var callSettings: CallSettings
 
@@ -73,10 +74,28 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     var trackPublisher: AnyPublisher<TrackEvent, Never> { mediaAdapter.trackPublisher }
     var disconnectedPublisher: AnyPublisher<Void, Never> {
         peerConnection
-            .publisher(eventType: StreamRTCPeerConnection.ICEConnectionChangedEvent.self)
+            .publisher(eventType: StreamRTCPeerConnection.DidChangeConnectionStateEvent.self)
             .filter { $0.state == .disconnected || $0.state == .failed }
             .map { _ in () }
             .eraseToAnyPublisher()
+    }
+
+    /// A Boolean value indicating whether the peer connection is in a healthy state.
+    ///
+    /// The peer connection is considered healthy if its ICE connection state is not
+    /// `.failed` or `.closed`, and its overall connection state is not `.failed` or `.closed`.
+    /// This property provides a quick way to check if the connection is active and able to
+    /// send or receive data.
+    var isHealthy: Bool {
+        let invalidICEConnectionStates = Set([RTCIceConnectionState.failed, .closed])
+        let invalidConnectionStates = Set([RTCPeerConnectionState.failed, .closed])
+        guard
+            !invalidICEConnectionStates.contains(peerConnection.iceConnectionState),
+            !invalidConnectionStates.contains(peerConnection.connectionState)
+        else {
+            return false
+        }
+        return true
     }
 
     /// Retrieves track information for a specified track type and collection type.
@@ -143,7 +162,14 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
-            )
+            ),
+            iceAdapter: .init(
+                sessionID: sessionId,
+                peerType: peerType,
+                peerConnection: peerConnection,
+                sfuAdapter: sfuAdapter
+            ),
+            iceConnectionStateAdapter: .init()
         )
     }
 
@@ -156,7 +182,9 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         audioSettings: AudioSettings,
         publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
-        mediaAdapter: MediaAdapter
+        mediaAdapter: MediaAdapter,
+        iceAdapter: ICEAdapter,
+        iceConnectionStateAdapter: ICEConnectionStateAdapter
     ) {
         self.sessionId = sessionId
         self.peerType = peerType
@@ -170,13 +198,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             ? .peerConnectionPublisher
             : .peerConnectionSubscriber
         self.mediaAdapter = mediaAdapter
+        self.iceAdapter = iceAdapter
+        self.iceConnectionStateAdapter = iceConnectionStateAdapter
 
-        iceAdapter = .init(
-            sessionID: sessionId,
-            peerType: peerType,
-            peerConnection: peerConnection,
-            sfuAdapter: sfuAdapter
-        )
+        // Warm up instances
+        iceConnectionStateAdapter.peerConnectionCoordinator = self
 
         // Start ICERestart events observation
         observeICERestartEvents()

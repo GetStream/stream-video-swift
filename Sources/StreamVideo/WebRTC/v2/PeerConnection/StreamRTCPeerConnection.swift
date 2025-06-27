@@ -38,6 +38,10 @@ final class StreamRTCPeerConnection: StreamRTCPeerConnectionProtocol, @unchecked
         .receive(on: dispatchQueue)
         .eraseToAnyPublisher()
 
+    var iceConnectionState: RTCIceConnectionState { source.iceConnectionState }
+
+    var connectionState: RTCPeerConnectionState { source.connectionState }
+
     private let delegatePublisher = DelegatePublisher()
     private let source: RTCPeerConnection
 

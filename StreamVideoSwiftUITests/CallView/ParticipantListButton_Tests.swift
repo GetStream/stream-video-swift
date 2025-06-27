@@ -16,8 +16,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Senda
 
     override func setUp() async throws {
         try await super.setUp()
-        let call = Call.dummy()
-        viewModel.setActiveCall(call)
+        viewModel.setActiveCall(Call.dummy())
     }
 
     override func tearDown() async throws {
