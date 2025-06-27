@@ -204,7 +204,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Starts publishing the local video track.
     func publish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
@@ -268,7 +268,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
 
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 do {
                     try await self?.stopVideoCapturingSession()
                 } catch {

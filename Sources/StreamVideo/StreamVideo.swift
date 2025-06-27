@@ -19,7 +19,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
     private enum DisposableKey: String { case ringEventReceived }
 
-    public final class State: ObservableObject, @unchecked Sendable {
+    final class Store: @unchecked Sendable {
         @Published public internal(set) var connection: ConnectionStatus
         @Published public internal(set) var user: User
         @Published public internal(set) var activeCall: Call? {
@@ -28,8 +28,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         @Published public internal(set) var ringingCall: Call?
 
-        private nonisolated let disposableBag = DisposableBag()
-
         init(user: User) {
             self.user = user
             connection = .initialized
@@ -37,28 +35,72 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         // MARK: - Private Helpers
 
-        private func didUpdateActiveCall(_ activeCall: Call?, oldValue: Call?) {
+        private func didUpdateActiveCall(
+            _ activeCall: Call?,
+            oldValue: Call?
+        ) {
             if let oldValue, oldValue.cId != activeCall?.cId {
                 oldValue.leave()
             }
-
-            if ringingCall != nil {
-                Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                    self?.ringingCall = nil
-                }
-            }
-        }
-
-        private func stopRingingCallIfRequired() {
             ringingCall = nil
         }
     }
-    
-    public var state: State
-    public let videoConfig: VideoConfig
-    public var user: User {
-        state.user
+
+    public final class State: ObservableObject, @unchecked Sendable {
+        @Published public internal(set) var connection: ConnectionStatus
+        @Published public internal(set) var user: User
+        @Published public internal(set) var activeCall: Call?
+        @Published public internal(set) var ringingCall: Call?
+        private nonisolated let disposableBag = DisposableBag()
+
+        init(_ store: Store) {
+            connection = store.connection
+            user = store.user
+            activeCall = store.activeCall
+            ringingCall = store.ringingCall
+
+            subscribe(on: store.$connection.eraseToAnyPublisher(), keyPath: \.connection)
+            subscribe(on: store.$user.eraseToAnyPublisher(), keyPath: \.user)
+            subscribe(
+                on: store.$activeCall.eraseToAnyPublisher(),
+                removeDuplicatesBy: { $0?.cId == $1?.cId },
+                keyPath: \.activeCall
+            )
+            subscribe(
+                on: store.$ringingCall.eraseToAnyPublisher(),
+                removeDuplicatesBy: { $0?.cId == $1?.cId },
+                keyPath: \.ringingCall
+            )
+        }
+
+        private func subscribe<V: Equatable>(
+            on publisher: AnyPublisher<V, Never>,
+            keyPath: ReferenceWritableKeyPath<State, V>
+        ) {
+            publisher
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .assign(to: keyPath, onWeak: self)
+                .store(in: disposableBag)
+        }
+
+        private func subscribe<V>(
+            on publisher: AnyPublisher<V, Never>,
+            removeDuplicatesBy: @escaping (V, V) -> Bool = { _, _ in false },
+            keyPath: ReferenceWritableKeyPath<State, V>
+        ) {
+            publisher
+                .removeDuplicates(by: removeDuplicatesBy)
+                .receive(on: DispatchQueue.main)
+                .assign(to: keyPath, onWeak: self)
+                .store(in: disposableBag)
+        }
     }
+    
+    let store: Store
+    public let state: State
+    public let videoConfig: VideoConfig
+    public var user: User { store.user }
 
     /// Provides information regarding hardware-acceleration capabilities (neuralEngine) on device.
     public var isHardwareAccelerationAvailable: Bool { neuralEngineExists }
@@ -171,7 +213,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         autoConnectOnInit: Bool
     ) {
         self.apiKey = APIKey(apiKey)
-        state = State(user: user)
+        let store = Store(user: user)
+        self.store = store
+        state = State(store)
         self.token = token
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
@@ -471,7 +515,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     try Task.checkCancellation()
                     let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
 
-                    self.state.user = guestInfo.user
+                    self.store.user = guestInfo.user
                     self.token = guestInfo.token
                     self.tokenProvider = guestInfo.tokenProvider
 
@@ -534,6 +578,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 .Timer
                 .publish(every: 0.1, on: .main, in: .default)
                 .autoconnect()
+                .receive(on: DispatchQueue.global(qos: .default))
                 .filter { [weak webSocketClient] _ in webSocketClient?.connectionState.isConnected == true }
                 .nextValue(timeout: 30) { cancellable = $0 }
             cancellable?.cancel()
@@ -589,6 +634,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 .Timer
                 .publish(every: 0.1, on: .main, in: .default)
                 .autoconnect()
+                .receive(on: DispatchQueue.global(qos: .default))
                 .log(.debug) { _ in "Waiting for connection id" }
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
                 .nextValue(timeout: 5) { cancellable = $0 }
@@ -767,7 +813,7 @@ extension StreamVideo: ConnectionStateDelegate {
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
-        self.state.connection = ConnectionStatus(webSocketConnectionState: state)
+        store.connection = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
             if let serverError = source.serverError {
@@ -824,10 +870,10 @@ extension StreamVideo: ConnectionStateDelegate {
                 }
                 return (event: source, call: call)
             }
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+            .sink { [weak self] in
                 guard let self else { return }
-                $0.call.state.update(from: $0.event)
-                self.state.ringingCall = $0.call
+                $0.call.store.update(from: $0.event)
+                store.ringingCall = $0.call
             }
             .store(in: disposableBag, key: DisposableKey.ringEventReceived.rawValue)
     }
@@ -846,11 +892,8 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
-                guard let self else { return }
-                call.state.update(from: ringEvent)
-                self.state.ringingCall = call
-            }
+            call.store.update(from: ringEvent)
+            store.ringingCall = call
         }
     }
 }

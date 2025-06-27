@@ -37,7 +37,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         participantsPublisher = call?
             .state
             .$participants
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: DispatchQueue.global(qos: .default))
             .map { value in value.filter { $0.sessionId != participant.sessionId } }
             .removeDuplicates(by: { lhs, rhs in
                 let lhsSessionIds = lhs.map(\.sessionId)

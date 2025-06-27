@@ -23,9 +23,6 @@ public struct LocalParticipantViewModifier: ViewModifier {
     @State var participantsCount: Int
     var participantsCountPublisher: AnyPublisher<Int, Never>?
 
-    @State var audioLevels: [Float]
-    var audioLevelsPublisher: AnyPublisher<[Float], Never>?
-
     public init(
         localParticipant: CallParticipant,
         call: Call?,
@@ -79,12 +76,6 @@ public struct LocalParticipantViewModifier: ViewModifier {
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
-
-        audioLevels = microphoneChecker.audioLevels
-        audioLevelsPublisher = microphoneChecker
-            .$audioLevels
-            .receive(on: DispatchQueue.main)
-            .eraseToAnyPublisher()
     }
 
     public func body(content: Content) -> some View {
@@ -118,7 +109,6 @@ public struct LocalParticipantViewModifier: ViewModifier {
                 )
                 .accessibility(identifier: "microphoneCheckView")
                 .onReceive(hasAudioPublisher) { hasAudio = $0 }
-                .onReceive(audioLevelsPublisher) { audioLevels = $0 }
 
                 Spacer()
 

@@ -54,7 +54,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
     // MARK: - private
     
     private func subscribeToConnectionUpdates() {
-        streamVideo.state.$connection.sink { [weak self] status in
+        streamVideo.store.$connection.sink { [weak self] status in
             guard let self = self else { return }
             if case .disconnected = status {
                 self.socketDisconnected = true
@@ -140,8 +140,8 @@ public class CallsController: ObservableObject, @unchecked Sendable {
         guard let callEvent = event.rawValue as? WSCallEvent else { return }
         for (index, call) in calls.enumerated() {
             if call.cId == callEvent.callCid {
+                call.store.updateState(from: event)
                 Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                    call.state.updateState(from: event)
                     self?.calls[index] = call
                 }
                 return
@@ -152,8 +152,8 @@ public class CallsController: ObservableObject, @unchecked Sendable {
                 callType: callCreated.call.type,
                 callId: callCreated.call.id
             )
+            call.store.update(from: callCreated)
             Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                call.state.update(from: callCreated)
                 self?.calls.insert(call, at: 0)
             }
         }
@@ -164,9 +164,7 @@ public class CallsController: ObservableObject, @unchecked Sendable {
             callType: callResponse.call.type,
             callId: callResponse.call.id
         )
-        Task(disposableBag: disposableBag) { @MainActor in
-            call.state.update(from: callResponse)
-        }
+        call.store.update(from: callResponse)
         return call
     }
     

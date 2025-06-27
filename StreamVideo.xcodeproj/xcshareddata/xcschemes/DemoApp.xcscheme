@@ -122,7 +122,7 @@
    <ProfileAction
       buildConfiguration = "Debug"
       shouldUseLaunchSchemeArgsEnv = "YES"
-      savedToolIdentifier = ""
+      savedToolIdentifier = "StreasmVideo - Memory Usage"
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
       <BuildableProductRunnable

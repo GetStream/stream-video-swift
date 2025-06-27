@@ -108,6 +108,7 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
             .Timer
             .publish(every: interval, on: .main, in: .default)
             .autoconnect()
+            .receive(on: DispatchQueue.global(qos: .default))
             .compactMap { [weak self] _ in self?.provider() }
             .sink { [weak self] in self?.deliverStats($0) }
     }

@@ -52,9 +52,7 @@ final class StreamRejectionReasonProvider: RejectionReasonProviding, @unchecked 
 
         let isUserBusy = activeCall != nil
         let userId = streamVideo?.user.id
-        let isUserRejectingOutgoingCall = await Task(disposableBag: disposableBag) { @MainActor in
-            rejectingCall.state.createdBy?.id == userId
-        }.value
+        let isUserRejectingOutgoingCall = rejectingCall.store.createdBy?.id == userId
 
         if isUserBusy {
             return RejectCallRequest.Reason.busy

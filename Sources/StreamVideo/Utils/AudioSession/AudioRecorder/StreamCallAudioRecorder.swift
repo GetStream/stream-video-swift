@@ -122,7 +122,8 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
                 .Timer
                 .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
                 .autoconnect()
-                .sinkTask(storeIn: disposableBag, identifier: "update-meters") { [weak self, audioRecorder] _ in
+                .receive(on: DispatchQueue.global(qos: .default))
+                .sink { [weak self, audioRecorder] _ in
                     audioRecorder.updateMeters()
                     self?._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))
                 }

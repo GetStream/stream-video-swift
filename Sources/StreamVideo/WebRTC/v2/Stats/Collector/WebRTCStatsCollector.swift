@@ -80,7 +80,7 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
             .Timer
             .publish(every: interval, on: .main, in: .default)
             .autoconnect()
-            .receive(on: DispatchQueue.global(qos: .utility))
+            .receive(on: DispatchQueue.global(qos: .default))
             .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
             .sink { [weak self] _ in self?.collectStats() }
 

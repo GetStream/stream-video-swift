@@ -163,23 +163,12 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 return
             }
             do {
-                if streamVideo.state.connection != .connected {
-                    let result = await Task(disposableBag: disposableBag) { [weak self] in
-                        try await self?.streamVideo?.connect()
-                    }.result
-
-                    switch result {
-                    case .success:
-                        break
-                    case let .failure(failure):
-                        throw failure
-                    }
+                if streamVideo.store.connection != .connected {
+                    try await streamVideo.connect()
                 }
 
-                if streamVideo.state.ringingCall?.cId != callEntry.call.cId {
-                    Task(disposableBag: disposableBag) { [weak self] in
-                        self?.streamVideo?.state.ringingCall = callEntry.call
-                    }
+                if streamVideo.store.ringingCall?.cId != callEntry.call.cId {
+                    streamVideo.store.ringingCall = callEntry.call
                 }
 
                 let callState = try await callEntry.call.get()
@@ -344,18 +333,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     ) {
         /// We listen for the event so in the case we are the only ones remaining
         /// in the call, we leave.
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            if let call = callEntry(for: response.callCid)?.call,
-               call.state.participants.count == 1 {
-                log.debug(
-                    "Call will end as only one participant left in the call",
-                    subsystems: .callKit
-                )
-                callEnded(response.callCid, ringingTimedOut: false)
-            }
+        if let call = callEntry(for: response.callCid)?.call,
+           call.store.participants.count == 1 {
+            log.debug(
+                "Call will end as only one participant left in the call",
+                subsystems: .callKit
+            )
+            callEnded(response.callCid, ringingTimedOut: false)
         }
     }
 
@@ -434,7 +418,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimerCancellable = nil
         active = action.callUUID
 
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
@@ -459,7 +443,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 action.fail()
             }
 
-            let callSettings = callToJoinEntry.call.state.callSettings
+            let callSettings = callToJoinEntry.call.store.callSettings
             do {
                 if callSettings.audioOn == false {
                     try await requestTransaction(
@@ -616,6 +600,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .Timer
             .publish(every: timeout, on: .main, in: .default)
             .autoconnect()
+            .receive(on: DispatchQueue.global(qos: .default))
             .sink { [weak self] _ in
                 log.debug(
                     "Detected ringing timeout, hanging up...",

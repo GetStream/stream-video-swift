@@ -5,7 +5,14 @@
 import Combine
 import Foundation
 
-public struct PermissionRequest: @unchecked Sendable, Identifiable {
+public struct PermissionRequest: @unchecked Sendable, Identifiable, Equatable {
+    public static func == (lhs: PermissionRequest, rhs: PermissionRequest) -> Bool {
+        lhs.id == rhs.id
+            && lhs.permission == rhs.permission
+            && lhs.user == rhs.user
+            && lhs.requestedAt == rhs.requestedAt
+    }
+    
     public let id: UUID = .init()
     public let permission: String
     public let user: User
@@ -29,112 +36,65 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
     }
 }
 
-@MainActor
 public class CallState: ObservableObject {
-
-    @Injected(\.streamVideo) var streamVideo
+    @Injected(\.screenProperties) private var screenProperties
 
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
-    @Published public internal(set) var sessionId: String = ""
-    @Published public internal(set) var participants = [CallParticipant]()
-    @Published public internal(set) var participantsMap = [String: CallParticipant]() {
-        didSet { didUpdate(Array(participantsMap.values)) }
-    }
+    @Published public private(set) var sessionId: String
+    @Published public private(set) var participants: [CallParticipant]
+    @Published public private(set) var participantsMap: [String: CallParticipant]
+    @Published public private(set) var localParticipant: CallParticipant?
+    @Published public private(set) var dominantSpeaker: CallParticipant?
+    @Published public private(set) var remoteParticipants: [CallParticipant]
+    @Published public private(set) var activeSpeakers: [CallParticipant]
+    @Published public private(set) var members: [Member]
+    @Published public private(set) var screenSharingSession: ScreenSharingSession?
 
-    @Published public internal(set) var localParticipant: CallParticipant?
-    @Published public internal(set) var dominantSpeaker: CallParticipant?
-    @Published public internal(set) var remoteParticipants: [CallParticipant] = []
-    @Published public internal(set) var activeSpeakers: [CallParticipant] = []
-    @Published public internal(set) var members: [Member] = []
-    @Published public internal(set) var screenSharingSession: ScreenSharingSession? = nil {
-        didSet {
-            let isCurrentUserSharing = screenSharingSession?.participant.id == sessionId
-            /// When screensharingSession is non-nil we need to ensure that the track is also enabled.
-            /// Otherwise, we can get in a situation where a track which was shared previously,
-            /// was disabled (due to PiP) and that will cause the track not showing on UI.
-            /// Forcing it here to be enabled, should mitigate this issue and ensure that the track is always
-            /// visible whenever screensharingSession is non-nil.
-            screenSharingSession?.track?.isEnabled = true
-            if isCurrentUserSharing != isCurrentUserScreensharing {
-                isCurrentUserScreensharing = isCurrentUserSharing
-            }
-        }
-    }
+    @Published public private(set) var recordingState: RecordingState
+    @Published public private(set) var blockedUserIds: Set<String>
+    @Published public private(set) var settings: CallSettingsResponse?
+    @Published public private(set) var ownCapabilities: [OwnCapability]
 
-    @Published public internal(set) var recordingState: RecordingState = .noRecording
-    @Published public internal(set) var blockedUserIds: Set<String> = []
-    @Published public internal(set) var settings: CallSettingsResponse?
-    @Published public internal(set) var ownCapabilities: [OwnCapability] = [] {
-        didSet {
-            let oldValue = Set(oldValue)
-            let newValue = Set(ownCapabilities)
-            guard newValue != oldValue else {
-                return
-            }
-            log.debug(
-                """
-                Updating ownCapabilities:
-                From:
-                \(oldValue.map(\.rawValue))
-                
-                To:
-                \(ownCapabilities.map(\.rawValue))
-                """,
-                subsystems: .webRTC
-            )
-        }
-    }
+    @Published public private(set) var capabilitiesByRole: [String: [String]]
+    @Published public private(set) var backstage: Bool
+    @Published public private(set) var broadcasting: Bool
+    @Published public private(set) var createdAt: Date
 
-    @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
-    @Published public internal(set) var backstage: Bool = false
-    @Published public internal(set) var broadcasting: Bool = false
-    @Published public internal(set) var createdAt: Date = .distantPast {
-        didSet { if !isInitialized { isInitialized = true }}
-    }
+    @Published public private(set) var updatedAt: Date
+    @Published public private(set) var startsAt: Date?
+    @Published public private(set) var startedAt: Date?
 
-    @Published public internal(set) var updatedAt: Date = .distantPast
-    @Published public internal(set) var startsAt: Date?
-    @Published public internal(set) var startedAt: Date? {
-        didSet {
-            setupDurationTimer()
-        }
-    }
+    @Published public private(set) var endedAt: Date?
+    @Published public private(set) var endedBy: User?
+    @Published public private(set) var custom: [String: RawJSON]
+    @Published public private(set) var team: String?
+    @Published public private(set) var createdBy: User?
+    @Published public private(set) var ingress: Ingress?
+    @Published public private(set) var permissionRequests: [PermissionRequest]
+    @Published public private(set) var transcribing: Bool
+    @Published public private(set) var captioning: Bool
+    @Published public private(set) var egress: EgressResponse?
+    @Published public private(set) var session: CallSessionResponse?
 
-    @Published public internal(set) var endedAt: Date?
-    @Published public internal(set) var endedBy: User?
-    @Published public internal(set) var custom: [String: RawJSON] = [:]
-    @Published public internal(set) var team: String?
-    @Published public internal(set) var createdBy: User?
-    @Published public internal(set) var ingress: Ingress?
-    @Published public internal(set) var permissionRequests: [PermissionRequest] = []
-    @Published public internal(set) var transcribing: Bool = false
-    @Published public internal(set) var captioning: Bool = false
-    @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
-    @Published public internal(set) var session: CallSessionResponse? {
-        didSet {
-            didUpdate(session)
-        }
-    }
+    @Published public private(set) var reconnectionStatus: ReconnectionStatus
+    @Published public private(set) var anonymousParticipantCount: UInt32
+    @Published public private(set) var participantCount: UInt32
+    @Published public private(set) var isInitialized: Bool
+    @Published public private(set) var callSettings: CallSettings
 
-    @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
-    @Published public internal(set) var anonymousParticipantCount: UInt32 = 0
-    @Published public internal(set) var participantCount: UInt32 = 0
-    @Published public internal(set) var isInitialized: Bool = false
-    @Published public internal(set) var callSettings = CallSettings()
+    @Published public private(set) var isCurrentUserScreensharing: Bool
+    @Published public private(set) var duration: TimeInterval
+    @Published public private(set) var statsReport: CallStatsReport?
 
-    @Published public internal(set) var isCurrentUserScreensharing: Bool = false
-    @Published public internal(set) var duration: TimeInterval = 0
-    @Published public internal(set) var statsReport: CallStatsReport?
+    @Published public private(set) var closedCaptions: [CallClosedCaption]
 
-    @Published public internal(set) var closedCaptions: [CallClosedCaption] = []
-
-    @Published public internal(set) var statsCollectionInterval: Int = 0
+    @Published public private(set) var statsCollectionInterval: Int
 
     /// A public enum representing the settings for incoming video streams in a WebRTC
     /// session. This enum supports different policies like none, manual, or
     /// disabled, each potentially applying to specific session IDs.
-    @Published public internal(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
+    @Published public private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings
     
     /// This property holds the error that indicates the user has been disconnected
     /// due to a network-related issue. When the user’s connection is disrupted for longer than the specified
@@ -143,386 +103,122 @@ public class CallState: ObservableObject {
     ///
     /// - SeeAlso: ``ClientError.NetworkNotAvailable`` for the type of error set when a
     ///            disconnection due to network issues occurs.
-    @Published public internal(set) var disconnectionError: Error?
-    
-    var sortComparators = defaultSortPreset {
-        didSet {
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else {
-                    return
-                }
-                didUpdate(participants)
-            }
-        }
-    }
-    
-    private var localCallSettingsUpdate = false
-    private var durationCancellable: AnyCancellable?
-    private nonisolated let disposableBag = DisposableBag()
+    @Published public private(set) var disconnectionError: Error?
 
-    /// We mark this one as `nonisolated` to allow us to initialise a state instance without isolation.
-    /// That's a safe operation because `MainActor` is only required to ensure that all `@Published`
-    /// properties, will publish changes on the main thread.
-    nonisolated init() {}
+    private let disposableBag = DisposableBag()
 
-    internal func updateState(from event: VideoEvent) {
-        switch event {
-        case let .typeBlockedUserEvent(event):
-            blockUser(id: event.user.id)
-        case let .typeCallAcceptedEvent(event):
-            update(from: event.call)
-        case .typeCallHLSBroadcastingStartedEvent:
-            egress?.broadcasting = true
-        case .typeCallHLSBroadcastingStoppedEvent:
-            egress?.broadcasting = false
-        case let .typeCallCreatedEvent(event):
-            update(from: event.call)
-            mergeMembers(event.members)
-        case let .typeCallEndedEvent(event):
-            update(from: event.call)
-        case let .typeCallLiveStartedEvent(event):
-            update(from: event.call)
-        case let .typeCallMemberAddedEvent(event):
-            mergeMembers(event.members)
-        case let .typeCallMemberRemovedEvent(event):
-            let updated = members.filter { !event.members.contains($0.id) }
-            members = updated
-        case let .typeCallMemberUpdatedEvent(event):
-            mergeMembers(event.members)
-        case let .typeCallMemberUpdatedPermissionEvent(event):
-            capabilitiesByRole = event.capabilitiesByRole
-            mergeMembers(event.members)
-            update(from: event.call)
-        case let .typeCallNotificationEvent(event):
-            mergeMembers(event.members)
-            update(from: event.call)
-        case .typeCallReactionEvent:
-            break
-        case .typeCallRecordingStartedEvent:
-            if recordingState != .recording {
-                recordingState = .recording
-            }
-        case .typeCallRecordingStoppedEvent:
-            if recordingState != .noRecording {
-                recordingState = .noRecording
-            }
-        case let .typeCallRejectedEvent(event):
-            update(from: event.call)
-        case let .typeCallRingEvent(event):
-            update(from: event.call)
-            mergeMembers(event.members)
-        case let .typeCallSessionEndedEvent(event):
-            update(from: event.call)
-        case let .typeCallSessionParticipantJoinedEvent(event):
-            if let index = session?.participants.firstIndex(where: {
-                $0.userSessionId == event.participant.userSessionId
-            }), index < (session?.participants.count ?? 0) {
-                session?.participants[index] = event.participant
-            } else {
-                session?.participants.append(event.participant)
-            }
-        case let .typeCallSessionParticipantLeftEvent(event):
-            session?.participants.removeAll(where: { participant in
-                participant.userSessionId == event.participant.userSessionId
-            })
-        case let .typeCallSessionStartedEvent(event):
-            update(from: event.call)
-        case let .typeCallUpdatedEvent(event):
-            update(from: event.call)
-        case let .typePermissionRequestEvent(event):
-            addPermissionRequest(user: event.user.toUser, permissions: event.permissions, requestedAt: event.createdAt)
-        case let .typeUnblockedUserEvent(event):
-            unblockUser(id: event.user.id)
-        case let .typeUpdatedCallPermissionsEvent(event):
-            updateOwnCapabilities(event)
-        case .typeConnectedEvent:
-            // note: connection events are not relevant for call state sync'ing
-            break
-        case .typeConnectionErrorEvent:
-            // note: connection events are not relevant for call state sync'ing
-            break
-        case .typeCustomVideoEvent:
-            // note: custom events are exposed via event subscriptions
-            break
-        case .typeHealthCheckEvent:
-            // note: health checks are not relevant for call state sync'ing
-            break
-        case .typeCallUserMutedEvent:
-            break
-        case .typeCallDeletedEvent:
-            break
-        case .typeCallHLSBroadcastingFailedEvent:
-            break
-        case .typeCallRecordingFailedEvent:
-            recordingState = .noRecording
-        case .typeCallRecordingReadyEvent:
-            break
-        case .typeClosedCaptionEvent:
-            break
-        case .typeCallTranscriptionReadyEvent:
-            break
-        case .typeCallTranscriptionFailedEvent:
-            transcribing = false
-        case .typeCallTranscriptionStartedEvent:
-            transcribing = true
-        case .typeCallTranscriptionStoppedEvent:
-            transcribing = false
-        case .typeCallMissedEvent:
-            break
-        case .typeCallRtmpBroadcastStartedEvent:
-            broadcasting = true
-        case .typeCallRtmpBroadcastStoppedEvent:
-            broadcasting = false
-        case .typeCallRtmpBroadcastFailedEvent:
-            broadcasting = false
-        case .typeCallSessionParticipantCountsUpdatedEvent:
-            break
-        case .typeUserUpdatedEvent:
-            break
-        case .typeCallClosedCaptionsFailedEvent:
-            captioning = false
-        case .typeCallClosedCaptionsStartedEvent:
-            captioning = true
-        case .typeCallClosedCaptionsStoppedEvent:
-            captioning = false
-        }
-    }
-    
-    internal func addPermissionRequest(user: User, permissions: [String], requestedAt: Date) {
-        let requests = permissions.map {
-            PermissionRequest(
-                permission: $0,
-                user: user,
-                requestedAt: requestedAt,
-                onReject: self.removePermissionRequest
-            )
-        }
-        permissionRequests.append(contentsOf: requests)
-    }
-    
-    internal func removePermissionRequest(request: PermissionRequest) {
-        permissionRequests = permissionRequests.filter {
-            $0.id != request.id
-        }
-    }
-    
-    internal func blockUser(id: String) {
-        if !blockedUserIds.contains(id) {
-            blockedUserIds.insert(id)
-        }
-    }
-    
-    internal func unblockUser(id: String) {
-        blockedUserIds.remove(id)
-    }
-    
-    internal func mergeMembers(_ response: [MemberResponse]) {
-        var current = members
-        var changed = false
-        let membersDict = Dictionary(uniqueKeysWithValues: members.lazy.map { ($0.id, $0) })
-        response.forEach {
-            guard let m = membersDict[$0.userId] else {
-                current.insert($0.toMember, at: 0)
-                changed = true
-                return
-            }
-            if m.updatedAt != $0.updatedAt {
-                if let index = members.firstIndex(where: { $0.id == m.id }) {
-                    current[index] = $0.toMember
-                }
-                changed = true
-            }
-        }
-        if changed {
-            members = current
-        }
-    }
-    
-    internal func update(from response: GetOrCreateCallResponse) {
-        update(from: response.call)
-        mergeMembers(response.members)
-        ownCapabilities = response.ownCapabilities
-    }
-    
-    internal func update(from response: JoinCallResponse) {
-        update(from: response.call)
-        mergeMembers(response.members)
-        ownCapabilities = response.ownCapabilities
-        statsCollectionInterval = response.statsOptions.reportingIntervalMs / 1000
-    }
-    
-    internal func update(from response: GetCallResponse) {
-        update(from: response.call)
-        mergeMembers(response.members)
-        ownCapabilities = response.ownCapabilities
-    }
-    
-    internal func update(from response: CallStateResponseFields) {
-        update(from: response.call)
-        mergeMembers(response.members)
-        ownCapabilities = response.ownCapabilities
-    }
-    
-    internal func update(from response: UpdateCallResponse) {
-        update(from: response.call)
-        mergeMembers(response.members)
-        ownCapabilities = response.ownCapabilities
-    }
-    
-    internal func update(from event: CallCreatedEvent) {
-        update(from: event.call)
-        mergeMembers(event.members)
-    }
-    
-    internal func update(from event: CallRingEvent) {
-        update(from: event.call)
-        mergeMembers(event.members)
-    }
-    
-    internal func update(from response: CallResponse) {
-        custom = response.custom
-        createdAt = response.createdAt
-        updatedAt = response.updatedAt
-        startsAt = response.startsAt
-        endedAt = response.endedAt
-        createdBy = response.createdBy.toUser
-        backstage = response.backstage
-        recordingState = response.recording ? .recording : .noRecording
-        transcribing = response.transcribing
-        captioning = response.captioning
-        blockedUserIds = Set(response.blockedUserIds.map { $0 })
-        team = response.team
-        session = response.session
-        settings = response.settings
-        egress = response.egress
-        
-        let rtmp = RTMP(
-            address: response.ingress.rtmp.address,
-            streamKey: streamVideo.token.rawValue
-        )
-        ingress = Ingress(rtmp: rtmp)
-        
-        if !localCallSettingsUpdate {
-            callSettings = .init(response.settings)
-        }
-    }
-    
-    internal func update(callSettings: CallSettings) {
-        guard callSettings != self.callSettings else {
-            localCallSettingsUpdate = true
-            return
-        }
-        self.callSettings = callSettings
-        localCallSettingsUpdate = true
-    }
-    
-    internal func update(statsReport: CallStatsReport?) {
-        self.statsReport = statsReport
+    init(_ store: CallStateStore) {
+        sessionId = store.sessionId
+        participants = store.participants
+        participantsMap = store.participantsMap
+        localParticipant = store.localParticipant
+        dominantSpeaker = store.dominantSpeaker
+        remoteParticipants = store.remoteParticipants
+        activeSpeakers = store.activeSpeakers
+        members = store.members
+        screenSharingSession = store.screenSharingSession
+        recordingState = store.recordingState
+        blockedUserIds = store.blockedUserIds
+        settings = store.settings
+        ownCapabilities = store.ownCapabilities
+        capabilitiesByRole = store.capabilitiesByRole
+        backstage = store.backstage
+        broadcasting = store.broadcasting
+        createdAt = store.createdAt
+        updatedAt = store.updatedAt
+        startsAt = store.startsAt
+        startedAt = store.startedAt
+        endedAt = store.endedAt
+        endedBy = store.endedBy
+        custom = store.custom
+        team = store.team
+        createdBy = store.createdBy
+        ingress = store.ingress
+        permissionRequests = store.permissionRequests
+        transcribing = store.transcribing
+        captioning = store.captioning
+        egress = store.egress
+        session = store.session
+        reconnectionStatus = store.reconnectionStatus
+        anonymousParticipantCount = store.anonymousParticipantCount
+        participantCount = store.participantCount
+        isInitialized = store.isInitialized
+        callSettings = store.callSettings
+        isCurrentUserScreensharing = store.isCurrentUserScreensharing
+        duration = store.duration
+        statsReport = store.statsReport
+        closedCaptions = store.closedCaptions
+        statsCollectionInterval = store.statsCollectionInterval
+        incomingVideoQualitySettings = store.incomingVideoQualitySettings
+        disconnectionError = store.disconnectionError
+
+        subscribe(on: store.$sessionId.eraseToAnyPublisher(), keyPath: \.sessionId)
+        subscribe(on: store.$participants.eraseToAnyPublisher(), keyPath: \.participants)
+        subscribe(on: store.$participantsMap.eraseToAnyPublisher(), keyPath: \.participantsMap)
+        subscribe(on: store.$localParticipant.eraseToAnyPublisher(), keyPath: \.localParticipant)
+        subscribe(on: store.$dominantSpeaker.eraseToAnyPublisher(), keyPath: \.dominantSpeaker)
+        subscribe(on: store.$remoteParticipants.eraseToAnyPublisher(), keyPath: \.remoteParticipants)
+        subscribe(on: store.$activeSpeakers.eraseToAnyPublisher(), keyPath: \.activeSpeakers)
+        subscribe(on: store.$members.eraseToAnyPublisher(), keyPath: \.members)
+        subscribe(on: store.$screenSharingSession.eraseToAnyPublisher(), keyPath: \.screenSharingSession)
+        subscribe(on: store.$recordingState.eraseToAnyPublisher(), keyPath: \.recordingState)
+        subscribe(on: store.$blockedUserIds.eraseToAnyPublisher(), keyPath: \.blockedUserIds)
+        subscribe(on: store.$settings.eraseToAnyPublisher(), keyPath: \.settings)
+        subscribe(on: store.$ownCapabilities.eraseToAnyPublisher(), keyPath: \.ownCapabilities)
+        subscribe(on: store.$capabilitiesByRole.eraseToAnyPublisher(), keyPath: \.capabilitiesByRole)
+        subscribe(on: store.$backstage.eraseToAnyPublisher(), keyPath: \.backstage)
+        subscribe(on: store.$broadcasting.eraseToAnyPublisher(), keyPath: \.broadcasting)
+        subscribe(on: store.$createdAt.eraseToAnyPublisher(), keyPath: \.createdAt)
+        subscribe(on: store.$updatedAt.eraseToAnyPublisher(), keyPath: \.updatedAt)
+        subscribe(on: store.$startsAt.eraseToAnyPublisher(), keyPath: \.startsAt)
+        subscribe(on: store.$startedAt.eraseToAnyPublisher(), keyPath: \.startedAt)
+        subscribe(on: store.$endedAt.eraseToAnyPublisher(), keyPath: \.endedAt)
+        subscribe(on: store.$endedBy.eraseToAnyPublisher(), keyPath: \.endedBy)
+        subscribe(on: store.$custom.eraseToAnyPublisher(), keyPath: \.custom)
+        subscribe(on: store.$team.eraseToAnyPublisher(), keyPath: \.team)
+        subscribe(on: store.$createdBy.eraseToAnyPublisher(), keyPath: \.createdBy)
+        subscribe(on: store.$ingress.eraseToAnyPublisher(), keyPath: \.ingress)
+        subscribe(on: store.$permissionRequests.eraseToAnyPublisher(), keyPath: \.permissionRequests)
+        subscribe(on: store.$transcribing.eraseToAnyPublisher(), keyPath: \.transcribing)
+        subscribe(on: store.$captioning.eraseToAnyPublisher(), keyPath: \.captioning)
+        subscribe(on: store.$egress.eraseToAnyPublisher(), keyPath: \.egress)
+        subscribe(on: store.$session.eraseToAnyPublisher(), keyPath: \.session)
+        subscribe(on: store.$reconnectionStatus.eraseToAnyPublisher(), keyPath: \.reconnectionStatus)
+        subscribe(on: store.$anonymousParticipantCount.eraseToAnyPublisher(), keyPath: \.anonymousParticipantCount)
+        subscribe(on: store.$participantCount.eraseToAnyPublisher(), keyPath: \.participantCount)
+        subscribe(on: store.$isInitialized.eraseToAnyPublisher(), keyPath: \.isInitialized)
+        subscribe(on: store.$callSettings.eraseToAnyPublisher(), keyPath: \.callSettings)
+        subscribe(on: store.$isCurrentUserScreensharing.eraseToAnyPublisher(), keyPath: \.isCurrentUserScreensharing)
+        subscribe(on: store.$duration.eraseToAnyPublisher(), keyPath: \.duration)
+        subscribe(on: store.$statsReport.eraseToAnyPublisher(), keyPath: \.statsReport)
+        subscribe(on: store.$closedCaptions.eraseToAnyPublisher(), keyPath: \.closedCaptions)
+        subscribe(on: store.$statsCollectionInterval.eraseToAnyPublisher(), keyPath: \.statsCollectionInterval)
+        subscribe(on: store.$incomingVideoQualitySettings.eraseToAnyPublisher(), keyPath: \.incomingVideoQualitySettings)
+        subscribe(on: store.$disconnectionError.eraseToAnyPublisher(), keyPath: \.disconnectionError)
     }
 
-    internal func update(closedCaptions: [CallClosedCaption]) {
-        self.closedCaptions = closedCaptions
-    }
-
-    private func updateOwnCapabilities(_ event: UpdatedCallPermissionsEvent) {
-        guard
-            event.user.id == streamVideo.user.id
-        else {
-            return
-        }
-        ownCapabilities = event.ownCapabilities
-    }
-    
-    private func didUpdate(_ newParticipants: [CallParticipant]) {
-        // Combine existing and newly added participants.
-        let currentParticipantIds = Set(participants.map(\.id))
-        let newlyAddedParticipants = Set(newParticipants.map(\.id))
-            .subtracting(currentParticipantIds)
-            .compactMap { participantsMap[$0] }
-        
-        // Sort the updated participants.
-        let updatedCurrentParticipants: [CallParticipant] = (
-            participants
-                .compactMap { participantsMap[$0.id] } + newlyAddedParticipants
-        )
-        .sorted(by: sortComparators)
-        
-        // Variables to hold segregated participants.
-        var remoteParticipants: [CallParticipant] = []
-        var activeSpeakers: [CallParticipant] = []
-        var screenSharingSession: ScreenSharingSession?
-        
-        // Segregate participants based on conditions.
-        for participant in updatedCurrentParticipants {
-            // Check if participant is local or remote.
-            if participant.sessionId == sessionId {
-                localParticipant = participant
-            } else {
-                remoteParticipants.append(participant)
-            }
-            
-            // Check if participant is speaking.
-            if participant.isSpeaking {
-                activeSpeakers.append(participant)
-            }
-            
-            // Check if participant is a dominant speaker.
-            if participant.isDominantSpeaker {
-                dominantSpeaker = participant
-            }
-            
-            // Check if participant is sharing their screen.
-            if let screenshareTrack = participant.screenshareTrack, participant.isScreensharing {
-                screenSharingSession = .init(track: screenshareTrack, participant: participant)
-            }
-        }
-        
-        // Update the respective class properties.
-        participants = updatedCurrentParticipants
-        self.screenSharingSession = screenSharingSession
-        self.remoteParticipants = remoteParticipants
-        self.activeSpeakers = activeSpeakers
-    }
-    
-    private func didUpdate(_ egress: EgressResponse?) {
-        broadcasting = egress?.broadcasting ?? false
-    }
-    
-    private func didUpdate(_ session: CallSessionResponse?) {
-        guard let session else { return }
-        if let startedAt = session.startedAt {
-            self.startedAt = startedAt
-        } else if let liveStartedAt = session.liveStartedAt {
-            startedAt = liveStartedAt
-        } else if startedAt == nil {
-            /// If we don't receive a value from the SFU we start the timer on the current date.
-            startedAt = Date()
-        }
-        
-        if session.liveEndedAt != nil {
-            resetTimer()
-        }
-    }
-    
-    private func setupDurationTimer() {
-        resetTimer()
-        durationCancellable = Foundation
-            .Timer
-            .publish(every: 1.0, on: .main, in: .default)
-            .autoconnect()
+    private func subscribe<V: Equatable>(
+        on publisher: AnyPublisher<V, Never>,
+        keyPath: ReferenceWritableKeyPath<CallState, V>
+    ) {
+        publisher
+            .removeDuplicates()
+            .debounce(for: .seconds(Int(screenProperties.refreshRate)), scheduler: DispatchQueue.main)
             .receive(on: DispatchQueue.main)
-            .compactMap { [weak self] _ in
-                if let startedAt = self?.startedAt {
-                    return Date().timeIntervalSince(startedAt)
-                } else {
-                    return 0
-                }
-            }
-            .assign(to: \.duration, onWeak: self)
+            .assign(to: keyPath, onWeak: self)
+            .store(in: disposableBag)
     }
-    
-    private func resetTimer() {
-        durationCancellable?.cancel()
-        durationCancellable = nil
+
+    private func subscribe<V>(
+        on publisher: AnyPublisher<V, Never>,
+        removeDuplicatesBy: @escaping (V, V) -> Bool = { _, _ in false },
+        keyPath: ReferenceWritableKeyPath<CallState, V>
+    ) {
+        publisher
+            .removeDuplicates(by: removeDuplicatesBy)
+            .debounce(for: .seconds(Int(screenProperties.refreshRate)), scheduler: DispatchQueue.main)
+            .receive(on: DispatchQueue.main)
+            .assign(to: keyPath, onWeak: self)
+            .store(in: disposableBag)
     }
 }

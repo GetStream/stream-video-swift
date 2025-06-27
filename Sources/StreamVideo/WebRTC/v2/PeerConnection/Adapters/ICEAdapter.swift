@@ -177,7 +177,7 @@ actor ICEAdapter: @unchecked Sendable {
     private func task(
         for candidate: RTCIceCandidate
     ) {
-        Task(disposableBag: disposableBag) { @MainActor [weak peerConnection, peerType] in
+        Task(disposableBag: disposableBag) { [weak peerConnection, peerType] in
             guard let peerConnection else { return }
             do {
                 try Task.checkCancellation()

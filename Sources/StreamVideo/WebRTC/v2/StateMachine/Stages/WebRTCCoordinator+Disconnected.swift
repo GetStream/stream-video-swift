@@ -131,6 +131,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .Timer
                     .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
                     .autoconnect()
+                    .receive(on: DispatchQueue.global(qos: .default))
                     .nextValue { cancellable = $0 }
                 cancellable?.cancel()
                 cancellable = nil
@@ -230,6 +231,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .Timer
                 .publish(every: context.disconnectionTimeout, on: .main, in: .default)
                 .autoconnect()
+                .receive(on: DispatchQueue.global(qos: .default))
                 .sink { [weak self] _ in self?.didTimeInStageExpired() }
         }
 

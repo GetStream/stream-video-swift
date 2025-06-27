@@ -68,7 +68,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         participants = viewModel.participants
         participantsPublisher = viewModel
             .$participants
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: DispatchQueue.global(qos: .default))
             .removeDuplicates(by: { lhs, rhs in
                 let lhsSessionIds = lhs.map(\.sessionId)
                 let rhsSessionIds = rhs.map(\.sessionId)

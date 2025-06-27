@@ -15,6 +15,7 @@ open class CallViewModel: ObservableObject {
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
     @Injected(\.callAudioRecorder) var audioRecorder
     @Injected(\.applicationStateAdapter) var applicationStateAdapter
+    @Injected(\.screenProperties) var screenProperties
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -22,28 +23,30 @@ open class CallViewModel: ObservableObject {
             guard call?.cId != oldValue?.cId else { return }
             pictureInPictureAdapter.call = call
             lastLayoutChange = Date()
-            participantUpdates = call?.state.$participantsMap
-                .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] participants in
-                    self?.callParticipants = participants
-                })
+            participantUpdates = call?
+                .state
+                .$participantsMap
+                .assign(to: \.callParticipants, onWeak: self)
+
             sortedParticipantUpdates = call?
                 .state
                 .$participants
                 .sink { [weak self] in self?.didUpdate(callParticipants: $0) }
 
-            blockedUserUpdates = call?.state.$blockedUserIds
-                .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] blockedUserIds in
-                    self?.blockedUsers = blockedUserIds.map { User(id: $0) }
-                })
-            recordingUpdates = call?.state.$recordingState
-                .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] newState in
-                    self?.recordingState = newState
-                })
-            reconnectionUpdates = call?.state.$reconnectionStatus
-                .receive(on: RunLoop.main)
+            blockedUserUpdates = call?
+                .state
+                .$blockedUserIds
+                .map { blockedUserIds in blockedUserIds.map { User(id: $0) } }
+                .assign(to: \.blockedUsers, onWeak: self)
+
+            recordingUpdates = call?
+                .state
+                .$recordingState
+                .assign(to: \.recordingState, onWeak: self)
+
+            reconnectionUpdates = call?
+                .state
+                .$reconnectionStatus
                 .sink(receiveValue: { [weak self] reconnectionStatus in
                     guard let self else { return }
                     switch reconnectionStatus {
@@ -55,19 +58,22 @@ open class CallViewModel: ObservableObject {
                         }
                     }
                 })
-            screenSharingUpdates = call?.state.$screenSharingSession
-                .receive(on: RunLoop.main)
+
+            screenSharingUpdates = call?
+                .state
+                .$screenSharingSession
                 .sink(receiveValue: { [weak self] screenSharingSession in
                     if screenSharingSession?.participant.id != self?.lastScreenSharingParticipant?.id {
                         self?.lastLayoutChange = Date()
                     }
                     self?.lastScreenSharingParticipant = screenSharingSession?.participant
                 })
-            callSettingsUpdates = call?.state.$callSettings
-                .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] settings in
-                    self?.callSettings = settings
-                })
+
+            callSettingsUpdates = call?
+                .state
+                .$callSettings
+                .assign(to: \.callSettings, onWeak: self)
+
             if let callSettings = call?.state.callSettings {
                 self.callSettings = callSettings
             }
@@ -234,7 +240,7 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedVideoState(!callSettings.videoOn)
             return
         }
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 try await call.camera.toggle()
@@ -251,7 +257,7 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedAudioState(!callSettings.audioOn)
             return
         }
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 try await call.microphone.toggle()
@@ -268,7 +274,7 @@ open class CallViewModel: ObservableObject {
             self.callSettings = callSettings.withUpdatedCameraPosition(callSettings.cameraPosition.next())
             return
         }
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 try await call.camera.flip()
@@ -285,7 +291,7 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedAudioOutputState(!callSettings.audioOutputOn)
             return
         }
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 if callSettings.audioOutputOn {
@@ -306,7 +312,7 @@ open class CallViewModel: ObservableObject {
             callSettings = callSettings.withUpdatedSpeakerState(!callSettings.speakerOn)
             return
         }
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 try await call.speaker.toggleSpeakerPhone()
@@ -370,7 +376,7 @@ open class CallViewModel: ObservableObject {
                 callSettings: callSettings
             )
             self.call = call
-            Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
                     let callData = try await call.create(
@@ -426,7 +432,7 @@ open class CallViewModel: ObservableObject {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
         setCallingState(.lobby(lobbyInfo))
         if !localCallSettingsChange {
-            Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 do {
                     let call = streamVideo.call(callType: callType, callId: callId)
@@ -448,7 +454,7 @@ open class CallViewModel: ObservableObject {
         callId: String,
         customData: [String: RawJSON]? = nil
     ) {
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             let call = streamVideo.call(callType: callType, callId: callId)
             do {
@@ -478,7 +484,7 @@ open class CallViewModel: ObservableObject {
         callType: String,
         callId: String
     ) {
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             let call = streamVideo.call(callType: callType, callId: callId)
             let rejectionReason = await streamVideo
@@ -502,8 +508,7 @@ open class CallViewModel: ObservableObject {
     ///  - participant: the participant whose track visibility would be changed.
     ///  - isVisible: whether the track should be visible.
     public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) {
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
-            guard let self else { return }
+        Task {
             await call?.changeTrackVisibility(for: participant, isVisible: isVisible)
         }
     }
@@ -513,7 +518,7 @@ open class CallViewModel: ObservableObject {
     ///  - trackSize: the size of the track.
     ///  - participant: the call participant.
     public func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) {
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             log.debug("Updating track size for participant \(participant.name) to \(trackSize)")
             await call?.updateTrackSize(trackSize, for: participant)
@@ -521,7 +526,7 @@ open class CallViewModel: ObservableObject {
     }
 
     public func startScreensharing(type: ScreensharingType) {
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 await disablePictureInPictureIfRequired(type)
@@ -533,7 +538,7 @@ open class CallViewModel: ObservableObject {
     }
 
     public func stopScreensharing() {
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 try await call?.stopScreensharing()
@@ -673,7 +678,7 @@ open class CallViewModel: ObservableObject {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
-        enteringCallTask = Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        enteringCallTask = Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 log.debug("Starting call")
@@ -713,7 +718,7 @@ open class CallViewModel: ObservableObject {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 setCallingState(.idle)
-                Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+                Task(disposableBag: disposableBag) { [weak self] in
                     await self?.audioRecorder.stopRecording()
                 }
                 enteringCallTask = nil
@@ -760,7 +765,7 @@ open class CallViewModel: ObservableObject {
             return
         }
 
-        Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
                 let rejectionReason = await streamVideo
@@ -832,7 +837,7 @@ open class CallViewModel: ObservableObject {
                         return
                     }
 
-                    Task(disposableBag: disposableBag, priority: .userInitiated) { @MainActor [weak self] in
+                    Task(disposableBag: disposableBag) { @MainActor [weak self] in
                         self?.participantEvent = participantEvent
                     }
                 }
@@ -910,7 +915,7 @@ open class CallViewModel: ObservableObject {
             }()
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
-                Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
+                Task(disposableBag: disposableBag) { [weak self] in
                     _ = try? await outgoingCall.reject()
                     self?.leaveCall()
                 }
@@ -979,14 +984,22 @@ open class CallViewModel: ObservableObject {
             (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true),
             let sessionId = call?.state.sessionId
         else {
-            Task { @MainActor in
-                self.participants = callParticipants
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    self.participants = callParticipants
+                }
+            } else {
+                Task { @MainActor in self.participants = callParticipants }
             }
             return
         }
 
-        Task { @MainActor in
-            self.participants = callParticipants.filter { $0.sessionId != sessionId }
+        let updatedParticipants = callParticipants.filter { $0.sessionId != sessionId }
+
+        if Thread.isMainThread {
+            MainActor.assumeIsolated { self.participants = updatedParticipants }
+        } else {
+            Task { @MainActor in self.participants = updatedParticipants }
         }
     }
 

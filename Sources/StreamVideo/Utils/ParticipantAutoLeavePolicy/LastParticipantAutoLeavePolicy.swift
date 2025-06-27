@@ -70,12 +70,7 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
     private var call: Call? {
         didSet {
             // Handle updates to the current call.
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else {
-                    return
-                }
-                didUpdateCall(call, oldValue: oldValue)
-            }
+            didUpdateCall(call, oldValue: oldValue)
         }
     }
 

@@ -124,7 +124,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// This enables the primary track and creates additional transceivers based
     /// on the current publish options. It also starts the audio recorder.
     func publish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled

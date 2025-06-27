@@ -36,7 +36,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
         hasParticipants = viewModel.callParticipants.count > 1
         hasParticipantsPublisher = viewModel
             .$callParticipants
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: DispatchQueue.global(qos: .default))
             .map(\.count)
             .map { $0 > 1 }
             .removeDuplicates()

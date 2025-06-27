@@ -12,13 +12,13 @@ public struct MicrophoneCheckView: View {
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     
-    @State var audioLevels: [Float]
+    var audioLevels: [Float]
     var audioLevelsPublisher: AnyPublisher<[Float], Never>
 
-    @State var audioOn: Bool
+    var audioOn: Bool
     var audioOnPublisher: AnyPublisher<Bool, Never>
 
-    @State var isSilent: Bool
+    var isSilent: Bool
     var isSilentPublisher: AnyPublisher<Bool, Never>
 
     var isPinned: Bool
@@ -60,7 +60,7 @@ public struct MicrophoneCheckView: View {
             maxHeight: maxHeight
         )
     }
-
+        
     init(
         audioLevels: [Float],
         audioLevelsPublisher: AnyPublisher<[Float], Never>,
@@ -95,50 +95,29 @@ public struct MicrophoneCheckView: View {
             corners: [.topRight],
             backgroundColor: colors.participantInfoBackgroundColor
         )
-        .onReceive(audioLevelsPublisher) { audioLevels = $0 }
-        .onReceive(audioOnPublisher) { audioOn = $0 }
-        .onReceive(isSilentPublisher) { isSilent = $0 }
         .debugViewRendering()
     }
 
     @ViewBuilder
     var leadingView: some View {
-        if isPinned {
-            Image(systemName: "pin.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: CGFloat(maxHeight))
-                .foregroundColor(.white)
-                .padding(.trailing, 4)
-        }
+        PinnedView(isPinned: isPinned, maxHeight: maxHeight)
     }
 
     @ViewBuilder
     var middleView: some View {
-        Text(streamVideo.user.name)
-            .foregroundColor(.white)
-            .multilineTextAlignment(.leading)
-            .lineLimit(1)
-            .font(fonts.caption1)
-            .minimumScaleFactor(0.7)
-            .accessibility(identifier: "participantName")
+        UserNameView(name: streamVideo.user.name)
     }
 
     @ViewBuilder
     var trailingView: some View {
-        if audioOn, !isSilent {
-            AudioVolumeIndicator(
-                audioLevels: audioLevels,
-                maxHeight: maxHeight,
-                minValue: 0,
-                maxValue: 1
-            )
-        } else {
-            images.micTurnOff
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: CGFloat(maxHeight))
-                .foregroundColor(colors.inactiveCallControl)
-        }
+        AudioVolumeIndicatorContainerView(
+            audioOn: audioOn,
+            audioOnPublisher: audioOnPublisher,
+            audioLevels: audioLevels,
+            audioLevelsPublisher: audioLevelsPublisher,
+            isSilent: isSilent,
+            isSilentPublisher: isSilentPublisher,
+            maxHeight: maxHeight
+        )
     }
 }

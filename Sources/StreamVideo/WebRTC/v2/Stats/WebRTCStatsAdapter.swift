@@ -295,6 +295,7 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
             .Timer
             .publish(every: 3, on: .main, in: .default)
             .autoconnect()
+            .receive(on: DispatchQueue.global(qos: .default))
             .sink { [weak self] _ in
                 self?.reporter.triggerDelivery()
                 self?.disposableBag.remove(key.rawValue)

@@ -33,7 +33,7 @@ public struct LayoutMenuView: View {
     var participantsLayoutPublisher: AnyPublisher<ParticipantsLayout, Never> {
         viewModel
             .$participantsLayout
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: DispatchQueue.global(qos: .default))
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
@@ -42,7 +42,7 @@ public struct LayoutMenuView: View {
     var participantsCountPublisher: AnyPublisher<Int, Never> {
         viewModel
             .$callParticipants
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: DispatchQueue.global(qos: .default))
             .map(\.count)
             .removeDuplicates()
             .receive(on: DispatchQueue.main)

@@ -32,7 +32,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
         _ proximity: ProximityState,
         on call: Call
     ) {
-        processingQueue.addTaskOperation { @MainActor [weak self, weak call] in
+        processingQueue.addTaskOperation { [weak self, weak call] in
             guard
                 let self,
                 let call,
@@ -43,7 +43,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
 
             switch proximity {
             case .near:
-                let callSettings = call.state.callSettings
+                let callSettings = call.store.callSettings
                 if callSettings.speakerOn {
                     self.callSettingsBeforeProximityChange = callSettings
                     try? await call.callController.changeSpeakerState(isEnabled: false)

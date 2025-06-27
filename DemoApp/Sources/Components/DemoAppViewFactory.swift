@@ -101,3 +101,10 @@ final class DemoAppViewFactory: ViewFactory {
         )
     }
 }
+
+struct EmptyViewModifier: ViewModifier {
+
+    func body(content: Content) -> some View {
+        content
+    }
+}

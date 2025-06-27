@@ -89,10 +89,8 @@ extension Call.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    if streamVideo.state.ringingCall?.cId == call.cId {
-                        await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
-                            streamVideo?.state.ringingCall = nil
-                        }.value
+                    if streamVideo.store.ringingCall?.cId == call.cId {
+                        streamVideo.store.ringingCall = nil
                     }
 
                     try Task.checkCancellation()

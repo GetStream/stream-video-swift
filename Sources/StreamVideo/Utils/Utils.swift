@@ -6,7 +6,7 @@ import Foundation
 
 internal extension DispatchQueue {
 
-    static let sdk = DispatchQueue(label: "StreamVideoSDK", qos: .userInitiated)
+    static let sdk = DispatchQueue(label: "StreamVideoSDK", qos: .default)
 }
 
 func postNotification(

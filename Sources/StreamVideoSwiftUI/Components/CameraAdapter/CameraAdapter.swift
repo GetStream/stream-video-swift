@@ -148,8 +148,7 @@ extension CameraAdapter: AVCaptureVideoDataOutputSampleBufferDelegate {
     ) {
         guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
 
-        Task { @MainActor in
-            self.image = CIImage(cvPixelBuffer: pixelBuffer)
-        }
+        let image = CIImage(cvPixelBuffer: pixelBuffer)
+        Task { @MainActor in self.image = image }
     }
 }

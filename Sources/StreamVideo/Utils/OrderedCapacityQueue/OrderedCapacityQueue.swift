@@ -53,7 +53,7 @@ final class OrderedCapacityQueue<Element> {
             .Timer
             .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
             .autoconnect()
-            .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: DispatchQueue.global(qos: .default))
             .sink { [weak self] _ in self?.removeItemsIfRequired() }
     }
     
@@ -92,6 +92,7 @@ final class OrderedCapacityQueue<Element> {
                 .Timer
                 .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
                 .autoconnect()
+                .receive(on: DispatchQueue.global(qos: .default))
                 .sink { [weak self] _ in self?.removeItemsIfRequired() }
         } else if !isEnabled, removalTimerCancellable != nil {
             removalTimerCancellable?.cancel()

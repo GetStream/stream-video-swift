@@ -131,7 +131,7 @@ struct CallOverlayContentView<Factory: ViewFactory>: View {
                 }
             )
             .accessibility(identifier: "cornerDraggableView")
-//            .padding()
+            .padding()
         }
     }
 
