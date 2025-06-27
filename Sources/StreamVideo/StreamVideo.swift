@@ -141,7 +141,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     /// Background worker that takes care about client connection recovery when the Internet comes back
     /// OR app transitions from background to foreground.
     private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
-    private(set) var timerType: Timer.Type = DefaultTimer.self
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()

@@ -57,6 +57,7 @@ final class ICEConnectionStateAdapter {
                 .Timer
                 .publish(every: scheduleICERestartInterval, on: .main, in: .default)
                 .autoconnect()
+                .receive(on: DispatchQueue.global(qos: .default))
                 .sink { [weak self] _ in self?.restartICE() }
 
         case .connected:

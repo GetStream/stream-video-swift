@@ -345,6 +345,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .Timer
                 .publish(every: 1, on: .main, in: .default)
                 .autoconnect()
+                .receive(on: DispatchQueue.global(qos: .default))
                 .compactMap { [weak self] _ in self?.context.lastHealthCheckReceivedAt }
                 .filter { [weak self] in
                     guard
