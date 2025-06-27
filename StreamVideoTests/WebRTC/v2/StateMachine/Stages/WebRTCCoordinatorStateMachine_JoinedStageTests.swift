@@ -508,6 +508,79 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in }
     }
 
+    // MARK: observeDisconnectEvent
+
+    func test_transition_sfuErrorWithErrorCodeParticipantLostSignal_landsOnDisconnectedWithReconenctionStrategyFastReconnect(
+    ) async {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { [mockCoordinatorStack] in
+                var error = Stream_Video_Sfu_Event_Error()
+                error.reconnectStrategy = .unspecified
+                error.error.code = .participantSignalLost
+                mockCoordinatorStack?
+                    .sfuStack
+                    .receiveEvent(.sfuEvent(.error(error)))
+            }
+        ) { stage in
+            switch stage.context.reconnectionStrategy {
+            case .fast:
+                break
+            default:
+                XCTFail()
+            }
+        }
+    }
+
+    // MARK: - observeHealthCheckResponses
+
+    func test_transition_hasNotReceivedHealthCheckResponseForTheRequiredTime_landsOnDisconnectedWithReconenctionStrategyFastReconnect(
+    ) async {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+        subject.context.lastHealthCheckReceivedAt = .init()
+        subject.context.webSocketHealthTimeout = 1
+
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: {}
+        ) { stage in
+            switch stage.context.reconnectionStrategy {
+            case .fast:
+                break
+            default:
+                XCTFail()
+            }
+        }
+    }
+
+    func test_transition_hasReceivedHealthCheckResponseForTheRequiredTime_remainsOnJoined() async {
+        await mockCoordinatorStack.coordinator.stateAdapter.set(
+            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
+        )
+        let lastHealthCheckReceivedAt = Date()
+        subject.context.lastHealthCheckReceivedAt = lastHealthCheckReceivedAt
+        subject.context.webSocketHealthTimeout = 5
+
+        await assertResultAfterTrigger {
+            self.mockCoordinatorStack.sfuStack.receiveEvent(.sfuEvent(.healthCheckResponse(.init())))
+        } validationHandler: { expectation in
+            guard
+                let currentLastHealthCheckReceivedAt = self.subject.context.lastHealthCheckReceivedAt,
+                currentLastHealthCheckReceivedAt > lastHealthCheckReceivedAt,
+                self.subject.context.reconnectionStrategy == .rejoin
+            else {
+                return
+            }
+            expectation.fulfill()
+        }
+    }
+
     // MARK: observePreferredReconnectionStrategy
 
     func test_transition_sfuErrorWithReconnectionStrategyFastReceived_updatesContext() async {
@@ -654,14 +727,13 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             .stateAdapter
             .configurePeerConnections()
 
-        await assertResultAfterTrigger(
-            trigger: {
-                subject.send(())
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { subject.send(()) },
+            validationHandler: { stage in
+                XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
             }
-        ) { expectation in
-            XCTAssertEqual(mockPublisher?.timesCalled(.restartICE), 1)
-            expectation.fulfill()
-        }
+        )
     }
 
     func test_transition_subscriberDisconnects_restartICEWasTriggeredOnSubscriber() async throws {
@@ -682,14 +754,13 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
             .stateAdapter
             .configurePeerConnections()
 
-        await assertResultAfterTrigger(
-            trigger: {
-                subject.send(())
+        await assertTransitionAfterTrigger(
+            expectedTarget: .disconnected,
+            trigger: { subject.send(()) },
+            validationHandler: { stage in
+                XCTAssertEqual(stage.context.reconnectionStrategy, .rejoin)
             }
-        ) { expectation in
-            XCTAssertEqual(mockSubscriber?.timesCalled(.restartICE), 1)
-            expectation.fulfill()
-        }
+        )
     }
 
     // MARK: configureStatsCollectionAndDelivery
@@ -887,7 +958,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         subject.context.coordinator = mockCoordinatorStack.coordinator
         _ = subject.transition(from: .joining(subject.context))
         await wait(for: 0.5)
-        let resultExpectation = expectation(description: "Expectation to for desired result to occur.")
+        let resultExpectation = expectation(description: "Expectation for desired result to occur.")
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask {

@@ -46,6 +46,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         videoMediaAdapter: videoMediaAdapter,
         screenShareMediaAdapter: screenShareMediaAdapter
     )
+    private lazy var iceConnectionStateAdapter: ICEConnectionStateAdapter! = .init()
     private lazy var subject: RTCPeerConnectionCoordinator! = .init(
         sessionId: sessionId,
         peerType: peerType,
@@ -55,7 +56,14 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         audioSettings: .dummy(opusDtxEnabled: true, redundantCodingEnabled: true),
         publishOptions: .dummy(),
         sfuAdapter: mockSFUStack.adapter,
-        mediaAdapter: mediaAdapter
+        mediaAdapter: mediaAdapter,
+        iceAdapter: .init(
+            sessionID: sessionId,
+            peerType: peerType,
+            peerConnection: mockPeerConnection,
+            sfuAdapter: mockSFUStack.adapter
+        ),
+        iceConnectionStateAdapter: iceConnectionStateAdapter
     )
 
     override func tearDown() {
@@ -73,7 +81,53 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
         peerConnectionFactory = nil
         mockPeerConnection = nil
         sessionId = nil
+        iceConnectionStateAdapter = nil
         super.tearDown()
+    }
+
+    // MARK: - init
+
+    func test_init_peerConnectionCoordinatorWasSetOnICEConnectionStateAdapter() {
+        _ = subject
+
+        XCTAssertTrue(iceConnectionStateAdapter.peerConnectionCoordinator === subject)
+    }
+
+    // MARK: - isHealthy
+
+    func test_isHealthy_ICEConnectionFailed_ConnectionStateHealthy_returnsFalse() {
+        mockPeerConnection.stub(for: \.iceConnectionState, with: .failed)
+        mockPeerConnection.stub(for: \.connectionState, with: .connected)
+
+        XCTAssertFalse(subject.isHealthy)
+    }
+
+    func test_isHealthy_ICEConnectionClose_ConnectionStateHealthy_returnsFalse() {
+        mockPeerConnection.stub(for: \.iceConnectionState, with: .closed)
+        mockPeerConnection.stub(for: \.connectionState, with: .connected)
+
+        XCTAssertFalse(subject.isHealthy)
+    }
+
+    func test_isHealthy_ICEConnectionHealthy_ConnectionStateFailed_returnsTrue() {
+        mockPeerConnection.stub(for: \.iceConnectionState, with: .connected)
+        mockPeerConnection.stub(for: \.connectionState, with: .failed)
+
+        XCTAssertFalse(subject.isHealthy)
+    }
+
+    func test_isHealthy_ICEConnectionHealthy_ConnectionStateClosed_returnsTrue() {
+        mockPeerConnection.stub(for: \.iceConnectionState, with: .connected)
+        mockPeerConnection.stub(for: \.connectionState, with: .closed)
+
+        XCTAssertFalse(subject.isHealthy)
+    }
+
+    func test_isHealthy_ICEConnectionHealthy_ConnectionStateHealthy_returnsTrue() {
+        mockPeerConnection.stub(for: \.iceConnectionState, with: .connected)
+        mockPeerConnection.stub(for: \.connectionState, with: .connected)
+
+        XCTAssertTrue(subject.isHealthy)
     }
 
     // MARK: - setUp(with:ownCapabilities:)

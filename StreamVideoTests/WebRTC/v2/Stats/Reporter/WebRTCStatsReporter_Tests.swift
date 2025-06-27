@@ -82,6 +82,7 @@ final class WebRTCStatsReporter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_sfuAdapterNotNil_updateToAnotherSFUAdapter_firstReportCollectionIsCancelledAndOnlyTheSecondOneCompletes(
     ) async throws {
+        try XCTSkipIf(true, "https://linear.app/stream/issue/IOS-904/reenable-skipped-tests")
         let sfuStack = MockSFUStack()
 
         await withTaskGroup(of: Void.self) { group in

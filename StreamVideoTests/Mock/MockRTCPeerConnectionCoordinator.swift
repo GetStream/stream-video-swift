@@ -126,6 +126,7 @@ final class MockRTCPeerConnectionCoordinator:
     var stubbedMid: [TrackType: String] = [:]
     var stubbedTrack: [TrackType: RTCMediaStreamTrack] = [:]
     var stubbedTrackInfo: [TrackType: [Stream_Video_Sfu_Models_TrackInfo]] = [:]
+    let stubEventSubject: PassthroughSubject<RTCPeerConnectionEvent, Never> = .init()
 
     override var disconnectedPublisher: AnyPublisher<Void, Never> {
         if let stub = stubbedProperty[propertyKey(for: \.disconnectedPublisher)] as? AnyPublisher<Void, Never> {
@@ -133,6 +134,14 @@ final class MockRTCPeerConnectionCoordinator:
         } else {
             return super.disconnectedPublisher
         }
+    }
+
+    override var eventPublisher: AnyPublisher<RTCPeerConnectionEvent, Never> {
+        stubEventSubject.eraseToAnyPublisher()
+    }
+
+    override var isHealthy: Bool {
+        self[dynamicMember: \.isHealthy]
     }
 
     convenience init?(
@@ -145,25 +154,47 @@ final class MockRTCPeerConnectionCoordinator:
         publishOptions: PublishOptions = .init(),
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
-        screenShareSessionProvider: ScreenShareSessionProvider = .init()
+        screenShareSessionProvider: ScreenShareSessionProvider = .init(),
+        iceAdapter: ICEAdapter? = nil,
+        iceConnectionStateAdapter: ICEConnectionStateAdapter? = nil
     ) throws {
         let peerConnectionFactory = PeerConnectionFactory.build(
             audioProcessingModule: MockAudioProcessingModule.shared
         )
+
+        let sessionId = String.unique
+        let peerConnection = MockRTCPeerConnection()
         self.init(
-            sessionId: .unique,
+            sessionId: sessionId,
             peerType: peerType,
-            peerConnection: MockRTCPeerConnection(),
-            peerConnectionFactory: peerConnectionFactory,
+            peerConnection: peerConnection,
             videoOptions: videoOptions,
-            videoConfig: videoConfig,
             callSettings: callSettings,
             audioSettings: audioSettings,
             publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
-            videoCaptureSessionProvider: videoCaptureSessionProvider,
-            screenShareSessionProvider: screenShareSessionProvider
+            mediaAdapter: .init(
+                sessionID: sessionId,
+                peerConnectionType: peerType,
+                peerConnection: peerConnection,
+                peerConnectionFactory: peerConnectionFactory,
+                sfuAdapter: sfuAdapter,
+                videoOptions: videoOptions,
+                videoConfig: videoConfig,
+                publishOptions: publishOptions,
+                videoCaptureSessionProvider: videoCaptureSessionProvider,
+                screenShareSessionProvider: screenShareSessionProvider
+            ),
+            iceAdapter: iceAdapter ?? .init(
+                sessionID: sessionId,
+                peerType: peerType,
+                peerConnection: peerConnection,
+                sfuAdapter: sfuAdapter
+            ),
+            iceConnectionStateAdapter: iceConnectionStateAdapter ?? .init()
         )
+
+        stub(for: \.isHealthy, with: true)
     }
 
     override func changePublishQuality(
