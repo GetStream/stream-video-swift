@@ -64,11 +64,8 @@ final class PictureInPictureEnforcedStopAdapter {
     ) {
         switch (applicationState, isPictureInPictureActive) {
         case (.foreground, true):
-            Foundation
-                .Timer
-                .publish(every: screenProperties.refreshRate, on: .main, in: .default)
-                .autoconnect()
-                .receive(on: DispatchQueue.global(qos: .default))
+            DefaultTimer
+                .publish(every: screenProperties.refreshRate)
                 .filter { [weak self] _ in self?.applicationStateAdapter.state == .foreground }
                 .log(.debug) { _ in "Will attempt to forcefully stop Picture-in-Picture." }
                 .receive(on: DispatchQueue.main)

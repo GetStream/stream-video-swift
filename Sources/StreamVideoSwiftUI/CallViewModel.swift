@@ -744,11 +744,8 @@ open class CallViewModel: ObservableObject {
     }
 
     private func startTimer(timeout: TimeInterval) {
-        ringingCancellable = Foundation
-            .Timer
-            .publish(every: timeout, on: .main, in: .default)
-            .autoconnect()
-            .receive(on: DispatchQueue.global(qos: .default))
+        ringingCancellable = DefaultTimer
+            .publish(every: timeout)
             .log(.debug) { _ in "Detected ringing timeout, hanging up..." }
             .sink { [weak self] _ in self?.handleCallHangUp(ringTimeout: true) }
     }

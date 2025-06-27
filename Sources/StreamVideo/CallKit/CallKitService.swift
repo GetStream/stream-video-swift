@@ -596,11 +596,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Parameter callState: The state of the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
         let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
-        ringingTimerCancellable = Foundation
-            .Timer
-            .publish(every: timeout, on: .main, in: .default)
-            .autoconnect()
-            .receive(on: DispatchQueue.global(qos: .default))
+        ringingTimerCancellable = DefaultTimer
+            .publish(every: timeout)
             .sink { [weak self] _ in
                 log.debug(
                     "Detected ringing timeout, hanging up...",

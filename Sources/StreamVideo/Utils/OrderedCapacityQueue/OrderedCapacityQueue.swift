@@ -49,11 +49,8 @@ final class OrderedCapacityQueue<Element> {
     init(capacity: Int, removalTime: TimeInterval) {
         self.capacity = capacity
         self.removalTime = removalTime
-        removalTimerCancellable = Foundation
-            .Timer
-            .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
-            .autoconnect()
-            .receive(on: DispatchQueue.global(qos: .default))
+        removalTimerCancellable = DefaultTimer
+            .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
             .sink { [weak self] _ in self?.removeItemsIfRequired() }
     }
     
@@ -88,11 +85,8 @@ final class OrderedCapacityQueue<Element> {
     ///   should be enabled.
     private func toggleRemovalObservation(_ isEnabled: Bool) {
         if isEnabled, removalTimerCancellable == nil {
-            removalTimerCancellable = Foundation
-                .Timer
-                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
-                .autoconnect()
-                .receive(on: DispatchQueue.global(qos: .default))
+            removalTimerCancellable = DefaultTimer
+                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
                 .sink { [weak self] _ in self?.removeItemsIfRequired() }
         } else if !isEnabled, removalTimerCancellable != nil {
             removalTimerCancellable?.cancel()

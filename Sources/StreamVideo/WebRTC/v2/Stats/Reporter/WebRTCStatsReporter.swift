@@ -104,10 +104,8 @@ final class WebRTCStatsReporter: WebRTCStatsReporting, @unchecked Sendable {
             return
         }
 
-        deliveryCancellable = Foundation
-            .Timer
-            .publish(every: interval, on: .main, in: .default)
-            .autoconnect()
+        deliveryCancellable = DefaultTimer
+            .publish(every: interval)
             .receive(on: DispatchQueue.global(qos: .default))
             .compactMap { [weak self] _ in self?.provider() }
             .sink { [weak self] in self?.deliverStats($0) }

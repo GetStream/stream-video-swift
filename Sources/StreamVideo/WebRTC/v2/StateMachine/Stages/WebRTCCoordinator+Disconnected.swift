@@ -127,11 +127,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 /// We add a small delay of 100ms in oder to ensure that the internet connection state
                 /// has been updated, so that when we start observing it will receive the latest and
                 /// updated value.
-                _ = try? await Foundation
-                    .Timer
-                    .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
-                    .autoconnect()
-                    .receive(on: DispatchQueue.global(qos: .default))
+                _ = try? await DefaultTimer
+                    .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
                     .nextValue { cancellable = $0 }
                 cancellable?.cancel()
                 cancellable = nil
@@ -227,11 +224,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
             guard context.disconnectionTimeout > 0 else {
                 return
             }
-            timeInStageCancellable = Foundation
-                .Timer
-                .publish(every: context.disconnectionTimeout, on: .main, in: .default)
-                .autoconnect()
-                .receive(on: DispatchQueue.global(qos: .default))
+            timeInStageCancellable = DefaultTimer
+                .publish(every: context.disconnectionTimeout)
                 .sink { [weak self] _ in self?.didTimeInStageExpired() }
         }
 

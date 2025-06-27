@@ -12,27 +12,26 @@ import SwiftUI
     @Published var showTimerAlert: Bool = false {
         didSet {
             if showTimerAlert, let timerEndsAt {
-                sessionEndCountdown?.invalidate()
+                sessionEndCountdown?.cancel()
+                sessionEndCountdown = nil
                 secondsUntilEnd = timerEndsAt.timeIntervalSinceNow
-                sessionEndCountdown = Timer.scheduledTimer(
-                    withTimeInterval: 1.0,
-                    repeats: true,
-                    block: { [weak self] _ in
+                sessionEndCountdown = DefaultTimer
+                    .publish(every: 1.0)
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] _ in
                         guard let self else { return }
-                        Task { @MainActor in
-                            if self.secondsUntilEnd <= 0 {
-                                self.sessionEndCountdown?.invalidate()
-                                self.sessionEndCountdown = nil
-                                self.secondsUntilEnd = 0
-                                self.showTimerAlert = false
-                                return
-                            }
-                            self.secondsUntilEnd -= 1
+                        if self.secondsUntilEnd <= 0 {
+                            self.sessionEndCountdown?.cancel()
+                            self.sessionEndCountdown = nil
+                            self.secondsUntilEnd = 0
+                            self.showTimerAlert = false
+                            return
                         }
+                        self.secondsUntilEnd -= 1
                     }
-                )
             } else if !showTimerAlert {
-                sessionEndCountdown?.invalidate()
+                sessionEndCountdown?.cancel()
+                sessionEndCountdown = nil
                 secondsUntilEnd = 0
             }
         }
@@ -48,9 +47,9 @@ import SwiftUI
         }
     }
 
-    private var timer: Timer?
-    private var sessionEndCountdown: Timer?
-    
+    private var timer: AnyCancellable?
+    private var sessionEndCountdown: AnyCancellable?
+
     private let alertInterval: TimeInterval
     
     private var extendDuration: TimeInterval
@@ -107,7 +106,7 @@ import SwiftUI
     }
     
     private func setupTimerIfNeeded() {
-        timer?.invalidate()
+        timer?.cancel()
         timer = nil
         showTimerAlert = false
         if let timerEndsAt {
@@ -118,22 +117,19 @@ import SwiftUI
                 return
             }
             log.debug("Starting a timer in \(timerInterval) seconds")
-            timer = Timer.scheduledTimer(
-                withTimeInterval: timerInterval,
-                repeats: false,
-                block: { [weak self] _ in
-                    guard let self else { return }
-                    log.debug("Showing timer alert")
-                    Task { @MainActor in
-                        self.showTimerAlert = true
-                    }
+            timer = DefaultTimer
+                .publish(every: timerInterval)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    self?.showTimerAlert = true
+                    self?.timer?.cancel()
+                    self?.timer = nil
                 }
-            )
         }
     }
     
     deinit {
-        timer?.invalidate()
-        sessionEndCountdown?.invalidate()
+        timer?.cancel()
+        sessionEndCountdown?.cancel()
     }
 }

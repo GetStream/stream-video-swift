@@ -455,11 +455,8 @@ final class CallStateStore {
 
     private func setupDurationTimer() {
         resetTimer()
-        durationCancellable = Foundation
-            .Timer
-            .publish(every: 1.0, on: .main, in: .default)
-            .autoconnect()
-            .receive(on: DispatchQueue.global(qos: .default))
+        durationCancellable = DefaultTimer
+            .publish(every: 1.0)
             .compactMap { [weak self] _ in
                 if let startedAt = self?.startedAt {
                     return Date().timeIntervalSince(startedAt)
