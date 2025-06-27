@@ -2,8 +2,8 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 public protocol Timer {
     /// Schedules a new timer.

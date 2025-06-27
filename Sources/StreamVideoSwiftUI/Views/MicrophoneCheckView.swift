@@ -28,7 +28,7 @@ public struct MicrophoneCheckView: View {
     public init(
         viewModel: LobbyViewModel,
         isPinned: Bool,
-        maxHeight: Float = 14,
+        maxHeight: Float = 14
     ) {
         self.init(
             audioLevels: viewModel.audioLevels,

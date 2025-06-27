@@ -15,7 +15,7 @@ struct ParticipantEventsNotificationViewModifier: ViewModifier {
 
     @State var event: ParticipantEvent?
 
-    init(viewModel: CallViewModel,) {
+    init(viewModel: CallViewModel) {
         publisher = viewModel
             .$participantEvent
             .receive(on: DispatchQueue.main)

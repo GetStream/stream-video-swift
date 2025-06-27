@@ -27,7 +27,7 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
                 guard let self else {
                     return
                 }
-                await didUpdateCall(call)
+                didUpdateCall(call)
             }
         }
     }
