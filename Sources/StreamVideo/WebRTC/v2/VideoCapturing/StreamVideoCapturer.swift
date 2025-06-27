@@ -11,8 +11,7 @@ protocol StreamVideoCapturerActionHandler: Sendable {
 
 actor StreamVideoCapturer: StreamVideoCapturing {
 
-    private let executor = DispatchQueueExecutor()
-    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     enum Action: @unchecked Sendable, CustomStringConvertible {
     case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
@@ -223,12 +222,12 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         frameRate: Int
     ) async throws {
         if let videoCaptureSession {
-            _ = try await enqueueOperation(
+            try await enqueueOperation(
                 for: .checkBackgroundCameraAccess(videoCaptureSession)
-            ).value
+            )
         }
 
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .startCapture(
                 position: position,
                 dimensions: dimensions,
@@ -237,27 +236,27 @@ actor StreamVideoCapturer: StreamVideoCapturing {
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-        ).value
+        )
     }
 
     func stopCapture() async throws {
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .stopCapture(
                 videoCapturer: videoCapturer
             )
-        ).value
+        )
     }
 
     func setCameraPosition(_ position: AVCaptureDevice.Position) async throws {
         guard videoCaptureSession != nil else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .setCameraPosition(
                 position: position,
                 videoSource: videoSource,
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-        ).value
+        )
     }
 
     func setVideoFilter(_ videoFilter: VideoFilter?) {
@@ -273,7 +272,7 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         _ dimensions: CGSize
     ) async throws {
         guard let device = videoCaptureSession?.activeVideoCaptureDevice else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .updateCaptureQuality(
                 dimensions: dimensions,
                 device: device,
@@ -281,83 +280,83 @@ actor StreamVideoCapturer: StreamVideoCapturing {
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-        ).value
+        )
     }
 
     func focus(at point: CGPoint) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .focus(
                 point: point,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func zoom(by factor: CGFloat) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .zoom(
                 factor: factor,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .addCapturePhotoOutput(
                 capturePhotoOutput: capturePhotoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .removeCapturePhotoOutput(
                 capturePhotoOutput: capturePhotoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .addVideoOutput(
                 videoOutput: videoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .removeVideoOutput(
                 videoOutput: videoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     // MARK: - Private
 
     private func enqueueOperation(
         for action: Action
-    ) -> Task<Void, Error> {
-        Task(disposableBag: disposableBag) { [weak self] in
+    ) async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else {
                 return
             }
