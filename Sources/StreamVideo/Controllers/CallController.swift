@@ -38,9 +38,10 @@ class CallController: @unchecked Sendable {
             subscribeToParticipantsCountUpdatesEvent(call)
             subscribeToCurrentUserBlockedState(call)
             if let call {
-                Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                Task(disposableBag: disposableBag) { [weak self, weak call] in
                     guard let self else { return }
-                    call.state.sessionId = await webRTCCoordinator.stateAdapter.sessionID
+                    let sessionId = await webRTCCoordinator.stateAdapter.sessionID
+                    call?.store.sessionId = sessionId
                 }
             }
         }
@@ -511,22 +512,22 @@ class CallController: @unchecked Sendable {
         webRTCParticipantsObserver = participants?
             .$value
             .removeDuplicates() // Avoid unnecessary updates when participants haven't changed.
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] participants in
-                self?.call?.state.participantsMap = participants
-            }
+            .sink { [weak self] in self?.call?.store.participantsMap = $0 }
     }
 
     private func handleParticipantCountUpdated() async {
         await webRTCCoordinator
             .stateAdapter
             .$participantsCount
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.participantCount = $0 }
+            .removeDuplicates()
+            .sink { [weak self] in self?.call?.store.participantCount = $0 }
             .store(in: disposableBag)
 
         await webRTCCoordinator
             .stateAdapter
             .$anonymousCount
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.anonymousParticipantCount = $0 }
+            .removeDuplicates()
+            .sink { [weak self] in self?.call?.store.anonymousParticipantCount = $0 }
             .store(in: disposableBag)
     }
 
@@ -596,13 +597,12 @@ class CallController: @unchecked Sendable {
     }
 
     private func didFetch(_ response: JoinCallResponse) async {
+        guard let call else { return }
         let sessionId = await webRTCCoordinator.stateAdapter.sessionID
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            self?.call?.state.sessionId = sessionId
-            self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
-            self?.call?.state.ownCapabilities = response.ownCapabilities
-            self?.call?.state.update(from: response)
-        }
+        call.store.sessionId = sessionId
+        call.store.recordingState = response.call.recording ? .recording : .noRecording
+        call.store.ownCapabilities = response.ownCapabilities
+        call.store.update(from: response)
     }
 
     private func webRTCClientDidUpdateStage(
@@ -624,7 +624,7 @@ class CallController: @unchecked Sendable {
 
             call?.update(reconnectionStatus: .connected)
         case .error:
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 guard let self else { return }
                 if let call, let errorStage = stage as? WebRTCCoordinator.StateMachine.Stage.ErrorStage {
                     call.transitionDueToError(errorStage.error)
@@ -645,8 +645,8 @@ class CallController: @unchecked Sendable {
 
         call
             .eventPublisher(for: CallSessionParticipantCountsUpdatedEvent.self)
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak call] event in
-                call?.state.participantCount = event
+            .sink { [weak call] event in
+                call?.store.participantCount = event
                     .participantsCountByRole
                     .filter { $0.key != anonymousUserRoleKey } // TODO: Workaround. To be removed
                     .values
@@ -655,11 +655,11 @@ class CallController: @unchecked Sendable {
 
                 // TODO: Workaround. To be removed
                 if event.anonymousParticipantCount > 0 {
-                    call?.state.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
+                    call?.store.anonymousParticipantCount = UInt32(event.anonymousParticipantCount)
                 } else if let anonymousCount = event.participantsCountByRole[anonymousUserRoleKey] {
-                    call?.state.anonymousParticipantCount = UInt32(anonymousCount)
+                    call?.store.anonymousParticipantCount = UInt32(anonymousCount)
                 } else {
-                    call?.state.anonymousParticipantCount = 0
+                    call?.store.anonymousParticipantCount = 0
                 }
             }
             .store(in: disposableBag, key: DisposableKey.participantsCountUpdatesEvent.rawValue)
@@ -669,32 +669,27 @@ class CallController: @unchecked Sendable {
         disposableBag.remove(DisposableKey.currentUserBlocked.rawValue)
         guard let call else { return }
         let currentUser = user
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
+        call
+            .store
+            .$blockedUserIds
+            .filter { $0.contains(currentUser.id) }
+            .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
+            .sinkTask(storeIn: disposableBag) { [weak self] _ in
+                guard let self else { return }
+                self
+                    .webRTCCoordinator
+                    .stateMachine
+                    .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
             }
-
-            call
-                .state
-                .$blockedUserIds
-                .filter { $0.contains(currentUser.id) }
-                .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
-                .sinkTask(storeIn: disposableBag) { [weak self] _ in
-                    guard let self else { return }
-                    self
-                        .webRTCCoordinator
-                        .stateMachine
-                        .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
-                }
-                .store(in: disposableBag, key: DisposableKey.currentUserBlocked.rawValue)
-        }
+            .store(in: disposableBag, key: DisposableKey.currentUserBlocked.rawValue)
     }
 
     private func observeSessionIDUpdates() async {
         webRTCClientSessionIDObserver = await webRTCCoordinator
             .stateAdapter
             .$sessionID
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.sessionId = $0 }
+            .removeDuplicates()
+            .sink { [weak self] in self?.call?.store.sessionId = $0 }
     }
 
     private func observeStatsReporterUpdates() async {
@@ -705,7 +700,7 @@ class CallController: @unchecked Sendable {
             .sink { [disposableBag, weak self] statsReporter in
                 statsReporter
                     .latestReportPublisher
-                    .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.statsReport = $0 }
+                    .sink { [weak self] in self?.call?.store.statsReport = $0 }
                     .store(in: disposableBag)
             }
             .store(in: disposableBag)
@@ -716,7 +711,7 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$callSettings
             .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.callSettings = $0 }
+            .sink { [weak self] in self?.call?.store.callSettings = $0 }
             .store(in: disposableBag)
     }
 }

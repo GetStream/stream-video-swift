@@ -211,16 +211,29 @@ struct AppUserView: View {
         if user.imageURL != nil {
             DemoAppViewFactory
                 .shared
-                .makeUserAvatar(user, with: .init(size: size))
+                .makeUserAvatar(
+                    user,
+                    with: .init(
+                        size: size,
+                        failbackProvider: { AnyView(erasing: failbackView) }
+                    )
+                )
                 .accessibilityIdentifier("userAvatar")
-        } else if let firstCharacter = (overrideUserName ?? user.name).first {
+        } else {
+            failbackView
+                .accessibilityIdentifier("userAvatar")
+        }
+    }
+
+    @ViewBuilder
+    var failbackView: some View {
+        if let firstCharacter = (overrideUserName ?? user.name).first {
             Text(String(firstCharacter))
                 .fontWeight(.medium)
                 .foregroundColor(colors.text)
                 .frame(width: size, height: size)
                 .background(Color(.secondarySystemBackground))
                 .clipShape(Circle())
-                .accessibilityIdentifier("userAvatar")
         }
     }
 }

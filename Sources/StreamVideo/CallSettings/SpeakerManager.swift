@@ -27,7 +27,7 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
                 guard let self else {
                     return
                 }
-                await didUpdateCall(call)
+                didUpdateCall(call)
             }
         }
     }
@@ -100,7 +100,6 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
         )
     }
 
-    @MainActor
     private func didUpdateCall(_ call: Call?) {
         let observationKey = "call-settings-cancellable"
         disposableBag.remove(observationKey)
@@ -111,7 +110,7 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
 
         let typeOfSelf = type(of: self)
         call
-            .state
+            .store
             .$callSettings
             .map { Settings($0) }
             .removeDuplicates()

@@ -21,7 +21,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
     private var tokenProvider: UserTokenProvider?
     private let updateQueue: DispatchQueue = .init(
         label: "io.getStream.video.URLSessionClient",
-        qos: .userInitiated
+        qos: .default
     )
     private(set) var onTokenUpdate: UserTokenUpdater?
 

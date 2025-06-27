@@ -54,6 +54,8 @@ struct DemoMoreControlsViewModifier: ViewModifier {
 
                             DemoTranscriptionAndClosedCaptionsButtonView(viewModel: viewModel)
 
+                            DemoMoreThermalStateButtonView()
+
                             DemoMoreControlListButtonView(
                                 action: { isStatsPresented = true },
                                 label: "Stats"

@@ -12,70 +12,54 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     @Injected(\.appearance) var appearance
     @Injected(\.chatViewModel) var chatViewModel
 
-    var microphoneChecker: MicrophoneChecker
-
-    @ObservedObject var appState: AppState = .shared
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject var reactionsAdapter = InjectedValues[\.reactionsAdapter]
+    var sessionTimer: SessionTimer
 
-    @State var mutedIndicatorShown = false
+    @State var showTimerAlert = false
     @StateObject var snapshotViewModel: DemoSnapshotViewModel
-    @StateObject var sessionTimer: SessionTimer
-    
+
     private let viewFactory: ViewFactory
 
     init(
         viewFactory: ViewFactory,
-        microphoneChecker: MicrophoneChecker,
         viewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        self.microphoneChecker = microphoneChecker
         self.viewModel = viewModel
+        sessionTimer = .init(call: viewModel.call, alertInterval: 60)
         _snapshotViewModel = .init(wrappedValue: .init(viewModel))
-        _sessionTimer = .init(wrappedValue: .init(call: viewModel.call, alertInterval: 60))
+        showTimerAlert = false
     }
 
     var body: some View {
-        viewFactory
-            .makeInnerCallView(viewModel: viewModel)
-            .onReceive(microphoneChecker.decibelsPublisher, perform: { values in
-                guard !viewModel.callSettings.audioOn else { return }
-                for value in values {
-                    if (value > -50 && value < 0) && !mutedIndicatorShown {
-                        mutedIndicatorShown = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                            mutedIndicatorShown = false
-                        }
-                        return
-                    }
-                }
-            })
-            .overlay(
-                mutedIndicatorShown ?
-                    VStack {
-                        Spacer()
-                        Text("You are muted.")
-                            .padding(8)
-                            .background(Color(UIColor.systemBackground))
-                            .foregroundColor(appearance.colors.text)
-                            .cornerRadius(16)
-                            .padding()
-                    }
-                    : nil
-            )
-            .overlay(
-                ZStack {
-                    reactionsAdapter.showFireworks
-                        ? FireworksView(config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast))
-                        : nil
-                }
-            )
-            .overlay(
-                sessionTimer.showTimerAlert ? DemoSessionTimerView(sessionTimer: sessionTimer) : nil
-            )
+        contentView
+            .overlay(fireworksReactionView)
+            .overlay(sessionTimerView)
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
             .toastView(toast: $snapshotViewModel.toast)
+            .onReceive(sessionTimer.$showTimerAlert) { showTimerAlert = $0 }
+    }
+
+    @ViewBuilder
+    var contentView: some View {
+        CallView(viewFactory: viewFactory, viewModel: viewModel)
+    }
+
+    @ViewBuilder
+    var fireworksReactionView: some View {
+        if reactionsAdapter.showFireworks {
+            FireworksView(
+                config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast)
+            )
+        }
+    }
+
+    @ViewBuilder
+    var sessionTimerView: some View {
+        if showTimerAlert {
+            DemoSessionTimerView(sessionTimer: sessionTimer)
+        }
     }
 }

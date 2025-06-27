@@ -15,8 +15,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     private lazy var stateMachine: StateMachine = .init(self)
 
-    @MainActor
-    public internal(set) var state = CallState()
+    public let state: CallState
+    let store: CallStateStore
 
     /// The call id.
     public let callId: String
@@ -51,7 +51,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Provides access to device's proximity
     private lazy var proximity: ProximityManager = .init(
         self,
-        activeCallPublisher: streamVideo.state.$activeCall.eraseToAnyPublisher()
+        activeCallPublisher: streamVideo.store.$activeCall.eraseToAnyPublisher()
     )
 
     private let disposableBag = DisposableBag()
@@ -71,6 +71,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController: CallController,
         callSettings: CallSettings? = nil
     ) {
+        let store = CallStateStore()
+        self.store = store
+        state = .init(store)
         self.callId = callId
         self.callType = callType
         self.coordinatorClient = coordinatorClient
@@ -104,9 +107,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             coordinatorClient: coordinatorClient,
             callController: callController
         )
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            self?.state.update(from: response)
-        }
+        store.update(from: response)
     }
 
     deinit {
@@ -117,9 +118,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func configure(callSettings: CallSettings?) {
         /// If we received a non-nil initial callSettings, we updated them here.
         if let callSettings {
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.state.update(callSettings: callSettings)
-            }
+            store.update(callSettings: callSettings)
         }
 
         _ = closedCaptionsAdapter
@@ -234,11 +233,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             notify: notify,
             video: nil
         )
-        await state.update(from: response)
+        store.update(from: response)
         if ring {
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.streamVideo.state.ringingCall = self
-            }
+            streamVideo.store.ringingCall = self
         }
         return response
     }
@@ -248,7 +245,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func ring() async throws -> CallResponse {
         let response = try await get(ring: true)
-        await state.update(from: response)
+        store.update(from: response)
         return response.call
     }
 
@@ -257,7 +254,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func notify() async throws -> CallResponse {
         let response = try await get(notify: true)
-        await state.update(from: response)
+        store.update(from: response)
         return response.call
     }
 
@@ -336,11 +333,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             getOrCreateCallRequest: request
         )
-        await state.update(from: response)
+        store.update(from: response)
         if ring {
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.streamVideo.state.ringingCall = self
-            }
+            streamVideo.store.ringingCall = self
         }
         return response.call
     }
@@ -368,7 +363,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             updateCallRequest: request
         )
-        await state.update(from: response)
+        store.update(from: response)
         return response
     }
 
@@ -536,6 +531,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Leave the current call.
     public func leave() {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in self?.leave() }
+            return
+        }
         postNotification(with: CallNotification.callEnded, object: self)
 
         disposableBag.removeAll()
@@ -550,16 +549,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // Reset the activeAudioFilter
         setAudioFilter(nil)
 
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            if streamVideo.state.ringingCall?.cId == cId {
-                streamVideo.state.ringingCall = nil
-            }
-            if streamVideo.state.activeCall?.cId == cId {
-                streamVideo.state.activeCall = nil
-            }
+        if streamVideo.store.ringingCall?.cId == cId {
+            streamVideo.store.ringingCall = nil
+        }
+        if streamVideo.store.activeCall?.cId == cId {
+            streamVideo.store.activeCall = nil
         }
     }
 
@@ -568,7 +562,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// capability to enable noise cancellation.
     /// - Throws: An error if starting noise cancellation fails.
     public func startNoiseCancellation() async throws {
-        guard await currentUserHasCapability(.enableNoiseCancellation) else {
+        guard currentUserHasCapability(.enableNoiseCancellation) else {
             throw ClientError.MissingPermissions()
         }
         try await callController.startNoiseCancellation(state.sessionId)
@@ -585,8 +579,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Checks if the current user can request permissions.
     /// - Parameter permissions: The permissions to request.
     /// - Returns: A Boolean value indicating if the current user can request the permissions.
-    @MainActor public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
-        guard let callSettings = state.settings else {
+    public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
+        guard let callSettings = store.settings else {
             return false
         }
         for permission in permissions {
@@ -610,11 +604,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
     @discardableResult
     public func request(permissions: [Permission]) async throws -> RequestPermissionResponse {
-        if await state.isInitialized == false {
+        if store.isInitialized == false {
             let response = try await get()
-            await state.update(from: response)
+            store.update(from: response)
         }
-        if await !currentUserCanRequestPermissions(permissions) {
+        if !currentUserCanRequestPermissions(permissions) {
             throw ClientError.MissingPermissions()
         }
         let request = RequestPermissionRequest(
@@ -630,11 +624,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Checks if the current user has a certain call capability.
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
-    @MainActor public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
-        if !state.isInitialized {
+    public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
+        if !store.isInitialized {
             log.warning("currentUserHasCapability called before the call was initialized using .get .create or .join")
         }
-        return state.ownCapabilities.contains(capability)
+        return store.ownCapabilities.contains(capability)
     }
 
     /// Grants permissions to a user for a call.
@@ -661,10 +655,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             granted: [request.permission],
             revoked: []
         )
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            self.state.removePermissionRequest(request: request)
-        }
+        store.removePermissionRequest(request: request)
         return response
     }
 
@@ -733,7 +724,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             blockUserRequest: BlockUserRequest(userId: userId)
         )
-        await state.blockUser(id: userId)
+        store.blockUser(id: userId)
         return response
     }
 
@@ -748,7 +739,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             unblockUserRequest: UnblockUserRequest(userId: userId)
         )
-        await state.unblockUser(id: userId)
+        store.unblockUser(id: userId)
         return response
     }
 
@@ -902,7 +893,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             type: callType
         )
         let response = try await coordinatorClient.queryCallMembers(queryMembersRequest: request)
-        await state.mergeMembers(response.members)
+        store.mergeMembers(response.members)
         return response
     }
 
@@ -975,7 +966,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         userId: String,
         sessionId: String
     ) async throws -> PinResponse {
-        if await !currentUserHasCapability(.pinForEveryone) {
+        if !currentUserHasCapability(.pinForEveryone) {
             throw ClientError.MissingPermissions()
         }
         let pinRequest = PinRequest(sessionId: sessionId, userId: userId)
@@ -995,7 +986,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         userId: String,
         sessionId: String
     ) async throws -> UnpinResponse {
-        if await !currentUserHasCapability(.pinForEveryone) {
+        if !currentUserHasCapability(.pinForEveryone) {
             throw ClientError.MissingPermissions()
         }
         let unpinRequest = UnpinRequest(sessionId: sessionId, userId: userId)
@@ -1193,7 +1184,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// collecting feedback.
     /// - Throws: An error if the feedback collection process encounters an issue.
     @discardableResult
-    @MainActor
     public func collectUserFeedback(
         rating: Int,
         reason: String? = nil,
@@ -1212,11 +1202,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// - Parameters:
     ///   - sortComparators: An array of `StreamSortComparator` objects for `CallParticipant`.
-    @MainActor
     public func updateParticipantsSorting(
         with sortComparators: [StreamSortComparator<CallParticipant>]
     ) {
-        state.sortComparators = sortComparators
+        store.sortComparators = sortComparators
     }
 
     // MARK: - IncomingVideoQualitySettings
@@ -1227,12 +1216,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter value: The new `IncomingVideoQualitySettings` to be applied. It
     ///   determine whether video streams are allowed, manually controlled, or disabled for
     ///   specific session groups.
-    @MainActor
     public func setIncomingVideoQualitySettings(
         _ value: IncomingVideoQualitySettings
     ) async {
         // Update the state with the new incoming video policy.
-        state.incomingVideoQualitySettings = value
+        store.incomingVideoQualitySettings = value
 
         // Informs the call controller to apply the new incoming video policy.
         await callController.setIncomingVideoQualitySettings(value)
@@ -1306,7 +1294,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         // We update the closedCaptions & transcription language to the provided
         // one.
-        await state.settings?.transcription.language = request
+        store.settings?.transcription.language = request
             .language
             .map { TranscriptionSettings.Language(rawValue: $0) ?? .unknown } ?? .unknown
 
@@ -1343,7 +1331,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///     is presented in seconds. Must be greater than 0.5 seconds.
     ///   - maxVisibleItems: The maximum number of visible closed caption items.
     ///     Must be greater than 1.
-    @MainActor
     public func updateClosedCaptionsSettings(
         itemPresentationDuration: TimeInterval,
         maxVisibleItems: Int
@@ -1393,12 +1380,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            if reconnectionStatus != self.state.reconnectionStatus {
-                self.state.reconnectionStatus = reconnectionStatus
-            }
-        }
+        store.reconnectionStatus = reconnectionStatus
 
         guard
             reconnectionStatus == .connected,
@@ -1413,9 +1395,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     internal func update(recordingState: RecordingState) {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            self?.state.recordingState = recordingState
-        }
+        store.recordingState = recordingState
     }
 
     internal func onEvent(_ event: WrappedEvent) async {
@@ -1425,18 +1405,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard videoEvent.forCall(cid: cId) else {
             return
         }
-        await Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            self.state.updateState(from: videoEvent)
-        }.value
 
+        store.updateState(from: videoEvent)
         eventSubject.send(event)
     }
 
-    @MainActor
     internal func transitionDueToError(_ error: Error) {
         if stateMachine.currentStage.id == .joined {
-            state.disconnectionError = error
+            store.disconnectionError = error
         }
         stateMachine.transition(
             .error(
@@ -1467,7 +1443,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         granted: [String],
         revoked: [String]
     ) async throws -> UpdateUserPermissionsResponse {
-        if await !currentUserHasCapability(.updateCallPermissions) {
+        if !currentUserHasCapability(.updateCallPermissions) {
             throw ClientError.MissingPermissions()
         }
         let updatePermissionsRequest = UpdateUserPermissionsRequest(
@@ -1495,113 +1471,85 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             updateCallMembersRequest: request
         )
-        await state.mergeMembers(response.members)
+        store.mergeMembers(response.members)
         return response
     }
 
     private func subscribeToOwnCapabilitiesChanges() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            self
-                .state
-                .$ownCapabilities
-                .removeDuplicates()
-                .sinkTask(storeIn: disposableBag) { [weak self] in
-                    await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
-                }
-                .store(in: disposableBag)
-        }
+        store
+            .$ownCapabilities
+            .removeDuplicates()
+            .sinkTask(storeIn: disposableBag) { [weak self] in
+                await self?.callController.updateOwnCapabilities(ownCapabilities: $0)
+            }
+            .store(in: disposableBag)
     }
 
     private func subscribeToLocalCallSettingsChanges() {
-        speaker.$status.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedSpeakerState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
+        speaker
+            .$status
+            .dropFirst()
+            .compactMap { [weak self] in self?.store.callSettings.withUpdatedSpeakerState($0.boolValue) }
+            .assign(to: \.callSettings, onWeak: store)
+            .store(in: disposableBag)
 
-        speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedAudioOutputState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
+        speaker
+            .$audioOutputStatus
+            .dropFirst()
+            .compactMap { [weak self] in self?.store.callSettings.withUpdatedAudioOutputState($0.boolValue) }
+            .assign(to: \.callSettings, onWeak: store)
+            .store(in: disposableBag)
 
-        camera.$status.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedVideoState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
+        camera
+            .$status
+            .dropFirst()
+            .compactMap { [weak self] in self?.store.callSettings.withUpdatedVideoState($0.boolValue) }
+            .assign(to: \.callSettings, onWeak: store)
+            .store(in: disposableBag)
 
-        camera.$direction.dropFirst().sink { [weak self] position in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedCameraPosition(position)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
+        camera
+            .$direction
+            .dropFirst()
+            .compactMap { [weak self] in self?.store.callSettings.withUpdatedCameraPosition($0) }
+            .assign(to: \.callSettings, onWeak: store)
+            .store(in: disposableBag)
 
-        microphone.$status.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedAudioState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
+        microphone
+            .$status
+            .dropFirst()
+            .compactMap { [weak self] in self?.store.callSettings.withUpdatedAudioState($0.boolValue) }
+            .assign(to: \.callSettings, onWeak: store)
+            .store(in: disposableBag)
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
-                .filter { $0.0 != nil }
-                .map { $0.1?.audio.noiseCancellation }
-                .removeDuplicates()
-                .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: disposableBag)
-        }
+        Publishers
+            .CombineLatest(store.$session, store.$settings)
+            .filter { $0.0 != nil }
+            .map { $0.1?.audio.noiseCancellation }
+            .removeDuplicates()
+            .sink { [weak self] in self?.didUpdate($0) }
+            .store(in: disposableBag)
     }
 
     private func subscribeToTranscriptionSettingsChanges() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
-                .filter { $0.0 != nil }
-                .map { $0.1?.transcription }
-                .removeDuplicates()
-                .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: disposableBag)
-        }
+        Publishers
+            .CombineLatest(store.$session, state.$settings)
+            .filter { $0.0 != nil }
+            .map { $0.1?.transcription }
+            .removeDuplicates()
+            .sink { [weak self] in self?.didUpdate($0) }
+            .store(in: disposableBag)
     }
 
     private func subscribeToClosedCaptionsSettingsChanges() {
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else { return }
-            Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
-                .filter { $0.0 != nil }
-                .map { $0.1?.transcription.closedCaptionMode }
-                .removeDuplicates()
-                .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: disposableBag)
-        }
+        Publishers
+            .CombineLatest(store.$session, store.$settings)
+            .filter { $0.0 != nil }
+            .map { $0.1?.transcription.closedCaptionMode }
+            .removeDuplicates()
+            .sink { [weak self] in self?.didUpdate($0) }
+            .store(in: disposableBag)
     }
 
     func updateCallSettingsManagers(with callSettings: CallSettings) {
@@ -1667,16 +1615,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
 
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
             do {
                 switch value.mode {
-                case .disabled where state.transcribing == true:
+                case .disabled where store.transcribing == true:
                     log.debug("TranscriptionSettings updated with mode:\(value.mode). Will deactivate transcriptions.")
                     try await stopTranscription()
-                case .autoOn where state.transcribing == false:
+                case .autoOn where store.transcribing == false:
                     log.debug("TranscriptionSettings updated with mode:\(value.mode). Will activate transcriptions.")
                     try await startTranscription()
                 default:
@@ -1696,16 +1644,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
 
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+        Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
             do {
                 switch mode {
-                case .disabled where state.captioning == true:
+                case .disabled where store.captioning == true:
                     log.debug("ClosedCaptionSettings updated with mode:\(mode). Will deactivate closedCaptions.")
                     try await stopClosedCaptions()
-                case .autoOn where state.captioning == false:
+                case .autoOn where store.captioning == false:
                     log.debug("ClosedCaptionSettings updated with mode:\(mode). Will activate closedCaptions.")
                     try await startClosedCaptions()
                 default:

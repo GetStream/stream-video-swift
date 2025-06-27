@@ -37,7 +37,7 @@ final class Batcher<Item> {
     /// The closure which processes the batch.
     private let handler: @Sendable(_ batch: [Item], _ completion: @Sendable @escaping () -> Void) -> Void
     /// The serial queue where item appends and batch processing is happening on.
-    private let queue = DispatchQueue(label: "io.getstream.Batch.\(Item.self)")
+    private let queue = DispatchQueue(label: "io.getstream.Batch.\(Item.self)", qos: .default)
     /// The current batch of items.
     private(set) var currentBatch: [Item] = []
     

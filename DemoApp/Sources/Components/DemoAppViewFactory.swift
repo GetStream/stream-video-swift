@@ -33,20 +33,11 @@ final class DemoAppViewFactory: ViewFactory {
             .background(Appearance.default.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
     }
 
-    func makeInnerWaitingLocalUserView(viewModel: CallViewModel) -> AnyView {
-        .init(WaitingLocalUserView(viewModel: viewModel, viewFactory: self))
-    }
-
     func makeCallView(viewModel: CallViewModel) -> DemoCallView<DemoAppViewFactory> {
         DemoCallView(
             viewFactory: self,
-            microphoneChecker: MicrophoneChecker(),
             viewModel: viewModel
         )
-    }
-
-    func makeInnerCallView(viewModel: CallViewModel) -> AnyView {
-        .init(StreamVideoSwiftUI.CallView(viewFactory: self, viewModel: viewModel))
     }
 
     func makeCallControlsView(viewModel: CallViewModel) -> some View {
@@ -108,5 +99,12 @@ final class DemoAppViewFactory: ViewFactory {
                     .padding(.bottom, 30)
             }
         )
+    }
+}
+
+struct EmptyViewModifier: ViewModifier {
+
+    func body(content: Content) -> some View {
+        content
     }
 }

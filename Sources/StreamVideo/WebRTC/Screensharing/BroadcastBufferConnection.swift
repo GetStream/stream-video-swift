@@ -62,7 +62,7 @@ class BroadcastBufferConnection: NSObject, @unchecked Sendable {
     private func scheduleStreams() {
         shouldKeepRunning = true
         
-        streamQueue = DispatchQueue.global(qos: .userInteractive)
+        streamQueue = DispatchQueue.global(qos: .default)
         streamQueue?.async { [weak self] in
             self?.inputStream?.schedule(in: .current, forMode: .common)
             self?.outputStream?.schedule(in: .current, forMode: .common)

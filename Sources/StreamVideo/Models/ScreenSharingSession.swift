@@ -5,7 +5,7 @@
 import Foundation
 import StreamWebRTC
 
-public struct ScreenSharingSession {
+public struct ScreenSharingSession: Equatable {
     public let track: RTCVideoTrack?
     public let participant: CallParticipant
 }

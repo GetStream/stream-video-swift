@@ -13,7 +13,7 @@ struct DemoCallingViewModifier: ViewModifier {
     @Injected(\.callKitAdapter) private var callKitAdapter
     @Injected(\.appearance) private var appearance
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
 
     private var text: Binding<String>
@@ -56,7 +56,7 @@ struct DemoCallingViewModifier: ViewModifier {
                     )
                 }
             }
-            .onChange(of: viewModel.callingState) { callingState in
+            .onReceive(viewModel.$callingState) { callingState in
                 switch callingState {
                 case .inCall where !self.text.wrappedValue.isEmpty:
                     appState.deeplinkInfo = .empty
@@ -84,7 +84,7 @@ struct DemoCallingViewModifier: ViewModifier {
                     text.wrappedValue = ""
                 }
             }
-            .toastView(toast: $viewModel.toast)
+            .toastView(toast: .init(get: { viewModel.toast }, set: { viewModel.toast = $0 }))
     }
 
     private func joinCallIfNeeded(with callId: String, callType: String) {

@@ -22,7 +22,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject private var appState = AppState.shared
 
     private var viewFactory: Factory

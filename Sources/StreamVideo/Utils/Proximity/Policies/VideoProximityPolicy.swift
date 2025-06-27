@@ -39,16 +39,16 @@ public final class VideoProximityPolicy: ProximityPolicy, @unchecked Sendable {
         _ proximity: ProximityState,
         on call: Call
     ) {
-        processingQueue.addTaskOperation { @MainActor [weak self, weak call] in
+        processingQueue.addTaskOperation { [weak self, weak call] in
             guard let self, let call else {
                 return
             }
 
             switch proximity {
             case .near:
-                let callSettings = call.state.callSettings
+                let callSettings = call.store.callSettings
                 let cachedValue = CachedValue(
-                    incomingVideoQualitySettings: call.state.incomingVideoQualitySettings,
+                    incomingVideoQualitySettings: call.store.incomingVideoQualitySettings,
                     videoOn: callSettings.videoOn
                 )
                 self.cachedValue = cachedValue

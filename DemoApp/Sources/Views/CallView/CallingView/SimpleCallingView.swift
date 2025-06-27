@@ -20,7 +20,7 @@ struct SimpleCallingView: View {
     @State private var showChangeEnvironmentPrompt: Bool = false
 
     @ObservedObject var appState = AppState.shared
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, callId: String) {
         self.viewModel = viewModel

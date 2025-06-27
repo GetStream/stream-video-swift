@@ -32,7 +32,6 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
             .modifier(ThermalStateViewModifier())
     }
 
-    @MainActor
     @ViewBuilder
     private func contentView(_ rootView: Content) -> some View {
         DemoVideoViewOverlay(

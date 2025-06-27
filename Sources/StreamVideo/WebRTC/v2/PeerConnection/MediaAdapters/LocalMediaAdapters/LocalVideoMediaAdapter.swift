@@ -15,7 +15,6 @@ import StreamWebRTC
 /// seamlessly with the WebRTC framework.
 final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
-    @Injected(\.videoCapturePolicy) private var videoCapturePolicy
     @Injected(\.captureDeviceProvider) private var captureDeviceProvider
 
     /// A unique identifier representing the current call session.
@@ -204,7 +203,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// Starts publishing the local video track.
     func publish() {
-        processingQueue.addTaskOperation { @MainActor [weak self] in
+        processingQueue.addTaskOperation { [weak self] in
             guard
                 let self,
                 !primaryTrack.isEnabled
@@ -268,7 +267,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
 
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            Task(disposableBag: disposableBag) { [weak self] in
                 do {
                     try await self?.stopVideoCapturingSession()
                 } catch {
@@ -516,6 +515,12 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     private func adaptCaptureDimensions(
         for layerSettings: [Stream_Video_Sfu_Event_VideoSender]
     ) async {
+        guard
+            let capturer = videoCaptureSessionProvider.activeSession?.capturer
+        else {
+            return
+        }
+
         let dimensions = layerSettings
             .map { PublishOptions.VideoPublishOptions(id: Int($0.publishOptionID), codec: VideoCodec($0.codec)) }
             .filter { transceiverStorage.get(for: $0)?.transceiver.sender.track != nil }
@@ -528,10 +533,7 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         }
 
         do {
-            try await videoCapturePolicy.updateCaptureQuality(
-                with: preferredDimensions,
-                for: videoCaptureSessionProvider.activeSession
-            )
+            try await capturer.updateCaptureQuality(preferredDimensions)
         } catch {
             log.error(error, subsystems: .sfu)
         }

@@ -341,10 +341,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 }
                 .store(in: disposableBag)
 
-            Foundation
-                .Timer
-                .publish(every: 1, on: .main, in: .default)
-                .autoconnect()
+            DefaultTimer
+                .publish(every: 1)
                 .compactMap { [weak self] _ in self?.context.lastHealthCheckReceivedAt }
                 .filter { [weak self] in
                     guard

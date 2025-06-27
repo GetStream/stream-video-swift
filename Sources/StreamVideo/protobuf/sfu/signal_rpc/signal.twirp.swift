@@ -8,7 +8,7 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
     let hostname: String
     var token: String
     let apiKey: String
-    let syncQueue = DispatchQueue(label: "Stream_Video_Sfu_Signal_SignalServer", qos: .userInitiated)
+    let syncQueue = DispatchQueue(label: "Stream_Video_Sfu_Signal_SignalServer", qos: .default)
     let pathPrefix: String = "/stream.video.sfu.signal.SignalServer/"
     var httpConfig = HTTPConfig.default //TODO: move this
     

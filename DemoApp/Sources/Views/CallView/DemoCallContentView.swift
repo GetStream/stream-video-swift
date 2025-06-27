@@ -8,7 +8,7 @@ import SwiftUI
 
 struct DemoCallContentView: View {
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var callId: String
     var loggedInView: AppEnvironment.LoggedInView
 

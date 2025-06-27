@@ -37,11 +37,11 @@ public struct CreateCallOptions: Sendable, Hashable {
     }
 }
 
-public struct Ingress {
+public struct Ingress: Equatable {
     public let rtmp: RTMP
 }
 
-public struct RTMP {
+public struct RTMP: Equatable {
     public let address: String
     public let streamKey: String
 }

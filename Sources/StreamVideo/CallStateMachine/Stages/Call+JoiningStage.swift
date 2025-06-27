@@ -128,24 +128,22 @@ extension Call.StateMachine.Stage {
             if let callSettings = input.callSettings {
                 try Task.checkCancellation()
 
-                await call.state.update(callSettings: callSettings)
+                call.store.update(callSettings: callSettings)
             }
 
             try Task.checkCancellation()
 
-            await call.state.update(from: response)
+            call.store.update(from: response)
 
             try Task.checkCancellation()
 
-            let updated = await call.state.callSettings
+            let updated = call.store.callSettings
 
             call.updateCallSettingsManagers(with: updated)
 
             try Task.checkCancellation()
 
-            await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
-                streamVideo?.state.activeCall = call
-            }.value
+            streamVideo.store.activeCall = call
 
             try Task.checkCancellation()
 

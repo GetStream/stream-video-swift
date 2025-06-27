@@ -13,7 +13,7 @@ public enum BroadcastState {
 }
 
 /// Class responsible for observing broadcast state changes.
-public class BroadcastObserver: ObservableObject {
+public class BroadcastObserver: ObservableObject, @unchecked Sendable {
 
     /// Published property to track the current state of the broadcast.
     @Published public var broadcastState: BroadcastState = .notStarted

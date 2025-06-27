@@ -13,8 +13,8 @@ struct DemoCallingTopView: View {
     @Injected(\.colors) var colors
 
     @ObservedObject var streamVideo = InjectedValues[\.streamVideo]
-    @ObservedObject var callViewModel: CallViewModel
-    @ObservedObject var appState: AppState = .shared
+    var callViewModel: CallViewModel
+    var appState: AppState = .shared
     @State var logoutAlertShown = false
 
     private var currentUser: User {

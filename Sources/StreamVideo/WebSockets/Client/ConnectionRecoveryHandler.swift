@@ -253,7 +253,7 @@ private extension DefaultConnectionRecoveryHandler {
         
         reconnectionTimer = reconnectionTimerType.schedule(
             timeInterval: delay,
-            queue: .main,
+            queue: .global(qos: .default),
             onFire: { [weak self] in
                 log.debug("Timer 🔥", subsystems: .webSocket)
                 

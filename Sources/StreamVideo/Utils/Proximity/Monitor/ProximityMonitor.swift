@@ -26,7 +26,6 @@ public protocol ProximityProviding {
     var isActive: Bool { get }
 
     /// Starts monitoring device proximity state
-    @MainActor
     func startObservation()
 
     /// Stops monitoring device proximity state
@@ -39,6 +38,7 @@ final class ProximityMonitor: ProximityProviding, ObservableObject, @unchecked S
     @Injected(\.currentDevice) private var currentDevice
 
     private var stateObservationCancellable: AnyCancellable?
+    private let disposableBag = DisposableBag()
 
     /// Current proximity state of the device
     @Published public private(set) var state: ProximityState = .far
@@ -54,21 +54,24 @@ final class ProximityMonitor: ProximityProviding, ObservableObject, @unchecked S
 
     /// Starts monitoring device proximity state.
     /// Only activates on iPhone devices and if not already monitoring.
-    @MainActor
     func startObservation() {
         #if canImport(UIKit)
         guard currentDevice.deviceType == .phone, !isActive else {
             return
         }
-        currentDevice.isProximityMonitoringEnabled = true
+        Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            guard let self else { return }
+            currentDevice.isProximityMonitoringEnabled = true
 
-        stateObservationCancellable = NotificationCenter
-            .default
-            .publisher(for: UIDevice.proximityStateDidChangeNotification)
-            .map { _ in ProximityState(UIDevice.current.proximityState) }
-            .removeDuplicates()
-            .log(.debug, subsystems: .audioSession) { "Proximity state updated \($0)." }
-            .assign(to: \.state, onWeak: self)
+            stateObservationCancellable = NotificationCenter
+                .default
+                .publisher(for: UIDevice.proximityStateDidChangeNotification)
+                .map { _ in ProximityState(UIDevice.current.proximityState) }
+                .removeDuplicates()
+                .log(.debug) { "Proximity state updated \($0)." }
+                .assign(to: \.state, onWeak: self)
+        }
+
         #endif
     }
 

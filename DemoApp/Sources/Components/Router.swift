@@ -35,7 +35,6 @@ final class Router: ObservableObject {
 
     private init(_ appState: AppState) {
         self.appState = appState
-
         if
             appState.unsecureRepository.currentConfiguration() != AppEnvironment.configuration
             || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL
@@ -48,7 +47,6 @@ final class Router: ObservableObject {
         // Store the current AppEnvironment configuration.
         appState.unsecureRepository.save(configuration: AppEnvironment.configuration)
         appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
-
         Task {
             do {
                 try await loadLoggedInUser()

@@ -31,9 +31,7 @@ final class ProximityManager: @unchecked Sendable {
 
         if isSupported {
             activeCallPublisher
-                .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
-                    self?.didUpdateActiveCall($0)
-                }
+                .sinkTask(storeIn: disposableBag) { [weak self] in self?.didUpdateActiveCall($0) }
                 .store(in: disposableBag)
         }
     }
@@ -75,7 +73,6 @@ final class ProximityManager: @unchecked Sendable {
 
     /// Handles active call changes by starting/stopping proximity observation
     /// - Parameter activeCall: New active call or nil if no active call
-    @MainActor
     private func didUpdateActiveCall(_ activeCall: Call?) {
         if
             let activeCall,

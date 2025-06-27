@@ -36,7 +36,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// A public publisher that exposes the average power of the audio signal.
     open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
 
-    @Atomic private(set) var isRecording: Bool = false {
+    @Atomic public private(set) var isRecording: Bool = false {
         willSet {
             activeCallAudioSession?.isRecording = newValue
             _isRecordingSubject.send(newValue)
@@ -118,11 +118,9 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
             updateMetersTimerCancellable?.cancel()
             disposableBag.remove("update-meters")
-            updateMetersTimerCancellable = Foundation
-                .Timer
-                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
-                .autoconnect()
-                .sinkTask(storeIn: disposableBag, identifier: "update-meters") { [weak self, audioRecorder] _ in
+            updateMetersTimerCancellable = DefaultTimer
+                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
+                .sink { [weak self, audioRecorder] _ in
                     audioRecorder.updateMeters()
                     self?._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))
                 }

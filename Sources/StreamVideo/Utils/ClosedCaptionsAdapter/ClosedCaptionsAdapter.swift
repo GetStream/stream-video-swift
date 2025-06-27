@@ -84,6 +84,6 @@ final class ClosedCaptionsAdapter {
 
         itemsCancellable = items
             .publisher
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak call] in call?.state.update(closedCaptions: $0) }
+            .sink { [weak call] in call?.store.closedCaptions = $0 }
     }
 }
