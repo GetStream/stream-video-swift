@@ -48,6 +48,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Senda
     }
 
     private func assertSubject(
+        record: Bool = false,
         @ViewBuilder _ subject: () -> some View,
         file: StaticString = #file,
         function: String = #function,
@@ -57,6 +58,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase, @unchecked Senda
             subject(),
             variants: snapshotVariants,
             size: sizeThatFits,
+            record: record,
             line: line,
             file: file,
             function: function

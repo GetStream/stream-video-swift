@@ -33,6 +33,7 @@
   },
   "testTargets" : [
     {
+      "parallelizable" : true,
       "skippedTests" : [
         "ThermalStateObserverTests\/test_injectedValueWasSetCorrectly()"
       ],
