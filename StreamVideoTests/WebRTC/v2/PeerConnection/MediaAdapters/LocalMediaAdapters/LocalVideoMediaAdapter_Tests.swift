@@ -707,6 +707,42 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(activeEncoding.scalabilityMode, scalabilityMode)
     }
 
+    func test_changePublishQuality_forActiveTransceiver_videoCapturerWasCalledWithCorrectDimensions() async throws {
+        let transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
+        mockPeerConnection.stub(for: .addTransceiver, with: transceiver)
+        try await subject.setUp(
+            with: .init(videoOn: true, cameraPosition: .back),
+            ownCapabilities: [.sendVideo]
+        )
+        try await subject.didUpdateCallSettings(.init(videoOn: true))
+        await fulfillment { self.mockPeerConnection.timesCalled(.addTransceiver) == 1 }
+
+        let scalabilityMode = "L2T1"
+
+        subject.changePublishQuality(
+            with: [
+                .dummy(
+                    codec: .dummy(name: "h264"),
+                    layers: [
+                        .dummy(
+                            name: "q",
+                            isActive: true,
+                            scalabilityMode: scalabilityMode,
+                            maxFramerate: 30,
+                            maxBitrate: 120,
+                            scaleResolutionDownBy: 2,
+                        )
+                    ],
+                    trackType: .video,
+                )
+            ]
+        )
+
+        await fulfillment {
+            self.mockVideoCapturer.timesCalled(.updateCaptureQuality) == 1
+        }
+    }
+
     func test_changePublishQuality_forInactiveTransceiver_transceiverWasUpdatedCorrectly() async throws {
         let transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .h264))
         let av1Transceiver = try makeTransceiver(of: .video, videoOptions: .dummy(codec: .av1))

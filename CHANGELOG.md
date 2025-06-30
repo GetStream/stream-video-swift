@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 - Performance improvements around timers. [#877](https://github.com/GetStream/stream-video-swift/pull/877)
+- Improve VideoCapturer handling [#872](https://github.com/GetStream/stream-video-swift/pull/872)
 
 ### 🐞 Fixed
 - An issue causing the CallSettings to be misaligned with the UI components. [#882](https://github.com/GetStream/stream-video-swift/pull/882)
