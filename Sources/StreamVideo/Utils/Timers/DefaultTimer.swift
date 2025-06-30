@@ -12,7 +12,7 @@ import Foundation
  allowing precise control of scheduling on custom queues. This ensures that
  timers are not bound to the main thread and can run in background contexts.
  */
-struct DefaultTimer: Timer {
+public struct DefaultTimer: Timer {
     /// Schedules a one-shot timer that fires once after the specified interval.
     ///
     /// The timer executes the ``onFire`` callback on the specified dispatch queue,
@@ -66,7 +66,7 @@ struct DefaultTimer: Timer {
     ///   - repeating: Whether the timer should repeat. Ignored in current
     ///     implementation.
     /// - Returns: A publisher that emits ``Date`` values.
-    static func publish(
+    public static func publish(
         every interval: TimeInterval
     ) -> AnyPublisher<Date, Never> {
         TimerStorage

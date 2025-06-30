@@ -45,10 +45,8 @@ final class ParticipantEventResetAdapter: @unchecked Sendable {
                 return
             }
 
-            timerCancellable = Foundation
-                .Timer
-                .publish(every: 1, on: .main, in: .default)
-                .autoconnect()
+            timerCancellable = DefaultTimer
+                .publish(every: 1)
                 .sink { [weak self] _ in self?.timerFired() }
         }
     }

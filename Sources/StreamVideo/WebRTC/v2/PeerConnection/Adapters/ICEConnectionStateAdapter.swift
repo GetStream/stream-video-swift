@@ -53,10 +53,8 @@ final class ICEConnectionStateAdapter {
             peerConnectionCoordinator?.restartICE()
 
         case .disconnected:
-            scheduledRestartICECancellable = Foundation
-                .Timer
-                .publish(every: scheduleICERestartInterval, on: .main, in: .default)
-                .autoconnect()
+            scheduledRestartICECancellable = DefaultTimer
+                .publish(every: scheduleICERestartInterval)
                 .sink { [weak self] _ in self?.restartICE() }
 
         case .connected:

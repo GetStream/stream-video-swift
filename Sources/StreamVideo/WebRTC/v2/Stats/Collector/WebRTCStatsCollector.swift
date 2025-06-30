@@ -76,10 +76,8 @@ final class WebRTCStatsCollector: WebRTCStatsCollecting, @unchecked Sendable {
         }
 
         collectionCancellable?.cancel()
-        collectionCancellable = Foundation
-            .Timer
-            .publish(every: interval, on: .main, in: .default)
-            .autoconnect()
+        collectionCancellable = DefaultTimer
+            .publish(every: interval)
             .receive(on: DispatchQueue.global(qos: .utility))
             .log(.debug, subsystems: .webRTC) { _ in "Will collect stats." }
             .sink { [weak self] _ in self?.collectStats() }
