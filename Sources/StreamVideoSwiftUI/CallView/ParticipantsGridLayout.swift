@@ -7,7 +7,7 @@ import StreamWebRTC
 import SwiftUI
 
 public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
-    
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
@@ -29,7 +29,7 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
         self.onChangeTrackVisibility = onChangeTrackVisibility
         self.call = call
     }
-    
+
     public var body: some View {
         ZStack {
             if orientationAdapter.orientation.isPortrait {
@@ -55,13 +55,13 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
 }
 
 struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
-    
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
     var body: some View {
         ZStack {
             if participants.count <= 3 {
@@ -107,13 +107,13 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
 }
 
 struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
-    
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
     var body: some View {
         ZStack {
             if participants.count <= 3 {
@@ -159,9 +159,9 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
 }
 
 struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+
     var viewFactory: Factory
     var call: Call?
     var leftColumnParticipants: [CallParticipant]
@@ -169,7 +169,7 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     var availableFrame: CGRect
     var innerItemSpace: CGFloat = 8
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
     var body: some View {
         HStack(spacing: innerItemSpace) {
             VerticalParticipantsView(
@@ -207,9 +207,9 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
 }
 
 struct TwoRowParticipantsView<Factory: ViewFactory>: View {
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+
     var viewFactory: Factory
     var call: Call?
     var firstRowParticipants: [CallParticipant]
@@ -217,7 +217,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     var availableFrame: CGRect
     var innerItemSpacing: CGFloat = 8
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
     var body: some View {
         VStack(spacing: 8) {
             HorizontalParticipantsView(
@@ -227,7 +227,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
                 availableFrame: bounds,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
-            
+
             HorizontalParticipantsView(
                 viewFactory: viewFactory,
                 call: call,
@@ -239,7 +239,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
         .frame(maxWidth: availableFrame.width, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
     }
-    
+
     private var bounds: CGRect {
         .init(
             origin: .zero,
@@ -249,7 +249,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
 }
 
 struct VerticalParticipantsView<Factory: ViewFactory>: View {
-            
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
@@ -289,11 +289,11 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
             }
         }
     }
-    
+
     private var ratio: CGFloat {
         itemFrame.width / itemFrame.height
     }
-    
+
     private var itemFrame: CGRect {
         let itemsCount = CGFloat(includeSpacer ? participants.count + 1 : participants.count)
         return .init(
@@ -307,7 +307,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
 }
 
 struct HorizontalParticipantsView<Factory: ViewFactory>: View {
-            
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
@@ -341,18 +341,18 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
             }
         }
     }
-    
+
     private var bounds: CGRect {
         .init(
             origin: .zero,
             size: CGSize(width: availableWidth, height: availableFrame.height)
         )
     }
-    
+
     private var ratio: CGFloat {
         availableWidth / availableFrame.height
     }
-    
+
     private var availableWidth: CGFloat {
         (availableFrame.width - totalInnerItemSpacing) / CGFloat(participants.count)
     }

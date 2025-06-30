@@ -2,22 +2,29 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     @Injected(\.colors) var colors
+    @Injected(\.currentDevice) var currentDevice
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
     var frame: CGRect
     var innerItemSpace: CGFloat
     var viewFactory: Factory
     var isZoomEnabled: Bool
 
-    private let identifier = UUID()
     @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
+
+    @State var hideUIElements: Bool
+    var hideUIElementsPublisher: AnyPublisher<Bool, Never>
+
+    @State var participants: [CallParticipant]
+    var participantsPublisher: AnyPublisher<[CallParticipant], Never>?
 
     public init(
         viewModel: CallViewModel,
@@ -50,35 +57,71 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         self.innerItemSpace = innerItemSpace
         self.viewFactory = viewFactory
         self.isZoomEnabled = isZoomEnabled
+
+        hideUIElements = viewModel.hideUIElements
+        hideUIElementsPublisher = viewModel
+            .$hideUIElements
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        participants = viewModel.participants
+        participantsPublisher = viewModel
+            .$participants
+            .receive(on: DispatchQueue.global(qos: .default))
+            .removeDuplicates(by: { lhs, rhs in
+                let lhsSessionIds = lhs.map(\.sessionId)
+                let rhsSessionIds = rhs.map(\.sessionId)
+                return lhsSessionIds == rhsSessionIds
+            })
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     public var body: some View {
         VStack(spacing: innerItemSpace) {
-            if !viewModel.hideUIElements, orientationAdapter.orientation.isPortrait || UIDevice.current.isIpad {
-                Text("\(screenSharing.participant.name) presenting")
-                    .foregroundColor(colors.text)
-                    .padding()
-                    .accessibility(identifier: "participantPresentingLabel")
-            }
+            headerView
+            middleView
+            footerView
+        }
+        .onReceive(hideUIElementsPublisher) { hideUIElements = $0 }
+        .onReceive(participantsPublisher) { participants = $0 }
+    }
 
-            if isZoomEnabled, !viewModel.hideUIElements {
-                ZoomableScrollView { screensharingView }
-            } else {
-                screensharingView
-            }
-            
-            if !viewModel.hideUIElements {
-                HorizontalParticipantsListView(
-                    viewFactory: viewFactory,
-                    participants: viewModel.participants,
-                    frame: participantsStripFrame,
-                    call: viewModel.call,
-                    showAllInfo: true
-                )
-            }
+    @ViewBuilder
+    var headerView: some View {
+        if !hideUIElements,
+           (orientationAdapter.orientation.isPortrait || currentDevice.deviceType == .pad) {
+            Text("\(screenSharing.participant.name) presenting")
+                .foregroundColor(colors.text)
+                .padding()
+                .accessibility(identifier: "participantPresentingLabel")
         }
     }
 
+    @ViewBuilder
+    var middleView: some View {
+        if isZoomEnabled, !hideUIElements {
+            ZoomableScrollView { screensharingView }
+        } else {
+            screensharingView
+        }
+    }
+
+    @ViewBuilder
+    var footerView: some View {
+        if !hideUIElements {
+            HorizontalParticipantsListView(
+                viewFactory: viewFactory,
+                participants: participants,
+                frame: participantsStripFrame,
+                call: viewModel.call,
+                showAllInfo: true
+            )
+        }
+    }
+
+    @ViewBuilder
     private var screensharingView: some View {
         VideoRendererView(
             id: "\(screenSharing.participant.id)-screenshare",
@@ -87,7 +130,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         ) { view in
             if let track = screenSharing.participant.screenshareTrack {
                 log.info(
-                    "Found \(track.kind) track:\(track.trackId) for \(screenSharing.participant.name) and will add on \(type(of: self)):\(identifier))",
+                    "Found \(track.kind) track:\(track.trackId) for \(screenSharing.participant.name) and will add on \(type(of: self)))",
                     subsystems: .webRTC
                 )
                 view.add(track: track)
@@ -122,18 +165,5 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             width: frame.width,
             height: barHeight
         )
-    }
-}
-
-struct HorizontalContainer<Content: View>: View {
-    
-    @ViewBuilder var content: () -> Content
-    
-    var body: some View {
-        if #available(iOS 14.0, *) {
-            LazyHStack(content: content)
-        } else {
-            HStack(content: content)
-        }
     }
 }

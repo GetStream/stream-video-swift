@@ -10,17 +10,15 @@ struct CallingParticipantView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     var participant: Member?
     var caller: String = ""
-    
+
     var body: some View {
-        ZStack {
-            if let participant = participant {
-                IncomingCallParticipantView(
-                    viewFactory: viewFactory,
-                    participant: participant
-                )
-            } else {
-                CircledTitleView(title: caller.isEmpty ? "" : String(caller.uppercased().first!))
-            }
+        if let participant = participant {
+            IncomingCallParticipantView(
+                viewFactory: viewFactory,
+                participant: participant
+            )
+        } else {
+            CircledTitleView(title: caller.isEmpty ? "" : String(caller.uppercased().first!))
         }
     }
 }
@@ -28,13 +26,13 @@ struct CallingParticipantView<Factory: ViewFactory>: View {
 struct AnimatingParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.colors) var colors
-    
-    @State var isCalling = false
 
     var viewFactory: Factory
     var participant: Member?
     var caller: String = ""
-    
+
+    @State var isCalling = false
+
     var body: some View {
         CallingParticipantView(
             viewFactory: viewFactory,
@@ -54,14 +52,14 @@ struct AnimatingParticipantView<Factory: ViewFactory>: View {
                     opacity: 0.2,
                     isCalling: isCalling
                 )
-                    
+
                 // Middle circle
                 PulsatingCircle(
                     scaleEffect: isCalling ? 0.7 : 1.1,
                     opacity: 0.5,
                     isCalling: isCalling
                 )
-                    
+
                 // Inner circle
                 PulsatingCircle(
                     scaleEffect: isCalling ? 0.5 : 1.2,
@@ -77,14 +75,15 @@ struct AnimatingParticipantView<Factory: ViewFactory>: View {
 }
 
 struct PulsatingCircle: View {
-    
+
     @Injected(\.colors) var colors
+
     var scaleEffect: CGFloat
     var opacity: CGFloat
     var isCalling: Bool
     var size: CGFloat = .expandedAvatarSize
     var animation: Animation = .easeOut(duration: 1).repeatForever(autoreverses: true)
-    
+
     var body: some View {
         Circle()
             .fill(colors.callPulsingColor)

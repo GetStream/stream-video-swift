@@ -2,16 +2,16 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
-@available(iOS 14.0, *)
 public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
-    
+
     var rootView: RootView
     var viewFactory: Factory
-    @StateObject var viewModel: CallViewModel
-    
+    var viewModel: CallViewModel
+
     public init(
         rootView: RootView,
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -19,9 +19,9 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     ) {
         self.rootView = rootView
         self.viewFactory = viewFactory
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         ZStack {
             rootView
@@ -30,28 +30,48 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     }
 }
 
-@available(iOS 14.0, *)
 public struct CallContainer<Factory: ViewFactory>: View {
-    
+
     @Injected(\.utils) var utils
-    
+
     var viewFactory: Factory
-    @StateObject var viewModel: CallViewModel
-    
-    private let padding: CGFloat = 16
-    
+    var viewModel: CallViewModel
+    var padding: CGFloat = 16
+
+    @State var callingState: CallingState
+    var callingStatePublisher: AnyPublisher<CallingState, Never>
+
+    @State var hasParticipants: Bool
+    var hasParticipantsPublisher: AnyPublisher<Bool, Never>
+
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         viewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        _viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
+
+        callingState = viewModel.callingState
+        callingStatePublisher = viewModel
+            .$callingState
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        hasParticipants = viewModel.callParticipants.count > 1
+        hasParticipantsPublisher = viewModel
+            .$callParticipants
+            .receive(on: DispatchQueue.global(qos: .default))
+            .map(\.count)
+            .map { $0 > 1 }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
-    
+
     public var body: some View {
         Group {
             if shouldShowCallView {
-                if viewModel.callParticipants.count > 1 {
+                if hasParticipants {
                     if viewModel.isMinimized {
                         viewFactory.makeMinimizedCallView(viewModel: viewModel)
                     } else {
@@ -60,41 +80,43 @@ public struct CallContainer<Factory: ViewFactory>: View {
                 } else {
                     viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
                 }
-            } else if viewModel.callingState == .reconnecting {
+            } else if callingState == .reconnecting {
                 viewFactory.makeReconnectionView(viewModel: viewModel)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .toastView(toast: $viewModel.toast)
+        .toastView(toast: .init(get: { viewModel.toast }, set: { viewModel.toast = $0 }))
         .overlay(overlayView)
-        .onReceive(viewModel.$callingState) { _ in
-            if viewModel.callingState == .idle || viewModel.callingState == .inCall {
+        .onReceive(callingStatePublisher) {
+            if $0 == .idle || $0 == .inCall {
                 utils.callSoundsPlayer.stopOngoingSound()
             }
+            callingState = $0
         }
+        .onReceive(hasParticipantsPublisher) { hasParticipants = $0 }
     }
-    
+
     @ViewBuilder
     private var overlayView: some View {
-        if case let .incoming(callInfo) = viewModel.callingState {
+        if case let .incoming(callInfo) = callingState {
             viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
-        } else if viewModel.callingState == .outgoing {
+        } else if callingState == .outgoing {
             viewFactory.makeOutgoingCallView(viewModel: viewModel)
-        } else if viewModel.callingState == .joining {
+        } else if callingState == .joining {
             viewFactory.makeJoiningCallView(viewModel: viewModel)
-        } else if case let .lobby(lobbyInfo) = viewModel.callingState {
+        } else if case let .lobby(lobbyInfo) = callingState {
             viewFactory.makeLobbyView(
                 viewModel: viewModel,
                 lobbyInfo: lobbyInfo,
-                callSettings: $viewModel.callSettings
+                callSettings: .init(get: { viewModel.callSettings }, set: { viewModel.callSettings = $0 })
             )
         } else {
             EmptyView()
         }
     }
-    
+
     private var shouldShowCallView: Bool {
-        switch viewModel.callingState {
+        switch callingState {
         case .outgoing, .incoming(_), .inCall, .joining, .lobby:
             return true
         default:
@@ -107,58 +129,86 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
 
     @Injected(\.appearance) var appearance
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var viewFactory: Factory
-    
+
+    @State var callingState: CallingState
+    var callingStatePublisher: AnyPublisher<CallingState, Never>
+
     public init(viewModel: CallViewModel, viewFactory: Factory) {
         self.viewModel = viewModel
         self.viewFactory = viewFactory
+
+        callingState = viewModel.callingState
+        callingStatePublisher = viewModel
+            .$callingState
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
-    
+
     public var body: some View {
-        ZStack {
-            DefaultBackgroundGradient()
-                .edgesIgnoringSafeArea(.all)
+        contentView
+            .background(backgroundView)
+            .onReceive(callingStatePublisher) { callingState = $0 }
+    }
 
-            VStack {
-                viewFactory.makeCallTopView(viewModel: viewModel)
-                    .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
-
-                Group {
-                    if let localParticipant = viewModel.localParticipant {
-                        GeometryReader { proxy in
-                            LocalVideoView(
-                                viewFactory: viewFactory,
-                                participant: localParticipant,
-                                idSuffix: "waiting",
-                                callSettings: viewModel.callSettings,
-                                call: viewModel.call,
-                                availableFrame: proxy.frame(in: .global)
-                            )
-                            .modifier(viewFactory.makeLocalParticipantViewModifier(
-                                localParticipant: localParticipant,
-                                callSettings: $viewModel.callSettings,
-                                call: viewModel.call
-                            ))
-                        }
-                    } else {
-                        Spacer()
-                    }
-                }
+    @ViewBuilder
+    var contentView: some View {
+        VStack {
+            headerView
+            middleView
                 .padding(.horizontal, 8)
-                .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
-
-                viewFactory.makeCallControlsView(viewModel: viewModel)
-                    .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
-            }
-            .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
+            footerView
         }
+        .presentParticipantListView(viewFactory: viewFactory, viewModel: viewModel)
+    }
+
+    @ViewBuilder
+    var headerView: some View {
+        if callingState != .reconnecting {
+            viewFactory.makeCallTopView(viewModel: viewModel)
+        }
+    }
+
+    @ViewBuilder
+    var middleView: some View {
+        if callingState != .reconnecting, let localParticipant = viewModel.localParticipant {
+            GeometryReader { proxy in
+                LocalVideoView(
+                    viewFactory: viewFactory,
+                    participant: localParticipant,
+                    idSuffix: "waiting",
+                    callSettings: viewModel.callSettings,
+                    call: viewModel.call,
+                    availableFrame: proxy.frame(in: .global)
+                )
+                .modifier(viewFactory.makeLocalParticipantViewModifier(
+                    localParticipant: localParticipant,
+                    callSettings: .init(get: { viewModel.callSettings }, set: { viewModel.callSettings = $0 }),
+                    call: viewModel.call
+                ))
+            }
+        } else {
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    var footerView: some View {
+        if callingState != .reconnecting {
+            viewFactory.makeCallControlsView(viewModel: viewModel)
+        }
+    }
+
+    @ViewBuilder
+    var backgroundView: some View {
+        DefaultBackgroundGradient()
+            .edgesIgnoringSafeArea(.all)
     }
 }
 
-@available(iOS 14.0, *)
 public struct CallModifier<Factory: ViewFactory>: ViewModifier {
-    
+
     var viewFactory: Factory
     var viewModel: CallViewModel
 
@@ -170,17 +220,13 @@ public struct CallModifier<Factory: ViewFactory>: ViewModifier {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
-    
-    public func body(content: Content) -> some View {
-        VideoViewOverlay(rootView: content, viewFactory: viewFactory, viewModel: viewModel)
-    }
-}
-
-@available(iOS 14.0, *)
-extension CallModifier where Factory == DefaultViewFactory {
 
     @MainActor
-    public init(viewModel: CallViewModel) {
+    public init(viewModel: CallViewModel) where Factory == DefaultViewFactory {
         self.init(viewFactory: DefaultViewFactory.shared, viewModel: viewModel)
+    }
+
+    public func body(content: Content) -> some View {
+        VideoViewOverlay(rootView: content, viewFactory: viewFactory, viewModel: viewModel)
     }
 }

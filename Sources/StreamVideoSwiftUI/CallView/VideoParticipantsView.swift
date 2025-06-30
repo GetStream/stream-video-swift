@@ -2,16 +2,23 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
 
 public struct VideoParticipantsView<Factory: ViewFactory>: View {
-    
+
     var viewFactory: Factory
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+
+    @State var participants: [CallParticipant]
+    var participantsPublisher: AnyPublisher<[CallParticipant], Never>
+
+    @State var participantsLayout: ParticipantsLayout
+    var participantsLayoutPublisher: AnyPublisher<ParticipantsLayout, Never>
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -23,36 +30,60 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
         self.viewModel = viewModel
         self.availableFrame = availableFrame
         self.onChangeTrackVisibility = onChangeTrackVisibility
+
+        participants = viewModel.participants
+        participantsPublisher = viewModel
+            .$participants
+            .receive(on: DispatchQueue.global(qos: .default))
+            .removeDuplicates(by: { lhs, rhs in
+                let lhsSessionIds = lhs.map(\.sessionId)
+                let rhsSessionIds = rhs.map(\.sessionId)
+                return lhsSessionIds == rhsSessionIds
+            })
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        participantsLayout = viewModel.participantsLayout
+        participantsLayoutPublisher = viewModel
+            .$participantsLayout
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
-    
+
     public var body: some View {
-        ZStack {
-            if viewModel.participantsLayout == .fullScreen, let first = viewModel.participants.first {
-                ParticipantsFullScreenLayout(
-                    viewFactory: viewFactory,
-                    participant: first,
-                    call: viewModel.call,
-                    frame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
-                )
-            } else if viewModel.participantsLayout == .spotlight, let first = viewModel.participants.first {
-                ParticipantsSpotlightLayout(
-                    viewFactory: viewFactory,
-                    participant: first,
-                    call: viewModel.call,
-                    participants: Array(viewModel.participants.dropFirst()),
-                    frame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
-                )
-            } else {
-                ParticipantsGridLayout(
-                    viewFactory: viewFactory,
-                    call: viewModel.call,
-                    participants: viewModel.participants,
-                    availableFrame: availableFrame,
-                    onChangeTrackVisibility: onChangeTrackVisibility
-                )
-            }
+        contentView
+            .onReceive(participantsPublisher) { participants = $0 }
+            .onReceive(participantsLayoutPublisher) { participantsLayout = $0 }
+    }
+
+    @ViewBuilder
+    var contentView: some View {
+        if participantsLayout == .fullScreen, let first = participants.first {
+            ParticipantsFullScreenLayout(
+                viewFactory: viewFactory,
+                participant: first,
+                call: viewModel.call,
+                frame: availableFrame,
+                onChangeTrackVisibility: onChangeTrackVisibility
+            )
+        } else if participantsLayout == .spotlight, let first = participants.first {
+            ParticipantsSpotlightLayout(
+                viewFactory: viewFactory,
+                participant: first,
+                call: viewModel.call,
+                participants: Array(participants.dropFirst()),
+                frame: availableFrame,
+                onChangeTrackVisibility: onChangeTrackVisibility
+            )
+        } else {
+            ParticipantsGridLayout(
+                viewFactory: viewFactory,
+                call: viewModel.call,
+                participants: participants,
+                availableFrame: availableFrame,
+                onChangeTrackVisibility: onChangeTrackVisibility
+            )
         }
     }
 }
@@ -64,12 +95,17 @@ public enum VideoCallParticipantDecoration: Hashable, CaseIterable {
 
 public struct VideoCallParticipantModifier: ViewModifier {
 
-    var participant: CallParticipant
     var call: Call?
     var availableFrame: CGRect
     var ratio: CGFloat
     var showAllInfo: Bool
     var decorations: Set<VideoCallParticipantDecoration>
+
+    @State var participant: CallParticipant
+    var participantPublisher: AnyPublisher<CallParticipant, Never>?
+
+    @State var participantsCount: Int
+    var participantsCountPublisher: AnyPublisher<Int, Never>?
 
     public init(
         participant: CallParticipant,
@@ -79,54 +115,69 @@ public struct VideoCallParticipantModifier: ViewModifier {
         showAllInfo: Bool,
         decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
     ) {
-        self.participant = participant
         self.call = call
         self.availableFrame = availableFrame
         self.ratio = ratio
         self.showAllInfo = showAllInfo
         self.decorations = .init(decorations)
+
+        self.participant = participant
+        participantPublisher = call?
+            .state
+            .$participantsMap
+            .compactMap { $0[participant.sessionId] }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        participantsCount = call?.state.participants.endIndex ?? 0
+        participantsCountPublisher = call?
+            .state
+            .$participants
+            .map(\.endIndex)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
-    
+
     public func body(content: Content) -> some View {
         content
             .adjustVideoFrame(to: availableFrame.size.width, ratio: ratio)
-            .overlay(
-                ZStack {
-                    BottomView(content: {
-                        HStack {
-                            ParticipantInfoView(
-                                participant: participant,
-                                isPinned: participant.isPinned
-                            )
-                            
-                            Spacer()
-
-                            if showAllInfo {
-                                ConnectionQualityIndicator(
-                                    connectionQuality: participant.connectionQuality
-                                )
-                            }
-                        }
-                    })
-                }
-            )
+            .overlay(participantInfoView)
             .applyDecorationModifierIfRequired(
                 VideoCallParticipantOptionsModifier(participant: participant, call: call),
                 decoration: .options,
                 availableDecorations: decorations
             )
             .applyDecorationModifierIfRequired(
-                VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount),
+                VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantsCount),
                 decoration: .speaking,
                 availableDecorations: decorations
             )
+            .onReceive(participantPublisher) { participant = $0 }
+            .onReceive(participantsCountPublisher) { participantsCount = $0 }
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .clipped()
     }
 
-    @MainActor
-    private var participantCount: Int {
-        call?.state.participants.count ?? 0
+    @ViewBuilder
+    var participantInfoView: some View {
+        BottomView {
+            HStack {
+                ParticipantInfoView(
+                    participant: participant,
+                    isPinned: participant.isPinned
+                )
+
+                Spacer()
+
+                if showAllInfo {
+                    ConnectionQualityIndicator(
+                        connectionQuality: participant.connectionQuality
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -325,7 +376,14 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     var customData: [String: RawJSON]
     var call: Call?
 
+    @State private var track: RTCVideoTrack?
+    var trackPublisher: AnyPublisher<RTCVideoTrack?, Never>?
+
+    @State private var showVideo: Bool
+    var showVideoPublisher: AnyPublisher<Bool, Never>?
+
     @State private var isUsingFrontCameraForLocalUser: Bool = false
+    var isUsingFrontCameraForLocalUserPublisher: AnyPublisher<Bool, Never>?
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -345,61 +403,85 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.customData = customData
         self.call = call
+
+        track = participant.track
+        trackPublisher = call?
+            .state
+            .$participantsMap
+            .map { $0[participant.sessionId]?.track }
+            .removeDuplicates(by: { $0?.trackId == $1?.trackId })
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        showVideo = participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
+        showVideoPublisher = call?
+            .state
+            .$participantsMap
+            .map { $0[participant.sessionId]?.shouldDisplayTrack ?? false }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+
+        if participant.sessionId == call?.state.localParticipant?.sessionId {
+            isUsingFrontCameraForLocalUser = call?.state.callSettings.cameraPosition == .front
+            isUsingFrontCameraForLocalUserPublisher = call?
+                .state
+                .$callSettings
+                .map { $0.cameraPosition == .front }
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .eraseToAnyPublisher()
+        }
     }
-    
+
     public var body: some View {
-        withCallSettingsObservation {
-            VideoRendererView(
-                id: id,
-                size: availableFrame.size,
-                contentMode: contentMode,
-                showVideo: showVideo,
-                handleRendering: { [weak call, participant] view in
-                    guard call != nil else { return }
-                    view.handleViewRendering(for: participant) { [weak call] size, participant in
-                        Task { [weak call] in
-                            await call?.updateTrackSize(size, for: participant)
-                        }
-                    }
-                }
-            )
-        }
-        .opacity(showVideo ? 1 : 0)
-        .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
-        .accessibility(identifier: "callParticipantView")
-        .streamAccessibility(value: showVideo ? "1" : "0")
-        .overlay(
-            CallParticipantImageView(
-                viewFactory: viewFactory,
-                id: participant.id,
-                name: participant.name,
-                imageURL: participant.profileImageURL
-            )
-            .opacity(showVideo ? 0 : 1)
-        )
+        contentView
+            .onReceive(trackPublisher) { track = $0 }
+            .onReceive(showVideoPublisher) { showVideo = $0 }
+            .onReceive(isUsingFrontCameraForLocalUserPublisher) { isUsingFrontCameraForLocalUser = $0 }
+            .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
+            .accessibility(identifier: "callParticipantView")
+            .streamAccessibility(value: showVideo ? "1" : "0")
+            .id(participant.sessionId)
     }
 
-    private var showVideo: Bool {
-        participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
-    }
-
-    @MainActor
     @ViewBuilder
-    private func withCallSettingsObservation(
-        @ViewBuilder _ content: () -> some View
-    ) -> some View {
-        if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
-            Group {
-                if isUsingFrontCameraForLocalUser {
-                    content()
-                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                } else {
-                    content()
-                }
-            }.onReceive(call?.state.$callSettings) { self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
+    var contentView: some View {
+        if showVideo, track != nil {
+            if isUsingFrontCameraForLocalUser {
+                videoRendererView
+                    .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+            } else {
+                videoRendererView
+            }
         } else {
-            content()
+            placeholderView
         }
+    }
+
+    @ViewBuilder
+    var videoRendererView: some View {
+        if let track {
+            TrackVideoRendererView(
+                track: track,
+                contentMode: contentMode
+            ) { [weak call, participant] size in
+                Task { [weak call] in
+                    await call?.updateTrackSize(size, for: participant)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    var placeholderView: some View {
+        CallParticipantImageView(
+            viewFactory: viewFactory,
+            id: participant.id,
+            name: participant.name,
+            imageURL: participant.profileImageURL
+        )
+        .frame(width: availableFrame.width, height: availableFrame.height)
     }
 }
 
@@ -407,7 +489,7 @@ public struct ParticipantInfoView: View {
     @Injected(\.images) var images
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
-    
+
     var participant: CallParticipant
     var isPinned: Bool
     var maxHeight: CGFloat
@@ -421,7 +503,7 @@ public struct ParticipantInfoView: View {
         self.isPinned = isPinned
         self.maxHeight = CGFloat(maxHeight)
     }
-    
+
     public var body: some View {
         HStack(spacing: 4) {
             if isPinned {
@@ -439,7 +521,7 @@ public struct ParticipantInfoView: View {
                 .font(fonts.caption1)
                 .minimumScaleFactor(0.7)
                 .accessibility(identifier: "participantName")
-                        
+
             SoundIndicator(participant: participant)
                 .frame(maxHeight: maxHeight)
         }
@@ -455,16 +537,16 @@ public struct ParticipantInfoView: View {
 }
 
 public struct SoundIndicator: View {
-            
+
     @Injected(\.images) var images
     @Injected(\.colors) var colors
-    
+
     let participant: CallParticipant
-    
+
     public init(participant: CallParticipant) {
         self.participant = participant
     }
-    
+
     public var body: some View {
         (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
             .resizable()

@@ -64,10 +64,10 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
 }
 
 struct ParticipantChangeModifier: ViewModifier {
-    
+
     var participant: CallParticipant
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
     func body(content: Content) -> some View {
         if #available(iOS 14, *) {
             content

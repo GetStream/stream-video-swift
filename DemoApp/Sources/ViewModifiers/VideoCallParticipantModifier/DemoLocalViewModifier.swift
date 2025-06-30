@@ -8,18 +8,29 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoLocalViewModifier: ViewModifier {
-        
+
     var localParticipant: CallParticipant
-    var callSettings: Binding<CallSettings>
     var call: Call?
-    
+
+    @State var callSettings: CallSettings
+
+    init(
+        localParticipant: CallParticipant,
+        callSettings: Binding<CallSettings>,
+        call: Call? = nil
+    ) {
+        self.localParticipant = localParticipant
+        self.callSettings = callSettings.wrappedValue
+        self.call = call
+    }
+
     func body(content: Content) -> some View {
         content
             .modifier(
                 LocalParticipantViewModifier(
                     localParticipant: localParticipant,
                     call: call,
-                    callSettings: callSettings,
+                    callSettings: .init(get: { callSettings }, set: { callSettings = $0 }),
                     showAllInfo: true,
                     decorations: [.speaking]
                 )

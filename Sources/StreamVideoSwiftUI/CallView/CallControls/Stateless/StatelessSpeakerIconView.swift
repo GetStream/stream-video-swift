@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
@@ -14,16 +15,15 @@ public struct StatelessSpeakerIconView: View {
 
     @Injected(\.images) private var images
 
-    /// The associated call for the speaker icon.
-    public weak var call: Call?
+    /// The size of the toggle camera icon.
+    var size: CGFloat
 
-    /// The size of the speaker icon.
-    public var size: CGFloat
+    /// The action handler for the toggle camera icon button.
+    var actionHandler: ActionHandler?
 
-    /// The action handler for the speaker icon button.
-    public var actionHandler: ActionHandler?
+    var publisher: AnyPublisher<Bool, Never>?
 
-    @ObservedObject private var callSettings: CallSettings
+    @State var isEnabled: Bool
 
     /// Initializes a stateless speaker icon view.
     ///
@@ -37,9 +37,15 @@ public struct StatelessSpeakerIconView: View {
         size: CGFloat = 44,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
+        isEnabled = call?.state.callSettings.speakerOn ?? false
+        publisher = call?
+            .state
+            .$callSettings
+            .compactMap(\.speakerOn)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
         self.actionHandler = actionHandler
     }
 
@@ -49,15 +55,17 @@ public struct StatelessSpeakerIconView: View {
             action: { actionHandler?() },
             label: {
                 CallIconView(
-                    icon: callSettings.speakerOn
+                    icon: isEnabled
                         ? images.speakerOn
                         : images.speakerOff,
                     size: size,
-                    iconStyle: callSettings.speakerOn
+                    iconStyle: isEnabled
                         ? .primary
                         : .transparent
                 )
             }
         )
+        .streamAccessibility(value: isEnabled ? "1" : "0")
+        .onReceive(publisher) { isEnabled = $0 }
     }
 }

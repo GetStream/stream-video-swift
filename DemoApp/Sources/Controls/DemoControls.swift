@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import class StreamChat.ChatChannelController
 import struct StreamChatSwiftUI.ChatChannelView
 import StreamVideo
@@ -21,7 +22,7 @@ struct AppControlsWithChat: View {
     private let size: CGFloat = 50
     private let cornerRadius: CGFloat = 24
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, canOpenChat: Bool = true) {
         self.viewModel = viewModel
@@ -39,7 +40,7 @@ struct AppControlsWithChat: View {
                     preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
                 )
             }
-            #endif
+            #endif // !targetEnvironment(simulator)
             VideoIconView(viewModel: viewModel)
             MicrophoneIconView(viewModel: viewModel)
 
@@ -58,12 +59,21 @@ struct AppControlsWithChat: View {
 
 struct MoreControlsIconView: View {
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     let size: CGFloat
+
+    @State var isActive: Bool
+    var isActivePublisher: AnyPublisher<Bool, Never>
 
     init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
+
+        isActive = viewModel.moreControlsShown
+        isActivePublisher = viewModel
+            .$moreControlsShown
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 
     var body: some View {
@@ -75,12 +85,13 @@ struct MoreControlsIconView: View {
                 CallIconView(
                     icon: Image(systemName: "ellipsis"),
                     size: size,
-                    iconStyle: viewModel.moreControlsShown ? .secondaryActive : .secondary
+                    iconStyle: isActive ? .secondaryActive : .secondary
                 )
                 .rotationEffect(.degrees(90))
             }
         )
         .accessibility(identifier: "moreControlsToggle")
+        .onReceive(isActivePublisher) { isActive = $0 }
     }
 }
 
@@ -109,12 +120,30 @@ struct ChatIconView: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
 
-    @ObservedObject var viewModel: DemoChatViewModel
+    var viewModel: DemoChatViewModel
     let size: CGFloat
+
+    @State var isActive: Bool
+    var isActivePublisher: AnyPublisher<Bool, Never>
+
+    @State var unreadCount: Int
+    var unreadCountPublisher: AnyPublisher<Int, Never>
 
     init(viewModel: DemoChatViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
+
+        isActive = viewModel.isChatVisible
+        isActivePublisher = viewModel
+            .$isChatVisible
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+
+        unreadCount = viewModel.unreadCount
+        unreadCountPublisher = viewModel
+            .$unreadCount
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 
     var body: some View {
@@ -126,14 +155,22 @@ struct ChatIconView: View {
                 CallIconView(
                     icon: .init(systemName: "bubble.left.and.bubble.right.fill"),
                     size: size,
-                    iconStyle: viewModel.isChatVisible ? .secondaryActive : .secondary
-                ).overlay(
-                    ControlBadgeView("\(viewModel.unreadCount)")
-                        .opacity(viewModel.unreadCount > 0 ? 1 : 0)
-                )
+                    iconStyle: isActive ? .secondaryActive : .secondary
+                ).overlay(overlayView)
             }
         )
         .accessibility(identifier: "chatToggle")
+        .onReceive(isActivePublisher) { isActive = $0 }
+        .onReceive(unreadCountPublisher) { unreadCount = $0 }
+    }
+
+    @ViewBuilder
+    var overlayView: some View {
+        if unreadCount > 0 {
+            ControlBadgeView("\(unreadCount)")
+        } else {
+            EmptyView()
+        }
     }
 }
 
@@ -141,7 +178,6 @@ struct ChatView: View {
 
     var channelController: ChatChannelController
     var chatViewModel: DemoChatViewModel
-    var callViewModel: CallViewModel
 
     var body: some View {
         NavigationView {

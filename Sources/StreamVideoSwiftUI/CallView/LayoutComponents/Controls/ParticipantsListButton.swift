@@ -10,13 +10,8 @@ import SwiftUI
 /// display a badge with the number of the total participants in the call.
 public struct ParticipantsListButton: View {
 
-    @Injected(\.images) var images
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
-
-    @ObservedObject var viewModel: CallViewModel
-    @State private var count: Int = 0
-    let size: CGFloat
+    var viewModel: CallViewModel
+    var size: CGFloat
 
     public init(
         viewModel: CallViewModel,
@@ -29,7 +24,9 @@ public struct ParticipantsListButton: View {
     public var body: some View {
         StatelessParticipantsListButton(
             call: viewModel.call,
-            isActive: $viewModel.participantsShown
-        ) { [weak viewModel] in viewModel?.participantsShown = true }
+            isActive: .init(get: { viewModel.participantsShown }, set: { viewModel.participantsShown = $0 })
+        ) { [weak viewModel] in
+            viewModel?.participantsShown = true
+        }
     }
 }

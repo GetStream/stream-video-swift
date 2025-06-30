@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 import SwiftUI
@@ -14,16 +15,15 @@ public struct StatelessVideoIconView: View {
 
     @Injected(\.images) private var images
 
-    /// The associated call for the video icon.
-    public weak var call: Call?
+    /// The size of the toggle camera icon.
+    var size: CGFloat
 
-    /// The size of the video icon.
-    public var size: CGFloat
+    /// The action handler for the toggle camera icon button.
+    var actionHandler: ActionHandler?
 
-    /// The action handler for the video icon button.
-    public var actionHandler: ActionHandler?
+    var publisher: AnyPublisher<Bool, Never>?
 
-    @ObservedObject private var callSettings: CallSettings
+    @State var isEnabled: Bool
 
     /// Initializes a stateless video icon view.
     ///
@@ -36,9 +36,15 @@ public struct StatelessVideoIconView: View {
         size: CGFloat = 44,
         actionHandler: ActionHandler? = nil
     ) {
-        self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
+        isEnabled = call?.state.callSettings.videoOn ?? false
+        publisher = call?
+            .state
+            .$callSettings
+            .compactMap(\.videoOn)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
         self.actionHandler = actionHandler
     }
 
@@ -48,17 +54,18 @@ public struct StatelessVideoIconView: View {
             action: { actionHandler?() },
             label: {
                 CallIconView(
-                    icon: callSettings.videoOn
+                    icon: isEnabled
                         ? images.videoTurnOn
                         : images.videoTurnOff,
                     size: size,
-                    iconStyle: callSettings.videoOn
+                    iconStyle: isEnabled
                         ? .transparent
                         : .disabled
                 )
             }
         )
         .accessibility(identifier: "cameraToggle")
-        .streamAccessibility(value: callSettings.videoOn ? "1" : "0")
+        .streamAccessibility(value: isEnabled ? "1" : "0")
+        .onReceive(publisher) { isEnabled = $0 }
     }
 }

@@ -10,26 +10,21 @@ public struct CallParticipantsInfoView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
     @StateObject var viewModel: CallParticipantsInfoViewModel
-    @ObservedObject var callViewModel: CallViewModel
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
         callViewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        self.callViewModel = callViewModel
         _viewModel = StateObject(
-            wrappedValue: CallParticipantsInfoViewModel(
-                call: callViewModel.call
-            )
+            wrappedValue: CallParticipantsInfoViewModel(callViewModel)
         )
     }
-    
+
     public var body: some View {
         CallParticipantsView(
             viewFactory: viewFactory,
-            viewModel: viewModel,
-            callViewModel: callViewModel
+            viewModel: viewModel
         )
     }
 }
@@ -39,43 +34,34 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
-    @ObservedObject var callViewModel: CallViewModel
 
     init(
         viewFactory: Factory,
-        viewModel: CallParticipantsInfoViewModel,
-        callViewModel: CallViewModel
+        viewModel: CallParticipantsInfoViewModel
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
-        self.callViewModel = callViewModel
     }
 
     var body: some View {
         CallParticipantsViewContainer(
             viewFactory: viewFactory,
             viewModel: viewModel,
-            participants: participants,
-            call: callViewModel.call,
-            blockedUsers: callViewModel.blockedUsers,
-            callSettings: callViewModel.callSettings,
+            participants: viewModel.participants,
+            call: viewModel.callViewModel.call,
+            blockedUsers: viewModel.callViewModel.blockedUsers,
+            callSettings: viewModel.callViewModel.callSettings,
             inviteParticipantsShown: $viewModel.inviteParticipantsShown,
             inviteTapped: {
                 viewModel.inviteParticipantsShown = true
             },
             muteTapped: {
-                callViewModel.toggleMicrophoneEnabled()
+                viewModel.callViewModel.toggleMicrophoneEnabled()
             },
             closeTapped: {
-                callViewModel.participantsShown = false
+                viewModel.callViewModel.participantsShown = false
             }
         )
-    }
-    
-    private var participants: [CallParticipant] {
-        callViewModel.callParticipants
-            .map(\.value)
-            .sorted(by: { $0.name < $1.name })
     }
 }
 
@@ -83,7 +69,7 @@ struct CallParticipantsView<Factory: ViewFactory>: View {
 struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
 
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
-    
+
     @Injected(\.colors) var colors
     @Injected(\.images) var images
 
@@ -96,7 +82,7 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
     var inviteTapped: () -> Void
     var muteTapped: () -> Void
     var closeTapped: () -> Void
-    
+
     @State private var listHeight: CGFloat
 
     init(
@@ -140,8 +126,8 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
                         }
                         if !blockedUsers.isEmpty {
                             BlockedUsersView(
-                                blockedUsers: blockedUsers,
-                                unblockActions: viewModel.unblockActions(for:)
+                                viewModel: viewModel,
+                                blockedUsers: blockedUsers
                             )
                         }
                     }
@@ -197,16 +183,16 @@ struct CallParticipantsViewContainer<Factory: ViewFactory>: View {
 }
 
 struct ParticipantsButton: View {
-    
+
     @Injected(\.colors) private var colors
     @Injected(\.fonts) private var fonts
-    
+
     private let cornerRadius: CGFloat = 24
-    
+
     var title: String
     var primaryStyle: Bool = true
     var onTapped: () -> Void
-    
+
     var body: some View {
         Button {
             onTapped()
@@ -230,21 +216,23 @@ struct ParticipantsButton: View {
 }
 
 struct BlockedUsersView: View {
-    
+
+    var viewModel: CallParticipantsInfoViewModel
     var blockedUsers: [User]
-    var unblockActions: @MainActor(User) -> [CallParticipantMenuAction]
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
+
                 Text(L10n.Call.Participants.blocked)
                     .font(.headline)
                     .multilineTextAlignment(.leading)
                     .padding(.vertical, 8)
+
                 ForEach(blockedUsers) { blockedUser in
                     Text(blockedUser.id)
                         .contextMenu {
-                            ForEach(unblockActions(blockedUser)) { menuAction in
+                            ForEach(viewModel.unblockActions(for: blockedUser)) { menuAction in
                                 Button {
                                     menuAction.action(blockedUser.id)
                                 } label: {
@@ -268,7 +256,7 @@ struct CallParticipantView<Factory: ViewFactory>: View {
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
     @Injected(\.images) var images
-    
+
     private let imageSize: CGFloat = 48
 
     var viewFactory: Factory

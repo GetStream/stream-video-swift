@@ -139,7 +139,7 @@ extension VideoRenderer {
             )
             self.participant = participant
             add(track: track)
-            DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
+            DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.01) { [weak self] in
                 guard let self else { return }
                 let prev = participant.trackSize
                 if let viewSize, prev != viewSize {

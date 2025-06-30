@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
@@ -10,13 +11,37 @@ public struct MicrophoneCheckView: View {
     @Injected(\.fonts) var fonts
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
-    
+
     var audioLevels: [Float]
-    var microphoneOn: Bool
+    var audioLevelsPublisher: AnyPublisher<[Float], Never>
+
+    var audioOn: Bool
+    var audioOnPublisher: AnyPublisher<Bool, Never>
+
     var isSilent: Bool
+    var isSilentPublisher: AnyPublisher<Bool, Never>
+
     var isPinned: Bool
+
     var maxHeight: Float = 14
-    
+
+    public init(
+        viewModel: LobbyViewModel,
+        isPinned: Bool,
+        maxHeight: Float = 14
+    ) {
+        self.init(
+            audioLevels: viewModel.audioLevels,
+            audioLevelsPublisher: viewModel.$audioLevels.eraseToAnyPublisher(),
+            audioOn: viewModel.audioOn,
+            audioOnPublisher: viewModel.$audioOn.eraseToAnyPublisher(),
+            isSilent: viewModel.isSilent,
+            isSilentPublisher: viewModel.$isSilent.eraseToAnyPublisher(),
+            isPinned: isPinned,
+            maxHeight: maxHeight
+        )
+    }
+
     public init(
         audioLevels: [Float],
         microphoneOn: Bool,
@@ -24,46 +49,43 @@ public struct MicrophoneCheckView: View {
         isPinned: Bool,
         maxHeight: Float = 14
     ) {
+        self.init(
+            audioLevels: audioLevels,
+            audioLevelsPublisher: Just(audioLevels).eraseToAnyPublisher(),
+            audioOn: microphoneOn,
+            audioOnPublisher: Just(microphoneOn).eraseToAnyPublisher(),
+            isSilent: isSilent,
+            isSilentPublisher: Just(isSilent).eraseToAnyPublisher(),
+            isPinned: isPinned,
+            maxHeight: maxHeight
+        )
+    }
+
+    init(
+        audioLevels: [Float],
+        audioLevelsPublisher: AnyPublisher<[Float], Never>,
+        audioOn: Bool,
+        audioOnPublisher: AnyPublisher<Bool, Never>,
+        isSilent: Bool,
+        isSilentPublisher: AnyPublisher<Bool, Never>,
+        isPinned: Bool,
+        maxHeight: Float = 14
+    ) {
         self.audioLevels = audioLevels
-        self.microphoneOn = microphoneOn
+        self.audioLevelsPublisher = audioLevelsPublisher
+        self.audioOn = audioOn
+        self.audioOnPublisher = audioOnPublisher
         self.isSilent = isSilent
+        self.isSilentPublisher = isSilentPublisher
         self.isPinned = isPinned
         self.maxHeight = maxHeight
     }
-    
+
     public var body: some View {
         HStack(spacing: 4) {
-            if isPinned {
-                Image(systemName: "pin.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: CGFloat(maxHeight))
-                    .foregroundColor(.white)
-                    .padding(.trailing, 4)
-            }
-
-            Text(streamVideo.user.name)
-                .foregroundColor(.white)
-                .multilineTextAlignment(.leading)
-                .lineLimit(1)
-                .font(fonts.caption1)
-                .minimumScaleFactor(0.7)
-                .accessibility(identifier: "participantName")
-
-            if microphoneOn && !isSilent {
-                AudioVolumeIndicator(
-                    audioLevels: audioLevels,
-                    maxHeight: maxHeight,
-                    minValue: 0,
-                    maxValue: 1
-                )
-            } else {
-                images.micTurnOff
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: CGFloat(maxHeight))
-                    .foregroundColor(colors.inactiveCallControl)
-            }
+            leadingView
+            middleView
+            trailingView
         }
         .padding(.all, 2)
         .padding(.horizontal, 4)
@@ -74,61 +96,59 @@ public struct MicrophoneCheckView: View {
             backgroundColor: colors.participantInfoBackgroundColor
         )
     }
+
+    @ViewBuilder
+    var leadingView: some View {
+        PinnedView(isPinned: isPinned, maxHeight: maxHeight)
+    }
+
+    @ViewBuilder
+    var middleView: some View {
+        UserNameView(name: streamVideo.user.name)
+    }
+
+    @ViewBuilder
+    var trailingView: some View {
+        AudioVolumeIndicatorContainerView(
+            audioOn: audioOn,
+            audioOnPublisher: audioOnPublisher,
+            audioLevels: audioLevels,
+            audioLevelsPublisher: audioLevelsPublisher,
+            isSilent: isSilent,
+            isSilentPublisher: isSilentPublisher,
+            maxHeight: maxHeight
+        )
+    }
 }
 
-public struct AudioVolumeIndicator: View {
-    
-    @Injected(\.colors) var colors
-    
-    var audioLevels: [Float]
+struct PinnedView: View {
+    var isPinned: Bool
     var maxHeight: Float
-    var minValue: Float
-    var maxValue: Float
-    
-    public init(
-        audioLevels: [Float],
-        maxHeight: Float = 14,
-        minValue: Float,
-        maxValue: Float
-    ) {
-        self.audioLevels = audioLevels
-        self.maxHeight = maxHeight
-        self.minValue = minValue
-        self.maxValue = maxValue
-    }
-    
-    public var body: some View {
-        HStack(spacing: 2) {
-            ForEach(levels) { level in
-                VStack {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(colors.goodConnectionQualityIndicatorColor)
-                        .frame(width: 2, height: height(for: level.value))
-                }
-                .frame(height: CGFloat(maxHeight))
-            }
+
+    var body: some View {
+        if isPinned {
+            Image(systemName: "pin.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: CGFloat(maxHeight))
+                .foregroundColor(.white)
+                .padding(.trailing, 4)
         }
-    }
-    
-    var levels: [AudioLevel] {
-        var levels = [AudioLevel]()
-        for (index, level) in audioLevels.enumerated() {
-            levels.append(AudioLevel(value: level, index: index))
-        }
-        return levels
-    }
-    
-    private func height(for value: Float) -> CGFloat {
-        let height: CGFloat = value > 0 ? CGFloat(value * maxHeight) : 0
-        return max(height, 1)
     }
 }
 
-struct AudioLevel: Identifiable {
-    var id: String {
-        "\(index)-\(value)"
-    }
+struct UserNameView: View {
+    @Injected(\.fonts) private var fonts
 
-    let value: Float
-    let index: Int
+    var name: String
+
+    var body: some View {
+        Text(name)
+            .foregroundColor(.white)
+            .multilineTextAlignment(.leading)
+            .lineLimit(1)
+            .font(fonts.caption1)
+            .minimumScaleFactor(0.7)
+            .accessibility(identifier: "participantName")
+    }
 }

@@ -2,95 +2,102 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
 public struct CallTopView: View {
-            
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.colors) var colors
     @Injected(\.images) var images
-    
-    @ObservedObject var viewModel: CallViewModel
+
+    var viewModel: CallViewModel
+
+    @State var isCurrentUserScreensharing: Bool
+    var isCurrentUserScreensharingPublisher: AnyPublisher<Bool, Never>?
+
     @State var sharingPopupDismissed = false
-    
+
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
+
+        isCurrentUserScreensharing = viewModel
+            .call?
+            .state
+            .isCurrentUserScreensharing ?? false
+        isCurrentUserScreensharingPublisher = viewModel
+            .call?
+            .state
+            .$isCurrentUserScreensharing
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
-    
+
     public var body: some View {
-        Group {
-            HStack(spacing: 0) {
-                HStack {
-                    if
-                        #available(iOS 14.0, *),
-                        viewModel.callParticipants.count > 1
-                    {
-                        LayoutMenuView(viewModel: viewModel)
-                            .opacity(hideLayoutMenu ? 0 : 1)
-                            .accessibility(identifier: "viewMenu")
-                    }
-
-                    if call?.state.ownCapabilities.contains(.sendVideo) == true {
-                        ToggleCameraIconView(viewModel: viewModel)
-                    }
-
-                    Spacer()
-                }
+        HStack(spacing: 0) {
+            leadingView
                 .frame(maxWidth: .infinity)
 
-                HStack(alignment: .center) {
-                    CallDurationView(viewModel)
-                }
-                .frame(height: 44)
+            middleView
                 .frame(maxWidth: .infinity)
 
-                HStack {
-                    Spacer()
-                    HangUpIconView(viewModel: viewModel)
-                }
+            trailingView
                 .frame(maxWidth: .infinity)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical)
-            .frame(maxWidth: .infinity)
         }
-        .overlay(
-            viewModel.call?.state.isCurrentUserScreensharing == true ?
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-                .opacity(sharingPopupDismissed ? 0 : 1)
-                : nil
-        )
-    }
-    
-    private var hideLayoutMenu: Bool {
-        viewModel.call?.state.screenSharingSession != nil
-            && viewModel.call?.state.isCurrentUserScreensharing == false
+        .padding(.horizontal, 16)
+        .padding(.vertical)
+        .frame(maxWidth: .infinity)
+        .overlay(overlayView)
+        .onReceive(isCurrentUserScreensharingPublisher) { isCurrentUserScreensharing = $0 }
     }
 
-    private var call: Call? {
-        switch viewModel.callingState {
-        case .incoming, .outgoing:
-            return streamVideo.state.ringingCall
-        default:
-            return viewModel.call
+    @ViewBuilder
+    private var leadingView: some View {
+        HStack {
+            LayoutMenuView(viewModel: viewModel)
+            ToggleCameraIconView(viewModel: viewModel)
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private var middleView: some View {
+        HStack(alignment: .center) {
+            CallDurationView(viewModel)
+        }
+        .frame(height: 44)
+    }
+
+    @ViewBuilder
+    private var trailingView: some View {
+        HStack {
+            Spacer()
+            HangUpIconView(viewModel: viewModel)
+        }
+    }
+
+    @ViewBuilder
+    private var overlayView: some View {
+        if isCurrentUserScreensharing {
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed
+            )
         }
     }
 }
 
 public struct SharingIndicator: View {
-            
-    @ObservedObject var viewModel: CallViewModel
+
+    var viewModel: CallViewModel
     @Binding var sharingPopupDismissed: Bool
-    
+
     public init(viewModel: CallViewModel, sharingPopupDismissed: Binding<Bool>) {
-        _viewModel = ObservedObject(initialValue: viewModel)
+        self.viewModel = viewModel
         _sharingPopupDismissed = sharingPopupDismissed
     }
-    
+
     public var body: some View {
         HStack {
             Text(L10n.Call.Current.sharing)

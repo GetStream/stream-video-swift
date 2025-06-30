@@ -9,7 +9,7 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
     
     @Injected(\.colors) var colors
     
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     var viewFactory: Factory
     
     public init(
@@ -36,5 +36,6 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
                 )
                 .cornerRadius(16)
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

@@ -140,17 +140,18 @@ struct IncomingCallParticipantView<Factory: ViewFactory>: View {
 }
 
 struct CircledTitleView: View {
-    
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
-    
+
     var title: String
     var size: CGFloat = .expandedAvatarSize
-    
+
     var body: some View {
         ZStack {
             Circle()
                 .foregroundColor(colors.tintColor)
+
             Text(title)
                 .foregroundColor(.white)
                 .font(fonts.title)

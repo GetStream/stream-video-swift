@@ -13,7 +13,7 @@ struct ChatModifier: ViewModifier {
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
 
-    @ObservedObject var viewModel: CallViewModel
+    var viewModel: CallViewModel
     @ObservedObject var chatViewModel: DemoChatViewModel
 
     func body(content: Content) -> some View {
@@ -24,8 +24,7 @@ struct ChatModifier: ViewModifier {
                 if let channelController = chatViewModel.channelController {
                     ChatView(
                         channelController: channelController,
-                        chatViewModel: chatViewModel,
-                        callViewModel: viewModel
+                        chatViewModel: chatViewModel
                     )
                     .withModalNavigationBar(title: "Chat") { chatViewModel.isChatVisible = false }
                     .withDragIndicator()

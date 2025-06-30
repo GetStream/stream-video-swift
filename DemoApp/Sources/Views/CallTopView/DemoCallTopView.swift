@@ -2,122 +2,42 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoCallTopView: View {
 
-    @Injected(\.fonts) var fonts
-    @Injected(\.colors) var colors
-    @Injected(\.images) var images
+    var viewModel: CallViewModel
 
-    @ObservedObject var viewModel: CallViewModel
-    @ObservedObject var appState = AppState.shared
-    @State var sharingPopupDismissed = false
+    @State var isLivestream: Bool
+    var isLivestreamPublisher: AnyPublisher<Bool, Never>?
 
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
+
+        isLivestream = (viewModel.call?.callType == .livestream)
+        isLivestreamPublisher = viewModel
+            .$call
+            .map { $0?.callType == .livestream }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            if !isCallLivestream {
-                HStack {
-                    if viewModel.callParticipants.count > 1, !hideLayoutMenu {
-                        LayoutMenuView(viewModel: viewModel)
-                            .accessibility(identifier: "viewMenu")
-                    }
-
-                    ToggleCameraIconView(viewModel: viewModel)
-
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity)
-            }
-
-            if !isCallLivestream {
-                HStack(alignment: .center) {
-                    CallDurationView(viewModel)
-                }
-                .frame(height: 44)
-                .frame(maxWidth: .infinity)
-            }
-
-            HStack {
-                Spacer()
-                livestreamControlsView
-                HangUpIconView(viewModel: viewModel)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .padding(.horizontal, 16)
-        .padding(.top)
-        .frame(maxWidth: .infinity)
-        .overlay(
-            viewModel.call?.state.isCurrentUserScreensharing == true ?
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-                .opacity(sharingPopupDismissed ? 0 : 1)
-                : nil
-        )
-    }
-
-    private var isCallLivestream: Bool {
-        guard let call = viewModel.call else { return false }
-        return call.callType == .livestream
-    }
-
-    private var hideLayoutMenu: Bool {
-        viewModel.call?.state.screenSharingSession != nil
-            && viewModel.call?.state.isCurrentUserScreensharing == false
+        contentView
+            .onReceive(isLivestreamPublisher) { isLivestream = $0 }
     }
 
     @ViewBuilder
-    private var livestreamControlsView: some View {
-        if let call = viewModel.call, call.callType == .livestream, call.currentUserHasCapability(.startBroadcastCall) {
-            Menu {
-                Button {
-                    Task {
-                        do {
-                            if call.state.backstage {
-                                try await call.goLive()
-                            } else {
-                                try await call.stopLive()
-                            }
-                        } catch {
-                            log.error(error)
-                        }
-                    }
-                } label: {
-                    if call.state.backstage {
-                        Label {
-                            Text("Start Live")
-                        } icon: {
-                            Image(systemName: "play.fill")
-                                .foregroundColor(colors.accentGreen)
-                        }
-                    } else {
-                        Label {
-                            Text("Stop Live")
-                        } icon: {
-                            Image(systemName: "stop.fill")
-                                .foregroundColor(colors.accentRed)
-                        }
-                    }
-                }
-
-            } label: {
-                CallIconView(
-                    icon: Image(systemName: "gear"),
-                    size: 44,
-                    iconStyle: .transparent
-                )
-            }
+    var contentView: some View {
+        if isLivestream {
+            DemoLivestreamTopView(viewModel: viewModel)
         } else {
-            EmptyView()
+            DefaultViewFactory
+                .shared
+                .makeCallTopView(viewModel: viewModel)
         }
     }
 }

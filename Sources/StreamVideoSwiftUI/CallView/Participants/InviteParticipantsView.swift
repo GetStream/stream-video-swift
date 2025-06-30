@@ -89,12 +89,12 @@ public struct InviteParticipantsView<Factory: ViewFactory>: View {
 }
 
 struct UsersHeaderView: View {
-    
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
-    
+
     var title = L10n.Call.Participants.onPlatform
-    
+
     var body: some View {
         HStack {
             Text(title)
@@ -102,7 +102,7 @@ struct UsersHeaderView: View {
                 .padding(.vertical, 2)
                 .font(fonts.body)
                 .foregroundColor(Color(colors.textLowEmphasis))
-            
+
             Spacer()
         }
         .background(Color(colors.background1))
@@ -113,7 +113,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
 
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
-    
+
     private let avatarSize: CGFloat = 56
 
     var viewFactory: Factory
@@ -139,7 +139,7 @@ struct VideoUserView<Factory: ViewFactory>: View {
                 .font(fonts.bodyBold)
 
             Spacer()
-            
+
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
                     .renderingMode(.template)

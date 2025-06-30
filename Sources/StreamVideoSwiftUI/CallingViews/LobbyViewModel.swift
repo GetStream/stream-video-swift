@@ -11,83 +11,165 @@ import SwiftUI
 public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     @Injected(\.callAudioRecorder) private var callAudioRecorder
 
-    private let camera: Any
+    let camera: Any?
     private var imagesTask: Task<Void, Never>?
     private let disposableBag = DisposableBag()
 
-    @Published public var viewfinderImage: Image?
-    @Published public var participants = [User]()
-    
+    @Published public var viewFinderImage: Image?
+    @Published public var participants: [User]
+    @Published public var audioOn: Bool {
+        didSet { didUpdate(audioOn: audioOn) }
+    }
+
+    @Published public var videoOn: Bool {
+        didSet { didUpdate(videoOn: videoOn) }
+    }
+
+    @Published public var cameraPosition: CameraPosition
+    @Published public var audioLevels: [Float]
+    @Published public var isSilent: Bool
+
     private let call: Call
-    
-    public init(callType: String, callId: String) {
-        call = InjectedValues[\.streamVideo].call(
+    private let callViewModel: CallViewModel
+    private let microphoneChecker: MicrophoneChecker
+    private let onJoinCallTap: () -> Void
+    private let onCloseLobbyTap: () -> Void
+
+    public init(
+        callType: String,
+        callId: String,
+        callViewModel: CallViewModel,
+        onJoinCallTap: @escaping () -> Void,
+        onCloseLobbyTap: @escaping () -> Void
+    ) {
+        let call = InjectedValues[\.streamVideo].call(
             callType: callType,
             callId: callId
         )
-        if #available(iOS 14, *) {
+        self.call = call
+        self.callViewModel = callViewModel
+        audioOn = callViewModel.callSettings.audioOn
+        videoOn = callViewModel.callSettings.videoOn
+        cameraPosition = callViewModel.callSettings.cameraPosition
+
+        let microphoneChecker = MicrophoneChecker()
+        self.microphoneChecker = microphoneChecker
+        audioLevels = microphoneChecker.audioLevels
+        isSilent = microphoneChecker.isSilent
+
+        self.onJoinCallTap = onJoinCallTap
+        self.onCloseLobbyTap = onCloseLobbyTap
+
+        participants = call.state.participants.map(\.user)
+        if #available(iOS 14.0, *) {
             camera = Camera()
-            imagesTask = Task {
-                await handleCameraPreviews()
-            }
         } else {
-            camera = NSObject()
+            camera = nil
         }
+
         loadCurrentMembers()
         subscribeForCallJoinUpdates()
         subscribeForCallLeaveUpdates()
-    }
-    
-    @available(iOS 14, *)
-    func handleCameraPreviews() async {
-        let imageStream = (camera as? Camera)?.previewStream.dropFirst()
-            .map(\.image)
-        
-        guard let imageStream = imageStream else { return }
 
-        for await image in imageStream {
-            await MainActor.run {
-                viewfinderImage = image
+        microphoneChecker
+            .$audioLevels
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.audioLevels, onWeak: self)
+            .store(in: disposableBag)
+
+        microphoneChecker
+            .$audioLevels
+            .compactMap { [weak microphoneChecker] _ in microphoneChecker?.isSilent ?? false }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.isSilent, onWeak: self)
+            .store(in: disposableBag)
+
+        callViewModel
+            .$callSettings
+            .map(\.audioOn)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.audioOn, onWeak: self)
+            .store(in: disposableBag)
+
+        callViewModel
+            .$callSettings
+            .map(\.videoOn)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.videoOn, onWeak: self)
+            .store(in: disposableBag)
+
+        callViewModel
+            .$callSettings
+            .map(\.cameraPosition)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.cameraPosition, onWeak: self)
+            .store(in: disposableBag)
+
+        call
+            .state
+            .$participants
+            .removeDuplicates()
+            .map { $0.map(\.user) }
+            .assign(to: \.participants, onWeak: self)
+            .store(in: disposableBag)
+
+        if #available(iOS 14.0, *), let camera = camera as? Camera {
+            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+                guard let self else { return }
+                for await image in camera.previewStream {
+                    viewFinderImage = image.image
+                }
             }
         }
     }
-    
+
     public func startCamera(front: Bool) {
-        if #available(iOS 14, *) {
-            if front {
-                (camera as? Camera)?.switchCaptureDevice()
-            }
-            Task {
-                await(camera as? Camera)?.start()
+        if #available(iOS 14.0, *), let camera = camera as? Camera {
+            Task(disposableBag: disposableBag) {
+                await camera.start()
             }
         }
     }
-    
+
     public func stopCamera() {
-        imagesTask?.cancel()
-        imagesTask = nil
-        if #available(iOS 14, *) {
-            (camera as? Camera)?.stop()
+        if #available(iOS 14.0, *), let camera = camera as? Camera {
+            camera.stop()
         }
     }
-    
+
     public func cleanUp() {
         disposableBag.removeAll()
-        Task {
-            await callAudioRecorder.stopRecording()
-        }
     }
 
-    public func didUpdate(callSettings: CallSettings) async {
-        if callSettings.audioOn {
-            await callAudioRecorder.startRecording(ignoreActiveCall: true)
-        } else {
-            await callAudioRecorder.stopRecording()
+    public func didTapJoin() {
+        onJoinCallTap()
+    }
+
+    public func didTapClose() {
+        if callAudioRecorder.isRecording {
+            Task(disposableBag: disposableBag) { [weak callAudioRecorder] in
+                await callAudioRecorder?.stopRecording()
+            }
         }
+        stopCamera()
+        cleanUp()
+        onCloseLobbyTap()
+    }
+
+    public func toggleMicrophoneEnabled() {
+        callViewModel.toggleMicrophoneEnabled()
+    }
+
+    public func toggleCameraEnabled() {
+        callViewModel.toggleCameraEnabled()
     }
 
     // MARK: - private
-    
+
     private func loadCurrentMembers() {
         Task {
             do {
@@ -100,7 +182,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
             }
         }
     }
-    
+
     private func subscribeForCallJoinUpdates() {
         call
             .eventPublisher(for: CallSessionParticipantJoinedEvent.self)
@@ -112,7 +194,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
             }
             .store(in: disposableBag)
     }
-    
+
     private func subscribeForCallLeaveUpdates() {
         call
             .eventPublisher(for: CallSessionParticipantLeftEvent.self)
@@ -135,6 +217,26 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
                 }
             }
             .store(in: disposableBag)
+    }
+
+    private func didUpdate(audioOn: Bool) {
+        if audioOn, !callAudioRecorder.isRecording {
+            Task(disposableBag: disposableBag) { [weak callAudioRecorder] in
+                await callAudioRecorder?.startRecording(ignoreActiveCall: true)
+            }
+        } else if !audioOn, callAudioRecorder.isRecording {
+            Task(disposableBag: disposableBag) { [weak callAudioRecorder] in
+                await callAudioRecorder?.stopRecording()
+            }
+        }
+    }
+
+    private func didUpdate(videoOn: Bool) {
+        if videoOn {
+            startCamera(front: cameraPosition == .front)
+        } else if !videoOn {
+            stopCamera()
+        }
     }
 }
 

@@ -2,25 +2,20 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
-@available(iOS 14.0, *)
 public struct LobbyView<Factory: ViewFactory>: View {
 
-    @StateObject var viewModel: LobbyViewModel
-    @StateObject var microphoneChecker = MicrophoneChecker()
+    @Injected(\.colors) var colors
 
     var viewFactory: Factory
-    var callId: String
-    var callType: String
-    @Binding var callSettings: CallSettings
-    var onJoinCallTap: () -> Void
-    var onCloseLobby: () -> Void
-        
+    var viewModel: LobbyViewModel
+
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
-        viewModel: LobbyViewModel? = nil,
+        callViewModel: CallViewModel,
         callId: String,
         callType: String,
         callSettings: Binding<CallSettings>,
@@ -28,113 +23,77 @@ public struct LobbyView<Factory: ViewFactory>: View {
         onCloseLobby: @escaping () -> Void
     ) {
         self.viewFactory = viewFactory
-        self.callId = callId
-        self.callType = callType
-        self.onJoinCallTap = onJoinCallTap
-        self.onCloseLobby = onCloseLobby
-        _callSettings = callSettings
-        _viewModel = StateObject(
-            wrappedValue: viewModel ?? LobbyViewModel(
-                callType: callType,
-                callId: callId
-            )
-        )
-        let microphoneCheckerInstance = MicrophoneChecker()
-        _microphoneChecker = .init(wrappedValue: microphoneCheckerInstance)
-    }
-    
-    public var body: some View {
-        LobbyContentView(
-            viewModel: viewModel,
-            microphoneChecker: microphoneChecker,
-            viewFactory: viewFactory,
-            callId: callId,
+        viewModel = LobbyViewModel(
             callType: callType,
-            callSettings: $callSettings,
+            callId: callId,
+            callViewModel: callViewModel,
             onJoinCallTap: onJoinCallTap,
-            onCloseLobby: onCloseLobby
+            onCloseLobbyTap: onCloseLobby
         )
-        .onChange(of: callSettings) { newValue in Task { await viewModel.didUpdate(callSettings: newValue) } }
-        .onAppear { Task { await viewModel.didUpdate(callSettings: callSettings) } }
     }
-}
 
-struct LobbyContentView<Factory: ViewFactory>: View {
-
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-    @Injected(\.streamVideo) var streamVideo
-    
-    @ObservedObject var viewModel: LobbyViewModel
-    @ObservedObject var microphoneChecker: MicrophoneChecker
-
-    var viewFactory: Factory
-    var callId: String
-    var callType: String
-    @Binding var callSettings: CallSettings
-    var onJoinCallTap: () -> Void
-    var onCloseLobby: () -> Void
-    
-    var body: some View {
+    public var body: some View {
         VStack {
-            ZStack {
-                HStack {
-                    Spacer()
-                    Button {
-                        onCloseLobby()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundColor(colors.text)
-                    }
-                }
-
-                VStack(alignment: .center) {
-                    Text(L10n.WaitingRoom.title)
-                        .font(.title)
-                        .foregroundColor(colors.text)
-                        .bold()
-
-                    Text(L10n.WaitingRoom.subtitle)
-                        .font(.body)
-                        .foregroundColor(Color(colors.textLowEmphasis))
-                }
-            }
-            .padding()
-            .zIndex(1)
-
-            VStack {
-                CameraCheckView(
-                    viewModel: viewModel,
-                    microphoneChecker: microphoneChecker,
-                    viewFactory: viewFactory,
-                    callSettings: callSettings
-                )
-
-                if microphoneChecker.isSilent {
-                    Text(L10n.WaitingRoom.Mic.notWorking)
-                        .font(.caption)
-                        .foregroundColor(colors.text)
-                }
-
-                CallSettingsView(callSettings: $callSettings)
-
-                JoinCallView(
-                    viewFactory: viewFactory,
-                    callId: callId,
-                    callType: callType,
-                    callParticipants: viewModel.participants,
-                    onJoinCallTap: onJoinCallTap
-                )
-            }
-            .padding()
+            headerView
+            middleView
+            footerView
         }
+        .padding()
         .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear { viewModel.startCamera(front: true) }
         .onDisappear {
             viewModel.stopCamera()
             viewModel.cleanUp()
         }
+    }
+
+    @ViewBuilder
+    var headerView: some View {
+        ZStack {
+            HStack {
+                Spacer()
+                Button {
+                    viewModel.didTapClose()
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundColor(colors.text)
+                }
+            }
+
+            VStack(alignment: .center) {
+                Text(L10n.WaitingRoom.title)
+                    .font(.title)
+                    .foregroundColor(colors.text)
+                    .bold()
+
+                Text(L10n.WaitingRoom.subtitle)
+                    .font(.body)
+                    .foregroundColor(Color(colors.textLowEmphasis))
+            }
+        }
+        .padding()
+        .zIndex(1)
+    }
+
+    @ViewBuilder
+    var middleView: some View {
+        CameraCheckView(
+            viewFactory: viewFactory,
+            viewModel: viewModel
+        )
+
+        SilentMicrophoneIndicator(viewModel: viewModel)
+
+        CallSettingsView(viewModel: viewModel)
+    }
+
+    @ViewBuilder
+    var footerView: some View {
+        JoinCallView(
+            viewFactory: viewFactory,
+            viewModel: viewModel
+        )
+        .layoutPriority(2)
     }
 }
 
@@ -143,54 +102,38 @@ struct CameraCheckView<Factory: ViewFactory>: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
-    
-    @ObservedObject var viewModel: LobbyViewModel
-    @ObservedObject var microphoneChecker: MicrophoneChecker
+
     var viewFactory: Factory
-    var callSettings: CallSettings
+    var viewModel: LobbyViewModel
+
+    init(
+        viewFactory: Factory,
+        viewModel: LobbyViewModel
+    ) {
+        self.viewModel = viewModel
+        self.viewFactory = viewFactory
+    }
 
     var body: some View {
-        GeometryReader { proxy in
-            Group {
-                if let image = viewModel.viewfinderImage, callSettings.videoOn {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .accessibility(identifier: "cameraCheckView")
-                        .streamAccessibility(value: "1")
-                } else {
-                    ZStack {
-                        Rectangle()
-                            .fill(colors.lobbySecondaryBackground)
-
-                        viewFactory.makeUserAvatar(
-                            streamVideo.user,
-                            with: .init(size: 80)
-                        )
-                        .accessibility(identifier: "cameraCheckView")
-                        .streamAccessibility(value: "0")
-                    }
-                    .opacity(callSettings.videoOn ? 0 : 1)
-                }
-            }
-            .frame(width: proxy.size.width, height: proxy.size.height)
-            .overlay(
-                VStack {
-                    Spacer()
-                    HStack {
-                        MicrophoneCheckView(
-                            audioLevels: microphoneChecker.audioLevels,
-                            microphoneOn: callSettings.audioOn,
-                            isSilent: microphoneChecker.isSilent,
-                            isPinned: false
-                        )
-                        .accessibility(identifier: "microphoneCheckView")
-                        Spacer()
-                    }
-                }
-            )
+        contentView
+            .overlay(overlayView)
             .clipped()
             .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    @ViewBuilder
+    var contentView: some View {
+        CameraFeedPreviewView(viewFactory: viewFactory, viewModel: viewModel)
+    }
+
+    @ViewBuilder
+    var overlayView: some View {
+        BottomView {
+            HStack {
+                MicrophoneCheckView(viewModel: viewModel, isPinned: false)
+                    .accessibility(identifier: "microphoneCheckView")
+                Spacer()
+            }
         }
     }
 }
@@ -200,11 +143,22 @@ struct JoinCallView<Factory: ViewFactory>: View {
     @Injected(\.colors) var colors
 
     var viewFactory: Factory
-    var callId: String
-    var callType: String
-    var callParticipants: [User]
-    var onJoinCallTap: () -> Void
-    
+    var viewModel: LobbyViewModel
+
+    @State var participants: [User]
+    var participantsPublisher: AnyPublisher<[User], Never>
+
+    init(
+        viewFactory: Factory,
+        viewModel: LobbyViewModel
+    ) {
+        self.viewFactory = viewFactory
+        self.viewModel = viewModel
+
+        participants = viewModel.participants
+        participantsPublisher = viewModel.$participants.eraseToAnyPublisher()
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(waitingRoomDescription)
@@ -212,19 +166,19 @@ struct JoinCallView<Factory: ViewFactory>: View {
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibility(identifier: "callParticipantsCount")
-                .streamAccessibility(value: "\(callParticipants.count)")
-            
+                .streamAccessibility(value: "\(participants.count)")
+
             if #available(iOS 14, *) {
-                if !callParticipants.isEmpty {
+                if !participants.isEmpty {
                     ParticipantsInCallView(
                         viewFactory: viewFactory,
-                        callParticipants: callParticipants
+                        callParticipants: participants
                     )
                 }
             }
-            
+
             Button {
-                onJoinCallTap()
+                viewModel.didTapJoin()
             } label: {
                 Text(L10n.WaitingRoom.join)
                     .bold()
@@ -239,14 +193,15 @@ struct JoinCallView<Factory: ViewFactory>: View {
         .padding()
         .background(colors.lobbySecondaryBackground)
         .cornerRadius(16)
+        .onReceive(participantsPublisher) { participants = $0 }
     }
-    
+
     private var waitingRoomDescription: String {
-        "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(callParticipants.count))"
+        "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(participants.count))"
     }
-    
+
     private var otherParticipantsCount: Int {
-        let count = callParticipants.count - 1
+        let count = participants.count - 1
         if count > 0 {
             return count
         } else {
@@ -256,48 +211,69 @@ struct JoinCallView<Factory: ViewFactory>: View {
 }
 
 struct CallSettingsView: View {
-    
+
     @Injected(\.images) var images
-    
-    @Binding var callSettings: CallSettings
-    
-    private let iconSize: CGFloat = 50
-    
+
+    var viewModel: LobbyViewModel
+    var iconSize: CGFloat
+
+    @State var audioOn: Bool
+    var audioOnPublisher: AnyPublisher<Bool, Never>
+
+    @State var videoOn: Bool
+    var videoOnPublisher: AnyPublisher<Bool, Never>
+
+    init(
+        viewModel: LobbyViewModel,
+        iconSize: CGFloat = 50
+    ) {
+        self.viewModel = viewModel
+        self.iconSize = iconSize
+
+        audioOn = viewModel.audioOn
+        audioOnPublisher = viewModel.$audioOn.eraseToAnyPublisher()
+        videoOn = viewModel.videoOn
+        videoOnPublisher = viewModel.$videoOn.eraseToAnyPublisher()
+    }
+
     var body: some View {
         HStack(spacing: 32) {
-            Button {
-                callSettings = CallSettings(
-                    audioOn: !callSettings.audioOn,
-                    videoOn: callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn
-                )
-            } label: {
-                CallIconView(
-                    icon: (callSettings.audioOn ? images.micTurnOn : images.micTurnOff),
-                    size: iconSize,
-                    iconStyle: (callSettings.audioOn ? .primary : .transparent)
-                )
-                .accessibility(identifier: "microphoneToggle")
-                .streamAccessibility(value: callSettings.audioOn ? "1" : "0")
-            }
-
-            Button {
-                callSettings = CallSettings(
-                    audioOn: callSettings.audioOn,
-                    videoOn: !callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn
-                )
-            } label: {
-                CallIconView(
-                    icon: (callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
-                    size: iconSize,
-                    iconStyle: (callSettings.videoOn ? .primary : .transparent)
-                )
-                .accessibility(identifier: "cameraToggle")
-                .streamAccessibility(value: callSettings.videoOn ? "1" : "0")
-            }
+            toggleMicrophoneButton
+            toggleCameraButton
         }
         .padding()
+        .onReceive(audioOnPublisher) { audioOn = $0 }
+        .onReceive(videoOnPublisher) { videoOn = $0 }
+    }
+
+    @ViewBuilder
+    var toggleMicrophoneButton: some View {
+        Button {
+            viewModel.toggleMicrophoneEnabled()
+        } label: {
+            CallIconView(
+                icon: audioOn ? images.micTurnOn : images.micTurnOff,
+                size: iconSize,
+                iconStyle: audioOn ? .primary : .transparent
+            )
+            .accessibility(identifier: "microphoneToggle")
+            .streamAccessibility(value: audioOn ? "1" : "0")
+        }
+    }
+
+    @ViewBuilder
+    var toggleCameraButton: some View {
+        Button {
+            viewModel.toggleCameraEnabled()
+        } label: {
+            CallIconView(
+                icon: videoOn ? images.videoTurnOn : images.videoTurnOff,
+                size: iconSize,
+                iconStyle: videoOn ? .primary : .transparent
+            )
+            .accessibility(identifier: "cameraToggle")
+            .streamAccessibility(value: videoOn ? "1" : "0")
+        }
     }
 }
 
@@ -329,9 +305,9 @@ struct ParticipantsInCallView<Factory: ViewFactory>: View {
         }
         return result
     }
-    
+
     private let viewSize: CGFloat = 64
-    
+
     var body: some View {
         ScrollView(.horizontal) {
             LazyHStack {
