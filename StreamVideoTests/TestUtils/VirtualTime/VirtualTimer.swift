@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 import protocol StreamVideo.Timer
@@ -14,7 +15,11 @@ struct VirtualTimeTimer: Timer {
         time = nil
     }
 
-    static func schedule(timeInterval: TimeInterval, queue: DispatchQueue, onFire: @escaping () -> Void) -> TimerControl {
+    static func schedule(
+        timeInterval: TimeInterval,
+        queue: DispatchQueue,
+        onFire: @escaping () -> Void
+    ) -> TimerControl {
         Self.time.scheduleTimer(
             interval: timeInterval,
             repeating: false,
@@ -34,9 +39,17 @@ struct VirtualTimeTimer: Timer {
         )
     }
 
+    static func publish(
+        every interval: TimeInterval,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+    ) -> AnyPublisher<Date, Never> {
+        DefaultTimer
+            .publish(every: interval)
+    }
+
     static func currentTime() -> Date {
         Date(timeIntervalSinceReferenceDate: time.currentTime)
     }
 }
-
-extension VirtualTime.TimerControl: TimerControl, RepeatingTimerControl {}

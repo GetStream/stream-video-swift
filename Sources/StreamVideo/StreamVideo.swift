@@ -531,10 +531,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         do {
             var cancellable: AnyCancellable?
             log.debug("Listening for WS connection")
-            _ = try await Foundation
-                .Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
+            _ = try await DefaultTimer
+                .publish(every: 0.1)
                 .filter { [weak webSocketClient] _ in webSocketClient?.connectionState.isConnected == true }
                 .nextValue(timeout: 30) { cancellable = $0 }
             cancellable?.cancel()
@@ -586,10 +584,8 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         var cancellable: AnyCancellable?
         do {
-            let result = try await Foundation
-                .Timer
-                .publish(every: 0.1, on: .main, in: .default)
-                .autoconnect()
+            let result = try await DefaultTimer
+                .publish(every: 0.1)
                 .log(.debug) { _ in "Waiting for connection id" }
                 .compactMap { [weak self] _ in self?.loadConnectionIdFromHealthcheck() }
                 .nextValue(timeout: 5) { cancellable = $0 }

@@ -506,10 +506,8 @@ public class CallState: ObservableObject {
     
     private func setupDurationTimer() {
         resetTimer()
-        durationCancellable = Foundation
-            .Timer
-            .publish(every: 1.0, on: .main, in: .default)
-            .autoconnect()
+        durationCancellable = DefaultTimer
+            .publish(every: 1.0)
             .receive(on: DispatchQueue.main)
             .compactMap { [weak self] _ in
                 if let startedAt = self?.startedAt {

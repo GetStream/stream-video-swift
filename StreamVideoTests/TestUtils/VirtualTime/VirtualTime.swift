@@ -3,6 +3,7 @@
 //
 
 import Foundation
+@testable import StreamVideo
 import XCTest
 
 /// This class allows simulating time-based events in tests.
@@ -90,8 +91,9 @@ final class VirtualTime {
 
 extension VirtualTime {
     /// Internal representation of a timer scheduled with `VirtualTime`. Not meant to be used directly.
-    class TimerControl {
+    class TimerControl: RepeatingTimerControl {
         private(set) var isActive = true
+        var isRunning: Bool { isActive }
 
         var repeatingPeriod: TimeInterval
         var scheduledFireTime: TimeInterval

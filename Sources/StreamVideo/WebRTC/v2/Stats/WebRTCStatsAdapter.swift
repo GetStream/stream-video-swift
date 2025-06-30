@@ -291,10 +291,8 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
     /// - Parameter key: The disposable key to manage the reporting timer.
     private func scheduleStatsReporting(for key: DisposableKey) {
         disposableBag.remove(key.rawValue)
-        Foundation
-            .Timer
-            .publish(every: 3, on: .main, in: .default)
-            .autoconnect()
+        DefaultTimer
+            .publish(every: 3)
             .sink { [weak self] _ in
                 self?.reporter.triggerDelivery()
                 self?.disposableBag.remove(key.rawValue)

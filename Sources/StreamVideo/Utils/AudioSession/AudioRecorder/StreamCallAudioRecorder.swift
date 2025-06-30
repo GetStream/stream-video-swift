@@ -118,10 +118,8 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
             updateMetersTimerCancellable?.cancel()
             disposableBag.remove("update-meters")
-            updateMetersTimerCancellable = Foundation
-                .Timer
-                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate, on: .main, in: .default)
-                .autoconnect()
+            updateMetersTimerCancellable = DefaultTimer
+                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
                 .sinkTask(storeIn: disposableBag, identifier: "update-meters") { [weak self, audioRecorder] _ in
                     audioRecorder.updateMeters()
                     self?._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))

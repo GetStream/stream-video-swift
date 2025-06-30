@@ -54,10 +54,6 @@ extension WebRTCCoordinator.StateMachine {
             case idle, connecting, connected, joining, joined, leaving, cleanUp,
                  disconnected, fastReconnecting, fastReconnected, rejoining,
                  migrating, migrated, error, blocked
-
-            #if canImport(XCTest)
-            case testOnly
-            #endif
         }
 
         /// The identifier for the current stage.
