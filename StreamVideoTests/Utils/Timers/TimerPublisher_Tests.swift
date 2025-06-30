@@ -64,29 +64,29 @@ final class TimerPublisher_Tests: XCTestCase, @unchecked Sendable {
 
         let expectation = expectation(description: "Should receive values after resubscription")
 
-        subject
+        LogConfig.level = .debug
+        var cancellable = subject
+            .log(.debug) { "Received value: \($0.millisecondsSince1970)" }
             .sink { [weak self] in self?.receivedDates.append($0) }
-            .store(in: disposableBag)
 
-        Task {
-            try? await Task.sleep(nanoseconds: 250_000_000)
-            self.disposableBag.removeAll()
-            XCTAssertEqual(receivedDates.count, 1)
-            receivedDates = []
+        await wait(for: 0.25)
+        cancellable.cancel()
 
-            try? await Task.sleep(nanoseconds: 250_000_000)
-            XCTAssertTrue(receivedDates.isEmpty)
+        XCTAssertEqual(receivedDates.count, 1)
 
-            subject
-                .prefix(2)
-                .sink { [weak self] in
-                    self?.receivedDates.append($0)
-                    if self?.receivedDates.count == 2 {
-                        expectation.fulfill()
-                    }
+        receivedDates = []
+
+        await wait(for: 0.25)
+        XCTAssertTrue(receivedDates.isEmpty)
+
+        cancellable = subject
+            .prefix(2)
+            .sink { [weak self] in
+                self?.receivedDates.append($0)
+                if self?.receivedDates.count == 2 {
+                    expectation.fulfill()
                 }
-                .store(in: self.disposableBag)
-        }
+            }
 
         await fulfillment(of: [expectation])
     }

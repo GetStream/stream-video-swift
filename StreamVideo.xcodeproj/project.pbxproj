@@ -361,7 +361,6 @@
 		408721EC2E127405006A68CB /* RepeatingTimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721EB2E127405006A68CB /* RepeatingTimerControl.swift */; };
 		408721EE2E12740E006A68CB /* TimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721ED2E12740E006A68CB /* TimerControl.swift */; };
 		408721F12E12741F006A68CB /* DispatchWorkItem+TimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */; };
-		408721F42E127534006A68CB /* TimerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F32E127534006A68CB /* TimerStorage.swift */; };
 		408721F72E127551006A68CB /* TimerPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F62E127551006A68CB /* TimerPublisher.swift */; };
 		408721FA2E127A18006A68CB /* TimerPublisher_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */; };
 		4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */; };
@@ -1936,7 +1935,6 @@
 		408721EB2E127405006A68CB /* RepeatingTimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingTimerControl.swift; sourceTree = "<group>"; };
 		408721ED2E12740E006A68CB /* TimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerControl.swift; sourceTree = "<group>"; };
 		408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchWorkItem+TimerControl.swift"; sourceTree = "<group>"; };
-		408721F32E127534006A68CB /* TimerStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerStorage.swift; sourceTree = "<group>"; };
 		408721F62E127551006A68CB /* TimerPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher.swift; sourceTree = "<group>"; };
 		408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher_Tests.swift; sourceTree = "<group>"; };
 		4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamUUIDFactory.swift; sourceTree = "<group>"; };
@@ -3678,7 +3676,6 @@
 			isa = PBXGroup;
 			children = (
 				408721F52E127540006A68CB /* TimerPublisher */,
-				408721F22E1274FD006A68CB /* TimerStorage */,
 				408721E62E1273C6006A68CB /* Protocol */,
 				408721E22E12738D006A68CB /* Repeating */,
 				408721EF2E12741A006A68CB /* Extensions */,
@@ -4001,14 +3998,6 @@
 				408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */,
 			);
 			path = Extensions;
-			sourceTree = "<group>";
-		};
-		408721F22E1274FD006A68CB /* TimerStorage */ = {
-			isa = PBXGroup;
-			children = (
-				408721F32E127534006A68CB /* TimerStorage.swift */,
-			);
-			path = TimerStorage;
 			sourceTree = "<group>";
 		};
 		408721F52E127540006A68CB /* TimerPublisher */ = {
@@ -7974,7 +7963,6 @@
 				841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */,
 				40483CB82C9B1DEE00B4FCA8 /* WebRTCCoordinatorProviding.swift in Sources */,
 				4028FEAB2DC536DE001F9DC3 /* Date+millisecondsSince1970.swift in Sources */,
-				408721F42E127534006A68CB /* TimerStorage.swift in Sources */,
 				40FEA2C62DA4000A00AC523B /* (null) in Sources */,
 				401C1EEB2D4900C500304609 /* ClosedCaptionsAdapter.swift in Sources */,
 				842E70D32B91BE1700D2D68B /* CallRecordingReadyEvent.swift in Sources */,

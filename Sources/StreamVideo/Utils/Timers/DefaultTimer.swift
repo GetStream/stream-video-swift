@@ -55,17 +55,18 @@ public struct DefaultTimer: Timer {
         RepeatingTimer(timeInterval: timeInterval, queue: queue, onFire: onFire)
     }
 
-    /// Returns a publisher that emits ``Date`` values at the given interval.
+    /// Returns a Combine publisher that emits `Date` values at a fixed interval.
     ///
-    /// The timer is shared from ``TimerStorage`` and runs on a background queue,
-    /// making it suitable for off-main-thread operations. Timers are not bound to
-    /// the main thread and are suitable for use in background contexts.
+    /// The timer operates on a background queue and only emits values while
+    /// there are active subscribers. If the interval is less than or equal to
+    /// zero, a warning is logged and a single `Date` value is emitted instead.
     ///
     /// - Parameters:
-    ///   - interval: Time between timer events.
-    ///   - repeating: Whether the timer should repeat. Ignored in current
-    ///     implementation.
-    /// - Returns: A publisher that emits ``Date`` values.
+    ///   - interval: Time between emitted date values.
+    ///   - file: The file from which the method is called. Used for logging.
+    ///   - function: The function from which the method is called.
+    ///   - line: The line number from which the method is called.
+    /// - Returns: A publisher that emits dates while subscribed.
     public static func publish(
         every interval: TimeInterval,
         file: StaticString = #file,
@@ -81,9 +82,6 @@ public struct DefaultTimer: Timer {
             )
             return Just(Date()).eraseToAnyPublisher()
         }
-        return TimerStorage
-            .currentValue
-            .timer(for: interval)
-            .eraseToAnyPublisher()
+        return TimerPublisher(interval: interval).eraseToAnyPublisher()
     }
 }

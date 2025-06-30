@@ -48,9 +48,7 @@ final class ICEConnectionStateAdapter {
     private func didUpdate(_ state: RTCIceConnectionState) {
         switch state {
         case .failed:
-            scheduledRestartICECancellable?.cancel()
-            scheduledRestartICECancellable = nil
-            peerConnectionCoordinator?.restartICE()
+            restartICE()
 
         case .disconnected:
             scheduledRestartICECancellable = DefaultTimer
@@ -76,7 +74,7 @@ final class ICEConnectionStateAdapter {
     /// Subscribes to ICE connection state events from the coordinator and
     /// cancels previous subscriptions when the coordinator changes.
     ///
-    /// - Parameter peerConnectionCoordinator: The coordinator to observe.
+    /// - Parameter peerConnectionCoordinator: The coordinator to observe.
     private func didUpdate(
         _ peerConnectionCoordinator: RTCPeerConnectionCoordinator?
     ) {
