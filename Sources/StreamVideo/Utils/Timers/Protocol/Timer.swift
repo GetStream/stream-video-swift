@@ -61,7 +61,10 @@ protocol Timer {
     ///   - repeating: A Boolean indicating if the timer should repeat.
     /// - Returns: A publisher that emits the current `Date` on each fire.
     static func publish(
-        every interval: TimeInterval
+        every interval: TimeInterval,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
     ) -> AnyPublisher<Date, Never>
 }
 

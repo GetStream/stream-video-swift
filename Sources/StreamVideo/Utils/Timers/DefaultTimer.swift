@@ -67,9 +67,21 @@ public struct DefaultTimer: Timer {
     ///     implementation.
     /// - Returns: A publisher that emits ``Date`` values.
     public static func publish(
-        every interval: TimeInterval
+        every interval: TimeInterval,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
     ) -> AnyPublisher<Date, Never> {
-        TimerStorage
+        guard interval > 0 else {
+            log.warning(
+                "Interval cannot be 0 or less",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+            return Just(Date()).eraseToAnyPublisher()
+        }
+        return TimerStorage
             .currentValue
             .timer(for: interval)
             .eraseToAnyPublisher()

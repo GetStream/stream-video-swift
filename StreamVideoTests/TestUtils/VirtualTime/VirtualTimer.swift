@@ -40,7 +40,10 @@ struct VirtualTimeTimer: Timer {
     }
 
     static func publish(
-        every interval: TimeInterval
+        every interval: TimeInterval,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
     ) -> AnyPublisher<Date, Never> {
         DefaultTimer
             .publish(every: interval)

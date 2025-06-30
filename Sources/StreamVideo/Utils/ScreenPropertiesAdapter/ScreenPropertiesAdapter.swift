@@ -11,9 +11,9 @@ import UIKit
 
 public final class ScreenPropertiesAdapter: @unchecked Sendable {
 
-    public private(set) var preferredFramesPerSecond: Int = 0
-    public private(set) var refreshRate: TimeInterval = 0
-    public private(set) var scale: CGFloat = 0
+    public private(set) var preferredFramesPerSecond: Int = 30
+    public private(set) var refreshRate: TimeInterval = 0.16
+    public private(set) var scale: CGFloat = 1
 
     init() {
         Task { @MainActor in
