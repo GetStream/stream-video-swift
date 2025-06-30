@@ -356,6 +356,14 @@
 		408521E52D661C7600F012B8 /* RawJSON+Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E42D661C7500F012B8 /* RawJSON+Double.swift */; };
 		408521E72D661CA700F012B8 /* ThermalState+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */; };
 		408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408679F62BD12F1000D027E0 /* AudioFilter.swift */; };
+		408721E42E127396006A68CB /* RepeatingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721E32E127396006A68CB /* RepeatingTimer.swift */; };
+		408721E82E1273CE006A68CB /* DefaultTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721E72E1273CE006A68CB /* DefaultTimer.swift */; };
+		408721EC2E127405006A68CB /* RepeatingTimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721EB2E127405006A68CB /* RepeatingTimerControl.swift */; };
+		408721EE2E12740E006A68CB /* TimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721ED2E12740E006A68CB /* TimerControl.swift */; };
+		408721F12E12741F006A68CB /* DispatchWorkItem+TimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */; };
+		408721F42E127534006A68CB /* TimerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F32E127534006A68CB /* TimerStorage.swift */; };
+		408721F72E127551006A68CB /* TimerPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F62E127551006A68CB /* TimerPublisher.swift */; };
+		408721FA2E127A18006A68CB /* TimerPublisher_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */; };
 		4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */; };
 		408937912C134305000EEB69 /* View+AlertWithTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408937902C134305000EEB69 /* View+AlertWithTextField.swift */; };
 		408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
@@ -1923,6 +1931,14 @@
 		408521E42D661C7500F012B8 /* RawJSON+Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RawJSON+Double.swift"; sourceTree = "<group>"; };
 		408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThermalState+Comparable.swift"; sourceTree = "<group>"; };
 		408679F62BD12F1000D027E0 /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
+		408721E32E127396006A68CB /* RepeatingTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingTimer.swift; sourceTree = "<group>"; };
+		408721E72E1273CE006A68CB /* DefaultTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTimer.swift; sourceTree = "<group>"; };
+		408721EB2E127405006A68CB /* RepeatingTimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingTimerControl.swift; sourceTree = "<group>"; };
+		408721ED2E12740E006A68CB /* TimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerControl.swift; sourceTree = "<group>"; };
+		408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchWorkItem+TimerControl.swift"; sourceTree = "<group>"; };
+		408721F32E127534006A68CB /* TimerStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerStorage.swift; sourceTree = "<group>"; };
+		408721F62E127551006A68CB /* TimerPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher.swift; sourceTree = "<group>"; };
+		408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher_Tests.swift; sourceTree = "<group>"; };
 		4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamUUIDFactory.swift; sourceTree = "<group>"; };
 		408937902C134305000EEB69 /* View+AlertWithTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+AlertWithTextField.swift"; sourceTree = "<group>"; };
 		408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoConfig+Dummy.swift"; sourceTree = "<group>"; };
@@ -3661,7 +3677,12 @@
 		404780412DE61EAD0085AE05 /* Timers */ = {
 			isa = PBXGroup;
 			children = (
-				84A7E1A72883E46200526C98 /* Timer.swift */,
+				408721F52E127540006A68CB /* TimerPublisher */,
+				408721F22E1274FD006A68CB /* TimerStorage */,
+				408721E62E1273C6006A68CB /* Protocol */,
+				408721E22E12738D006A68CB /* Repeating */,
+				408721EF2E12741A006A68CB /* Extensions */,
+				408721E72E1273CE006A68CB /* DefaultTimer.swift */,
 			);
 			path = Timers;
 			sourceTree = "<group>";
@@ -3954,6 +3975,56 @@
 				400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */,
 			);
 			path = AudioFilter;
+			sourceTree = "<group>";
+		};
+		408721E22E12738D006A68CB /* Repeating */ = {
+			isa = PBXGroup;
+			children = (
+				408721EB2E127405006A68CB /* RepeatingTimerControl.swift */,
+				408721E32E127396006A68CB /* RepeatingTimer.swift */,
+			);
+			path = Repeating;
+			sourceTree = "<group>";
+		};
+		408721E62E1273C6006A68CB /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				408721ED2E12740E006A68CB /* TimerControl.swift */,
+				84A7E1A72883E46200526C98 /* Timer.swift */,
+			);
+			path = Protocol;
+			sourceTree = "<group>";
+		};
+		408721EF2E12741A006A68CB /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		408721F22E1274FD006A68CB /* TimerStorage */ = {
+			isa = PBXGroup;
+			children = (
+				408721F32E127534006A68CB /* TimerStorage.swift */,
+			);
+			path = TimerStorage;
+			sourceTree = "<group>";
+		};
+		408721F52E127540006A68CB /* TimerPublisher */ = {
+			isa = PBXGroup;
+			children = (
+				408721F62E127551006A68CB /* TimerPublisher.swift */,
+			);
+			path = TimerPublisher;
+			sourceTree = "<group>";
+		};
+		408721F82E127A10006A68CB /* Timers */ = {
+			isa = PBXGroup;
+			children = (
+				408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */,
+			);
+			path = Timers;
 			sourceTree = "<group>";
 		};
 		408937892C062B0B000EEB69 /* UUIDProviding */ = {
@@ -5680,28 +5751,29 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				406568882E04275700A67EAC /* IdleTimerAdapter */,
-				40FAAC872DDC9F83007BF93A /* ConsumableBucket */,
 				40FAAC852DDC9B2D007BF93A /* AnyEncodable.swift */,
-				40B3E5392DBBAF8B00DE8F50 /* Proximity */,
-				40FB95CD2DAD6FD700B24BC7 /* Extensions */,
-				400C9FC22D9D0BC900DB26DC /* OperationQueue+TaskOperations */,
-				401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */,
-				401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */,
-				4067F31A2CDA55D1002E28BD /* AudioSession */,
-				40E18AB02CD51FB900A65C9F /* Queues */,
-				4029E9562CB943E800E1D571 /* CollectionDelayedUpdateObserver_Tests.swift */,
-				40C2B5C42C2D7ADE00EC2C2D /* RejectionReasonProvider */,
-				40C4DF4E2C1C41470035DBC2 /* ParticipantAutoLeavePolicy */,
-				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
-				842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */,
-				8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */,
-				84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */,
 				84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */,
-				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
-				84D6E5392B3AD10000D0056C /* RepeatingTimer_Tests.swift */,
-				4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */,
 				403FB1482BFDF3950047A696 /* CallCache_Tests.swift */,
+				401C1EF12D4945BE00304609 /* ClosedCaptionsAdapterTests.swift */,
+				4029E9562CB943E800E1D571 /* CollectionDelayedUpdateObserver_Tests.swift */,
+				842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */,
+				84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */,
+				401C1EEF2D493DCA00304609 /* OrderedCapacityQueueTests.swift */,
+				8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */,
+				84D6E5392B3AD10000D0056C /* RepeatingTimer_Tests.swift */,
+				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
+				4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */,
+				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
+				4067F31A2CDA55D1002E28BD /* AudioSession */,
+				40FAAC872DDC9F83007BF93A /* ConsumableBucket */,
+				40FB95CD2DAD6FD700B24BC7 /* Extensions */,
+				406568882E04275700A67EAC /* IdleTimerAdapter */,
+				400C9FC22D9D0BC900DB26DC /* OperationQueue+TaskOperations */,
+				40C4DF4E2C1C41470035DBC2 /* ParticipantAutoLeavePolicy */,
+				40B3E5392DBBAF8B00DE8F50 /* Proximity */,
+				40E18AB02CD51FB900A65C9F /* Queues */,
+				40C2B5C42C2D7ADE00EC2C2D /* RejectionReasonProvider */,
+				408721F82E127A10006A68CB /* Timers */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -7605,6 +7677,7 @@
 				40FDE1F62D6E086200985F81 /* Sequence.swift in Sources */,
 				8490032329D308A000AD9BB4 /* BackstageSettingsRequest.swift in Sources */,
 				404098BF2DDE29AD00D7BEC5 /* WebRTCItemTransformerProcessingUnit.swift in Sources */,
+				408721EE2E12740E006A68CB /* TimerControl.swift in Sources */,
 				841BAA362BD15CDE000C73E4 /* CallEvent.swift in Sources */,
 				8456E6D1287EC343004E180E /* Logger.swift in Sources */,
 				40429D5D2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift in Sources */,
@@ -7629,6 +7702,7 @@
 				40BBC4B72C627E59002AEF92 /* VideoMediaAdapter.swift in Sources */,
 				84D91E9D2C7CB0AA00B163A0 /* CallRtmpBroadcastFailedEvent.swift in Sources */,
 				84A737D028F4716E001A6769 /* models.pb.swift in Sources */,
+				408721E42E127396006A68CB /* RepeatingTimer.swift in Sources */,
 				846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */,
 				40E3634C2D09F9EF0028C52A /* CameraBackgroundAccessHandler.swift in Sources */,
 				842E70DB2B91BE1700D2D68B /* ListTranscriptionsResponse.swift in Sources */,
@@ -7849,6 +7923,7 @@
 				40D36ADC2DDE00DD00972D75 /* WebRTCTracing.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
+				408721F12E12741F006A68CB /* DispatchWorkItem+TimerControl.swift in Sources */,
 				845C09972C11AAA200F725B3 /* RejectCallRequest.swift in Sources */,
 				4028FEA52DC5046F001F9DC3 /* WebRTCStatsAdapter.swift in Sources */,
 				40FB02032BAC93A800A1C206 /* CallKitAdapter.swift in Sources */,
@@ -7899,6 +7974,7 @@
 				841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */,
 				40483CB82C9B1DEE00B4FCA8 /* WebRTCCoordinatorProviding.swift in Sources */,
 				4028FEAB2DC536DE001F9DC3 /* Date+millisecondsSince1970.swift in Sources */,
+				408721F42E127534006A68CB /* TimerStorage.swift in Sources */,
 				40FEA2C62DA4000A00AC523B /* (null) in Sources */,
 				401C1EEB2D4900C500304609 /* ClosedCaptionsAdapter.swift in Sources */,
 				842E70D32B91BE1700D2D68B /* CallRecordingReadyEvent.swift in Sources */,
@@ -7992,6 +8068,7 @@
 				40BBC4A72C623D03002AEF92 /* StreamRTCPeerConnection+DelegatePublisher.swift in Sources */,
 				40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */,
 				842B8E222A2DFED900863A87 /* CallNotificationEvent.swift in Sources */,
+				408721E82E1273CE006A68CB /* DefaultTimer.swift in Sources */,
 				408CF9CB2CAFF46500F56833 /* VideoCapturePolicy.swift in Sources */,
 				406B3BE12C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift in Sources */,
 				845C09842C0DEB5C00F725B3 /* LimitsSettingsRequest.swift in Sources */,
@@ -8003,6 +8080,7 @@
 				8490032229D308A000AD9BB4 /* AudioSettingsRequest.swift in Sources */,
 				40AB34B62C5D089E00B5B6B3 /* Task+Timeout.swift in Sources */,
 				40F101682D5A653200C49481 /* AudioSessionPolicy.swift in Sources */,
+				408721F72E127551006A68CB /* TimerPublisher.swift in Sources */,
 				408521E72D661CA700F012B8 /* ThermalState+Comparable.swift in Sources */,
 				84DC38B629ADFCFD00946713 /* QueryMembersResponse.swift in Sources */,
 				4159F16C2C86FA41002B94D3 /* TURNAggregatedStats.swift in Sources */,
@@ -8085,6 +8163,7 @@
 				8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */,
 				84CD12202C73831000056640 /* CallMissedEvent.swift in Sources */,
 				842B8E1C2A2DFED900863A87 /* AcceptCallResponse.swift in Sources */,
+				408721EC2E127405006A68CB /* RepeatingTimerControl.swift in Sources */,
 				40FE5EB32C9C73E0006B0881 /* StreamDeviceOrientationAdapter.swift in Sources */,
 				40AAD1952D2EF36B00D10330 /* CaptureDeviceProtocol.swift in Sources */,
 				40F18B8E2BEBB65100ADF76E /* View+OptionalPublisher.swift in Sources */,
@@ -8301,6 +8380,7 @@
 				84F58B8F29EEB32700010C4C /* WebSocketPingController_Mock.swift in Sources */,
 				40AB34C12C5D3DBC00B5B6B3 /* AggregatedStatsReport+Dummy.swift in Sources */,
 				40F101802D5D078800C49481 /* MockAudioSessionPolicy.swift in Sources */,
+				408721FA2E127A18006A68CB /* TimerPublisher_Tests.swift in Sources */,
 				406B3C0A2C8F605000FC93A1 /* PeerConnectionFactory+Mock.swift in Sources */,
 				40382F472C89D00200C2D00F /* Stream_Video_Sfu_Models_Participant+Convenience.swift in Sources */,
 				84DC44982BA3ACC70050290C /* CallStatsReporting_Tests.swift in Sources */,

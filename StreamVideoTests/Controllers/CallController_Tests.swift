@@ -790,7 +790,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
 final class MockTestOnlyStage: WebRTCCoordinator.StateMachine.Stage, @unchecked Sendable {
     convenience init() {
-        self.init(id: .testOnly, context: .init())
+        self.init(id: .joined, context: .init())
     }
 
     override func transition(
