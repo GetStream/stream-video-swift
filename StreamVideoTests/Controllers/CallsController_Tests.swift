@@ -72,9 +72,9 @@ final class CallsController_Tests: ControllerTestCase, @unchecked Sendable {
         // When
         try await callsController.loadNextCalls()
         // Simulate connection drop
-        streamVideo?.state.connection = .disconnected()
+        streamVideo?.state.backingStorage.connection = .disconnected()
         try await waitForCallEvent()
-        streamVideo?.state.connection = .connected
+        streamVideo?.state.backingStorage.connection = .connected
         await fulfillment { self.httpClient.requestCounter == 2 }
     }
     
@@ -85,9 +85,9 @@ final class CallsController_Tests: ControllerTestCase, @unchecked Sendable {
         // When
         try await callsController.loadNextCalls()
         // Simulate connection drop
-        streamVideo?.state.connection = .disconnected()
+        streamVideo?.state.backingStorage.connection = .disconnected()
         try await waitForCallEvent()
-        streamVideo?.state.connection = .connected
+        streamVideo?.state.backingStorage.connection = .connected
         try await waitForCallEvent()
         
         // Then

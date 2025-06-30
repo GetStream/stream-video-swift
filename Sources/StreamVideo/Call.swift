@@ -236,9 +236,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.streamVideo.state.ringingCall = self
-            }
+            streamVideo.state.backingStorage.ringingCall = self
         }
         return response
     }
@@ -338,9 +336,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.update(from: response)
         if ring {
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.streamVideo.state.ringingCall = self
-            }
+            streamVideo.state.backingStorage.ringingCall = self
         }
         return response.call
     }
@@ -550,16 +546,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // Reset the activeAudioFilter
         setAudioFilter(nil)
 
-        Task(disposableBag: disposableBag) { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            if streamVideo.state.ringingCall?.cId == cId {
-                streamVideo.state.ringingCall = nil
-            }
-            if streamVideo.state.activeCall?.cId == cId {
-                streamVideo.state.activeCall = nil
-            }
+        if streamVideo.state.backingStorage.ringingCall?.cId == cId {
+            streamVideo.state.backingStorage.ringingCall = nil
+        }
+        if streamVideo.state.backingStorage.activeCall?.cId == cId {
+            streamVideo.state.backingStorage.activeCall = nil
         }
     }
 

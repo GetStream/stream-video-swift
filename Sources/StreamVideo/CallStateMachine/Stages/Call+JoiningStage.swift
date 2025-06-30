@@ -143,9 +143,7 @@ extension Call.StateMachine.Stage {
 
             try Task.checkCancellation()
 
-            await Task(disposableBag: disposableBag) { @MainActor [weak streamVideo] in
-                streamVideo?.state.activeCall = call
-            }.value
+            streamVideo.state.backingStorage.activeCall = call
 
             try Task.checkCancellation()
 

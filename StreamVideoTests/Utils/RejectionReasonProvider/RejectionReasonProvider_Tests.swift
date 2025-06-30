@@ -20,8 +20,12 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     @MainActor
     func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsBusy_thenReturnsBusyReason() async {
         let ringingCall = MockCall(.dummy())
-        mockStreamVideo.state.activeCall = MockCall(.dummy())
-        mockStreamVideo.state.ringingCall = ringingCall
+        mockStreamVideo.state.backingStorage.activeCall = MockCall(.dummy())
+        mockStreamVideo.state.backingStorage.ringingCall = ringingCall
+        await fulfillment {
+            self.mockStreamVideo.state.activeCall != nil
+                && self.mockStreamVideo.state.ringingCall != nil
+        }
 
         let reason = await subject.reason(
             for: ringingCall.cId,
@@ -35,8 +39,9 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsRejectingOutgoingCall_thenReturnsCancelReason(
     ) async {
         let ringingCall = MockCall(.dummy())
-        mockStreamVideo.state.ringingCall = ringingCall
+        mockStreamVideo.state.backingStorage.ringingCall = ringingCall
         ringingCall.state.createdBy = mockStreamVideo.user
+        await fulfillment { self.mockStreamVideo.state.ringingCall != nil }
 
         let reason = await subject.reason(
             for: ringingCall.cId,
@@ -50,8 +55,9 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     func test_rejectionReason_givenRingingCallWithMatchingCidAndNoRingTimeout_whenUserIsRejectingOutgoingCall_thenReturnsCancelReason(
     ) async {
         let ringingCall = MockCall(.dummy())
-        mockStreamVideo.state.ringingCall = ringingCall
+        mockStreamVideo.state.backingStorage.ringingCall = ringingCall
         ringingCall.state.createdBy = mockStreamVideo.user
+        await fulfillment { self.mockStreamVideo.state.ringingCall != nil }
 
         let reason = await subject.reason(
             for: ringingCall.cId,
@@ -65,8 +71,9 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     func test_rejectionReason_givenRingingCallWithMatchingCidAndNoRingTimeout_whenUserIsNotBusyAndNotRejectingOutgoingCall_thenReturnsDeclineReason(
     ) async {
         let ringingCall = MockCall(.dummy())
-        mockStreamVideo.state.ringingCall = ringingCall
+        mockStreamVideo.state.backingStorage.ringingCall = ringingCall
         ringingCall.state.createdBy = .dummy()
+        await fulfillment { self.mockStreamVideo.state.ringingCall != nil }
 
         let reason = await subject.reason(
             for: ringingCall.cId,
@@ -80,8 +87,9 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     func test_rejectionReason_givenRingingCallWithMatchingCidAndRingTimeout_whenUserIsNotBusyAndNotRejectingOutgoingCall_thenReturnsTimeoutReason(
     ) async {
         let ringingCall = MockCall(.dummy())
-        mockStreamVideo.state.ringingCall = ringingCall
+        mockStreamVideo.state.backingStorage.ringingCall = ringingCall
         ringingCall.state.createdBy = .dummy()
+        await fulfillment { self.mockStreamVideo.state.ringingCall != nil }
 
         let reason = await subject.reason(
             for: ringingCall.cId,
@@ -94,8 +102,9 @@ final class StreamRejectionReasonProviderTests: XCTestCase, @unchecked Sendable 
     @MainActor
     func test_rejectionReason_givenNoRingingCallMatchingCid_thenReturnsNil() async {
         let ringingCall = MockCall(.dummy())
-        mockStreamVideo.state.ringingCall = ringingCall
+        mockStreamVideo.state.backingStorage.ringingCall = ringingCall
         ringingCall.state.createdBy = .dummy()
+        await fulfillment { self.mockStreamVideo.state.ringingCall != nil }
 
         let reason = await subject.reason(
             for: .unique,

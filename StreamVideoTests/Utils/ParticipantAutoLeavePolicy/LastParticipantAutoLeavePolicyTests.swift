@@ -130,11 +130,11 @@ final class LastParticipantAutoLeavePolicyTests: XCTestCase, @unchecked Sendable
     }
 
     private func mockRingingCall(_ call: Call?) {
-        mockStreamVideo.state.ringingCall = call
+        mockStreamVideo.state.backingStorage.ringingCall = call
     }
 
     private func mockActiveCall(_ call: Call?) {
-        mockStreamVideo.state.activeCall = call
+        mockStreamVideo.state.backingStorage.activeCall = call
     }
 
     private func mockParticipantsJoined(_ count: Int, on call: Call) {

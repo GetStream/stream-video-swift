@@ -951,7 +951,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     private func stubConnectionState(to status: ConnectionStatus) {
         let mockedState = mockedStreamVideo.state
-        mockedState.connection = status
+        mockedState.backingStorage.connection = status
         mockedStreamVideo.stub(for: \.state, with: mockedState)
     }
 

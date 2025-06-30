@@ -13,22 +13,17 @@ public typealias UserTokenUpdater = @Sendable(UserToken) -> Void
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo: ObservableObject, @unchecked Sendable {
-    
+
     @Injected(\.callCache) private var callCache
     @Injected(\.screenProperties) private var screenProperties
 
     private enum DisposableKey: String { case ringEventReceived }
 
-    public final class State: ObservableObject, @unchecked Sendable {
-        @Published public internal(set) var connection: ConnectionStatus
-        @Published public internal(set) var user: User
-        @Published public internal(set) var activeCall: Call? {
-            didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) }
-        }
-
-        @Published public internal(set) var ringingCall: Call?
-
-        private nonisolated let disposableBag = DisposableBag()
+    final class BackingStorage: @unchecked Sendable {
+        @Published var connection: ConnectionStatus
+        @Published var user: User
+        @Published var activeCall: Call? { didSet { didUpdateActiveCall(activeCall, oldValue: oldValue) } }
+        @Published var ringingCall: Call?
 
         init(user: User) {
             self.user = user
@@ -37,23 +32,72 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
         // MARK: - Private Helpers
 
-        private func didUpdateActiveCall(_ activeCall: Call?, oldValue: Call?) {
+        private func didUpdateActiveCall(
+            _ activeCall: Call?,
+            oldValue: Call?
+        ) {
             if let oldValue, oldValue.cId != activeCall?.cId {
                 oldValue.leave()
             }
-
-            if ringingCall != nil {
-                Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                    self?.ringingCall = nil
-                }
-            }
-        }
-
-        private func stopRingingCallIfRequired() {
             ringingCall = nil
         }
     }
-    
+
+    public final class State: ObservableObject, @unchecked Sendable {
+        @Published public private(set) var connection: ConnectionStatus
+        @Published public private(set) var user: User
+        @Published public private(set) var activeCall: Call?
+        @Published public private(set) var ringingCall: Call?
+
+        let backingStorage: BackingStorage
+        private let disposableBag = DisposableBag()
+
+        init(user: User) {
+            let backingStorage = BackingStorage(user: user)
+            self.backingStorage = backingStorage
+            connection = backingStorage.connection
+            self.user = backingStorage.user
+            activeCall = backingStorage.activeCall
+            ringingCall = backingStorage.ringingCall
+
+            subscribe(on: backingStorage.$connection.eraseToAnyPublisher(), keyPath: \.connection)
+            subscribe(on: backingStorage.$user.eraseToAnyPublisher(), keyPath: \.user)
+            subscribe(
+                on: backingStorage.$activeCall.eraseToAnyPublisher(),
+                removeDuplicatesBy: { $0?.cId == $1?.cId },
+                keyPath: \.activeCall
+            )
+            subscribe(
+                on: backingStorage.$ringingCall.eraseToAnyPublisher(),
+                removeDuplicatesBy: { $0?.cId == $1?.cId },
+                keyPath: \.ringingCall
+            )
+        }
+
+        private func subscribe<V: Equatable>(
+            on publisher: AnyPublisher<V, Never>,
+            keyPath: ReferenceWritableKeyPath<State, V>
+        ) {
+            publisher
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .assign(to: keyPath, onWeak: self)
+                .store(in: disposableBag)
+        }
+
+        private func subscribe<V>(
+            on publisher: AnyPublisher<V, Never>,
+            removeDuplicatesBy: @escaping (V, V) -> Bool = { _, _ in false },
+            keyPath: ReferenceWritableKeyPath<State, V>
+        ) {
+            publisher
+                .removeDuplicates(by: removeDuplicatesBy)
+                .receive(on: DispatchQueue.main)
+                .assign(to: keyPath, onWeak: self)
+                .store(in: disposableBag)
+        }
+    }
+
     public var state: State
     public let videoConfig: VideoConfig
     public var user: User {
@@ -74,13 +118,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     private static let endpointConfig: EndpointConfig = .production
     private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
-    
+
     private var webSocketClient: WebSocketClient? {
         didSet {
             setupConnectionRecoveryHandler()
         }
     }
-        
+
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
@@ -95,7 +139,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         center.add(middlewares: middlewares)
         return center
     }()
-    
+
     /// Background worker that takes care about client connection recovery when the Internet comes back
     /// OR app transitions from background to foreground.
     private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
@@ -103,7 +147,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
-        
+
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
@@ -178,7 +222,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         self.videoConfig = videoConfig
         self.environment = environment
         self.pushNotificationsConfig = pushNotificationsConfig
-        
+
         apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
         coordinatorClient = DefaultAPI(
@@ -238,7 +282,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public func connect() async throws {
         try await connectUser()
     }
-    
+
     /// Creates a call with the provided call id, type and members.
     /// This method doesn't create the call on the backend, for that you need to call `join` or `getOrCreateCall`.
     /// - Parameters:
@@ -284,7 +328,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
         return controller
     }
-    
+
     /// Sets a device for push notifications.
     /// - Parameter id: the id of the device (token) for push notifications.
     @discardableResult
@@ -299,7 +343,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             isVoip: false
         )
     }
-    
+
     /// Sets a device for VoIP push notifications.
     /// - Parameter id: the id of the device (token) for VoIP push notifications.
     @discardableResult
@@ -314,7 +358,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             isVoip: true
         )
     }
-    
+
     /// Deletes the device with the provided id.
     /// - Parameter id: the id of the device that will be deleted.
     @discardableResult
@@ -324,13 +368,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         return try await coordinatorClient.deleteDevice(id: id)
     }
-    
+
     /// Lists the devices registered for the user.
     /// - Returns: an array of `Device`s.
     public func listDevices() async throws -> [Device] {
         try await coordinatorClient.listDevices().devices
     }
-    
+
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
         await withCheckedContinuation { [webSocketClient] continuation in
@@ -388,7 +432,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         eventPublisher(for: event).eraseAsAsyncStream()
     }
-    
+
     public func queryCalls(
         next: String? = nil,
         watch: Bool = false
@@ -472,7 +516,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                     try Task.checkCancellation()
                     let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
 
-                    self.state.user = guestInfo.user
+                    self.state.backingStorage.user = guestInfo.user
                     self.token = guestInfo.token
                     self.tokenProvider = guestInfo.tokenProvider
 
@@ -514,7 +558,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         )
         return controller
     }
-    
+
     private func connectWebSocketClient() async throws {
         let queryParams = Self.endpointConfig.connectQueryParams(
             apiKey: apiKey.apiKeyString
@@ -525,7 +569,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         } else {
             throw ClientError.Unknown()
         }
-        
+
         log.debug("Listening for WS connection")
 
         do {
@@ -544,13 +588,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             throw ClientError.NetworkError()
         }
     }
-    
+
     private func makeWebSocketClient(
         url: URL,
         apiKey: APIKey
     ) -> WebSocketClient {
         let webSocketClient = environment.webSocketClientBuilder(eventNotificationCenter, url)
-        
+
         webSocketClient.connectionStateDelegate = self
         webSocketClient.onWSConnectionEstablished = { [weak self, weak webSocketClient] in
             guard let self = self, let webSocketClient else { return }
@@ -561,7 +605,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
                 image: self.user.imageURL?.absoluteString,
                 name: self.user.originalName
             )
-            
+
             let authRequest = WSAuthMessageRequest(
                 token: self.token.rawValue,
                 userDetails: connectUserRequest
@@ -569,15 +613,15 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 
             webSocketClient.engine?.send(jsonMessage: authRequest)
         }
-        
+
         return webSocketClient
     }
-    
+
     private func loadConnectionId() async -> String {
         if let connectionId = loadConnectionIdFromHealthcheck() {
             return connectionId
         }
-        
+
         guard webSocketClient?.connectionState == .connecting
             || webSocketClient?.connectionState == .authenticating
         else {
@@ -604,7 +648,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             return ""
         }
     }
-    
+
     private func loadConnectionIdFromHealthcheck() -> String? {
         guard
             case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState,
@@ -614,7 +658,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         return connectionId
     }
-    
+
     private func loadGuestUserInfo(
         for user: User,
         apiKey: String
@@ -625,7 +669,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             environment: environment
         )
         let token = UserToken(rawValue: guestUserResponse.accessToken)
-        
+
         // Update the user and token provider.
         var updatedUser = guestUserResponse.user.toUser
         let lastNameComponent = updatedUser.name.split(separator: "-").last.map { String($0) }
@@ -653,7 +697,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         return (user: updatedUser, token: token, tokenProvider: tokenProvider)
     }
-    
+
     private func setDevice(
         id: String,
         pushProvider: PushNotificationsProvider,
@@ -669,12 +713,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             pushProviderName: name,
             voipToken: isVoip
         )
-        
+
         log.debug("Sending request to save device")
 
         return try await coordinatorClient.createDevice(createDeviceRequest: createDeviceRequest)
     }
-    
+
     private func setupConnectionRecoveryHandler() {
         guard let webSocketClient = webSocketClient else {
             return
@@ -686,7 +730,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             eventNotificationCenter
         )
     }
-    
+
     private func connectUser(isInitial: Bool = false) async throws {
         if !isInitial && connectTask != nil {
             log.debug("Waiting for already running connect task")
@@ -701,7 +745,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         }
         try await connectWebSocketClient()
     }
-    
+
     private func createGuestUser(
         id: String,
         apiKey: String,
@@ -716,7 +760,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         let request = CreateGuestRequest(user: UserRequest(id: id))
         return try await defaultAPI.createGuest(createGuestRequest: request)
     }
-    
+
     private func loadGuestToken(
         userId: String,
         apiKey: String,
@@ -747,7 +791,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             }
         }
     }
-    
+
     private func prefetchLocation() {
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
@@ -763,12 +807,12 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
 }
 
 extension StreamVideo: ConnectionStateDelegate {
-    
+
     func webSocketClient(
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
-        self.state.connection = ConnectionStatus(webSocketConnectionState: state)
+        self.state.backingStorage.connection = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
             if let serverError = source.serverError {
@@ -828,14 +872,14 @@ extension StreamVideo: ConnectionStateDelegate {
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
                 guard let self else { return }
                 $0.call.state.update(from: $0.event)
-                self.state.ringingCall = $0.call
+                self.state.backingStorage.ringingCall = $0.call
             }
             .store(in: disposableBag, key: DisposableKey.ringEventReceived.rawValue)
     }
 }
 
 extension StreamVideo: WSEventsSubscriber {
-    
+
     func onEvent(_ event: WrappedEvent) async {
         eventSubject.send(event)
         checkRingEvent(event)
@@ -850,7 +894,7 @@ extension StreamVideo: WSEventsSubscriber {
             Task(disposableBag: disposableBag) { @MainActor [weak self, call] in
                 guard let self else { return }
                 call.state.update(from: ringEvent)
-                self.state.ringingCall = call
+                self.state.backingStorage.ringingCall = call
             }
         }
     }

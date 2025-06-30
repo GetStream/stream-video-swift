@@ -176,10 +176,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     }
                 }
 
-                if streamVideo.state.ringingCall?.cId != callEntry.call.cId {
-                    Task(disposableBag: disposableBag) { [weak self] in
-                        self?.streamVideo?.state.ringingCall = callEntry.call
-                    }
+                if streamVideo.state.backingStorage.ringingCall?.cId != callEntry.call.cId {
+                    streamVideo.state.backingStorage.ringingCall = callEntry.call
                 }
 
                 let callState = try await callEntry.call.get()
