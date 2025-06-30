@@ -44,7 +44,7 @@ final class RepeatingTimer: RepeatingTimerControl, @unchecked Sendable {
     ) {
         timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(
-            deadline: .now() + .milliseconds(Int(timeInterval)),
+            deadline: .now() + .seconds(Int(timeInterval)),
             repeating: timeInterval,
             leeway: .seconds(1)
         )
