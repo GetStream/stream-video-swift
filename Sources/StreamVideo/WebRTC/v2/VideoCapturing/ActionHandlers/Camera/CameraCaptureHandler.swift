@@ -3,6 +3,7 @@
 //
 
 import AVFoundation
+import Combine
 import CoreMedia
 import Foundation
 import StreamWebRTC
@@ -115,7 +116,8 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
 
         guard let outputFormat = captureDevice.outputFormat(
             preferredDimensions: .init(configuration.dimensions),
-            preferredFrameRate: configuration.frameRate
+            preferredFrameRate: configuration.frameRate,
+            preferredMediaSubType: videoCapturer.preferredOutputPixelFormat()
         ) else {
             throw ClientError(
                 "\(type(of: self)) was unable to perform action because no output format found for dimensions:\(configuration.dimensions) frameRate:\(configuration.frameRate)."
@@ -215,7 +217,8 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
 
         guard let outputFormat = captureDevice.outputFormat(
             preferredDimensions: .init(configuration.dimensions),
-            preferredFrameRate: configuration.frameRate
+            preferredFrameRate: configuration.frameRate,
+            preferredMediaSubType: videoCapturer.preferredOutputPixelFormat()
         ) else {
             throw ClientError(
                 "\(type(of: self)) was unable to perform action because no output format found for dimensions:\(configuration.dimensions) frameRate:\(configuration.frameRate)."

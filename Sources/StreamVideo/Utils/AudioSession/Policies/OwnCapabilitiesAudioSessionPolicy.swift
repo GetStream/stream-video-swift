@@ -21,8 +21,6 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
-    private let currentDevice = CurrentDevice.currentValue
-
     /// Initializes a new `OwnCapabilitiesAudioSessionPolicy` instance.
     public init() {}
 
@@ -46,7 +44,9 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             )
         }
 
-        let currentDeviceHasEarpiece = currentDevice.deviceType == .phone
+        let currentDeviceHasEarpiece = CurrentDevice
+            .currentValue
+            .deviceType == .phone
 
         let category: AVAudioSession.Category = callSettings.audioOn
             || (callSettings.speakerOn && currentDeviceHasEarpiece)
