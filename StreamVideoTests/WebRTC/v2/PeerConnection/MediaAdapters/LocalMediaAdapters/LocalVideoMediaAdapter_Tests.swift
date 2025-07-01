@@ -730,10 +730,10 @@ final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
                             scalabilityMode: scalabilityMode,
                             maxFramerate: 30,
                             maxBitrate: 120,
-                            scaleResolutionDownBy: 2,
+                            scaleResolutionDownBy: 2
                         )
                     ],
-                    trackType: .video,
+                    trackType: .video
                 )
             ]
         )
