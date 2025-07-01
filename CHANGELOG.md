@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🔄 Changed
 - Performance improvements around timers. [#877](https://github.com/GetStream/stream-video-swift/pull/877)
 
+### 🐞 Fixed
+- An issue causing the CallSettings to be misaligned with the UI components. [#882](https://github.com/GetStream/stream-video-swift/pull/882)
+
 # [1.27.2](https://github.com/GetStream/stream-video-swift/releases/tag/1.27.2)
 _June 25, 2025_
 
