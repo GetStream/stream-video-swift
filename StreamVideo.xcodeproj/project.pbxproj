@@ -363,6 +363,8 @@
 		408721F12E12741F006A68CB /* DispatchWorkItem+TimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */; };
 		408721F72E127551006A68CB /* TimerPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F62E127551006A68CB /* TimerPublisher.swift */; };
 		408721FA2E127A18006A68CB /* TimerPublisher_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */; };
+		408722392E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */; };
+		4087223A2E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */; };
 		4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */; };
 		408937912C134305000EEB69 /* View+AlertWithTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408937902C134305000EEB69 /* View+AlertWithTextField.swift */; };
 		408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
@@ -1937,6 +1939,7 @@
 		408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchWorkItem+TimerControl.swift"; sourceTree = "<group>"; };
 		408721F62E127551006A68CB /* TimerPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher.swift; sourceTree = "<group>"; };
 		408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher_Tests.swift; sourceTree = "<group>"; };
+		408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMoreThermalStateButtonView.swift; sourceTree = "<group>"; };
 		4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamUUIDFactory.swift; sourceTree = "<group>"; };
 		408937902C134305000EEB69 /* View+AlertWithTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+AlertWithTextField.swift"; sourceTree = "<group>"; };
 		408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoConfig+Dummy.swift"; sourceTree = "<group>"; };
@@ -4110,6 +4113,7 @@
 		409145F12B68FEF0007F3C17 /* MoreControls */ = {
 			isa = PBXGroup;
 			children = (
+				408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */,
 				40BBC47A2C6227DF002AEF92 /* Extensions */,
 				409145F22B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift */,
 				40BBC4782C6227DC002AEF92 /* DemoNoiseCancellationButtonView.swift */,
@@ -7464,6 +7468,7 @@
 				409146062B68FF4B007F3C17 /* DemoControls.swift in Sources */,
 				4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */,
 				847B47B52A249E7E000714CE /* Examples.swift in Sources */,
+				408722392E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */,
 				40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */,
 				409145FE2B68FEF0007F3C17 /* DemoVideoCallParticipantModifier.swift in Sources */,
 				4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */,
@@ -7597,6 +7602,7 @@
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
 				40AB35622B738C8100E465CC /* CustomCallView.swift in Sources */,
 				40AB35452B738C4100E465CC /* DemoMoreControlListButtonView.swift in Sources */,
+				4087223A2E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */,
 				40B713692A275F1400D1FE67 /* AppState.swift in Sources */,
 				409D2A532D88704D006A55EF /* DemoBroadcastMoreControlsListButtonView.swift in Sources */,
 				40AB353C2B738B5700E465CC /* DemoSnapshotViewModel.swift in Sources */,
