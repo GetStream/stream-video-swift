@@ -17,7 +17,7 @@ final class AVAudioRecorderBuilder {
     // instances of AVAudioRecorders. (useful when using MicrophoneChecker
     // during a Call).
     // https://stackoverflow.com/a/8575101
-    static let defaultRecordingSettings: [String: Any] = [
+    static let defaultRecordingSettings: [String: any Sendable] = [
         AVFormatIDKey: Int(kAudioFormatLinearPCM),
         AVSampleRateKey: 12000,
         AVNumberOfChannelsKey: 1,
