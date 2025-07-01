@@ -14,9 +14,7 @@ extension AVAudioSession.CategoryOptions {
         appIsInForeground: Bool
     ) -> AVAudioSession.CategoryOptions {
         var result: AVAudioSession.CategoryOptions = [
-            .allowBluetooth,
-            .allowBluetoothA2DP,
-            .allowAirPlay
+            .allowBluetooth
         ]
 
         /// - Note:We only add the `defaultToSpeaker` if the following are true:
