@@ -9,10 +9,82 @@ protocol StreamVideoCapturerActionHandler: Sendable {
     func handle(_ action: StreamVideoCapturer.Action) async throws
 }
 
-actor StreamVideoCapturer: StreamVideoCapturing {
+final class StreamVideoCapturer: StreamVideoCapturing {
 
-    private let executor = DispatchQueueExecutor()
-    nonisolated var unownedExecutor: UnownedSerialExecutor { .init(ordinary: executor) }
+    // MARK: - Convenience Initialisers
+
+    static func cameraCapturer(
+        with videoSource: RTCVideoSource,
+        videoCaptureSession: AVCaptureSession = .init()
+    ) -> StreamVideoCapturer {
+        let videoCapturerDelegate = StreamVideoCaptureHandler(source: videoSource)
+
+        #if targetEnvironment(simulator)
+        let videoCapturer: RTCVideoCapturer = {
+            if let videoURL = InjectedValues[\.simulatorStreamFile] {
+                return SimulatorScreenCapturer(
+                    delegate: videoCapturerDelegate,
+                    videoURL: videoURL
+                )
+            } else {
+                return RTCFileVideoCapturer(delegate: videoSource)
+            }
+        }()
+        return .init(
+            videoSource: videoSource,
+            videoCapturer: videoCapturer,
+            videoCapturerDelegate: videoCapturerDelegate,
+            actionHandlers: [
+                SimulatorCaptureHandler()
+            ]
+        )
+        #else
+        return .init(
+            videoSource: videoSource,
+            videoCapturer: RTCCameraVideoCapturer(
+                delegate: videoCapturerDelegate,
+                captureSession: videoCaptureSession
+            ),
+            videoCapturerDelegate: videoCapturerDelegate,
+            actionHandlers: [
+                CameraBackgroundAccessHandler(),
+                CameraCaptureHandler(),
+                CameraFocusHandler(),
+                CameraCapturePhotoHandler(),
+                CameraVideoOutputHandler(),
+                CameraZoomHandler()
+            ]
+        )
+        #endif
+    }
+
+    static func screenShareCapturer(
+        with videoSource: RTCVideoSource
+    ) -> StreamVideoCapturer {
+        .init(
+            videoSource: videoSource,
+            videoCapturer: RTCVideoCapturer(delegate: videoSource),
+            videoCapturerDelegate: videoSource,
+            actionHandlers: [
+                ScreenShareCaptureHandler()
+            ]
+        )
+    }
+
+    static func broadcastCapturer(
+        with videoSource: RTCVideoSource
+    ) -> StreamVideoCapturer {
+        .init(
+            videoSource: videoSource,
+            videoCapturer: RTCVideoCapturer(delegate: videoSource),
+            videoCapturerDelegate: videoSource,
+            actionHandlers: [
+                BroadcastCaptureHandler()
+            ]
+        )
+    }
+
+    // MARK: - Nested Types
 
     enum Action: @unchecked Sendable, CustomStringConvertible {
     case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
@@ -101,11 +173,14 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         }
     }
 
+    // MARK: - Properties
+
     private let videoSource: RTCVideoSource
     private let videoCapturer: RTCVideoCapturer
     private let videoCapturerDelegate: RTCVideoCapturerDelegate
     private let actionHandlers: [StreamVideoCapturerActionHandler]
     private let disposableBag = DisposableBag()
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     private var videoCaptureSession: AVCaptureSession? {
         guard
@@ -116,78 +191,7 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         return cameraVideoCapturer.captureSession
     }
 
-    // MARK: - Initialisers
-
-    static func cameraCapturer(
-        with videoSource: RTCVideoSource,
-        videoCaptureSession: AVCaptureSession = .init()
-    ) -> StreamVideoCapturer {
-        let videoCapturerDelegate = StreamVideoCaptureHandler(source: videoSource)
-
-        #if targetEnvironment(simulator)
-        let videoCapturer: RTCVideoCapturer = {
-            if let videoURL = InjectedValues[\.simulatorStreamFile] {
-                return SimulatorScreenCapturer(
-                    delegate: videoCapturerDelegate,
-                    videoURL: videoURL
-                )
-            } else {
-                return RTCFileVideoCapturer(delegate: videoSource)
-            }
-        }()
-        return .init(
-            videoSource: videoSource,
-            videoCapturer: videoCapturer,
-            videoCapturerDelegate: videoCapturerDelegate,
-            actionHandlers: [
-                SimulatorCaptureHandler()
-            ]
-        )
-        #else
-        return .init(
-            videoSource: videoSource,
-            videoCapturer: RTCCameraVideoCapturer(
-                delegate: videoCapturerDelegate,
-                captureSession: videoCaptureSession
-            ),
-            videoCapturerDelegate: videoCapturerDelegate,
-            actionHandlers: [
-                CameraBackgroundAccessHandler(),
-                CameraCaptureHandler(),
-                CameraFocusHandler(),
-                CameraCapturePhotoHandler(),
-                CameraVideoOutputHandler(),
-                CameraZoomHandler()
-            ]
-        )
-        #endif
-    }
-
-    static func screenShareCapturer(
-        with videoSource: RTCVideoSource
-    ) -> StreamVideoCapturer {
-        .init(
-            videoSource: videoSource,
-            videoCapturer: RTCVideoCapturer(delegate: videoSource),
-            videoCapturerDelegate: videoSource,
-            actionHandlers: [
-                ScreenShareCaptureHandler()
-            ]
-        )
-    }
-
-    static func broadcastCapturer(
-        with videoSource: RTCVideoSource
-    ) -> StreamVideoCapturer {
-        .init(
-            videoSource: videoSource,
-            videoCapturer: RTCVideoCapturer(delegate: videoSource),
-            videoCapturerDelegate: videoSource,
-            actionHandlers: [
-                BroadcastCaptureHandler()
-            ]
-        )
-    }
+    // MARK: - Initialiser
 
     init(
         videoSource: RTCVideoSource,
@@ -223,12 +227,12 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         frameRate: Int
     ) async throws {
         if let videoCaptureSession {
-            _ = try await enqueueOperation(
+            try await enqueueOperation(
                 for: .checkBackgroundCameraAccess(videoCaptureSession)
-            ).value
+            )
         }
 
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .startCapture(
                 position: position,
                 dimensions: dimensions,
@@ -237,27 +241,27 @@ actor StreamVideoCapturer: StreamVideoCapturing {
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-        ).value
+        )
     }
 
     func stopCapture() async throws {
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .stopCapture(
                 videoCapturer: videoCapturer
             )
-        ).value
+        )
     }
 
     func setCameraPosition(_ position: AVCaptureDevice.Position) async throws {
         guard videoCaptureSession != nil else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .setCameraPosition(
                 position: position,
                 videoSource: videoSource,
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-        ).value
+        )
     }
 
     func setVideoFilter(_ videoFilter: VideoFilter?) {
@@ -273,7 +277,7 @@ actor StreamVideoCapturer: StreamVideoCapturing {
         _ dimensions: CGSize
     ) async throws {
         guard let device = videoCaptureSession?.activeVideoCaptureDevice else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .updateCaptureQuality(
                 dimensions: dimensions,
                 device: device,
@@ -281,83 +285,83 @@ actor StreamVideoCapturer: StreamVideoCapturing {
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
-        ).value
+        )
     }
 
     func focus(at point: CGPoint) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .focus(
                 point: point,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func zoom(by factor: CGFloat) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .zoom(
                 factor: factor,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func addCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .addCapturePhotoOutput(
                 capturePhotoOutput: capturePhotoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func removeCapturePhotoOutput(
         _ capturePhotoOutput: AVCapturePhotoOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .removeCapturePhotoOutput(
                 capturePhotoOutput: capturePhotoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func addVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .addVideoOutput(
                 videoOutput: videoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws {
         guard let videoCaptureSession else { return }
-        _ = try await enqueueOperation(
+        try await enqueueOperation(
             for: .removeVideoOutput(
                 videoOutput: videoOutput,
                 videoCaptureSession: videoCaptureSession
             )
-        ).value
+        )
     }
 
     // MARK: - Private
 
     private func enqueueOperation(
         for action: Action
-    ) -> Task<Void, Error> {
-        Task(disposableBag: disposableBag) { [weak self] in
+    ) async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
             guard let self else {
                 return
             }
