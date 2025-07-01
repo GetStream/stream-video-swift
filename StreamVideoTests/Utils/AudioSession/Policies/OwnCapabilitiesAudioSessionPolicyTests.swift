@@ -71,9 +71,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, AVAudioSession.PortOverride.none)
@@ -98,9 +96,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, .speaker)
@@ -184,8 +180,6 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
             configuration.options,
             [
                 .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay,
                 .defaultToSpeaker
             ]
         )
@@ -209,9 +203,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -235,9 +227,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -261,9 +251,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }

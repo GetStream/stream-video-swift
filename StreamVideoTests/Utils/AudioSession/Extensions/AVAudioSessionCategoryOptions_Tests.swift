@@ -18,9 +18,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -33,9 +31,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -48,9 +44,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -63,9 +57,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: true
             ),
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -79,8 +71,6 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
             ),
             [
                 .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay,
                 .defaultToSpeaker
             ]
         )
@@ -94,9 +84,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: true
             ),
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -109,9 +97,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: true
             ),
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
@@ -124,9 +110,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth,
-                .allowBluetoothA2DP,
-                .allowAirPlay
+                .allowBluetooth
             ]
         )
     }
