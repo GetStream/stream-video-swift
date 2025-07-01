@@ -129,7 +129,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // to ensure it's uniqueness.
         _ = stateMachine
         subscribeToOwnCapabilitiesChanges()
-        subscribeToLocalCallSettingsChanges()
     }
 
     /// Joins the current call.
@@ -1511,58 +1510,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 }
                 .store(in: disposableBag)
         }
-    }
-
-    private func subscribeToLocalCallSettingsChanges() {
-        speaker.$status.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedSpeakerState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
-
-        speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedAudioOutputState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
-
-        camera.$status.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedVideoState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
-
-        camera.$direction.dropFirst().sink { [weak self] position in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedCameraPosition(position)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
-
-        microphone.$status.dropFirst().sink { [weak self] status in
-            guard let self else { return }
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                guard let self else { return }
-                let newState = self.state.callSettings.withUpdatedAudioState(status.boolValue)
-                self.state.update(callSettings: newState)
-            }
-        }
-        .store(in: disposableBag)
     }
 
     private func subscribeToNoiseCancellationSettingsChanges() {
