@@ -28,12 +28,12 @@ final class MockCaptureDevice: CaptureDeviceProtocol, Mockable, @unchecked Senda
     }
 
     enum MockFunctionInputKey: Payloadable {
-        case outputFormat(preferredDimensions: CMVideoDimensions, preferredFrameRate: Int)
+        case outputFormat(preferredDimensions: CMVideoDimensions, preferredFrameRate: Int, preferredMediaSubType: FourCharCode)
 
         var payload: Any {
             switch self {
-            case let .outputFormat(preferredDimensions, preferredFrameRate):
-                return (preferredDimensions, preferredFrameRate)
+            case let .outputFormat(preferredDimensions, preferredFrameRate, preferredMediaSubType):
+                return (preferredDimensions, preferredFrameRate, preferredMediaSubType)
             }
         }
     }
@@ -45,12 +45,14 @@ final class MockCaptureDevice: CaptureDeviceProtocol, Mockable, @unchecked Senda
 
     func outputFormat(
         preferredDimensions: CMVideoDimensions,
-        preferredFrameRate: Int
+        preferredFrameRate: Int,
+        preferredMediaSubType: FourCharCode
     ) -> AVCaptureDevice.Format? {
         stubbedFunctionInput[.outputFormat]?.append(
             .outputFormat(
                 preferredDimensions: preferredDimensions,
-                preferredFrameRate: preferredFrameRate
+                preferredFrameRate: preferredFrameRate,
+                preferredMediaSubType: preferredMediaSubType
             )
         )
 

@@ -6,20 +6,23 @@ import AVFoundation
 
 /// A protocol that defines the properties and methods for a capture device.
 protocol CaptureDeviceProtocol: Sendable {
-    /// The position of the capture device.
+    /// The physical position of the capture device (e.g., front or back).
     var position: AVCaptureDevice.Position { get }
 
-    /// Returns the output format for the capture device based on the preferred
-    /// dimensions and frame rate.
+    /// Returns a suitable output format based on the desired video settings.
+    ///
+    /// This method searches the available formats on the capture device to find
+    /// one that matches the given dimensions, frame rate, and media subtype.
     ///
     /// - Parameters:
-    ///   - preferredDimensions: The preferred dimensions for the video output.
-    ///   - preferredFrameRate: The preferred frame rate for the video output.
-    /// - Returns: An optional `AVCaptureDevice.Format` that matches the
-    ///   preferred dimensions and frame rate.
+    ///   - preferredDimensions: Desired width and height of the video.
+    ///   - preferredFrameRate: Desired number of frames per second.
+    ///   - preferredMediaSubType: Desired pixel format or encoding (e.g., '420v').
+    /// - Returns: A format that best matches the criteria, or `nil` if none found.
     func outputFormat(
         preferredDimensions: CMVideoDimensions,
-        preferredFrameRate: Int
+        preferredFrameRate: Int,
+        preferredMediaSubType: FourCharCode
     ) -> AVCaptureDevice.Format?
 }
 

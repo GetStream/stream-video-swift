@@ -365,6 +365,7 @@
 		408721FA2E127A18006A68CB /* TimerPublisher_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */; };
 		408722392E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */; };
 		4087223A2E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */; };
+		408722372E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722362E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift */; };
 		4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */; };
 		408937912C134305000EEB69 /* View+AlertWithTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408937902C134305000EEB69 /* View+AlertWithTextField.swift */; };
 		408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
@@ -1940,6 +1941,7 @@
 		408721F62E127551006A68CB /* TimerPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher.swift; sourceTree = "<group>"; };
 		408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher_Tests.swift; sourceTree = "<group>"; };
 		408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMoreThermalStateButtonView.swift; sourceTree = "<group>"; };
+		408722362E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Format+MediaSubType.swift"; sourceTree = "<group>"; };
 		4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamUUIDFactory.swift; sourceTree = "<group>"; };
 		408937902C134305000EEB69 /* View+AlertWithTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+AlertWithTextField.swift"; sourceTree = "<group>"; };
 		408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoConfig+Dummy.swift"; sourceTree = "<group>"; };
@@ -5054,6 +5056,7 @@
 				40D36ACF2DDDF97500972D75 /* AVAudioRecorder+Sendable.swift */,
 				40AAD17D2D27FBD800D10330 /* AVCaptureDevice.Position+Convenience.swift */,
 				40E363512D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift */,
+				408722362E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift */,
 				40E363442D09F2BD0028C52A /* AVCaptureDevice.Format+Convenience.swift */,
 			);
 			path = AVFoundation;
@@ -8132,6 +8135,7 @@
 				848CCCE82AB8ED8F002E83A2 /* StartHLSBroadcastingResponse.swift in Sources */,
 				84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */,
 				40E3636C2D0A24390028C52A /* ScreenShareCaptureHandler.swift in Sources */,
+				408722372E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
 				4012B1892BFC9E6F006B0031 /* UnfairQueue.swift in Sources */,
 				840F59922A77FDCB00EF3EB2 /* UnpinResponse.swift in Sources */,
