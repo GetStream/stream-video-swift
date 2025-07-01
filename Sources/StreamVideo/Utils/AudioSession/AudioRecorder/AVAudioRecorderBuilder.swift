@@ -18,10 +18,10 @@ final class AVAudioRecorderBuilder {
     // during a Call).
     // https://stackoverflow.com/a/8575101
     static let defaultRecordingSettings: [String: Any] = [
-        AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-        AVSampleRateKey: 16000,
+        AVFormatIDKey: Int(kAudioFormatLinearPCM),
+        AVSampleRateKey: 12000,
         AVNumberOfChannelsKey: 1,
-        AVEncoderBitRateKey: 32000
+        AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
     ]
 
     /// The URL where the audio recording will be saved.
