@@ -72,7 +72,7 @@ final class ParticipantEventResetAdapter_Tests: XCTestCase, @unchecked Sendable 
                 XCTAssertNotNil(self.viewModel.participantEvent)
 
                 await self.wait(for: self.interval)
-                XCTAssertNil(self.viewModel.participantEvent)
+                await self.fulfilmentInMainActor { self.viewModel.participantEvent == nil }
             }
 
             try await group.waitForAll()
