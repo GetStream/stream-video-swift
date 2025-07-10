@@ -118,6 +118,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
+        
+        Task {
+            await configureAudioSession()
+        }
     }
 
     deinit {
@@ -292,8 +296,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 await executor.peerConnectionReceivedTrackEvent(.subscriber, event: event)
             })
             .store(in: peerConnectionsDisposableBag)
-
-        configureAudioSession()
 
         /// We setUp and restoreScreenSharing on  the publisher in order to prepare all required tracks
         /// for publication. In that way, negotiation will wait until ``completeSetUp`` has been called.
