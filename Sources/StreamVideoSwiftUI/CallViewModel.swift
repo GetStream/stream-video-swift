@@ -1051,7 +1051,7 @@ public enum CallingState: Equatable, CustomStringConvertible, Sendable {
     }
 }
 
-public struct LobbyInfo: Equatable {
+public struct LobbyInfo: Equatable, Sendable {
     public let callId: String
     public let callType: String
     public let participants: [Member]

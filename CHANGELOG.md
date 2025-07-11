@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [1.28.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.28.1)
+_July 11, 2025_
+
+### 🐞 Fixed
+- Fix an issue where CallKit audio was not functioning properly. [#885](https://github.com/GetStream/stream-video-swift/pull/885)
+
 # [1.28.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.28.0)
 _July 01, 2025_
 

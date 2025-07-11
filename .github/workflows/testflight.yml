@@ -40,7 +40,7 @@ jobs:
     - uses: ./.github/actions/xcode-cache
     - if: ${{ github.event.inputs.release }} == 'Debug'
       run: brew install imagemagick
-    - run: bundle exec fastlane swiftui_testflight_build configuration:"${{ github.event.inputs.release }}"
+    - run: bundle exec fastlane swiftui_testflight_build configuration:"${{ github.event.inputs.release || (github.event_name == 'pull_request' && 'Debug') || (github.event_name == 'release' && 'Release') }}"
       timeout-minutes: 40
     - uses: 8398a7/action-slack@v3
       with:

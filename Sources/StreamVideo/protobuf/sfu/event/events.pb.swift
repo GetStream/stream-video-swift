@@ -248,6 +248,15 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     set {eventPayload = .changePublishOptions(newValue)}
   }
 
+  /// InboundStateNotification
+  var inboundStateNotification: Stream_Video_Sfu_Event_InboundStateNotification {
+    get {
+      if case .inboundStateNotification(let v)? = eventPayload {return v}
+      return Stream_Video_Sfu_Event_InboundStateNotification()
+    }
+    set {eventPayload = .inboundStateNotification(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_EventPayload: Equatable {
@@ -317,6 +326,8 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     case participantMigrationComplete(Stream_Video_Sfu_Event_ParticipantMigrationComplete)
     /// ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
     case changePublishOptions(Stream_Video_Sfu_Event_ChangePublishOptions)
+    /// InboundStateNotification
+    case inboundStateNotification(Stream_Video_Sfu_Event_InboundStateNotification)
 
   #if !swift(>=4.1)
     static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, rhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) -> Bool {
@@ -410,6 +421,10 @@ struct Stream_Video_Sfu_Event_SfuEvent {
       }()
       case (.changePublishOptions, .changePublishOptions): return {
         guard case .changePublishOptions(let l) = lhs, case .changePublishOptions(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.inboundStateNotification, .inboundStateNotification): return {
+        guard case .inboundStateNotification(let l) = lhs, case .inboundStateNotification(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -793,6 +808,11 @@ struct Stream_Video_Sfu_Event_JoinRequest {
   var preferredSubscribeOptions: [Stream_Video_Sfu_Models_SubscribeOption] {
     get {return _storage._preferredSubscribeOptions}
     set {_uniqueStorage()._preferredSubscribeOptions = newValue}
+  }
+
+  var capabilities: [Stream_Video_Sfu_Models_ClientCapability] {
+    get {return _storage._capabilities}
+    set {_uniqueStorage()._capabilities = newValue}
   }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -1217,6 +1237,36 @@ struct Stream_Video_Sfu_Event_CallEnded {
   init() {}
 }
 
+struct Stream_Video_Sfu_Event_InboundStateNotification {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var inboundVideoStates: [Stream_Video_Sfu_Event_InboundVideoState] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Event_InboundVideoState {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var userID: String = String()
+
+  var sessionID: String = String()
+
+  var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
+
+  var paused: Bool = false
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Event_SfuEvent: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: @unchecked Sendable {}
@@ -1255,6 +1305,8 @@ extension Stream_Video_Sfu_Event_ChangePublishQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_CallGrantsUpdated: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_GoAway: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_CallEnded: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_InboundStateNotification: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_InboundVideoState: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -1286,6 +1338,7 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     24: .standard(proto: "participant_updated"),
     25: .standard(proto: "participant_migration_complete"),
     27: .standard(proto: "change_publish_options"),
+    28: .standard(proto: "inbound_state_notification"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1580,6 +1633,19 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
           self.eventPayload = .changePublishOptions(v)
         }
       }()
+      case 28: try {
+        var v: Stream_Video_Sfu_Event_InboundStateNotification?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .inboundStateNotification(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .inboundStateNotification(v)
+        }
+      }()
       default: break
       }
     }
@@ -1678,6 +1744,10 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     case .changePublishOptions?: try {
       guard case .changePublishOptions(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 27)
+    }()
+    case .inboundStateNotification?: try {
+      guard case .inboundStateNotification(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 28)
     }()
     case nil: break
     }
@@ -2297,6 +2367,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     7: .standard(proto: "reconnect_details"),
     9: .standard(proto: "preferred_publish_options"),
     10: .standard(proto: "preferred_subscribe_options"),
+    11: .same(proto: "capabilities"),
   ]
 
 fileprivate class _StorageClass: @unchecked Sendable {
@@ -2310,6 +2381,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
     var _reconnectDetails: Stream_Video_Sfu_Event_ReconnectDetails? = nil
     var _preferredPublishOptions: [Stream_Video_Sfu_Models_PublishOption] = []
     var _preferredSubscribeOptions: [Stream_Video_Sfu_Models_SubscribeOption] = []
+    var _capabilities: [Stream_Video_Sfu_Models_ClientCapability] = []
 
     static let defaultInstance = _StorageClass()
 
@@ -2326,6 +2398,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
       _reconnectDetails = source._reconnectDetails
       _preferredPublishOptions = source._preferredPublishOptions
       _preferredSubscribeOptions = source._preferredSubscribeOptions
+      _capabilities = source._capabilities
     }
   }
 
@@ -2354,6 +2427,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         case 8: try { try decoder.decodeSingularStringField(value: &_storage._publisherSdp) }()
         case 9: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredPublishOptions) }()
         case 10: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredSubscribeOptions) }()
+        case 11: try { try decoder.decodeRepeatedEnumField(value: &_storage._capabilities) }()
         default: break
         }
       }
@@ -2396,6 +2470,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
       if !_storage._preferredSubscribeOptions.isEmpty {
         try visitor.visitRepeatedMessageField(value: _storage._preferredSubscribeOptions, fieldNumber: 10)
       }
+      if !_storage._capabilities.isEmpty {
+        try visitor.visitPackedEnumField(value: _storage._capabilities, fieldNumber: 11)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2415,6 +2492,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         if _storage._reconnectDetails != rhs_storage._reconnectDetails {return false}
         if _storage._preferredPublishOptions != rhs_storage._preferredPublishOptions {return false}
         if _storage._preferredSubscribeOptions != rhs_storage._preferredSubscribeOptions {return false}
+        if _storage._capabilities != rhs_storage._capabilities {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -3295,6 +3373,88 @@ extension Stream_Video_Sfu_Event_CallEnded: SwiftProtobuf.Message, SwiftProtobuf
 
   static func ==(lhs: Stream_Video_Sfu_Event_CallEnded, rhs: Stream_Video_Sfu_Event_CallEnded) -> Bool {
     if lhs.reason != rhs.reason {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Event_InboundStateNotification: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".InboundStateNotification"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "inbound_video_states"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.inboundVideoStates) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.inboundVideoStates.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.inboundVideoStates, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Event_InboundStateNotification, rhs: Stream_Video_Sfu_Event_InboundStateNotification) -> Bool {
+    if lhs.inboundVideoStates != rhs.inboundVideoStates {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Event_InboundVideoState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".InboundVideoState"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .standard(proto: "session_id"),
+    3: .standard(proto: "track_type"),
+    4: .same(proto: "paused"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
+      case 4: try { try decoder.decodeSingularBoolField(value: &self.paused) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.userID.isEmpty {
+      try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
+    }
+    if !self.sessionID.isEmpty {
+      try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 2)
+    }
+    if self.trackType != .unspecified {
+      try visitor.visitSingularEnumField(value: self.trackType, fieldNumber: 3)
+    }
+    if self.paused != false {
+      try visitor.visitSingularBoolField(value: self.paused, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Event_InboundVideoState, rhs: Stream_Video_Sfu_Event_InboundVideoState) -> Bool {
+    if lhs.userID != rhs.userID {return false}
+    if lhs.sessionID != rhs.sessionID {return false}
+    if lhs.trackType != rhs.trackType {return false}
+    if lhs.paused != rhs.paused {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

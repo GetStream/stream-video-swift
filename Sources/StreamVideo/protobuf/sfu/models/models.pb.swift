@@ -746,6 +746,49 @@ extension Stream_Video_Sfu_Models_AppleThermalState: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+/// ClientCapability defines a feature that client supports
+enum Stream_Video_Sfu_Models_ClientCapability: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+
+  /// Enables SFU pausing inbound video
+  case subscriberVideoPause // = 1
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .subscriberVideoPause
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .subscriberVideoPause: return 1
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_ClientCapability: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static let allCases: [Stream_Video_Sfu_Models_ClientCapability] = [
+    .unspecified,
+    .subscriberVideoPause,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// CallState is the current state of the call
 /// as seen by an SFU.
 struct Stream_Video_Sfu_Models_CallState {
@@ -1445,6 +1488,7 @@ extension Stream_Video_Sfu_Models_CallEndedReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_WebsocketReconnectStrategy: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AndroidThermalState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AppleThermalState: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_ClientCapability: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantCount: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Pin: @unchecked Sendable {}
@@ -1610,6 +1654,13 @@ extension Stream_Video_Sfu_Models_AppleThermalState: SwiftProtobuf._ProtoNamePro
     2: .same(proto: "APPLE_THERMAL_STATE_FAIR"),
     3: .same(proto: "APPLE_THERMAL_STATE_SERIOUS"),
     4: .same(proto: "APPLE_THERMAL_STATE_CRITICAL"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_ClientCapability: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "CLIENT_CAPABILITY_UNSPECIFIED"),
+    1: .same(proto: "CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE"),
   ]
 }
 
