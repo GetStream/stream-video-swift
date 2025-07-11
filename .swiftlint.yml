@@ -26,4 +26,4 @@ custom_rules:
 # Enabled/disabled rules
 only_rules:
   - unhandled_throwing_task
-  - custom_rules
+  # - custom_rules
