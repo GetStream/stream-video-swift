@@ -20,8 +20,6 @@ reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
 swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
-swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
-swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"]
 
 before_all do |lane|
   if is_ci
@@ -673,10 +671,13 @@ end
 desc 'Run source code formatting/linting'
 lane :run_swift_format do |options|
   Dir.chdir('..') do
-    action = options[:lint] ? "--lint" : ""
-    swiftformat_source_paths.each do |path|
-      sh("mint run swiftformat #{action} --config .swiftformat --exclude #{swiftformat_excluded_paths.join(',')} #{path}")
-      sh("mint run swiftlint lint --config .swiftlint.yml --progress --quiet --reporter json #{path}")
+    strict = options[:strict] ? '--lint' : nil
+    sources_matrix[:swiftformat_include].each do |path|
+      sh("mint run swiftformat #{strict} --config .swiftformat --exclude #{sources_matrix[:swiftformat_exclude].join(',')} #{path}")
+      next if path.include?('Tests')
+
+      sh("mint run swiftlint lint --config .swiftlint.yml --fix --progress --quiet --reporter json #{path}") unless strict
+      sh("mint run swiftlint lint --config .swiftlint.yml --strict --progress --quiet --reporter json #{path}")
     end
   end
 end
@@ -708,7 +709,9 @@ lane :sources_matrix do
     documentation_tests: ['Sources', 'DocumentationTests', xcode_project],
     size: ['Sources', xcode_project],
     public_interface: ['Sources'],
-    ruby: ['fastlane']
+    ruby: ['fastlane'],
+    swiftformat_include: ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"],
+    swiftformat_exclude: ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
   }
 end
 
