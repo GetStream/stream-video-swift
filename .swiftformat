@@ -7,6 +7,7 @@
 --disable extensionAccessControl
 --disable andOperator
 --disable blankLinesAtStartOfScope
+--disable opaqueGenericParameters
 
 # Rules inferred from Swift Standard Library:
 --disable anyObjectProtocol, wrapMultilineStatementBraces
