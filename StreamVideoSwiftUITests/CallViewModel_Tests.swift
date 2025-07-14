@@ -2,7 +2,6 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-#if swift(>=6.0)
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
 import StreamWebRTC
@@ -32,9 +31,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         thirdUser = nil
         secondUser = nil
         firstUser = nil
-        mockResponseBuilder = nil
-        peerConnectionFactory = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     @MainActor
@@ -554,6 +551,46 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await fulfilmentInMainActor { self.subject.participantEvent == nil }
     }
 
+    func test_inCall_ringingCallEnds_activeCallRemainsJoined() async throws {
+        // Given
+        await prepare()
+        subject.startCall(callType: callType, callId: callId, members: participants)
+        await assertCallingState(.inCall)
+
+        let newCallId = String.unique
+        let cid = callCid(from: newCallId, callType: .default)
+        // When
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallRingEvent(
+                    .init(
+                        call: .dummy(cid: cid),
+                        callCid: cid,
+                        createdAt: .init(),
+                        members: [],
+                        sessionId: .unique,
+                        user: .dummy(),
+                        video: true
+                    )
+                )
+            )
+        )
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallEndedEvent(
+                    .init(
+                        call: .dummy(cid: cid),
+                        callCid: cid,
+                        createdAt: .init()
+                    )
+                )
+            )
+        )
+
+        // Then
+        await assertCallingState(.inCall)
+    }
+
     func test_inCall_participantJoinedAndLeft() async throws {
         // Given
         await prepare()
@@ -968,9 +1005,6 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         streamVideo.state.user = firstUser.user
 
         subject = .init()
-        await fulfilmentInMainActor(file: file, line: line) {
-            self.subject.isSubscribedToCallEvents
-        }
     }
 
     private func prepareIncomingCallScenario(
@@ -1110,11 +1144,18 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         if let delay {
             await wait(for: delay)
         }
+        #if compiler(>=6.0)
         await fulfilmentInMainActor(
             "CallViewModel.callingState expected:\(expected) actual: \(subject.callingState)",
             file: file,
             line: line
         ) { self.subject.callingState == expected }
+        #else
+        await fulfilmentInMainActor(
+            file: file,
+            line: line
+        ) { self.subject.callingState == expected }
+        #endif
     }
 }
 
@@ -1138,4 +1179,3 @@ extension User {
 extension Member {
     var userId: String { id }
 }
-#endif

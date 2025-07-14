@@ -211,10 +211,6 @@ open class CallViewModel: ObservableObject {
         }
     }
 
-    /// A simple value, signalling that the viewModel has been subscribed to receive callEvents from
-    /// `StreamVideo`.
-    private(set) var isSubscribedToCallEvents: Bool = false
-
     public init(
         participantsLayout: ParticipantsLayout = .grid,
         callSettings: CallSettings? = nil
@@ -589,7 +585,9 @@ open class CallViewModel: ObservableObject {
             self.call = call
         } else if call == nil, callingState != .idle {
             setCallingState(.idle)
-            self.call = nil
+            Task { @MainActor in
+                self.call = nil
+            }
         }
     }
 
@@ -817,10 +815,13 @@ open class CallViewModel: ObservableObject {
                         handleAcceptedEvent(callEvent)
                     case .rejected:
                         handleRejectedEvent(callEvent)
-                    case .ended:
+                    case let .ended(event) where event.callCid == call?.cId:
                         Task { @MainActor [weak self] in
                             self?.leaveCall()
                         }
+                    case .ended:
+                        // Another call ended. No action is required.
+                        break
                     case let .userBlocked(callEventInfo):
                         if
                             callEventInfo.user?.id == streamVideo.user.id,
