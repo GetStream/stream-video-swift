@@ -140,6 +140,14 @@ final class SFUEventAdapter: @unchecked Sendable {
             }
             .sinkTask(queue: processingQueue) { [weak self] in await self?.handleChangePublishOptions($0) }
             .store(in: disposableBag)
+
+        sfuAdapter
+            .publisher(eventType: Stream_Video_Sfu_Event_InboundStateNotification.self)
+            .log(.debug, subsystems: .sfu) {
+                "Processing SFU event of type:\(type(of: $0)) for userID:\($0.inboundVideoStates.map { "(userID:\($0.userID) trackType:\(TrackType($0.trackType)) isPaused:\($0.paused))" }.joined(separator: ", "))"
+            }
+            .sinkTask(queue: processingQueue) { [weak self] in await self?.handleInboundVideoState($0) }
+            .store(in: disposableBag)
     }
 
     // MARK: - Event handlers
@@ -388,7 +396,9 @@ final class SFUEventAdapter: @unchecked Sendable {
 
             switch event.type {
             case .audio:
-                updatedParticipants[sessionID] = participant.withUpdated(audio: false)
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(audio: false)
+                    .withUnpausedTrack(.audio)
                 log.debug(
                     """
                     AudioTrack was unpublished
@@ -399,7 +409,9 @@ final class SFUEventAdapter: @unchecked Sendable {
                 )
 
             case .video:
-                updatedParticipants[sessionID] = participant.withUpdated(video: false)
+                updatedParticipants[sessionID] = participant
+                    .withUpdated(video: false)
+                    .withUnpausedTrack(.video)
                 log.debug(
                     """
                     VideoTrack was unpublished
@@ -413,6 +425,7 @@ final class SFUEventAdapter: @unchecked Sendable {
                 updatedParticipants[sessionID] = participant
                     .withUpdated(screensharing: false)
                     .withUpdated(screensharingTrack: nil)
+                    .withUnpausedTrack(.screenshare)
                 log.debug(
                     """
                     ScreenShareTrack was unpublished
@@ -497,5 +510,41 @@ final class SFUEventAdapter: @unchecked Sendable {
     ) async {
         await stateAdapter
             .set(publishOptions: .init(event.publishOptions))
+    }
+
+    /// Handles an InboundStateNotification event and updates paused track state.
+    ///
+    /// - Parameter event: The InboundStateNotification event to handle.
+    ///
+    /// This event is sent by the SFU to indicate whether a track (e.g., video,
+    /// screenshare) for a given participant is paused or resumed. The method
+    /// updates the corresponding participant's state accordingly.
+    private func handleInboundVideoState(
+        _ event: Stream_Video_Sfu_Event_InboundStateNotification
+    ) async {
+        await stateAdapter.enqueue { participants in
+            var updatedParticipants = participants
+
+            for inboundVideoState in event.inboundVideoStates {
+                let trackType = TrackType(inboundVideoState.trackType)
+                guard
+                    let participant = updatedParticipants[inboundVideoState.sessionID],
+                    trackType != .unknown
+                else {
+                    continue
+                }
+
+                var updatedParticipant = participant
+                if inboundVideoState.paused {
+                    updatedParticipant = participant.withPausedTrack(trackType)
+                } else {
+                    updatedParticipant = participant.withUnpausedTrack(trackType)
+                }
+
+                updatedParticipants[inboundVideoState.sessionID] = updatedParticipant
+            }
+
+            return updatedParticipants
+        }
     }
 }

@@ -95,25 +95,27 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     await sfuAdapter.sendJoinRequest(
-                        WebRTCJoinRequestFactory()
-                            .buildRequest(
-                                with: isFastReconnecting ? .fastReconnect : .default,
+                        WebRTCJoinRequestFactory(
+                            capabilities: coordinator.stateAdapter.clientCapabilities.map(\.rawValue)
+                        )
+                        .buildRequest(
+                            with: isFastReconnecting ? .fastReconnect : .default,
+                            coordinator: coordinator,
+                            publisherSdp: try await buildSessionDescription(
+                                peerConnectionType: .publisher,
                                 coordinator: coordinator,
-                                publisherSdp: try await buildSessionDescription(
-                                    peerConnectionType: .publisher,
-                                    coordinator: coordinator,
-                                    sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: isFastReconnecting
-                                ),
-                                subscriberSdp: try await buildSessionDescription(
-                                    peerConnectionType: .subscriber,
-                                    coordinator: coordinator,
-                                    sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: isFastReconnecting
-                                ),
-                                reconnectAttempt: context.reconnectAttempts,
-                                publisher: await coordinator.stateAdapter.publisher
-                            )
+                                sfuAdapter: sfuAdapter,
+                                isFastReconnecting: isFastReconnecting
+                            ),
+                            subscriberSdp: try await buildSessionDescription(
+                                peerConnectionType: .subscriber,
+                                coordinator: coordinator,
+                                sfuAdapter: sfuAdapter,
+                                isFastReconnecting: isFastReconnecting
+                            ),
+                            reconnectAttempt: context.reconnectAttempts,
+                            publisher: await coordinator.stateAdapter.publisher
+                        )
                     )
 
                     try Task.checkCancellation()
@@ -158,25 +160,27 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     await sfuAdapter.sendJoinRequest(
-                        WebRTCJoinRequestFactory()
-                            .buildRequest(
-                                with: .migration(fromHostname: context.migratingFromSFU),
+                        WebRTCJoinRequestFactory(
+                            capabilities: coordinator.stateAdapter.clientCapabilities.map(\.rawValue)
+                        )
+                        .buildRequest(
+                            with: .migration(fromHostname: context.migratingFromSFU),
+                            coordinator: coordinator,
+                            publisherSdp: try await buildSessionDescription(
+                                peerConnectionType: .publisher,
                                 coordinator: coordinator,
-                                publisherSdp: try await buildSessionDescription(
-                                    peerConnectionType: .publisher,
-                                    coordinator: coordinator,
-                                    sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: false
-                                ),
-                                subscriberSdp: try await buildSessionDescription(
-                                    peerConnectionType: .subscriber,
-                                    coordinator: coordinator,
-                                    sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: false
-                                ),
-                                reconnectAttempt: context.reconnectAttempts,
-                                publisher: context.previousSessionPublisher
-                            )
+                                sfuAdapter: sfuAdapter,
+                                isFastReconnecting: false
+                            ),
+                            subscriberSdp: try await buildSessionDescription(
+                                peerConnectionType: .subscriber,
+                                coordinator: coordinator,
+                                sfuAdapter: sfuAdapter,
+                                isFastReconnecting: false
+                            ),
+                            reconnectAttempt: context.reconnectAttempts,
+                            publisher: context.previousSessionPublisher
+                        )
                     )
 
                     context.reconnectAttempts += 1
@@ -216,25 +220,27 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     await sfuAdapter.sendJoinRequest(
-                        WebRTCJoinRequestFactory()
-                            .buildRequest(
-                                with: .rejoin(fromSessionID: isRejoiningFromSessionID),
+                        WebRTCJoinRequestFactory(
+                            capabilities: coordinator.stateAdapter.clientCapabilities.map(\.rawValue)
+                        )
+                        .buildRequest(
+                            with: .rejoin(fromSessionID: isRejoiningFromSessionID),
+                            coordinator: coordinator,
+                            publisherSdp: try await buildSessionDescription(
+                                peerConnectionType: .publisher,
                                 coordinator: coordinator,
-                                publisherSdp: try await buildSessionDescription(
-                                    peerConnectionType: .publisher,
-                                    coordinator: coordinator,
-                                    sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: false
-                                ),
-                                subscriberSdp: try await buildSessionDescription(
-                                    peerConnectionType: .subscriber,
-                                    coordinator: coordinator,
-                                    sfuAdapter: sfuAdapter,
-                                    isFastReconnecting: false
-                                ),
-                                reconnectAttempt: context.reconnectAttempts,
-                                publisher: context.previousSessionPublisher
-                            )
+                                sfuAdapter: sfuAdapter,
+                                isFastReconnecting: false
+                            ),
+                            subscriberSdp: try await buildSessionDescription(
+                                peerConnectionType: .subscriber,
+                                coordinator: coordinator,
+                                sfuAdapter: sfuAdapter,
+                                isFastReconnecting: false
+                            ),
+                            reconnectAttempt: context.reconnectAttempts,
+                            publisher: context.previousSessionPublisher
+                        )
                     )
                     context.reconnectAttempts += 1
 

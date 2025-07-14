@@ -76,6 +76,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
 
+    private(set) var clientCapabilities: Set<ClientCapability> = []
+
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
 
@@ -216,6 +218,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         statsAdapter?.isTracingEnabled = value
     }
 
+    func set(clientCapabilities value: Set<ClientCapability>) {
+        self.clientCapabilities = value
+    }
+
     // MARK: - Session Management
 
     /// Refreshes the session by setting a new session ID.
@@ -260,7 +266,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
-            screenShareSessionProvider: screenShareSessionProvider
+            screenShareSessionProvider: screenShareSessionProvider,
+            clientCapabilities: clientCapabilities
         )
 
         let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
@@ -278,7 +285,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
-            screenShareSessionProvider: screenShareSessionProvider
+            screenShareSessionProvider: screenShareSessionProvider,
+            clientCapabilities: clientCapabilities
         )
 
         publisher

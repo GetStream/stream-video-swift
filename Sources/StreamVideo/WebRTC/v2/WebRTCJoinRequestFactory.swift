@@ -25,6 +25,8 @@ struct WebRTCJoinRequestFactory {
         }
     }
 
+    var capabilities: [Stream_Video_Sfu_Models_ClientCapability]
+
     /// Builds a join request for WebRTC.
     /// - Parameters:
     ///   - connectionType: The type of connection for the join request.
@@ -59,7 +61,8 @@ struct WebRTCJoinRequestFactory {
             coordinator: coordinator,
             publisherSdp: publisherSdp
         )
-        
+        result.capabilities = capabilities
+
         if let reconnectDetails = await buildReconnectDetails(
             for: connectionType,
             coordinator: coordinator,

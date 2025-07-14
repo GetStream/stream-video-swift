@@ -572,7 +572,8 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     .$incomingVideoQualitySettings
                     .eraseToAnyPublisher(),
                 sfuAdapter: sfuAdapter,
-                sessionID: await stateAdapter.sessionID
+                sessionID: await stateAdapter.sessionID,
+                clientCapabilities: await stateAdapter.clientCapabilities
             )
         }
     }

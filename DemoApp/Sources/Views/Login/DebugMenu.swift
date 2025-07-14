@@ -129,6 +129,10 @@ struct DebugMenu: View {
         didSet { AppEnvironment.proximityPolicies = proximityPolicies }
     }
 
+    @State private var clientCapabilities = AppEnvironment.clientCapabilities {
+        didSet { AppEnvironment.clientCapabilities = clientCapabilities }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -187,6 +191,18 @@ struct DebugMenu: View {
                 currentValue: closedCaptionsIntegration,
                 label: "ClosedCaptions Integration"
             ) { self.closedCaptionsIntegration = $0 }
+
+            makeMultipleSelectMenu(
+                for: ClientCapability.allCases,
+                currentValues: clientCapabilities,
+                label: "Client Capabilities"
+            ) { item, isSelected in
+                if isSelected {
+                    clientCapabilities = clientCapabilities.filter { item != $0 }
+                } else {
+                    clientCapabilities.insert(item)
+                }
+            }
 
             makeMenu(
                 for: [.default, .ownCapabilities],

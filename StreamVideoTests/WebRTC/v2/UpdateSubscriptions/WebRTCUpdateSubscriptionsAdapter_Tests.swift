@@ -17,7 +17,8 @@ final class WebRTCUpdateSubscriptionsAdapter_Tests: XCTestCase, @unchecked Senda
         participantsPublisher: participantsSubject.eraseToAnyPublisher(),
         incomingVideoQualitySettingsPublisher: incomingVideoQualitySettingsSubject.eraseToAnyPublisher(),
         sfuAdapter: mockSFUStack.adapter,
-        sessionID: sessionID
+        sessionID: sessionID,
+        clientCapabilities: []
     )
 
     override func setUp() {

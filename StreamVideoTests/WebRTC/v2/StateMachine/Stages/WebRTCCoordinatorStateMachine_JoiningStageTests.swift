@@ -114,6 +114,10 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
+        await mockCoordinatorStack
+            .coordinator
+            .updateClientCapabilities([.subscriberVideoPause])
+
         try await assertTransition(
             from: .connected,
             expectedTarget: .disconnected,
@@ -139,6 +143,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertEqual(request.joinRequest.reconnectDetails.strategy, .unspecified)
             XCTAssertTrue(request.joinRequest.reconnectDetails.previousSessionID.isEmpty)
             XCTAssertTrue(request.joinRequest.reconnectDetails.fromSfuID.isEmpty)
+            XCTAssertEqual(request.joinRequest.capabilities, [.subscriberVideoPause])
         }
     }
 

@@ -537,6 +537,24 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.broadcasting == false)
     }
 
+    // MARK: - updateClientCapabilities
+
+    func test_updateClientCapabilities_correctlyUpdatesStateAdapter() async throws {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init())
+
+        await call.updateClientCapabilities([.subscriberVideoPause])
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                Set<ClientCapability>.self,
+                for: .updateClientCapabilities
+            )?.first,
+            [.subscriberVideoPause]
+        )
+    }
+
     // MARK: - Private helpers
 
     private func assertUpdateState(

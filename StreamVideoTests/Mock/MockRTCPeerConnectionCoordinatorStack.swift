@@ -39,7 +39,8 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
         spySubject: PassthroughSubject<TrackEvent, Never> = .init(),
         mockLocalAudioMediaAdapter: MockLocalMediaAdapter = .init(),
         mockLocalVideoMediaAdapter: MockLocalMediaAdapter = .init(),
-        mockLocalScreenSharingMediaAdapter: MockLocalMediaAdapter = .init()
+        mockLocalScreenSharingMediaAdapter: MockLocalMediaAdapter = .init(),
+        clientCapabilities: Set<ClientCapability> = []
     ) {
         self.sessionId = sessionId
         self.peerConnection = peerConnection
@@ -108,7 +109,8 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
             sfuAdapter: mockSFUStack.adapter,
             mediaAdapter: mediaAdapter,
             iceAdapter: iceAdapter,
-            iceConnectionStateAdapter: iceConnectionStateAdapter
+            iceConnectionStateAdapter: iceConnectionStateAdapter,
+            clientCapabilities: clientCapabilities
         )
     }
 }

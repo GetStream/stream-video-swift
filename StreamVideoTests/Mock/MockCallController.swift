@@ -12,6 +12,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case setDisconnectionTimeout
         case observeWebRTCStateUpdated
         case changeVideoState
+        case updateClientCapabilities
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -29,6 +30,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
         case changeVideoState(Bool)
 
+        case updateClientCapabilities(Set<ClientCapability>)
+
         var payload: Any {
             switch self {
             case let .setDisconnectionTimeout(timeout):
@@ -38,6 +41,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             case .observeWebRTCStateUpdated:
                 return ()
             case let .changeVideoState(value):
+                return value
+            case let .updateClientCapabilities(value):
                 return value
             }
         }
@@ -114,5 +119,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     override func changeVideoState(isEnabled: Bool) async throws {
         stubbedFunctionInput[.changeVideoState]?
             .append(.changeVideoState(isEnabled))
+    }
+
+    override func updateClientCapabilities(_ capabilities: Set<ClientCapability>) async {
+        stubbedFunctionInput[.updateClientCapabilities]?
+            .append(.updateClientCapabilities(capabilities))
     }
 }

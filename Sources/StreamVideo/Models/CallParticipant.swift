@@ -43,7 +43,17 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
     public var audioLevel: Float
     /// List of the last 10 audio levels.
     public var audioLevels: [Float]
+    /// Pinning metadata used to keep this participant visible across layouts.
+    ///
+    /// If set, the participant is considered pinned either locally or remotely.
+    /// SDK integrators can use this to reflect UI state (e.g., always visible).
     public var pin: PinInfo?
+
+    /// The set of media track types currently paused for this participant.
+    ///
+    /// This is used to control bandwidth or presentation. SDK integrators can
+    /// rely on it to know when a participant's track has been paused remotely.
+    public var pausedTracks: Set<TrackType>
 
     /// The user's id. This is not necessarily unique, since a user can join from multiple devices.
     public var userId: String {
@@ -81,7 +91,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         joinedAt: Date,
         audioLevel: Float,
         audioLevels: [Float],
-        pin: PinInfo?
+        pin: PinInfo?,
+        pausedTracks: Set<TrackType>
     ) {
         user = User(
             id: userId,
@@ -106,6 +117,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         self.audioLevel = audioLevel
         self.audioLevels = audioLevels
         self.pin = pin
+        self.pausedTracks = pausedTracks
     }
 
     public static func == (lhs: CallParticipant, rhs: CallParticipant) -> Bool {
@@ -127,7 +139,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.audioLevels == rhs.audioLevels &&
             lhs.pin == rhs.pin &&
             lhs.track === rhs.track &&
-            lhs.screenshareTrack === rhs.screenshareTrack
+            lhs.screenshareTrack === rhs.screenshareTrack &&
+            lhs.pausedTracks == rhs.pausedTracks
     }
 
     public var isPinned: Bool {
@@ -141,7 +154,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
 
     /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
-        hasVideo && showTrack && track != nil
+        hasVideo && showTrack && track != nil && pausedTracks.contains(.video) == false
     }
 
     public func withUpdated(trackSize: CGSize) -> CallParticipant {
@@ -166,7 +179,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -192,7 +206,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -218,7 +233,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -244,7 +260,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -270,7 +287,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -296,7 +314,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -322,7 +341,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -348,7 +368,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -383,7 +404,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: levels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -409,7 +431,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -435,7 +458,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 
@@ -461,7 +485,66 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
+        )
+    }
+
+    public func withPausedTrack(_ trackType: TrackType) -> CallParticipant {
+        var updatedPausedTracks = pausedTracks
+        updatedPausedTracks.insert(trackType)
+        return CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt,
+            audioLevel: audioLevel,
+            audioLevels: audioLevels,
+            pin: pin,
+            pausedTracks: updatedPausedTracks
+        )
+    }
+
+    public func withUnpausedTrack(_ trackType: TrackType) -> CallParticipant {
+        var updatedPausedTracks = pausedTracks
+        updatedPausedTracks.remove(trackType)
+        return CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt,
+            audioLevel: audioLevel,
+            audioLevels: audioLevels,
+            pin: pin,
+            pausedTracks: updatedPausedTracks
         )
     }
 }

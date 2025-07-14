@@ -659,6 +659,15 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         XCTAssertEqual(call.state.anonymousParticipantCount, 0)
     }
 
+    func test_updateClientCapabilities_correctlyUpdatesStateAdapter() async throws {
+        await subject.updateClientCapabilities([.subscriberVideoPause])
+
+        await assertEqualAsync(
+            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.clientCapabilities,
+            [.subscriberVideoPause]
+        )
+    }
+
     // MARK: - Private helpers
 
     private func assertTransitionToStage(

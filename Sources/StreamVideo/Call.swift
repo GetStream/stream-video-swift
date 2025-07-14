@@ -1389,6 +1389,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         proximity.remove(policy)
     }
 
+    // MARK: - ClientCapabilities
+
+    /// Updates the set of client capabilities for the call.
+    ///
+    /// - Parameter clientCapabilities: A set of client capabilities that influence
+    ///     subscription logic (e.g., support for paused tracks).
+    public func updateClientCapabilities(_ clientCapabilities: Set<ClientCapability>) async {
+        await callController.updateClientCapabilities(clientCapabilities)
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {

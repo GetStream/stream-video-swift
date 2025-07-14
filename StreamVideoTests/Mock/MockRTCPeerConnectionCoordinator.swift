@@ -191,7 +191,8 @@ final class MockRTCPeerConnectionCoordinator:
                 peerConnection: peerConnection,
                 sfuAdapter: sfuAdapter
             ),
-            iceConnectionStateAdapter: iceConnectionStateAdapter ?? .init()
+            iceConnectionStateAdapter: iceConnectionStateAdapter ?? .init(),
+            clientCapabilities: []
         )
 
         stub(for: \.isHealthy, with: true)
