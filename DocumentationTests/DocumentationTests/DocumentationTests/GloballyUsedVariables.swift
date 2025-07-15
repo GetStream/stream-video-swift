@@ -37,7 +37,8 @@ var participant = CallParticipant(
     joinedAt: .init(),
     audioLevel: 0,
     audioLevels: [],
-    pin: nil
+    pin: nil,
+    pausedTracks: []
 )
 var contentMode = UIView.ContentMode.scaleAspectFit
 var id = ""
@@ -421,7 +422,8 @@ var otherParticipant = CallParticipant(
     joinedAt: .init(),
     audioLevel: 0,
     audioLevels: [],
-    pin: nil
+    pin: nil,
+    pausedTracks: []
 )
 
 final class UserManager {
