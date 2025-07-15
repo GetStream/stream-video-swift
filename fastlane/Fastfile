@@ -764,6 +764,7 @@ lane :validate_public_interface do
   pr_comment(text: content, edit_last_comment_with_text: header) if is_ci
 
   # Checkout the original branch
+  sh("git fetch origin #{original_branch}")
   sh("git checkout #{original_branch}")
 end
 
