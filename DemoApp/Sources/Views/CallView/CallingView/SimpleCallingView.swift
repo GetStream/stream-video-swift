@@ -198,8 +198,7 @@ struct SimpleCallingView: View {
     }
 
     private func setClientCapabilities(for callId: String) async {
-        let clientCapabilities = AppEnvironment.clientCapabilities
-        guard !clientCapabilities.isEmpty else {
+        guard let clientCapabilities = AppEnvironment.clientCapabilities else {
             return
         }
         let call = streamVideo.call(callType: callType, callId: callId)

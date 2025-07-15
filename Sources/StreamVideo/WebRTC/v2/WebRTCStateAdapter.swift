@@ -76,7 +76,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
 
-    private(set) var clientCapabilities: Set<ClientCapability> = []
+    private(set) var clientCapabilities: Set<ClientCapability> = [
+        .subscriberVideoPause
+    ]
 
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?

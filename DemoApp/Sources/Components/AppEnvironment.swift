@@ -622,7 +622,7 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
-    static var clientCapabilities: Set<ClientCapability> = []
+    static var clientCapabilities: Set<ClientCapability>?
 }
 
 extension ClientCapability: Debuggable {
