@@ -20,6 +20,7 @@
 		4029E95E2CB94EAE00E1D571 /* 22-manual-quality-selection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4029E95D2CB94EA700E1D571 /* 22-manual-quality-selection.swift */; };
 		404CAED82B8E3874007087BC /* 06-apply-video-filters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */; };
 		4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */; };
+		40895E622E264BB000D3049D /* 25-incoming-video-state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40895E612E264BB000D3049D /* 25-incoming-video-state.swift */; };
 		408CE0F52BD91B490052EC3A /* 19-transcriptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F42BD91B490052EC3A /* 19-transcriptions.swift */; };
 		409774B02CC19F5500E0D3EE /* 23-network-disruption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409774AF2CC19F4900E0D3EE /* 23-network-disruption.swift */; };
 		409C39692B67CC5C0090044C /* 04-screensharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C39682B67CC5C0090044C /* 04-screensharing.swift */; };
@@ -102,6 +103,7 @@
 		4029E95D2CB94EA700E1D571 /* 22-manual-quality-selection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "22-manual-quality-selection.swift"; sourceTree = "<group>"; };
 		404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-apply-video-filters.swift"; sourceTree = "<group>"; };
 		4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-callkit-integration.swift"; sourceTree = "<group>"; };
+		40895E612E264BB000D3049D /* 25-incoming-video-state.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "25-incoming-video-state.swift"; sourceTree = "<group>"; };
 		408CE0F42BD91B490052EC3A /* 19-transcriptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "19-transcriptions.swift"; sourceTree = "<group>"; };
 		409774AF2CC19F4900E0D3EE /* 23-network-disruption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "23-network-disruption.swift"; sourceTree = "<group>"; };
 		409C39682B67CC5C0090044C /* 04-screensharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-screensharing.swift"; sourceTree = "<group>"; };
@@ -286,6 +288,7 @@
 				4029E95D2CB94EA700E1D571 /* 22-manual-quality-selection.swift */,
 				409774AF2CC19F4900E0D3EE /* 23-network-disruption.swift */,
 				401C1EF32D494CED00304609 /* 24-closed-captions.swift */,
+				40895E612E264BB000D3049D /* 25-incoming-video-state.swift */,
 			);
 			path = "05-ui-cookbook";
 			sourceTree = "<group>";
@@ -487,6 +490,7 @@
 				40FFDC442B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift in Sources */,
 				40FFDC872B63FEAE004DA7A2 /* 05-incoming-call.swift in Sources */,
 				4029E95E2CB94EAE00E1D571 /* 22-manual-quality-selection.swift in Sources */,
+				40895E622E264BB000D3049D /* 25-incoming-video-state.swift in Sources */,
 				40FFDC942B6401CC004DA7A2 /* 07-video-fallback.swift in Sources */,
 				400D91C72B63D96800EBA47D /* 03-quickstart.swift in Sources */,
 				40FFDC9E2B64063D004DA7A2 /* 12-connection-unstable.swift in Sources */,
