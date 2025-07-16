@@ -737,6 +737,7 @@
 		40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */; };
 		40E741FA2D54E6F40044C955 /* RTCAudioSessionDelegatePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E741F92D54E6F40044C955 /* RTCAudioSessionDelegatePublisher.swift */; };
 		40E741FF2D553ACD0044C955 /* CurrentDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E741FE2D553ACD0044C955 /* CurrentDevice.swift */; };
+		40E7A45B2E29495500E8AB8B /* WebRTCLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E7A4582E29487700E8AB8B /* WebRTCLogger.swift */; };
 		40E9B3B12BCD755F00ACF18F /* MemberResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */; };
 		40E9B3B32BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */; };
 		40E9B3B52BCD93F500ACF18F /* Credentials+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */; };
@@ -2246,6 +2247,7 @@
 		40E363762D0A2E320028C52A /* BroadcastBufferReaderKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferReaderKey.swift; sourceTree = "<group>"; };
 		40E741F92D54E6F40044C955 /* RTCAudioSessionDelegatePublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioSessionDelegatePublisher.swift; sourceTree = "<group>"; };
 		40E741FE2D553ACD0044C955 /* CurrentDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentDevice.swift; sourceTree = "<group>"; };
+		40E7A4582E29487700E8AB8B /* WebRTCLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCLogger.swift; sourceTree = "<group>"; };
 		40E9B3B02BCD755F00ACF18F /* MemberResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemberResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B22BCD93AE00ACF18F /* JoinCallResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JoinCallResponse+Dummy.swift"; sourceTree = "<group>"; };
 		40E9B3B42BCD93F500ACF18F /* Credentials+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Credentials+Dummy.swift"; sourceTree = "<group>"; };
@@ -5894,6 +5896,7 @@
 		8456E6C7287EC343004E180E /* Logger */ = {
 			isa = PBXGroup;
 			children = (
+				40E7A4582E29487700E8AB8B /* WebRTCLogger.swift */,
 				40BBC4A92C6270F5002AEF92 /* Array+Logger.swift */,
 				40AB34E02C5E73F900B5B6B3 /* Publisher+Logger.swift */,
 				8456E6C8287EC343004E180E /* Logger.swift */,
@@ -8161,6 +8164,7 @@
 				4092517E2E05AFF000DC0FB3 /* MidStereoInformation.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
+				40E7A45B2E29495500E8AB8B /* WebRTCLogger.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				40BBC4CE2C639054002AEF92 /* WebRTCCoordinator+Error.swift in Sources */,
