@@ -432,7 +432,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         try await stateAdapter.audioSession.didUpdatePolicy(policy)
     }
 
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
+    func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
         try stateAdapter.audioSession.callKitActivated(audioSession)
     }
 
@@ -442,6 +442,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await stateAdapter.disableClientCapabilities(capabilities)
+    }
+
+    // MARK: - CallKit tracing
+    func didPerform(_ action: WebRTCTrace.CallKitAction) async {
+        await stateAdapter.trace(.init(action))
     }
 
     // MARK: - Private

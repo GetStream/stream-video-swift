@@ -103,7 +103,7 @@ extension WebRTCTrace {
         event: SFUAdapterEvent
     ) {
         self.init(
-            id: nil,
+            id: "sfu",
             tag: event.traceTag,
             data: event.traceData
         )
@@ -119,7 +119,7 @@ extension WebRTCTrace {
         event: SelectiveEncodable
     ) {
         self.init(
-            id: nil,
+            id: "sfu",
             tag: tag,
             data: .init(event)
         )
@@ -134,7 +134,6 @@ extension WebRTCTrace {
     ///   - callSettings: The active call settings.
     ///   - audioSession: The audio session state.
     init(
-        callSettings: CallSettings,
         audioSession: StreamAudioSession
     ) {
         self.init(
@@ -155,18 +154,70 @@ extension WebRTCTrace {
     init(
         status: InternetConnectionStatus
     ) {
-        let data = {
+        let tag = {
             switch status {
             case .available:
-                return "online"
+                return "network.state.online"
             case .unavailable, .unknown:
-                return "offline"
+                return "network.state.offline"
             }
         }()
         self.init(
             id: nil,
-            tag: "network.changed",
-            data: .init(data)
+            tag: tag,
+            data: nil
+        )
+    }
+}
+
+extension WebRTCTrace {
+    enum CallKitAction: String {
+        case didReset
+        case didActivateAudioSession
+        case didDeactivateAudioSession
+        case performAnswerCall
+        case performEndCall
+        case performRejectCall
+        case performSetMutedCall
+    }
+
+    init(
+        _ action: CallKitAction
+    ) {
+        self.init(
+            id: nil,
+            tag: "callKit.\(action.rawValue)",
+            data: nil
+        )
+    }
+}
+
+extension WebRTCTrace {
+
+    init(
+        applicationState: ApplicationState
+    ) {
+        self.init(
+            id: nil,
+            tag: "application.state.\(applicationState.rawValue)",
+            data: nil
+        )
+    }
+}
+
+extension WebRTCTrace {
+
+    init(
+        thermalState: ProcessInfo.ThermalState
+    ) {
+        self.init(
+            id: nil,
+            tag: "device.thermal.state.\(thermalState)",
+            data: nil
+        )
+    }
+}
+
         )
     }
 }

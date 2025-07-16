@@ -196,6 +196,10 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
         traces.trace(trace)
     }
 
+    func consume(_ bucket: ConsumableBucket<WebRTCTrace>) {
+        traces.consume(bucket)
+    }
+
     // MARK: - Private helpers
 
     /// Handles updates to the SFU adapter, reattaching all relevant observers.
@@ -252,7 +256,7 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
             traces.trace(.init(peerType: .subscriber, statsReport: stats))
         }
 
-        let reconnectAttempts = self.reconnectAttempts
+        let reconnectAttempts = self.reconnectAttempts + 1
         let peerConnectionTraces = traces
             .flushTraces()
             .map {
@@ -266,6 +270,8 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
                     value.id = "\(reconnectAttempts)-pub"
                 } else if id == PeerConnectionType.subscriber.rawValue {
                     value.id = "\(reconnectAttempts)-sub"
+                } else if id == "sfu" {
+                    value.id = "\(reconnectAttempts)-sfu"
                 }
                 return value
             }

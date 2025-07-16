@@ -6,6 +6,7 @@ import AVFoundation
 import CallKit
 import Combine
 import Foundation
+import StreamWebRTC
 
 /// `CallKitService` manages interactions with the CallKit framework,
 /// facilitating VoIP calls in an application.
@@ -368,6 +369,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         log.debug("CXProvider didReset.", subsystems: .callKit)
         storageAccessQueue.sync {
             for (_, entry) in _storage {
+                entry.call.didPerform(.didReset)
                 entry.call.leave()
             }
         }
@@ -393,6 +395,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         if
             let active,
             let call = callEntry(for: active)?.call {
+            call.didPerform(.didActivateAudioSession)
+
             do {
                 try call.callKitActivated(audioSession)
             } catch {
@@ -417,6 +421,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             """,
             subsystems: .callKit
         )
+        if
+            let active,
+            let call = callEntry(for: active)?.call {
+            call.didPerform(.didDeactivateAudioSession)
+        }
     }
 
     open func provider(
@@ -433,6 +442,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         ringingTimerCancellable?.cancel()
         ringingTimerCancellable = nil
         active = action.callUUID
+        callToJoinEntry.call.didPerform(.performAnswerCall)
 
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else {
@@ -510,6 +520,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 subsystems: .callKit
             )
             if currentCallWasEnded {
+                stackEntry.call.didPerform(.performEndCall)
                 stackEntry.call.leave()
             } else {
                 do {
@@ -527,6 +538,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         """,
                         subsystems: .callKit
                     )
+                    stackEntry.call.didPerform(.performRejectCall)
                     try await stackEntry.call.reject(reason: rejectionReason)
                 } catch {
                     log.error(error, subsystems: .callKit)
@@ -546,6 +558,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             action.fail()
             return
         }
+        stackEntry.call.didPerform(.performSetMutedCall)
         Task(disposableBag: disposableBag) {
             do {
                 if action.isMuted {

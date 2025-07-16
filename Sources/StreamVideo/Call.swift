@@ -1487,6 +1487,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try callController.callKitActivated(audioSession)
     }
 
+    internal func didPerform(_ action: WebRTCTrace.CallKitAction) {
+        Task(disposableBag: disposableBag) { [weak callController] in
+            await callController?.didPerform(action)
+        }
+    }
+
     // MARK: - private
 
     private func updatePermissions(

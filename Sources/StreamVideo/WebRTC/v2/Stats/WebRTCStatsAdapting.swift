@@ -73,4 +73,6 @@ protocol WebRTCStatsAdapting: AnyObject, Sendable {
     ///
     /// - Parameter trace: The trace event to record.
     func trace(_ trace: WebRTCTrace)
+
+    func consume(_ bucket: ConsumableBucket<WebRTCTrace>)
 }
