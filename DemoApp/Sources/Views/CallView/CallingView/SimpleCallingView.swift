@@ -202,7 +202,7 @@ struct SimpleCallingView: View {
             return
         }
         let call = streamVideo.call(callType: callType, callId: callId)
-        await call.updateClientCapabilities(clientCapabilities)
+        await call.enableClientCapabilities(clientCapabilities)
     }
 
     private func parseURLIfRequired(_ text: String) {

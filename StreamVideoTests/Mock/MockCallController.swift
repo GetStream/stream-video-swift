@@ -12,7 +12,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case setDisconnectionTimeout
         case observeWebRTCStateUpdated
         case changeVideoState
-        case updateClientCapabilities
+        case enableClientCapabilities
+        case disableClientCapabilities
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -30,7 +31,9 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
         case changeVideoState(Bool)
 
-        case updateClientCapabilities(Set<ClientCapability>)
+        case enableClientCapabilities(Set<ClientCapability>)
+
+        case disableClientCapabilities(Set<ClientCapability>)
 
         var payload: Any {
             switch self {
@@ -42,7 +45,9 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 return ()
             case let .changeVideoState(value):
                 return value
-            case let .updateClientCapabilities(value):
+            case let .enableClientCapabilities(value):
+                return value
+            case let .disableClientCapabilities(value):
                 return value
             }
         }
@@ -121,8 +126,17 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             .append(.changeVideoState(isEnabled))
     }
 
-    override func updateClientCapabilities(_ capabilities: Set<ClientCapability>) async {
-        stubbedFunctionInput[.updateClientCapabilities]?
-            .append(.updateClientCapabilities(capabilities))
+    override func enableClientCapabilities(
+        _ capabilities: Set<ClientCapability>
+    ) async {
+        stubbedFunctionInput[.enableClientCapabilities]?
+            .append(.enableClientCapabilities(capabilities))
+    }
+
+    override func disableClientCapabilities(
+        _ capabilities: Set<ClientCapability>
+    ) async {
+        stubbedFunctionInput[.disableClientCapabilities]?
+            .append(.disableClientCapabilities(capabilities))
     }
 }

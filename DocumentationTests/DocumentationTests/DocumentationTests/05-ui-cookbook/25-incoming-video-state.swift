@@ -7,7 +7,7 @@ import Combine
 fileprivate func content() {
     asyncContainer {
         let call = streamVideo.call(callType: "default", callId: "my-call-id")
-        await call.updateClientCapabilities([])
+        await call.disableClientCapabilities([.subscriberVideoPause])
     }
 
     container {

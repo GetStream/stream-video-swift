@@ -436,8 +436,12 @@ final class WebRTCCoordinator: @unchecked Sendable {
         try stateAdapter.audioSession.callKitActivated(audioSession)
     }
 
-    func updateClientCapabilities(_ capabilities: Set<ClientCapability>) async {
-        await stateAdapter.set(clientCapabilities: capabilities)
+    func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
+        await stateAdapter.enableClientCapabilities(capabilities)
+    }
+
+    func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
+        await stateAdapter.disableClientCapabilities(capabilities)
     }
 
     // MARK: - Private

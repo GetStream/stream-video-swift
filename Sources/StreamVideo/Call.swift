@@ -1389,14 +1389,32 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         proximity.remove(policy)
     }
 
-    // MARK: - ClientCapabilities
+    // MARK: - Client Capabilities
 
-    /// Updates the set of client capabilities for the call.
+    /// Enables a set of client capabilities for the call.
     ///
-    /// - Parameter clientCapabilities: A set of client capabilities that influence
-    ///     subscription logic (e.g., support for paused tracks).
-    public func updateClientCapabilities(_ clientCapabilities: Set<ClientCapability>) async {
-        await callController.updateClientCapabilities(clientCapabilities)
+    /// Use this to activate one or more client capabilities for the current call
+    /// session. Enabling capabilities may affect how features such as paused tracks,
+    /// bandwidth management, or other optional behaviors work for this call.
+    ///
+    /// - Parameter capabilities: The set of capabilities to enable.
+    public func enableClientCapabilities(
+        _ capabilities: Set<ClientCapability>
+    ) async {
+        await callController.enableClientCapabilities(capabilities)
+    }
+
+    /// Disables a set of client capabilities for the call.
+    ///
+    /// Use this to deactivate one or more client capabilities for the current call
+    /// session. Disabling capabilities can limit or remove optional features
+    /// associated with those capabilities.
+    ///
+    /// - Parameter capabilities: The set of capabilities to disable.
+    public func disableClientCapabilities(
+        _ capabilities: Set<ClientCapability>
+    ) async {
+        await callController.disableClientCapabilities(capabilities)
     }
 
     // MARK: - Internal

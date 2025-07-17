@@ -220,8 +220,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         statsAdapter?.isTracingEnabled = value
     }
 
-    func set(clientCapabilities value: Set<ClientCapability>) {
-        self.clientCapabilities = value
+    // MARK: - Client Capabilities
+
+    func enableClientCapabilities(_ capabilities: Set<ClientCapability>) {
+        self.clientCapabilities = self.clientCapabilities.union(capabilities)
+    }
+
+    func disableClientCapabilities(_ capabilities: Set<ClientCapability>) {
+        self.clientCapabilities = self.clientCapabilities.subtracting(capabilities)
     }
 
     // MARK: - Session Management

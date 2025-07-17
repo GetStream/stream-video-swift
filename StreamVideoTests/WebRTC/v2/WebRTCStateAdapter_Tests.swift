@@ -286,11 +286,22 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
-    // MARK: - setClientCapabilities
+    // MARK: - enableClientCapabilities
 
-    func test_setClientCapabilities_shouldUpdateClientCapabilities() async throws {
+    func enableClientCapabilities_shouldUpdateClientCapabilities() async throws {
 
-        await subject.set(clientCapabilities: [])
+        await subject.enableClientCapabilities([.subscriberVideoPause])
+
+        await assertEqualAsync(await subject.clientCapabilities, [.subscriberVideoPause])
+    }
+
+    // MARK: - disableClientCapabilities
+
+    func test_enableClientCapabilities_shouldUpdateClientCapabilities() async throws {
+
+        await subject.enableClientCapabilities([.subscriberVideoPause])
+
+        await subject.disableClientCapabilities([.subscriberVideoPause])
 
         await assertEqualAsync(await subject.clientCapabilities, [])
     }

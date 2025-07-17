@@ -114,10 +114,6 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             .stateAdapter
             .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
 
-        await mockCoordinatorStack
-            .coordinator
-            .updateClientCapabilities([.subscriberVideoPause])
-
         try await assertTransition(
             from: .connected,
             expectedTarget: .disconnected,
