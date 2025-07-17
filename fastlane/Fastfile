@@ -710,8 +710,8 @@ lane :sources_matrix do
     size: ['Sources', xcode_project],
     public_interface: ['Sources'],
     ruby: ['fastlane'],
-    swiftformat_include: ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoSwiftUITests", "StreamVideoUIKitTests"],
-    swiftformat_exclude: ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
+    swiftformat_include: ['Sources', 'DemoApp', 'DemoAppUIKit', 'StreamVideoTests', 'StreamVideoSwiftUITests', 'StreamVideoUIKitTests'],
+    swiftformat_exclude: ['**/Generated', '**/generated', '**/protobuf', '**/OpenApi']
   }
 end
 
