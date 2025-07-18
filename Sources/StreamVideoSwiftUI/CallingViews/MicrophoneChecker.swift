@@ -47,10 +47,12 @@ public final class MicrophoneChecker: ObservableObject {
     }
 
     public func startListening(ignoreActiveCall: Bool = false) async {
+        await audioRecorder.startRecording()
         log.warning("Method \(#function) has been deprecated and will be removed in the future.")
     }
 
     public func stopListening() async {
+        await audioRecorder.stopRecording()
         log.warning("Method \(#function) has been deprecated and will be removed in the future.")
     }
 

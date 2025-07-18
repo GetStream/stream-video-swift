@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Fixing an issue that when using StreamVideoSwiftUI microphone may not get activated.
 
 # [1.28.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.28.1)
 _July 11, 2025_
