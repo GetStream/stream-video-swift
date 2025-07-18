@@ -515,6 +515,12 @@ class CallController: @unchecked Sendable {
         await webRTCCoordinator.disableClientCapabilities(capabilities)
     }
 
+    // MARK: - CallKit tracing
+
+    func didPerform(_ action: WebRTCTrace.CallKitAction) async {
+        await webRTCCoordinator.didPerform(action)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {

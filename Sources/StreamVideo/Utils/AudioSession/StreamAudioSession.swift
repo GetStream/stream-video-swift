@@ -55,6 +55,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// Retrieves the current audio route description.
     var currentRoute: AVAudioSessionRouteDescription { audioSession.currentRoute }
 
+    private let audioDeviceModule: RTCAudioDeviceModule
+
     /// Initializes a new `StreamAudioSessionAdapter` instance, configuring
     /// the session with default settings and enabling manual audio control
     /// for WebRTC.
@@ -69,13 +71,15 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         callSettings: CallSettings = .init(),
         ownCapabilities: Set<OwnCapability> = [],
         policy: AudioSessionPolicy = DefaultAudioSessionPolicy(),
-        audioSession: AudioSessionProtocol = StreamRTCAudioSession()
+        audioSession: AudioSessionProtocol = StreamRTCAudioSession(),
+        audioDeviceModule: RTCAudioDeviceModule
     ) {
         activeCallSettings = callSettings
         self.ownCapabilities = ownCapabilities
         self.policy = policy
         self.audioSession = audioSession
         category = audioSession.category
+        self.audioDeviceModule = audioDeviceModule
 
         /// Update the active call's `audioSession` to make available to
         /// other components.
@@ -413,6 +417,16 @@ extension StreamAudioSession: Encodable {
     // MARK: - Codable
 
     enum CodingKeys: String, CodingKey {
+        case isActive
+        case isRecording
+        case isAudioModuleRecording
+        case isAudioModulePlaying
+        case category
+        case mode
+        case overrideOutputPort
+        case useManualAudio
+        case isAudioEnabled
+        case hasRecordPermission
         case speakerOn
         case device
         case deviceIsExternal = "device.isExternal"
@@ -422,11 +436,23 @@ extension StreamAudioSession: Encodable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(activeCallSettings.speakerOn, forKey: .speakerOn)
+        try container.encode(audioSession.isActive, forKey: .isActive)
+        try container.encode(isRecording, forKey: .isRecording)
+        try container.encode(audioDeviceModule.recording, forKey: .isAudioModuleRecording)
+        try container.encode(audioDeviceModule.playing, forKey: .isAudioModulePlaying)
+        try container.encode(audioSession.category.rawValue, forKey: .category)
+        try container.encode(audioSession.mode.rawValue, forKey: .mode)
+        try container.encode(audioSession.overrideOutputPort.stringValue, forKey: .overrideOutputPort)
+        try container.encode(audioSession.hasRecordPermission, forKey: .hasRecordPermission)
         try container.encode("\(audioSession.currentRoute)", forKey: .device)
         try container.encode(audioSession.currentRoute.isExternal, forKey: .deviceIsExternal)
         try container.encode(audioSession.currentRoute.isSpeaker, forKey: .deviceIsSpeaker)
         try container.encode(audioSession.currentRoute.isReceiver, forKey: .deviceIsReceiver)
+
+        if let rtcAudioSession = audioSession as? StreamRTCAudioSession {
+            try container.encode(rtcAudioSession.useManualAudio, forKey: .useManualAudio)
+            try container.encode(rtcAudioSession.isAudioEnabled, forKey: .isAudioEnabled)
+        }
     }
 }
 

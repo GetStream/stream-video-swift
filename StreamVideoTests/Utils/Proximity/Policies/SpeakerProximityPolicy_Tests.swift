@@ -12,18 +12,23 @@ final class SpeakerProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockAudioSession: MockAudioSession! = .init()
     private lazy var mockCall: MockCall! = .init(.dummy())
+    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var subject: SpeakerProximityPolicy! = .init()
 
     override func setUp() async throws {
         try await super.setUp()
         _ = mockCall
         await wait(for: 0.25)
-        StreamAudioSession.currentValue = .init(audioSession: mockAudioSession)
+        StreamAudioSession.currentValue = .init(
+            audioSession: mockAudioSession,
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
+        )
     }
 
     override func tearDown() async throws {
         subject = nil
         mockCall = nil
+        peerConnectionFactory = nil
         mockAudioSession = nil
         try await super.tearDown()
     }

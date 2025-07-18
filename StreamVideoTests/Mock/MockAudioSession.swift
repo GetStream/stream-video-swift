@@ -8,7 +8,6 @@ import Combine
 import StreamWebRTC
 
 final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendable {
-
     // MARK: - Mockable
 
     typealias FunctionKey = MockFunctionKey
@@ -114,6 +113,21 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
     var isAudioEnabled: Bool {
         get { self[dynamicMember: \.isAudioEnabled] }
         set { stub(for: \.isAudioEnabled, with: newValue) }
+    }
+
+    var mode: AVAudioSession.Mode {
+        get { self[dynamicMember: \.mode] }
+        set { stub(for: \.mode, with: newValue) }
+    }
+
+    var overrideOutputPort: AVAudioSession.PortOverride {
+        get { self[dynamicMember: \.overrideOutputPort] }
+        set { stub(for: \.overrideOutputPort, with: newValue) }
+    }
+
+    var hasRecordPermission: Bool {
+        get { self[dynamicMember: \.hasRecordPermission] }
+        set { stub(for: \.hasRecordPermission, with: newValue) }
     }
 
     /// Sets the audio category, mode, and options.

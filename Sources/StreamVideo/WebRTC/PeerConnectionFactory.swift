@@ -42,7 +42,9 @@ final class PeerConnectionFactory: @unchecked Sendable {
     var supportedVideoCodecDecoding: [RTCVideoCodecInfo] {
         defaultDecoder.supportedCodecs()
     }
-    
+
+    var audioDeviceModule: RTCAudioDeviceModule { factory.audioDeviceModule }
+
     /// Creates or retrieves a PeerConnectionFactory instance for a given
     /// audio processing module.
     /// - Parameter audioProcessingModule: The RTCAudioProcessingModule to use.

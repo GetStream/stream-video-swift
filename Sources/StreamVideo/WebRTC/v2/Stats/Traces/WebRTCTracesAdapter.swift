@@ -27,11 +27,19 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
         case callEnded
         case goAway
         case error
+        case applicationState
+        case thermalState
+        case batteryLevel
+        case batteryState
     }
 
     /// Used to wrap an error that occurred while tracing a method call, preserving
     /// the input that triggered the error for later debugging or reporting.
     struct TraceMethodError<V: Encodable>: Encodable { var input: V; var error: String }
+
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+    @Injected(\.thermalStateObserver) private var thermalStateObserver
+    @Injected(\.currentDevice) private var currentDevice
 
     /// Enables or disables trace collection and statistics buffering.
     ///
@@ -42,8 +50,14 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
             if !isEnabled {
                 _ = peerConnectionBucket.consume(flush: true)
                 _ = sfuRequestsBucket.consume(flush: true)
+                _ = genericRequestsBucket.consume(flush: true)
                 _ = encoderStatsBucket.consume(flush: true)
                 _ = decoderStatsBucket.consume(flush: true)
+
+                disposableBag.remove(DisposableKey.applicationState.rawValue)
+                disposableBag.remove(DisposableKey.thermalState.rawValue)
+                disposableBag.remove(DisposableKey.batteryLevel.rawValue)
+                disposableBag.remove(DisposableKey.batteryState.rawValue)
             }
         }
     }
@@ -83,6 +97,8 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     private let peerConnectionBucket: ConsumableBucket<WebRTCTrace>
     /// Buffers trace events related to SFU adapter requests and responses.
     private var sfuRequestsBucket: ConsumableBucket<WebRTCTrace>
+
+    private var genericRequestsBucket: ConsumableBucket<WebRTCTrace>
     /// Buffers performance statistics for WebRTC encoding streams.
     private let encoderStatsBucket: ConsumableBucket<[Stream_Video_Sfu_Models_PerformanceStats]>
     /// Buffers performance statistics for WebRTC decoding streams.
@@ -100,6 +116,7 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     ) {
         peerConnectionBucket = .init()
         sfuRequestsBucket = .init()
+        genericRequestsBucket = .init()
 
         encoderStatsBucket = .init(
             latestReportPublisher
@@ -124,6 +141,18 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
                 .eraseToAnyPublisher(),
             transformer: WebRTCStatsItemTransformer(mode: .decoder)
         )
+
+        applicationStateAdapter
+            .statePublisher
+            .map { WebRTCTrace(applicationState: $0) }
+            .sink { [weak self] in self?.trace($0) }
+            .store(in: disposableBag, key: DisposableKey.applicationState.rawValue)
+
+        thermalStateObserver
+            .statePublisher
+            .map { WebRTCTrace(thermalState: $0) }
+            .sink { [weak self] in self?.trace($0) }
+            .store(in: disposableBag, key: DisposableKey.thermalState.rawValue)
     }
 
     /// Appends a trace event to the appropriate bucket.
@@ -136,10 +165,14 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
         guard isEnabled else {
             return
         }
-        if trace.id != nil {
-            peerConnectionBucket.append(trace)
+        if let traceId = trace.id {
+            if traceId == "sfu" {
+                sfuRequestsBucket.append(trace)
+            } else {
+                peerConnectionBucket.append(trace)
+            }
         } else {
-            sfuRequestsBucket.append(trace)
+            genericRequestsBucket.append(trace)
         }
     }
 
@@ -153,7 +186,8 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     func flushTraces() -> [WebRTCTrace] {
         let peerConnectionTraces = peerConnectionBucket.consume(flush: true)
         let sfuRequestsTraces = sfuRequestsBucket.consume(flush: true)
-        return peerConnectionTraces + sfuRequestsTraces
+        let genericRequestsTraces = genericRequestsBucket.consume(flush: true)
+        return peerConnectionTraces + sfuRequestsTraces + genericRequestsTraces
     }
 
     /// Flushes all buffered WebRTC encoder performance statistics.
@@ -176,7 +210,30 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     ///
     /// - Parameter traces: The traces to restore.
     func restore(_ traces: [WebRTCTrace]) {
-        peerConnectionBucket.insert(traces, at: 0)
+        var sfuTraces = [WebRTCTrace]()
+        var genericTraces = [WebRTCTrace]()
+        var peerConnection = [WebRTCTrace]()
+        traces.forEach { trace in
+            guard let id = trace.id else {
+                genericTraces.append(trace)
+                return
+            }
+
+            if id.hasSuffix("sfu") {
+                sfuTraces.append(trace)
+            } else {
+                peerConnection.append(trace)
+            }
+        }
+
+        sfuRequestsBucket.insert(sfuTraces, at: 0)
+        genericRequestsBucket.insert(genericTraces, at: 0)
+        peerConnectionBucket.insert(peerConnection, at: 0)
+    }
+
+    func consume(_ bucket: ConsumableBucket<WebRTCTrace>) {
+        let traces = bucket.consume(flush: true)
+        traces.forEach { trace($0) }
     }
 
     // MARK: - Private Helpers
@@ -285,11 +342,11 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
     ///
     /// Enriches trace data with the latest call and audio configuration.
     private func didUpdate(_ callSettings: CallSettings?) {
-        guard let callSettings, let audioSession else {
+        guard let audioSession else {
             return
         }
-        peerConnectionBucket.append(
-            .init(callSettings: callSettings, audioSession: audioSession)
+        genericRequestsBucket.append(
+            .init(audioSession: audioSession)
         )
     }
 }
