@@ -445,6 +445,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
     }
 
     // MARK: - CallKit tracing
+
     func didPerform(_ action: WebRTCTrace.CallKitAction) async {
         await stateAdapter.trace(.init(action))
     }
