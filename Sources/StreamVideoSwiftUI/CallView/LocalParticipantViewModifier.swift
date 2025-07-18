@@ -30,6 +30,12 @@ public struct LocalParticipantViewModifier: ViewModifier {
         _callSettings = callSettings
         self.showAllInfo = showAllInfo
         self.decorations = .init(decorations)
+
+        Task {
+            callSettings.wrappedValue.audioOn
+                ? await microphoneCheckerInstance.startListening()
+                : await microphoneCheckerInstance.stopListening()
+        }
     }
 
     public func body(content: Content) -> some View {
@@ -52,6 +58,13 @@ public struct LocalParticipantViewModifier: ViewModifier {
                         }
                     }
                 }
+                .onChange(of: callSettings, perform: { newValue in
+                    Task {
+                        newValue.audioOn
+                            ? await microphoneChecker.startListening()
+                            : await microphoneChecker.stopListening()
+                    }
+                })
             )
             .applyDecorationModifierIfRequired(
                 VideoCallParticipantOptionsModifier(participant: localParticipant, call: call),
@@ -120,6 +133,8 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                     .padding(.bottom, 2)
                 }
                 .padding(.all, showAllInfo ? 16 : 8)
+                .onAppear { Task { await microphoneChecker.startListening() } }
+                .onDisappear { Task { await microphoneChecker.stopListening() } }
             )
             .applyDecorationModifierIfRequired(
                 VideoCallParticipantOptionsModifier(participant: localParticipant, call: call),
