@@ -57,7 +57,8 @@ struct ReactionOverlayView_Previews: PreviewProvider {
                 joinedAt: Date(),
                 audioLevel: 0,
                 audioLevels: [],
-                pin: nil
+                pin: nil,
+                pausedTracks: []
             )
         )
     }

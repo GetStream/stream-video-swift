@@ -13,7 +13,7 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig
     )
-    private var subject: WebRTCJoinRequestFactory! = .init()
+    private var subject: WebRTCJoinRequestFactory! = .init(capabilities: [])
 
     // MARK: - Lifecycle
 

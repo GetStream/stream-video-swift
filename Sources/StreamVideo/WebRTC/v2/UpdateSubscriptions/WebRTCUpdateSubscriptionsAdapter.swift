@@ -11,6 +11,9 @@ import Foundation
 /// computes the necessary subscription details, and instructs the SFUAdapter
 /// to update subscriptions accordingly. It ensures updates are sent only
 /// when there are meaningful changes.
+///
+/// Subscription behavior is influenced by the provided `clientCapabilities`,
+/// allowing customization such as support for paused tracks.
 final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     /// The session identifier for the current WebRTC session.
     private let sessionID: String
@@ -19,7 +22,7 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     /// A serial queue used to process update tasks in order.
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     /// A factory that builds subscription details for WebRTC tracks.
-    private let tracksFactory: WebRTCJoinRequestFactory = .init()
+    private let tracksFactory: WebRTCJoinRequestFactory
     /// A container for cancellable Combine subscriptions.
     private let disposableBag = DisposableBag()
     /// The active Combine subscription observing participants and settings.
@@ -37,6 +40,8 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
     ///     video quality settings.
     ///   - sfuAdapter: The SFU adapter to send updates to.
     ///   - sessionID: The identifier for the session.
+    ///   - clientCapabilities: A set of client capabilities affecting
+    ///     subscription behavior (e.g., paused tracks support).
     init(
         participantsPublisher: AnyPublisher<
             WebRTCStateAdapter.ParticipantsStorage, Never
@@ -45,10 +50,12 @@ final class WebRTCUpdateSubscriptionsAdapter: @unchecked Sendable {
             IncomingVideoQualitySettings, Never
         >,
         sfuAdapter: SFUAdapter,
-        sessionID: String
+        sessionID: String,
+        clientCapabilities: Set<ClientCapability>
     ) {
         self.sessionID = sessionID
         self.sfuAdapter = sfuAdapter
+        tracksFactory = .init(capabilities: clientCapabilities.map(\.rawValue))
         observable = Publishers.CombineLatest(
             participantsPublisher,
             incomingVideoQualitySettingsPublisher

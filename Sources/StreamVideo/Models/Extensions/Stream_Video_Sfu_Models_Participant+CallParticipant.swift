@@ -27,7 +27,8 @@ extension Stream_Video_Sfu_Models_Participant {
             joinedAt: joinedAt.date,
             audioLevel: audioLevel,
             audioLevels: [audioLevel],
-            pin: pin
+            pin: pin,
+            pausedTracks: []
         )
     }
 }

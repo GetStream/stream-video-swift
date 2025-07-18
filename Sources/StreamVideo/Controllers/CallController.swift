@@ -505,6 +505,16 @@ class CallController: @unchecked Sendable {
         try webRTCCoordinator.callKitActivated(audioSession)
     }
 
+    // MARK: - Client Capabilities
+
+    func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
+        await webRTCCoordinator.enableClientCapabilities(capabilities)
+    }
+
+    func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
+        await webRTCCoordinator.disableClientCapabilities(capabilities)
+    }
+
     // MARK: - private
 
     private func handleParticipantsUpdated() {

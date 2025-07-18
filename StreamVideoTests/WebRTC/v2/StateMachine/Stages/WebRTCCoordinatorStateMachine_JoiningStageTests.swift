@@ -139,6 +139,7 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             XCTAssertEqual(request.joinRequest.reconnectDetails.strategy, .unspecified)
             XCTAssertTrue(request.joinRequest.reconnectDetails.previousSessionID.isEmpty)
             XCTAssertTrue(request.joinRequest.reconnectDetails.fromSfuID.isEmpty)
+            XCTAssertEqual(request.joinRequest.capabilities, [.subscriberVideoPause])
         }
     }
 

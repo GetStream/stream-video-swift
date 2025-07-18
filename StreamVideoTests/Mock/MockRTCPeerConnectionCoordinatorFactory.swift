@@ -21,7 +21,8 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
         publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        clientCapabilities: Set<ClientCapability>
     ) -> RTCPeerConnectionCoordinator {
         stubbedBuildCoordinatorResult[peerType] ?? MockRTCPeerConnectionCoordinator(
             sessionId: sessionId,
@@ -35,7 +36,8 @@ final class MockRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinato
             publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
-            screenShareSessionProvider: screenShareSessionProvider
+            screenShareSessionProvider: screenShareSessionProvider,
+            clientCapabilities: clientCapabilities
         )
     }
 }

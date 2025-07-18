@@ -63,7 +63,8 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
             peerConnection: mockPeerConnection,
             sfuAdapter: mockSFUStack.adapter
         ),
-        iceConnectionStateAdapter: iceConnectionStateAdapter
+        iceConnectionStateAdapter: iceConnectionStateAdapter,
+        clientCapabilities: []
     )
 
     override func tearDown() {

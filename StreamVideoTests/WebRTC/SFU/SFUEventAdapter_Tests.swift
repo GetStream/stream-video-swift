@@ -423,6 +423,24 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_handleTrackUnpublished_givenAudioEvent_whenPublishedWithPausedTracksAudio_thenUpdatesParticipantAudioStatus(
+    ) async throws {
+        let participant = CallParticipant.dummy(hasAudio: true, pausedTracks: [.audio])
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.sessionID = participant.sessionId
+        event.type = .audio
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.trackUnpublished(event)),
+            initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0.count == 1
+                && $0[participant.sessionId]?.hasAudio == false
+                && $0[participant.sessionId]?.pausedTracks.isEmpty == true
+        }
+    }
+
     func test_handleTrackUnpublished_givenVideoEvent_whenPublished_thenUpdatesParticipantVideoStatus() async throws {
         let participant = CallParticipant.dummy(hasVideo: true)
         var event = Stream_Video_Sfu_Event_TrackUnpublished()
@@ -438,6 +456,24 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    func test_handleTrackUnpublished_givenVideoEvent_whenPublishedWithPausedTracksVideo_thenUpdatesParticipantVideoStatus(
+    ) async throws {
+        let participant = CallParticipant.dummy(hasVideo: true, pausedTracks: [.video])
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.sessionID = participant.sessionId
+        event.type = .video
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.trackUnpublished(event)),
+            initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0.count == 1
+                && $0[participant.sessionId]?.hasVideo == false
+                && $0[participant.sessionId]?.pausedTracks.isEmpty == true
+        }
+    }
+
     func test_handleTrackUnpublished_givenScreenShareEvent_whenPublished_thenUpdatesParticipantScreenShareStatus() async throws {
         let participant = CallParticipant.dummy(isScreenSharing: true)
         var event = Stream_Video_Sfu_Event_TrackUnpublished()
@@ -450,6 +486,24 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) {
             $0.count == 1 && $0[participant.sessionId]?.isScreensharing == false
+        }
+    }
+
+    func test_handleTrackUnpublished_givenScreenShareEvent_whenPublishedWithPausedTracksScreenshar_thenUpdatesParticipantScreenShareStatus(
+    ) async throws {
+        let participant = CallParticipant.dummy(isScreenSharing: true, pausedTracks: [.screenshare])
+        var event = Stream_Video_Sfu_Event_TrackUnpublished()
+        event.sessionID = participant.sessionId
+        event.type = .screenShare
+
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.trackUnpublished(event)),
+            initialState: [participant].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0.count == 1
+                && $0[participant.sessionId]?.isScreensharing == false
+                && $0[participant.sessionId]?.pausedTracks.isEmpty == true
         }
     }
 
@@ -554,6 +608,145 @@ final class SFUEventAdapter_Tests: XCTestCase, @unchecked Sendable {
             wrappedEvent: .sfuEvent(.changePublishOptions(event)),
             initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
         ) { _ in await self.stateAdapter.publishOptions == expected }
+    }
+
+    // MARK: inboundStateNotification
+
+    func test_handleInboundVideoState_givenEvent_updatesParticipantsWithPausedTracks() async throws {
+        let participantA = CallParticipant.dummy()
+        let participantB = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_InboundStateNotification()
+        var participantAInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantAInboundState.paused = true
+        participantAInboundState.trackType = .video
+        participantAInboundState.sessionID = participantA.sessionId
+        event.inboundVideoStates = [
+            participantAInboundState
+        ]
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.inboundStateNotification(event)),
+            initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0[participantA.sessionId]?.pausedTracks == [.video] && $0[participantB.sessionId]?.pausedTracks.isEmpty == true
+        }
+    }
+
+    func test_handleInboundVideoState_givenEventWithMultipleUsers_updatesParticipantsWithPausedTracks() async throws {
+        let participantA = CallParticipant.dummy()
+        let participantB = CallParticipant.dummy()
+        let participantC = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_InboundStateNotification()
+
+        var participantAInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantAInboundState.paused = true
+        participantAInboundState.trackType = .video
+        participantAInboundState.sessionID = participantA.sessionId
+
+        var participantBInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantBInboundState.paused = true
+        participantBInboundState.trackType = .audio
+        participantBInboundState.sessionID = participantB.sessionId
+
+        event.inboundVideoStates = [
+            participantAInboundState,
+            participantBInboundState
+        ]
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.inboundStateNotification(event)),
+            initialState: [participantA, participantB, participantC]
+                .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0[participantA.sessionId]?.pausedTracks == [.video] && $0[participantB.sessionId]?
+                .pausedTracks == [.audio] && $0[participantC.sessionId]?.pausedTracks.isEmpty == true
+        }
+    }
+
+    func test_handleInboundVideoState_givenEvent_updatesParticipantsWithUnpausedTracks() async throws {
+        let participantA = CallParticipant.dummy(pausedTracks: [.video])
+        let participantB = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_InboundStateNotification()
+        var participantAInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantAInboundState.paused = false
+        participantAInboundState.trackType = .video
+        participantAInboundState.sessionID = participantA.sessionId
+        event.inboundVideoStates = [
+            participantAInboundState
+        ]
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.inboundStateNotification(event)),
+            initialState: [participantA, participantB].reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0[participantA.sessionId]?.pausedTracks.isEmpty == true
+                && $0[participantB.sessionId]?.pausedTracks.isEmpty == true
+        }
+    }
+
+    func test_handleInboundVideoState_givenEventWithMultipleUsers_updatesParticipantsWithUnpausedTracks() async throws {
+        let participantA = CallParticipant.dummy(pausedTracks: [.video])
+        let participantB = CallParticipant.dummy(pausedTracks: [.audio])
+        let participantC = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_InboundStateNotification()
+
+        var participantAInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantAInboundState.paused = false
+        participantAInboundState.trackType = .video
+        participantAInboundState.sessionID = participantA.sessionId
+
+        var participantBInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantBInboundState.paused = false
+        participantBInboundState.trackType = .audio
+        participantBInboundState.sessionID = participantB.sessionId
+
+        event.inboundVideoStates = [
+            participantAInboundState,
+            participantBInboundState
+        ]
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.inboundStateNotification(event)),
+            initialState: [participantA, participantB, participantC]
+                .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0[participantA.sessionId]?.pausedTracks.isEmpty == true
+                && $0[participantB.sessionId]?.pausedTracks.isEmpty == true
+                && $0[participantC.sessionId]?.pausedTracks.isEmpty == true
+        }
+    }
+
+    func test_handleInboundVideoState_givenEventWithMultipleUsersWithMulptiplePausedTracks_updatesParticipantsWithCorrectTracks(
+    ) async throws {
+        let participantA = CallParticipant.dummy(pausedTracks: [.video, .screenshare])
+        let participantB = CallParticipant.dummy(pausedTracks: [.audio, .video])
+        let participantC = CallParticipant.dummy()
+        var event = Stream_Video_Sfu_Event_InboundStateNotification()
+
+        var participantAInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantAInboundState.paused = false
+        participantAInboundState.trackType = .video
+        participantAInboundState.sessionID = participantA.sessionId
+
+        var participantBInboundState = Stream_Video_Sfu_Event_InboundVideoState()
+        participantBInboundState.paused = false
+        participantBInboundState.trackType = .audio
+        participantBInboundState.sessionID = participantB.sessionId
+
+        event.inboundVideoStates = [
+            participantAInboundState,
+            participantBInboundState
+        ]
+        try await assert(
+            event,
+            wrappedEvent: .sfuEvent(.inboundStateNotification(event)),
+            initialState: [participantA, participantB, participantC]
+                .reduce(into: [String: CallParticipant]()) { $0[$1.sessionId] = $1 }
+        ) {
+            $0[participantA.sessionId]?.pausedTracks == [.screenshare]
+                && $0[participantB.sessionId]?.pausedTracks == [.video]
+                && $0[participantC.sessionId]?.pausedTracks.isEmpty == true
+        }
     }
 
     // MARK: - Private helpers

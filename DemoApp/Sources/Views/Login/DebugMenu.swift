@@ -129,6 +129,11 @@ struct DebugMenu: View {
         didSet { AppEnvironment.proximityPolicies = proximityPolicies }
     }
 
+    @State private var availableClientCapabilities = ClientCapability.allCases
+    @State private var preferredClientCapabilities = AppEnvironment.clientCapabilities {
+        didSet { AppEnvironment.clientCapabilities = preferredClientCapabilities }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -187,6 +192,40 @@ struct DebugMenu: View {
                 currentValue: closedCaptionsIntegration,
                 label: "ClosedCaptions Integration"
             ) { self.closedCaptionsIntegration = $0 }
+
+            makeMultipleSelectMenu(
+                for: availableClientCapabilities,
+                currentValues: preferredClientCapabilities ?? [],
+                additionalItems: {
+                    if preferredClientCapabilities != nil {
+                        Divider()
+
+                        Button {
+                            self.preferredClientCapabilities = nil
+                        } label: {
+                            Text("Remove overrides")
+                        }
+                    } else {
+                        EmptyView()
+                    }
+                },
+                label: "Override Client Capabilities"
+            ) { item, isSelected in
+                if isSelected {
+                    if let preferredClientCapabilities {
+                        if preferredClientCapabilities.count == 1 {
+                            self.preferredClientCapabilities = nil
+                        } else {
+                            self.preferredClientCapabilities = preferredClientCapabilities.filter { item != $0 }
+                        }
+                    }
+                } else {
+                    if preferredClientCapabilities == nil {
+                        preferredClientCapabilities = Set<ClientCapability>()
+                    }
+                    preferredClientCapabilities?.insert(item)
+                }
+            }
 
             makeMenu(
                 for: [.default, .ownCapabilities],
@@ -484,6 +523,7 @@ struct DebugMenu: View {
     private func makeMultipleSelectMenu<Item: Debuggable>(
         for items: [Item],
         currentValues: Set<Item>,
+        @ViewBuilder additionalItems: () -> some View = { EmptyView() },
         label: String,
         updater: @escaping (Item, Bool) -> Void
     ) -> some View {
@@ -501,6 +541,7 @@ struct DebugMenu: View {
                     }
                 }
             }
+            additionalItems()
         } label: {
             Text(label)
         }

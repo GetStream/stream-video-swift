@@ -34,6 +34,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     private let peerType: PeerConnectionType
     private let peerConnection: StreamRTCPeerConnectionProtocol
     private let subsystem: LogSubsystem
+    private let clientCapabilities: Set<ClientCapability>
     private let disposableBag: DisposableBag = .init()
     private let dispatchQueue = DispatchQueue(label: "io.getstream.peerconnection.serial.offer.queue")
 
@@ -140,7 +141,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        clientCapabilities: Set<ClientCapability>
     ) {
         self.init(
             sessionId: sessionId,
@@ -169,7 +171,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 peerConnection: peerConnection,
                 sfuAdapter: sfuAdapter
             ),
-            iceConnectionStateAdapter: .init()
+            iceConnectionStateAdapter: .init(),
+            clientCapabilities: clientCapabilities
         )
     }
 
@@ -184,7 +187,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         mediaAdapter: MediaAdapter,
         iceAdapter: ICEAdapter,
-        iceConnectionStateAdapter: ICEConnectionStateAdapter
+        iceConnectionStateAdapter: ICEConnectionStateAdapter,
+        clientCapabilities: Set<ClientCapability>
     ) {
         self.sessionId = sessionId
         self.peerType = peerType
@@ -200,6 +204,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         self.mediaAdapter = mediaAdapter
         self.iceAdapter = iceAdapter
         self.iceConnectionStateAdapter = iceConnectionStateAdapter
+        self.clientCapabilities = clientCapabilities
 
         // Warm up instances
         iceConnectionStateAdapter.peerConnectionCoordinator = self
@@ -547,8 +552,10 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
             setPublisherProcessingQueue.addTaskOperation { [weak self] in
                 guard let self else { return }
 
-                let trackInfo = WebRTCJoinRequestFactory()
-                    .buildAnnouncedTracks(self, collectionType: .allAvailable)
+                let trackInfo = WebRTCJoinRequestFactory(
+                    capabilities: clientCapabilities.map(\.rawValue)
+                )
+                .buildAnnouncedTracks(self, collectionType: .allAvailable)
 
                 /// We only want to trigger a renegotiation if the user is already publishing any media.
                 /// In any other case we skip.
@@ -731,8 +738,11 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
 
             try await ensureSetUpHasBeenCompleted()
 
-            let tracksInfo = WebRTCJoinRequestFactory()
-                .buildAnnouncedTracks(self, collectionType: .allAvailable)
+            /// - Note: Capabilities aren't required at this point and thus it's ok to leave it empty.
+            let tracksInfo = WebRTCJoinRequestFactory(
+                capabilities: clientCapabilities.map(\.rawValue)
+            )
+            .buildAnnouncedTracks(self, collectionType: .allAvailable)
 
             // This is only used for debugging and internal validation.
             validateTracksAndTransceivers(.video, tracksInfo: tracksInfo)

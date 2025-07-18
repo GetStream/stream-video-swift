@@ -25,6 +25,10 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
+    ///   - clientCapabilities: A set of client capabilities that affect how the
+    ///     coordinator behaves (e.g., enabling paused tracks support).
+    ///
+    /// This parameter affects features such as support for paused tracks.
     /// - Returns: An initialized `RTCPeerConnectionCoordinator` instance.
     func buildCoordinator(
         sessionId: String,
@@ -38,7 +42,8 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
         publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        clientCapabilities: Set<ClientCapability>
     ) -> RTCPeerConnectionCoordinator
 }
 
@@ -62,6 +67,10 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
+    ///   - clientCapabilities: A set of client capabilities that affect how the
+    ///     coordinator behaves (e.g., enabling paused tracks support).
+    ///
+    /// This parameter affects features such as support for paused tracks.
     /// - Returns: A newly created `RTCPeerConnectionCoordinator` instance.
     func buildCoordinator(
         sessionId: String,
@@ -75,7 +84,8 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
         publishOptions: PublishOptions,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        clientCapabilities: Set<ClientCapability>
     ) -> RTCPeerConnectionCoordinator {
         RTCPeerConnectionCoordinator(
             sessionId: sessionId,
@@ -89,7 +99,8 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
             publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
-            screenShareSessionProvider: screenShareSessionProvider
+            screenShareSessionProvider: screenShareSessionProvider,
+            clientCapabilities: clientCapabilities
         )
     }
 }

@@ -76,6 +76,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
 
+    private(set) var clientCapabilities: Set<ClientCapability> = [
+        .subscriberVideoPause
+    ]
+
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
 
@@ -216,6 +220,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         statsAdapter?.isTracingEnabled = value
     }
 
+    // MARK: - Client Capabilities
+
+    func enableClientCapabilities(_ capabilities: Set<ClientCapability>) {
+        self.clientCapabilities = self.clientCapabilities.union(capabilities)
+    }
+
+    func disableClientCapabilities(_ capabilities: Set<ClientCapability>) {
+        self.clientCapabilities = self.clientCapabilities.subtracting(capabilities)
+    }
+
     // MARK: - Session Management
 
     /// Refreshes the session by setting a new session ID.
@@ -260,7 +274,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
-            screenShareSessionProvider: screenShareSessionProvider
+            screenShareSessionProvider: screenShareSessionProvider,
+            clientCapabilities: clientCapabilities
         )
 
         let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
@@ -278,7 +293,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             publishOptions: publishOptions,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
-            screenShareSessionProvider: screenShareSessionProvider
+            screenShareSessionProvider: screenShareSessionProvider,
+            clientCapabilities: clientCapabilities
         )
 
         publisher

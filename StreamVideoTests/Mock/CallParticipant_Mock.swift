@@ -29,7 +29,8 @@ extension CallParticipant {
         joinedAt: Date = .init(timeIntervalSince1970: 0),
         audioLevel: Float = 0,
         audioLevels: [Float] = [],
-        pin: PinInfo? = nil
+        pin: PinInfo? = nil,
+        pausedTracks: Set<TrackType> = []
     ) -> CallParticipant {
         .init(
             id: id,
@@ -52,7 +53,8 @@ extension CallParticipant {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pin: pin
+            pin: pin,
+            pausedTracks: pausedTracks
         )
     }
 }

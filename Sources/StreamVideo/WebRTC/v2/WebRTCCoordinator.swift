@@ -436,6 +436,14 @@ final class WebRTCCoordinator: @unchecked Sendable {
         try stateAdapter.audioSession.callKitActivated(audioSession)
     }
 
+    func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
+        await stateAdapter.enableClientCapabilities(capabilities)
+    }
+
+    func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
+        await stateAdapter.disableClientCapabilities(capabilities)
+    }
+
     // MARK: - Private
 
     /// Creates the state machine for managing WebRTC stages.

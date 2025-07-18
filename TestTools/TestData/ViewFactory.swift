@@ -85,7 +85,8 @@ struct ParticipantFactory {
                 joinedAt: Date(),
                 audioLevel: 0,
                 audioLevels: [],
-                pin: nil
+                pin: nil,
+                pausedTracks: []
             )
             factory.append(participant)
         }

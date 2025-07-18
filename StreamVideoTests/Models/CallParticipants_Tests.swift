@@ -27,7 +27,8 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
             joinedAt: Date(),
             audioLevel: 0,
             audioLevels: [],
-            pin: nil
+            pin: nil,
+            pausedTracks: []
         )
         
         // When
@@ -98,5 +99,36 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
         )
 
         XCTAssertTrue(subject.shouldDisplayTrack)
+    }
+
+    func test_shouldDisplayTrack_hasVideoTrueShowTrackTrueTrackNotNilPausedTracksContainsVideo_returnsFalse() {
+        let subject = CallParticipant.dummy(
+            hasVideo: true,
+            showTrack: true,
+            track: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false),
+            pausedTracks: [.video]
+        )
+
+        XCTAssertFalse(subject.shouldDisplayTrack)
+    }
+
+    func test_shouldDisplayTrack_hasVideoTrueShowTrackTrueTrackNotNilPausedTracksDoesNotContainVideo_returnstrue() {
+        let subject = CallParticipant.dummy(
+            hasVideo: true,
+            showTrack: true,
+            track: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false),
+            pausedTracks: []
+        )
+
+        XCTAssertTrue(subject.shouldDisplayTrack)
+    }
+
+    // MARK: - Equatable
+
+    func test_isEqual_participantWithDifferentPausedTracksAreNotEqual() {
+        let participantA = CallParticipant.dummy(pausedTracks: [.video])
+        let participantB = participantA.withPausedTrack(.audio)
+
+        XCTAssertNotEqual(participantA, participantB)
     }
 }

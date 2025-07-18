@@ -548,6 +548,28 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(videoPublishOptions.bitrate, 1000)
     }
 
+    // MARK: - enableClientCapabilities
+
+    func test_enableClientCapabilities_correctlyUpdatesStateAdapter() async throws {
+        await subject.enableClientCapabilities([.subscriberVideoPause])
+
+        await assertEqualAsync(
+            await subject.stateAdapter.clientCapabilities,
+            [.subscriberVideoPause]
+        )
+    }
+
+    // MARK: - disableClientCapabilities
+
+    func test_disableClientCapabilities_correctlyUpdatesStateAdapter() async throws {
+        await subject.disableClientCapabilities([.subscriberVideoPause])
+
+        await assertEqualAsync(
+            await subject.stateAdapter.clientCapabilities,
+            []
+        )
+    }
+
     // MARK: - Private helpers
 
     private func assertEqualAsync<T: Equatable>(

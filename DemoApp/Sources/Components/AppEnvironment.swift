@@ -620,6 +620,20 @@ extension AppEnvironment {
     }()
 }
 
+extension AppEnvironment {
+
+    static var clientCapabilities: Set<ClientCapability>?
+}
+
+extension ClientCapability: Debuggable {
+    var title: String {
+        switch self {
+        case .subscriberVideoPause:
+            "Subscriber video pause"
+        }
+    }
+}
+
 extension String: Debuggable {
     var title: String {
         self

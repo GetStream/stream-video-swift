@@ -363,11 +363,12 @@
 		408721F12E12741F006A68CB /* DispatchWorkItem+TimerControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */; };
 		408721F72E127551006A68CB /* TimerPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F62E127551006A68CB /* TimerPublisher.swift */; };
 		408721FA2E127A18006A68CB /* TimerPublisher_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */; };
+		408722372E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722362E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift */; };
 		408722392E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */; };
 		4087223A2E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */; };
-		408722372E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408722362E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift */; };
 		4089378B2C062B17000EEB69 /* StreamUUIDFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */; };
 		408937912C134305000EEB69 /* View+AlertWithTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408937902C134305000EEB69 /* View+AlertWithTextField.swift */; };
+		40895E602E25538E00D3049D /* ClientCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40895E5F2E25538E00D3049D /* ClientCapability.swift */; };
 		408CE0F72BD95EB60052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
 		408CE0F82BD95F170052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
 		408CE0F92BD95F1B0052EC3A /* VideoConfig+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */; };
@@ -1937,10 +1938,11 @@
 		408721F02E12741F006A68CB /* DispatchWorkItem+TimerControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchWorkItem+TimerControl.swift"; sourceTree = "<group>"; };
 		408721F62E127551006A68CB /* TimerPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher.swift; sourceTree = "<group>"; };
 		408721F92E127A18006A68CB /* TimerPublisher_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPublisher_Tests.swift; sourceTree = "<group>"; };
-		408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMoreThermalStateButtonView.swift; sourceTree = "<group>"; };
 		408722362E13C91F006A68CB /* AVCaptureDevice.Format+MediaSubType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureDevice.Format+MediaSubType.swift"; sourceTree = "<group>"; };
+		408722382E13CD9D006A68CB /* DemoMoreThermalStateButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMoreThermalStateButtonView.swift; sourceTree = "<group>"; };
 		4089378A2C062B17000EEB69 /* StreamUUIDFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamUUIDFactory.swift; sourceTree = "<group>"; };
 		408937902C134305000EEB69 /* View+AlertWithTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+AlertWithTextField.swift"; sourceTree = "<group>"; };
+		40895E5F2E25538E00D3049D /* ClientCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCapability.swift; sourceTree = "<group>"; };
 		408CE0F62BD95EB60052EC3A /* VideoConfig+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoConfig+Dummy.swift"; sourceTree = "<group>"; };
 		408CF9C22CAE886500F56833 /* WebRTCIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCIntegrationTests.swift; sourceTree = "<group>"; };
 		408CF9C52CAEC24A00F56833 /* ScreenPropertiesAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenPropertiesAdapter.swift; sourceTree = "<group>"; };
@@ -5957,6 +5959,7 @@
 				8454A3182AAB374B00A012C6 /* CallStatsReport.swift */,
 				40034C1F2CFDABE600A318B1 /* PublishOptions.swift */,
 				4039F0CB2D0241120078159E /* AudioCodec.swift */,
+				40895E5F2E25538E00D3049D /* ClientCapability.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -7785,6 +7788,7 @@
 				84DC389529ADFCFD00946713 /* QueryMembersRequest.swift in Sources */,
 				84DC38AB29ADFCFD00946713 /* RecordSettingsRequest.swift in Sources */,
 				84EA5D3F28C09AAC004D3531 /* CallController.swift in Sources */,
+				40895E602E25538E00D3049D /* ClientCapability.swift in Sources */,
 				84DC38CA29ADFCFD00946713 /* UpdateCallRequest.swift in Sources */,
 				40E363752D0A2C6B0028C52A /* CGSize+Adapt.swift in Sources */,
 				4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */,

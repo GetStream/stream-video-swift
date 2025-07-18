@@ -439,7 +439,16 @@ public struct ParticipantInfoView: View {
                 .font(fonts.caption1)
                 .minimumScaleFactor(0.7)
                 .accessibility(identifier: "participantName")
-                        
+
+            if participant.pausedTracks.contains(.video) {
+                Image(systemName: "wifi.slash")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: maxHeight)
+                    .foregroundColor(.white)
+                    .padding(.trailing, 4)
+            }
+
             SoundIndicator(participant: participant)
                 .frame(maxHeight: maxHeight)
         }
