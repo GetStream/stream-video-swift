@@ -16,11 +16,13 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
     enum MockFunctionKey: Hashable, CaseIterable {
         case scheduleStatsReporting
         case trace
+        case consume
     }
 
     enum MockFunctionInputKey: Payloadable {
         case scheduleStatsReporting
         case trace(WebRTCTrace)
+        case consume(ConsumableBucket<WebRTCTrace>)
 
         var payload: Any {
             switch self {
@@ -28,6 +30,8 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
                 return ()
             case let .trace(trace):
                 return trace
+            case let .consume(bucket):
+                return bucket
             }
         }
     }
@@ -119,5 +123,9 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
 
     func trace(_ trace: WebRTCTrace) {
         stubbedFunctionInput[.trace]?.append(.trace(trace))
+    }
+
+    func consume(_ bucket: ConsumableBucket<WebRTCTrace>) {
+        stubbedFunctionInput[.consume]?.append(.consume(bucket))
     }
 }

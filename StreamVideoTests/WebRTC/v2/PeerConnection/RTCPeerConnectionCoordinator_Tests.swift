@@ -14,7 +14,9 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockSFUStack: MockSFUStack! = .init()
-    private lazy var audioSession: StreamAudioSession! = .init()
+    private lazy var audioSession: StreamAudioSession! = .init(
+        audioDeviceModule: peerConnectionFactory.audioDeviceModule
+    )
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockLocalMediaAdapterA: MockLocalMediaAdapter! = .init()
     private lazy var mockLocalMediaAdapterB: MockLocalMediaAdapter! = .init()

@@ -9,9 +9,13 @@ import Combine
 
 final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
 
+    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var builder: AVAudioRecorderBuilder! = .init(cachedResult: mockAudioRecorder)
     private lazy var mockAudioSession: MockAudioSession! = .init()
-    private lazy var audioSession: StreamAudioSession! = .init(audioSession: mockAudioSession)
+    private lazy var audioSession: StreamAudioSession! = .init(
+        audioSession: mockAudioSession,
+        audioDeviceModule: peerConnectionFactory.audioDeviceModule
+    )
     private lazy var mockActiveCallProvider: MockStreamActiveCallProvider! = .init()
     private var mockAudioRecorder: MockAudioRecorder!
     private lazy var subject: StreamCallAudioRecorder! = .init(audioRecorderBuilder: builder)
@@ -31,6 +35,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
         mockAudioSession = nil
         mockActiveCallProvider = nil
         mockAudioRecorder = nil
+        peerConnectionFactory = nil
         subject = nil
         super.tearDown()
     }
@@ -41,7 +46,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
         let filename = "test_recording.m4a"
         let recorder = StreamCallAudioRecorder(filename: filename)
 
-        let actualFileURL = await recorder.audioRecorderBuilder.fileURL.lastPathComponent
+        let actualFileURL = recorder.audioRecorderBuilder.fileURL.lastPathComponent
         XCTAssertTrue(actualFileURL == filename)
     }
 

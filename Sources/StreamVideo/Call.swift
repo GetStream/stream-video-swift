@@ -1473,6 +1473,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
+    // MARK: - CallKit
+
     /// Notifies the `Call` instance that CallKit has activated the system audio
     /// session.
     ///

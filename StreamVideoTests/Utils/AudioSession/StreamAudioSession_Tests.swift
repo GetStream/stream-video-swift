@@ -11,11 +11,13 @@ import XCTest
 final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var disposableBag: DisposableBag! = .init()
+    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockAudioSession: MockAudioSession! = .init()
     private lazy var mockPolicy: MockAudioSessionPolicy! = .init()
     private lazy var subject: StreamAudioSession! = .init(
         policy: mockPolicy,
-        audioSession: mockAudioSession
+        audioSession: mockAudioSession,
+        audioDeviceModule: peerConnectionFactory.audioDeviceModule
     )
 
     override func tearDown() {
@@ -23,6 +25,7 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
         subject = nil
         disposableBag.removeAll()
         mockAudioSession = nil
+        peerConnectionFactory = nil
         mockPolicy = nil
         super.tearDown()
     }
@@ -192,7 +195,8 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
         subject = .init(
             callSettings: .init(audioOn: false),
             policy: mockPolicy,
-            audioSession: mockAudioSession
+            audioSession: mockAudioSession,
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
         )
 
         try await assertConfigurationWasCalledOnPolicy({
@@ -207,7 +211,8 @@ final class StreamAudioSession_Tests: XCTestCase, @unchecked Sendable {
         subject = .init(
             callSettings: .init(audioOn: true),
             policy: mockPolicy,
-            audioSession: mockAudioSession
+            audioSession: mockAudioSession,
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
         )
 
         try await subject.prepareForRecording()

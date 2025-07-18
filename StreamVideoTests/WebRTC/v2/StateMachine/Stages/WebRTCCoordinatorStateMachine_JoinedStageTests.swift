@@ -223,8 +223,7 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in
             do {
                 let trace = try XCTUnwrap(statsAdapter.recordedInputPayload(WebRTCTrace.self, for: .trace)?.first)
-                XCTAssertEqual(trace.tag, "network.changed")
-                XCTAssertEqual(trace.data?.value as? String, "offline")
+                XCTAssertEqual(trace.tag, "network.state.offline")
             } catch {
                 XCTFail("\(error)")
             }

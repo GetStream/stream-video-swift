@@ -217,7 +217,3 @@ extension WebRTCTrace {
         )
     }
 }
-
-        )
-    }
-}
