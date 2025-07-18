@@ -639,3 +639,9 @@ extension String: Debuggable {
         self
     }
 }
+
+extension Bool: Debuggable {
+    var title: String {
+        self ? "True" : "False"
+    }
+}

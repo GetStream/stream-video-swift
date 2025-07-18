@@ -32,7 +32,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
         .audioSession,
         .videoCapturer,
         .pictureInPicture,
-        .callKit
+        .callKit,
+        .webRTCInternal
     ]
 
     /// All subsystems within the SDK.
@@ -52,7 +53,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
         .audioSession,
         .videoCapturer,
         .pictureInPicture,
-        .callKit
+        .callKit,
+        .webRTCInternal
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -88,6 +90,7 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
     public static let pictureInPicture = Self(rawValue: 1 << 14)
     /// The subsystem responsible for PicutreInPicture.
     public static let callKit = Self(rawValue: 1 << 15)
+    public static let webRTCInternal = Self(rawValue: 1 << 16)
 
     public var description: String {
         switch rawValue {
@@ -123,6 +126,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
             return "picture-in-picture"
         case LogSubsystem.callKit.rawValue:
             return "CallKit"
+        case LogSubsystem.webRTCInternal.rawValue:
+            return "webRTC-Internal"
         default:
             return "unknown(rawValue:\(rawValue)"
         }
@@ -284,7 +289,12 @@ public enum LogConfig {
             _logger = newValue
         }
     }
-    
+
+    public static var webRTCLogsEnabled: Bool {
+        get { WebRTCLogger.default.enabled }
+        set { WebRTCLogger.default.enabled = true }
+    }
+
     /// Invalidates the current logger instance so it can be recreated.
     private static func invalidateLogger() {
         _logger = nil

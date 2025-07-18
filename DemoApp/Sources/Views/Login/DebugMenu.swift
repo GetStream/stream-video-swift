@@ -298,6 +298,12 @@ struct DebugMenu: View {
                 label: "Log Level"
             ) { LogConfig.level = $0 }
 
+            makeMenu(
+                for: [true, false],
+                currentValue: LogConfig.webRTCLogsEnabled,
+                label: "WebRTC Logs"
+            ) { LogConfig.webRTCLogsEnabled = $0 }
+
             Button {
                 isLogsViewerVisible = true
             } label: {
