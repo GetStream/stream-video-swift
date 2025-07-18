@@ -64,7 +64,10 @@ final class WebRTCStatsAdapter_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_setAudioSession_propagatesToTraces() {
-        let session = StreamAudioSession()
+        let peerConnectionFactory = PeerConnectionFactory.mock()
+        let session = StreamAudioSession(
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
+        )
         subject.audioSession = session
         XCTAssertTrue(mockTraces.audioSession === session)
     }

@@ -36,7 +36,7 @@ final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
 
         let trace = WebRTCTrace(event: event)
 
-        XCTAssertNil(trace.id)
+        XCTAssertEqual(trace.id, "sfu")
         XCTAssertEqual(trace.tag, "create")
         XCTAssertEqual((trace.data?.value as? [String: String])?["url"], event.hostname)
     }
@@ -46,22 +46,16 @@ final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
 
         let trace = WebRTCTrace(tag: "proto", event: proto)
 
-        XCTAssertNil(trace.id)
+        XCTAssertEqual(trace.id, "sfu")
         XCTAssertEqual(trace.tag, "proto")
         XCTAssertEqual(trace.data?.value as? Stream_Video_Sfu_Event_CallEnded, proto)
     }
 
     func test_init_getUserMedia() {
-        let callSettings = CallSettings(
-            audioOn: true,
-            videoOn: false,
-            speakerOn: true,
-            audioOutputOn: true,
-            cameraPosition: .front
-        )
-        let audio = StreamAudioSession()
+        let peerConnectionFactory = PeerConnectionFactory.mock()
+        let audio = StreamAudioSession(audioDeviceModule: peerConnectionFactory.audioDeviceModule)
 
-        let trace = WebRTCTrace(callSettings: callSettings, audioSession: audio)
+        let trace = WebRTCTrace(audioSession: audio)
 
         XCTAssertNil(trace.id)
         XCTAssertEqual(trace.tag, "navigator.mediaDevices.getUserMediaOnSuccess")
@@ -72,24 +66,21 @@ final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
         let trace = WebRTCTrace(status: .available(.great))
 
         XCTAssertNil(trace.id)
-        XCTAssertEqual(trace.tag, "network.changed")
-        XCTAssertEqual(trace.data?.value as? String, "online")
+        XCTAssertEqual(trace.tag, "network.state.online")
     }
 
     func test_init_networkStatus_unavailable() {
         let trace = WebRTCTrace(status: .unavailable)
 
         XCTAssertNil(trace.id)
-        XCTAssertEqual(trace.tag, "network.changed")
-        XCTAssertEqual(trace.data?.value as? String, "offline")
+        XCTAssertEqual(trace.tag, "network.state.offline")
     }
 
     func test_init_networkStatus_unknown() {
         let trace = WebRTCTrace(status: .unknown)
 
         XCTAssertNil(trace.id)
-        XCTAssertEqual(trace.tag, "network.changed")
-        XCTAssertEqual(trace.data?.value as? String, "offline")
+        XCTAssertEqual(trace.tag, "network.state.offline")
     }
 
     func test_equatable() throws {

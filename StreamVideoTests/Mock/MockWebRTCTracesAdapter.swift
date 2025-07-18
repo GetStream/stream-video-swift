@@ -17,6 +17,7 @@ final class MockWebRTCTracesAdapter: WebRTCTracing, Mockable, @unchecked Sendabl
         case flushEncoderPerformanceStats
         case flushDecoderPerformanceStats
         case restore
+        case consume
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -25,6 +26,7 @@ final class MockWebRTCTracesAdapter: WebRTCTracing, Mockable, @unchecked Sendabl
         case flushEncoderPerformanceStats
         case flushDecoderPerformanceStats
         case restore([WebRTCTrace])
+        case consume(ConsumableBucket<WebRTCTrace>)
 
         var payload: Any {
             switch self {
@@ -38,6 +40,8 @@ final class MockWebRTCTracesAdapter: WebRTCTracing, Mockable, @unchecked Sendabl
                 return ()
             case let .restore(traces):
                 return traces
+            case let .consume(bucket):
+                return bucket
             }
         }
     }
@@ -112,5 +116,9 @@ final class MockWebRTCTracesAdapter: WebRTCTracing, Mockable, @unchecked Sendabl
 
     func restore(_ traces: [WebRTCTrace]) {
         stubbedFunctionInput[.restore]?.append(.restore(traces))
+    }
+
+    func consume(_ bucket: ConsumableBucket<WebRTCTrace>) {
+        stubbedFunctionInput[.consume]?.append(.consume(bucket))
     }
 }

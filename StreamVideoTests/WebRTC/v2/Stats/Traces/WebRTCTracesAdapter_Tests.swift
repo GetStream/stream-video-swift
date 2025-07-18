@@ -25,8 +25,8 @@ final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.trace(expected)
 
         let flushed = subject.flushTraces()
-        XCTAssertEqual(flushed.endIndex, 1)
-        let actual = try XCTUnwrap(flushed.first)
+        XCTAssertEqual(flushed.endIndex, 3)
+        let actual = try XCTUnwrap(flushed.first(where: { $0.tag == "offer" }))
         XCTAssertEqual(actual, expected)
     }
 
@@ -36,8 +36,8 @@ final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.trace(expected)
 
         let flushed = subject.flushTraces()
-        XCTAssertEqual(flushed.endIndex, 1)
-        let actual = try XCTUnwrap(flushed.first)
+        XCTAssertEqual(flushed.endIndex, 3)
+        let actual = try XCTUnwrap(flushed.first(where: { $0.tag == "sfu-event" }))
         XCTAssertEqual(actual, expected)
     }
 
@@ -49,7 +49,7 @@ final class WebRTCTracesAdapter_Tests: XCTestCase, @unchecked Sendable {
         subject.trace(trace2)
 
         let allTraces = subject.flushTraces()
-        XCTAssertEqual(allTraces.count, 2)
+        XCTAssertEqual(allTraces.count, 4)
 
         XCTAssertTrue(subject.flushTraces().isEmpty)
     }

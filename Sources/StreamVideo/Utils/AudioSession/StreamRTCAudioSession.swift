@@ -22,11 +22,17 @@ protocol AudioSessionProtocol {
 
     var category: AVAudioSession.Category { get }
 
+    var mode: AVAudioSession.Mode { get }
+
+    var overrideOutputPort: AVAudioSession.PortOverride { get }
+
     /// A Boolean value indicating whether manual audio routing is used.
     var useManualAudio: Bool { get set }
 
     /// A Boolean value indicating whether audio is enabled.
     var isAudioEnabled: Bool { get set }
+
+    var hasRecordPermission: Bool { get }
 
     /// Configures the audio session category and options.
     /// - Parameters:
@@ -89,6 +95,10 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
 
     var category: AVAudioSession.Category { state.category }
 
+    var mode: AVAudioSession.Mode { state.mode }
+
+    var overrideOutputPort: AVAudioSession.PortOverride { state.overrideOutputPort }
+
     /// A Boolean value indicating whether the audio session uses manual
     /// audio routing.
     var useManualAudio: Bool {
@@ -101,6 +111,8 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         set { source.isAudioEnabled = newValue }
         get { source.isAudioEnabled }
     }
+
+    var hasRecordPermission: Bool { source.session.recordPermission == .granted }
 
     // MARK: - Lifecycle
 
@@ -175,7 +187,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         _ isActive: Bool
     ) async throws {
         try await performOperation { [weak self] in
-            guard let self else {
+            guard let self, source.isActive != isActive else {
                 return
             }
 
@@ -243,5 +255,18 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         webRTCConfiguration.mode = state.mode.rawValue
         webRTCConfiguration.categoryOptions = state.options
         RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
+    }
+}
+
+extension AVAudioSession.PortOverride {
+    var stringValue: String {
+        switch self {
+        case .none:
+            return "none"
+        case .speaker:
+            return "speaker"
+        @unknown default:
+            return "unknown"
+        }
     }
 }

@@ -18,7 +18,10 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var audioSession: MockAudioSession! = .init()
-    private lazy var audioSessionAdapter: StreamAudioSession! = .init(audioSession: audioSession)
+    private lazy var audioSessionAdapter: StreamAudioSession! = .init(
+        audioSession: audioSession,
+        audioDeviceModule: peerConnectionFactory.audioDeviceModule
+    )
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var subject: LocalAudioMediaAdapter! = .init(
         sessionID: sessionId,

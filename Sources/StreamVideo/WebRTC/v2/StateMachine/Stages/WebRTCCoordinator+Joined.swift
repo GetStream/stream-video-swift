@@ -490,6 +490,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 statsReporter.publisher = await stateAdapter.publisher
                 statsReporter.subscriber = await stateAdapter.subscriber
                 statsReporter.sfuAdapter = await stateAdapter.sfuAdapter
+                statsReporter.reconnectAttempts = context.reconnectAttempts
 
                 /// Update the state adapter with the new stats reporter.
                 await stateAdapter.set(statsAdapter: statsReporter)
@@ -500,6 +501,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 statsReporter?.publisher = await stateAdapter.publisher
                 statsReporter?.subscriber = await stateAdapter.subscriber
                 statsReporter?.sfuAdapter = await stateAdapter.sfuAdapter
+                statsReporter?.reconnectAttempts = context.reconnectAttempts
             }
         }
 

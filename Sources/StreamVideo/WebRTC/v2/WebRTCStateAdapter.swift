@@ -43,7 +43,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     let peerConnectionFactory: PeerConnectionFactory
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
-    let audioSession: StreamAudioSession = .init()
+    let audioSession: StreamAudioSession
     let trackStorage: WebRTCTrackStorage = .init()
 
     /// Published properties that represent different parts of the WebRTC state.
@@ -90,6 +90,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let peerConnectionsDisposableBag = DisposableBag()
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    private var queuedTraces: ConsumableBucket<WebRTCTrace> = .init()
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -116,13 +117,15 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        self.peerConnectionFactory = PeerConnectionFactory.build(
+        let peerConnectionFactory = PeerConnectionFactory.build(
             audioProcessingModule: videoConfig.audioProcessingModule
         )
+        self.peerConnectionFactory = peerConnectionFactory
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-        
+        self.audioSession = .init(audioDeviceModule: peerConnectionFactory.audioDeviceModule)
+
         Task {
             await configureAudioSession()
         }
@@ -183,6 +186,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func set(statsAdapter value: WebRTCStatsAdapting?) {
         self.statsAdapter = value
         value?.audioSession = audioSession
+        value?.consume(queuedTraces)
     }
 
     /// Sets the SFU (Selective Forwarding Unit) adapter and updates the stats
@@ -483,6 +487,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 fileName: fileName,
                 lineNumber: lineNumber
             )
+        }
+    }
+
+    func trace(_ trace: WebRTCTrace) {
+        if let statsAdapter {
+            statsAdapter.trace(trace)
+        } else {
+            queuedTraces.append(trace)
         }
     }
 

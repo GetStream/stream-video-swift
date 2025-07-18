@@ -1473,6 +1473,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
+    // MARK: - CallKit
+
     /// Notifies the `Call` instance that CallKit has activated the system audio
     /// session.
     ///
@@ -1485,6 +1487,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the call controller fails to handle the activation.
     internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
         try callController.callKitActivated(audioSession)
+    }
+
+    internal func didPerform(_ action: WebRTCTrace.CallKitAction) {
+        Task(disposableBag: disposableBag) { [weak callController] in
+            await callController?.didPerform(action)
+        }
     }
 
     // MARK: - private

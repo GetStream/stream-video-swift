@@ -42,4 +42,6 @@ protocol WebRTCTracing: AnyObject, Sendable {
 
     /// Restores peer connection traces, inserting them at the front of the buffer.
     func restore(_ traces: [WebRTCTrace])
+
+    func consume(_ bucket: ConsumableBucket<WebRTCTrace>)
 }

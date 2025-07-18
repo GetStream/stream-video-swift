@@ -15,7 +15,7 @@ public protocol AppStateProviding: Sendable {
 }
 
 /// Represents the app's state: foreground or background.
-public enum ApplicationState: Sendable, Equatable { case foreground, background }
+public enum ApplicationState: String, Sendable, Equatable { case foreground, background }
 
 /// An adapter that observes the app's state and publishes changes.
 final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @unchecked Sendable {
