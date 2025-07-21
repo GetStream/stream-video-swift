@@ -292,7 +292,7 @@ public enum LogConfig {
 
     public static var webRTCLogsEnabled: Bool {
         get { WebRTCLogger.default.enabled }
-        set { WebRTCLogger.default.enabled = true }
+        set { WebRTCLogger.default.enabled = newValue }
     }
 
     /// Invalidates the current logger instance so it can be recreated.
