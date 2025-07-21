@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.29.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.29.0)
+_July 21, 2025_
+
 ### ✅ Added
 - `ClientCapabilities` have been added to support remote subscriber track pause. [#888](https://github.com/GetStream/stream-video-swift/pull/888)
 
