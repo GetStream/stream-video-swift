@@ -91,6 +91,22 @@ final class WebRTCCoordinatorStateMachine_DisconnectedStageTests: XCTestCase, @u
         }
     }
 
+    func test_transition_cleansUpLastHealthCheckReceivedAt() async throws {
+        subject.context.lastHealthCheckReceivedAt = .init()
+
+        await assertTransitionAfterTrigger(trigger: {}) { target in
+            XCTAssertNil(target.context.lastHealthCheckReceivedAt)
+        }
+    }
+
+    func test_transition_cleansUpDisconnectionSource() async throws {
+        subject.context.disconnectionSource = .noPongReceived
+
+        await assertTransitionAfterTrigger(trigger: {}) { target in
+            XCTAssertNil(target.context.disconnectionSource)
+        }
+    }
+
     func test_transition_scheduleStatsReportingWasCalled() async throws {
         let statsAdapter = MockWebRTCStatsAdapter()
         await mockCoordinatorStack.coordinator.stateAdapter.set(
