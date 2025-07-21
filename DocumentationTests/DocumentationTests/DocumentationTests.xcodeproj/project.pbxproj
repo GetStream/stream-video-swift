@@ -758,7 +758,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-video-noise-cancellation-swift";
 			requirement = {
 				kind = upToNextMinorVersion;
-				minimumVersion = 1.0.1;
+				minimumVersion = 1.0.3;
 			};
 		};
 		40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */ = {
