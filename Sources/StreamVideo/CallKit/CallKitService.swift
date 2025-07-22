@@ -231,7 +231,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
         log.debug(
             """
-            Call rejected
+            Call accepted
             callId:\(newCallEntry.call.callId)
             callType:\(newCallEntry.call.callType)
             callerId:\(newCallEntry.createdBy?.id)
