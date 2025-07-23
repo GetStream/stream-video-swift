@@ -15,9 +15,9 @@ pre-commit:
         - merge
         - rebase
 
-pre-push:
-  jobs:
-    - run: mint run swiftlint lint --config .swiftlint.yml --strict --progress --quiet --reporter json {push_files}
+    - run: mint run swiftlint lint --config .swiftlint.yml --strict --progress --quiet --reporter json {staged_files}
       glob: "*.{swift}"
+      stage_fixed: true
       skip:
-        - merge-commit
+        - merge
+        - rebase
