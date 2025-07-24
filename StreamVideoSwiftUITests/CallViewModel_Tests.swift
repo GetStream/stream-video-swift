@@ -17,7 +17,14 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
     private lazy var callId: String! = UUID().uuidString
     private lazy var participants: [Member]! = [firstUser, secondUser]
     private var streamVideo: MockStreamVideo!
-    private lazy var mockCall: MockCall! = .init(.dummy(callType: callType, callId: callId))
+    private lazy var mockCoordinatorClient: MockDefaultAPI! = .init()
+    private lazy var mockCall: MockCall! = .init(
+        .dummy(
+            callType: callType,
+            callId: callId,
+            coordinatorClient: mockCoordinatorClient
+        )
+    )
 
     private var subject: CallViewModel!
 
@@ -31,6 +38,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         thirdUser = nil
         secondUser = nil
         firstUser = nil
+        mockCoordinatorClient = nil
         try await super.tearDown()
     }
 
@@ -208,6 +216,62 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
 
         // Then
         await assertCallingState(.idle)
+    }
+
+    func test_outgoingCall_callCreatedPriorToStarting_rejectedEventFromOneParticipantCallRemainsOngoing() async throws {
+        LogConfig.level = .debug
+        // Given
+        let memberResponses = (participants + [thirdUser]).map {
+            MemberResponse(
+                createdAt: .init(),
+                custom: [:],
+                updatedAt: .init(),
+                user: .dummy(id: $0.id),
+                userId: $0.userId
+            )
+        }
+        mockCoordinatorClient.stub(
+            for: .getOrCreateCall,
+            with: GetOrCreateCallResponse(
+                call: .dummy(
+                    cid: callCid(from: callId, callType: callType),
+                    settings: .dummy(ring: .dummy(autoCancelTimeoutMs: 15000))
+                ),
+                created: true,
+                duration: "",
+                members: memberResponses,
+                ownCapabilities: [],
+            )
+        )
+        await prepare()
+        mockCall.stub(for: .create, with: ()) // We stub with something irrelevant to cause the mock to forward to super the request
+
+        subject.startCall(
+            callType: .default,
+            callId: callId,
+            members: [],
+            ring: true
+        )
+        await assertCallingState(.outgoing)
+
+        // When
+        streamVideo.process(
+            .coordinatorEvent(
+                .typeCallRejectedEvent(.dummy(
+                    call: .dummy(
+                        cid: cId,
+                        session: .dummy(
+                            rejectedBy: [secondUser.userId: Date()]
+                        )
+                    ),
+                    callCid: cId,
+                    createdAt: Date(),
+                    user: secondUser.user.toUserResponse()
+                ))
+            )
+        )
+        await wait(for: 1.0)
+        await assertCallingState(.outgoing)
     }
 
     func test_outgoingCall_callEndedEvent() async throws {
@@ -969,8 +1033,6 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) async {
-        LogConfig.level = .debug
-
         mockCall.stub(
             for: .join,
             with: JoinCallResponse.dummy(

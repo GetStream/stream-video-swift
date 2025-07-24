@@ -64,6 +64,18 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] settings in
                     self?.callSettings = settings
                 })
+
+            // We only update the outgoingCallMembers if they are empty (which
+            // means that the call was created externally)
+            callMembersUpdates = call?
+                .state
+                .$members
+                .filter { [weak self] _ in
+                    self?.outgoingCallMembers.isEmpty == true
+                        && self?.callingState == .outgoing
+                }
+                .receive(on: RunLoop.main)
+                .assign(to: \.outgoingCallMembers, onWeak: self)
             if let callSettings = call?.state.callSettings {
                 self.callSettings = callSettings
             }
@@ -162,6 +174,7 @@ open class CallViewModel: ObservableObject {
     private var recordingUpdates: AnyCancellable?
     private var screenSharingUpdates: AnyCancellable?
     private var callSettingsUpdates: AnyCancellable?
+    private var callMembersUpdates: AnyCancellable?
     private var applicationLifecycleUpdates: AnyCancellable?
 
     private var ringingCancellable: AnyCancellable?
@@ -921,7 +934,9 @@ open class CallViewModel: ObservableObject {
             let accepted = outgoingCall.state.session?.acceptedBy.count ?? 0
             if accepted == 0, rejections >= outgoingMembersCount {
                 Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
-                    _ = try? await outgoingCall.reject()
+                    _ = try? await outgoingCall.reject(
+                        reason: "Call rejected by all \(outgoingMembersCount) outgoing call members."
+                    )
                     self?.leaveCall()
                 }
             }
