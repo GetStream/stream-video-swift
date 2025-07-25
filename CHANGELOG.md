@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [1.29.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.29.1)
+_July 25, 2025_
+
 ### 🐞 Fixed
 - An issue that caused the CallViewModel to end outgoing group calls prematurely when a participant rejected the call. [#901](https://github.com/GetStream/stream-video-swift/pull/901)
 
