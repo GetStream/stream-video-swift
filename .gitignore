@@ -14,9 +14,12 @@ StreamVideo.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 build/
 DerivedData/
 *.xcframework
+
+# Interface Analyser
 stream-module-interface-analyser/
-public_interface_current.resolved
-public_interface_previous.resolved
+interface-analyser-report.md
+public_interface_current.*
+public_interface_previous.*
 
 ## Various settings
 *.pbxuser
