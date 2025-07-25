@@ -341,6 +341,7 @@
 		4072A5922DAEB41500108E8F /* PictureInPictureDelegateProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5912DAEB41500108E8F /* PictureInPictureDelegateProxy.swift */; };
 		4072A5942DAF992400108E8F /* PictureInPictureParticipantModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5932DAF992400108E8F /* PictureInPictureParticipantModifier.swift */; };
 		4072A5962DAF99E000108E8F /* PictureInPictureContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4072A5952DAF99E000108E8F /* PictureInPictureContentProvider.swift */; };
+		4073BC992E326DAF001E8965 /* MockDefaultAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A81302DA3C5F0001F7FA8 /* MockDefaultAPI.swift */; };
 		407508312DE861E100155CC8 /* DispatchQueueExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407508302DE861E100155CC8 /* DispatchQueueExecutor.swift */; };
 		4075F0782DCE3FFC0062A4CC /* WebRTCTrackStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075F0772DCE3FFC0062A4CC /* WebRTCTrackStorage.swift */; };
 		407AF7142B615D3300E9E3E7 /* CallDurationView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407AF7132B615D3300E9E3E7 /* CallDurationView_Tests.swift */; };
@@ -8641,6 +8642,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4073BC992E326DAF001E8965 /* MockDefaultAPI.swift in Sources */,
 				40B575D02DCCEBA900F489B8 /* PictureInPictureEnforcedStopAdapterTests.swift in Sources */,
 				82FF40BE2A17C73500B4D95E /* CallConnectingView_Tests.swift in Sources */,
 				407AF7182B61619900E9E3E7 /* ParticipantListButton_Tests.swift in Sources */,
