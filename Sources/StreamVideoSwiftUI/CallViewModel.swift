@@ -67,7 +67,7 @@ open class CallViewModel: ObservableObject {
 
             // We only update the outgoingCallMembers if they are empty (which
             // means that the call was created externally)
-            callMembersUpdates = call?
+            outgoingCallMembersUpdates = call?
                 .state
                 .$members
                 .filter { [weak self] _ in
@@ -174,7 +174,7 @@ open class CallViewModel: ObservableObject {
     private var recordingUpdates: AnyCancellable?
     private var screenSharingUpdates: AnyCancellable?
     private var callSettingsUpdates: AnyCancellable?
-    private var callMembersUpdates: AnyCancellable?
+    private var outgoingCallMembersUpdates: AnyCancellable?
     private var applicationLifecycleUpdates: AnyCancellable?
 
     private var ringingCancellable: AnyCancellable?

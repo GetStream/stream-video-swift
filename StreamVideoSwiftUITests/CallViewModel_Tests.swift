@@ -240,7 +240,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
                 created: true,
                 duration: "",
                 members: memberResponses,
-                ownCapabilities: [],
+                ownCapabilities: []
             )
         )
         await prepare()
