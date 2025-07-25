@@ -5,7 +5,7 @@ Pod::Spec.new do |spec|
   spec.description = 'StreamVideo is the official Swift client for Stream Video, a service for building video applications.'
 
   spec.homepage = 'https://getstream.io/video/'
-  spec.license = { type: 'BSD-3', file: 'LICENSE' }
+  spec.license = { type: 'Proprietary', file: 'LICENSE' }
   spec.author = { 'getstream.io' => 'support@getstream.io' }
   spec.social_media_url = 'https://getstream.io'
 
