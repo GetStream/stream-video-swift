@@ -100,7 +100,26 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
         video: Bool? = nil,
         transcription: TranscriptionSettingsRequest? = nil
     ) async throws -> CallResponse {
-        stubbedFunction[.create] as! CallResponse
+        if let response = stubbedFunction[.create] as? CallResponse {
+            return response
+        } else if let error = stubbedFunction[.create] as? Error {
+            throw error
+        } else {
+            return try await super.create(
+                members: members,
+                memberIds: memberIds,
+                custom: custom,
+                startsAt: startsAt,
+                team: team,
+                ring: ring,
+                notify: notify,
+                maxDuration: maxDuration,
+                maxParticipants: maxParticipants,
+                backstage: backstage,
+                video: video,
+                transcription: transcription
+            )
+        }
     }
 
     override func get(

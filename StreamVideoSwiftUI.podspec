@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
   spec.name = 'StreamVideoSwiftUI'
-  spec.version = '1.29.0'
+  spec.version = '1.29.1'
   spec.summary = 'StreamVideo SwiftUI Video Components'
   spec.description = 'StreamVideoSwiftUI SDK offers flexible SwiftUI components able to display data provided by StreamVideo SDK.'
 
   spec.homepage = 'https://getstream.io/video/'
-  spec.license = { type: 'BSD-3', file: 'LICENSE' }
+  spec.license = { type: 'Proprietary', file: 'LICENSE' }
   spec.author = { 'getstream.io' => 'support@getstream.io' }
   spec.social_media_url = 'https://getstream.io'
 
