@@ -1,7 +1,7 @@
 pre-commit:
   parallel: false
   jobs:
-    - run: mint run swiftformat --config .swiftformat --exclude '**/Generated', '**/generated', '**/protobuf', '**/OpenApi' {staged_files}
+    - run: mint run swiftformat --config .swiftformat {staged_files}
       glob: "*.{swift}"
       stage_fixed: true
       exclude:
