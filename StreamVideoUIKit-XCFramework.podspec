@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
   spec.name = 'StreamVideoUIKit-XCFramework'
-  spec.version = '1.29.0'
+  spec.version = '1.29.1'
   spec.summary = 'StreamVideo UIKit Video Components'
   spec.description = 'StreamVideoUIKit SDK offers flexible UIKit components able to display data provided by StreamVideo SDK.'
 
   spec.homepage = 'https://getstream.io/video/'
-  spec.license = { type: 'BSD-3', file: 'LICENSE' }
+  spec.license = { type: 'Proprietary', file: 'LICENSE' }
   spec.author = { 'getstream.io' => 'support@getstream.io' }
   spec.social_media_url = 'https://getstream.io'
 

@@ -11,11 +11,13 @@ final class MockDefaultAPI: DefaultAPI, Mockable, @unchecked Sendable {
     enum MockFunctionKey: Hashable, CaseIterable {
         case acceptCall
         case rejectCall
+        case getOrCreateCall
     }
 
     enum MockFunctionInputKey: Payloadable {
         case acceptCall(type: String, id: String)
         case rejectCall(type: String, id: String, request: RejectCallRequest)
+        case getOrCreateCall(type: String, id: String, getOrCreateCallRequest: GetOrCreateCallRequest)
 
         var payload: Any {
             switch self {
@@ -23,6 +25,9 @@ final class MockDefaultAPI: DefaultAPI, Mockable, @unchecked Sendable {
                 return (type, id)
 
             case let .rejectCall(type, id, request):
+                return (type, id, request)
+
+            case let .getOrCreateCall(type, id, request):
                 return (type, id, request)
             }
         }
@@ -51,6 +56,31 @@ final class MockDefaultAPI: DefaultAPI, Mockable, @unchecked Sendable {
     }
 
     // MARK: - Mocks
+
+    override func getOrCreateCall(
+        type: String,
+        id: String,
+        getOrCreateCallRequest: GetOrCreateCallRequest
+    ) async throws -> GetOrCreateCallResponse {
+        stubbedFunctionInput[.getOrCreateCall]?.append(
+            .getOrCreateCall(
+                type: type,
+                id: id,
+                getOrCreateCallRequest: getOrCreateCallRequest
+            )
+        )
+        if let response = stubbedFunction[.getOrCreateCall] as? GetOrCreateCallResponse {
+            return response
+        } else if let error = stubbedFunction[.getOrCreateCall] as? Error {
+            throw error
+        } else {
+            return try await super.getOrCreateCall(
+                type: type,
+                id: id,
+                getOrCreateCallRequest: getOrCreateCallRequest
+            )
+        }
+    }
 
     override func acceptCall(
         type: String,
