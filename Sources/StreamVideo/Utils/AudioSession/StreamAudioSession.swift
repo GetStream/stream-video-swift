@@ -161,9 +161,19 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             try await audioSession.setActive(true)
         } catch {
             log.error(
-                "Unable to activate AudioSession",
-                subsystems: .audioSession,
-                error: error
+                "Unable to activate AudioSession. [Error: \(error)]",
+                subsystems: .audioSession
+            )
+        }
+    }
+
+    func deactivateIfRequired() async {
+        do {
+            try await audioSession.setActive(false)
+        } catch {
+            log.error(
+                "Unable to deactivate AudioSession. [Error: \(error)]",
+                subsystems: .audioSession
             )
         }
     }
