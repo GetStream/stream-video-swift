@@ -156,6 +156,18 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
+    func activateIfRequired() async {
+        do {
+            try await audioSession.setActive(true)
+        } catch {
+            log.error(
+                "Unable to activate AudioSession",
+                subsystems: .audioSession,
+                error: error
+            )
+        }
+    }
+
     // MARK: - OwnCapabilities
 
     /// Updates the audio session with new call settings.
