@@ -57,6 +57,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     private let audioDeviceModule: RTCAudioDeviceModule
 
+    private let audioSessionActivationObserver = AVAudioSessionStatusObserver(.sharedInstance())
+
     /// Initializes a new `StreamAudioSessionAdapter` instance, configuring
     /// the session with default settings and enabling manual audio control
     /// for WebRTC.
@@ -154,6 +156,14 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         } else {
             try audioSession.setOverrideOutputAudioPort(.none)
         }
+    }
+
+    func activate() {
+        audioSessionActivationObserver.repeatedActivationAttempts()
+    }
+
+    func deactivate() {
+        audioSessionActivationObserver.stop()
     }
 
     // MARK: - OwnCapabilities
@@ -472,5 +482,44 @@ extension InjectedValues {
         set {
             Self[StreamAudioSession.self] = newValue
         }
+    }
+}
+
+final class AVAudioSessionStatusObserver {
+    @Injected(\.screenProperties) private var screenProperties
+
+    private let session: AVAudioSession
+    private var cancellable: AnyCancellable?
+
+    private var attempts: Int = 0
+
+    init(_ session: AVAudioSession) {
+        self.session = session
+    }
+
+    func repeatedActivationAttempts() {
+        cancellable?.cancel()
+        cancellable = DefaultTimer
+            .publish(every: screenProperties.refreshRate)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                do {
+                    try session.setActive(true)
+                    cancellable?.cancel()
+                    cancellable = nil
+                    log.debug(
+                        "AudioSession was activated successfully after \(attempts) attempts.",
+                        subsystems: .audioSession
+                    )
+                    attempts = 0
+                } catch {
+                    attempts += 1
+                }
+            }
+    }
+
+    func stop() {
+        cancellable?.cancel()
+        cancellable = nil
     }
 }
