@@ -155,6 +155,14 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 )
             }
             .store(in: disposableBag, key: DisposableKey.observer.rawValue)
+//
+//        audioSession
+//            .eventPublisher
+//            .compactMap {
+//                switch $0 {
+//                case .audioUnitStartFailedWithError(audioSession: <#T##RTCAudioSession#>, error: <#T##any Error#>)
+//                }
+//            }
     }
 
     /// Removes all observers and resets the active audio session.
@@ -166,7 +174,12 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
-    func activate(from source: ActivationSource) async throws {
+    func activate(
+        from source: ActivationSource,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws {
         var wasEnabled = false
         do {
             switch source {
@@ -178,7 +191,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 isCallActive = true
                 log.info(
                     "Application has state:\(applicationStateAdapter.state). AudioSession activation cannot happen from source:\(source).",
-                    subsystems: .audioSession
+                    subsystems: .audioSession,
+                    functionName: function,
+                    fileName: file,
+                    lineNumber: line
                 )
             case .reporting:
                 try await didUpdate(
@@ -203,7 +219,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             case AVAudioSession.ErrorCode.insufficientPriority.rawValue:
                 log.warning(
                     "Audio session setActive:\(isActive) cannot be fulfilled due to insufficient priority.",
-                    subsystems: .audioSession
+                    subsystems: .audioSession,
+                    functionName: function,
+                    fileName: file,
+                    lineNumber: line
                 )
             default:
                 throw error
@@ -221,7 +240,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
         log.debug(
             "AudioSession was activated from source:\(source).",
-            subsystems: .audioSession
+            subsystems: .audioSession,
+            functionName: function,
+            fileName: file,
+            lineNumber: line
         )
     }
 
