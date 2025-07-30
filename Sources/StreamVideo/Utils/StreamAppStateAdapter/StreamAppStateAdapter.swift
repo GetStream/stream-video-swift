@@ -55,6 +55,13 @@ final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @uncheck
                 .store(in: disposableBag)
 
             notificationCenter
+                .publisher(for: UIApplication.didBecomeActiveNotification)
+                .map { _ in ApplicationState.foreground }
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.state, onWeak: self)
+                .store(in: disposableBag)
+
+            notificationCenter
                 .publisher(for: UIApplication.didEnterBackgroundNotification)
                 .map { _ in ApplicationState.background }
                 .receive(on: DispatchQueue.main)
