@@ -1485,8 +1485,18 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter audioSession: The active `AVAudioSession` instance provided by
     ///   CallKit.
     /// - Throws: An error if the call controller fails to handle the activation.
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
-        try callController.callKitActivated(audioSession)
+    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) async throws {
+        try await callController.callKitActivated(audioSession)
+        didPerform(.didActivateAudioSession)
+    }
+
+    internal func callKitDidReport() async throws {
+        try await callController.callKitDidReport()
+    }
+
+    internal func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
+        try await callController.callKitDeactivated(audioSession)
+        didPerform(.didDeactivateAudioSession)
     }
 
     internal func didPerform(_ action: WebRTCTrace.CallKitAction) {

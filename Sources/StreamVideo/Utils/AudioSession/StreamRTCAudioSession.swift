@@ -59,6 +59,10 @@ protocol AudioSessionProtocol {
     /// Requests permission to record audio from the user.
     /// - Returns: `true` if permission was granted, otherwise `false`.
     func requestRecordPermission() async -> Bool
+
+    func didActivate(_ audioSession: AVAudioSessionProtocol)
+
+    func didDeactivate(_ audioSession: AVAudioSessionProtocol)
 }
 
 /// A class implementing the `AudioSessionProtocol` that manages the WebRTC
@@ -143,37 +147,33 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         try await performOperation { [weak self] in
             guard let self else { return }
 
-            let state = self.state
-            let needsCategoryUpdate = category != state.category
-            let needsModeUpdate = mode != state.mode
-            let needsOptionsUpdate = categoryOptions != state.options
+            let currentConfiguration = RTCAudioSessionConfiguration.current()
+            currentConfiguration.category = category.rawValue
+            currentConfiguration.mode = mode.rawValue
+            currentConfiguration.categoryOptions = categoryOptions
 
-            guard needsCategoryUpdate || needsModeUpdate || needsOptionsUpdate else {
-                return
-            }
-
-            if needsCategoryUpdate || needsOptionsUpdate {
-                if needsModeUpdate {
-                    try source.setCategory(
-                        category,
-                        mode: mode,
-                        options: categoryOptions
-                    )
-                } else {
-                    try source.setCategory(category, with: categoryOptions)
-                }
-            } else if needsModeUpdate {
-                try source.setMode(mode)
-            }
-
-            self.state = .init(
+            let updatedState = State(
                 category: category,
                 mode: mode,
                 options: categoryOptions,
                 overrideOutputPort: state.overrideOutputPort
             )
+            let currentState = self.state
 
-            updateWebRTCConfiguration(with: self.state)
+            do {
+                updateWebRTCConfiguration(with: updatedState)
+                try source.setConfiguration(currentConfiguration)
+            } catch {
+                updateWebRTCConfiguration(with: currentState)
+                log.error(
+                    """
+                    Failed to setCategory:\(category) mode:\(mode) options:\(category).
+                    Current values category:\(state.category) mode:\(state.mode) options:\(state.options)
+                    """,
+                    subsystems: .audioSession
+                )
+                throw error
+            }
 
             log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
         }
@@ -192,6 +192,7 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
             }
 
             try source.setActive(isActive)
+            log.debug("AudioSession updated isActive:\(isActive).", subsystems: .audioSession)
         }
     }
 
@@ -227,6 +228,26 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
                 continuation.resume(returning: result)
             }
         }
+    }
+
+    func didActivate(_ audioSession: AVAudioSessionProtocol) {
+        guard
+            let avAudioSession = audioSession as? AVAudioSession
+        else {
+            return
+        }
+
+        source.audioSessionDidActivate(avAudioSession)
+    }
+
+    func didDeactivate(_ audioSession: AVAudioSessionProtocol) {
+        guard
+            let avAudioSession = audioSession as? AVAudioSession
+        else {
+            return
+        }
+
+        source.audioSessionDidDeactivate(avAudioSession)
     }
 
     // MARK: - Private Helpers

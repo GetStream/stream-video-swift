@@ -11,6 +11,24 @@ import StreamWebRTC
 /// and routing to output devices such as speakers and in-ear speakers.
 final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+
+    enum ActivationSource: CustomStringConvertible {
+        case `internal`
+        case reporting
+        case callKit(AVAudioSessionProtocol)
+        var description: String {
+            switch self {
+            case .internal:
+                return ".internal"
+            case .reporting:
+                return ".reporting"
+            case .callKit:
+                return ".callKit"
+            }
+        }
+    }
+
     /// The last applied audio session configuration.
     private var lastUsedConfiguration: AudioSessionConfiguration?
 
@@ -87,7 +105,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
         var audioSession = self.audioSession
         audioSession.useManualAudio = true
-        audioSession.isAudioEnabled = true
 
         audioSession
             .eventPublisher
@@ -137,23 +154,65 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
-    func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
-        let configuration = policy.configuration(
-            for: activeCallSettings,
-            ownCapabilities: ownCapabilities
-        )
-
-        try audioSession.setCategory(
-            configuration.category,
-            mode: configuration.mode,
-            with: configuration.options
-        )
-
-        if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
-            try audioSession.setOverrideOutputAudioPort(overrideOutputAudioPort)
-        } else {
-            try audioSession.setOverrideOutputAudioPort(.none)
+    func activate(from source: ActivationSource) async throws {
+        var wasEnabled = false
+        switch source {
+        case .internal where applicationStateAdapter.state == .foreground:
+            try await performSetActive(true)
+            wasEnabled = true
+        case .internal:
+            log.info(
+                "Application has state:\(applicationStateAdapter.state). AudioSession activation cannot happen from source:\(source).",
+                subsystems: .audioSession
+            )
+        case .reporting:
+            try await didUpdate(
+                callSettings: activeCallSettings,
+                ownCapabilities: ownCapabilities,
+                force: true
+            )
+            try await performSetActive(true)
+            wasEnabled = true
+        case let .callKit(session):
+            try await didUpdate(
+                callSettings: activeCallSettings,
+                ownCapabilities: ownCapabilities,
+                force: true
+            )
+            audioSession.didActivate(session)
+            wasEnabled = true
         }
+
+        guard wasEnabled else {
+            return
+        }
+
+        var audioSession = audioSession
+        audioSession.isAudioEnabled = true
+
+        log.debug(
+            "AudioSession was activated from source:\(source).",
+            subsystems: .audioSession
+        )
+    }
+
+    func deactivate(from source: ActivationSource) async throws {
+        switch source {
+        case .internal:
+            try await performSetActive(false)
+        case .reporting:
+            break
+        case let .callKit(session):
+            audioSession.didDeactivate(session)
+        }
+
+        var audioSession = audioSession
+        audioSession.isAudioEnabled = false
+        
+        log.debug(
+            "AudioSession was deactivated from source:\(source).",
+            subsystems: .audioSession
+        )
     }
 
     // MARK: - OwnCapabilities
@@ -268,6 +327,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 """,
                 subsystems: .audioSession
             )
+
             return
         }
 
@@ -321,6 +381,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     private func didUpdate(
         callSettings: CallSettings,
         ownCapabilities: Set<OwnCapability>,
+        force: Bool = false,
         file: StaticString = #file,
         functionName: StaticString = #function,
         line: UInt = #line
@@ -335,7 +396,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 ownCapabilities: ownCapabilities
             )
 
-            guard configuration != lastUsedConfiguration else {
+            guard configuration != lastUsedConfiguration || force else {
                 return
             }
 
@@ -346,6 +407,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 - policy: \(type(of: policy)) 
                 - settings: \(callSettings) 
                 - ownCapabilities:\(ownCapabilities)
+                - force: \(force)
                 """,
                 subsystems: .audioSession,
                 functionName: functionName,
@@ -393,6 +455,15 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             }
 
             lastUsedConfiguration = configuration
+        }
+    }
+
+    private func performSetActive(_ isActive: Bool) async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+            try await audioSession.setActive(isActive)
         }
     }
 

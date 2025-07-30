@@ -164,6 +164,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 return
             }
             do {
+                try await callEntry.call.callKitDidReport()
                 if streamVideo.state.connection != .connected {
                     let result = await Task(disposableBag: disposableBag) { [weak self] in
                         try await self?.streamVideo?.connect()
@@ -392,13 +393,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        if
+        guard
             let active,
-            let call = callEntry(for: active)?.call {
-            call.didPerform(.didActivateAudioSession)
+            let call = callEntry(for: active)?.call
+        else {
+            return
+        }
 
+        Task {
             do {
-                try call.callKitActivated(audioSession)
+                try await call.callKitActivated(audioSession)
             } catch {
                 log.error(error, subsystems: .callKit)
             }
@@ -421,10 +425,20 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             """,
             subsystems: .callKit
         )
-        if
+
+        guard
             let active,
-            let call = callEntry(for: active)?.call {
-            call.didPerform(.didDeactivateAudioSession)
+            let call = callEntry(for: active)?.call
+        else {
+            return
+        }
+
+        Task {
+            do {
+                try await call.callKitDeactivated(audioSession)
+            } catch {
+                log.error(error, subsystems: .callKit)
+            }
         }
     }
 
