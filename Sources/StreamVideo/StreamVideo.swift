@@ -207,7 +207,9 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         configuration.mode = AVAudioSession.Mode.videoChat.rawValue
         configuration.categoryOptions = [.allowBluetooth]
         RTCAudioSessionConfiguration.setWebRTC(configuration)
+        RTCAudioSession.sharedInstance().lockForConfiguration()
         try? RTCAudioSession.sharedInstance().setConfiguration(configuration)
+        RTCAudioSession.sharedInstance().unlockForConfiguration()
 
         // Warm up
         _ = eventNotificationCenter
