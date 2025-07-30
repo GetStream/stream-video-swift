@@ -184,9 +184,9 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         do {
             switch source {
             case .internal where applicationStateAdapter.state == .foreground:
-                try await performSetActive(true)
                 wasEnabled = true
                 isCallActive = true
+                try await performSetActive(true)
             case .internal:
                 isCallActive = true
                 log.info(
