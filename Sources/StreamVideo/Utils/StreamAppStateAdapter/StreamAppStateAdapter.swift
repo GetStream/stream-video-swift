@@ -15,13 +15,13 @@ public protocol AppStateProviding: Sendable {
 }
 
 /// Represents the app's state: foreground or background.
-public enum ApplicationState: String, Sendable, Equatable { case foreground, background }
+public enum ApplicationState: String, Sendable, Equatable { case unknown, foreground, background }
 
 /// An adapter that observes the app's state and publishes changes.
 final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @unchecked Sendable {
 
     /// The current state of the app.
-    @Published public private(set) var state: ApplicationState = .foreground
+    @Published public private(set) var state: ApplicationState = .unknown
     var statePublisher: AnyPublisher<ApplicationState, Never> { $state.eraseToAnyPublisher() }
 
     private let notificationCenter: NotificationCenter
@@ -32,6 +32,11 @@ final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @uncheck
     init(notificationCenter: NotificationCenter = .default) {
         self.notificationCenter = notificationCenter
         setUp()
+
+        statePublisher
+            .log(.debug) { "Application state changed to \($0)" }
+            .sink { _ in }
+            .store(in: disposableBag)
     }
 
     // MARK: - Private Helpers
@@ -55,6 +60,17 @@ final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @uncheck
                 .receive(on: DispatchQueue.main)
                 .assign(to: \.state, onWeak: self)
                 .store(in: disposableBag)
+
+            switch UIApplication.shared.applicationState {
+            case .active:
+                state = .foreground
+            case .inactive:
+                state = .unknown
+            case .background:
+                state = .background
+            @unknown default:
+                state = .unknown
+            }
 
             log.debug("\(type(of: self)) now observes application lifecycle.")
         }
