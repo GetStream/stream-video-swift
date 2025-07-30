@@ -147,22 +147,18 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         try await performOperation { [weak self] in
             guard let self else { return }
 
-            let currentConfiguration = RTCAudioSessionConfiguration.current()
-            currentConfiguration.category = category.rawValue
-            currentConfiguration.mode = mode.rawValue
-            currentConfiguration.categoryOptions = categoryOptions
-
+            let currentState = self.state
             let updatedState = State(
                 category: category,
                 mode: mode,
                 options: categoryOptions,
                 overrideOutputPort: state.overrideOutputPort
             )
-            let currentState = self.state
 
             do {
                 updateWebRTCConfiguration(with: updatedState)
-                try source.setConfiguration(currentConfiguration)
+                try source.setConfiguration(.webRTC())
+                self.state = updatedState
             } catch {
                 updateWebRTCConfiguration(with: currentState)
                 log.error(
@@ -175,7 +171,10 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
                 throw error
             }
 
-            log.debug("AudioSession updated with state \(self.state)", subsystems: .audioSession)
+            log.debug(
+                "AudioSession updated with state \(self.state)",
+                subsystems: .audioSession
+            )
         }
     }
 

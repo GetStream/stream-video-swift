@@ -633,6 +633,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     func configureAudioSession() async throws {
         audioSession.delegate = self
+        try await audioSession.activate(from: .internal)
 
         $callSettings
             .removeDuplicates()
@@ -655,8 +656,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 }
             }
             .store(in: disposableBag)
-
-        try await audioSession.activate(from: .internal)
     }
 
     // MARK: - AudioSessionDelegate
