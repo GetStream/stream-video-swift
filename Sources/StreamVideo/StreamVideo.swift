@@ -202,6 +202,13 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             self?.token = userToken
         }
 
+        let configuration = RTCAudioSessionConfiguration.webRTC()
+        configuration.category = AVAudioSession.Category.playAndRecord.rawValue
+        configuration.mode = AVAudioSession.Mode.videoChat.rawValue
+        configuration.categoryOptions = [.allowBluetooth]
+        RTCAudioSessionConfiguration.setWebRTC(configuration)
+        try? RTCAudioSession.sharedInstance().setConfiguration(configuration)
+
         // Warm up
         _ = eventNotificationCenter
         _ = idleTimerAdapter
