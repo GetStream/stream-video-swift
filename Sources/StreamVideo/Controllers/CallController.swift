@@ -505,11 +505,7 @@ class CallController: @unchecked Sendable {
         try await webRTCCoordinator.callKitActivated(audioSession)
     }
 
-    internal func callKitDidReport() async throws {
-        try await webRTCCoordinator.callKitDidReport()
-    }
-
-    internal func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
+    func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
         try await webRTCCoordinator.callKitDeactivated(audioSession)
     }
 

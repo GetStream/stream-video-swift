@@ -164,7 +164,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 return
             }
             do {
-                try await callEntry.call.callKitDidReport()
+
                 if streamVideo.state.connection != .connected {
                     let result = await Task(disposableBag: disposableBag) { [weak self] in
                         try await self?.streamVideo?.connect()
@@ -430,6 +430,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             let active,
             let call = callEntry(for: active)?.call
         else {
+            RTCAudioSession.sharedInstance().audioSessionDidActivate(audioSession)
             return
         }
 

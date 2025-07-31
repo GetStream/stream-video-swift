@@ -7,54 +7,87 @@ import Combine
 import StreamWebRTC
 
 /// Enumeration representing all the events published by the delegate.
-enum AudioSessionEvent {
-    case didBeginInterruption(session: RTCAudioSession)
+enum AudioSessionEvent: @unchecked Sendable, CustomStringConvertible {
+case didBeginInterruption(session: RTCAudioSession)
 
-    case didEndInterruption(session: RTCAudioSession, shouldResumeSession: Bool)
+     case didEndInterruption(session: RTCAudioSession, shouldResumeSession: Bool)
 
-    case didChangeRoute(
-        session: RTCAudioSession,
-        reason: AVAudioSession.RouteChangeReason,
-        previousRoute: AVAudioSessionRouteDescription
-    )
+     case didChangeRoute(
+         session: RTCAudioSession,
+         reason: AVAudioSession.RouteChangeReason,
+         previousRoute: AVAudioSessionRouteDescription
+     )
 
-    case mediaServerTerminated(session: RTCAudioSession)
+     case mediaServerTerminated(session: RTCAudioSession)
 
-    case mediaServerReset(session: RTCAudioSession)
+     case mediaServerReset(session: RTCAudioSession)
 
-    case didChangeCanPlayOrRecord(
-        session: RTCAudioSession,
-        canPlayOrRecord: Bool
-    )
+     case didChangeCanPlayOrRecord(
+         session: RTCAudioSession,
+         canPlayOrRecord: Bool
+     )
 
-    case didStartPlayOrRecord(session: RTCAudioSession)
+     case didStartPlayOrRecord(session: RTCAudioSession)
 
-    case didStopPlayOrRecord(session: RTCAudioSession)
+     case didStopPlayOrRecord(session: RTCAudioSession)
 
-    case didChangeOutputVolume(
-        audioSession: RTCAudioSession,
-        outputVolume: Float
-    )
+     case didChangeOutputVolume(
+         audioSession: RTCAudioSession,
+         outputVolume: Float
+     )
 
-    case didDetectPlayoutGlitch(
-        audioSession: RTCAudioSession,
-        totalNumberOfGlitches: Int64
-    )
+     case didDetectPlayoutGlitch(
+         audioSession: RTCAudioSession,
+         totalNumberOfGlitches: Int64
+     )
 
-    case willSetActive(audioSession: RTCAudioSession, active: Bool)
+     case willSetActive(audioSession: RTCAudioSession, active: Bool)
 
-    case didSetActive(audioSession: RTCAudioSession, active: Bool)
+     case didSetActive(audioSession: RTCAudioSession, active: Bool)
 
-    case failedToSetActive(
-        audioSession: RTCAudioSession,
-        active: Bool,
-        error: Error
-    )
+     case failedToSetActive(
+         audioSession: RTCAudioSession,
+         active: Bool,
+         error: Error
+     )
 
-    case audioUnitStartFailedWithError(
-        audioSession: RTCAudioSession,
-        error: Error
-    )
+     case audioUnitStartFailedWithError(
+         audioSession: RTCAudioSession,
+         error: Error
+     )
+
+     var description: String {
+        switch self {
+        case let .didBeginInterruption(session):
+            return ".didBeginInterruption(session:\(session))"
+        case let .didEndInterruption(session, shouldResumeSession):
+            return ".didEndInterruption(session:\(session), shouldResumeSession:\(shouldResumeSession))"
+        case let .didChangeRoute(session, reason, previousRoute):
+            return ".didChangeRoute(session:\(session), reason:\(reason), previousRoute:\(previousRoute))"
+        case let .mediaServerTerminated(session):
+            return ".mediaServerTerminated(session:\(session))"
+        case let .mediaServerReset(session):
+            return ".mediaServerReset(session:\(session))"
+        case let .didChangeCanPlayOrRecord(session, canPlayOrRecord):
+            return ".didChangeCanPlayOrRecord(session:\(session), canPlayOrRecord:\(canPlayOrRecord))"
+        case let .didStartPlayOrRecord(session):
+            return ".didStartPlayOrRecord(session:\(session))"
+        case let .didStopPlayOrRecord(session):
+            return ".didStopPlayOrRecord(session:\(session))"
+        case let .didChangeOutputVolume(audioSession, outputVolume):
+            return ".didChangeOutputVolume(audioSession:\(audioSession), outputVolume:\(outputVolume))"
+        case let .didDetectPlayoutGlitch(audioSession, totalNumberOfGlitches):
+            return ".didDetectPlayoutGlitch(audioSession:\(audioSession), totalNumberOfGlitches:\(totalNumberOfGlitches))"
+        case let .willSetActive(audioSession, active):
+            return ".willSetActive(audioSession:\(audioSession), active:\(active))"
+        case let .didSetActive(audioSession, active):
+            return ".didSetActive(audioSession:\(audioSession), active:\(active))"
+        case let .failedToSetActive(audioSession, active, error):
+            return ".failedToSetActive(audioSession:\(audioSession), active:\(active), error:\(error))"
+        case let .audioUnitStartFailedWithError(audioSession, error):
+            return ".audioUnitStartFailedWithError(audioSession:\(audioSession), error:\(error))"
+        }
+    }
 }
 
 // MARK: - Delegate Publisher Class
