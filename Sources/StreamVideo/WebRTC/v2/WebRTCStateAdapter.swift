@@ -635,6 +635,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         audioSession.delegate = self
         try await audioSession.activate(.internal)
 
+        audioSession
+            .eventPublisher
+            .map { WebRTCTrace($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trace($0) }
+            .store(in: disposableBag)
+
         $callSettings
             .removeDuplicates()
             .sinkTask(storeIn: disposableBag) { [weak audioSession] in

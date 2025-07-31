@@ -13,6 +13,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     @Injected(\.callKitAdapter) private var callKitAdapter
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+    @Injected(\.streamVideo) private var streamVideo
 
     enum DisposableKey: String { case observer }
 
@@ -53,6 +54,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     /// Delegate for handling audio session events.
     weak var delegate: StreamAudioSessionAdapterDelegate?
+
+    var eventPublisher: AnyPublisher<AudioSessionEvent, Never> { audioSession.eventPublisher }
 
     // MARK: - AudioSession State
 
@@ -212,8 +215,9 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
             switch source {
             case .internal:
+                let ringingCall = streamVideo.state.ringingCall
                 guard
-                    callKitAdapter.streamVideo == nil || applicationStateAdapter.state == .foreground,
+                    callKitAdapter.streamVideo == nil || (applicationStateAdapter.state == .foreground && ringingCall == nil),
                     !audioSession.isActive
                 else {
                     return
@@ -238,6 +242,11 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
             var audioSession = audioSession
             audioSession.isAudioEnabled = true
             isCallActive = true
+
+            log.debug(
+                "AudioSession with source:\(source) was activated.",
+                subsystems: .audioSession
+            )
         }
     }
 
@@ -402,19 +411,19 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 return
             }
 
-            log.debug(
-                """
-                Will configure AudioSession with
-                - configuration: \(configuration)
-                - policy: \(type(of: policy)) 
-                - settings: \(callSettings) 
-                - ownCapabilities:\(ownCapabilities)
-                """,
-                subsystems: .audioSession,
-                functionName: functionName,
-                fileName: file,
-                lineNumber: line
-            )
+//            log.debug(
+//                """
+//                Will configure AudioSession with
+//                - configuration: \(configuration)
+//                - policy: \(type(of: policy)) 
+//                - settings: \(callSettings) 
+//                - ownCapabilities:\(ownCapabilities)
+//                """,
+//                subsystems: .audioSession,
+//                functionName: functionName,
+//                fileName: file,
+//                lineNumber: line
+//            )
 
             try await audioSession.setCategory(
                 configuration.category,

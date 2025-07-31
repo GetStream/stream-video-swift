@@ -131,6 +131,10 @@ final class StreamRTCAudioSession: AudioSessionProtocol, @unchecked Sendable, Re
         source.add(sourceDelegate)
     }
 
+    deinit {
+        source.remove(sourceDelegate)
+    }
+
     // MARK: - Configuration
 
     /// Configures the audio category and category options for the session.

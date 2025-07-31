@@ -7,7 +7,7 @@ import Combine
 import StreamWebRTC
 
 /// Enumeration representing all the events published by the delegate.
-enum AudioSessionEvent: @unchecked Sendable, CustomStringConvertible {
+enum AudioSessionEvent: @unchecked Sendable, CustomStringConvertible, Encodable {
 case didBeginInterruption(session: RTCAudioSession)
 
      case didEndInterruption(session: RTCAudioSession, shouldResumeSession: Bool)
@@ -88,6 +88,113 @@ case didBeginInterruption(session: RTCAudioSession)
             return ".audioUnitStartFailedWithError(audioSession:\(audioSession), error:\(error))"
         }
     }
+
+    var title: String {
+        switch self {
+        case .didBeginInterruption:
+            return ".didBeginInterruption"
+        case .didEndInterruption:
+            return ".didEndInterruption"
+        case .didChangeRoute:
+            return ".didChangeRoute"
+        case .mediaServerTerminated:
+            return ".mediaServerTerminated"
+        case .mediaServerReset:
+            return ".mediaServerReset"
+        case .didChangeCanPlayOrRecord:
+            return ".didChangeCanPlayOrRecord"
+        case .didStartPlayOrRecord:
+            return ".didStartPlayOrRecord"
+        case .didStopPlayOrRecord:
+            return ".didStopPlayOrRecord"
+        case .didChangeOutputVolume:
+            return ".didChangeOutputVolume"
+        case .didDetectPlayoutGlitch:
+            return ".didDetectPlayoutGlitch"
+        case .willSetActive:
+            return ".willSetActive"
+        case .didSetActive:
+            return ".didSetActive"
+        case .failedToSetActive:
+            return ".failedToSetActive"
+        case .audioUnitStartFailedWithError:
+            return ".audioUnitStartFailedWithError"
+        }
+    }
+
+    // MARK: - Custom Encoding Keys
+
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case shouldResumeSession
+        case reason
+        case previousRoute
+        case canPlayOrRecord
+        case outputVolume
+        case totalNumberOfGlitches
+        case active
+        case errorDescription
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case .didBeginInterruption:
+            try container.encode("didBeginInterruption", forKey: .type)
+
+        case let .didEndInterruption(_, shouldResumeSession):
+            try container.encode("didEndInterruption", forKey: .type)
+            try container.encode(shouldResumeSession, forKey: .shouldResumeSession)
+
+        case let .didChangeRoute(_, reason, previousRoute):
+            try container.encode("didChangeRoute", forKey: .type)
+            try container.encode(reason.rawValue, forKey: .reason)
+            // AVAudioSessionRouteDescription is not Encodable, encode a summary string instead
+            try container.encode(previousRoute.description, forKey: .previousRoute)
+
+        case .mediaServerTerminated:
+            try container.encode("mediaServerTerminated", forKey: .type)
+
+        case .mediaServerReset:
+            try container.encode("mediaServerReset", forKey: .type)
+
+        case let .didChangeCanPlayOrRecord(_, canPlayOrRecord):
+            try container.encode("didChangeCanPlayOrRecord", forKey: .type)
+            try container.encode(canPlayOrRecord, forKey: .canPlayOrRecord)
+
+        case .didStartPlayOrRecord:
+            try container.encode("didStartPlayOrRecord", forKey: .type)
+
+        case .didStopPlayOrRecord:
+            try container.encode("didStopPlayOrRecord", forKey: .type)
+
+        case let .didChangeOutputVolume(_, outputVolume):
+            try container.encode("didChangeOutputVolume", forKey: .type)
+            try container.encode(outputVolume, forKey: .outputVolume)
+
+        case let .didDetectPlayoutGlitch(_, totalNumberOfGlitches):
+            try container.encode("didDetectPlayoutGlitch", forKey: .type)
+            try container.encode(totalNumberOfGlitches, forKey: .totalNumberOfGlitches)
+
+        case let .willSetActive(_, active):
+            try container.encode("willSetActive", forKey: .type)
+            try container.encode(active, forKey: .active)
+
+        case let .didSetActive(_, active):
+            try container.encode("didSetActive", forKey: .type)
+            try container.encode(active, forKey: .active)
+
+        case let .failedToSetActive(_, active, error):
+            try container.encode("failedToSetActive", forKey: .type)
+            try container.encode(active, forKey: .active)
+            try container.encode(error.localizedDescription, forKey: .errorDescription)
+
+        case let .audioUnitStartFailedWithError(_, error):
+            try container.encode("audioUnitStartFailedWithError", forKey: .type)
+            try container.encode(error.localizedDescription, forKey: .errorDescription)
+        }
+    }
 }
 
 // MARK: - Delegate Publisher Class
@@ -103,13 +210,13 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
     var publisher: AnyPublisher<AudioSessionEvent, Never> {
         subject.eraseToAnyPublisher()
     }
-    
+
     // MARK: - RTCAudioSessionDelegate Methods
-    
+
     func audioSessionDidBeginInterruption(_ session: RTCAudioSession) {
         subject.send(.didBeginInterruption(session: session))
     }
-    
+
     func audioSessionDidEndInterruption(
         _ session: RTCAudioSession,
         shouldResumeSession: Bool
@@ -121,7 +228,7 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSessionDidChangeRoute(
         _ session: RTCAudioSession,
         reason: AVAudioSession.RouteChangeReason,
@@ -135,15 +242,15 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSessionMediaServerTerminated(_ session: RTCAudioSession) {
         subject.send(.mediaServerTerminated(session: session))
     }
-    
+
     func audioSessionMediaServerReset(_ session: RTCAudioSession) {
         subject.send(.mediaServerReset(session: session))
     }
-    
+
     func audioSession(
         _ session: RTCAudioSession,
         didChangeCanPlayOrRecord canPlayOrRecord: Bool
@@ -155,15 +262,15 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSessionDidStartPlayOrRecord(_ session: RTCAudioSession) {
         subject.send(.didStartPlayOrRecord(session: session))
     }
-    
+
     func audioSessionDidStopPlayOrRecord(_ session: RTCAudioSession) {
         subject.send(.didStopPlayOrRecord(session: session))
     }
-    
+
     func audioSession(
         _ audioSession: RTCAudioSession,
         didChangeOutputVolume outputVolume: Float
@@ -175,7 +282,7 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSession(
         _ audioSession: RTCAudioSession,
         didDetectPlayoutGlitch totalNumberOfGlitches: Int64
@@ -187,7 +294,7 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSession(
         _ audioSession: RTCAudioSession,
         willSetActive active: Bool
@@ -199,7 +306,7 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSession(
         _ audioSession: RTCAudioSession,
         didSetActive active: Bool
@@ -211,7 +318,7 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSession(
         _ audioSession: RTCAudioSession,
         failedToSetActive active: Bool,
@@ -225,7 +332,7 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
             )
         )
     }
-    
+
     func audioSession(
         _ audioSession: RTCAudioSession,
         audioUnitStartFailedWithError error: Error
@@ -236,5 +343,39 @@ final class RTCAudioSessionDelegatePublisher: NSObject, RTCAudioSessionDelegate 
                 error: error
             )
         )
+    }
+}
+
+#if compiler(>=6.0)
+extension RTCAudioSession: @retroactive Encodable {}
+#else
+extension RTCAudioSession: Encodable {}
+#endif
+
+extension RTCAudioSession {
+
+    enum CodingKeys: String, CodingKey {
+        case isActive
+        case category
+        case mode
+        case useManualAudio
+        case isAudioEnabled
+        case device
+        case deviceIsExternal = "device.isExternal"
+        case deviceIsSpeaker = "device.isSpeaker"
+        case deviceIsReceiver = "device.isReceiver"
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(isActive, forKey: .isActive)
+        try container.encode(category, forKey: .category)
+        try container.encode(mode, forKey: .mode)
+        try container.encode("\(currentRoute)", forKey: .device)
+        try container.encode(currentRoute.isExternal, forKey: .deviceIsExternal)
+        try container.encode(currentRoute.isSpeaker, forKey: .deviceIsSpeaker)
+        try container.encode(currentRoute.isReceiver, forKey: .deviceIsReceiver)
+        try container.encode(useManualAudio, forKey: .useManualAudio)
+        try container.encode(isAudioEnabled, forKey: .isAudioEnabled)
     }
 }
