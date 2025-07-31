@@ -71,6 +71,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     @Atomic private var isCallActive = false
     @Atomic private var isObservationEnabled = false
 
+    private let callCId: String
+
     private let audioDeviceModule: RTCAudioDeviceModule
 
     /// Initializes a new `StreamAudioSessionAdapter` instance, configuring
@@ -84,12 +86,14 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// - Parameter audioSession: An `AudioSessionProtocol` instance. Defaults
     ///   to `StreamRTCAudioSession`.
     required init(
+        callCId: String,
         callSettings: CallSettings = .init(),
         ownCapabilities: Set<OwnCapability> = [],
         policy: AudioSessionPolicy = DefaultAudioSessionPolicy(),
         audioSession: AudioSessionProtocol = StreamRTCAudioSession(),
         audioDeviceModule: RTCAudioDeviceModule
     ) {
+        self.callCId = callCId
         activeCallSettings = callSettings
         self.ownCapabilities = ownCapabilities
         self.policy = policy
@@ -205,7 +209,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     // MARK: - Activation/Deactivation
 
     func activate(_ source: ActivationSource) async throws {
-        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard
                 let self,
                 !isCallActive
@@ -254,9 +258,10 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     }
 
     func deactivate(_ source: ActivationSource) async throws {
-        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard
-                let self
+                let self,
+                streamVideo.state.activeCall?.cId == callCId
             else {
                 return
             }
