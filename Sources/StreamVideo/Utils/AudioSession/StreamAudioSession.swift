@@ -215,13 +215,12 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
             switch source {
             case .internal:
-                let ringingCall = streamVideo.state.ringingCall
                 guard
-                    callKitAdapter.streamVideo == nil || (applicationStateAdapter.state == .foreground && ringingCall == nil),
+                    callKitAdapter.streamVideo == nil || (applicationStateAdapter.state == .foreground),
                     !audioSession.isActive
                 else {
                     log.debug(
-                        "AudioSession wasn't activated as isActive:\(audioSession.isActive) hasRingingCall:\(ringingCall != nil)",
+                        "AudioSession wasn't activated as isActive:\(audioSession.isActive)",
                         subsystems: .audioSession
                     )
                     return
