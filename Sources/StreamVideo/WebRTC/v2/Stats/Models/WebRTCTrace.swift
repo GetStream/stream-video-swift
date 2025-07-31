@@ -190,6 +190,16 @@ extension WebRTCTrace {
             data: nil
         )
     }
+
+    init(
+        _ event: AudioSessionEvent
+    ) {
+        self.init(
+            id: nil,
+            tag: "audio.session\(event.title)",
+            data: AnyEncodable(event)
+        )
+    }
 }
 
 extension WebRTCTrace {
