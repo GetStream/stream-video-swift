@@ -261,6 +261,9 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
             guard
                 let self,
+                // TODO: Probably we need to improve this one as if another
+                // call is active we still need to remove the observers from
+                // the audioSession.
                 streamVideo.state.activeCall?.cId == callCId
             else {
                 return
