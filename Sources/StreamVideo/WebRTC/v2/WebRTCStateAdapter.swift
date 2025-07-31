@@ -124,7 +124,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-        self.audioSession = .init(audioDeviceModule: peerConnectionFactory.audioDeviceModule)
+        self.audioSession = .init(
+            callCId: callCid,
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
+        )
     }
 
     deinit {
