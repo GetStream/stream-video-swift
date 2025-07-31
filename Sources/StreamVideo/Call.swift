@@ -1490,11 +1490,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         didPerform(.didActivateAudioSession)
     }
 
-    internal func callKitDidReport() async throws {
-        try await callController.callKitDidReport()
-    }
-
-    internal func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
+    func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
         try await callController.callKitDeactivated(audioSession)
         didPerform(.didDeactivateAudioSession)
     }

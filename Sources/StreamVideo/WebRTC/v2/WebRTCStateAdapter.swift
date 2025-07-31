@@ -359,7 +359,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         set(anonymousCount: 0)
         set(participantPins: [])
         trackStorage.removeAll()
-        try? await audioSession.deactivate(from: .internal)
+        try? await audioSession.deactivate(.internal)
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
@@ -633,7 +633,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     func configureAudioSession() async throws {
         audioSession.delegate = self
-        try await audioSession.activate(from: .internal)
+        try await audioSession.activate(.internal)
 
         $callSettings
             .removeDuplicates()

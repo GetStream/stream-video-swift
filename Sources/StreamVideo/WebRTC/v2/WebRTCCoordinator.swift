@@ -435,17 +435,13 @@ final class WebRTCCoordinator: @unchecked Sendable {
     func callKitActivated(_ audioSession: AVAudioSessionProtocol) async throws {
         try await stateAdapter
             .audioSession
-            .activate(from: .callKit(audioSession))
-    }
-
-    func callKitDidReport() async throws {
-        try await stateAdapter.audioSession.activate(from: .reporting)
+            .activate(.callKit(audioSession))
     }
 
     func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
         try await stateAdapter
             .audioSession
-            .deactivate(from: .callKit(audioSession))
+            .deactivate(.callKit(audioSession))
     }
 
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
