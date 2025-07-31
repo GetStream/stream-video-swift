@@ -209,6 +209,23 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         RTCAudioSessionConfiguration.setWebRTC(configuration)
         RTCAudioSession.sharedInstance().lockForConfiguration()
         try? RTCAudioSession.sharedInstance().setConfiguration(configuration)
+        if #available(iOS 14.5, *) {
+            do {
+                try RTCAudioSession
+                    .sharedInstance()
+                    .session
+                    .setPrefersNoInterruptionsFromSystemAlerts(true)
+                log.debug(
+                    "AudioSession setPrefersNoInterruptionsFromSystemAlerts:\(true) completed.",
+                    subsystems: .audioSession
+                )
+            } catch {
+                log.error(
+                    "AudioSession was unable to setPrefersNoInterruptionsFromSystemAlerts:\(true). \(error)",
+                    subsystems: .audioSession
+                )
+            }
+        }
         RTCAudioSession.sharedInstance().unlockForConfiguration()
 
         // Warm up
