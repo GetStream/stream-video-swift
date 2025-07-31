@@ -155,14 +155,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 )
             }
             .store(in: disposableBag, key: DisposableKey.observer.rawValue)
-//
-//        audioSession
-//            .eventPublisher
-//            .compactMap {
-//                switch $0 {
-//                case .audioUnitStartFailedWithError(audioSession: <#T##RTCAudioSession#>, error: <#T##any Error#>)
-//                }
-//            }
     }
 
     /// Removes all observers and resets the active audio session.
@@ -202,8 +194,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                     ownCapabilities: ownCapabilities,
                     force: true
                 )
-                try await performSetActive(true)
-                wasEnabled = true
             case let .callKit(session):
                 try await didUpdate(
                     callSettings: activeCallSettings,
