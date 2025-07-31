@@ -201,7 +201,7 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                     force: true
                 )
                 audioSession.didActivate(session)
-                wasEnabled = true
+                wasEnabled = applicationStateAdapter.state != .foreground
             }
         } catch {
             let nsError = error as NSError
