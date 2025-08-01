@@ -124,11 +124,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-        self.audioSession = .init(audioDeviceModule: peerConnectionFactory.audioDeviceModule)
-
-        Task {
-            await configureAudioSession()
-        }
+        self.audioSession = .init(
+            callCId: callCid,
+            audioDeviceModule: peerConnectionFactory.audioDeviceModule
+        )
     }
 
     deinit {
@@ -363,6 +362,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         set(anonymousCount: 0)
         set(participantPins: [])
         trackStorage.removeAll()
+        try? await audioSession.deactivate(.internal)
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
@@ -634,8 +634,15 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         }
     }
 
-    private func configureAudioSession() {
+    func configureAudioSession() async throws {
         audioSession.delegate = self
+        try await audioSession.activate(.internal)
+
+        audioSession
+            .eventPublisher
+            .map { WebRTCTrace($0) }
+            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trace($0) }
+            .store(in: disposableBag)
 
         $callSettings
             .removeDuplicates()

@@ -501,8 +501,12 @@ class CallController: @unchecked Sendable {
             .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
     }
 
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
-        try webRTCCoordinator.callKitActivated(audioSession)
+    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) async throws {
+        try await webRTCCoordinator.callKitActivated(audioSession)
+    }
+
+    func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
+        try await webRTCCoordinator.callKitDeactivated(audioSession)
     }
 
     // MARK: - Client Capabilities

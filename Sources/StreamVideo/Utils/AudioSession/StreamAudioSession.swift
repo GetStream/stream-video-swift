@@ -11,6 +11,17 @@ import StreamWebRTC
 /// and routing to output devices such as speakers and in-ear speakers.
 final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
+    @Injected(\.callKitAdapter) private var callKitAdapter
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+    @Injected(\.streamVideo) private var streamVideo
+
+    enum DisposableKey: String { case observer }
+
+    enum ActivationSource: @unchecked Sendable {
+        case `internal`
+        case callKit(AVAudioSessionProtocol)
+    }
+
     /// The last applied audio session configuration.
     private var lastUsedConfiguration: AudioSessionConfiguration?
 
@@ -44,6 +55,8 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// Delegate for handling audio session events.
     weak var delegate: StreamAudioSessionAdapterDelegate?
 
+    var eventPublisher: AnyPublisher<AudioSessionEvent, Never> { audioSession.eventPublisher }
+
     // MARK: - AudioSession State
 
     /// Indicates whether the session is recording.
@@ -54,6 +67,11 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
     /// Retrieves the current audio route description.
     var currentRoute: AVAudioSessionRouteDescription { audioSession.currentRoute }
+
+    @Atomic private var isCallActive = false
+    @Atomic private var isObservationEnabled = false
+
+    private let callCId: String
 
     private let audioDeviceModule: RTCAudioDeviceModule
 
@@ -68,12 +86,14 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
     /// - Parameter audioSession: An `AudioSessionProtocol` instance. Defaults
     ///   to `StreamRTCAudioSession`.
     required init(
+        callCId: String,
         callSettings: CallSettings = .init(),
         ownCapabilities: Set<OwnCapability> = [],
         policy: AudioSessionPolicy = DefaultAudioSessionPolicy(),
         audioSession: AudioSessionProtocol = StreamRTCAudioSession(),
         audioDeviceModule: RTCAudioDeviceModule
     ) {
+        self.callCId = callCId
         activeCallSettings = callSettings
         self.ownCapabilities = ownCapabilities
         self.policy = policy
@@ -87,37 +107,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
 
         var audioSession = self.audioSession
         audioSession.useManualAudio = true
-        audioSession.isAudioEnabled = true
-
-        audioSession
-            .eventPublisher
-            .compactMap {
-                guard case let .didChangeRoute(session, reason, previousRoute) = $0 else {
-                    return nil
-                }
-                return (session, reason, previousRoute)
-            }
-            .filter { $0.0.isActive }
-            .log(.debug, subsystems: .audioSession) { [weak self] session, reason, previousRoute in
-                """
-                AudioSession didChangeRoute reason:\(reason)
-                - isActive: \(session.isActive)
-                - isRecording: \(self?.isRecording.description ?? "-")
-                - category: \(AVAudioSession.Category(rawValue: session.category))
-                - mode: \(AVAudioSession.Mode(rawValue: session.mode))
-                - categoryOptions: \(session.categoryOptions)
-                - currentRoute:\(session.currentRoute)
-                - previousRoute:\(previousRoute)
-                """
-            }
-            .sink { [weak self] in
-                self?.audioSessionDidChangeRoute(
-                    $0,
-                    reason: $1,
-                    previousRoute: $2
-                )
-            }
-            .store(in: disposableBag)
 
         if let streamAudioSession = audioSession as? StreamRTCAudioSession {
             streamAudioSession
@@ -126,33 +115,17 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 .assign(to: \.category, onWeak: self)
                 .store(in: disposableBag)
         }
+
+        initialAudioSessionConfiguration()
     }
 
     /// Removes all observers and resets the active audio session.
     nonisolated func dismantle() {
+        Task { try? await deactivate(.internal) }
         disposableBag.removeAll()
         if Self.currentValue === self {
             // Reset activeCall audioSession.
             Self.currentValue = nil
-        }
-    }
-
-    func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
-        let configuration = policy.configuration(
-            for: activeCallSettings,
-            ownCapabilities: ownCapabilities
-        )
-
-        try audioSession.setCategory(
-            configuration.category,
-            mode: configuration.mode,
-            with: configuration.options
-        )
-
-        if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
-            try audioSession.setOverrideOutputAudioPort(overrideOutputAudioPort)
-        } else {
-            try audioSession.setOverrideOutputAudioPort(.none)
         }
     }
 
@@ -233,6 +206,103 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         return result
     }
 
+    // MARK: - Activation/Deactivation
+
+    func activate(_ source: ActivationSource) async throws {
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
+            guard
+                let self,
+                !isCallActive
+            else {
+                return
+            }
+
+            switch source {
+            case .internal:
+                guard
+                    callKitAdapter.streamVideo == nil || (applicationStateAdapter.state == .foreground),
+                    !audioSession.isActive
+                else {
+                    log.debug(
+                        "AudioSession wasn't activated as isActive:\(audioSession.isActive)",
+                        subsystems: .audioSession
+                    )
+                    return
+                }
+
+                do {
+                    try await audioSession.setActive(true)
+                } catch {
+                    let nsError = error as NSError
+                    switch nsError.code {
+                    case AVAudioSession.ErrorCode.insufficientPriority.rawValue:
+                        log.warning("AudioSession cannot be activated as currently is being active by CallKit (or another process) with higher priority.")
+                    default:
+                        throw error
+                    }
+                }
+            case .callKit(let aVAudioSession):
+                audioSession.didActivate(aVAudioSession)
+            }
+
+            audioSessionEventObservation()
+            var audioSession = audioSession
+            audioSession.isAudioEnabled = true
+            isCallActive = true
+
+            log.debug(
+                "AudioSession with source:\(source) was activated.",
+                subsystems: .audioSession
+            )
+        }
+    }
+
+    func deactivate(_ source: ActivationSource) async throws {
+        try await processingQueue.addSynchronousTaskOperation { @MainActor [weak self] in
+            guard
+                let self,
+                // TODO: Probably we need to improve this one as if another
+                // call is active we still need to remove the observers from
+                // the audioSession.
+                streamVideo.state.activeCall?.cId == callCId
+            else {
+                return
+            }
+
+            var wasDeactivated = false
+            switch source {
+            case .internal:
+                guard isCallActive else {
+                    return
+                }
+                do {
+                    try await audioSession.setActive(false)
+                } catch {
+                    log.warning(
+                        "Unable to deactivate audio session. \(error)",
+                        subsystems: .audioSession
+                    )
+                }
+                wasDeactivated = true
+            case .callKit(let avAudioSession):
+                audioSession.didDeactivate(avAudioSession)
+            }
+
+            guard wasDeactivated else {
+                return
+            }
+
+            disposableBag.remove(DisposableKey.observer.rawValue)
+            var audioSession = audioSession
+            audioSession.isAudioEnabled = false
+
+            log.debug(
+                "AudioSession with source:\(source) has been deactivated.",
+                subsystems: .audioSession
+            )
+        }
+    }
+
     // MARK: - Private helpers
 
     /// Handles audio route changes, updating the session based on the reason
@@ -255,22 +325,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         reason: AVAudioSession.RouteChangeReason,
         previousRoute: AVAudioSessionRouteDescription
     ) {
-        guard session.isActive else {
-            return
-        }
-
-        guard session.category == category.rawValue else {
-            log.warning(
-                """
-                AudioSession category mismatch between AVAudioSession & SDK:
-                - AVAudioSession.category: \(AVAudioSession.Category(rawValue: session.category))
-                - SDK: \(category)
-                """,
-                subsystems: .audioSession
-            )
-            return
-        }
-
         guard currentDevice.deviceType == .phone else {
             if activeCallSettings.speakerOn != session.currentRoute.isSpeaker {
                 log.warning(
@@ -309,6 +363,35 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
+    private func audioSessionDidEndInterruption(
+        shouldResume: Bool
+    ) {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+
+            guard shouldResume, isCallActive, !audioSession.isActive else {
+                return
+            }
+
+            do {
+                try await audioSession.setActive(true)
+            } catch {
+                log.error(
+                    "AudioSession was unable to resume after interruption ended.",
+                    subsystems: .audioSession,
+                    error: error
+                )
+            }
+
+            log.debug(
+                "AudioSession was resumed after interruption ended.",
+                subsystems: .audioSession
+            )
+        }
+    }
+
     /// Updates the audio session configuration based on the provided call
     /// settings and own capabilities.
     ///
@@ -339,56 +422,27 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                 return
             }
 
-            log.debug(
-                """
-                Will configure AudioSession with
-                - configuration: \(configuration)
-                - policy: \(type(of: policy)) 
-                - settings: \(callSettings) 
-                - ownCapabilities:\(ownCapabilities)
-                """,
-                subsystems: .audioSession,
-                functionName: functionName,
-                fileName: file,
-                lineNumber: line
+//            log.debug(
+//                """
+//                Will configure AudioSession with
+//                - configuration: \(configuration)
+//                - policy: \(type(of: policy)) 
+//                - settings: \(callSettings) 
+//                - ownCapabilities:\(ownCapabilities)
+//                """,
+//                subsystems: .audioSession,
+//                functionName: functionName,
+//                fileName: file,
+//                lineNumber: line
+//            )
+
+            try await audioSession.setCategory(
+                configuration.category,
+                mode: configuration.mode,
+                with: configuration.options
             )
 
-            if configuration.category == .playback, isRecording {
-                log.debug(
-                    "AudioSession is currently recording. Defer execution until recording has stopped.",
-                    subsystems: .audioSession,
-                    functionName: functionName,
-                    fileName: file,
-                    lineNumber: line
-                )
-                await deferExecutionUntilRecordingIsStopped()
-            }
-
-            if
-                configuration.overrideOutputAudioPort == nil,
-                audioSession.category == AVAudioSession.Category.playAndRecord
-            {
-                try await audioSession.overrideOutputAudioPort(.none)
-            }
-
-            do {
-                try await audioSession.setCategory(
-                    configuration.category,
-                    mode: configuration.mode,
-                    with: configuration.options
-                )
-            } catch {
-                log.error(
-                    "Failed while setting AudioSession category:\(configuration.category) mode:\(configuration.mode) options:\(configuration.options)",
-                    subsystems: .audioSession,
-                    error: error,
-                    functionName: functionName,
-                    fileName: file,
-                    lineNumber: line
-                )
-            }
-
-            if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
+            if let overrideOutputAudioPort = configuration.overrideOutputAudioPort, isCallActive {
                 try await audioSession.overrideOutputAudioPort(overrideOutputAudioPort)
             }
 
@@ -396,19 +450,69 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         }
     }
 
-    /// Defers execution until recording is stopped.
-    private func deferExecutionUntilRecordingIsStopped() async {
-        do {
-            _ = try await $isRecording
-                .filter { $0 == false }
-                .nextValue(timeout: deferExecutionDueToRecordingInterval)
-            try await Task.sleep(nanoseconds: 250 * 1_000_000)
-        } catch {
-            log.error(
-                "Defer execution until recording has stopped failed.",
-                subsystems: .audioSession,
-                error: error
-            )
+    private func performSetActive(_ isActive: Bool) async throws {
+        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+            try await audioSession.setActive(isActive)
+        }
+    }
+
+    private func audioSessionEventObservation() {
+        audioSession
+            .eventPublisher
+            .log(.debug, subsystems: .audioSession) { "Received audioSessionEvent: \($0)" }
+            .sink { [weak self] in
+                switch $0 {
+                case let .didChangeRoute(session, reason, previousRoute):
+                    self?.audioSessionDidChangeRoute(
+                        session,
+                        reason: reason,
+                        previousRoute: previousRoute
+                    )
+                case .didEndInterruption(_, let shouldResumeSession):
+                    self?.audioSessionDidEndInterruption(shouldResume: shouldResumeSession)
+                default:
+                    break
+                }
+            }
+            .store(in: disposableBag, key: DisposableKey.observer.rawValue)
+    }
+
+    private func initialAudioSessionConfiguration() {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+
+            let requiresCategoryUpdate = audioSession.category != .playAndRecord
+            let requiresModeUpdate = audioSession.mode != .voiceChat && audioSession.mode != .videoChat
+
+            guard requiresCategoryUpdate || requiresModeUpdate else {
+                log.info(
+                    "AudioSession initial configuration isn't required.",
+                    subsystems: .audioSession
+                )
+                return
+            }
+
+            do {
+                try await audioSession.setCategory(
+                    .playAndRecord,
+                    mode: .voiceChat,
+                    with: .allowBluetooth
+                )
+                log.debug(
+                    "AudioSession initial configuration completed.",
+                    subsystems: .audioSession
+                )
+            } catch {
+                log.warning(
+                    "Failed to set initial audio session configuration: \(error)",
+                    subsystems: .audioSession
+                )
+            }
         }
     }
 }

@@ -202,6 +202,32 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             self?.token = userToken
         }
 
+        let configuration = RTCAudioSessionConfiguration.webRTC()
+        configuration.category = AVAudioSession.Category.playAndRecord.rawValue
+        configuration.mode = AVAudioSession.Mode.videoChat.rawValue
+        configuration.categoryOptions = [.allowBluetooth]
+        RTCAudioSessionConfiguration.setWebRTC(configuration)
+        RTCAudioSession.sharedInstance().lockForConfiguration()
+        try? RTCAudioSession.sharedInstance().setConfiguration(configuration)
+        if #available(iOS 14.5, *) {
+            do {
+                try RTCAudioSession
+                    .sharedInstance()
+                    .session
+                    .setPrefersNoInterruptionsFromSystemAlerts(true)
+                log.debug(
+                    "AudioSession setPrefersNoInterruptionsFromSystemAlerts:\(true) completed.",
+                    subsystems: .audioSession
+                )
+            } catch {
+                log.error(
+                    "AudioSession was unable to setPrefersNoInterruptionsFromSystemAlerts:\(true). \(error)",
+                    subsystems: .audioSession
+                )
+            }
+        }
+        RTCAudioSession.sharedInstance().unlockForConfiguration()
+
         // Warm up
         _ = eventNotificationCenter
         _ = idleTimerAdapter
