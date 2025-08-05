@@ -95,9 +95,11 @@ final class WebRTCCoordinator: @unchecked Sendable {
         callSettings: CallSettings?,
         options: CreateCallOptions?,
         ring: Bool,
-        notify: Bool
+        notify: Bool,
+        source: JoinSource
     ) async throws {
         await stateAdapter.set(initialCallSettings: callSettings)
+        stateMachine.currentStage.context.joinSource = source
         stateMachine.transition(
             .connecting(
                 stateMachine.currentStage.context,
@@ -428,20 +430,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
         )
     }
 
-    func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
-        try await stateAdapter.audioSession.didUpdatePolicy(policy)
-    }
-
-    func callKitActivated(_ audioSession: AVAudioSessionProtocol) async throws {
-        try await stateAdapter
-            .audioSession
-            .activate(.callKit(audioSession))
-    }
-
-    func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
-        try await stateAdapter
-            .audioSession
-            .deactivate(.callKit(audioSession))
+    func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async {
+        await stateAdapter.set(audioSessionPolicy: policy)
     }
 
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {

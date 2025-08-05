@@ -337,7 +337,6 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
                     subsystems: .audioSession
                 )
                 delegate?.audioSessionAdapterDidUpdateCallSettings(
-                    self,
                     callSettings: activeCallSettings
                         .withUpdatedSpeakerState(session.currentRoute.isSpeaker)
                 )
@@ -348,13 +347,11 @@ final class StreamAudioSession: @unchecked Sendable, ObservableObject {
         switch (activeCallSettings.speakerOn, session.currentRoute.isSpeaker) {
         case (true, false):
             delegate?.audioSessionAdapterDidUpdateCallSettings(
-                self,
                 callSettings: activeCallSettings.withUpdatedSpeakerState(false)
             )
 
         case (false, true) where session.category == AVAudioSession.Category.playAndRecord.rawValue:
             delegate?.audioSessionAdapterDidUpdateCallSettings(
-                self,
                 callSettings: activeCallSettings.withUpdatedSpeakerState(true)
             )
 

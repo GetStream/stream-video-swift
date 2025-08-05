@@ -8,7 +8,7 @@ import Foundation
 extension AVAudioSession {
     /// Asynchronously requests permission to record audio.
     /// - Returns: A Boolean indicating whether permission was granted.
-    private func requestRecordPermission() async -> Bool {
+    func requestRecordPermission() async -> Bool {
         await withCheckedContinuation { continuation in
             self.requestRecordPermission { result in
                 continuation.resume(returning: result)

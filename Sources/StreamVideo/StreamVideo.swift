@@ -16,6 +16,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
     @Injected(\.screenProperties) private var screenProperties
+    @Injected(\.audioStore) private var audioStore
 
     private enum DisposableKey: String { case ringEventReceived }
 
@@ -202,31 +203,11 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             self?.token = userToken
         }
 
-        let configuration = RTCAudioSessionConfiguration.webRTC()
-        configuration.category = AVAudioSession.Category.playAndRecord.rawValue
-        configuration.mode = AVAudioSession.Mode.videoChat.rawValue
-        configuration.categoryOptions = [.allowBluetooth]
-        RTCAudioSessionConfiguration.setWebRTC(configuration)
-        RTCAudioSession.sharedInstance().lockForConfiguration()
-        try? RTCAudioSession.sharedInstance().setConfiguration(configuration)
-        if #available(iOS 14.5, *) {
-            do {
-                try RTCAudioSession
-                    .sharedInstance()
-                    .session
-                    .setPrefersNoInterruptionsFromSystemAlerts(true)
-                log.debug(
-                    "AudioSession setPrefersNoInterruptionsFromSystemAlerts:\(true) completed.",
-                    subsystems: .audioSession
-                )
-            } catch {
-                log.error(
-                    "AudioSession was unable to setPrefersNoInterruptionsFromSystemAlerts:\(true). \(error)",
-                    subsystems: .audioSession
-                )
-            }
-        }
-        RTCAudioSession.sharedInstance().unlockForConfiguration()
+        audioStore
+            .publisher
+            .log(.debug, subsystems: .audioSession) { "AudioStore state: \($0)" }
+            .sink { _ in }
+            .store(in: disposableBag)
 
         // Warm up
         _ = eventNotificationCenter

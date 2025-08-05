@@ -47,6 +47,19 @@
 		4014F1032D8C2EBC004E7EFD /* Gleap in Frameworks */ = {isa = PBXBuildFile; productRef = 4014F1022D8C2EBC004E7EFD /* Gleap */; };
 		4014F1062D8C2F07004E7EFD /* GleapAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014F1052D8C2F07004E7EFD /* GleapAdapter.swift */; };
 		4014F1072D8C2F07004E7EFD /* GleapAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014F1052D8C2F07004E7EFD /* GleapAdapter.swift */; };
+		4019A2502E40E08B00CE70A4 /* RTCAudioStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A24F2E40E08B00CE70A4 /* RTCAudioStore.swift */; };
+		4019A2542E40E25000CE70A4 /* RTCAudioStore+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2532E40E25000CE70A4 /* RTCAudioStore+Action.swift */; };
+		4019A2572E40E27000CE70A4 /* RTCAudioStore+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2562E40E27000CE70A4 /* RTCAudioStore+State.swift */; };
+		4019A25A2E40E2A600CE70A4 /* RTCAudioStoreAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2592E40E2A600CE70A4 /* RTCAudioStoreAction.swift */; };
+		4019A25C2E40E2E800CE70A4 /* RTCAudioStoreReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A25B2E40E2E800CE70A4 /* RTCAudioStoreReducer.swift */; };
+		4019A25E2E40E45D00CE70A4 /* RTCAudioSessionReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A25D2E40E45D00CE70A4 /* RTCAudioSessionReducer.swift */; };
+		4019A2632E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2622E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift */; };
+		4019A2682E40ED5900CE70A4 /* RTCAudioStore+InterruptionEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2672E40ED5900CE70A4 /* RTCAudioStore+InterruptionEffect.swift */; };
+		4019A26A2E40F1CE00CE70A4 /* RTCAudioStore+ActiveEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2692E40F1CE00CE70A4 /* RTCAudioStore+ActiveEffect.swift */; };
+		4019A26D2E40F48300CE70A4 /* CallAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A26C2E40F48300CE70A4 /* CallAudioSession.swift */; };
+		4019A26F2E40FC8F00CE70A4 /* RTCAudioStore+RouteChangeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A26E2E40FC8F00CE70A4 /* RTCAudioStore+RouteChangeEffect.swift */; };
+		4019A2712E4102C700CE70A4 /* RTCAudioStore+MediaServerEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2702E4102C700CE70A4 /* RTCAudioStore+MediaServerEffect.swift */; };
+		4019A2782E42225800CE70A4 /* CallKitAudioSessionReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4019A2772E42225800CE70A4 /* CallKitAudioSessionReducer.swift */; };
 		401A0F032AB1C1B600BE2DBD /* ThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */; };
 		401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */; };
 		401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A72A9DF7B400534ED1 /* EffectsLibrary */; };
@@ -1707,6 +1720,19 @@
 		40149DCD2B7E837A00473176 /* StreamCallAudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder.swift; sourceTree = "<group>"; };
 		40149DCF2B7E839500473176 /* AVAudioSession+RequestRecordPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSession+RequestRecordPermission.swift"; sourceTree = "<group>"; };
 		4014F1052D8C2F07004E7EFD /* GleapAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GleapAdapter.swift; sourceTree = "<group>"; };
+		4019A24F2E40E08B00CE70A4 /* RTCAudioStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioStore.swift; sourceTree = "<group>"; };
+		4019A2532E40E25000CE70A4 /* RTCAudioStore+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+Action.swift"; sourceTree = "<group>"; };
+		4019A2562E40E27000CE70A4 /* RTCAudioStore+State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+State.swift"; sourceTree = "<group>"; };
+		4019A2592E40E2A600CE70A4 /* RTCAudioStoreAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioStoreAction.swift; sourceTree = "<group>"; };
+		4019A25B2E40E2E800CE70A4 /* RTCAudioStoreReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioStoreReducer.swift; sourceTree = "<group>"; };
+		4019A25D2E40E45D00CE70A4 /* RTCAudioSessionReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioSessionReducer.swift; sourceTree = "<group>"; };
+		4019A2622E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioStoreMiddleware.swift; sourceTree = "<group>"; };
+		4019A2672E40ED5900CE70A4 /* RTCAudioStore+InterruptionEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+InterruptionEffect.swift"; sourceTree = "<group>"; };
+		4019A2692E40F1CE00CE70A4 /* RTCAudioStore+ActiveEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+ActiveEffect.swift"; sourceTree = "<group>"; };
+		4019A26C2E40F48300CE70A4 /* CallAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallAudioSession.swift; sourceTree = "<group>"; };
+		4019A26E2E40FC8F00CE70A4 /* RTCAudioStore+RouteChangeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+RouteChangeEffect.swift"; sourceTree = "<group>"; };
+		4019A2702E4102C700CE70A4 /* RTCAudioStore+MediaServerEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+MediaServerEffect.swift"; sourceTree = "<group>"; };
+		4019A2772E42225800CE70A4 /* CallKitAudioSessionReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAudioSessionReducer.swift; sourceTree = "<group>"; };
 		401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserver.swift; sourceTree = "<group>"; };
 		401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatAdapter.swift; sourceTree = "<group>"; };
 		401A64B02A9DF83200534ED1 /* TokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenResponse.swift; sourceTree = "<group>"; };
@@ -3139,6 +3165,66 @@
 			path = Gleap;
 			sourceTree = "<group>";
 		};
+		4019A24E2E40E08200CE70A4 /* v2 */ = {
+			isa = PBXGroup;
+			children = (
+				4019A2642E40ECFA00CE70A4 /* Effects */,
+				4019A2552E40E26800CE70A4 /* State */,
+				4019A2522E40E22E00CE70A4 /* Actions */,
+				4019A2612E40EB4700CE70A4 /* Middleware */,
+				4019A2512E40E22300CE70A4 /* Reducers */,
+				4019A24F2E40E08B00CE70A4 /* RTCAudioStore.swift */,
+				4019A26C2E40F48300CE70A4 /* CallAudioSession.swift */,
+			);
+			path = v2;
+			sourceTree = "<group>";
+		};
+		4019A2512E40E22300CE70A4 /* Reducers */ = {
+			isa = PBXGroup;
+			children = (
+				4019A25B2E40E2E800CE70A4 /* RTCAudioStoreReducer.swift */,
+				4019A25D2E40E45D00CE70A4 /* RTCAudioSessionReducer.swift */,
+				4019A2772E42225800CE70A4 /* CallKitAudioSessionReducer.swift */,
+			);
+			path = Reducers;
+			sourceTree = "<group>";
+		};
+		4019A2522E40E22E00CE70A4 /* Actions */ = {
+			isa = PBXGroup;
+			children = (
+				4019A2592E40E2A600CE70A4 /* RTCAudioStoreAction.swift */,
+				4019A2532E40E25000CE70A4 /* RTCAudioStore+Action.swift */,
+			);
+			path = Actions;
+			sourceTree = "<group>";
+		};
+		4019A2552E40E26800CE70A4 /* State */ = {
+			isa = PBXGroup;
+			children = (
+				4019A2562E40E27000CE70A4 /* RTCAudioStore+State.swift */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		4019A2612E40EB4700CE70A4 /* Middleware */ = {
+			isa = PBXGroup;
+			children = (
+				4019A2622E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift */,
+			);
+			path = Middleware;
+			sourceTree = "<group>";
+		};
+		4019A2642E40ECFA00CE70A4 /* Effects */ = {
+			isa = PBXGroup;
+			children = (
+				4019A2672E40ED5900CE70A4 /* RTCAudioStore+InterruptionEffect.swift */,
+				4019A2692E40F1CE00CE70A4 /* RTCAudioStore+ActiveEffect.swift */,
+				4019A26E2E40FC8F00CE70A4 /* RTCAudioStore+RouteChangeEffect.swift */,
+				4019A2702E4102C700CE70A4 /* RTCAudioStore+MediaServerEffect.swift */,
+			);
+			path = Effects;
+			sourceTree = "<group>";
+		};
 		401A64A92A9DF7E600534ED1 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
@@ -3813,6 +3899,7 @@
 		4067F3062CDA32F0002E28BD /* AudioSession */ = {
 			isa = PBXGroup;
 			children = (
+				4019A24E2E40E08200CE70A4 /* v2 */,
 				40802AE72DD2A7BA00B9F970 /* Protocols */,
 				40F101632D5A322E00C49481 /* Policies */,
 				4067F3092CDA330E002E28BD /* Extensions */,
@@ -7646,6 +7733,7 @@
 				402D0E882D0C94CD00E9B83F /* RTCAudioTrack+Clone.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
 				402D0E8A2D0C94E600E9B83F /* RTCVideoTrack+Clone.swift in Sources */,
+				4019A2632E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift in Sources */,
 				406B3BD92C8F337000FC93A1 /* MediaAdapting.swift in Sources */,
 				40E363622D0A1C2E0028C52A /* SimulatorCaptureHandler.swift in Sources */,
 				84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */,
@@ -7681,6 +7769,7 @@
 				4159F1822C86FA41002B94D3 /* UserEventPayload.swift in Sources */,
 				40BBC4B72C627E59002AEF92 /* VideoMediaAdapter.swift in Sources */,
 				84D91E9D2C7CB0AA00B163A0 /* CallRtmpBroadcastFailedEvent.swift in Sources */,
+				4019A25A2E40E2A600CE70A4 /* RTCAudioStoreAction.swift in Sources */,
 				84A737D028F4716E001A6769 /* models.pb.swift in Sources */,
 				408721E42E127396006A68CB /* RepeatingTimer.swift in Sources */,
 				846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */,
@@ -7758,6 +7847,7 @@
 				406B3BFE2C8F53CB00FC93A1 /* StreamRTCPeerConnectionProtocol.swift in Sources */,
 				4039F0C02D0099E40078159E /* RTCRtpCodecCapability+Convenience.swift in Sources */,
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
+				4019A2712E4102C700CE70A4 /* RTCAudioStore+MediaServerEffect.swift in Sources */,
 				40BBC4DE2C63A507002AEF92 /* WebRTCCoordinator+CleanUp.swift in Sources */,
 				84CD12222C73831000056640 /* CallRtmpBroadcastStoppedEvent.swift in Sources */,
 				40FB15212BF78FA100D5E580 /* Publisher+NextValue.swift in Sources */,
@@ -7853,6 +7943,7 @@
 				40AD64B12DC15BEB0077AE15 /* WebRTCTrace.swift in Sources */,
 				40034C202CFDABE600A318B1 /* PublishOptions.swift in Sources */,
 				84DC389329ADFCFD00946713 /* ScreensharingSettingsRequest.swift in Sources */,
+				4019A2782E42225800CE70A4 /* CallKitAudioSessionReducer.swift in Sources */,
 				84EBA4A22A72B81100577297 /* BroadcastBufferConnection.swift in Sources */,
 				40FB150A2BF74C1300D5E580 /* CallCache.swift in Sources */,
 				40FB02012BAC8A4A00A1C206 /* CallKitService.swift in Sources */,
@@ -7862,6 +7953,7 @@
 				84DC389F29ADFCFD00946713 /* JoinCallResponse.swift in Sources */,
 				84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */,
 				4065839D2B877B6500B4F979 /* UIDevice+NeuralEngine.swift in Sources */,
+				4019A26F2E40FC8F00CE70A4 /* RTCAudioStore+RouteChangeEffect.swift in Sources */,
 				40FB15142BF77D9000D5E580 /* Call+Stage.swift in Sources */,
 				84DC38D229ADFCFD00946713 /* UpdatedCallPermissionsEvent.swift in Sources */,
 				40429D5B2C779ADB00AC7FFF /* SFUEventAdapter.swift in Sources */,
@@ -7915,7 +8007,9 @@
 				40AD64B82DC16AB10077AE15 /* WebRTCTracesAdapter.swift in Sources */,
 				40BBC4D42C639371002AEF92 /* WebRTCCoordinator+Connected.swift in Sources */,
 				40D36AC02DDDB88200972D75 /* WebRTCStatsAdapting.swift in Sources */,
+				4019A25E2E40E45D00CE70A4 /* RTCAudioSessionReducer.swift in Sources */,
 				848CCCE62AB8ED8F002E83A2 /* BroadcastSettingsResponse.swift in Sources */,
+				4019A2502E40E08B00CE70A4 /* RTCAudioStore.swift in Sources */,
 				40FB8FF62D661DC400F4390A /* Call+Identifiable.swift in Sources */,
 				4039F0CC2D0241120078159E /* AudioCodec.swift in Sources */,
 				4028FE982DC4F638001F9DC3 /* ConsumableBucket.swift in Sources */,
@@ -8038,6 +8132,7 @@
 				40E741FF2D553ACD0044C955 /* CurrentDevice.swift in Sources */,
 				84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */,
 				406B3C432C91E41400FC93A1 /* WebRTCAuthenticator.swift in Sources */,
+				4019A2682E40ED5900CE70A4 /* RTCAudioStore+InterruptionEffect.swift in Sources */,
 				84BAD77A2A6BFEF900733156 /* BroadcastBufferUploader.swift in Sources */,
 				40C4DF4B2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift in Sources */,
 				408521E52D661C7600F012B8 /* RawJSON+Double.swift in Sources */,
@@ -8049,6 +8144,7 @@
 				40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */,
 				842B8E222A2DFED900863A87 /* CallNotificationEvent.swift in Sources */,
 				408721E82E1273CE006A68CB /* DefaultTimer.swift in Sources */,
+				4019A26D2E40F48300CE70A4 /* CallAudioSession.swift in Sources */,
 				406B3BE12C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift in Sources */,
 				845C09842C0DEB5C00F725B3 /* LimitsSettingsRequest.swift in Sources */,
 				4159F1742C86FA41002B94D3 /* MediaPubSubHint.swift in Sources */,
@@ -8057,6 +8153,7 @@
 				40BBC4DC2C63A4C8002AEF92 /* WebRTCCoordinator+Leaving.swift in Sources */,
 				40BBC4E62C63A619002AEF92 /* WebRTCCoordinator+Rejoining.swift in Sources */,
 				8490032229D308A000AD9BB4 /* AudioSettingsRequest.swift in Sources */,
+				4019A2572E40E27000CE70A4 /* RTCAudioStore+State.swift in Sources */,
 				40AB34B62C5D089E00B5B6B3 /* Task+Timeout.swift in Sources */,
 				40F101682D5A653200C49481 /* AudioSessionPolicy.swift in Sources */,
 				408721F72E127551006A68CB /* TimerPublisher.swift in Sources */,
@@ -8086,6 +8183,7 @@
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
 				40BBC48B2C623C6E002AEF92 /* ICEAdapter.swift in Sources */,
 				4065838A2B87695500B4F979 /* BlurBackgroundVideoFilter.swift in Sources */,
+				4019A2542E40E25000CE70A4 /* RTCAudioStore+Action.swift in Sources */,
 				403793C52D35196600C752DF /* StreamAppStateAdapter.swift in Sources */,
 				84DC38B429ADFCFD00946713 /* ICEServer.swift in Sources */,
 				4159F1902C86FA41002B94D3 /* PublisherAggregateStats.swift in Sources */,
@@ -8165,8 +8263,10 @@
 				4092517E2E05AFF000DC0FB3 /* MidStereoInformation.swift in Sources */,
 				843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */,
 				84DC389229ADFCFD00946713 /* RequestPermissionRequest.swift in Sources */,
+				4019A25C2E40E2E800CE70A4 /* RTCAudioStoreReducer.swift in Sources */,
 				40E7A45B2E29495500E8AB8B /* WebRTCLogger.swift in Sources */,
 				84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */,
+				4019A26A2E40F1CE00CE70A4 /* RTCAudioStore+ActiveEffect.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				40BBC4CE2C639054002AEF92 /* WebRTCCoordinator+Error.swift in Sources */,
 				401C1EE12D48EB9F00304609 /* OrderedCapacityQueue.swift in Sources */,

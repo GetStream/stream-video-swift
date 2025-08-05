@@ -5,8 +5,7 @@
 import AVFoundation
 
 /// Represents the audio session configuration.
-public struct AudioSessionConfiguration: ReflectiveStringConvertible,
-    Equatable {
+public struct AudioSessionConfiguration: ReflectiveStringConvertible, Equatable, Sendable {
     /// The audio session category.
     var category: AVAudioSession.Category
     /// The audio session mode.

@@ -360,7 +360,9 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
-                try await coordinator.stateAdapter.configureAudioSession()
+                try await coordinator.stateAdapter.configureAudioSession(
+                    source: context.joinSource
+                )
                 try await coordinator.stateAdapter.configurePeerConnections()
 
                 // Once our PeerConnection have been created we consume the

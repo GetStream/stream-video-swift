@@ -155,7 +155,9 @@ public class CallState: ObservableObject {
             }
         }
     }
-    
+
+    var joinSource: JoinSource?
+
     private var localCallSettingsUpdate = false
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()
@@ -524,3 +526,5 @@ public class CallState: ObservableObject {
         durationCancellable = nil
     }
 }
+
+enum JoinSource { case inApp, callKit }

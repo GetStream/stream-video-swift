@@ -34,6 +34,7 @@ final class StreamAppStateAdapter: AppStateProviding, ObservableObject, @uncheck
         setUp()
 
         statePublisher
+            .removeDuplicates()
             .log(.debug) { "Application state changed to \($0)" }
             .sink { _ in }
             .store(in: disposableBag)

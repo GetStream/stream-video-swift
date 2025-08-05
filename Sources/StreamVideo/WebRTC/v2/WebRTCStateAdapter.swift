@@ -43,7 +43,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     let peerConnectionFactory: PeerConnectionFactory
     let videoCaptureSessionProvider: VideoCaptureSessionProvider
     let screenShareSessionProvider: ScreenShareSessionProvider
-    let audioSession: StreamAudioSession
+    let audioSession: CallAudioSession
     let trackStorage: WebRTCTrackStorage = .init()
 
     /// Published properties that represent different parts of the WebRTC state.
@@ -124,14 +124,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
-        self.audioSession = .init(
-            callCId: callCid,
-            audioDeviceModule: peerConnectionFactory.audioDeviceModule
-        )
-    }
-
-    deinit {
-        audioSession.dismantle()
+        self.audioSession = .init()
     }
 
     /// Sets the session ID.
@@ -184,7 +177,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
         self.statsAdapter = value
-        value?.audioSession = audioSession
+//        value?.audioSession = audioSession
         value?.consume(queuedTraces)
     }
 
@@ -221,6 +214,14 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     func set(isTracingEnabled value: Bool) {
         self.isTracingEnabled = value
         statsAdapter?.isTracingEnabled = value
+    }
+
+    func set(audioSessionPolicy: AudioSessionPolicy) {
+        audioSession.didUpdatePolicy(
+            audioSessionPolicy,
+            callSettings: callSettings,
+            ownCapabilities: ownCapabilities
+        )
     }
 
     // MARK: - Client Capabilities
@@ -362,7 +363,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         set(anonymousCount: 0)
         set(participantPins: [])
         trackStorage.removeAll()
-        try? await audioSession.deactivate(.internal)
+//        try? await audioSession.deactivate(.internal)
+        audioSession.deactivate()
     }
 
     /// Cleans up the session for reconnection, clearing adapters and tracks.
@@ -389,6 +391,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         /// We set the initialCallSettings to the last activated CallSettings, in order to maintain the state
         /// during reconnects.
         initialCallSettings = callSettings
+        audioSession.deactivate()
     }
 
     /// Restores screen sharing if an active session exists.
@@ -634,43 +637,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         }
     }
 
-    func configureAudioSession() async throws {
-        audioSession.delegate = self
-        try await audioSession.activate(.internal)
-
-        audioSession
-            .eventPublisher
-            .map { WebRTCTrace($0) }
-            .sinkTask(storeIn: disposableBag) { [weak self] in await self?.trace($0) }
-            .store(in: disposableBag)
-
-        $callSettings
-            .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { [weak audioSession] in
-                do {
-                    try await audioSession?.didUpdateCallSettings($0)
-                } catch {
-                    log.error(error)
-                }
-            }
-            .store(in: disposableBag)
-
-        $ownCapabilities
-            .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { [weak audioSession] in
-                do {
-                    try await audioSession?.didUpdateOwnCapabilities($0)
-                } catch {
-                    log.error(error)
-                }
-            }
-            .store(in: disposableBag)
+    func configureAudioSession(source: JoinSource?) async throws {
+        audioSession.activate(
+            callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
+            ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),
+            delegate: self,
+            shouldSetActive: source != .callKit
+        )
     }
 
     // MARK: - AudioSessionDelegate
 
     nonisolated func audioSessionAdapterDidUpdateCallSettings(
-        _ adapter: StreamAudioSession,
         callSettings: CallSettings
     ) {
         Task(disposableBag: disposableBag) { [weak self] in

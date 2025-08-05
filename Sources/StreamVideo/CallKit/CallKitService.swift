@@ -15,6 +15,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.currentDevice) private var currentDevice
+    @Injected(\.audioStore) private var audioStore
     private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
@@ -393,20 +394,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        guard
-            let active,
-            let call = callEntry(for: active)?.call
-        else {
-            return
-        }
-
-        Task {
-            do {
-                try await call.callKitActivated(audioSession)
-            } catch {
-                log.error(error, subsystems: .callKit)
-            }
-        }
+        audioStore.dispatch(.callKit(.activate(audioSession)))
     }
 
     public func provider(
@@ -426,21 +414,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        guard
-            let active,
-            let call = callEntry(for: active)?.call
-        else {
-            RTCAudioSession.sharedInstance().audioSessionDidActivate(audioSession)
-            return
-        }
-
-        Task {
-            do {
-                try await call.callKitDeactivated(audioSession)
-            } catch {
-                log.error(error, subsystems: .callKit)
-            }
-        }
+        audioStore.dispatch(.callKit(.deactivate(audioSession)))
     }
 
     open func provider(
@@ -475,6 +449,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
 
             do {
+                callToJoinEntry.call.state.joinSource = .callKit
                 try await callToJoinEntry.call.join(callSettings: callSettings)
                 action.fulfill()
             } catch {

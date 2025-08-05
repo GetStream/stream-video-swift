@@ -147,6 +147,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
+        let joinSource = await state.joinSource ?? .inApp
         let result: Any? = stateMachine.withLock { currentStage, transitionHandler in
             if
                 currentStage.id == .joined,
@@ -194,6 +195,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                                 options: options,
                                 ring: ring,
                                 notify: notify,
+                                source: joinSource,
                                 deliverySubject: deliverySubject
                             )
                         )
@@ -1371,8 +1373,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter policy: A conforming `AudioSessionPolicy` that defines
     ///   the audio session configuration to be applied.
     /// - Throws: An error if the update fails.
-    public func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
-        try await callController.updateAudioSessionPolicy(policy)
+    public func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async {
+        await callController.updateAudioSessionPolicy(policy)
     }
 
     /// Adds a proximity policy to manage device proximity behavior during the call.
@@ -1471,28 +1473,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 error: error
             )
         )
-    }
-
-    // MARK: - CallKit
-
-    /// Notifies the `Call` instance that CallKit has activated the system audio
-    /// session.
-    ///
-    /// This method should be called when the system activates the `AVAudioSession`
-    /// as a result of an incoming or outgoing CallKit-managed call. It allows the
-    /// call to update the provided CallKit AVAudioSession based on the internal CallSettings.
-    ///
-    /// - Parameter audioSession: The active `AVAudioSession` instance provided by
-    ///   CallKit.
-    /// - Throws: An error if the call controller fails to handle the activation.
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) async throws {
-        try await callController.callKitActivated(audioSession)
-        didPerform(.didActivateAudioSession)
-    }
-
-    func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
-        try await callController.callKitDeactivated(audioSession)
-        didPerform(.didDeactivateAudioSession)
     }
 
     internal func didPerform(_ action: WebRTCTrace.CallKitAction) {

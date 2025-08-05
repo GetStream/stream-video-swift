@@ -12,6 +12,7 @@ open class CallKitAdapter {
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
     @Injected(\.callKitService) private var callKitService
     @Injected(\.currentDevice) private var currentDevice
+    @Injected(\.audioStore) private var audioStore
 
     private var loggedInStateCancellable: AnyCancellable?
 
@@ -73,6 +74,7 @@ open class CallKitAdapter {
         }
 
         callKitService.streamVideo = streamVideo
+        audioStore.add(CallKitAudioSessionReducer())
 
         guard streamVideo != nil else {
             unregisterForIncomingCalls()

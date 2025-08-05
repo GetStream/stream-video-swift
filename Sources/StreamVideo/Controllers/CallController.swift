@@ -122,7 +122,8 @@ class CallController: @unchecked Sendable {
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
         ring: Bool = false,
-        notify: Bool = false
+        notify: Bool = false,
+        source: JoinSource
     ) async throws -> JoinCallResponse {
         joinCallResponseSubject = .init(nil)
 
@@ -131,7 +132,8 @@ class CallController: @unchecked Sendable {
             callSettings: callSettings,
             options: options,
             ring: ring,
-            notify: notify
+            notify: notify,
+            source: source
         )
         
         guard
@@ -479,8 +481,8 @@ class CallController: @unchecked Sendable {
     ///
     /// - Parameter policy: The audio session policy to apply
     /// - Throws: An error if the policy update fails
-    func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
-        try await webRTCCoordinator.updateAudioSessionPolicy(policy)
+    func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async {
+        await webRTCCoordinator.updateAudioSessionPolicy(policy)
     }
 
     /// Sets up observation of WebRTC state changes.
@@ -499,14 +501,6 @@ class CallController: @unchecked Sendable {
             .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
-    }
-
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) async throws {
-        try await webRTCCoordinator.callKitActivated(audioSession)
-    }
-
-    func callKitDeactivated(_ audioSession: AVAudioSessionProtocol) async throws {
-        try await webRTCCoordinator.callKitDeactivated(audioSession)
     }
 
     // MARK: - Client Capabilities
