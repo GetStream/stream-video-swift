@@ -26,8 +26,8 @@ final class RTCAudioStore: @unchecked Sendable {
     private let stateSubject: CurrentValueSubject<State, Never>
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
-    @Atomic private var middleware: [RTCAudioStoreMiddleware] = []
-    @Atomic private var reducers: [RTCAudioStoreReducer] = []
+    @Atomic private(set) var middleware: [RTCAudioStoreMiddleware] = []
+    @Atomic private(set) var reducers: [RTCAudioStoreReducer] = []
 
     private var logCancellable: AnyCancellable?
 

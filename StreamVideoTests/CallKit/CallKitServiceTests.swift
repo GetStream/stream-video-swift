@@ -58,6 +58,27 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - didUpdate(streamVideo:)
+
+    func test_didUpdateStreamVideo_streamVideoIsNotNil_callKitReducerWasAdded() async {
+        subject.streamVideo = mockedStreamVideo
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.reducers.first { $0 is CallKitAudioSessionReducer } != nil
+        }
+    }
+
+    func test_didUpdateStreamVideo_streamVideoIsNotNilInitiallyAndThenBecomesNil_callKitReducerWasRemoved() async {
+        subject.streamVideo = mockedStreamVideo
+
+        await wait(for: 0.2)
+        subject.streamVideo = nil
+
+        await fulfillment {
+            self.mockAudioStore.audioStore.reducers.first { $0 is CallKitAudioSessionReducer } == nil
+        }
+    }
+
     // MARK: - reportIncomingCall
 
     @MainActor

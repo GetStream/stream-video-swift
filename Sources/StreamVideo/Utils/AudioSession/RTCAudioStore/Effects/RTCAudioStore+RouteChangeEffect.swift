@@ -74,6 +74,11 @@ extension RTCAudioStore {
                 return
             }
 
+            /// We rewrite the reference to RTCAudioSession with our internal session in order to allow
+            /// easier stubbing for tests. That's a safe operation as our internal session is already pointing
+            /// to the shared RTCAudioSession.
+            let session = self.session
+
             guard currentDevice.deviceType == .phone else {
                 if activeCallSettings.speakerOn != session.currentRoute.isSpeaker {
                     log.warning(
