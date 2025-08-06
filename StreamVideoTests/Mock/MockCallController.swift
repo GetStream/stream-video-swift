@@ -24,7 +24,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             callSettings: CallSettings?,
             options: CreateCallOptions?,
             ring: Bool = false,
-            notify: Bool = false
+            notify: Bool = false,
+            source: JoinSource
         )
 
         case observeWebRTCStateUpdated
@@ -39,8 +40,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             switch self {
             case let .setDisconnectionTimeout(timeout):
                 return timeout
-            case let .join(create, callSettings, options, ring, notify):
-                return (create, callSettings, options, ring, notify)
+            case let .join(create, callSettings, options, ring, notify, source):
+                return (create, callSettings, options, ring, notify, source)
             case .observeWebRTCStateUpdated:
                 return ()
             case let .changeVideoState(value):
@@ -84,7 +85,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
         ring: Bool = false,
-        notify: Bool = false
+        notify: Bool = false,
+        source: JoinSource
     ) async throws -> JoinCallResponse {
         stubbedFunctionInput[.join]?.append(
             .join(
@@ -92,7 +94,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 callSettings: callSettings,
                 options: options,
                 ring: ring,
-                notify: notify
+                notify: notify,
+                source: source
             )
         )
 
@@ -106,7 +109,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
                 callSettings: callSettings,
                 options: options,
                 ring: ring,
-                notify: notify
+                notify: notify,
+                source: source
             )
         }
     }

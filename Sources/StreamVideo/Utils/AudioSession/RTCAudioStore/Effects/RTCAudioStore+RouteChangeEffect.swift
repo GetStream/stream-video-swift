@@ -20,7 +20,7 @@ extension RTCAudioStore {
         @Injected(\.currentDevice) private var currentDevice
 
         /// The audio session being observed for route changes.
-        private let session: RTCAudioSession
+        private let session: AudioSessionProtocol
         /// The RTCAudioStore being updated on route change events.
         private weak var store: RTCAudioStore?
         /// Delegate for notifying about call settings changes.

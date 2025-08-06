@@ -177,7 +177,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     /// Sets the WebRTC stats reporter.
     func set(statsAdapter value: WebRTCStatsAdapting?) {
         self.statsAdapter = value
-        self.audioSession.statsAdapter = value
         value?.consume(queuedTraces)
     }
 
@@ -363,7 +362,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         set(anonymousCount: 0)
         set(participantPins: [])
         trackStorage.removeAll()
-//        try? await audioSession.deactivate(.internal)
         audioSession.deactivate()
     }
 
@@ -642,6 +640,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             callSettingsPublisher: $callSettings.removeDuplicates().eraseToAnyPublisher(),
             ownCapabilitiesPublisher: $ownCapabilities.removeDuplicates().eraseToAnyPublisher(),
             delegate: self,
+            statsAdapter: statsAdapter,
             /// If we are joining from CallKit the AudioSession will be activated from it and we
             /// shouldn't attempt another activation.
             shouldSetActive: source != .callKit

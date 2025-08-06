@@ -82,7 +82,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                             callSettings: callSettings,
                             options: options,
                             ring: true,
-                            notify: true
+                            notify: true,
+                            source: .inApp
                         )
                 }
             }

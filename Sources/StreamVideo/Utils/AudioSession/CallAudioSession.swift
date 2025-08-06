@@ -12,9 +12,10 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
 
     @Injected(\.audioStore) private var audioStore
 
-    var statsAdapter: WebRTCStatsAdapting?
-
     var currentRoute: AVAudioSessionRouteDescription { audioStore.session.currentRoute }
+
+    private(set) weak var delegate: StreamAudioSessionAdapterDelegate?
+    private(set) var statsAdapter: WebRTCStatsAdapting?
 
     /// The current audio session policy used to configure the session.
     /// Determines audio behavior for the call session.
@@ -22,7 +23,6 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
     @Atomic private(set) var policy: AudioSessionPolicy
 
     private let disposableBag = DisposableBag()
-    private weak var delegate: StreamAudioSessionAdapterDelegate?
 
     private var interruptionEffect: RTCAudioStore.InterruptionEffect?
     private var routeChangeEffect: RTCAudioStore.RouteChangeEffect?
@@ -39,11 +39,13 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
         callSettingsPublisher: AnyPublisher<CallSettings, Never>,
         ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>,
         delegate: StreamAudioSessionAdapterDelegate,
+        statsAdapter: WebRTCStatsAdapting?,
         shouldSetActive: Bool
     ) {
         disposableBag.removeAll()
 
         self.delegate = delegate
+        self.statsAdapter = statsAdapter
         interruptionEffect = .init(audioStore)
         routeChangeEffect = .init(
             audioStore,

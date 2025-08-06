@@ -15,11 +15,13 @@ import StreamWebRTC
 /// thread-safe, observable way.
 final class RTCAudioStore: @unchecked Sendable {
 
+    static let shared = RTCAudioStore()
+
     /// The current state of the audio session.
     var state: State { stateSubject.value }
 
     /// The underlying WebRTC audio session being managed.
-    let session: RTCAudioSession
+    let session: AudioSessionProtocol
 
     private let stateSubject: CurrentValueSubject<State, Never>
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
@@ -29,14 +31,14 @@ final class RTCAudioStore: @unchecked Sendable {
 
     private var logCancellable: AnyCancellable?
 
-    private init(
-        session: RTCAudioSession = .sharedInstance(),
+    init(
+        session: AudioSessionProtocol = RTCAudioSession.sharedInstance(),
         underlyingQueue: dispatch_queue_t? = .global(qos: .userInteractive)
     ) {
         self.session = session
         let prefersNoInterruptionsFromSystemAlerts = {
             if #available(iOS 14.5, *) {
-                return session.session.prefersNoInterruptionsFromSystemAlerts
+                return session.prefersNoInterruptionsFromSystemAlerts
             } else {
                 return false
             }
@@ -53,7 +55,7 @@ final class RTCAudioStore: @unchecked Sendable {
                 mode: .init(rawValue: session.mode),
                 options: session.categoryOptions,
                 overrideOutputAudioPort: .none,
-                hasRecordingPermission: session.session.recordPermission == .granted
+                hasRecordingPermission: session.recordPermissionGranted
             )
         )
         processingQueue.underlyingQueue = underlyingQueue
@@ -62,7 +64,7 @@ final class RTCAudioStore: @unchecked Sendable {
             .log(.debug, subsystems: .audioSession) { "AudioStore state updated to: \($0)" }
             .sink { _ in }
 
-        add(RTCAudioSessionReducer())
+        add(RTCAudioSessionReducer(store: self))
 
         dispatch(.audioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)))
         dispatch(.audioSession(.useManualAudio(true)))
@@ -181,7 +183,7 @@ final class RTCAudioStore: @unchecked Sendable {
             return true
         }
 
-        let result = await session.session.requestRecordPermission()
+        let result = await session.requestRecordPermission()
         dispatch(.audioSession(.setHasRecordingPermission(result)))
         return result
     }
@@ -257,7 +259,7 @@ final class RTCAudioStore: @unchecked Sendable {
 }
 
 extension RTCAudioStore: InjectionKey {
-    nonisolated(unsafe) static var currentValue: RTCAudioStore = .init()
+    nonisolated(unsafe) static var currentValue: RTCAudioStore = .shared
 }
 
 extension InjectedValues {

@@ -77,16 +77,6 @@ final class MockWebRTCStatsAdapter: Mockable, WebRTCStatsAdapting, @unchecked Se
         set { stub(for: \.subscriber, with: newValue) }
     }
 
-    var callSettings: CallSettings? {
-        get { self[dynamicMember: \.callSettings] }
-        set { stub(for: \.callSettings, with: newValue) }
-    }
-
-    var audioSession: StreamAudioSession? {
-        get { self[dynamicMember: \.audioSession] }
-        set { stub(for: \.audioSession, with: newValue) }
-    }
-
     var deliveryInterval: TimeInterval {
         get { self[dynamicMember: \.deliveryInterval] }
         set { stub(for: \.deliveryInterval, with: newValue) }

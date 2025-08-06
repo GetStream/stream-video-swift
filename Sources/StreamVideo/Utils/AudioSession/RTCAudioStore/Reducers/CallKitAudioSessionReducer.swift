@@ -15,14 +15,14 @@ import StreamWebRTC
 final class CallKitAudioSessionReducer: RTCAudioStoreReducer {
 
     /// The underlying WebRTC audio session that is managed by this reducer.
-    private let source: RTCAudioSession
+    private let source: AudioSessionProtocol
 
     /// Creates a new reducer for handling CallKit-related audio session changes.
     ///
     /// - Parameter source: The `RTCAudioSession` instance to manage. Defaults to
     ///   the shared singleton instance.
-    init(source: RTCAudioSession = .sharedInstance()) {
-        self.source = source
+    init(store: RTCAudioStore) {
+        source = store.session
     }
 
     // MARK: - RTCAudioStoreReducer

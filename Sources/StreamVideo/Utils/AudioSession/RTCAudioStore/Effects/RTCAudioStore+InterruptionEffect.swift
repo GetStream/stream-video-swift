@@ -17,7 +17,7 @@ extension RTCAudioStore {
     final class InterruptionEffect: NSObject, RTCAudioSessionDelegate {
 
         /// The audio session instance used to observe interruption events.
-        private let session: RTCAudioSession
+        private let session: AudioSessionProtocol
         /// A weak reference to the `RTCAudioStore` to dispatch state changes.
         private weak var store: RTCAudioStore?
 

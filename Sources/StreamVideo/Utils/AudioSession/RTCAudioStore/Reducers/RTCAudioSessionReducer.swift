@@ -12,12 +12,12 @@ import StreamWebRTC
 /// and permissions, encapsulating the logic for applying these changes safely and atomically.
 final class RTCAudioSessionReducer: RTCAudioStoreReducer {
 
-    private let source: RTCAudioSession
+    private let source: AudioSessionProtocol
 
     /// Initializes the reducer with a given `RTCAudioSession` source.
     /// - Parameter source: The audio session instance to manage. Defaults to the shared singleton.
-    init(source: RTCAudioSession = .sharedInstance()) {
-        self.source = source
+    init(store: RTCAudioStore) {
+        source = store.session
     }
 
     // MARK: - RTCAudioStoreReducer
@@ -56,7 +56,7 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
             guard updatedState.isActive != value else {
                 break
             }
-            try perform { try $0.setActive(value) }
+            try source.perform { try $0.setActive(value) }
             updatedState.isActive = value
 
         case let .isInterrupted(value):
@@ -71,7 +71,7 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
             updatedState.useManualAudio = value
 
         case let .setCategory(category, mode, options):
-            try perform {
+            try source.perform {
                 /// We update the `webRTC` default configuration because, the WebRTC audioStack
                 /// can be restarted for various reasons. When the stack restarts it gets reconfigured
                 /// with the `webRTC` configuration. If then the configuration is invalid compared
@@ -93,7 +93,7 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
             updatedState.options = options
 
         case let .setOverrideOutputPort(port):
-            try perform {
+            try source.perform {
                 try $0.overrideOutputAudioPort(port)
             }
 
@@ -101,8 +101,8 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
 
         case let .setPrefersNoInterruptionsFromSystemAlerts(value):
             if #available(iOS 14.5, *) {
-                try perform {
-                    try $0.session.setPrefersNoInterruptionsFromSystemAlerts(value)
+                try source.perform {
+                    try $0.setPrefersNoInterruptionsFromSystemAlerts(value)
                 }
 
                 updatedState.prefersNoInterruptionsFromSystemAlerts = value
@@ -113,15 +113,5 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
         }
 
         return updatedState
-    }
-
-    // MARK: - Private Helpers
-
-    private func perform(
-        _ operation: (RTCAudioSession) throws -> Void
-    ) throws {
-        source.lockForConfiguration()
-        defer { source.unlockForConfiguration() }
-        try operation(source)
     }
 }

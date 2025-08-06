@@ -179,7 +179,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(statsAdapter: expected)
 
         await assertTrueAsync(await subject.statsAdapter === expected)
-        await assertTrueAsync(await subject.audioSession === expected.audioSession)
     }
 
     // MARK: - setSFUAdapter
@@ -454,18 +453,25 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
     }
 
-    func test_configurePeerConnections_audioSessionWasConfigured() async throws {
+    // MARK: - configureAudioSession
+
+    func test_configureAudioSession_audioSessionWasConfigured() async throws {
         let sfuStack = MockSFUStack()
         sfuStack.setConnectionState(to: .connected(healthCheckInfo: .init()))
-        await subject.set(sfuAdapter: sfuStack.adapter)
+        let statsAdapter = WebRTCStatsAdapter(
+            sessionID: .unique,
+            unifiedSessionID: .unique,
+            isTracingEnabled: true,
+            trackStorage: await subject.trackStorage
+        )
+        await subject.set(statsAdapter: statsAdapter)
         let ownCapabilities = Set<OwnCapability>([OwnCapability.blockUsers])
         await subject.set(ownCapabilities: ownCapabilities)
 
-        try await subject.configurePeerConnections()
+        try await subject.configureAudioSession(source: .inApp)
 
-        await fulfillment {
-            await self.subject.audioSession.delegate === self.subject
-        }
+        await assertTrueAsync(await subject.audioSession.delegate === subject)
+        await assertTrueAsync(await subject.audioSession.statsAdapter === statsAdapter)
     }
 
     // MARK: - cleanUp
@@ -801,7 +807,6 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         )
 
         subject.audioSessionAdapterDidUpdateCallSettings(
-            await subject.audioSession,
             callSettings: updatedCallSettings
         )
 

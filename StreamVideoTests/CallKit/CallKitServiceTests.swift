@@ -19,6 +19,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     private var callId: String = String(UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(10))
     private var localizedCallerName: String! = "Test Caller"
     private var callerId: String! = "test@example.com"
+    private var mockAudioStore: MockRTCAudioStore! = .init()
     private lazy var mockedStreamVideo: MockStreamVideo! = MockStreamVideo(
         stubbedProperty: [
             MockStreamVideo.propertyKey(for: \.state): MockStreamVideo.State(user: user)
@@ -37,6 +38,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     override func setUp() {
         super.setUp()
         InjectedValues[\.uuidFactory] = uuidFactory
+        mockAudioStore.makeShared()
         subject.callController = callController
         subject.callProvider = callProvider
         callProvider.setDelegate(subject, queue: nil)
@@ -52,6 +54,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         mockedStreamVideo = nil
         localizedCallerName = nil
         callerId = nil
+        mockAudioStore = nil
         super.tearDown()
     }
 
@@ -764,10 +767,18 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         call.state.callSettings = .init(speakerOn: true)
 
         let audioSession = AVAudioSession.sharedInstance()
+        mockAudioStore.session.isActive = true
         subject.provider(callProvider, didActivate: audioSession)
 
-        XCTAssertEqual(call.timesCalled(.callKitActivated), 1)
-        XCTAssertTrue(call.recordedInputPayload(AVAudioSession.self, for: .callKitActivated)?.first === audioSession)
+        await fulfillment { self.mockAudioStore.audioStore.state.isActive }
+        XCTAssertEqual(mockAudioStore.session.timesCalled(.audioSessionDidActivate), 1)
+        XCTAssertTrue(
+            mockAudioStore.session.recordedInputPayload(
+                AVAudioSession.self,
+                for: .audioSessionDidActivate
+            )?.first === audioSession
+        )
+        XCTAssertTrue(mockAudioStore.audioStore.state.isActive)
     }
 
     // MARK: - Private Helpers

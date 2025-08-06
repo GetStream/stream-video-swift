@@ -96,6 +96,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
+    /// A reducer responsible for handling audio session changes triggered by CallKit.
+    ///
+    /// The `callKitAudioReducer` manages updates to the audio session state in
+    /// response to CallKit events, ensuring proper activation and deactivation
+    /// of the audio system when calls are handled through CallKit.
+    private lazy var callKitAudioReducer = CallKitAudioSessionReducer(store: audioStore)
+
     /// Initializes the `CallKitService` instance.
     override public init() {
         super.init()
@@ -640,9 +647,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// A method that's being called every time the StreamVideo instance is getting updated.
     /// - Parameter streamVideo: The new StreamVideo instance (nil if none)
     open func didUpdate(_ streamVideo: StreamVideo?) {
+        if streamVideo != nil {
+            audioStore.add(callKitAudioReducer)
+        } else {
+            audioStore.remove(callKitAudioReducer)
+        }
+
         guard currentDevice.deviceType != .simulator else {
             return
         }
+
         subscribeToCallEvents()
     }
 

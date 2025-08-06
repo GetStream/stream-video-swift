@@ -83,16 +83,6 @@ final class MockWebRTCTracesAdapter: WebRTCTracing, Mockable, @unchecked Sendabl
         set { stub(for: \.subscriber, with: newValue) }
     }
 
-    var callSettings: CallSettings? {
-        get { self[dynamicMember: \.callSettings] }
-        set { stub(for: \.callSettings, with: newValue) }
-    }
-
-    var audioSession: StreamAudioSession? {
-        get { self[dynamicMember: \.audioSession] }
-        set { stub(for: \.audioSession, with: newValue) }
-    }
-
     // MARK: - Methods
 
     func trace(_ trace: WebRTCTrace) {

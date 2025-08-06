@@ -12,7 +12,6 @@ open class CallKitAdapter {
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
     @Injected(\.callKitService) private var callKitService
     @Injected(\.currentDevice) private var currentDevice
-    @Injected(\.audioStore) private var audioStore
 
     private var loggedInStateCancellable: AnyCancellable?
 
@@ -44,13 +43,6 @@ open class CallKitAdapter {
     public var streamVideo: StreamVideo? {
         didSet { didUpdate(streamVideo) }
     }
-
-    /// A reducer responsible for handling audio session changes triggered by CallKit.
-    ///
-    /// The `callKitAudioReducer` manages updates to the audio session state in
-    /// response to CallKit events, ensuring proper activation and deactivation
-    /// of the audio system when calls are handled through CallKit.
-    private let callKitAudioReducer = CallKitAudioSessionReducer()
 
     /// Initializes the `CallKitAdapter`.
     public init() {}
@@ -85,12 +77,10 @@ open class CallKitAdapter {
         guard streamVideo != nil else {
             unregisterForIncomingCalls()
             loggedInStateCancellable = nil
-            audioStore.remove(callKitAudioReducer)
             return
         }
 
         registerForIncomingCalls()
-        audioStore.add(callKitAudioReducer)
     }
 }
 

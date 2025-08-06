@@ -52,8 +52,7 @@ final class WebRTCTrace_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_init_getUserMedia() {
-        let peerConnectionFactory = PeerConnectionFactory.mock()
-        let audio = StreamAudioSession(audioDeviceModule: peerConnectionFactory.audioDeviceModule)
+        let audio = CallAudioSession()
 
         let trace = WebRTCTrace(audioSession: audio)
 

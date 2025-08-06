@@ -70,7 +70,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         callSettings: expectedCallSettings,
                         options: expectedOptions,
                         ring: true,
-                        notify: true
+                        notify: true,
+                        source: .inApp
                     )
             }
         ) { stage in
@@ -146,7 +147,8 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         callSettings: nil,
                         options: nil,
                         ring: true,
-                        notify: true
+                        notify: true,
+                        source: .inApp
                     )
             }
         ) { _ in
