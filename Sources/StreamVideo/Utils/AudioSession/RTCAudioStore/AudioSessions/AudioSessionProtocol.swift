@@ -8,6 +8,7 @@ import StreamWebRTC
 
 protocol AudioSessionProtocol: AnyObject {
     var prefersNoInterruptionsFromSystemAlerts: Bool { get }
+    
     func setPrefersNoInterruptionsFromSystemAlerts(_ newValue: Bool) throws
 
     var isActive: Bool { get }

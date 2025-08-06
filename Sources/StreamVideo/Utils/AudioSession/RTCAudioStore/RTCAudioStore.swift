@@ -36,19 +36,12 @@ final class RTCAudioStore: @unchecked Sendable {
         underlyingQueue: dispatch_queue_t? = .global(qos: .userInteractive)
     ) {
         self.session = session
-        let prefersNoInterruptionsFromSystemAlerts = {
-            if #available(iOS 14.5, *) {
-                return session.prefersNoInterruptionsFromSystemAlerts
-            } else {
-                return false
-            }
-        }()
-
+        
         stateSubject = .init(
             .init(
                 isActive: session.isActive,
                 isInterrupted: false,
-                prefersNoInterruptionsFromSystemAlerts: prefersNoInterruptionsFromSystemAlerts,
+                prefersNoInterruptionsFromSystemAlerts: session.prefersNoInterruptionsFromSystemAlerts,
                 isAudioEnabled: session.isAudioEnabled,
                 useManualAudio: session.useManualAudio,
                 category: .init(rawValue: session.category),

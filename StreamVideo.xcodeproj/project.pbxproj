@@ -718,6 +718,7 @@
 		40D75C5C2E438633000E0438 /* AVAudioSessionRouteDescription+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C5B2E438633000E0438 /* AVAudioSessionRouteDescription+Dummy.swift */; };
 		40D75C5F2E438AC0000E0438 /* CallKitAudioSessionReducer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C5E2E438AC0000E0438 /* CallKitAudioSessionReducer_Tests.swift */; };
 		40D75C612E438BBF000E0438 /* RTCAudioSessionReducer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C602E438BBF000E0438 /* RTCAudioSessionReducer_Tests.swift */; };
+		40D75C632E4396D2000E0438 /* RTCAudioStore_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C622E4396D2000E0438 /* RTCAudioStore_Tests.swift */; };
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
 		40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */; };
@@ -2249,6 +2250,7 @@
 		40D75C5B2E438633000E0438 /* AVAudioSessionRouteDescription+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioSessionRouteDescription+Dummy.swift"; sourceTree = "<group>"; };
 		40D75C5E2E438AC0000E0438 /* CallKitAudioSessionReducer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitAudioSessionReducer_Tests.swift; sourceTree = "<group>"; };
 		40D75C602E438BBF000E0438 /* RTCAudioSessionReducer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioSessionReducer_Tests.swift; sourceTree = "<group>"; };
+		40D75C622E4396D2000E0438 /* RTCAudioStore_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCAudioStore_Tests.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
 		40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingTopView.swift; sourceTree = "<group>"; };
@@ -5056,6 +5058,7 @@
 			children = (
 				40D75C5D2E438A9C000E0438 /* Reducers */,
 				40D75C502E437FB8000E0438 /* Effects */,
+				40D75C622E4396D2000E0438 /* RTCAudioStore_Tests.swift */,
 			);
 			path = RTCAudioStore;
 			sourceTree = "<group>";
@@ -8590,6 +8593,7 @@
 				4052BF552DBA830D0085AFA5 /* MockAppStateAdapter.swift in Sources */,
 				40D36ABE2DDDB77A00972D75 /* MockWebRTCStatsAdapter.swift in Sources */,
 				401338782BF248B9007318BD /* MockStreamVideo.swift in Sources */,
+				40D75C632E4396D2000E0438 /* RTCAudioStore_Tests.swift in Sources */,
 				84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */,
 				40FAAC8B2DDCB488007BF93A /* MockConsumableBucketItemTransformer.swift in Sources */,
 				40AF6A432C93585B00BA2935 /* WebRTCCoordinatorStateMachine_MigratedStageTests.swift in Sources */,
