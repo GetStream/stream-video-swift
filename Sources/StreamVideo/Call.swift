@@ -147,7 +147,24 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
-        let joinSource = await state.joinSource ?? .inApp
+        /// Determines the source from which the join action was initiated.
+        ///
+        /// This block checks if the `joinSource` has already been set in the current
+        /// call state. If not, it assigns `.inApp` as the default join source,
+        /// indicating the call was joined from within the app UI. The resolved
+        /// `JoinSource` value is then used to record how the call was joined,
+        /// enabling analytics and behavioral branching based on entry point.
+        let joinSource = await {
+            if let joinSource = await state.joinSource {
+                return joinSource
+            } else {
+                return await Task { @MainActor in
+                    state.joinSource = .inApp
+                    return .inApp
+                }.value
+            }
+        }()
+
         let result: Any? = stateMachine.withLock { currentStage, transitionHandler in
             if
                 currentStage.id == .joined,

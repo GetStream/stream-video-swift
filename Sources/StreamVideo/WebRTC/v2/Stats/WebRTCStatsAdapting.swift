@@ -31,17 +31,6 @@ protocol WebRTCStatsAdapting: AnyObject, Sendable {
     /// subscriber peer connection.
     var subscriber: RTCPeerConnectionCoordinator? { get set }
 
-    /// The current call settings for the session.
-    ///
-    /// Updating this property updates the trace adapter and statistics collection
-    /// with the latest session configuration.
-    var callSettings: CallSettings? { get set }
-
-    /// The audio session currently used in the call.
-    ///
-    /// Used for trace enrichment and reporting audio configuration.
-    var audioSession: StreamAudioSession? { get set }
-
     /// The interval (in seconds) at which statistics are reported.
     ///
     /// Changing this property reschedules the stats reporting timer.

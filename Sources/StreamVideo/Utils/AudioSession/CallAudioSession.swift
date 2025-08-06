@@ -6,14 +6,19 @@ import AVFoundation
 import Combine
 import Foundation
 
-final class CallAudioSession: @unchecked Sendable {
+/// `CallAudioSession` manages the audio session for calls, handling configuration,
+/// activation, and deactivation.
+final class CallAudioSession: @unchecked Sendable, Encodable {
 
     @Injected(\.audioStore) private var audioStore
-    @Injected(\.callKitAdapter) private var callKitAdapter
-    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
+
+    var statsAdapter: WebRTCStatsAdapting?
 
     var currentRoute: AVAudioSessionRouteDescription { audioStore.session.currentRoute }
 
+    /// The current audio session policy used to configure the session.
+    /// Determines audio behavior for the call session.
+    /// Set this property to change how the session is configured.
     @Atomic private(set) var policy: AudioSessionPolicy
 
     private let disposableBag = DisposableBag()
@@ -21,7 +26,6 @@ final class CallAudioSession: @unchecked Sendable {
 
     private var interruptionEffect: RTCAudioStore.InterruptionEffect?
     private var routeChangeEffect: RTCAudioStore.RouteChangeEffect?
-    private var hasBeenActivated = false
 
     init(
         policy: AudioSessionPolicy = DefaultAudioSessionPolicy()
@@ -54,11 +58,13 @@ final class CallAudioSession: @unchecked Sendable {
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdateConfiguration($0) }
             .store(in: disposableBag)
 
-        audioStore.dispatch(.rtc(.isAudioEnabled(true)))
+        audioStore.dispatch(.audioSession(.isAudioEnabled(true)))
 
         if shouldSetActive {
-            audioStore.dispatch(.rtc(.isActive(true)))
+            audioStore.dispatch(.audioSession(.isActive(true)))
         }
+
+        statsAdapter?.trace(.init(audioSession: self))
     }
 
     func deactivate() {
@@ -70,7 +76,8 @@ final class CallAudioSession: @unchecked Sendable {
         delegate = nil
         interruptionEffect = nil
         routeChangeEffect = nil
-        audioStore.dispatch(.rtc(.isActive(false)))
+        audioStore.dispatch(.audioSession(.isActive(false)))
+        statsAdapter?.trace(.init(audioSession: self))
     }
 
     func didUpdatePolicy(
@@ -87,6 +94,27 @@ final class CallAudioSession: @unchecked Sendable {
         }
     }
 
+    // MARK: - Encodable
+
+    /// Restricts encoding to only serializable properties.
+    /// Only `policy` is encoded if it conforms to `Encodable`.
+    enum CodingKeys: String, CodingKey {
+        case state
+        case hasDelegate
+        case hasInterruptionEffect
+        case hasRouteChangeEffect
+        case policy
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(audioStore.state, forKey: .state)
+        try container.encode(delegate != nil, forKey: .hasDelegate)
+        try container.encode(interruptionEffect != nil, forKey: .hasInterruptionEffect)
+        try container.encode(routeChangeEffect != nil, forKey: .hasRouteChangeEffect)
+        try container.encode("\(type(of: policy))", forKey: .policy)
+    }
+
     // MARK: - Private Helpers
 
     private func didUpdateConfiguration(
@@ -99,8 +127,8 @@ final class CallAudioSession: @unchecked Sendable {
         }
 
         do {
-            try await audioStore.dispatch(
-                .rtc(
+            try await audioStore.dispatchAsync(
+                .audioSession(
                     .setCategory(
                         configuration.category,
                         mode: configuration.mode,
@@ -118,8 +146,8 @@ final class CallAudioSession: @unchecked Sendable {
 
         if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
             do {
-                try await audioStore.dispatch(
-                    .rtc(
+                try await audioStore.dispatchAsync(
+                    .audioSession(
                         .setOverrideOutputPort(overrideOutputAudioPort)
                     )
                 )
@@ -131,8 +159,13 @@ final class CallAudioSession: @unchecked Sendable {
                 )
             }
         }
+
+        statsAdapter?.trace(.init(audioSession: self))
     }
 
+    /// - Important: This method runs whenever an CallAudioSession is created and ensures that
+    /// the configuration is correctly for calling. This is quite important for CallKit as if the category and
+    /// mode aren't set correctly it won't activate the audioSession.
     private func initialAudioSessionConfiguration() {
         let state = audioStore.state
         let requiresCategoryUpdate = state.category != .playAndRecord
@@ -147,7 +180,7 @@ final class CallAudioSession: @unchecked Sendable {
         }
 
         audioStore.dispatch(
-            .rtc(
+            .audioSession(
                 .setCategory(
                     .playAndRecord,
                     mode: .voiceChat,

@@ -134,7 +134,7 @@ extension WebRTCTrace {
     ///   - callSettings: The active call settings.
     ///   - audioSession: The audio session state.
     init(
-        audioSession: StreamAudioSession
+        audioSession: CallAudioSession
     ) {
         self.init(
             id: nil,
@@ -188,16 +188,6 @@ extension WebRTCTrace {
             id: nil,
             tag: "callKit.\(action.rawValue)",
             data: nil
-        )
-    }
-
-    init(
-        _ event: AudioSessionEvent
-    ) {
-        self.init(
-            id: nil,
-            tag: "audio.session\(event.title)",
-            data: AnyEncodable(event)
         )
     }
 }

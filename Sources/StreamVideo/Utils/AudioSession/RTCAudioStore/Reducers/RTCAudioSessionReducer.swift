@@ -5,16 +5,37 @@
 import Foundation
 import StreamWebRTC
 
+/// A reducer responsible for managing changes to the audio session state within the WebRTC context.
+/// This class listens for audio-related actions and applies corresponding updates to the shared
+/// `RTCAudioSession` instance, ensuring the audio session is configured and controlled consistently.
+/// It handles activation, interruption, audio enabling, category settings, output port overrides,
+/// and permissions, encapsulating the logic for applying these changes safely and atomically.
 final class RTCAudioSessionReducer: RTCAudioStoreReducer {
 
     private let source: RTCAudioSession
 
+    /// Initializes the reducer with a given `RTCAudioSession` source.
+    /// - Parameter source: The audio session instance to manage. Defaults to the shared singleton.
     init(source: RTCAudioSession = .sharedInstance()) {
         self.source = source
     }
 
     // MARK: - RTCAudioStoreReducer
 
+    /// Processes an audio-related action and returns the updated audio store state.
+    ///
+    /// This method interprets the provided action, performs necessary operations on the underlying
+    /// `RTCAudioSession`, and returns a new state reflecting any changes. It safely handles session
+    /// configuration updates and respects current state to avoid redundant operations.
+    ///
+    /// - Parameters:
+    ///   - state: The current audio store state.
+    ///   - action: The action to apply to the state.
+    ///   - file: The source file from which the action originated.
+    ///   - function: The function from which the action originated.
+    ///   - line: The line number from which the action originated.
+    /// - Throws: Rethrows errors from audio session configuration operations.
+    /// - Returns: The updated audio store state after applying the action.
     func reduce(
         state: RTCAudioStore.State,
         action: RTCAudioStoreAction,
@@ -23,7 +44,7 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
         line: UInt
     ) throws -> RTCAudioStore.State {
         guard
-            case let .rtc(action) = action
+            case let .audioSession(action) = action
         else {
             return state
         }
@@ -51,6 +72,13 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
 
         case let .setCategory(category, mode, options):
             try perform {
+                /// We update the `webRTC` default configuration because, the WebRTC audioStack
+                /// can be restarted for various reasons. When the stack restarts it gets reconfigured
+                /// with the `webRTC` configuration. If then the configuration is invalid compared
+                /// to the state we expect we may find ourselves in a difficult to recover situation,
+                /// as our callSetting may be failing to get applied.
+                /// By updating the `webRTC` configuration we ensure that the audioStack will
+                /// start from the last known state in every restart, making things simpler to recover.
                 let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
                 webRTCConfiguration.category = category.rawValue
                 webRTCConfiguration.mode = mode.rawValue
@@ -95,30 +123,5 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
         source.lockForConfiguration()
         defer { source.unlockForConfiguration() }
         try operation(source)
-    }
-}
-
-extension RTCAudioSessionReducer {
-
-    enum Action {
-        case isActive(Bool)
-
-        case isInterrupted(Bool)
-
-        case isAudioEnabled(Bool)
-
-        case useManualAudio(Bool)
-
-        case setCategory(
-            AVAudioSession.Category,
-            mode: AVAudioSession.Mode,
-            options: AVAudioSession.CategoryOptions
-        )
-
-        case setOverrideOutputPort(AVAudioSession.PortOverride)
-
-        case setPrefersNoInterruptionsFromSystemAlerts(Bool)
-
-        case setHasRecordingPermission(Bool)
     }
 }

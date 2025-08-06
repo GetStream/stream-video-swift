@@ -32,12 +32,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @Injected(\.audioStore) private var audioStore
 
         private let disposableBag = DisposableBag()
-        private let requiresRejoinSubject: PassthroughSubject<Bool, Never> = .init()
         private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
-        private lazy var mediaServerEffect: RTCAudioStore.MediaServerEffect = .init(
-            audioStore,
-            requiresRejoinSubject: requiresRejoinSubject
-        )
 
         /// Initializes a new instance of `JoinedStage`.
         /// - Parameter context: The context for the joined stage.
@@ -45,8 +40,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
             _ context: Context
         ) {
             super.init(id: .joined, context: context)
-
-            _ = mediaServerEffect
         }
 
         deinit {
@@ -147,10 +140,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                     try Task.checkCancellation()
 
                     await configureUpdateSubscriptions()
-
-                    try Task.checkCancellation()
-
-                    observeAudioStoreState()
                 } catch {
                     await cleanUpPreviousSessionIfRequired()
                     transitionDisconnectOrError(error)
@@ -409,11 +398,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .removeDuplicates()
                 .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
                     guard let self else { return }
-
-                    if let statsAdapter = await context.coordinator?.stateAdapter.statsAdapter {
-                        statsAdapter.callSettings = callSettings
-                    }
-
                     do {
                         guard
                             let publisher = await context.coordinator?.stateAdapter.publisher
@@ -589,20 +573,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 sessionID: await stateAdapter.sessionID,
                 clientCapabilities: await stateAdapter.clientCapabilities
             )
-        }
-
-        private func observeAudioStoreState() {
-            requiresRejoinSubject
-                .filter { $0 }
-                .log(.debug, subsystems: .webRTC) { _ in "Triggering rejoin because the audio store state cannot be recovered." }
-                .sink { [weak self] _ in
-                    guard let self else {
-                        return
-                    }
-                    context.reconnectionStrategy = .rejoin
-                    transitionOrDisconnect(.disconnected(context))
-                }
-                .store(in: disposableBag)
         }
     }
 }

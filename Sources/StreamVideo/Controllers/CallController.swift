@@ -105,17 +105,21 @@ class CallController: @unchecked Sendable {
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didFetch($0) }
     }
 
-    /// Joins a call with the provided information.
+    /// Joins a call with the provided information and join source.
+    ///
     /// - Parameters:
-    ///  - callType: the type of the call
-    ///  - callId: the id of the call
-    ///  - callSettings: the current call settings
-    ///  - videoOptions: configuration options about the video
-    ///  - options: create call options
-    ///  - migratingFrom: if SFU migration is being performed
-    ///  - ring: whether ringing events should be handled
-    ///  - notify: whether uses should be notified about the call
-    /// - Returns: a newly created `Call`.
+    ///   - callType: The type of the call.
+    ///   - callId: The id of the call.
+    ///   - callSettings: The current call settings.
+    ///   - videoOptions: Configuration options about the video.
+    ///   - options: Create call options.
+    ///   - migratingFrom: If SFU migration is being performed.
+    ///   - ring: Whether ringing events should be handled.
+    ///   - notify: Whether users should be notified about the call.
+    ///   - source: Describes the source from which the join action was triggered.
+    ///            Use this to indicate if the call was joined from in-app UI or
+    ///            via CallKit.
+    /// - Returns: A newly created `JoinCallResponse`.
     @discardableResult
     func joinCall(
         create: Bool = true,

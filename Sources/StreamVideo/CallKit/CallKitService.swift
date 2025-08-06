@@ -394,6 +394,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
+        /// Activates the audio session for CallKit. This line notifies the audio store
+        /// to activate the provided AVAudioSession, ensuring that the app's audio
+        /// routing and configuration are correctly handled when CallKit takes control
+        /// of the audio session during a call.
         audioStore.dispatch(.callKit(.activate(audioSession)))
     }
 
@@ -414,6 +418,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
+        /// Notifies the audio store to deactivate the provided AVAudioSession.
+        /// This ensures that when CallKit relinquishes control of the audio session,
+        /// the app's audio routing and configuration are updated appropriately.
         audioStore.dispatch(.callKit(.deactivate(audioSession)))
     }
 
@@ -449,7 +456,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
 
             do {
+                /// Sets the join source to `.callKit` to indicate that the call was
+                /// joined via CallKit. This helps with audioSession management.
                 callToJoinEntry.call.state.joinSource = .callKit
+
                 try await callToJoinEntry.call.join(callSettings: callSettings)
                 action.fulfill()
             } catch {

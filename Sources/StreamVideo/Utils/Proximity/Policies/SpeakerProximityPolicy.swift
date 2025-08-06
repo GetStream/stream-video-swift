@@ -11,7 +11,7 @@ import Foundation
 /// and restores previous speaker state when device moves away.
 public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable {
 
-    @Injected(\.activeCallAudioSession) private var activeCallAudioSession
+    @Injected(\.audioStore) private var audioStore
     /// Unique identifier for this policy implementation
     public static let identifier: ObjectIdentifier = .init("speaker-proximity-policy" as NSString)
 
@@ -36,7 +36,7 @@ public final class SpeakerProximityPolicy: ProximityPolicy, @unchecked Sendable 
             guard
                 let self,
                 let call,
-                activeCallAudioSession?.currentRoute.isExternal == false
+                audioStore.session.currentRoute.isExternal == false
             else {
                 return
             }

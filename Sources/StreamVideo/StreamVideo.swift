@@ -203,12 +203,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             self?.token = userToken
         }
 
-        audioStore
-            .publisher
-            .log(.debug, subsystems: .audioSession) { "AudioStore state: \($0)" }
-            .sink { _ in }
-            .store(in: disposableBag)
-
         // Warm up
         _ = eventNotificationCenter
         _ = idleTimerAdapter

@@ -6,13 +6,19 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+/// Stores and manages the audio session state for real-time communication calls.
+///
+/// `RTCAudioStore` coordinates actions, state updates, and reducers for audio
+/// session control. It centralizes audio configuration, provides state
+/// observation, and enables serial action processing to avoid concurrency
+/// issues. Use this type to access and manage all call audio state in a
+/// thread-safe, observable way.
 final class RTCAudioStore: @unchecked Sendable {
 
-    enum Action { case delay(seconds: TimeInterval) }
-
+    /// The current state of the audio session.
     var state: State { stateSubject.value }
-    var publisher: AnyPublisher<State, Never> { stateSubject.eraseToAnyPublisher() }
 
+    /// The underlying WebRTC audio session being managed.
     let session: RTCAudioSession
 
     private let stateSubject: CurrentValueSubject<State, Never>
@@ -20,6 +26,8 @@ final class RTCAudioStore: @unchecked Sendable {
 
     @Atomic private var middleware: [RTCAudioStoreMiddleware] = []
     @Atomic private var reducers: [RTCAudioStoreReducer] = []
+
+    private var logCancellable: AnyCancellable?
 
     private init(
         session: RTCAudioSession = .sharedInstance(),
@@ -33,6 +41,7 @@ final class RTCAudioStore: @unchecked Sendable {
                 return false
             }
         }()
+
         stateSubject = .init(
             .init(
                 isActive: session.isActive,
@@ -49,15 +58,22 @@ final class RTCAudioStore: @unchecked Sendable {
         )
         processingQueue.underlyingQueue = underlyingQueue
 
+        logCancellable = stateSubject
+            .log(.debug, subsystems: .audioSession) { "AudioStore state updated to: \($0)" }
+            .sink { _ in }
+
         add(RTCAudioSessionReducer())
 
-        dispatch(.rtc(.setPrefersNoInterruptionsFromSystemAlerts(true)))
-        dispatch(.rtc(.useManualAudio(true)))
-        dispatch(.rtc(.isAudioEnabled(false)))
+        dispatch(.audioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)))
+        dispatch(.audioSession(.useManualAudio(true)))
+        dispatch(.audioSession(.isAudioEnabled(false)))
     }
 
     // MARK: - State Observation
 
+    /// Publishes changes to the specified state property.
+    ///
+    /// Use this to observe changes for a specific audio state key path.
     func publisher<V: Equatable>(
         _ keyPath: KeyPath<State, V>
     ) -> AnyPublisher<V, Never> {
@@ -69,16 +85,37 @@ final class RTCAudioStore: @unchecked Sendable {
 
     // MARK: - Reducers
 
-    func add(_ value: RTCAudioStoreMiddleware) {
+    /// Adds middleware to observe or intercept audio actions.
+    func add<T: RTCAudioStoreMiddleware>(_ value: T) {
+        guard middleware.first(where: { $0 === value }) == nil else {
+            return
+        }
         middleware.append(value)
     }
 
-    func add(_ value: RTCAudioStoreReducer) {
+    /// Removes previously added middleware.
+    func remove<T: RTCAudioStoreMiddleware>(_ value: T) {
+        middleware = middleware.filter { $0 !== value }
+    }
+
+    // MARK: - Reducers
+
+    /// Adds a reducer to handle audio session actions.
+    func add<T: RTCAudioStoreReducer>(_ value: T) {
+        guard reducers.first(where: { $0 === value }) == nil else {
+            return
+        }
         reducers.append(value)
+    }
+
+    /// Adds a reducer to handle audio session actions.
+    func remove<T: RTCAudioStoreReducer>(_ value: T) {
+        reducers = reducers.filter { $0 !== value }
     }
 
     // MARK: - Actions dispatch
 
+    /// Dispatches an audio store action asynchronously and waits for completion.
     func dispatchAsync(
         _ action: RTCAudioStoreAction,
         file: StaticString = #file,
@@ -90,9 +127,7 @@ final class RTCAudioStore: @unchecked Sendable {
                 return
             }
 
-            if case let .store(.delay(interval)) = action {
-                try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * interval))
-            }
+            await applyDelayIfRequired(for: action)
 
             try perform(
                 action,
@@ -103,6 +138,7 @@ final class RTCAudioStore: @unchecked Sendable {
         }
     }
 
+    /// Dispatches an audio store action for processing on the queue.
     func dispatch(
         _ action: RTCAudioStoreAction,
         file: StaticString = #file,
@@ -115,9 +151,7 @@ final class RTCAudioStore: @unchecked Sendable {
             }
 
             do {
-                if case let .store(.delay(interval)) = action {
-                    try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * interval))
-                }
+                await applyDelayIfRequired(for: action)
 
                 try perform(
                     action,
@@ -139,6 +173,7 @@ final class RTCAudioStore: @unchecked Sendable {
 
     // MARK: - Helpers
 
+    /// Requests record permission from the user, updating state.
     func requestRecordPermission() async -> Bool {
         guard
             !state.hasRecordingPermission
@@ -147,7 +182,7 @@ final class RTCAudioStore: @unchecked Sendable {
         }
 
         let result = await session.session.requestRecordPermission()
-        dispatch(.rtc(.setHasRecordingPermission(result)))
+        dispatch(.audioSession(.setHasRecordingPermission(result)))
         return result
     }
 
@@ -206,6 +241,18 @@ final class RTCAudioStore: @unchecked Sendable {
             )
             throw error
         }
+    }
+
+    /// Delays are important for flows like interruptionEnd where we need to perform multiple operations
+    /// at once while the same session may be accessed/modified from another part of the app (e.g. CallKit).
+    private func applyDelayIfRequired(for action: RTCAudioStoreAction) async {
+        guard
+            case let .generic(.delay(interval)) = action
+        else {
+            return
+        }
+
+        try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * interval))
     }
 }
 

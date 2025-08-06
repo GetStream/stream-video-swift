@@ -22,12 +22,6 @@ protocol WebRTCTracing: AnyObject, Sendable {
     /// Subscriber peer connection coordinator.
     var subscriber: RTCPeerConnectionCoordinator? { get set }
 
-    /// Current call settings.
-    var callSettings: CallSettings? { get set }
-
-    /// Audio session reference.
-    var audioSession: StreamAudioSession? { get set }
-
     /// Adds a trace event to the appropriate bucket.
     func trace(_ trace: WebRTCTrace)
 
