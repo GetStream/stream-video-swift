@@ -11,7 +11,7 @@ extension AVAudioSessionRouteDescription {
     ) -> AVAudioSessionRouteDescription {
         MockAVAudioSessionRouteDescription(
             inputs: [MockAVAudioSessionPortDescription(portType: input)],
-            outputs: [MockAVAudioSessionPortDescription(portType: output)],
+            outputs: [MockAVAudioSessionPortDescription(portType: output)]
         )
     }
 }
