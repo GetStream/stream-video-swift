@@ -25,6 +25,7 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
     ) -> AudioSessionConfiguration {
         guard applicationStateAdapter.state == .foreground else {
             return .init(
+                isActive: callSettings.audioOutputOn,
                 category: .playAndRecord,
                 mode: callSettings.videoOn ? .videoChat : .voiceChat,
                 options: .playAndRecord(
@@ -39,6 +40,7 @@ public struct DefaultAudioSessionPolicy: AudioSessionPolicy {
         }
 
         return .init(
+            isActive: callSettings.audioOutputOn,
             category: .playAndRecord,
             mode: callSettings.videoOn && callSettings.speakerOn ? .videoChat : .voiceChat,
             options: .playAndRecord(

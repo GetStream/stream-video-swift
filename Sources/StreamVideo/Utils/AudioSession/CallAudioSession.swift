@@ -129,15 +129,17 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
         }
 
         do {
-            try await audioStore.dispatchAsync(
-                .audioSession(
-                    .setCategory(
-                        configuration.category,
-                        mode: configuration.mode,
-                        options: configuration.options
+            if configuration.isActive {
+                try await audioStore.dispatchAsync(
+                    .audioSession(
+                        .setCategory(
+                            configuration.category,
+                            mode: configuration.mode,
+                            options: configuration.options
+                        )
                     )
                 )
-            )
+            }
         } catch {
             log.error(
                 "Unable to apply configuration category:\(configuration.category) mode:\(configuration.mode) options:\(configuration.options).",
@@ -146,7 +148,7 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
             )
         }
 
-        if let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
+        if configuration.isActive, let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
             do {
                 try await audioStore.dispatchAsync(
                     .audioSession(
@@ -161,8 +163,79 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
                 )
             }
         }
+        
+        await handleAudioOutputUpdateIfRequired(configuration)
 
         statsAdapter?.trace(.init(audioSession: self))
+    }
+
+    private func handleAudioOutputUpdateIfRequired(
+        _ configuration: AudioSessionConfiguration
+    ) async {
+        guard
+            configuration.isActive != audioStore.state.isActive
+        else {
+            return
+        }
+        do {
+            /// In the case where audioOutputOn has changed the order of actions matters
+            /// When activating we need:
+            /// 1. activate AVAudioSession
+            /// 2. set isAudioEnabled = true
+            /// 3. set RTCAudioSession.isActive = true
+            ///
+            /// When deactivating we need:
+            /// 1. set RTCAudioSession.isActive = false
+            /// 2. set isAudioEnabled = false
+            /// 3. deactivate AVAudioSession
+            if configuration.isActive {
+
+                try AVAudioSession.sharedInstance().setActive(true)
+
+                try await audioStore.dispatchAsync(
+                    .audioSession(
+                        .isAudioEnabled(true)
+                    )
+                )
+
+                try await audioStore.dispatchAsync(
+                    .audioSession(
+                        .isActive(true)
+                    )
+                )
+
+                log.debug(
+                    "AudioSession audioOutput has been enabled.",
+                    subsystems: .audioSession
+                )
+            } else {
+
+                try await audioStore.dispatchAsync(
+                    .audioSession(
+                        .isActive(false)
+                    )
+                )
+
+                try await audioStore.dispatchAsync(
+                    .audioSession(
+                        .isAudioEnabled(false)
+                    )
+                )
+
+                try AVAudioSession.sharedInstance().setActive(false)
+
+                log.debug(
+                    "AudioSession audioOutput has been disabled.",
+                    subsystems: .audioSession
+                )
+            }
+        } catch {
+            log.error(
+                "Failed while to applying AudioSession isActive:\(configuration.isActive) in order to match CallSettings.audioOutputOn.",
+                subsystems: .audioSession,
+                error: error
+            )
+        }
     }
 
     /// - Important: This method runs whenever an CallAudioSession is created and ensures that

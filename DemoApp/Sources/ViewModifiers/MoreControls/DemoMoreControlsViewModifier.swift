@@ -52,6 +52,17 @@ struct DemoMoreControlsViewModifier: ViewModifier {
                                 )
                             }
 
+                            DemoMoreControlListButtonView(
+                                action: { viewModel.toggleAudioOutput() },
+                                label: viewModel.callSettings.audioOutputOn ? "Disable audio output" : "Enable audio output"
+                            ) {
+                                Image(
+                                    systemName: viewModel.callSettings.audioOutputOn
+                                        ? "speaker.fill"
+                                        : "speaker.slash"
+                                )
+                            }
+
                             DemoTranscriptionAndClosedCaptionsButtonView(viewModel: viewModel)
 
                             DemoMoreThermalStateButtonView()
