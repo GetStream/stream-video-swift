@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- AudioSession management issues that were causing audio not being recorded during calls. [#906](https://github.com/GetStream/stream-video-swift/pull/906)
 
 # [1.29.1](https://github.com/GetStream/stream-video-swift/releases/tag/1.29.1)
 _July 25, 2025_
