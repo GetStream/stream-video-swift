@@ -122,15 +122,19 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
             /// 1. set RTCAudioSession.isActive = false
             /// 2. set isAudioEnabled = false
             /// 3. deactivate AVAudioSession
+            ///
+            /// - Weird behaviour:
+            /// We ignore the errors in AVAudioSession as in the case of CallKit we may fail to
+            /// deactivate the call but the following calls will ensure that there is no audio.
             try source.perform {
                 if value {
-                    try $0.avSession.setIsActive(value)
+                    try? $0.avSession.setIsActive(value)
                     $0.isAudioEnabled = value
                     try $0.setActive(value)
                 } else {
-                    try $0.setActive(value)
+                    try? $0.setActive(value)
                     $0.isAudioEnabled = value
-                    try $0.avSession.setIsActive(value)
+                    try? $0.avSession.setIsActive(value)
                 }
             }
             updatedState.isActive = value
