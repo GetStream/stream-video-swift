@@ -18,7 +18,7 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
     private(set) var statsAdapter: WebRTCStatsAdapting?
 
     /// The current audio session policy used to configure the session.
-    /// Determines audio behavior for the call session.
+    /// Determines audio behaviour for the call session.
     /// Set this property to change how the session is configured.
     @Atomic private(set) var policy: AudioSessionPolicy
 
@@ -178,57 +178,11 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
             return
         }
         do {
-            /// In the case where audioOutputOn has changed the order of actions matters
-            /// When activating we need:
-            /// 1. activate AVAudioSession
-            /// 2. set isAudioEnabled = true
-            /// 3. set RTCAudioSession.isActive = true
-            ///
-            /// When deactivating we need:
-            /// 1. set RTCAudioSession.isActive = false
-            /// 2. set isAudioEnabled = false
-            /// 3. deactivate AVAudioSession
-            if configuration.isActive {
-
-                try AVAudioSession.sharedInstance().setActive(true)
-
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .isAudioEnabled(true)
-                    )
+            try await audioStore.dispatchAsync(
+                .audioSession(
+                    .setAVAudioSessionActive(configuration.isActive)
                 )
-
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .isActive(true)
-                    )
-                )
-
-                log.debug(
-                    "AudioSession audioOutput has been enabled.",
-                    subsystems: .audioSession
-                )
-            } else {
-
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .isActive(false)
-                    )
-                )
-
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .isAudioEnabled(false)
-                    )
-                )
-
-                try AVAudioSession.sharedInstance().setActive(false)
-
-                log.debug(
-                    "AudioSession audioOutput has been disabled.",
-                    subsystems: .audioSession
-                )
-            }
+            )
         } catch {
             log.error(
                 "Failed while to applying AudioSession isActive:\(configuration.isActive) in order to match CallSettings.audioOutputOn.",

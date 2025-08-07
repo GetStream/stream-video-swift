@@ -7,6 +7,8 @@ import Foundation
 import StreamWebRTC
 
 protocol AudioSessionProtocol: AnyObject {
+    var avSession: AVAudioSessionProtocol { get }
+
     var prefersNoInterruptionsFromSystemAlerts: Bool { get }
     
     func setPrefersNoInterruptionsFromSystemAlerts(_ newValue: Bool) throws

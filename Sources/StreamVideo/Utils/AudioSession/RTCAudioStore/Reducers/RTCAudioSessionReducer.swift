@@ -110,6 +110,31 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
 
         case let .setHasRecordingPermission(value):
             updatedState.hasRecordingPermission = value
+
+        case let .setAVAudioSessionActive(value):
+            /// In the case where audioOutputOn has changed the order of actions matters
+            /// When activating we need:
+            /// 1. activate AVAudioSession
+            /// 2. set isAudioEnabled = true
+            /// 3. set RTCAudioSession.isActive = true
+            ///
+            /// When deactivating we need:
+            /// 1. set RTCAudioSession.isActive = false
+            /// 2. set isAudioEnabled = false
+            /// 3. deactivate AVAudioSession
+            try source.perform {
+                if value {
+                    try $0.avSession.setIsActive(value)
+                    $0.isAudioEnabled = value
+                    try $0.setActive(value)
+                } else {
+                    try $0.setActive(value)
+                    $0.isAudioEnabled = value
+                    try $0.avSession.setIsActive(value)
+                }
+            }
+            updatedState.isActive = value
+            updatedState.isAudioEnabled = value
         }
 
         return updatedState

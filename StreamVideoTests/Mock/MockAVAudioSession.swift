@@ -18,6 +18,7 @@ final class MockAVAudioSession: AVAudioSessionProtocol, Mockable, @unchecked Sen
     enum MockFunctionKey: CaseIterable {
         case setCategory
         case setOverrideOutputAudioPort
+        case setIsActive
     }
 
     /// Defines typed payloads passed along with tracked function calls.
@@ -29,6 +30,8 @@ final class MockAVAudioSession: AVAudioSessionProtocol, Mockable, @unchecked Sen
         )
         case setOverrideOutputAudioPort(value: AVAudioSession.PortOverride)
 
+        case setIsActive(Bool)
+
         // Return an untyped payload for storage in the base Mockable dictionary.
         var payload: Any {
             switch self {
@@ -36,6 +39,9 @@ final class MockAVAudioSession: AVAudioSessionProtocol, Mockable, @unchecked Sen
                 return (category, mode, options)
 
             case let .setOverrideOutputAudioPort(value):
+                return value
+
+            case let .setIsActive(value):
                 return value
             }
         }
@@ -85,6 +91,16 @@ final class MockAVAudioSession: AVAudioSessionProtocol, Mockable, @unchecked Sen
             input: .setOverrideOutputAudioPort(value: port)
         )
         if let error = stubbedFunction[.setOverrideOutputAudioPort] as? Error {
+            throw error
+        }
+    }
+
+    func setIsActive(_ active: Bool) throws {
+        record(
+            .setIsActive,
+            input: .setIsActive(active)
+        )
+        if let error = stubbedFunction[.setIsActive] as? Error {
             throw error
         }
     }

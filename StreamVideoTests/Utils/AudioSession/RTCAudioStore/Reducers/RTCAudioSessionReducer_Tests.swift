@@ -237,4 +237,42 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertTrue(updatedState.hasRecordingPermission)
     }
+
+    // MARK: - setAVAudioSessionActive
+
+    func test_reduce_setAVAudioSessionActive_isActiveIsTrue_activatesAVSessionIsAudioEnabledIsTrueSetActiveWasCalled() throws {
+        var state = RTCAudioStore.State.initial
+        state.isAudioEnabled = false
+        state.isActive = false
+
+        let updatedState = try subject.reduce(
+            state: state,
+            action: .audioSession(.setAVAudioSessionActive(true)),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual((store.session.avSession as? MockAVAudioSession)?.timesCalled(.setIsActive), 1)
+        XCTAssertTrue(updatedState.isAudioEnabled)
+        XCTAssertTrue(updatedState.isActive)
+    }
+
+    func test_reduce_setAVAudioSessionActive_isActiveIsFalse_deactivatesAVSessionIsAudioEnabledIsFalseSetActiveWasCalled() throws {
+        var state = RTCAudioStore.State.initial
+        state.isAudioEnabled = true
+        state.isActive = true
+
+        let updatedState = try subject.reduce(
+            state: state,
+            action: .audioSession(.setAVAudioSessionActive(false)),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        XCTAssertEqual((store.session.avSession as? MockAVAudioSession)?.timesCalled(.setIsActive), 1)
+        XCTAssertFalse(updatedState.isAudioEnabled)
+        XCTAssertFalse(updatedState.isActive)
+    }
 }

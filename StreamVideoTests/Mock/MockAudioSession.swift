@@ -87,6 +87,8 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
 
     // MARK: - AudioSessionProtocol
 
+    var avSession: AVAudioSessionProtocol = MockAVAudioSession()
+
     var prefersNoInterruptionsFromSystemAlerts: Bool = false
 
     func setPrefersNoInterruptionsFromSystemAlerts(_ newValue: Bool) throws {

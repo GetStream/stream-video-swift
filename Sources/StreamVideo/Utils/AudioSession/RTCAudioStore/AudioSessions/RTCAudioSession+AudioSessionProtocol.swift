@@ -6,6 +6,10 @@ import Foundation
 import StreamWebRTC
 
 extension RTCAudioSession: AudioSessionProtocol {
+    var avSession: any AVAudioSessionProtocol {
+        session
+    }
+    
     var prefersNoInterruptionsFromSystemAlerts: Bool {
         if #available(iOS 14.5, *) {
             return session.prefersNoInterruptionsFromSystemAlerts

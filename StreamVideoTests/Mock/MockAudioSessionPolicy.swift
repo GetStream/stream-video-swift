@@ -42,6 +42,7 @@ final class MockAudioSessionPolicy: Mockable, AudioSessionPolicy, @unchecked Sen
         stub(
             for: .configuration,
             with: AudioSessionConfiguration(
+                isActive: true,
                 category: .soloAmbient,
                 mode: .default,
                 options: []
