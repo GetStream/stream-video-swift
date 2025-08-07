@@ -16,7 +16,7 @@ final class WebRTCCoordinatorStateMachine_LeavingStageTests: XCTestCase, @unchec
         .allCases
         .filter { $0 != subject.id }
         .map { WebRTCCoordinator.StateMachine.Stage(id: $0, context: .init()) }
-    private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.joined, .disconnected]
+    private lazy var validStages: Set<WebRTCCoordinator.StateMachine.Stage.ID>! = [.joined, .disconnected, .connected, .connecting]
     private lazy var subject: WebRTCCoordinator.StateMachine.Stage! = .leaving(.init())
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig

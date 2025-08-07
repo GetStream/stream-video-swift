@@ -8,7 +8,7 @@ import Foundation
 
 /// `CallAudioSession` manages the audio session for calls, handling configuration,
 /// activation, and deactivation.
-final class CallAudioSession: @unchecked Sendable, Encodable {
+final class CallAudioSession: @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 
@@ -66,7 +66,7 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
             audioStore.dispatch(.audioSession(.isActive(true)))
         }
 
-        statsAdapter?.trace(.init(audioSession: self))
+        statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
 
     func deactivate() {
@@ -79,7 +79,7 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
         interruptionEffect = nil
         routeChangeEffect = nil
         audioStore.dispatch(.audioSession(.isActive(false)))
-        statsAdapter?.trace(.init(audioSession: self))
+        statsAdapter?.trace(.init(audioSession: traceRepresentation))
     }
 
     func didUpdatePolicy(
@@ -96,32 +96,13 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
         }
     }
 
-    // MARK: - Encodable
-
-    /// Restricts encoding to only serializable properties.
-    /// Only `policy` is encoded if it conforms to `Encodable`.
-    enum CodingKeys: String, CodingKey {
-        case state
-        case hasDelegate
-        case hasInterruptionEffect
-        case hasRouteChangeEffect
-        case policy
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(audioStore.state, forKey: .state)
-        try container.encode(delegate != nil, forKey: .hasDelegate)
-        try container.encode(interruptionEffect != nil, forKey: .hasInterruptionEffect)
-        try container.encode(routeChangeEffect != nil, forKey: .hasRouteChangeEffect)
-        try container.encode("\(type(of: policy))", forKey: .policy)
-    }
-
     // MARK: - Private Helpers
 
     private func didUpdateConfiguration(
         _ configuration: AudioSessionConfiguration
     ) async {
+        defer { statsAdapter?.trace(.init(audioSession: traceRepresentation)) }
+
         guard
             !Task.isCancelled
         else {
@@ -165,8 +146,6 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
         }
         
         await handleAudioOutputUpdateIfRequired(configuration)
-
-        statsAdapter?.trace(.init(audioSession: self))
     }
 
     private func handleAudioOutputUpdateIfRequired(
@@ -217,5 +196,27 @@ final class CallAudioSession: @unchecked Sendable, Encodable {
                 )
             )
         )
+    }
+}
+
+extension CallAudioSession {
+    struct TraceRepresentation: Encodable {
+        var state: RTCAudioStore.State
+        var hasDelegate: Bool
+        var hasInterruptionEffect: Bool
+        var hasRouteChangeEffect: Bool
+        var policy: String
+
+        init(_ source: CallAudioSession) {
+            state = source.audioStore.state
+            hasDelegate = source.delegate != nil
+            hasInterruptionEffect = source.interruptionEffect != nil
+            hasRouteChangeEffect = source.routeChangeEffect != nil
+            policy = String(describing: source.policy)
+        }
+    }
+
+    var traceRepresentation: TraceRepresentation {
+        .init(self)
     }
 }
