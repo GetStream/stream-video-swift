@@ -71,7 +71,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                         options: expectedOptions,
                         ring: true,
                         notify: true,
-                        source: .inApp
+                        source: .callKit
                     )
             }
         ) { stage in
@@ -84,6 +84,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(expectedStage.options?.team, expectedOptions.team)
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
+            XCTAssertEqual(expectedStage.context.joinSource, .callKit)
             await self.assertEqualAsync(
                 await self.subject.stateAdapter.initialCallSettings,
                 expectedCallSettings

@@ -9,6 +9,37 @@ import XCTest
 
 final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
+    private final class SpyReducer: RTCAudioStoreReducer, @unchecked Sendable {
+        var reduceError: Error?
+        private(set) var reduceWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: Date)?
+        func reduce(
+            state: RTCAudioStore.State,
+            action: RTCAudioStoreAction,
+            file: StaticString,
+            function: StaticString,
+            line: UInt
+        ) throws -> RTCAudioStore.State {
+            reduceWasCalled = (state, action, .init())
+            guard let reduceError else {
+                return state
+            }
+            throw reduceError
+        }
+    }
+
+    private final class SpyMiddleware: RTCAudioStoreMiddleware, @unchecked Sendable {
+        private(set) var applyWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: Date)?
+        func apply(
+            state: RTCAudioStore.State,
+            action: RTCAudioStoreAction,
+            file: StaticString,
+            function: StaticString,
+            line: UInt
+        ) {
+            applyWasCalled = (state, action, .init())
+        }
+    }
+
     // MARK: - Properties
 
     private lazy var subject: RTCAudioStore! = .init()
@@ -35,6 +66,51 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
             self.subject.state.prefersNoInterruptionsFromSystemAlerts == true
                 && self.subject.state.useManualAudio == true
                 && self.subject.state.isAudioEnabled == false
+        }
+    }
+
+    // MARK: - dispatch
+
+    func test_dispatch_middlewareWasCalledBeforeReducer() async throws {
+        let reducer = SpyReducer()
+        let middleware = SpyMiddleware()
+        subject.add(reducer)
+        subject.add(middleware)
+
+        subject.dispatch(.audioSession(.isActive(true)))
+        await fulfillment { middleware.applyWasCalled != nil && reducer.reduceWasCalled != nil }
+
+        let middlewareWasCalledAt = try XCTUnwrap(middleware.applyWasCalled?.calledAt)
+        let reducerWasCalledAt = try XCTUnwrap(reducer.reduceWasCalled?.calledAt)
+        XCTAssertTrue(reducerWasCalledAt.timeIntervalSince(middlewareWasCalledAt) > 0)
+    }
+
+    // MARK: - dispatchAsync
+
+    func test_dispatchAsync_middlewareWasCalledBeforeReducer() async throws {
+        let reducer = SpyReducer()
+        let middleware = SpyMiddleware()
+        subject.add(reducer)
+        subject.add(middleware)
+
+        try await subject.dispatchAsync(.audioSession(.isActive(true)))
+
+        let middlewareWasCalledAt = try XCTUnwrap(middleware.applyWasCalled?.calledAt)
+        let reducerWasCalledAt = try XCTUnwrap(reducer.reduceWasCalled?.calledAt)
+        XCTAssertTrue(reducerWasCalledAt.timeIntervalSince(middlewareWasCalledAt) > 0)
+    }
+
+    func test_dispatchAsync_reducerThrowsError_rethrowsError() async throws {
+        let expected = ClientError(.unique)
+        let reducer = SpyReducer()
+        reducer.reduceError = expected
+        subject.add(reducer)
+
+        do {
+            try await subject.dispatchAsync(.audioSession(.isActive(true)))
+            XCTFail()
+        } catch {
+            XCTAssertEqual((error as? ClientError)?.localizedDescription, expected.localizedDescription)
         }
     }
 }
