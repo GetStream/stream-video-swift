@@ -134,7 +134,7 @@ extension WebRTCTrace {
     ///   - callSettings: The active call settings.
     ///   - audioSession: The audio session state.
     init(
-        audioSession: StreamAudioSession
+        audioSession: CallAudioSession.TraceRepresentation
     ) {
         self.init(
             id: nil,

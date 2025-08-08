@@ -84,15 +84,6 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
         didSet { didUpdate(subscriber: subscriber) }
     }
 
-    /// Current call settings for the ongoing session. Updating this triggers a
-    /// trace update for session-related state.
-    var callSettings: CallSettings? {
-        didSet { didUpdate(callSettings) }
-    }
-
-    /// Audio session in use for this call. Used to enrich trace data with audio state.
-    var audioSession: StreamAudioSession?
-
     /// Buffers trace events related to publisher/subscriber peer connections.
     private let peerConnectionBucket: ConsumableBucket<WebRTCTrace>
     /// Buffers trace events related to SFU adapter requests and responses.
@@ -335,18 +326,6 @@ final class WebRTCTracesAdapter: WebRTCTracing, @unchecked Sendable {
                     hostname: sfuAdapter?.host ?? ""
                 )
             )
-        )
-    }
-
-    /// Handles updates to call settings and audio session state.
-    ///
-    /// Enriches trace data with the latest call and audio configuration.
-    private func didUpdate(_ callSettings: CallSettings?) {
-        guard let audioSession else {
-            return
-        }
-        genericRequestsBucket.append(
-            .init(audioSession: audioSession)
         )
     }
 }

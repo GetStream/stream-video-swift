@@ -11,11 +11,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
 
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var builder: AVAudioRecorderBuilder! = .init(cachedResult: mockAudioRecorder)
-    private lazy var mockAudioSession: MockAudioSession! = .init()
-    private lazy var audioSession: StreamAudioSession! = .init(
-        audioSession: mockAudioSession,
-        audioDeviceModule: peerConnectionFactory.audioDeviceModule
-    )
+    private lazy var mockAudioStore: MockRTCAudioStore! = .init()
     private lazy var mockActiveCallProvider: MockStreamActiveCallProvider! = .init()
     private var mockAudioRecorder: MockAudioRecorder!
     private lazy var subject: StreamCallAudioRecorder! = .init(audioRecorderBuilder: builder)
@@ -23,7 +19,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
     override func setUp() async throws {
         try await super.setUp()
         StreamActiveCallProviderKey.currentValue = mockActiveCallProvider
-        _ = audioSession
+        _ = mockAudioStore
         mockAudioRecorder = try .init(
             url: URL(string: "test.wav")!,
             settings: AVAudioRecorderBuilder.defaultRecordingSettings
@@ -32,7 +28,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() {
         builder = nil
-        mockAudioSession = nil
+        mockAudioStore = nil
         mockActiveCallProvider = nil
         mockAudioRecorder = nil
         peerConnectionFactory = nil
@@ -72,7 +68,8 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
     // MARK: - startRecording
 
     func testStartRecording_givenPermissionNotGranted_whenStarted_thenRecordsAndMetersAreNotUpdated() async throws {
-        mockAudioSession.stub(for: .requestRecordPermission, with: false)
+        mockAudioStore.makeShared()
+        mockAudioStore.session.stub(for: .requestRecordPermission, with: false)
         await setUpHasActiveCall(true)
 
         await subject.startRecording()
@@ -81,7 +78,8 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
     }
 
     func testStartRecording_givenPermissionGranted_whenStarted_thenRecordsAndMetersUpdates() async throws {
-        mockAudioSession.stub(for: .requestRecordPermission, with: true)
+        mockAudioStore.makeShared()
+        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
 
         await subject.startRecording()
@@ -90,7 +88,8 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
     }
 
     func testStartRecording_givenPermissionGrantedButNoActiveCall_whenStarted_thenRecordsAndMetersWontStart() async throws {
-        mockAudioSession.stub(for: .requestRecordPermission, with: true)
+        mockAudioStore.makeShared()
+        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
 
         await subject.startRecording()
 
@@ -99,7 +98,8 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
 
     func testStartRecording_givenPermissionGrantedButNoActiveCall_whenIgnoreActiveCallAndStarted_thenRecordsAndMetersUpdates(
     ) async throws {
-        mockAudioSession.stub(for: .requestRecordPermission, with: true)
+        mockAudioStore.makeShared()
+        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
 
         await subject.startRecording(ignoreActiveCall: true)
 
@@ -109,7 +109,8 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
     // MARK: - stopRecording
 
     func testStopRecording_givenRecording_whenStopped_thenStopsRecording() async throws {
-        mockAudioSession.stub(for: .requestRecordPermission, with: true)
+        mockAudioStore.makeShared()
+        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
 
         await subject.startRecording()
@@ -121,7 +122,8 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
     // MARK: - activeCall ended
 
     func test_activeCallEnded_givenAnActiveCallAndRecordingTrue_whenActiveCallEnds_thenStopsRecording() async throws {
-        mockAudioSession.stub(for: .requestRecordPermission, with: true)
+        mockAudioStore.makeShared()
+        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
         await subject.startRecording()
 
@@ -134,7 +136,8 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
 
     func test_activeCallEnded_givenAnActiveCallAndRecordingTrue_whenActiveCallEndsAndAnotherOneStarts_thenStartsRecording(
     ) async throws {
-        mockAudioSession.stub(for: .requestRecordPermission, with: true)
+        mockAudioStore.makeShared()
+        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         await setUpHasActiveCall(true)
         await subject.startRecording()
         await setUpHasActiveCall(false)
@@ -154,7 +157,7 @@ final class StreamAudioRecorderTests: XCTestCase, @unchecked Sendable {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
-        let audioRecorder = try await XCTAsyncUnwrap(await builder.result)
+        let audioRecorder = try XCTUnwrap(builder.result)
         XCTAssertEqual(
             audioRecorder.isRecording,
             isRecording,

@@ -15,7 +15,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     @Injected(\.activeCallProvider) private var activeCallProvider
-    @Injected(\.activeCallAudioSession) private var activeCallAudioSession
+    @Injected(\.audioStore) private var audioStore
 
     /// The builder used to create the AVAudioRecorder instance.
     let audioRecorderBuilder: AVAudioRecorderBuilder
@@ -38,7 +38,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     @Atomic private(set) var isRecording: Bool = false {
         willSet {
-            activeCallAudioSession?.isRecording = newValue
             _isRecordingSubject.send(newValue)
         }
     }
@@ -194,7 +193,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
 
     private func setUpAudioCaptureIfRequired() async throws -> AVAudioRecorder {
         guard
-            await activeCallAudioSession?.requestRecordPermission() == true
+            await audioStore.requestRecordPermission() == true
         else {
             throw ClientError("🎙️Permission denied.")
         }
@@ -219,11 +218,8 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     }
 
     private func deferSessionActivation() async {
-        guard let activeCallAudioSession else {
-            return
-        }
-        _ = try? await activeCallAudioSession
-            .$category
+        _ = try? await audioStore
+            .publisher(\.category)
             .filter { $0 == .playAndRecord }
             .nextValue(timeout: 1)
     }

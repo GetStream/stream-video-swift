@@ -29,6 +29,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
         @unchecked Sendable
     {
         @Injected(\.internetConnectionObserver) private var internetConnectionObserver
+        @Injected(\.audioStore) private var audioStore
 
         private let disposableBag = DisposableBag()
         private var updateSubscriptionsAdapter: WebRTCUpdateSubscriptionsAdapter?
@@ -397,11 +398,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .removeDuplicates()
                 .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
                     guard let self else { return }
-
-                    if let statsAdapter = await context.coordinator?.stateAdapter.statsAdapter {
-                        statsAdapter.callSettings = callSettings
-                    }
-
                     do {
                         guard
                             let publisher = await context.coordinator?.stateAdapter.publisher

@@ -82,7 +82,8 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
                             callSettings: callSettings,
                             options: options,
                             ring: true,
-                            notify: true
+                            notify: true,
+                            source: .callKit
                         )
                 }
             }
@@ -91,6 +92,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             XCTAssertEqual(expectedStage.options?.team, options.team)
             XCTAssertTrue(expectedStage.ring)
             XCTAssertTrue(expectedStage.notify)
+            XCTAssertEqual(expectedStage.context.joinSource, .callKit)
             await self.assertEqualAsync(
                 await self
                     .mockWebRTCCoordinatorFactory

@@ -3,60 +3,73 @@
 //
 
 import AVFoundation
-import Combine
+import Foundation
 @testable import StreamVideo
 import StreamWebRTC
 
 final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendable {
-    // MARK: - Mockable
-
     typealias FunctionKey = MockFunctionKey
     typealias FunctionInputKey = MockFunctionInputKey
 
-    /// Defines the "functions" or property accesses we want to track or stub.
-    enum MockFunctionKey: CaseIterable {
-        case setCategory
+    enum MockFunctionKey: Hashable, CaseIterable {
+        case setPrefersNoInterruptionsFromSystemAlerts
+        case requestRecordPermission
+        case addDelegate
+        case removeDelegate
+        case audioSessionDidActivate
+        case audioSessionDidDeactivate
         case setActive
         case overrideOutputAudioPort
-        case requestRecordPermission
+        case setConfiguration
     }
 
-    /// Defines typed payloads passed along with tracked function calls.
     enum MockFunctionInputKey: Payloadable {
-        case setCategory(
-            category: AVAudioSession.Category,
-            mode: AVAudioSession.Mode,
-            options: AVAudioSession.CategoryOptions
-        )
-        case setActive(value: Bool)
-        case overrideOutputAudioPort(value: AVAudioSession.PortOverride)
+        case setPrefersNoInterruptionsFromSystemAlerts(Bool)
         case requestRecordPermission
+        case addDelegate(RTCAudioSessionDelegate)
+        case removeDelegate(RTCAudioSessionDelegate)
+        case audioSessionDidActivate(AVAudioSession)
+        case audioSessionDidDeactivate(AVAudioSession)
+        case setActive(Bool)
+        case overrideOutputAudioPort(AVAudioSession.PortOverride)
+        case setConfiguration(RTCAudioSessionConfiguration)
 
-        // Return an untyped payload for storage in the base Mockable dictionary.
         var payload: Any {
             switch self {
-            case let .setCategory(category, mode, options):
-                return (category, mode, options)
-
-            case let .setActive(value):
-                return value
-
-            case let .overrideOutputAudioPort(value):
+            case let .setPrefersNoInterruptionsFromSystemAlerts(value):
                 return value
 
             case .requestRecordPermission:
                 return ()
+
+            case let .addDelegate(delegate):
+                return delegate
+
+            case let .removeDelegate(delegate):
+                return delegate
+
+            case let .audioSessionDidActivate(audioSession):
+                return audioSession
+
+            case let .audioSessionDidDeactivate(audioSession):
+                return audioSession
+
+            case let .setActive(isActive):
+                return isActive
+
+            case let .overrideOutputAudioPort(port):
+                return port
+
+            case let .setConfiguration(configuration):
+                return configuration
             }
         }
     }
 
-    // MARK: - Mockable Storage
-
     var stubbedProperty: [String: Any] = [:]
     var stubbedFunction: [FunctionKey: Any] = [:]
-    @Atomic
-    var stubbedFunctionInput: [FunctionKey: [FunctionInputKey]] = FunctionKey.allCases
-        .reduce(into: [FunctionKey: [MockFunctionInputKey]]()) { $0[$1] = [] }
+    @Atomic var stubbedFunctionInput: [FunctionKey: [MockFunctionInputKey]] =
+        MockFunctionKey.allCases.reduce(into: [:]) { $0[$1] = [] }
 
     func stub<T>(for keyPath: KeyPath<MockAudioSession, T>, with value: T) {
         stubbedProperty[propertyKey(for: keyPath)] = value
@@ -66,120 +79,96 @@ final class MockAudioSession: AudioSessionProtocol, Mockable, @unchecked Sendabl
         stubbedFunction[function] = value
     }
 
-    // MARK: - AudioSessionProtocol
-
-    let eventSubject = PassthroughSubject<AudioSessionEvent, Never>()
+    // MARK: - Init
 
     init() {
-        stub(for: \.eventPublisher, with: eventSubject.eraseToAnyPublisher())
-        stub(for: \.isActive, with: false)
-        stub(for: \.currentRoute, with: AVAudioSessionRouteDescription())
-        stub(for: \.category, with: AVAudioSession.Category.soloAmbient)
-        stub(for: \.useManualAudio, with: false)
-        stub(for: \.isAudioEnabled, with: false)
+        stub(for: .requestRecordPermission, with: false)
     }
 
-    /// Publishes audio session-related events.
-    var eventPublisher: AnyPublisher<AudioSessionEvent, Never> {
-        get { self[dynamicMember: \.eventPublisher] }
-        set { stub(for: \.eventPublisher, with: newValue) }
-    }
+    // MARK: - AudioSessionProtocol
 
-    /// Indicates whether the audio session is active.
-    var isActive: Bool {
-        get { self[dynamicMember: \.isActive] }
-        set { stub(for: \.isActive, with: newValue) }
-    }
+    var avSession: AVAudioSessionProtocol = MockAVAudioSession()
 
-    /// The current audio route for the session.
-    var currentRoute: AVAudioSessionRouteDescription {
-        get { self[dynamicMember: \.currentRoute] }
-        set { stub(for: \.currentRoute, with: newValue) }
-    }
+    var prefersNoInterruptionsFromSystemAlerts: Bool = false
 
-    /// The current audio session category.
-    var category: AVAudioSession.Category {
-        get { self[dynamicMember: \.category] }
-        set { stub(for: \.category, with: newValue) }
-    }
+    func setPrefersNoInterruptionsFromSystemAlerts(_ newValue: Bool) throws {
+        stubbedFunctionInput[.setPrefersNoInterruptionsFromSystemAlerts]?
+            .append(.setPrefersNoInterruptionsFromSystemAlerts(newValue))
 
-    /// A Boolean value indicating if manual audio routing is used.
-    var useManualAudio: Bool {
-        get { self[dynamicMember: \.useManualAudio] }
-        set { stub(for: \.useManualAudio, with: newValue) }
-    }
-
-    /// A Boolean value indicating if audio is enabled.
-    var isAudioEnabled: Bool {
-        get { self[dynamicMember: \.isAudioEnabled] }
-        set { stub(for: \.isAudioEnabled, with: newValue) }
-    }
-
-    var mode: AVAudioSession.Mode {
-        get { self[dynamicMember: \.mode] }
-        set { stub(for: \.mode, with: newValue) }
-    }
-
-    var overrideOutputPort: AVAudioSession.PortOverride {
-        get { self[dynamicMember: \.overrideOutputPort] }
-        set { stub(for: \.overrideOutputPort, with: newValue) }
-    }
-
-    var hasRecordPermission: Bool {
-        get { self[dynamicMember: \.hasRecordPermission] }
-        set { stub(for: \.hasRecordPermission, with: newValue) }
-    }
-
-    /// Sets the audio category, mode, and options.
-    func setCategory(
-        _ category: AVAudioSession.Category,
-        mode: AVAudioSession.Mode,
-        with categoryOptions: AVAudioSession.CategoryOptions
-    ) async throws {
-        record(.setCategory, input: .setCategory(
-            category: category,
-            mode: mode,
-            options: categoryOptions
-        ))
-        if let error = stubbedFunction[.setCategory] as? Error {
+        if let error = stubbedFunction[.setPrefersNoInterruptionsFromSystemAlerts] as? Error {
             throw error
         }
     }
 
-    /// Activates or deactivates the audio session.
-    func setActive(_ isActive: Bool) async throws {
-        record(.setActive, input: .setActive(value: isActive))
-        if let error = stubbedFunction[.setActive] as? Error {
-            throw error
-        }
+    var isActive: Bool = false
+
+    var isAudioEnabled: Bool = false
+
+    var useManualAudio: Bool = false
+
+    var category: String = ""
+
+    var mode: String = ""
+
+    var categoryOptions: AVAudioSession.CategoryOptions = []
+
+    var recordPermissionGranted: Bool = false
+
+    func requestRecordPermission() async -> Bool {
+        stubbedFunctionInput[.requestRecordPermission]?
+            .append(.requestRecordPermission)
+
+        return stubbedFunction[.requestRecordPermission] as! Bool
     }
 
-    /// Overrides the audio output port.
-    func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) async throws {
-        record(.overrideOutputAudioPort, input: .overrideOutputAudioPort(value: port))
+    var currentRoute: AVAudioSessionRouteDescription = .init()
+
+    func add(_ delegate: any RTCAudioSessionDelegate) {
+        stubbedFunctionInput[.addDelegate]?
+            .append(.addDelegate(delegate))
+    }
+
+    func remove(_ delegate: any RTCAudioSessionDelegate) {
+        stubbedFunctionInput[.removeDelegate]?
+            .append(.removeDelegate(delegate))
+    }
+
+    func audioSessionDidActivate(_ audioSession: AVAudioSession) {
+        stubbedFunctionInput[.audioSessionDidActivate]?
+            .append(.audioSessionDidActivate(audioSession))
+    }
+
+    func audioSessionDidDeactivate(_ audioSession: AVAudioSession) {
+        stubbedFunctionInput[.audioSessionDidDeactivate]?
+            .append(.audioSessionDidDeactivate(audioSession))
+    }
+
+    func setActive(_ isActive: Bool) throws {
+        stubbedFunctionInput[.setActive]?
+            .append(.setActive(isActive))
+    }
+
+    func perform(
+        _ operation: (any AudioSessionProtocol) throws -> Void
+    ) throws {
+        try operation(self)
+    }
+
+    func overrideOutputAudioPort(_ port: AVAudioSession.PortOverride) throws {
+        stubbedFunctionInput[.overrideOutputAudioPort]?
+            .append(.overrideOutputAudioPort(port))
+
         if let error = stubbedFunction[.overrideOutputAudioPort] as? Error {
             throw error
         }
     }
 
-    /// Requests permission to record audio.
-    func requestRecordPermission() async -> Bool {
-        record(.requestRecordPermission, input: .requestRecordPermission)
-        return (stubbedFunction[.requestRecordPermission] as? Bool) ?? false
-    }
+    func setConfiguration(_ configuration: RTCAudioSessionConfiguration) throws {
+        stubbedFunctionInput[.setConfiguration]?
+            .append(.setConfiguration(configuration))
 
-    // MARK: - Helpers
-
-    /// Tracks calls to a specific function/property in the mock.
-    private func record(
-        _ function: FunctionKey,
-        input: FunctionInputKey? = nil
-    ) {
-        if let input {
-            stubbedFunctionInput[function]?.append(input)
-        } else {
-            // Still record the call, but with no input
-            stubbedFunctionInput[function]?.append(contentsOf: [])
+        if let error = stubbedFunction[.setConfiguration] as? Error {
+            throw error
         }
     }
 }

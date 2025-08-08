@@ -17,6 +17,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
             create: true,
             ring: true,
             notify: true,
+            source: .inApp,
             deliverySubject: .init()
         )
     )
@@ -100,6 +101,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: .init(),
                     retryPolicy: .init(maxRetries: 0, delay: { _ in 0 })
                 )
@@ -122,6 +124,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: .init()
                 )
             )
@@ -148,6 +151,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: .init()
                 )
             )
@@ -173,6 +177,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: .init()
                 )
             )
@@ -198,6 +203,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: .init()
                 )
             )
@@ -231,6 +237,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: deliverySubject
                 )
             )
@@ -259,6 +266,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: .init()
                 )
             )
@@ -284,6 +292,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: .init(),
                     retryPolicy: .init(maxRetries: 2, delay: { _ in 0 })
                 )
@@ -321,6 +330,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
                     options: .init(memberIds: [.unique]),
                     ring: true,
                     notify: false,
+                    source: .inApp,
                     deliverySubject: deliverySubject,
                     retryPolicy: .init(maxRetries: 2, delay: { _ in 0 })
                 )
@@ -376,7 +386,7 @@ final class StreamCallStateMachineStageJoiningStage_Tests: StreamVideoTestCase, 
         iteration: Int = 0,
         context: Call.StateMachine.Stage.Context
     ) throws {
-        let joinInputType = (Bool, CallSettings?, CreateCallOptions?, Bool, Bool).self
+        let joinInputType = (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self
         let recordedInput = try XCTUnwrap(
             callController.recordedInputPayload(
                 joinInputType,

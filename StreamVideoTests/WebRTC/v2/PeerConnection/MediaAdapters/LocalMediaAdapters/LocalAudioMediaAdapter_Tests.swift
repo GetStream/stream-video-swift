@@ -17,11 +17,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
-    private lazy var audioSession: MockAudioSession! = .init()
-    private lazy var audioSessionAdapter: StreamAudioSession! = .init(
-        audioSession: audioSession,
-        audioDeviceModule: peerConnectionFactory.audioDeviceModule
-    )
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var subject: LocalAudioMediaAdapter! = .init(
         sessionID: sessionId,
@@ -37,8 +32,6 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     override func tearDown() {
         subject = nil
         spySubject = nil
-        audioSession = nil
-        audioSessionAdapter = nil
         mockSFUStack = nil
         mockPeerConnection = nil
         peerConnectionFactory = nil

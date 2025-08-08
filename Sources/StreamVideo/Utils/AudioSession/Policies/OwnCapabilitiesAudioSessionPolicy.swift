@@ -37,6 +37,7 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
     ) -> AudioSessionConfiguration {
         guard ownCapabilities.contains(.sendAudio) else {
             return .init(
+                isActive: callSettings.audioOutputOn,
                 category: .playback,
                 mode: .default,
                 options: .playback,
@@ -71,6 +72,7 @@ public struct OwnCapabilitiesAudioSessionPolicy: AudioSessionPolicy {
             : nil
 
         return .init(
+            isActive: callSettings.audioOutputOn,
             category: category,
             mode: mode,
             options: categoryOptions,

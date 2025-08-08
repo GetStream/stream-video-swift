@@ -176,12 +176,4 @@ final class MockCall: Call, Mockable, @unchecked Sendable {
             .updateTrackSize(trackSize: trackSize, participant: participant)
         )
     }
-
-    override func callKitActivated(
-        _ audioSession: AVAudioSessionProtocol
-    ) throws {
-        stubbedFunctionInput[.callKitActivated]?.append(
-            .callKitActivated(audioSession: audioSession)
-        )
-    }
 }

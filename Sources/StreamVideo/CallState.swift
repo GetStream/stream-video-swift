@@ -155,7 +155,14 @@ public class CallState: ObservableObject {
             }
         }
     }
-    
+
+    /// Describes the source from which the join action was triggered for this call.
+    ///
+    /// Use this property to determine whether the current call was joined from
+    /// the app's UI or via a system-level integration such as CallKit. This can
+    /// help customize logic, analytics, and UI based on how the call was started.
+    var joinSource: JoinSource?
+
     private var localCallSettingsUpdate = false
     private var durationCancellable: AnyCancellable?
     private nonisolated let disposableBag = DisposableBag()

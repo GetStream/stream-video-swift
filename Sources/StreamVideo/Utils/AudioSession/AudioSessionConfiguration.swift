@@ -5,8 +5,8 @@
 import AVFoundation
 
 /// Represents the audio session configuration.
-public struct AudioSessionConfiguration: ReflectiveStringConvertible,
-    Equatable {
+public struct AudioSessionConfiguration: ReflectiveStringConvertible, Equatable, Sendable {
+    var isActive: Bool
     /// The audio session category.
     var category: AVAudioSession.Category
     /// The audio session mode.
@@ -18,7 +18,8 @@ public struct AudioSessionConfiguration: ReflectiveStringConvertible,
 
     /// Compares two `AudioSessionConfiguration` instances for equality.
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.category == rhs.category &&
+        lhs.isActive == rhs.isActive &&
+            lhs.category == rhs.category &&
             lhs.mode == rhs.mode &&
             lhs.options.rawValue == rhs.options.rawValue &&
             lhs.overrideOutputAudioPort?.rawValue ==

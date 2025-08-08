@@ -45,17 +45,6 @@ final class WebRTCStatsAdapter: @unchecked Sendable, WebRTCStatsAdapting {
         didSet { didUpdate(subscriber: subscriber) }
     }
 
-    /// The current call settings associated with this adapter. Setting this
-    /// updates the trace adapter with the latest session configuration.
-    var callSettings: CallSettings? {
-        didSet { traces.callSettings = callSettings }
-    }
-
-    /// The audio session used in this call. Used for trace enrichment.
-    var audioSession: StreamAudioSession? {
-        didSet { traces.audioSession = audioSession }
-    }
-
     /// The interval at which statistics are reported (in seconds).
     ///
     /// Changing this property reschedules the reporting timer.
