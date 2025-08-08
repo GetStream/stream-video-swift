@@ -434,6 +434,15 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 return
             }
 
+            guard
+                publisher.isHealthy,
+                subscriber.isHealthy
+            else {
+                context.reconnectionStrategy = .rejoin
+                transitionOrDisconnect(.disconnected(context))
+                return
+            }
+
             publisher
                 .disconnectedPublisher
                 .log(.debug, subsystems: .webRTC) { "PeerConnection of type: .publisher was disconnected. Will attempt rejoin." }

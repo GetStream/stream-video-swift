@@ -89,7 +89,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     /// send or receive data.
     var isHealthy: Bool {
         let invalidICEConnectionStates = Set([RTCIceConnectionState.failed, .closed])
-        let invalidConnectionStates = Set([RTCPeerConnectionState.failed, .closed])
+        let invalidConnectionStates = Set([RTCPeerConnectionState.failed, .closed, .disconnected])
         guard
             !invalidICEConnectionStates.contains(peerConnection.iceConnectionState),
             !invalidConnectionStates.contains(peerConnection.connectionState)
