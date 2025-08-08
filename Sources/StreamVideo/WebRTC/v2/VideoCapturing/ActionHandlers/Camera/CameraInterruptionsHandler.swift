@@ -48,10 +48,18 @@ final class CameraInterruptionsHandler: StreamVideoCapturerActionHandler, @unche
     private func didStartCapture(session: AVCaptureSession) {
         let disposableBag = DisposableBag()
 
+        let interruptedNotification: Notification.Name = {
+            #if compiler(>=6.0)
+            return AVCaptureSession.wasInterruptedNotification
+            #else
+            return .AVCaptureSessionWasInterrupted
+            #endif
+        }()
+
         /// Observe AVCaptureSession interruptions and log reasons.
         NotificationCenter
             .default
-            .publisher(for: AVCaptureSession.wasInterruptedNotification)
+            .publisher(for: interruptedNotification)
             .compactMap { (notification: Notification) -> String? in
                 guard
                     let userInfo = notification.userInfo,
