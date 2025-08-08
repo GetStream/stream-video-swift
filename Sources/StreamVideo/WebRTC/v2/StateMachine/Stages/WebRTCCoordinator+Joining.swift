@@ -360,6 +360,17 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try Task.checkCancellation()
 
             if !isFastReconnecting {
+                /// Configures the audio session for the current call using the provided
+                /// join source. This ensures the session setup reflects whether the
+                /// join was triggered in-app or via CallKit and applies the correct
+                /// audio routing and category.
+                try await coordinator.stateAdapter.configureAudioSession(
+                    source: context.joinSource
+                )
+
+                /// Configures all peer connections after the audio session is ready.
+                /// Ensures signaling, media, and routing are correctly established for
+                /// all tracks as part of the join process.
                 try await coordinator.stateAdapter.configurePeerConnections()
 
                 // Once our PeerConnection have been created we consume the

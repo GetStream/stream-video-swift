@@ -122,7 +122,8 @@ extension Call.StateMachine.Stage {
                 callSettings: input.callSettings,
                 options: input.options,
                 ring: input.ring,
-                notify: input.notify
+                notify: input.notify,
+                source: input.source
             )
 
             if let callSettings = input.callSettings {

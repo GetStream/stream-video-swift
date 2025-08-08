@@ -105,24 +105,29 @@ class CallController: @unchecked Sendable {
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didFetch($0) }
     }
 
-    /// Joins a call with the provided information.
+    /// Joins a call with the provided information and join source.
+    ///
     /// - Parameters:
-    ///  - callType: the type of the call
-    ///  - callId: the id of the call
-    ///  - callSettings: the current call settings
-    ///  - videoOptions: configuration options about the video
-    ///  - options: create call options
-    ///  - migratingFrom: if SFU migration is being performed
-    ///  - ring: whether ringing events should be handled
-    ///  - notify: whether uses should be notified about the call
-    /// - Returns: a newly created `Call`.
+    ///   - callType: The type of the call.
+    ///   - callId: The id of the call.
+    ///   - callSettings: The current call settings.
+    ///   - videoOptions: Configuration options about the video.
+    ///   - options: Create call options.
+    ///   - migratingFrom: If SFU migration is being performed.
+    ///   - ring: Whether ringing events should be handled.
+    ///   - notify: Whether users should be notified about the call.
+    ///   - source: Describes the source from which the join action was triggered.
+    ///            Use this to indicate if the call was joined from in-app UI or
+    ///            via CallKit.
+    /// - Returns: A newly created `JoinCallResponse`.
     @discardableResult
     func joinCall(
         create: Bool = true,
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
         ring: Bool = false,
-        notify: Bool = false
+        notify: Bool = false,
+        source: JoinSource
     ) async throws -> JoinCallResponse {
         joinCallResponseSubject = .init(nil)
 
@@ -131,7 +136,8 @@ class CallController: @unchecked Sendable {
             callSettings: callSettings,
             options: options,
             ring: ring,
-            notify: notify
+            notify: notify,
+            source: source
         )
         
         guard
@@ -479,8 +485,8 @@ class CallController: @unchecked Sendable {
     ///
     /// - Parameter policy: The audio session policy to apply
     /// - Throws: An error if the policy update fails
-    func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async throws {
-        try await webRTCCoordinator.updateAudioSessionPolicy(policy)
+    func updateAudioSessionPolicy(_ policy: AudioSessionPolicy) async {
+        await webRTCCoordinator.updateAudioSessionPolicy(policy)
     }
 
     /// Sets up observation of WebRTC state changes.
@@ -499,10 +505,6 @@ class CallController: @unchecked Sendable {
             .log(.debug) { "WebRTC stack connection status updated to \($0.id)." }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.webRTCClientDidUpdateStage($0) }
-    }
-
-    internal func callKitActivated(_ audioSession: AVAudioSessionProtocol) throws {
-        try webRTCCoordinator.callKitActivated(audioSession)
     }
 
     // MARK: - Client Capabilities

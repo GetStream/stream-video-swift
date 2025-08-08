@@ -18,7 +18,8 @@ class CallController_Mock: CallController, @unchecked Sendable {
         callSettings: CallSettings?,
         options: CreateCallOptions? = nil,
         ring: Bool = false,
-        notify: Bool = false
+        notify: Bool = false,
+        source: JoinSource
     ) async throws -> JoinCallResponse {
         mockResponseBuilder.makeJoinCallResponse(cid: super.call?.cId ?? "default:\(String.unique)")
     }

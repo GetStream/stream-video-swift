@@ -58,7 +58,8 @@ final class WebRTCIntegrationTests: XCTestCase, @unchecked Sendable {
                                 callSettings: nil,
                                 options: nil,
                                 ring: false,
-                                notify: false
+                                notify: false,
+                                source: .inApp
                             )
                         },
                         .init {

@@ -475,7 +475,45 @@ final class Call_Tests: StreamVideoTestCase {
 
         XCTAssertEqual(mockCallController.timesCalled(.join), 1)
     }
-    
+
+    func test_join_stateContainsJoinSource_joinSourceWasPassedToCallController() async throws {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init())
+        mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+
+        call.state.joinSource = .callKit
+        _ = try await call.join()
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self,
+                for: .join
+            )?.first?.5,
+            .callKit
+        )
+    }
+
+    func test_join_stateDoesNotJoinSource_joinSourceDefaultsToInAppAndWasPassedToCallController() async throws {
+        let mockCallController = MockCallController()
+        let call = MockCall(.dummy(callController: mockCallController))
+        call.stub(for: \.state, with: .init())
+        mockCallController.stub(for: .join, with: JoinCallResponse.dummy())
+
+        call.state.joinSource = nil
+        _ = try await call.join()
+
+        XCTAssertEqual(
+            mockCallController.recordedInputPayload(
+                (Bool, CallSettings?, CreateCallOptions?, Bool, Bool, JoinSource).self,
+                for: .join
+            )?.first?.5,
+            .inApp
+        )
+    }
+
+    // MARK: - updateParticipantsSorting
+
     func test_call_customSorting() async throws {
         // Given
         let nameComparator: StreamSortComparator<CallParticipant> = {

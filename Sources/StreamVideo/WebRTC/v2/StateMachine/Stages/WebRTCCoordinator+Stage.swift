@@ -21,6 +21,7 @@ extension WebRTCCoordinator.StateMachine {
             var reconnectionStrategy: ReconnectionStrategy = .unknown
             var disconnectionSource: WebSocketConnectionState.DisconnectionSource? = nil
             var flowError: Error?
+            var joinSource: JoinSource?
 
             var isRejoiningFromSessionID: String? = nil
             var migratingFromSFU: String = ""

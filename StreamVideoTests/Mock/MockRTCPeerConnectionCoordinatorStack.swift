@@ -12,7 +12,7 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
     let peerConnection: MockRTCPeerConnection
     let peerConnectionFactory: PeerConnectionFactory
     let mockSFUStack: MockSFUStack
-    let audioSession: StreamAudioSession
+    let audioSession: CallAudioSession
     let spySubject: PassthroughSubject<TrackEvent, Never>
     let mockLocalAudioMediaAdapter: MockLocalMediaAdapter
     let mockLocalVideoMediaAdapter: MockLocalMediaAdapter
@@ -35,7 +35,7 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
         peerConnection: MockRTCPeerConnection = .init(),
         peerConnectionFactory: PeerConnectionFactory = .mock(),
         mockSFUStack: MockSFUStack = .init(),
-        audioSession: StreamAudioSession? = nil,
+        audioSession: CallAudioSession? = nil,
         spySubject: PassthroughSubject<TrackEvent, Never> = .init(),
         mockLocalAudioMediaAdapter: MockLocalMediaAdapter = .init(),
         mockLocalVideoMediaAdapter: MockLocalMediaAdapter = .init(),
@@ -46,7 +46,7 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
         self.peerConnection = peerConnection
         self.peerConnectionFactory = peerConnectionFactory
         self.mockSFUStack = mockSFUStack
-        self.audioSession = audioSession ?? .init(audioDeviceModule: peerConnectionFactory.audioDeviceModule)
+        self.audioSession = audioSession ?? .init()
         self.spySubject = spySubject
         self.mockLocalAudioMediaAdapter = mockLocalAudioMediaAdapter
         self.mockLocalVideoMediaAdapter = mockLocalVideoMediaAdapter

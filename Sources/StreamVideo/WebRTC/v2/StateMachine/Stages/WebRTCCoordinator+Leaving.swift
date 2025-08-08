@@ -47,7 +47,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             from previousStage: WebRTCCoordinator.StateMachine.Stage
         ) -> Self? {
             switch previousStage.id {
-            case .joined, .disconnected:
+            case .joined, .disconnected, .connecting, .connected:
                 execute()
                 return self
             default:

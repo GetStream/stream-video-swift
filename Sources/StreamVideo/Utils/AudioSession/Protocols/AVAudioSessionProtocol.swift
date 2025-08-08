@@ -25,9 +25,17 @@ protocol AVAudioSessionProtocol {
     func setOverrideOutputAudioPort(
         _ port: AVAudioSession.PortOverride
     ) throws
+
+    /// The method uses a slightly different name to avoid compiler not being able to automatically
+    /// fulfil the conformance to this protocol.
+    func setIsActive(_ active: Bool) throws
 }
 
 extension AVAudioSession: AVAudioSessionProtocol {
+    func setIsActive(_ active: Bool) throws {
+        try setActive(active)
+    }
+    
     func setCategory(
         _ category: Category,
         mode: Mode,

@@ -15,6 +15,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.currentDevice) private var currentDevice
+    @Injected(\.audioStore) private var audioStore
     private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
@@ -95,6 +96,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
+    /// A reducer responsible for handling audio session changes triggered by CallKit.
+    ///
+    /// The `callKitAudioReducer` manages updates to the audio session state in
+    /// response to CallKit events, ensuring proper activation and deactivation
+    /// of the audio system when calls are handled through CallKit.
+    private lazy var callKitAudioReducer = CallKitAudioSessionReducer(store: audioStore)
+
     /// Initializes the `CallKitService` instance.
     override public init() {
         super.init()
@@ -164,6 +172,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 return
             }
             do {
+
                 if streamVideo.state.connection != .connected {
                     let result = await Task(disposableBag: disposableBag) { [weak self] in
                         try await self?.streamVideo?.connect()
@@ -392,17 +401,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        if
-            let active,
-            let call = callEntry(for: active)?.call {
-            call.didPerform(.didActivateAudioSession)
-
-            do {
-                try call.callKitActivated(audioSession)
-            } catch {
-                log.error(error, subsystems: .callKit)
-            }
-        }
+        /// Activates the audio session for CallKit. This line notifies the audio store
+        /// to activate the provided AVAudioSession, ensuring that the app's audio
+        /// routing and configuration are correctly handled when CallKit takes control
+        /// of the audio session during a call.
+        audioStore.dispatch(.callKit(.activate(audioSession)))
     }
 
     public func provider(
@@ -421,11 +424,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             """,
             subsystems: .callKit
         )
-        if
-            let active,
-            let call = callEntry(for: active)?.call {
-            call.didPerform(.didDeactivateAudioSession)
-        }
+
+        /// Notifies the audio store to deactivate the provided AVAudioSession.
+        /// This ensures that when CallKit relinquishes control of the audio session,
+        /// the app's audio routing and configuration are updated appropriately.
+        audioStore.dispatch(.callKit(.deactivate(audioSession)))
     }
 
     open func provider(
@@ -460,6 +463,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
 
             do {
+                /// Sets the join source to `.callKit` to indicate that the call was
+                /// joined via CallKit. This helps with audioSession management.
+                callToJoinEntry.call.state.joinSource = .callKit
+
                 try await callToJoinEntry.call.join(callSettings: callSettings)
                 action.fulfill()
             } catch {
@@ -640,9 +647,16 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// A method that's being called every time the StreamVideo instance is getting updated.
     /// - Parameter streamVideo: The new StreamVideo instance (nil if none)
     open func didUpdate(_ streamVideo: StreamVideo?) {
+        if streamVideo != nil {
+            audioStore.add(callKitAudioReducer)
+        } else {
+            audioStore.remove(callKitAudioReducer)
+        }
+
         guard currentDevice.deviceType != .simulator else {
             return
         }
+
         subscribeToCallEvents()
     }
 

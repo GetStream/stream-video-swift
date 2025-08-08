@@ -30,6 +30,7 @@ extension Call.StateMachine {
                 var options: CreateCallOptions?
                 var ring: Bool
                 var notify: Bool
+                var source: JoinSource
                 var deliverySubject: PassthroughSubject<JoinCallResponse, Error>
 
                 var currentNumberOfRetries = 0

@@ -312,6 +312,30 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
         cancellable.cancel()
     }
 
+    func test_transition_fromConnected_configuresAudioSession() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .joined,
+            subject: subject
+        ) {
+            let audioSession = await $0.context.coordinator?.stateAdapter.audioSession
+            XCTAssertNotNil(audioSession?.delegate)
+        }
+        cancellable.cancel()
+    }
+
     func test_transition_fromConnectedSFUConnected_updatesParticipants() async throws {
         subject.context.coordinator = mockCoordinatorStack.coordinator
         subject.context.reconnectAttempts = 11
@@ -726,6 +750,30 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             let subscriber = await $0.context.coordinator?.stateAdapter.subscriber
             XCTAssertNotNil(publisher)
             XCTAssertNotNil(subscriber)
+        }
+        cancellable.cancel()
+    }
+
+    func test_transition_fromConnectedWithRejoin_configuresAudioSession() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.isRejoiningFromSessionID = .unique
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .connected,
+            expectedTarget: .joined,
+            subject: subject
+        ) {
+            let audioSession = await $0.context.coordinator?.stateAdapter.audioSession
+            XCTAssertNotNil(audioSession?.delegate)
         }
         cancellable.cancel()
     }
@@ -1353,6 +1401,31 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             let subscriber = await $0.context.coordinator?.stateAdapter.subscriber
             XCTAssertNotNil(publisher)
             XCTAssertNotNil(subscriber)
+        }
+        cancellable.cancel()
+    }
+
+    func test_transition_fromMigrated_configuresAudioSession() async throws {
+        subject.context.coordinator = mockCoordinatorStack.coordinator
+        subject.context.reconnectAttempts = 11
+        subject.context.migratingFromSFU = "test-sfu"
+        await mockCoordinatorStack
+            .coordinator
+            .stateAdapter
+            .set(sfuAdapter: mockCoordinatorStack.sfuStack.adapter)
+        mockCoordinatorStack.webRTCAuthenticator.stubbedFunction[.waitForConnect] = Result<Void, Error>.success(())
+        let cancellable = receiveEvent(
+            .sfuEvent(.joinResponse(Stream_Video_Sfu_Event_JoinResponse())),
+            every: 0.3
+        )
+
+        try await assertTransition(
+            from: .migrated,
+            expectedTarget: .joined,
+            subject: subject
+        ) {
+            let audioSession = await $0.context.coordinator?.stateAdapter.audioSession
+            XCTAssertNotNil(audioSession?.delegate)
         }
         cancellable.cancel()
     }

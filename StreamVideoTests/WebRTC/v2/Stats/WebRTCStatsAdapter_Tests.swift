@@ -51,27 +51,6 @@ final class WebRTCStatsAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(called?.contains(trace) ?? false)
     }
 
-    func test_setCallSettings_propagatesToTraces() {
-        let settings = CallSettings(
-            audioOn: true,
-            videoOn: false,
-            speakerOn: false,
-            audioOutputOn: true,
-            cameraPosition: .front
-        )
-        subject.callSettings = settings
-        XCTAssertEqual(mockTraces.callSettings, settings)
-    }
-
-    func test_setAudioSession_propagatesToTraces() {
-        let peerConnectionFactory = PeerConnectionFactory.mock()
-        let session = StreamAudioSession(
-            audioDeviceModule: peerConnectionFactory.audioDeviceModule
-        )
-        subject.audioSession = session
-        XCTAssertTrue(mockTraces.audioSession === session)
-    }
-
     func test_setPublisher_setsOnCollectorAndTraces() throws {
         let mockPub = try MockRTCPeerConnectionCoordinator(
             peerType: .publisher,

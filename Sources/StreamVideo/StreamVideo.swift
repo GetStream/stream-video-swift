@@ -16,6 +16,7 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     @Injected(\.callCache) private var callCache
     @Injected(\.screenProperties) private var screenProperties
+    @Injected(\.audioStore) private var audioStore
 
     private enum DisposableKey: String { case ringEventReceived }
 

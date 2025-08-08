@@ -653,32 +653,6 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         ) { _ in }
     }
 
-    func test_transition_callSettingsUpdated_statsAdapterUpdated() async throws {
-        try XCTSkipIf(
-            ProcessInfo().operatingSystemVersion.majorVersion == 15,
-            "https://linear.app/stream/issue/IOS-923"
-        )
-        
-        let statsAdapter = MockWebRTCStatsAdapter()
-        await mockCoordinatorStack.coordinator.stateAdapter.set(
-            statsAdapter: statsAdapter
-        )
-
-        let updateCallSettings = CallSettings(audioOn: true, videoOn: true)
-
-        await assertResultAfterTrigger(
-            trigger: { [mockCoordinatorStack] in
-                await mockCoordinatorStack?
-                    .coordinator
-                    .stateAdapter
-                    .set(callSettings: updateCallSettings)
-            }
-        ) { expectation in
-            XCTAssertEqual(statsAdapter.callSettings, updateCallSettings)
-            expectation.fulfill()
-        }
-    }
-
     func test_transition_callSettingsUpdated_publisherUpdated() async throws {
         await mockCoordinatorStack.coordinator.stateAdapter.set(
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
@@ -690,7 +664,6 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         let publisher = await mockCoordinatorStack?.coordinator.stateAdapter.publisher
         let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
         let updateCallSettings = CallSettings(audioOn: true, videoOn: true)
-        let audioSession = await mockCoordinatorStack.coordinator.stateAdapter.audioSession
 
         await assertResultAfterTrigger(
             trigger: { [mockCoordinatorStack] in
@@ -699,9 +672,8 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
                     .stateAdapter
                     .set(callSettings: updateCallSettings)
             }
-        ) { [mockPublisher, audioSession] expectation in
+        ) { [mockPublisher] expectation in
             XCTAssertEqual(mockPublisher.timesCalled(.didUpdateCallSettings), 1)
-            XCTAssertEqual(audioSession.activeCallSettings, updateCallSettings)
             expectation.fulfill()
         }
     }
