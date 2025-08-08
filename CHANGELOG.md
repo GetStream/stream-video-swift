@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+
+### ✅ Added
+- The SDK now handles the interruptions produced from AVCaptureSession to ensure video capturing is active when needed. [#907](https://github.com/GetStream/stream-video-swift/pull/907)
+
 ### 🐞 Fixed
 - AudioSession management issues that were causing audio not being recorded during calls. [#906](https://github.com/GetStream/stream-video-swift/pull/906)
 

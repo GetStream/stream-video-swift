@@ -52,7 +52,8 @@ final class StreamVideoCapturer: StreamVideoCapturing {
                 CameraFocusHandler(),
                 CameraCapturePhotoHandler(),
                 CameraVideoOutputHandler(),
-                CameraZoomHandler()
+                CameraZoomHandler(),
+                CameraInterruptionsHandler()
             ]
         )
         #endif

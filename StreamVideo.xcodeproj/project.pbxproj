@@ -711,6 +711,7 @@
 		40D36AE22DDE023800972D75 /* WebRTCStatsCollecting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36AE12DDE023800972D75 /* WebRTCStatsCollecting.swift */; };
 		40D36AE42DDE02D100972D75 /* MockWebRTCStatsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D36AE32DDE02D100972D75 /* MockWebRTCStatsCollector.swift */; };
 		40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */; };
+		40D75C652E44F5CE000E0438 /* CameraInterruptionsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C642E44F5CE000E0438 /* CameraInterruptionsHandler.swift */; };
 		40D75C522E437FBC000E0438 /* InterruptionEffect_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C512E437FBC000E0438 /* InterruptionEffect_Tests.swift */; };
 		40D75C542E438317000E0438 /* RouteChangeEffect_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C532E438317000E0438 /* RouteChangeEffect_Tests.swift */; };
 		40D75C562E4385FE000E0438 /* MockAVAudioSessionPortDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D75C552E4385FE000E0438 /* MockAVAudioSessionPortDescription.swift */; };
@@ -2243,6 +2244,7 @@
 		40D36AE12DDE023800972D75 /* WebRTCStatsCollecting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCStatsCollecting.swift; sourceTree = "<group>"; };
 		40D36AE32DDE02D100972D75 /* MockWebRTCStatsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebRTCStatsCollector.swift; sourceTree = "<group>"; };
 		40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer_Tests.swift; sourceTree = "<group>"; };
+		40D75C642E44F5CE000E0438 /* CameraInterruptionsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraInterruptionsHandler.swift; sourceTree = "<group>"; };
 		40D75C512E437FBC000E0438 /* InterruptionEffect_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterruptionEffect_Tests.swift; sourceTree = "<group>"; };
 		40D75C532E438317000E0438 /* RouteChangeEffect_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteChangeEffect_Tests.swift; sourceTree = "<group>"; };
 		40D75C552E4385FE000E0438 /* MockAVAudioSessionPortDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVAudioSessionPortDescription.swift; sourceTree = "<group>"; };
@@ -5203,6 +5205,7 @@
 				40E3635E2D0A18B10028C52A /* CameraZoomHandler.swift */,
 				40E3635A2D0A15E40028C52A /* CameraCapturePhotoHandler.swift */,
 				40E3635C2D0A17C10028C52A /* CameraVideoOutputHandler.swift */,
+				40D75C642E44F5CE000E0438 /* CameraInterruptionsHandler.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -8169,6 +8172,7 @@
 				40AD64C42DC269E60077AE15 /* ProximityMonitor.swift in Sources */,
 				40AD64C52DC269E60077AE15 /* VideoProximityPolicy.swift in Sources */,
 				40AD64C62DC269E60077AE15 /* ProximityPolicy.swift in Sources */,
+				40D75C652E44F5CE000E0438 /* CameraInterruptionsHandler.swift in Sources */,
 				40AD64C72DC269E60077AE15 /* SpeakerProximityPolicy.swift in Sources */,
 				841BAA3D2BD15CDE000C73E4 /* GetCallStatsResponse.swift in Sources */,
 				842E70D92B91BE1700D2D68B /* CallClosedCaption.swift in Sources */,

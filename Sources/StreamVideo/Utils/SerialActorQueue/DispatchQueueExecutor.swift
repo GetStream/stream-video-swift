@@ -98,6 +98,6 @@ final class DispatchQueueExecutor: SerialExecutor, @unchecked Sendable {
     }
 }
 
-#if swift(>=6.0)
+#if compiler(>=6.0)
 extension DispatchQueueExecutor: TaskExecutor {}
 #endif
