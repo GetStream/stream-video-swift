@@ -67,14 +67,6 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
     private var participantCount: Int {
         call?.state.participants.count ?? 0
     }
-    
-    private var horizontalPadding: CGFloat {
-        if #available(iOS 26, *) {
-            return 16
-        } else {
-            return 4
-        }
-    }
 }
 
 extension View {
