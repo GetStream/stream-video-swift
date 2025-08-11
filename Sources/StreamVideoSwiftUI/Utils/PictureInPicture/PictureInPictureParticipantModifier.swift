@@ -41,14 +41,16 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
                     HStack {
                         ParticipantInfoView(
                             participant: participant,
-                            isPinned: participant.isPinned
+                            isPinned: participant.isPinned,
+                            paddingsConfig: .participantInfoViewPiP
                         )
 
                         Spacer()
 
                         if showAllInfo {
                             ConnectionQualityIndicator(
-                                connectionQuality: participant.connectionQuality
+                                connectionQuality: participant.connectionQuality,
+                                paddingsConfig: .connectionIndicator
                             )
                         }
                     }
@@ -64,6 +66,14 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
     @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
+    }
+    
+    private var horizontalPadding: CGFloat {
+        if #available(iOS 26, *) {
+            return 16
+        } else {
+            return 4
+        }
     }
 }
 
