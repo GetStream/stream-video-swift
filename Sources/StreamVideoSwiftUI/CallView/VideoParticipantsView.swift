@@ -413,7 +413,7 @@ public struct ParticipantInfoView: View {
     var maxHeight: CGFloat
     var paddingsConfig: PaddingsConfig
 
-    public init(
+    @MainActor public init(
         participant: CallParticipant,
         isPinned: Bool,
         maxHeight: Float = 14,
