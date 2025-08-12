@@ -185,7 +185,7 @@ struct SimpleCallingView: View {
 
     private func setAudioSessionPolicyOverride(for callId: String) async throws {
         let call = streamVideo.call(callType: callType, callId: callId)
-        try await call.updateAudioSessionPolicy(AppEnvironment.audioSessionPolicy.value)
+        await call.updateAudioSessionPolicy(AppEnvironment.audioSessionPolicy.value)
     }
 
     private func setProximityPolicies(for callId: String) throws {

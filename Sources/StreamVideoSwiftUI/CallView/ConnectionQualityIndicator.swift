@@ -11,6 +11,7 @@ public struct ConnectionQualityIndicator: View {
 
     private var size: CGFloat = 28
     private var width: CGFloat = 3
+    private var paddingsConfig: EdgeInsets
 
     /// The connection quality represented by this indicator.
     var connectionQuality: ConnectionQuality
@@ -23,11 +24,13 @@ public struct ConnectionQualityIndicator: View {
     public init(
         connectionQuality: ConnectionQuality,
         size: CGFloat = 28,
-        width: CGFloat = 3
+        width: CGFloat = 3,
+        paddingsConfig: EdgeInsets = EdgeInsets()
     ) {
         self.connectionQuality = connectionQuality
         self.size = size
         self.width = width
+        self.paddingsConfig = paddingsConfig
     }
 
     public var body: some View {
@@ -41,6 +44,7 @@ public struct ConnectionQualityIndicator: View {
             }
         }
         .frame(width: size, height: size)
+        .padding(paddingsConfig)
         .cornerRadius(
             8,
             corners: [.topLeft],
