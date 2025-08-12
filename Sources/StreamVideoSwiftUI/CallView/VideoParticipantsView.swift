@@ -411,13 +411,13 @@ public struct ParticipantInfoView: View {
     var participant: CallParticipant
     var isPinned: Bool
     var maxHeight: CGFloat
-    var paddingsConfig: PaddingsConfig
+    var paddingsConfig: EdgeInsets
 
     @MainActor public init(
         participant: CallParticipant,
         isPinned: Bool,
         maxHeight: Float = 14,
-        paddingsConfig: PaddingsConfig = .participantInfoView
+        paddingsConfig: EdgeInsets = .participantInfoView
     ) {
         self.participant = participant
         self.isPinned = isPinned
@@ -455,10 +455,7 @@ public struct ParticipantInfoView: View {
             SoundIndicator(participant: participant)
                 .frame(maxHeight: maxHeight)
         }
-        .padding(.leading, paddingsConfig.leading)
-        .padding(.trailing, paddingsConfig.trailing)
-        .padding(.top, paddingsConfig.top)
-        .padding(.bottom, paddingsConfig.bottom)
+        .padding(paddingsConfig)
         .frame(height: 28)
         .cornerRadius(
             8,
