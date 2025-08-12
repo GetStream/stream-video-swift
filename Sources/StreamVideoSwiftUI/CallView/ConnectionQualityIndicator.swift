@@ -21,7 +21,7 @@ public struct ConnectionQualityIndicator: View {
     ///   - connectionQuality: The connection quality to be represented.
     ///   - size: The size of the indicator view.
     ///   - width: The width of each segment in the indicator.
-    @MainActor public init(
+    public init(
         connectionQuality: ConnectionQuality,
         size: CGFloat = 28,
         width: CGFloat = 3,
