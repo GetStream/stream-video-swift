@@ -71,9 +71,12 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     func test_setCallSettings_shouldUpdateCallSettings() async throws {
         let expected = CallSettings(cameraPosition: .back)
 
-        await subject.set(callSettings: expected)
+        await subject.enqueueCallSettings { _ in expected }
 
-        await assertEqualAsync(await subject.callSettings, expected)
+        await fulfillment {
+            let currentValue = await self.subject.callSettings
+            return currentValue == expected
+        }
     }
 
     // MARK: - setInitialCallSettings
@@ -330,13 +333,21 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
         await subject.set(ownCapabilities: ownCapabilities)
         let callSettings = CallSettings(cameraPosition: .back)
-        await subject.set(callSettings: callSettings)
+        await subject.enqueueCallSettings { _ in callSettings }
+        await fulfillment {
+            let currentValue = await self.subject.callSettings
+            return currentValue == callSettings
+        }
 
         try await subject.configurePeerConnections()
 
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
 
+        await fulfillment {
+            mockPublisher.timesCalled(.setUp) == 1
+                && mockSubscriber.timesCalled(.setUp) == 1
+        }
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
                 (CallSettings, [OwnCapability]).self,
@@ -388,7 +399,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let ownCapabilities = Set([OwnCapability.blockUsers, .changeMaxDuration])
         await subject.set(ownCapabilities: ownCapabilities)
         let callSettings = CallSettings(cameraPosition: .back)
-        await subject.set(callSettings: callSettings)
+        await subject.enqueueCallSettings { _ in callSettings }
 
         try await subject.configurePeerConnections()
 
@@ -594,7 +605,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             participants: participants,
             participantPins: pins
         )
-        await subject.set(callSettings: .init(cameraPosition: .back))
+        await subject.enqueueCallSettings { _ in .init(cameraPosition: .back) }
 
         await subject.cleanUpForReconnection()
 
@@ -798,28 +809,31 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - audioSessionDidUpdateCallSettings
 
     func test_audioSessionDidUpdateCallSettings_updatesCallSettingsAsExpected() async {
-        let updatedCallSettings = CallSettings(
+        let initialCallSettings = CallSettings(
             audioOn: false,
             videoOn: false,
-            speakerOn: true,
+            speakerOn: false,
             audioOutputOn: false,
             cameraPosition: .back
         )
+        await subject.enqueueCallSettings { _ in initialCallSettings }
+        await fulfillment {
+            let currentValue = await self.subject.callSettings
+            return currentValue == initialCallSettings
+        }
 
-        subject.audioSessionAdapterDidUpdateCallSettings(
-            callSettings: updatedCallSettings
+        subject.audioSessionAdapterDidUpdateSpeakerOn(
+            true
         )
 
-        await fulfillment { [subject] in
-            await subject?.callSettings == updatedCallSettings
-        }
+        await fulfillment { await self.subject.callSettings.speakerOn }
     }
 
     // MARK: - updateCallSettings
 
     func test_updateCallSettings_noChanges_callSettingsDoNotChange() async {
         let sessionID = await subject.sessionID
-        await subject.set(callSettings: .init(audioOn: true, videoOn: true))
+        await subject.enqueueCallSettings { _ in .init(audioOn: true, videoOn: true) }
         var event = Stream_Video_Sfu_Event_TrackUnpublished()
         event.participant = Stream_Video_Sfu_Models_Participant()
         event.participant.sessionID = sessionID
@@ -833,7 +847,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_updateCallSettings_withChangesInAudio_callSettingsDidUpdate() async {
         let sessionID = await subject.sessionID
-        await subject.set(callSettings: .init(audioOn: true, videoOn: true))
+        await subject.enqueueCallSettings { _ in .init(audioOn: true, videoOn: true) }
         var event = Stream_Video_Sfu_Event_TrackUnpublished()
         event.participant = Stream_Video_Sfu_Models_Participant()
         event.participant.sessionID = sessionID
@@ -841,13 +855,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await subject.updateCallSettings(from: event)
 
-        await assertFalseAsync(await subject.callSettings.audioOn)
-        await assertTrueAsync(await subject.callSettings.videoOn)
+        await fulfillment {
+            let currentValue = await self.subject.callSettings
+            return currentValue.audioOn == false && currentValue.videoOn == true
+        }
     }
 
     func test_updateCallSettings_withChangesInVideo_callSettingsDidUpdate() async {
         let sessionID = await subject.sessionID
-        await subject.set(callSettings: .init(audioOn: true, videoOn: true))
+        await subject.enqueueCallSettings { _ in .init(audioOn: true, videoOn: true) }
         var event = Stream_Video_Sfu_Event_TrackUnpublished()
         event.participant = Stream_Video_Sfu_Models_Participant()
         event.participant.sessionID = sessionID
@@ -855,8 +871,39 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
         await subject.updateCallSettings(from: event)
 
-        await assertTrueAsync(await subject.callSettings.audioOn)
-        await assertFalseAsync(await subject.callSettings.videoOn)
+        await fulfillment {
+            let currentValue = await self.subject.callSettings
+            return currentValue.audioOn == true && currentValue.videoOn == false
+        }
+    }
+
+    // MARK: - enqueueCallSettings
+
+    func test_enqueueCallSettings_withChanges_publisherWasUpdated() async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+
+        let newCallSettings = CallSettings(
+            audioOn: false,
+            videoOn: true,
+            speakerOn: false,
+            audioOutputOn: true,
+            cameraPosition: .back
+        )
+
+        await subject.enqueueCallSettings { _ in newCallSettings }
+        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+
+        await fulfillment {
+            mockPublisher.timesCalled(.didUpdateCallSettings) == 1
+        }
+
+        let updatedCallSettings = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(CallSettings.self, for: .didUpdateCallSettings)?
+                .first
+        )
+        XCTAssertEqual(updatedCallSettings, newCallSettings)
     }
 
     // MARK: - Private helpers
@@ -916,7 +963,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(sfuAdapter: sfuStack.adapter)
         await subject.set(videoFilter: videoFilter)
         await subject.set(ownCapabilities: ownCapabilities)
-        await subject.set(callSettings: callSettings)
+        await subject.enqueueCallSettings { _ in callSettings }
         await subject.set(token: .unique)
         await subject.set(participantsCount: 12)
         await subject.set(anonymousCount: 22)

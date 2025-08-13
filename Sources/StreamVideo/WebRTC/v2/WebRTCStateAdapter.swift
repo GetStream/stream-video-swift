@@ -90,6 +90,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let peerConnectionsDisposableBag = DisposableBag()
 
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private var queuedTraces: ConsumableBucket<WebRTCTrace> = .init()
 
     /// Initializes the WebRTC state adapter with user details and connection
@@ -133,28 +134,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     }
 
     /// Sets the call settings.
-    func set(
+    private func set(
         callSettings value: CallSettings,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-    ) {
-        guard value != callSettings else {
-            return
-        }
-        log.debug(
-            """
-            Updating CallSettings
-            From: \(callSettings)
-            To: \(value)
-            """,
-            subsystems: .webRTC,
-            functionName: function,
-            fileName: file,
-            lineNumber: line
-        )
-        self.callSettings = value
-    }
+    ) { self.callSettings = value }
 
     /// Sets the initial call settings.
     func set(initialCallSettings value: CallSettings?) { self.initialCallSettings = value }
@@ -491,6 +476,40 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         }
     }
 
+    func enqueueCallSettings(
+        functionName: StaticString = #function,
+        fileName: StaticString = #fileID,
+        lineNumber: UInt = #line,
+        _ operation: @Sendable @escaping (CallSettings) -> CallSettings
+    ) {
+        callSettingsProcessingQueue.addTaskOperation { [weak self] in
+            guard
+                let self
+            else {
+                return
+            }
+
+            let currentCallSettings = await callSettings
+            let updatedCallSettings = operation(currentCallSettings)
+            guard
+                updatedCallSettings != currentCallSettings
+            else {
+                return
+            }
+
+            await set(callSettings: updatedCallSettings)
+
+            guard
+                let publisher = await self.publisher
+            else {
+                return
+            }
+
+            try await publisher.didUpdateCallSettings(updatedCallSettings)
+            log.debug("Publisher callSettings updated: \(updatedCallSettings).", subsystems: .webRTC)
+        }
+    }
+
     func trace(_ trace: WebRTCTrace) {
         if let statsAdapter {
             statsAdapter.trace(trace)
@@ -561,25 +580,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             return
         }
 
-        let currentCallSettings = self.callSettings
-        let possibleNewCallSettings = {
-            switch event.type {
-            case .audio:
-                return currentCallSettings.withUpdatedAudioState(false)
-            case .video:
-                return currentCallSettings.withUpdatedVideoState(false)
-            default:
-                return currentCallSettings
-            }
-        }()
-
-        guard
-            currentCallSettings != possibleNewCallSettings
-        else {
-            return
+        enqueueCallSettings { currentCallSettings in
+            let possibleNewCallSettings = {
+                switch event.type {
+                case .audio:
+                    return currentCallSettings.withUpdatedAudioState(false)
+                case .video:
+                    return currentCallSettings.withUpdatedVideoState(false)
+                default:
+                    return currentCallSettings
+                }
+            }()
+            return possibleNewCallSettings
         }
-
-        set(callSettings: possibleNewCallSettings)
     }
 
     // MARK: - Private Helpers
@@ -649,16 +662,16 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     // MARK: - AudioSessionDelegate
 
-    nonisolated func audioSessionAdapterDidUpdateCallSettings(
-        callSettings: CallSettings
-    ) {
+    nonisolated func audioSessionAdapterDidUpdateSpeakerOn(_ speakerOn: Bool) {
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else {
                 return
             }
-            await self.set(callSettings: callSettings)
+            await self.enqueueCallSettings {
+                $0.withUpdatedSpeakerState(speakerOn)
+            }
             log.debug(
-                "AudioSession delegated updated call settings: \(callSettings)",
+                "AudioSession delegated updated speakerOn:\(speakerOn).",
                 subsystems: .audioSession
             )
         }

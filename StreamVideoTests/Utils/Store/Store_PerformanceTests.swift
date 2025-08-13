@@ -72,7 +72,6 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
                 }
                 
                 let elapsed = CFAbsoluteTimeGetCurrent() - start
-                print("Average sync dispatch latency: \(elapsed / 100 * 1000)ms")
                 
                 expectation.fulfill()
             }
@@ -141,8 +140,6 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
             }
             
             wait(for: [expectation], timeout: 10)
-            
-            print("Publisher notifications: \(receivedCount)")
             
             // Reset
             store.dispatch(.reset)

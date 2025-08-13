@@ -749,18 +749,16 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
     }
 
     private func assertWebRTCCoordinatorSettingsUpdated(
-        expected: @autoclosure () -> CallSettings,
+        expected: @Sendable @escaping @autoclosure () -> CallSettings,
         _ operation: () async throws -> Void,
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
         try await operation()
-        await assertEqualAsync(
-            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.callSettings,
-            expected(),
-            file: file,
-            line: line
-        )
+        await fulfillment(file: file, line: line) {
+            let callSettings = await self.mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.callSettings
+            return callSettings == expected()
+        }
     }
 
     private func assertNilAsync<T>(
@@ -788,7 +786,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
             await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(videoFilter: videoFilter)
         }
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(ownCapabilities: ownCapabilities)
-        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(callSettings: callSettings)
+        await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.enqueueCallSettings { _ in callSettings }
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(sessionID: .unique)
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(token: .unique)
         await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.set(participantsCount: 12)
