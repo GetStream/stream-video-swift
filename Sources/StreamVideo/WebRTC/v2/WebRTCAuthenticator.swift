@@ -95,9 +95,9 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         {
             callSettings = callSettings.withUpdatedSpeakerState(false)
         }
-        await coordinator.stateAdapter.set(
-            callSettings: callSettings
-        )
+        await coordinator
+            .stateAdapter
+            .enqueueCallSettings { _ in callSettings }
 
         await coordinator.stateAdapter.set(
             videoOptions: .init(preferredCameraPosition: {
