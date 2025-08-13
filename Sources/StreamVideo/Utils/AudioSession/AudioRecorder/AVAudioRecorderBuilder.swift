@@ -37,7 +37,7 @@ final class AVAudioRecorderBuilder {
     var result: AVAudioRecorder? { cachedResult }
 
     init(
-        inCacheDirectoryWithFilename filename: String,
+        inCacheDirectoryWithFilename filename: String = "recording.wav",
         settings: [String: any Sendable] = AVAudioRecorderBuilder.defaultRecordingSettings
     ) {
         let documentPath = FileManager.default.urls(

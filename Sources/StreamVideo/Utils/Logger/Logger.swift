@@ -33,7 +33,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
         .videoCapturer,
         .pictureInPicture,
         .callKit,
-        .webRTCInternal
+        .webRTCInternal,
+        .audioRecording
     ]
 
     /// All subsystems within the SDK.
@@ -54,7 +55,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
         .videoCapturer,
         .pictureInPicture,
         .callKit,
-        .webRTCInternal
+        .webRTCInternal,
+        .audioRecording
     ]
     
     /// The subsystem responsible for any other part of the SDK.
@@ -91,6 +93,7 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
     /// The subsystem responsible for PicutreInPicture.
     public static let callKit = Self(rawValue: 1 << 15)
     public static let webRTCInternal = Self(rawValue: 1 << 16)
+    public static let audioRecording = Self(rawValue: 1 << 17)
 
     public var description: String {
         switch rawValue {
@@ -128,6 +131,8 @@ public struct LogSubsystem: OptionSet, CustomStringConvertible, Sendable {
             return "CallKit"
         case LogSubsystem.webRTCInternal.rawValue:
             return "webRTC-Internal"
+        case LogSubsystem.audioRecording.rawValue:
+            return "audioRecording"
         default:
             return "unknown(rawValue:\(rawValue)"
         }
