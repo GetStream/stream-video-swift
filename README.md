@@ -14,6 +14,9 @@
   <img id="stream-video-uikit-label" alt="StreamVideoUIKit" src="https://img.shields.io/badge/StreamVideoUIKit-2.41%20MB-blue"/>
   <img id="stream-web-rtc-label" alt="StreamWebRTC" src="https://img.shields.io/badge/StreamWebRTC-9.85%20MB-blue"/>
 </p>
+<p align="center">
+  <a href="https://deepwiki.com/GetStream/stream-video-swift"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+</p>
 
 ![Stream Video for iOS Header image](https://github.com/GetStream/stream-video-swift/assets/12433593/e4a44ae5-a8eb-4ac7-8910-28187aa011f6)
 
