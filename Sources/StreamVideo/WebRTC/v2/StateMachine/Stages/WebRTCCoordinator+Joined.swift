@@ -119,10 +119,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
 
                     try Task.checkCancellation()
 
-                    await observeCallSettingsUpdates()
-
-                    try Task.checkCancellation()
-
                     await observePeerConnectionState()
 
                     try Task.checkCancellation()
@@ -384,42 +380,6 @@ extension WebRTCCoordinator.StateMachine.Stage {
                 .log(.debug, subsystems: .webRTC) { "Reconnection strategy updated to \($0)." }
                 .sink { [weak self] in self?.context.reconnectionStrategy = $0 }
                 .store(in: disposableBag)
-        }
-
-        /// Observes updates to the `callSettings` and ensures that any changes are
-        /// reflected in the publisher. This ensures that updates to audio, video, and
-        /// audio output settings are applied correctly during a WebRTC session.
-        private func observeCallSettingsUpdates() async {
-            await context
-                .coordinator?
-                .stateAdapter
-                .$callSettings
-                .compactMap { $0 }
-                .removeDuplicates()
-                .sinkTask(storeIn: disposableBag) { [weak self] callSettings in
-                    guard let self else { return }
-                    do {
-                        guard
-                            let publisher = await context.coordinator?.stateAdapter.publisher
-                        else {
-                            log.warning(
-                                "PeerConnection hasn't been set up for publishing.",
-                                subsystems: .webRTC
-                            )
-                            return
-                        }
-
-                        try await publisher.didUpdateCallSettings(callSettings)
-                        log.debug("Publisher callSettings updated.", subsystems: .webRTC)
-                    } catch {
-                        log.warning(
-                            "Will disconnect because failed to update callSettings on Publisher.[Error:\(error)]",
-                            subsystems: .webRTC
-                        )
-                        transitionDisconnectOrError(error)
-                    }
-                }
-                .store(in: disposableBag) // Store the Combine subscription in the disposable bag.
         }
 
         /// Observes the connection state of both the publisher and subscriber peer

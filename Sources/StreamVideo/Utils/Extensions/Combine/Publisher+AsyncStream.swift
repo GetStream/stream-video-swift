@@ -28,4 +28,21 @@ public extension Publisher where Output: Sendable {
             }
         }
     }
+
+    func _nextValue(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws -> Output? {
+        if #available(iOS 15.0, *) {
+            for try await value in self.values {
+                return value
+            }
+        } else {
+            for try await value in eraseAsAsyncStream() {
+                return value
+            }
+        }
+
+        throw ClientError("Missing value.", file, line)
+    }
 }

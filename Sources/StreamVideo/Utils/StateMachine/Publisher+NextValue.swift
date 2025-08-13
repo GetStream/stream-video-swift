@@ -6,7 +6,6 @@ import Combine
 import Foundation
 
 extension Publisher where Output: Sendable {
-
     /// Retrieves the next value from the publisher after optionally skipping the initial values.
     ///
     /// - Parameter dropFirst: The number of initial values to skip. Defaults to 0.
@@ -23,60 +22,28 @@ extension Publisher where Output: Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async throws -> Output {
-        try await withCheckedThrowingContinuation { continuation in
-            var cancellable: AnyCancellable?
-            var receivedValue = false
-            var timeoutWorkItem: DispatchWorkItem?
-
-            if let timeout = timeout {
-                let workItem = DispatchWorkItem {
-                    cancellable?.cancel()
-                    continuation.resume(
-                        throwing: ClientError("Operation timed out", file, line)
-                    )
+        let publisher = dropFirst > 0
+            ? self.dropFirst(dropFirst).eraseToAnyPublisher()
+            : eraseToAnyPublisher()
+        if let timeout {
+            return try await Task(
+                timeoutInSeconds: timeout,
+                file: file,
+                function: function,
+                line: line
+            ) {
+                if let value = try await publisher._nextValue(file: file, line: line) {
+                    return value
+                } else {
+                    throw ClientError("Missing value", file, line)
                 }
-                timeoutWorkItem = workItem
-                DispatchQueue
-                    .global()
-                    .asyncAfter(deadline: .now() + timeout, execute: workItem)
+            }.value
+        } else {
+            if let value = try await publisher._nextValue(file: file, line: line) {
+                return value
+            } else {
+                throw ClientError("Missing value", file, line)
             }
-
-            let publisher = dropFirst > 0
-                ? self.dropFirst(dropFirst).eraseToAnyPublisher()
-                : self.eraseToAnyPublisher()
-
-            let _cancellable = publisher
-                .sink(
-                    receiveCompletion: { completion in
-                        timeoutWorkItem?.cancel()
-                        switch completion {
-                        case .finished:
-                            if !receivedValue {
-                                continuation
-                                    .resume(
-                                        throwing: ClientError(
-                                            "Publisher completed with no value",
-                                            file,
-                                            line
-                                        )
-                                    )
-                            }
-                        case let .failure(error):
-                            if !receivedValue {
-                                continuation.resume(throwing: error)
-                            }
-                        }
-                        cancellable?.cancel()
-                    },
-                    receiveValue: { value in
-                        timeoutWorkItem?.cancel()
-                        guard !receivedValue else { return }
-                        receivedValue = true
-                        continuation.resume(returning: value)
-                    }
-                )
-            cancellable = _cancellable
-            registrationHandler?(_cancellable)
         }
     }
 }

@@ -131,11 +131,8 @@ final class WebRTCCoordinator: @unchecked Sendable {
     func changeCameraMode(
         position: CameraPosition
     ) async throws {
-        await stateAdapter.set(
-            callSettings: stateAdapter
-                .callSettings
-                .withUpdatedCameraPosition(position)
-        )
+        await stateAdapter
+            .enqueueCallSettings { $0.withUpdatedCameraPosition(position) }
         try await stateAdapter.publisher?.didUpdateCameraPosition(
             position == .front ? .front : .back
         )
@@ -145,44 +142,32 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ///
     /// - Parameter isEnabled: Whether the audio should be enabled.
     func changeAudioState(isEnabled: Bool) async {
-        await stateAdapter.set(
-            callSettings: stateAdapter
-                .callSettings
-                .withUpdatedAudioState(isEnabled)
-        )
+        await stateAdapter
+            .enqueueCallSettings { $0.withUpdatedAudioState(isEnabled) }
     }
 
     /// Changes the video state (enabled/disabled) for the call.
     ///
     /// - Parameter isEnabled: Whether the video should be enabled.
     func changeVideoState(isEnabled: Bool) async {
-        await stateAdapter.set(
-            callSettings: stateAdapter
-                .callSettings
-                .withUpdatedVideoState(isEnabled)
-        )
+        await stateAdapter
+            .enqueueCallSettings { $0.withUpdatedVideoState(isEnabled) }
     }
 
     /// Changes the audio output state (e.g., speaker or headphones).
     ///
     /// - Parameter isEnabled: Whether the output should be enabled.
     func changeSoundState(isEnabled: Bool) async {
-        await stateAdapter.set(
-            callSettings: stateAdapter
-                .callSettings
-                .withUpdatedAudioOutputState(isEnabled)
-        )
+        await stateAdapter
+            .enqueueCallSettings { $0.withUpdatedAudioOutputState(isEnabled) }
     }
 
     /// Changes the speaker state (enabled/disabled) for the call.
     ///
     /// - Parameter isEnabled: Whether the speaker should be enabled.
     func changeSpeakerState(isEnabled: Bool) async {
-        await stateAdapter.set(
-            callSettings: stateAdapter
-                .callSettings
-                .withUpdatedSpeakerState(isEnabled)
-        )
+        await stateAdapter
+            .enqueueCallSettings { $0.withUpdatedSpeakerState(isEnabled) }
     }
 
     /// Updates the visibility of a participant's track.
