@@ -12,74 +12,16 @@ import StreamWebRTC
 /// publishing the average power of the audio signal. Additionally, it adjusts its behavior based on the
 /// presence of an active call, automatically stopping recording if needed.
 open class StreamCallAudioRecorder: @unchecked Sendable {
-    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-
-    @Injected(\.activeCallProvider) private var activeCallProvider
-    @Injected(\.audioStore) private var audioStore
-
-    /// The builder used to create the AVAudioRecorder instance.
-    let audioRecorderBuilder: AVAudioRecorderBuilder
-
-    private let _isRecordingSubject: CurrentValueSubject<Bool, Never> = .init(false)
-    var isRecordingPublisher: AnyPublisher<Bool, Never> {
-        _isRecordingSubject.eraseToAnyPublisher()
-    }
-
-    private var hasActiveCallCancellable: AnyCancellable?
-
-    /// A cancellable used to schedule the update of audio meters.
-    private(set) var updateMetersTimerCancellable: AnyCancellable?
-
-    /// A PassthroughSubject that publishes the average power of the audio signal.
-    private var _metersPublisher: PassthroughSubject<Float, Never> = .init()
+    private let store = CallAudioRecording.store(initialState: .initial)
 
     /// A public publisher that exposes the average power of the audio signal.
-    open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
-
-    @Atomic private(set) var isRecording: Bool = false {
-        willSet {
-            _isRecordingSubject.send(newValue)
-        }
-    }
-
-    /// Indicates whether an active call is present, influencing recording behaviour.
-    private var hasActiveCall: Bool = false {
-        didSet {
-            guard hasActiveCall != oldValue else { return }
-            log.debug("🎙️updated with hasActiveCall:\(hasActiveCall).")
-            if !hasActiveCall {
-                Task(disposableBag: disposableBag) { [weak self] in await self?.stopRecording() }
-            }
-        }
-    }
-
-    private let disposableBag = DisposableBag()
-
-    /// Initializes the recorder with a filename.
-    ///
-    /// - Parameter filename: The name of the file to record to.
-    public init(filename: String) {
-        audioRecorderBuilder = .init(inCacheDirectoryWithFilename: filename)
-
-        setUp()
-    }
+    open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = store
+        .publisher(\.meter)
 
     /// Initializes the recorder with a custom builder and audio session.
     ///
     /// - Parameter audioRecorderBuilder: The builder used to create the recorder.
-    init(
-        audioRecorderBuilder: AVAudioRecorderBuilder
-    ) {
-        self.audioRecorderBuilder = audioRecorderBuilder
-
-        setUp()
-    }
-
-    deinit {
-        removeRecodingFile()
-        hasActiveCallCancellable?.cancel()
-        hasActiveCallCancellable = nil
-    }
+    public init() {}
 
     // MARK: - Public API
 
@@ -88,148 +30,22 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// - ignoreActiveCall: Instructs the internal AudioRecorder to ignore the existence of an activeCall
     /// and start recording anyway.
     open func startRecording(ignoreActiveCall: Bool = false) async {
-        await performOperation { [weak self] in
-            guard
-                let self,
-                !isRecording
-            else {
-                return
-            }
-
-            var audioRecorder: AVAudioRecorder?
-            do {
-                audioRecorder = try await setUpAudioCaptureIfRequired()
-            } catch {
-                log.error("🎙️Failed to set up recording session", error: error)
-            }
-
-            guard
-                let audioRecorder,
-                hasActiveCall || ignoreActiveCall
-            else {
-                return // No-op
-            }
-
-            await deferSessionActivation()
-            audioRecorder.record()
-            isRecording = true
-            audioRecorder.isMeteringEnabled = true
-
-            updateMetersTimerCancellable?.cancel()
-            disposableBag.remove("update-meters")
-            updateMetersTimerCancellable = DefaultTimer
-                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
-                .sinkTask(storeIn: disposableBag, identifier: "update-meters") { [weak self, audioRecorder] _ in
-                    audioRecorder.updateMeters()
-                    self?._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))
-                }
-
-            log.debug("️🎙️Recording started.")
+        if ignoreActiveCall {
+            store.dispatch(.setShouldRecord(true))
         }
+
+        store.dispatch(.setIsRecording(true))
     }
 
     /// Stops recording audio asynchronously.
     open func stopRecording() async {
-        await performOperation { [weak self] in
-            self?.updateMetersTimerCancellable?.cancel()
-            self?.updateMetersTimerCancellable = nil
-            self?.disposableBag.remove("update-meters")
-
-            guard
-                let self,
-                isRecording,
-                let audioRecorder = audioRecorderBuilder.result
-            else {
-                return
-            }
-
-            audioRecorder.stop()
-
-            // Ensure that recorder has stopped recording.
-            _ = try? await audioRecorder
-                .publisher(for: \.isRecording)
-                .filter { $0 == false }
-                .nextValue(timeout: 0.5)
-
-            isRecording = false
-            removeRecodingFile()
-
-            log.debug("️🎙️Recording stopped.")
-        }
-    }
-
-    // MARK: - Private helpers
-
-    private func performOperation(
-        file: StaticString = #file,
-        line: UInt = #line,
-        _ operation: @Sendable @escaping () async -> Void
-    ) async {
-        do {
-            try await processingQueue.addSynchronousTaskOperation {
-                await operation()
-                return () // Explicitly return Void
-            }
-        } catch {
-            log.error(ClientError(with: error, file, line))
-        }
-    }
-
-    private func setUp() {
-        do {
-            try audioRecorderBuilder.build()
-        } catch {
-            if type(of: error) != CancellationError.self {
-                log.error("🎙️Failed to create AVAudioRecorder.", error: error)
-            }
-        }
-
-        hasActiveCallCancellable = activeCallProvider
-            .hasActiveCallPublisher
-            .receive(on: DispatchQueue.global(qos: .utility))
-            .removeDuplicates()
-            .assign(to: \.hasActiveCall, onWeak: self)
-    }
-
-    private func setUpAudioCaptureIfRequired() async throws -> AVAudioRecorder {
-        guard
-            await audioStore.requestRecordPermission() == true
-        else {
-            throw ClientError("🎙️Permission denied.")
-        }
-
-        guard
-            let audioRecorder = audioRecorderBuilder.result
-        else {
-            throw ClientError("🎙️Unable to fetch AVAudioRecorder instance.")
-        }
-
-        return audioRecorder
-    }
-
-    private func removeRecodingFile() {
-        let fileURL = audioRecorderBuilder.fileURL
-        do {
-            try FileManager.default.removeItem(at: fileURL)
-            log.debug("🎙️Successfully deleted audio filename")
-        } catch {
-            log.debug("🎙️Cannot delete \(fileURL).\(error)")
-        }
-    }
-
-    private func deferSessionActivation() async {
-        _ = try? await audioStore
-            .publisher(\.category)
-            .filter { $0 == .playAndRecord }
-            .nextValue(timeout: 1)
+        store.dispatch(.setIsRecording(false))
     }
 }
 
 /// Provides the default value of the `StreamCallAudioRecorder` class.
 struct StreamCallAudioRecorderKey: InjectionKey {
-    nonisolated(unsafe) static var currentValue: StreamCallAudioRecorder = StreamCallAudioRecorder(
-        filename: "recording.wav"
-    )
+    nonisolated(unsafe) static var currentValue: StreamCallAudioRecorder = StreamCallAudioRecorder()
 }
 
 extension InjectedValues {
