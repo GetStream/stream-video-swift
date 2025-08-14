@@ -4,9 +4,8 @@
 
 import Foundation
 
-extension CallAudioRecordingStore {
-
-    struct State {
+extension CallAudioRecording {
+    struct StoreState: Equatable {
         var isRecording: Bool
         var isInterrupted: Bool
         var shouldRecord: Bool

@@ -4,17 +4,15 @@
 
 import Foundation
 
-extension CallAudioRecordingStore {
-
-    final class DefaultReducer: CallAudioRecordingReducer {
-
-        func reduce(
-            state: CallAudioRecordingStore.State,
-            action: CallAudioRecordingAction,
+extension CallAudioRecording {
+    final class DefaultReducer: Reducer<CallAudioRecording> {
+        override func reduce(
+            state: State,
+            action: Action,
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) throws -> CallAudioRecordingStore.State {
+        ) throws -> State {
             var updatedState = state
 
             switch action {

@@ -6,27 +6,20 @@ import AVFoundation
 import Combine
 import Foundation
 
-extension CallAudioRecordingStore {
-
-    final class AVAudioRecorderMiddleware: CallAudioRecordingMiddleware, @unchecked Sendable {
+extension CallAudioRecording {
+    final class AVAudioRecorderMiddleware: Middleware<CallAudioRecording>, @unchecked Sendable {
 
         @Injected(\.audioStore) private var audioStore
-
-        private weak var store: CallAudioRecordingStore?
 
         private let audioRecorderBuilder = AVAudioRecorderBuilder()
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
         private var updateMetersCancellable: AnyCancellable?
 
-        init(_ store: CallAudioRecordingStore) {
-            self.store = store
-        }
-
         // MARK: - CallAudioRecorderMiddleware
 
-        func apply(
-            state: CallAudioRecordingStore.State,
-            action: CallAudioRecordingAction,
+        override func apply(
+            state: State,
+            action: Action,
             file: StaticString,
             function: StaticString,
             line: UInt
@@ -86,7 +79,7 @@ extension CallAudioRecordingStore {
                     await audioStore.requestRecordPermission(),
                     audioRecorder.record()
                 else {
-                    store?.dispatch(.setIsRecording(false))
+                    dispatcher?(.setIsRecording(false))
                     audioRecorder.isMeteringEnabled = false
                     return
                 }
@@ -95,7 +88,7 @@ extension CallAudioRecordingStore {
                     .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
                     .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
                     .compactMap { [weak audioRecorder] in audioRecorder?.averagePower(forChannel: 0) }
-                    .sink { [weak self] in self?.store?.dispatch(.setMeter($0)) }
+                    .sink { [weak self] in self?.dispatcher?(.setMeter($0)) }
             }
         }
 
