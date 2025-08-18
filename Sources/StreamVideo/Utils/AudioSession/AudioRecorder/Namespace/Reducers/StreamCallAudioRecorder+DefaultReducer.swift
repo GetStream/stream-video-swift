@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// The default reducer for processing call audio recording actions.
     ///
     /// This reducer handles all state updates for the audio recording store.
@@ -24,7 +24,7 @@ extension CallAudioRecording {
     /// - Takes the current state and an action as input
     /// - Returns a new state without side effects
     /// - Does not modify the original state
-    final class DefaultReducer: Reducer<CallAudioRecording> {
+    final class DefaultReducer: Reducer<StreamCallAudioRecorder.Namespace> {
         /// Processes an action to produce a new state.
         ///
         /// This method creates a copy of the current state, applies the

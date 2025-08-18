@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
 
     /// A specialized logger for the call audio recording store that
     /// aggregates meter updates.
@@ -12,7 +12,7 @@ extension CallAudioRecording {
     /// This logger batches meter level updates to reduce log noise, only
     /// logging the average meter level after collecting a specified number
     /// of samples.
-    final class CallAudioRecordingLogger: StoreLogger<CallAudioRecording> {
+    final class StreamCallAudioRecorderLogger: StoreLogger<StreamCallAudioRecorder.Namespace> {
         /// Buffer to store meter values for averaging.
         private var metersUpdated: [Float] = []
         

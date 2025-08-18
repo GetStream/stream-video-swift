@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// Middleware that handles application state transitions for audio
     /// recording.
     ///
@@ -19,7 +19,7 @@ extension CallAudioRecording {
     /// iOS may reconfigure the audio session when the app transitions
     /// between states. This middleware ensures the recorder adapts to
     /// these changes without losing functionality.
-    final class ApplicationStateMiddleware: Middleware<CallAudioRecording>, @unchecked Sendable {
+    final class ApplicationStateMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
         /// Adapter for monitoring application state changes.
         @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 

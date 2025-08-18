@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// Actions that can be dispatched to the call audio recording store.
     ///
     /// These actions represent state changes in the audio recording system

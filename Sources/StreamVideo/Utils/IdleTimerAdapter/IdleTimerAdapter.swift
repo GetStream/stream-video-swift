@@ -14,13 +14,15 @@ final class IdleTimerAdapter: @unchecked Sendable {
     private(set) var isIdleTimerDisabled: Bool = false
     private let disposableBag = DisposableBag()
 
-    init(_ activeCallProvider: StreamActiveCallProviding) {
+    init(_ streamVideo: StreamVideo) {
         #if canImport(UIKit)
         Task { @MainActor in
             self.isIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
         }
-        activeCallProvider
-            .hasActiveCallPublisher
+        streamVideo
+            .state
+            .$activeCall
+            .map { $0 != nil }
             .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.didUpdate(hasActiveCall: $0) }
             .store(in: disposableBag)
         #endif

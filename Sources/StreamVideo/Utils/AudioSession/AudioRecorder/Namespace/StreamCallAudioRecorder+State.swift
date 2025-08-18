@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// The state structure for the call audio recording store.
     ///
     /// This state captures all aspects of the audio recording system,

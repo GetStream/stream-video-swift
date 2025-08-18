@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// Middleware that monitors audio session category changes.
     ///
     /// This middleware ensures recording is stopped when the audio session
@@ -20,7 +20,7 @@ extension CallAudioRecording {
     ///
     /// Recording stops for all other categories (e.g., `.playback`,
     /// `.ambient`, `.soloAmbient`).
-    final class CategoryMiddleware: Middleware<CallAudioRecording> {
+    final class CategoryMiddleware: Middleware<StreamCallAudioRecorder.Namespace> {
         /// The audio store for monitoring session category changes.
         @Injected(\.audioStore) private var audioStore
 

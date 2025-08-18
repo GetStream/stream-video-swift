@@ -43,7 +43,7 @@ import StreamWebRTC
 /// - Handles interruptions gracefully (phone calls, alarms, etc.)
 open class StreamCallAudioRecorder: @unchecked Sendable {
     /// The internal store managing recording state.
-    private let store = CallAudioRecording.store(initialState: .initial)
+    private let store = Namespace.store(initialState: .initial)
 
     /// Publisher that emits real-time audio power levels during recording.
     ///

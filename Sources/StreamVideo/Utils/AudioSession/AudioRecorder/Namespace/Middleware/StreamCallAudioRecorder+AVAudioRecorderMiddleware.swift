@@ -6,7 +6,7 @@ import AVFoundation
 import Combine
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// Middleware that manages the `AVAudioRecorder` instance for audio
     /// recording.
     ///
@@ -20,14 +20,14 @@ extension CallAudioRecording {
     ///
     /// Recording operations are performed on a serial operation queue to
     /// ensure thread safety when accessing the recorder instance.
-    final class AVAudioRecorderMiddleware: Middleware<CallAudioRecording>, @unchecked Sendable {
+    final class AVAudioRecorderMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
 
         /// The audio store for managing permissions and session state.
         @Injected(\.audioStore) private var audioStore
 
         /// Builder for creating and caching the audio recorder instance.
-        private let audioRecorderBuilder = AVAudioRecorderBuilder()
-        
+        private var audioRecorder: AVAudioRecorder?
+
         /// Serial queue for recorder operations to ensure thread safety.
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
         
@@ -102,14 +102,16 @@ extension CallAudioRecording {
                     return
                 }
 
-                do {
-                    try audioRecorderBuilder.build()
-                } catch {
-                    log.error(error, subsystems: .audioRecording)
-                    return
+                if audioRecorder == nil {
+                    do {
+                        self.audioRecorder = try AVAudioRecorder.build()
+                    } catch {
+                        log.error(error, subsystems: .audioRecording)
+                        return
+                    }
                 }
 
-                guard let audioRecorder = audioRecorderBuilder.result else {
+                guard let audioRecorder else {
                     return
                 }
 
@@ -142,7 +144,7 @@ extension CallAudioRecording {
                 guard
                     let self,
                     updateMetersCancellable != nil,
-                    let audioRecorder = audioRecorderBuilder.result
+                    let audioRecorder
                 else {
                     return
                 }

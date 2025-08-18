@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// Middleware that synchronizes audio recording with the active call
     /// state.
     ///
@@ -18,7 +18,7 @@ extension CallAudioRecording {
     /// - When a call becomes active, monitors its audio settings
     /// - When audio is enabled in the call, triggers recording
     /// - When the call ends, stops monitoring audio settings
-    final class ActiveCallMiddleware: Middleware<CallAudioRecording>, @unchecked Sendable {
+    final class ActiveCallMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
         /// The main StreamVideo instance for accessing call state.
         @Injected(\.streamVideo) private var streamVideo
 

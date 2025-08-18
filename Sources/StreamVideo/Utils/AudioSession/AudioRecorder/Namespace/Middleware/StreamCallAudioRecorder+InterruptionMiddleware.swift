@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-extension CallAudioRecording {
+extension StreamCallAudioRecorder.Namespace {
     /// Middleware that monitors and responds to audio session interruptions.
     ///
     /// This middleware listens for audio interruptions (such as incoming
@@ -19,7 +19,7 @@ extension CallAudioRecording {
     /// 2. It dispatches `.setIsInterrupted(true)` to pause recording
     /// 3. When the interruption ends, it dispatches `.setIsInterrupted(false)`
     /// 4. Recording automatically resumes if it should be active
-    final class InterruptionMiddleware: Middleware<CallAudioRecording> {
+    final class InterruptionMiddleware: Middleware<StreamCallAudioRecorder.Namespace> {
         /// The audio store for monitoring interruption state.
         @Injected(\.audioStore) private var audioStore
 
