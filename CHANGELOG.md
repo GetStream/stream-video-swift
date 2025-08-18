@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- An issue that was causing the local participant's audio waveform visualization to stop working. [#912](https://github.com/GetStream/stream-video-swift/pull/912)
 
 # [1.30.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.30.0)
 _August 08, 2025_
