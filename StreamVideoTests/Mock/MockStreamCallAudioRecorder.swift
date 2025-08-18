@@ -39,8 +39,13 @@ final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sen
         }
     }
 
+    let mockStore: Store<Namespace> = Namespace.store(
+        initialState: .initial,
+        middleware: []
+    )
+
     init() {
-        super.init(Namespace.store(initialState: .initial))
+        super.init(mockStore)
         InjectedValues[\.callAudioRecorder] = self
     }
 
