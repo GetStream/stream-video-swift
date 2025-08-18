@@ -440,6 +440,7 @@
 		40944D232E4E3D7D00088AF0 /* CallAudioRecording+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D222E4E3D7D00088AF0 /* CallAudioRecording+State.swift */; };
 		40944D252E4E3D9100088AF0 /* CallAudioRecording+Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D242E4E3D9100088AF0 /* CallAudioRecording+Logger.swift */; };
 		40944D272E4E3F7000088AF0 /* Executor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D262E4E3F7000088AF0 /* Executor.swift */; };
+		40944D292E532D4100088AF0 /* StoreDelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D282E532D4100088AF0 /* StoreDelay.swift */; };
 		409774AE2CC1979F00E0D3EE /* MockCallController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409774AD2CC1979F00E0D3EE /* MockCallController.swift */; };
 		409795402DC11381000C6E39 /* DemoVideoViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097953F2DC11381000C6E39 /* DemoVideoViewOverlay.swift */; };
 		409795412DC11381000C6E39 /* DemoVideoViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097953F2DC11381000C6E39 /* DemoVideoViewOverlay.swift */; };
@@ -2044,6 +2045,7 @@
 		40944D222E4E3D7D00088AF0 /* CallAudioRecording+State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallAudioRecording+State.swift"; sourceTree = "<group>"; };
 		40944D242E4E3D9100088AF0 /* CallAudioRecording+Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallAudioRecording+Logger.swift"; sourceTree = "<group>"; };
 		40944D262E4E3F7000088AF0 /* Executor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Executor.swift; sourceTree = "<group>"; };
+		40944D282E532D4100088AF0 /* StoreDelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreDelay.swift; sourceTree = "<group>"; };
 		409774AD2CC1979F00E0D3EE /* MockCallController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallController.swift; sourceTree = "<group>"; };
 		4097953F2DC11381000C6E39 /* DemoVideoViewOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoViewOverlay.swift; sourceTree = "<group>"; };
 		4097B37D2BF4B06A0057992D /* GetCallResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GetCallResponse+Dummy.swift"; sourceTree = "<group>"; };
@@ -4440,6 +4442,7 @@
 				40944D1E2E4E37E600088AF0 /* StoreNamespace.swift */,
 				40944D142E4E2D8F00088AF0 /* Store.swift */,
 				40944D162E4E352800088AF0 /* Reducer.swift */,
+				40944D282E532D4100088AF0 /* StoreDelay.swift */,
 				40944D182E4E353F00088AF0 /* Middleware.swift */,
 				40944D1A2E4E355B00088AF0 /* StoreLogger.swift */,
 				40944D262E4E3F7000088AF0 /* Executor.swift */,
@@ -8099,6 +8102,7 @@
 				404098C92DDF45ED00D7BEC5 /* Protobuf+SelectiveEncodable.swift in Sources */,
 				846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */,
 				840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */,
+				40944D292E532D4100088AF0 /* StoreDelay.swift in Sources */,
 				84DCA21C2A39D950000C3411 /* DefaultAPI.swift in Sources */,
 				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
 				841BAA442BD15CDE000C73E4 /* QueryCallStatsResponse.swift in Sources */,

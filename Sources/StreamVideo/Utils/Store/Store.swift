@@ -5,19 +5,82 @@
 import Combine
 import Foundation
 
+/// A Redux-like store for managing application state.
+///
+/// The store provides a centralized, predictable state container that
+/// follows unidirectional data flow principles. It coordinates actions,
+/// reducers, middleware, and state updates.
+///
+/// ## Architecture
+///
+/// The store implements the following data flow:
+/// 1. **Action Dispatch**: Actions describe state changes
+/// 2. **Middleware Processing**: Side effects and async operations
+/// 3. **Reducer Processing**: Pure state transformations
+/// 4. **State Publishing**: Notify observers of changes
+///
+/// ## Features
+///
+/// - **Thread-Safe**: Actions are processed serially on a queue
+/// - **Observable**: Publish state changes via Combine
+/// - **Extensible**: Add/remove middleware and reducers dynamically
+/// - **Debuggable**: Built-in logging and source tracking
+///
+/// ## Usage Example
+///
+/// ```swift
+/// let store = MyNamespace.store(initialState: .default)
+///
+/// // Subscribe to state changes
+/// store.publisher(\.someProperty)
+///     .sink { value in
+///         print("Property changed: \(value)")
+///     }
+///
+/// // Dispatch actions
+/// store.dispatch(.updateSomething(value))
+/// ```
+///
+/// - Note: The store is marked `@unchecked Sendable` because it manages
+///   its own synchronization through a serial operation queue.
 final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
 
+    /// The current state of the store.
+    ///
+    /// This property provides synchronous access to the current state.
+    /// For observing changes, use ``publisher(_:)`` instead.
     var state: Namespace.State { stateSubject.value }
 
+    /// Unique identifier for this store instance.
     private let identifier: String
+    
+    /// Logger for recording store operations.
     private let logger: StoreLogger<Namespace>
+    
+    /// Executor that processes actions through the pipeline.
     private let executor: StoreExecutor<Namespace>
+    
+    /// Publisher that holds and emits the current state.
     private let stateSubject: CurrentValueSubject<Namespace.State, Never>
+    
+    /// Serial queue ensuring thread-safe action processing.
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
+    /// Array of reducers that process actions to update state.
     @Atomic private(set) var reducers: [Reducer<Namespace>]
+    
+    /// Array of middleware that handle side effects.
     @Atomic private(set) var middleware: [Middleware<Namespace>]
 
+    /// Initializes a new store with the specified configuration.
+    ///
+    /// - Parameters:
+    ///   - identifier: Unique identifier for debugging and logging.
+    ///   - initialState: The initial state of the store.
+    ///   - reducers: Array of reducers for processing actions.
+    ///   - middleware: Array of middleware for side effects.
+    ///   - logger: Logger for recording store operations.
+    ///   - executor: Executor for processing the action pipeline.
     init(
         identifier: String,
         initialState: Namespace.State,
@@ -36,9 +99,14 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         middleware.forEach { add($0) }
     }
 
-    // MARK: - Reducers
+    // MARK: - Middleware Management
 
-    /// Adds middleware to observe or intercept audio actions.
+    /// Adds middleware to observe or intercept actions.
+    ///
+    /// Middleware are automatically connected to the store's dispatcher
+    /// and state provider. Duplicate middleware (by reference) are ignored.
+    ///
+    /// - Parameter value: The middleware to add.
     func add<T: Middleware<Namespace>>(_ value: T) {
         guard middleware.first(where: { $0 === value }) == nil else {
             return
@@ -49,15 +117,25 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     }
 
     /// Removes previously added middleware.
+    ///
+    /// This disconnects the middleware from the store's dispatcher and
+    /// state provider.
+    ///
+    /// - Parameter value: The middleware to remove.
     func remove<T: Middleware<Namespace>>(_ value: T) {
         middleware = middleware.filter { $0 !== value }
         value.dispatcher = nil
         value.stateProvider = nil
     }
 
-    // MARK: - Reducers
+    // MARK: - Reducer Management
 
-    /// Adds a reducer to handle audio session actions.
+    /// Adds a reducer to process actions.
+    ///
+    /// Reducers are executed in the order they were added. Duplicate
+    /// reducers (by reference) are ignored.
+    ///
+    /// - Parameter value: The reducer to add.
     func add<T: Reducer<Namespace>>(_ value: T) {
         guard reducers.first(where: { $0 === value }) == nil else {
             return
@@ -65,16 +143,33 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         reducers.append(value)
     }
 
-    /// Adds a reducer to handle audio session actions.
+    /// Removes a previously added reducer.
+    ///
+    /// - Parameter value: The reducer to remove.
     func remove<T: Reducer<Namespace>>(_ value: T) {
         reducers = reducers.filter { $0 !== value }
     }
 
     // MARK: - State Observation
 
-    /// Publishes changes to the specified state property.
+    /// Creates a publisher for observing changes to a specific state
+    /// property.
     ///
-    /// Use this to observe changes for a specific audio state key path.
+    /// The publisher only emits when the value at the key path changes,
+    /// using `Equatable` conformance to detect changes.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// store.publisher(\.isRecording)
+    ///     .sink { isRecording in
+    ///         updateUI(recording: isRecording)
+    ///     }
+    /// ```
+    ///
+    /// - Parameter keyPath: The key path to the state property to observe.
+    ///
+    /// - Returns: A publisher that emits the property value on changes.
     func publisher<V: Equatable>(
         _ keyPath: KeyPath<Namespace.State, V>
     ) -> AnyPublisher<V, Never> {
@@ -85,9 +180,38 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
 
     // MARK: - Action Dispatch
 
+    /// Dispatches an action synchronously, waiting for completion.
+    ///
+    /// This method blocks until the action has been fully processed through
+    /// middleware and reducers. Use this when you need to ensure an action
+    /// completes before continuing.
+    ///
+    /// - Parameters:
+    ///   - action: The action to dispatch.
+    ///   - delay: Configuration for delays before and/or after processing.
+    ///     Defaults to `.none()` (no delays).
+    ///   - file: Source file (automatically captured).
+    ///   - function: Function name (automatically captured).
+    ///   - line: Line number (automatically captured).
+    ///
+    /// - Throws: Any error from reducer processing.
+    ///
+    /// - Warning: This method blocks the calling task. Prefer
+    ///   ``dispatch(_:delay:file:function:line:)`` for fire-and-forget
+    ///   operations.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Wait for action to complete with delay
+    /// try await store.dispatchSync(
+    ///     .updateData,
+    ///     delay: .init(before: 0.5)
+    /// )
+    /// ```
     func dispatchSync(
         _ action: Namespace.Action,
-        delayBefore: TimeInterval? = nil,
+        delay: Delay = .none(),
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
@@ -101,7 +225,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
                 identifier: identifier,
                 state: state,
                 action: action,
-                delayBefore: delayBefore,
+                delay: delay,
                 reducers: reducers,
                 middleware: middleware,
                 logger: logger,
@@ -113,9 +237,38 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
         }
     }
 
+    /// Dispatches an action asynchronously.
+    ///
+    /// This method queues the action for processing and returns immediately.
+    /// Actions are processed serially in the order they were dispatched.
+    ///
+    /// - Parameters:
+    ///   - action: The action to dispatch.
+    ///   - delay: Configuration for delays before and/or after processing.
+    ///     Defaults to `.none()` (no delays).
+    ///   - file: Source file (automatically captured).
+    ///   - function: Function name (automatically captured).
+    ///   - line: Line number (automatically captured).
+    ///
+    /// - Note: Errors from reducers are logged but not thrown. Use
+    ///   ``dispatchSync(_:delay:file:function:line:)`` if you need error
+    ///   handling.
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Fire and forget with no delay
+    /// store.dispatch(.someAction)
+    ///
+    /// // Debounce rapid updates
+    /// store.dispatch(.updateValue(text), delay: .init(before: 0.3))
+    ///
+    /// // Add delay after for UI smoothness
+    /// store.dispatch(.transition, delay: .init(after: 0.2))
+    /// ```
     func dispatch(
         _ action: Namespace.Action,
-        delayBefore: TimeInterval? = nil,
+        delay: Delay = .none(),
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
@@ -130,7 +283,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
                     identifier: identifier,
                     state: state,
                     action: action,
-                    delayBefore: delayBefore,
+                    delay: delay,
                     reducers: reducers,
                     middleware: middleware,
                     logger: logger,

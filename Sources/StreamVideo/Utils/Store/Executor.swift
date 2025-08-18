@@ -5,13 +5,58 @@
 import Combine
 import Foundation
 
+/// Executes store actions by coordinating middleware, reducers, and
+/// logging.
+///
+/// The executor is responsible for the complete action processing
+/// pipeline:
+/// 1. Applying optional delay before processing
+/// 2. Running middleware for side effects
+/// 3. Processing reducers to generate new state
+/// 4. Logging the results
+/// 5. Publishing state updates
+/// 6. Applying optional delay after processing
+///
+/// ## Thread Safety
+///
+/// The executor itself is not thread-safe. Thread safety should be
+/// managed by the calling store through serial execution queues.
+///
+/// - Note: This is an internal component of the store architecture and
+///   should not be used directly.
 class StoreExecutor<Namespace: StoreNamespace> {
 
+    /// Executes a single action through the store pipeline.
+    ///
+    /// This method orchestrates the complete action processing flow,
+    /// ensuring proper ordering of operations and error handling.
+    ///
+    /// - Parameters:
+    ///   - identifier: The store identifier for logging.
+    ///   - state: The current state before processing.
+    ///   - action: The action to process.
+    ///   - delay: Configuration for delays before and after processing.
+    ///   - reducers: Array of reducers to apply to the action.
+    ///   - middleware: Array of middleware for side effects.
+    ///   - logger: Logger for recording action results.
+    ///   - subject: Publisher to emit the new state.
+    ///   - file: Source file of the action dispatch.
+    ///   - function: Function name of the action dispatch.
+    ///   - line: Line number of the action dispatch.
+    ///
+    /// - Throws: Any error thrown by reducers during processing.
+    ///
+    /// - Note: The execution flow is:
+    ///   1. Apply `delay.before` if specified
+    ///   2. Notify middleware of the action
+    ///   3. Process reducers to generate new state
+    ///   4. Publish the new state
+    ///   5. Apply `delay.after` if specified (only on success)
     func run(
         identifier: String,
         state: Namespace.State,
         action: Namespace.Action,
-        delayBefore: TimeInterval?,
+        delay: Store<Namespace>.Delay,
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
         logger: StoreLogger<Namespace>,
@@ -20,10 +65,10 @@ class StoreExecutor<Namespace: StoreNamespace> {
         function: StaticString,
         line: UInt
     ) async throws {
-        if let delayBefore {
-            try? await Task.sleep(nanoseconds: UInt64(1_000_000_000 * delayBefore))
-        }
+        // Apply optional delay before processing action
+        await delay.applyDelayBeforeIfRequired()
 
+        // Notify all middleware about the action
         middleware.forEach {
             $0.apply(
                 state: state,
@@ -35,6 +80,7 @@ class StoreExecutor<Namespace: StoreNamespace> {
         }
 
         do {
+            // Process action through all reducers sequentially
             let updatedState = try reducers
                 .reduce(state) {
                     try $1.reduce(
@@ -46,6 +92,7 @@ class StoreExecutor<Namespace: StoreNamespace> {
                     )
                 }
 
+            // Log successful completion
             logger.didComplete(
                 identifier: identifier,
                 action: action,
@@ -55,8 +102,13 @@ class StoreExecutor<Namespace: StoreNamespace> {
                 line: line
             )
 
+            // Publish new state to observers
             subject.send(updatedState)
+
+            // Apply optional delay after successful processing
+            await delay.applyDelayAfterIfRequired()
         } catch {
+            // Log failure and rethrow
             logger.didFail(
                 identifier: identifier,
                 action: action,

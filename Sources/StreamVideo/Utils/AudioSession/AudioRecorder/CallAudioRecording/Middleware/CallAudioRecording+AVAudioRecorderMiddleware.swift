@@ -7,16 +7,48 @@ import Combine
 import Foundation
 
 extension CallAudioRecording {
+    /// Middleware that manages the `AVAudioRecorder` instance for audio
+    /// recording.
+    ///
+    /// This middleware handles:
+    /// - Creating and configuring the audio recorder
+    /// - Starting and stopping recording based on state changes
+    /// - Publishing audio meter levels at the display refresh rate
+    /// - Managing recording permissions
+    ///
+    /// ## Thread Safety
+    ///
+    /// Recording operations are performed on a serial operation queue to
+    /// ensure thread safety when accessing the recorder instance.
     final class AVAudioRecorderMiddleware: Middleware<CallAudioRecording>, @unchecked Sendable {
 
+        /// The audio store for managing permissions and session state.
         @Injected(\.audioStore) private var audioStore
 
+        /// Builder for creating and caching the audio recorder instance.
         private let audioRecorderBuilder = AVAudioRecorderBuilder()
+        
+        /// Serial queue for recorder operations to ensure thread safety.
         private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+        
+        /// Subscription for publishing meter updates at refresh rate.
         private var updateMetersCancellable: AnyCancellable?
 
-        // MARK: - CallAudioRecorderMiddleware
+        // MARK: - Middleware
 
+        /// Processes actions to manage audio recording state.
+        ///
+        /// Responds to:
+        /// - `.setIsRecording`: Starts or stops recording
+        /// - `.setIsInterrupted`: Pauses recording during interruptions
+        /// - `.setShouldRecord`: Initiates recording when needed
+        ///
+        /// - Parameters:
+        ///   - state: The current store state.
+        ///   - action: The action being processed.
+        ///   - file: Source file of the action dispatch.
+        ///   - function: Function name of the action dispatch.
+        ///   - line: Line number of the action dispatch.
         override func apply(
             state: State,
             action: Action,
@@ -54,6 +86,13 @@ extension CallAudioRecording {
 
         // MARK: - Private Helpers
 
+        /// Starts audio recording asynchronously.
+        ///
+        /// This method:
+        /// 1. Builds the audio recorder if needed
+        /// 2. Requests recording permission
+        /// 3. Enables metering and starts recording
+        /// 4. Sets up a timer to publish meter updates
         private func startRecording() {
             processingQueue.addTaskOperation { [weak self] in
                 guard
@@ -92,6 +131,12 @@ extension CallAudioRecording {
             }
         }
 
+        /// Stops audio recording and cleans up resources.
+        ///
+        /// This method:
+        /// 1. Stops the active recording
+        /// 2. Disables metering
+        /// 3. Cancels the meter update timer
         private func stopRecording() {
             processingQueue.addOperation { [weak self] in
                 guard
