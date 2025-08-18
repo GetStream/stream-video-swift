@@ -42,36 +42,103 @@ import StreamWebRTC
 /// - Stops recording when the call ends or microphone is disabled
 /// - Handles interruptions gracefully (phone calls, alarms, etc.)
 open class StreamCallAudioRecorder: @unchecked Sendable {
-    /// The internal store managing recording state.
-    private let store = Namespace.store(initialState: .initial)
-
-    /// Publisher that emits real-time audio power levels during recording.
+    /// The current audio power level in decibels (dB).
     ///
-    /// The published values represent the average power in decibels (dB),
-    /// typically ranging from -160 dB (silence) to 0 dB (maximum level).
-    /// Updates are published at the display refresh rate for smooth UI
-    /// updates.
+    /// This property is continuously updated during recording to reflect
+    /// the real-time audio input level. Values typically range from:
+    /// - `-160 dB`: Complete silence or no input
+    /// - `-60 dB` to `-40 dB`: Very quiet speech
+    /// - `-40 dB` to `-20 dB`: Normal speech
+    /// - `-20 dB` to `0 dB`: Loud speech or noise
+    /// - `0 dB`: Maximum level (clipping may occur)
     ///
-    /// ## Example
+    /// The value updates at the display refresh rate (typically 60Hz) for
+    /// smooth UI animations.
+    ///
+    /// ## Usage Example
     ///
     /// ```swift
-    /// recorder.metersPublisher
+    /// // Observe meter changes with Combine
+    /// recorder.$meters
     ///     .map { dB in
     ///         // Convert dB to normalized value (0...1)
-    ///         return (dB + 160) / 160
+    ///         return max(0, min(1, (dB + 160) / 160))
     ///     }
     ///     .sink { normalizedLevel in
     ///         updateWaveformUI(level: normalizedLevel)
     ///     }
     /// ```
-    open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = store
-        .publisher(\.meter)
+    ///
+    /// - Note: Returns `0` when recording is not active.
+    @Published open private(set) var meters: Float = 0
+
+    /// Indicates whether audio recording is currently active.
+    ///
+    /// This property reflects the actual recording state, which may differ
+    /// from the desired state due to:
+    /// - Missing microphone permissions
+    /// - Audio session interruptions (phone calls, alarms)
+    /// - Audio session category incompatibility
+    /// - System resource constraints
+    ///
+    /// ## Observable
+    ///
+    /// As a `@Published` property, you can observe changes using Combine:
+    ///
+    /// ```swift
+    /// recorder.$isRecording
+    ///     .sink { isRecording in
+    ///         updateRecordingUI(active: isRecording)
+    ///     }
+    /// ```
+    ///
+    /// ## State Synchronization
+    ///
+    /// This property automatically synchronizes with:
+    /// - Active call microphone state
+    /// - Audio session interruptions
+    /// - Application lifecycle events
+    ///
+    /// - Important: Always check this property to determine the actual
+    ///   recording state rather than assuming recording started successfully
+    ///   after calling `startRecording()`.
+    @Published open private(set) var isRecording: Bool = false
+
+    /// The store managing recording state.
+    private let store: Store<Namespace>
+
+    /// Container for managing Combine subscriptions.
+    private let disposableBag = DisposableBag()
 
     /// Initializes a new audio recorder instance.
     ///
     /// The recorder is initialized with default settings optimized for
-    /// voice recording during calls.
-    public init() {}
+    /// voice recording during calls. During initialization:
+    /// 1. Creates the internal state store
+    /// 2. Sets up bindings between store state and published properties
+    /// 3. Prepares middleware for handling recording lifecycle
+    ///
+    /// The recorder automatically synchronizes its `isRecording` and
+    /// `meters` properties with the internal store state, ensuring UI
+    /// updates happen on the main thread.
+    public convenience init() {
+        self.init(Namespace.store(initialState: .initial))
+    }
+
+    init(_ store: Store<Namespace>) {
+        self.store = store
+        // Bind store's recording state to the published property
+        store
+            .publisher(\.isRecording)
+            .assign(to: \.isRecording, onWeak: self)
+            .store(in: disposableBag)
+
+        // Bind store's meter values to the published property
+        store
+            .publisher(\.meter)
+            .assign(to: \.meters, onWeak: self)
+            .store(in: disposableBag)
+    }
 
     // MARK: - Public API
 
@@ -90,7 +157,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     ///
     /// - Note: Recording requires microphone permission. The system will
     ///   prompt for permission if not already granted.
-    open func startRecording(ignoreActiveCall: Bool = false) async {
+    open func startRecording(ignoreActiveCall: Bool = false) {
         if ignoreActiveCall {
             store.dispatch(.setShouldRecord(true))
         }
@@ -106,7 +173,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     ///
     /// - Note: This method is safe to call even if recording is not
     ///   currently active.
-    open func stopRecording() async {
+    open func stopRecording() {
         store.dispatch(.setIsRecording(false))
     }
 }

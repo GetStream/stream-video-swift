@@ -39,24 +39,17 @@ final class MockStreamCallAudioRecorder: StreamCallAudioRecorder, @unchecked Sen
         }
     }
 
-    var metersSubject: CurrentValueSubject<Float, Never> = .init(0.0)
-
     init() {
-        super.init(filename: "mock_file")
+        super.init(Namespace.store(initialState: .initial))
         InjectedValues[\.callAudioRecorder] = self
     }
 
-    override func startRecording(ignoreActiveCall: Bool = false) async {
+    override func startRecording(ignoreActiveCall: Bool = false) {
         stubbedFunctionInput[.startRecording]?
             .append(.startRecording(ignoreActiveCall: ignoreActiveCall))
     }
 
-    override func stopRecording() async {
+    override func stopRecording() {
         stubbedFunctionInput[.stopRecording]?.append(.stopRecording)
-    }
-
-    // Mock the metersPublisher
-    override var metersPublisher: AnyPublisher<Float, Never> {
-        metersSubject.eraseToAnyPublisher()
     }
 }

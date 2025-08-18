@@ -319,7 +319,6 @@
 		406B3C082C8F602D00FC93A1 /* LocalAudioMediaAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C032C8F602D00FC93A1 /* LocalAudioMediaAdapter_Tests.swift */; };
 		406B3C0A2C8F605000FC93A1 /* PeerConnectionFactory+Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C092C8F604A00FC93A1 /* PeerConnectionFactory+Mock.swift */; };
 		406B3C0F2C8F866100FC93A1 /* MockStreamCallAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C0D2C8F865F00FC93A1 /* MockStreamCallAudioRecorder.swift */; };
-		406B3C142C8F870400FC93A1 /* MockActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C112C8F86FF00FC93A1 /* MockActiveCallProvider.swift */; };
 		406B3C162C90343300FC93A1 /* LocalVideoMediaAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C152C90342E00FC93A1 /* LocalVideoMediaAdapter_Tests.swift */; };
 		406B3C192C90385100FC93A1 /* VideoCapturerProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C182C90384800FC93A1 /* VideoCapturerProviding.swift */; };
 		406B3C1C2C903A2B00FC93A1 /* MockVideoCapturerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406B3C1A2C903A2500FC93A1 /* MockVideoCapturerFactory.swift */; };
@@ -440,6 +439,7 @@
 		40944D252E4E3D9100088AF0 /* StreamCallAudioRecorder+Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D242E4E3D9100088AF0 /* StreamCallAudioRecorder+Logger.swift */; };
 		40944D272E4E3F7000088AF0 /* Executor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D262E4E3F7000088AF0 /* Executor.swift */; };
 		40944D292E532D4100088AF0 /* StoreDelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D282E532D4100088AF0 /* StoreDelay.swift */; };
+		40944D2C2E534BDF00088AF0 /* SpyMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40944D2B2E534BDF00088AF0 /* SpyMiddleware.swift */; };
 		409774AE2CC1979F00E0D3EE /* MockCallController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409774AD2CC1979F00E0D3EE /* MockCallController.swift */; };
 		409795402DC11381000C6E39 /* DemoVideoViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097953F2DC11381000C6E39 /* DemoVideoViewOverlay.swift */; };
 		409795412DC11381000C6E39 /* DemoVideoViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4097953F2DC11381000C6E39 /* DemoVideoViewOverlay.swift */; };
@@ -1934,7 +1934,6 @@
 		406B3C032C8F602D00FC93A1 /* LocalAudioMediaAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAudioMediaAdapter_Tests.swift; sourceTree = "<group>"; };
 		406B3C092C8F604A00FC93A1 /* PeerConnectionFactory+Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PeerConnectionFactory+Mock.swift"; sourceTree = "<group>"; };
 		406B3C0D2C8F865F00FC93A1 /* MockStreamCallAudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamCallAudioRecorder.swift; sourceTree = "<group>"; };
-		406B3C112C8F86FF00FC93A1 /* MockActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockActiveCallProvider.swift; sourceTree = "<group>"; };
 		406B3C152C90342E00FC93A1 /* LocalVideoMediaAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVideoMediaAdapter_Tests.swift; sourceTree = "<group>"; };
 		406B3C182C90384800FC93A1 /* VideoCapturerProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturerProviding.swift; sourceTree = "<group>"; };
 		406B3C1A2C903A2500FC93A1 /* MockVideoCapturerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockVideoCapturerFactory.swift; sourceTree = "<group>"; };
@@ -2044,6 +2043,7 @@
 		40944D242E4E3D9100088AF0 /* StreamCallAudioRecorder+Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamCallAudioRecorder+Logger.swift"; sourceTree = "<group>"; };
 		40944D262E4E3F7000088AF0 /* Executor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Executor.swift; sourceTree = "<group>"; };
 		40944D282E532D4100088AF0 /* StoreDelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreDelay.swift; sourceTree = "<group>"; };
+		40944D2B2E534BDF00088AF0 /* SpyMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyMiddleware.swift; sourceTree = "<group>"; };
 		409774AD2CC1979F00E0D3EE /* MockCallController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallController.swift; sourceTree = "<group>"; };
 		4097953F2DC11381000C6E39 /* DemoVideoViewOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoViewOverlay.swift; sourceTree = "<group>"; };
 		4097B37D2BF4B06A0057992D /* GetCallResponse+Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GetCallResponse+Dummy.swift"; sourceTree = "<group>"; };
@@ -6307,6 +6307,7 @@
 		8492B87629081CE700006649 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
+				40944D2B2E534BDF00088AF0 /* SpyMiddleware.swift */,
 				40D75C572E438607000E0438 /* MockAVAudioSessionRouteDescription.swift */,
 				40D75C552E4385FE000E0438 /* MockAVAudioSessionPortDescription.swift */,
 				40D36ADF2DDE019F00972D75 /* MockWebRTCStatsReporter.swift */,
@@ -6336,7 +6337,6 @@
 				406B3C1A2C903A2500FC93A1 /* MockVideoCapturerFactory.swift */,
 				406B3C2A2C90601600FC93A1 /* MockLocalMediaAdapter.swift */,
 				406B3C0D2C8F865F00FC93A1 /* MockStreamCallAudioRecorder.swift */,
-				406B3C112C8F86FF00FC93A1 /* MockActiveCallProvider.swift */,
 				406B3C092C8F604A00FC93A1 /* PeerConnectionFactory+Mock.swift */,
 				406B3BFF2C8F5B4D00FC93A1 /* MockRTCPeerConnection.swift */,
 				40382F3A2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift */,
@@ -8543,6 +8543,7 @@
 				40F017572BBEF07B00E89FD1 /* GeofenceSettings+Dummy.swift in Sources */,
 				40C9E4532C9888C100802B28 /* WebRTCMigrationStatusObserver_Tests.swift in Sources */,
 				400C9FC42D9D0BDA00DB26DC /* OperationQueue_TaskOperationTests.swift in Sources */,
+				40944D2C2E534BDF00088AF0 /* SpyMiddleware.swift in Sources */,
 				40D75C562E4385FE000E0438 /* MockAVAudioSessionPortDescription.swift in Sources */,
 				40DE867D2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift in Sources */,
 				40483CBA2C9B1E6600B4FCA8 /* MockWebRTCCoordinatorFactory.swift in Sources */,
@@ -8588,7 +8589,6 @@
 				40B3E5422DBBB83A00DE8F50 /* ProximityManager_Tests.swift in Sources */,
 				40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */,
 				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,
-				406B3C142C8F870400FC93A1 /* MockActiveCallProvider.swift in Sources */,
 				40C2B5C62C2D7AED00EC2C2D /* RejectionReasonProvider_Tests.swift in Sources */,
 				841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */,
 				40F017452BBEEE6D00E89FD1 /* UserResponse+Dummy.swift in Sources */,

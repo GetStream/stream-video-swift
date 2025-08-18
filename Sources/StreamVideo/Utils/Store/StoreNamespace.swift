@@ -97,7 +97,13 @@ protocol StoreNamespace {
     /// - Parameter initialState: The initial state for the store.
     ///
     /// - Returns: A fully configured store instance.
-    static func store(initialState: State) -> Store<Self>
+    static func store(
+        initialState: State,
+        reducers: [Reducer<Self>],
+        middleware: [Middleware<Self>],
+        logger: StoreLogger<Self>,
+        executor: StoreExecutor<Self>
+    ) -> Store<Self>
 }
 
 // MARK: - Default Implementations
@@ -126,15 +132,19 @@ extension StoreNamespace {
     /// 5. Uses logger from `logger()`
     /// 6. Uses executor from `executor()`
     static func store(
-        initialState: State
+        initialState: State,
+        reducers: [Reducer<Self>] = Self.reducers(),
+        middleware: [Middleware<Self>] = Self.middleware(),
+        logger: StoreLogger<Self> = Self.logger(),
+        executor: StoreExecutor<Self> = Self.executor()
     ) -> Store<Self> {
         .init(
             identifier: Self.identifier,
             initialState: initialState,
-            reducers: Self.reducers(),
-            middleware: Self.middleware(),
-            logger: Self.logger(),
-            executor: Self.executor()
+            reducers: reducers,
+            middleware: middleware,
+            logger: logger,
+            executor: executor
         )
     }
 }
