@@ -34,10 +34,10 @@ extension StreamCallAudioRecorder.Namespace {
             // Monitor for category changes that are incompatible with recording
             cancellable = audioStore
                 .publisher(\.category)
-                .filter { $0 != .playAndRecord || $0 != .record }
+                .filter { $0 != .playAndRecord && $0 != .record }
                 .sink { [weak self] _ in
                     // Stop recording when category becomes incompatible
-                    self?.dispatcher?(.setIsRecording(false))
+                    self?.dispatcher?.dispatch(.setIsRecording(false))
                 }
         }
     }

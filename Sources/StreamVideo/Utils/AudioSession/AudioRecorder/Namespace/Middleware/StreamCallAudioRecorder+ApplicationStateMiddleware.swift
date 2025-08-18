@@ -60,9 +60,8 @@ extension StreamCallAudioRecorder.Namespace {
             }
 
             // Briefly stop and restart recording
-            dispatcher?(.setIsRecording(false))
-            try? await Task.sleep(nanoseconds: 250_000_000) // 250ms delay
-            dispatcher?(.setIsRecording(true))
+            dispatcher?.dispatch(.setIsRecording(false))
+            dispatcher?.dispatch(.setIsRecording(true), delay: .init(before: 0.25)) // 250ms delay
         }
     }
 }

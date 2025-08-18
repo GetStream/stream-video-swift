@@ -35,7 +35,7 @@ extension StreamCallAudioRecorder.Namespace {
                 .publisher(\.isInterrupted)
                 .sink { [weak self] isInterrupted in
                     // Update the store's interruption state
-                    self?.dispatcher?(.setIsInterrupted(isInterrupted))
+                    self?.dispatcher?.dispatch(.setIsInterrupted(isInterrupted))
                 }
         }
     }

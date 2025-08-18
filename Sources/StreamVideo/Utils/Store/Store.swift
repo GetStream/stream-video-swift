@@ -112,7 +112,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
             return
         }
         middleware.append(value)
-        value.dispatcher = { [weak self] in self?.dispatch($0) }
+        value.dispatcher = .init(self)
         value.stateProvider = { [weak self] in self?.state }
     }
 

@@ -5,34 +5,32 @@
 import Foundation
 @testable import StreamVideo
 
-extension StoreNamespace {
-
-    static func spyMiddleware() -> SpyMiddleware<Self> {
-        .init()
-    }
-}
-
-final class SpyMiddleware<Namespace: StoreNamespace>: Middleware<Namespace> {
+final class MockMiddleware<Namespace: StoreNamespace>: Middleware<Namespace> {
 
     private(set) var actionsReceived: [Namespace.Action] = []
     private(set) var actionsDispatched: [Namespace.Action] = []
 
     var stubbedState: Namespace.State?
-    var stubbedDispatcher: ((Namespace.Action) -> Void)?
-    var actualDispatcher: ((Namespace.Action) -> Void)?
+    var stubbedDispatcher: Store<Namespace>.Dispatcher?
+    var actualDispatcher: Store<Namespace>.Dispatcher?
 
-    override var dispatcher: ((Namespace.Action) -> Void)? {
+    override var dispatcher: Store<Namespace>.Dispatcher? {
         get { stubbedDispatcher }
         set { actualDispatcher = newValue }
     }
 
-    static func make() -> SpyMiddleware<Namespace> { Namespace.spyMiddleware() }
-
     override init() {
         super.init()
-        stubbedDispatcher = {
-            self.actionsDispatched.append($0)
-            self.actualDispatcher?($0)
+        stubbedDispatcher = .init { action, delay, file, function, line in
+            self.actionsDispatched.append(action)
+
+            self.actualDispatcher?.dispatch(
+                action,
+                delay: delay,
+                file: file,
+                function: function,
+                line: line
+            )
         }
     }
 

@@ -51,8 +51,8 @@ class Middleware<Namespace: StoreNamespace> {
     ///
     /// - Warning: Avoid creating infinite loops by dispatching actions
     ///   that trigger the same middleware repeatedly.
-    var dispatcher: ((Namespace.Action) -> Void)?
-    
+    var dispatcher: Store<Namespace>.Dispatcher?
+
     /// Closure for accessing the current store state.
     ///
     /// This provider is automatically set when the middleware is added to

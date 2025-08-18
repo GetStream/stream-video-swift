@@ -59,7 +59,7 @@ extension StreamCallAudioRecorder.Namespace {
                     .state
                     .$callSettings
                     .map(\.audioOn)
-                    .sink { [weak self] in self?.dispatcher?(.setShouldRecord($0)) }
+                    .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
             } else {
                 callSettingsCancellable?.cancel()
                 callSettingsCancellable = nil

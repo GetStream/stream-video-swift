@@ -7,11 +7,11 @@ import Combine
 @testable import StreamVideo
 @preconcurrency import XCTest
 
-final class StreamAudioRecorderTests: StreamVideoTestCase, @unchecked Sendable {
+final class StreamCallAudioRecorder_Tests: StreamVideoTestCase, @unchecked Sendable {
 
-    private lazy var spyMiddleware: SpyMiddleware<StreamCallAudioRecorder.Namespace>! = StreamCallAudioRecorder
+    private lazy var spyMiddleware: MockMiddleware<StreamCallAudioRecorder.Namespace>! = StreamCallAudioRecorder
         .Namespace
-        .spyMiddleware()
+        .mockMiddleware()
     private lazy var store: Store<StreamCallAudioRecorder.Namespace>! = StreamCallAudioRecorder
         .Namespace
         .store(initialState: .initial, middleware: [spyMiddleware])

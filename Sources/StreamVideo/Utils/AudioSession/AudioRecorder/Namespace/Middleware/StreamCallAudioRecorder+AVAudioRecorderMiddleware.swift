@@ -34,6 +34,10 @@ extension StreamCallAudioRecorder.Namespace {
         /// Subscription for publishing meter updates at refresh rate.
         private var updateMetersCancellable: AnyCancellable?
 
+        init(audioRecorder: AVAudioRecorder? = nil) {
+            self.audioRecorder = audioRecorder
+        }
+
         // MARK: - Middleware
 
         /// Processes actions to manage audio recording state.
@@ -75,6 +79,8 @@ extension StreamCallAudioRecorder.Namespace {
             case let .setShouldRecord(value):
                 if value, !state.isRecording {
                     startRecording()
+                } else if !value, state.isRecording {
+                    stopRecording()
                 } else {
                     break
                 }
@@ -120,7 +126,7 @@ extension StreamCallAudioRecorder.Namespace {
                     await audioStore.requestRecordPermission(),
                     audioRecorder.record()
                 else {
-                    dispatcher?(.setIsRecording(false))
+                    dispatcher?.dispatch(.setIsRecording(false))
                     audioRecorder.isMeteringEnabled = false
                     return
                 }
@@ -129,7 +135,7 @@ extension StreamCallAudioRecorder.Namespace {
                     .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
                     .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
                     .compactMap { [weak audioRecorder] in audioRecorder?.averagePower(forChannel: 0) }
-                    .sink { [weak self] in self?.dispatcher?(.setMeter($0)) }
+                    .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
             }
         }
 
