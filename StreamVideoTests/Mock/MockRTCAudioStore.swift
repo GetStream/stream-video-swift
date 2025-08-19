@@ -16,6 +16,10 @@ final class MockRTCAudioStore {
         audioStore = RTCAudioStore(session: session)
     }
 
+    deinit {
+        InjectedValues[\.audioStore] = .init()
+    }
+
     /// We call this just before the object that needs to use the mock is about to be created.
     func makeShared() {
         RTCAudioStore.currentValue = audioStore

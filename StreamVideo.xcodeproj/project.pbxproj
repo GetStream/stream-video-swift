@@ -857,7 +857,6 @@
 		40FB151B2BF77EEE00D5E580 /* Call+JoiningStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB151A2BF77EEE00D5E580 /* Call+JoiningStage.swift */; };
 		40FB151D2BF77EFA00D5E580 /* Call+JoinedStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB151C2BF77EFA00D5E580 /* Call+JoinedStage.swift */; };
 		40FB151F2BF78C6A00D5E580 /* Call+Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB151E2BF78C6A00D5E580 /* Call+Error.swift */; };
-		40FB15212BF78FA100D5E580 /* Publisher+NextValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */; };
 		40FB8FF62D661DC400F4390A /* Call+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */; };
 		40FB8FF82D661E2000F4390A /* String+OpenApiExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB8FF72D661E2000F4390A /* String+OpenApiExtensions.swift */; };
 		40FB8FFA2D661F3F00F4390A /* CustomStringConvertible+Retroactive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FB8FF92D661F3F00F4390A /* CustomStringConvertible+Retroactive.swift */; };
@@ -2383,7 +2382,6 @@
 		40FB151A2BF77EEE00D5E580 /* Call+JoiningStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Call+JoiningStage.swift"; sourceTree = "<group>"; };
 		40FB151C2BF77EFA00D5E580 /* Call+JoinedStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Call+JoinedStage.swift"; sourceTree = "<group>"; };
 		40FB151E2BF78C6A00D5E580 /* Call+Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Call+Error.swift"; sourceTree = "<group>"; };
-		40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+NextValue.swift"; sourceTree = "<group>"; };
 		40FB8FF72D661E2000F4390A /* String+OpenApiExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+OpenApiExtensions.swift"; sourceTree = "<group>"; };
 		40FB8FF92D661F3F00F4390A /* CustomStringConvertible+Retroactive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Retroactive.swift"; sourceTree = "<group>"; };
 		40FB95CF2DAD6FE600B24BC7 /* PublisherAsyncStreamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublisherAsyncStreamTests.swift; sourceTree = "<group>"; };
@@ -5560,7 +5558,6 @@
 			children = (
 				40FB150E2BF77CEC00D5E580 /* StreamStateMachine.swift */,
 				40FB15102BF77D5800D5E580 /* StreamStateMachineStage.swift */,
-				40FB15202BF78FA100D5E580 /* Publisher+NextValue.swift */,
 			);
 			path = StateMachine;
 			sourceTree = "<group>";
@@ -7902,7 +7899,6 @@
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
 				40BBC4DE2C63A507002AEF92 /* WebRTCCoordinator+CleanUp.swift in Sources */,
 				84CD12222C73831000056640 /* CallRtmpBroadcastStoppedEvent.swift in Sources */,
-				40FB15212BF78FA100D5E580 /* Publisher+NextValue.swift in Sources */,
 				40F646242C7F225200FFB10A /* CollectionDelayedUpdateObserver.swift in Sources */,
 				40382F282C88B80C00C2D00F /* SignalServerEvent.swift in Sources */,
 				84BAD77C2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift in Sources */,
