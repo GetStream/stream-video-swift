@@ -203,7 +203,7 @@ final class Store_RaceConditionTests: XCTestCase, @unchecked Sendable {
     /// Tests store cleanup while operations are active.
     func test_storeCleanup_withActiveOperations() async throws {
         // Given
-        var localStore: Store<RaceTestNamespace>? = RaceTestNamespace.store(
+        nonisolated(unsafe) var localStore: Store<RaceTestNamespace>? = RaceTestNamespace.store(
             initialState: .initial
         )
         
