@@ -50,7 +50,7 @@ import Foundation
 /// Multiple reducers can be composed to handle different parts of the
 /// state. They are executed in sequence, with each reducer receiving the
 /// state produced by the previous one.
-class Reducer<Namespace: StoreNamespace> {
+class Reducer<Namespace: StoreNamespace>: @unchecked Sendable {
     /// Processes an action to produce a new state.
     ///
     /// Override this method to implement state transformation logic. The

@@ -42,7 +42,7 @@
 ///
 /// Middleware should be thread-safe as they may be called from different
 /// contexts. Use appropriate synchronization when accessing shared state.
-class Middleware<Namespace: StoreNamespace> {
+class Middleware<Namespace: StoreNamespace>: @unchecked Sendable {
     /// Closure for dispatching new actions to the store.
     ///
     /// Use this to trigger additional actions in response to the current

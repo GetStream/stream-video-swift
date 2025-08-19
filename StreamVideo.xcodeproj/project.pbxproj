@@ -697,6 +697,9 @@
 		40C71B752E53697500733BF6 /* StreamCallAudioRecorder_ApplicationStateMiddlewareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B742E53697500733BF6 /* StreamCallAudioRecorder_ApplicationStateMiddlewareTests.swift */; };
 		40C71B792E536CE200733BF6 /* StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B782E536CE200733BF6 /* StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift */; };
 		40C71B7B2E536F0F00733BF6 /* MockAVAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B7A2E536F0F00733BF6 /* MockAVAudioRecorder.swift */; };
+		40C71B7F2E54790400733BF6 /* Store_RaceConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B7E2E54790400733BF6 /* Store_RaceConditionTests.swift */; };
+		40C71B802E54790400733BF6 /* Store_ConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B7C2E54790400733BF6 /* Store_ConcurrencyTests.swift */; };
+		40C71B812E54790400733BF6 /* Store_PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B7D2E54790400733BF6 /* Store_PerformanceTests.swift */; };
 		40C75BB72CB4044600C167C3 /* MockThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */; };
 		40C75BB82CB4045100C167C3 /* MockThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */; };
 		40C75BB92CB40D8700C167C3 /* Mockable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4013387B2BF248E9007318BD /* Mockable.swift */; };
@@ -2264,6 +2267,9 @@
 		40C71B742E53697500733BF6 /* StreamCallAudioRecorder_ApplicationStateMiddlewareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder_ApplicationStateMiddlewareTests.swift; sourceTree = "<group>"; };
 		40C71B782E536CE200733BF6 /* StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift; sourceTree = "<group>"; };
 		40C71B7A2E536F0F00733BF6 /* MockAVAudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVAudioRecorder.swift; sourceTree = "<group>"; };
+		40C71B7C2E54790400733BF6 /* Store_ConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store_ConcurrencyTests.swift; sourceTree = "<group>"; };
+		40C71B7D2E54790400733BF6 /* Store_PerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store_PerformanceTests.swift; sourceTree = "<group>"; };
+		40C71B7E2E54790400733BF6 /* Store_RaceConditionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store_RaceConditionTests.swift; sourceTree = "<group>"; };
 		40C75BB62CB4044600C167C3 /* MockThermalStateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockThermalStateObserver.swift; sourceTree = "<group>"; };
 		40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListViewModifier.swift; sourceTree = "<group>"; };
 		40C7B8312B61325500FB9DB2 /* ModalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalButton.swift; sourceTree = "<group>"; };
@@ -5083,6 +5089,9 @@
 		40C71B572E5355F800733BF6 /* Store */ = {
 			isa = PBXGroup;
 			children = (
+				40C71B7C2E54790400733BF6 /* Store_ConcurrencyTests.swift */,
+				40C71B7D2E54790400733BF6 /* Store_PerformanceTests.swift */,
+				40C71B7E2E54790400733BF6 /* Store_RaceConditionTests.swift */,
 				40C71B5F2E53577300733BF6 /* Store_Tests.swift */,
 			);
 			path = Store;
@@ -8704,6 +8713,9 @@
 				84D6E53A2B3AD10000D0056C /* RepeatingTimer_Tests.swift in Sources */,
 				40AF6A372C93423400BA2935 /* WebRTCCoordinatorStateMachine_FastReconnectingStageTests.swift in Sources */,
 				40F0176D2BBEF20D00E89FD1 /* EgressResponse+Dummy.swift in Sources */,
+				40C71B7F2E54790400733BF6 /* Store_RaceConditionTests.swift in Sources */,
+				40C71B802E54790400733BF6 /* Store_ConcurrencyTests.swift in Sources */,
+				40C71B812E54790400733BF6 /* Store_PerformanceTests.swift in Sources */,
 				84F58B9129EEB36E00010C4C /* EventNotificationCenter_Mock.swift in Sources */,
 				406B3C082C8F602D00FC93A1 /* LocalAudioMediaAdapter_Tests.swift in Sources */,
 				84F58B7F29EE97C800010C4C /* VirtualTimer.swift in Sources */,

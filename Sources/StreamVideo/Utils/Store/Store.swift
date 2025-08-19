@@ -67,10 +67,10 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// Array of reducers that process actions to update state.
-    @Atomic private(set) var reducers: [Reducer<Namespace>]
+    private var reducers: [Reducer<Namespace>]
     
     /// Array of middleware that handle side effects.
-    @Atomic private(set) var middleware: [Middleware<Namespace>]
+    private var middleware: [Middleware<Namespace>]
 
     /// Initializes a new store with the specified configuration.
     ///
@@ -108,12 +108,17 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///
     /// - Parameter value: The middleware to add.
     func add<T: Middleware<Namespace>>(_ value: T) {
-        guard middleware.first(where: { $0 === value }) == nil else {
-            return
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self,
+                middleware.first(where: { $0 === value }) == nil
+            else {
+                return
+            }
+            middleware.append(value)
+            value.dispatcher = .init(self)
+            value.stateProvider = { [weak self] in self?.state }
         }
-        middleware.append(value)
-        value.dispatcher = .init(self)
-        value.stateProvider = { [weak self] in self?.state }
     }
 
     /// Removes previously added middleware.
@@ -123,9 +128,17 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///
     /// - Parameter value: The middleware to remove.
     func remove<T: Middleware<Namespace>>(_ value: T) {
-        middleware = middleware.filter { $0 !== value }
-        value.dispatcher = nil
-        value.stateProvider = nil
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self
+            else {
+                return
+            }
+
+            middleware = middleware.filter { $0 !== value }
+            value.dispatcher = nil
+            value.stateProvider = nil
+        }
     }
 
     // MARK: - Reducer Management
@@ -137,17 +150,29 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///
     /// - Parameter value: The reducer to add.
     func add<T: Reducer<Namespace>>(_ value: T) {
-        guard reducers.first(where: { $0 === value }) == nil else {
-            return
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self,
+                reducers.first(where: { $0 === value }) == nil
+            else {
+                return
+            }
+            reducers.append(value)
         }
-        reducers.append(value)
     }
 
     /// Removes a previously added reducer.
     ///
     /// - Parameter value: The reducer to remove.
     func remove<T: Reducer<Namespace>>(_ value: T) {
-        reducers = reducers.filter { $0 !== value }
+        processingQueue.addOperation { [weak self] in
+            guard
+                let self
+            else {
+                return
+            }
+            reducers = reducers.filter { $0 !== value }
+        }
     }
 
     // MARK: - State Observation
