@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 
 public extension Publisher where Output: Sendable {
 

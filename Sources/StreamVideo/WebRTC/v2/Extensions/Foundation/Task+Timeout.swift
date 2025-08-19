@@ -14,7 +14,7 @@ extension Task where Failure == any Error {
         file: StaticString = #fileID,
         function: StaticString = #function,
         line: UInt = #line,
-        operation: @Sendable @escaping @isolated(any) () async throws -> Success
+        operation: @Sendable @escaping () async throws -> Success
     ) {
         self = Task(priority: priority) {
             try await withThrowingTaskGroup(of: Success.self) { group in
