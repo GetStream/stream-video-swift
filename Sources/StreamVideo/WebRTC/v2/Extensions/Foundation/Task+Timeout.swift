@@ -16,7 +16,7 @@ extension Task where Failure == any Error {
         line: UInt = #line,
         operation: @Sendable @escaping @isolated(any) () async throws -> Success
     ) {
-        self = Task(priority: priority, operation: {
+        self = Task(priority: priority) {
             try await withThrowingTaskGroup(of: Success.self) { group in
 
                 /// Add the operation to perform as the first task.
@@ -24,9 +24,14 @@ extension Task where Failure == any Error {
                     try await operation()
                 }
 
-                /// Add another task to trigger the timeout if it finishes earlier than our first task.
-                _ = group.addTaskUnlessCancelled { () -> Success in
-                    try await Task<Never, Never>.sleep(nanoseconds: UInt64(timeoutInSeconds * 1_000_000_000))
+                if timeoutInSeconds > 0, timeoutInSeconds <= TimeInterval(UInt64.max) {
+                    /// Add another task to trigger the timeout if it finishes earlier than our first task.
+                    _ = group.addTaskUnlessCancelled { () -> Success in
+                        try await Task<Never, Never>.sleep(nanoseconds: UInt64(timeoutInSeconds * 1_000_000_000))
+                        throw ClientError("Operation timed out", file, line)
+                    }
+                } else {
+                    log.warning("Invalid timeout:\(timeoutInSeconds) was passed to Task.timeout. Task will timeout immediately.")
                     throw ClientError("Operation timed out", file, line)
                 }
 
@@ -42,6 +47,6 @@ extension Task where Failure == any Error {
                 group.cancelAll()
                 return result
             }
-        })
+        }
     }
 }
