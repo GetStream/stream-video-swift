@@ -8,13 +8,21 @@ import XCTest
 
 final class StreamCallAudioRecorder_ApplicationStateMiddlewareTests: StreamVideoTestCase, @unchecked Sendable {
 
+    private var mockApplicationStateAdapter: MockAppStateAdapter! = .init()
     private var actionsReceived: [(StreamCallAudioRecorder.Namespace.Action, Store<StreamCallAudioRecorder.Namespace>.Delay)] = []
     private lazy var subject: StreamCallAudioRecorder
         .Namespace
         .ApplicationStateMiddleware! = .init()
 
+    override func setUp() {
+        super.setUp()
+        mockApplicationStateAdapter.makeShared()
+        _ = subject
+    }
+
     override func tearDown() {
         subject = nil
+        mockApplicationStateAdapter = nil
         super.tearDown()
     }
 
@@ -26,9 +34,7 @@ final class StreamCallAudioRecorder_ApplicationStateMiddlewareTests: StreamVideo
         subject.stateProvider = { .initial }
         subject.dispatcher = .init { _, _, _, _, _ in }
 
-        NotificationCenter
-            .default
-            .post(name: UIApplication.didEnterBackgroundNotification, object: nil)
+        mockApplicationStateAdapter.stubbedState = .background
 
         await safeFulfillment(of: [validation], timeout: 1)
     }
@@ -49,10 +55,7 @@ final class StreamCallAudioRecorder_ApplicationStateMiddlewareTests: StreamVideo
             self.actionsReceived.append((action, delay))
         }
 
-        NotificationCenter
-            .default
-            .post(name: UIApplication.didEnterBackgroundNotification, object: nil)
-
+        mockApplicationStateAdapter.stubbedState = .background
         await fulfillment { self.actionsReceived.endIndex == 2 }
 
         let firstEntry = try XCTUnwrap(actionsReceived.first)

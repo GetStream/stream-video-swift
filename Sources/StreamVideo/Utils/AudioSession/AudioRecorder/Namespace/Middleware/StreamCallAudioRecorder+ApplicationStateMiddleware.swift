@@ -23,9 +23,6 @@ extension StreamCallAudioRecorder.Namespace {
         /// Adapter for monitoring application state changes.
         @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
-        /// Container for managing subscription lifecycles.
-        private let disposableBag = DisposableBag()
-        
         /// Subscription to monitor application state changes.
         private var activeCallCancellable: AnyCancellable?
         
@@ -39,7 +36,7 @@ extension StreamCallAudioRecorder.Namespace {
             // Monitor application state changes
             activeCallCancellable = applicationStateAdapter
                 .statePublisher
-                .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdate($0) }
+                .sink { [weak self] in self?.didUpdate($0) }
         }
 
         // MARK: - Private Helpers
@@ -54,7 +51,7 @@ extension StreamCallAudioRecorder.Namespace {
         ///
         /// - Note: The 250ms delay allows the audio session to properly
         ///   reconfigure before restarting recording.
-        private func didUpdate(_ applicationState: ApplicationState) async {
+        private func didUpdate(_ applicationState: ApplicationState) {
             guard state?.isRecording == true else {
                 return
             }
