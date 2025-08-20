@@ -57,7 +57,11 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
                 })
             )
             .applyDecorationModifierIfRequired(
-                VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount),
+                VideoCallParticipantSpeakingModifier(
+                    participant: participant,
+                    participantCount: participantCount,
+                    cornerRadius: cornerRadius
+                ),
                 decoration: .speaking,
                 availableDecorations: decorations
             )
@@ -66,6 +70,14 @@ private struct PictureInPictureParticipantModifier: ViewModifier {
     @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
+    }
+    
+    private var cornerRadius: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 32
+        } else {
+            return 16
+        }
     }
 }
 
