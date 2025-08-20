@@ -287,26 +287,26 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
 
     public var participant: CallParticipant
     public var participantCount: Int
+    public var cornerRadius: CGFloat
 
     public init(
         participant: CallParticipant,
-        participantCount: Int
+        participantCount: Int,
+        cornerRadius: CGFloat = 16
     ) {
         self.participant = participant
         self.participantCount = participantCount
+        self.cornerRadius = cornerRadius
     }
 
     public func body(content: Content) -> some View {
         content
             .overlay(
-                Group {
-                    if participant.isSpeaking, participantCount > 1 {
-                        RoundedRectangle(cornerRadius: 16).strokeBorder(
-                            colors.participantSpeakingHighlightColor,
-                            lineWidth: 2
-                        )
-                    }
-                }
+                participant.isSpeaking && participantCount > 1 ?
+                    RoundedRectangle(cornerRadius: cornerRadius).strokeBorder(
+                        colors.participantSpeakingHighlightColor,
+                        lineWidth: 2
+                    ) : nil
             )
     }
 }
