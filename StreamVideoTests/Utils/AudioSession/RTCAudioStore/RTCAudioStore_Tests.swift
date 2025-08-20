@@ -11,7 +11,7 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
     private final class SpyReducer: RTCAudioStoreReducer, @unchecked Sendable {
         var reduceError: Error?
-        private(set) var reduceWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: Date)?
+        private(set) var reduceWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: DispatchTime)?
         func reduce(
             state: RTCAudioStore.State,
             action: RTCAudioStoreAction,
@@ -19,7 +19,7 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
             function: StaticString,
             line: UInt
         ) throws -> RTCAudioStore.State {
-            reduceWasCalled = (state, action, .init())
+            reduceWasCalled = (state, action, DispatchTime.now())
             guard let reduceError else {
                 return state
             }
@@ -28,7 +28,7 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
     }
 
     private final class SpyMiddleware: RTCAudioStoreMiddleware, @unchecked Sendable {
-        private(set) var applyWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: Date)?
+        private(set) var applyWasCalled: (state: RTCAudioStore.State, action: RTCAudioStoreAction, calledAt: DispatchTime)?
         func apply(
             state: RTCAudioStore.State,
             action: RTCAudioStoreAction,
@@ -36,7 +36,7 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
             function: StaticString,
             line: UInt
         ) {
-            applyWasCalled = (state, action, .init())
+            applyWasCalled = (state, action, DispatchTime.now())
         }
     }
 
@@ -82,7 +82,15 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
         let middlewareWasCalledAt = try XCTUnwrap(middleware.applyWasCalled?.calledAt)
         let reducerWasCalledAt = try XCTUnwrap(reducer.reduceWasCalled?.calledAt)
-        XCTAssertTrue(reducerWasCalledAt.timeIntervalSince(middlewareWasCalledAt) > 0)
+        let diff = middlewareWasCalledAt.distance(to: reducerWasCalledAt)
+        switch diff {
+        case .never:
+            XCTFail()
+        case let .nanoseconds(value):
+            return XCTAssertTrue(value > 0)
+        default:
+            XCTFail("It shouldn't be that long.")
+        }
     }
 
     // MARK: - dispatchAsync
@@ -97,7 +105,15 @@ final class RTCAudioStore_Tests: XCTestCase, @unchecked Sendable {
 
         let middlewareWasCalledAt = try XCTUnwrap(middleware.applyWasCalled?.calledAt)
         let reducerWasCalledAt = try XCTUnwrap(reducer.reduceWasCalled?.calledAt)
-        XCTAssertTrue(reducerWasCalledAt.timeIntervalSince(middlewareWasCalledAt) > 0)
+        let diff = middlewareWasCalledAt.distance(to: reducerWasCalledAt)
+        switch diff {
+        case .never:
+            XCTFail()
+        case let .nanoseconds(value):
+            return XCTAssertTrue(value > 0)
+        default:
+            XCTFail("It shouldn't be that long.")
+        }
     }
 
     func test_dispatchAsync_reducerThrowsError_rethrowsError() async throws {

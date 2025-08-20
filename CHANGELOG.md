@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🐞 Fixed
 - An issue that was causing the local participant's audio waveform visualization to stop working. [#912](https://github.com/GetStream/stream-video-swift/pull/912)
+- Proximity policies weren't updating CallSettings correctly. That would cause issues where Speaker may not be reenabled or video not being stopped/restarted when proximity changes. [#913](https://github.com/GetStream/stream-video-swift/pull/913)
 
 # [1.30.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.30.0)
 _August 08, 2025_

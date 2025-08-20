@@ -11,7 +11,7 @@ protocol StreamAudioSessionAdapterDelegate: AnyObject {
     /// - Parameters:
     ///   - audioSession: The `AudioSession` instance that made the update.
     ///   - callSettings: The updated `CallSettings`.
-    func audioSessionAdapterDidUpdateCallSettings(
-        callSettings: CallSettings
+    func audioSessionAdapterDidUpdateSpeakerOn(
+        _ speakerOn: Bool
     )
 }

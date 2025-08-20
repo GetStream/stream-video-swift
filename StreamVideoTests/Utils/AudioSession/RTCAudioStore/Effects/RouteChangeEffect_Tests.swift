@@ -12,10 +12,10 @@ final class RouteChangeEffect_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - Mocks
 
     final class MockDelegate: StreamAudioSessionAdapterDelegate {
-        private(set) var updatedCallSettings: CallSettings?
+        private(set) var updatedSpeakerOn: Bool?
 
-        func audioSessionAdapterDidUpdateCallSettings(callSettings: CallSettings) {
-            updatedCallSettings = callSettings
+        func audioSessionAdapterDidUpdateSpeakerOn(_ speakerOn: Bool) {
+            updatedSpeakerOn = speakerOn
         }
     }
 
@@ -121,6 +121,6 @@ final class RouteChangeEffect_Tests: XCTestCase, @unchecked Sendable {
         )
 
         // Then
-        XCTAssertEqual(delegate.updatedCallSettings, expectedCallSettings)
+        XCTAssertEqual(delegate.updatedSpeakerOn, expectedCallSettings?.speakerOn)
     }
 }

@@ -267,13 +267,13 @@ final class LocalVideoMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
 
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
+            _ = await Task(disposableBag: disposableBag) { @MainActor [weak self] in
                 do {
                     try await self?.stopVideoCapturingSession()
                 } catch {
                     log.error(error, subsystems: .webRTC)
                 }
-            }
+            }.result
 
             log.debug(
                 """

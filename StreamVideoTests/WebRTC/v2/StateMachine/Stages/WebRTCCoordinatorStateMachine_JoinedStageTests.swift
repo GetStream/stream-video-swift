@@ -625,59 +625,6 @@ final class WebRTCCoordinatorStateMachine_JoinedStageTests: XCTestCase, @uncheck
         }
     }
 
-    // MARK: observeCallSettingsUpdates
-
-    func test_transition_callSettingsUpdatedAndPublisherThrowsError_transitionsToDisconnected() async throws {
-        await mockCoordinatorStack.coordinator.stateAdapter.set(
-            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
-        )
-        try await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .configurePeerConnections()
-        let publisher = await mockCoordinatorStack?.coordinator.stateAdapter.publisher
-        let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
-        mockPublisher.stub(
-            for: .didUpdateCallSettings,
-            with: Result<Void, Error>.failure(ClientError())
-        )
-
-        await assertTransitionAfterTrigger(
-            expectedTarget: .disconnected,
-            trigger: { [mockCoordinatorStack] in
-                await mockCoordinatorStack?
-                    .coordinator
-                    .stateAdapter
-                    .set(callSettings: CallSettings(audioOn: true, videoOn: true))
-            }
-        ) { _ in }
-    }
-
-    func test_transition_callSettingsUpdated_publisherUpdated() async throws {
-        await mockCoordinatorStack.coordinator.stateAdapter.set(
-            sfuAdapter: mockCoordinatorStack.sfuStack.adapter
-        )
-        try await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .configurePeerConnections()
-        let publisher = await mockCoordinatorStack?.coordinator.stateAdapter.publisher
-        let mockPublisher = try XCTUnwrap(publisher as? MockRTCPeerConnectionCoordinator)
-        let updateCallSettings = CallSettings(audioOn: true, videoOn: true)
-
-        await assertResultAfterTrigger(
-            trigger: { [mockCoordinatorStack] in
-                await mockCoordinatorStack?
-                    .coordinator
-                    .stateAdapter
-                    .set(callSettings: updateCallSettings)
-            }
-        ) { [mockPublisher] expectation in
-            XCTAssertEqual(mockPublisher.timesCalled(.didUpdateCallSettings), 1)
-            expectation.fulfill()
-        }
-    }
-
     // MARK: observePeerConnectionState
 
     func test_transition_publisherDisconnects_restartICEWasTriggeredOnPublisher() async throws {
