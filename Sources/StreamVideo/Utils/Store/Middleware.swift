@@ -2,9 +2,9 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
-/// Base class for store middleware that intercept actions for side effects.
+/// Base class for store middleware that intercepts actions for side effects.
 ///
-/// Middleware sit between action dispatch and state reduction, allowing you
+/// Middleware sits between action dispatch and state reduction, allowing you
 /// to:
 /// - Perform asynchronous operations
 /// - Dispatch additional actions
@@ -14,7 +14,7 @@
 ///
 /// ## Architecture
 ///
-/// Middleware receive actions before reducers process them. They can:
+/// Middleware receives actions before reducers process them. They can:
 /// 1. Perform side effects (API calls, timers, etc.)
 /// 2. Dispatch new actions via the `dispatcher`
 /// 3. Access current state via the `state` property
