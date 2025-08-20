@@ -51,11 +51,11 @@ public struct CallTopView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            .overlay(overlayView)
             .padding(.horizontal, 16)
             .padding(.vertical)
             .frame(maxWidth: .infinity)
         }
-        .overlay(overlayView)
     }
 
     @ViewBuilder

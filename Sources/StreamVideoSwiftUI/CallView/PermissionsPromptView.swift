@@ -11,19 +11,20 @@ public struct PermissionsPromptView: View {
 
     @ObservedObject private var permissions = InjectedValues[\.permissions]
     @State private var presentNavigationPopup = false
+    @State private var isHidden = false
 
     public init() {}
 
     public var body: some View {
-        if !permissions.hasCameraPermission || !permissions.hasMicrophonePermission {
+        if (!permissions.hasCameraPermission || !permissions.hasMicrophonePermission), !isHidden {
             HStack {
                 title
-                Divider()
+                Spacer()
                 actionsContainerView
             }
-            .padding(.all, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
             .modifier(ShadowViewModifier())
-            .frame(maxHeight: 80)
             .alert(isPresented: $presentNavigationPopup) { alertContentView }
         }
     }
@@ -32,23 +33,26 @@ public struct PermissionsPromptView: View {
     private var title: some View {
         switch (permissions.hasCameraPermission, permissions.hasMicrophonePermission) {
         case (false, false):
-            Text("Please grant permission to access your camera and microphone.")
-                .font(.headline)
-                .minimumScaleFactor(0.7)
+            text(for: "Please grant permission to access your camera and microphone.")
 
         case (false, true):
-            Text("Please grant permission to access your camera.")
-                .font(.headline)
-                .minimumScaleFactor(0.7)
+            text(for: "Please grant permission to access your camera.")
 
         case (true, false):
-            Text("Please grant permission to access your microphone.")
-                .font(.headline)
-                .minimumScaleFactor(0.7)
+            text(for: "Please grant permission to access your microphone.")
 
         case (true, true):
             EmptyView()
         }
+    }
+
+    @ViewBuilder
+    private func text(for string: String) -> some View {
+        Text(string)
+            .font(.headline)
+            .minimumScaleFactor(0.5)
+            .multilineTextAlignment(.leading)
+            .lineLimit(3)
     }
 
     @ViewBuilder
@@ -63,21 +67,38 @@ public struct PermissionsPromptView: View {
         Button {
             presentNavigationPopup = true
         } label: {
-            Text("Open Settings")
+            if #available(iOS 14.0, *) {
+                Label {
+                    Text("Settings")
+                } icon: {
+                    Image(systemName: "gear")
+                }
+                .minimumScaleFactor(0.7)
+            } else {
+                Text("\(Image(systemName: "gear")) Settings")
+                    .minimumScaleFactor(0.7)
+            }
         }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
+        .foregroundColor(.white)
+        .background(Color.blue)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     private var alertContentView: Alert {
-        .init(
+        Alert(
             title: Text("Info"),
             message: Text(
                 "After toggling any of the settings in the system settings, the app will restart automatically. You will need to join the call again."
             ),
-            dismissButton:
-            .default(
+            primaryButton: .default(
                 Text("Continue"),
                 action: { try? urlNavigator.openSettings() }
-            )
+            ),
+            secondaryButton: .cancel {
+                isHidden = true
+            }
         )
     }
 }

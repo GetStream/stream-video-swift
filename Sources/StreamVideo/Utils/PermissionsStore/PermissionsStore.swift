@@ -68,6 +68,6 @@ extension PermissionStore: InjectionKey {
 extension InjectedValues {
     public var permissions: PermissionStore {
         get { Self[PermissionStore.self] }
-        set { _ = newValue }
+        set { Self[PermissionStore.self] = newValue }
     }
 }

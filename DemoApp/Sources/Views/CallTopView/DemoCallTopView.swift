@@ -51,10 +51,10 @@ struct DemoCallTopView: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .overlay(overlayView)
         .padding(.horizontal, 16)
         .padding(.top)
         .frame(maxWidth: .infinity)
-        .overlay(overlayView)
     }
 
     private var isCallLivestream: Bool {

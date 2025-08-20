@@ -71,7 +71,7 @@ public struct StatelessMicrophoneIconView: View {
 
     @ViewBuilder
     private func label(isEnabled: Bool, hasPermission: Bool) -> some View {
-        CallIconView(
+        let content = CallIconView(
             icon: isEnabled && hasPermission
                 ? controlStyle.enabled.icon
                 : controlStyle.disabled.icon,
@@ -80,16 +80,12 @@ public struct StatelessMicrophoneIconView: View {
                 ? controlStyle.enabled.iconStyle
                 : controlStyle.disabled.iconStyle
         )
-        .overlay(noPermissionOverlay)
-    }
 
-    @ViewBuilder
-    private var noPermissionOverlay: some View {
-        if !hasPermission {
-            TopRightView {
-                Image(systemName: "exclamationmark.circle.fill")
-                    .foregroundColor(.orange)
-            }
+        if hasPermission {
+            content
+        } else {
+            content
+                .badge(Image(systemName: "exclamationmark"), background: .orange)
         }
     }
 }
