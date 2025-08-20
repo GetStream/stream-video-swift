@@ -34,6 +34,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         }
     }
 
+    @Injected(\.permissions) private var permissions
+
     // Properties for user, API key, call ID, video configuration, and factories.
     let unifiedSessionId: String = UUID().uuidString
     let user: User
@@ -489,8 +491,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 return
             }
 
+            let permissions = await self.permissions
             let currentCallSettings = await callSettings
-            let updatedCallSettings = operation(currentCallSettings)
+            var updatedCallSettings = operation(currentCallSettings)
+
+            if !permissions.hasCameraPermission, updatedCallSettings.videoOn {
+                updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
+            }
+
+            if !permissions.hasMicrophonePermission, updatedCallSettings.audioOn {
+                updatedCallSettings = updatedCallSettings.withUpdatedAudioState(false)
+            }
+
             guard
                 updatedCallSettings != currentCallSettings
             else {

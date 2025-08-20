@@ -11,6 +11,7 @@ import UIKit
 @available(iOS 14.0, *)
 class Camera: NSObject, @unchecked Sendable {
     @Injected(\.orientationAdapter) private var orientationAdapter
+    @Injected(\.permissions) private var permissions
 
     private lazy var captureSession = AVCaptureSession()
     private var isCaptureSessionConfigured = false
@@ -186,24 +187,15 @@ class Camera: NSObject, @unchecked Sendable {
     }
     
     private func checkAuthorization() async -> Bool {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            log.debug("Camera access authorized.")
+        if permissions.hasCameraPermission {
             return true
-        case .notDetermined:
-            log.debug("Camera access not determined.")
-            sessionQueue.suspend()
-            let status = await AVCaptureDevice.requestAccess(for: .video)
-            sessionQueue.resume()
-            return status
-        case .denied:
-            log.debug("Camera access denied.")
-            return false
-        case .restricted:
-            log.debug("Camera library access restricted.")
-            return false
-        @unknown default:
-            return false
+        } else {
+            do {
+                return try await permissions.requestCameraPermission()
+            } catch {
+                log.error(error)
+                return false
+            }
         }
     }
     

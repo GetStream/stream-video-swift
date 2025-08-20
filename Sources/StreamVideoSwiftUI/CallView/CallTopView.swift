@@ -55,17 +55,21 @@ public struct CallTopView: View {
             .padding(.vertical)
             .frame(maxWidth: .infinity)
         }
-        .overlay(
-            viewModel.call?.state.isCurrentUserScreensharing == true ?
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-                .opacity(sharingPopupDismissed ? 0 : 1)
-                : nil
-        )
+        .overlay(overlayView)
     }
-    
+
+    @ViewBuilder
+    private var overlayView: some View {
+        if viewModel.call?.state.isCurrentUserScreensharing == true, !sharingPopupDismissed {
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed
+            )
+        } else {
+            PermissionsPromptView()
+        }
+    }
+
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
