@@ -88,11 +88,15 @@ extension AVAudioRecorder {
         ]
     ) throws -> AVAudioRecorder {
         // Get the cache directory for temporary audio storage
-        let documentPath = FileManager.default.urls(
-            for: .cachesDirectory,
-            in: .userDomainMask
-        )[0]
-        
+        guard
+            let documentPath = FileManager.default.urls(
+                for: .cachesDirectory,
+                in: .userDomainMask
+            ).first
+        else {
+            throw ClientError("No cache directory available.")
+        }
+
         // Construct the full file URL
         let fileURL = documentPath.appendingPathComponent(filename)
         
