@@ -325,6 +325,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     var customData: [String: RawJSON]
     var call: Call?
 
+    @ObservedObject private var permissions = InjectedValues[\.permissions]
     @State private var isUsingFrontCameraForLocalUser: Bool = false
 
     public init(
@@ -380,7 +381,15 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     }
 
     private var showVideo: Bool {
-        participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
+        if isLocalParticipant {
+            return call?.state.callSettings.videoOn == true && permissions.hasCameraPermission
+        } else {
+            return participant.shouldDisplayTrack
+        }
+    }
+
+    var isLocalParticipant: Bool {
+        participant.sessionId == call?.state.localParticipant?.sessionId
     }
 
     @MainActor
@@ -388,7 +397,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     private func withCallSettingsObservation(
         @ViewBuilder _ content: () -> some View
     ) -> some View {
-        if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
+        if isLocalParticipant {
             Group {
                 if isUsingFrontCameraForLocalUser {
                     content()
