@@ -303,11 +303,10 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
         content
             .overlay(
                 participant.isSpeaking && participantCount > 1 ?
-                RoundedRectangle(cornerRadius: cornerRadius).strokeBorder(
-                    colors.participantSpeakingHighlightColor,
-                    lineWidth: 2
-                )
-                : nil
+                    RoundedRectangle(cornerRadius: cornerRadius).strokeBorder(
+                        colors.participantSpeakingHighlightColor,
+                        lineWidth: 2
+                    ) : nil
             )
     }
 }
