@@ -10,13 +10,16 @@ public struct MicrophoneCheckView: View {
     @Injected(\.fonts) var fonts
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
-    
+    @Injected(\.permissions) var permissions
+
     var audioLevels: [Float]
     var microphoneOn: Bool
     var isSilent: Bool
     var isPinned: Bool
     var maxHeight: Float = 14
-    
+
+    @State private var hasMicrophoneAccess = true
+
     public init(
         audioLevels: [Float],
         microphoneOn: Bool,
@@ -50,7 +53,7 @@ public struct MicrophoneCheckView: View {
                 .minimumScaleFactor(0.7)
                 .accessibility(identifier: "participantName")
 
-            if microphoneOn && !isSilent {
+            if hasMicrophoneAccess, microphoneOn && !isSilent {
                 AudioVolumeIndicator(
                     audioLevels: audioLevels,
                     maxHeight: maxHeight,
@@ -73,6 +76,7 @@ public struct MicrophoneCheckView: View {
             corners: [.topRight],
             backgroundColor: colors.participantInfoBackgroundColor
         )
+        .onReceive(permissions.$hasMicrophonePermission) { hasMicrophoneAccess = $0 }
     }
 }
 

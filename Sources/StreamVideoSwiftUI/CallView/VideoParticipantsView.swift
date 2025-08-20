@@ -326,11 +326,10 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     var edgesIgnoringSafeArea: Edge.Set
     var customData: [String: RawJSON]
     var call: Call?
-
     private var isLocalParticipant: Bool
-
     private var callSettingsPublisher: AnyPublisher<CallSettings, Never>?
     @State private var callSettings: CallSettings?
+    @ObservedObject private var permissions = InjectedValues[\.permissions]
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,

@@ -6,10 +6,10 @@ import Foundation
 
 extension Store {
 
-    struct Dispatcher {
+    struct Dispatcher: Sendable {
 
-        typealias Handler = (Namespace.Action, Delay, StaticString, StaticString, UInt) -> Void
-        private var handler: Handler
+        typealias Handler = @Sendable(Namespace.Action, Delay, StaticString, StaticString, UInt) -> Void
+        private let handler: Handler
 
         init(_ store: Store) {
             handler = { [weak store] in

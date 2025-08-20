@@ -20,6 +20,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
     }
 
     @Injected(\.captureDeviceProvider) private var captureDeviceProvider
+    @Injected(\.permissions) private var permissions
 
     private var activeConfiguration: Configuration?
 
@@ -106,6 +107,12 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
                 subsystems: .videoCapturer
             )
             return
+        }
+
+        let hasPermission = try await permissions.requestCameraPermission()
+
+        guard hasPermission else {
+            throw ClientError("Camera access permission request failed.")
         }
 
         guard

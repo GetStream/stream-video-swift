@@ -13,6 +13,7 @@ public struct StatelessMicrophoneIconView: View {
     public typealias ActionHandler = () -> Void
 
     @Injected(\.images) private var images
+    @Injected(\.permissions) private var permissions
 
     /// The associated call for the microphone icon.
     public weak var call: Call?
@@ -23,7 +24,11 @@ public struct StatelessMicrophoneIconView: View {
     /// The action handler for the microphone icon button.
     public var actionHandler: ActionHandler?
 
+    public var controlStyle: ToggleControlStyle
+
     @ObservedObject private var callSettings: CallSettings
+
+    @State private var hasPermission: Bool
 
     /// Initializes a stateless microphone icon view.
     ///
@@ -34,32 +39,53 @@ public struct StatelessMicrophoneIconView: View {
     @MainActor
     public init(
         call: Call?,
+        callSettings: CallSettings = .init(),
         size: CGFloat = 44,
+        controlStyle: ToggleControlStyle = .init(
+            enabled: .init(icon: Appearance.default.images.micTurnOn, iconStyle: .transparent),
+            disabled: .init(icon: Appearance.default.images.micTurnOff, iconStyle: .disabled)
+        ),
         actionHandler: ActionHandler? = nil
     ) {
         self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? .init())
+        _callSettings = .init(wrappedValue: call?.state.callSettings ?? callSettings)
+        self.controlStyle = controlStyle
         self.actionHandler = actionHandler
+        hasPermission = InjectedValues[\.permissions].hasMicrophonePermission
     }
 
     /// The body of the microphone icon view.
     public var body: some View {
         Button(
             action: { actionHandler?() },
-            label: {
-                CallIconView(
-                    icon: callSettings.audioOn
-                        ? images.micTurnOn
-                        : images.micTurnOff,
-                    size: size,
-                    iconStyle: callSettings.audioOn
-                        ? .transparent
-                        : .disabled
-                )
-            }
+            label: { label(isEnabled: callSettings.audioOn, hasPermission: hasPermission) }
         )
+        .disabled(!hasPermission)
         .accessibility(identifier: "microphoneToggle")
         .streamAccessibility(value: callSettings.audioOn ? "1" : "0")
+        .onReceive(permissions.$hasMicrophonePermission) { hasPermission = $0 }
+    }
+
+    // MARK: - Private Helpers
+
+    @ViewBuilder
+    private func label(isEnabled: Bool, hasPermission: Bool) -> some View {
+        let content = CallIconView(
+            icon: isEnabled && hasPermission
+                ? controlStyle.enabled.icon
+                : controlStyle.disabled.icon,
+            size: size,
+            iconStyle: isEnabled && hasPermission
+                ? controlStyle.enabled.iconStyle
+                : controlStyle.disabled.iconStyle
+        )
+
+        if hasPermission {
+            content
+        } else {
+            content
+                .badge(Image(systemName: "exclamationmark"), background: .orange)
+        }
     }
 }

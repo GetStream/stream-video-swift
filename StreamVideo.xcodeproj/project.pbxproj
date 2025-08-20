@@ -707,6 +707,17 @@
 		40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8312B61325500FB9DB2 /* ModalButton.swift */; };
 		40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */; };
 		40C7B8362B613C7800FB9DB2 /* ParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */; };
+		40C8F0062E55D25300A0CC87 /* PermissionsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0052E55D25300A0CC87 /* PermissionsStore.swift */; };
+		40C8F0092E55D28400A0CC87 /* PermissionStore+Namespace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0082E55D28400A0CC87 /* PermissionStore+Namespace.swift */; };
+		40C8F00B2E55D2C000A0CC87 /* PermissionStore+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F00A2E55D2C000A0CC87 /* PermissionStore+Action.swift */; };
+		40C8F00D2E55D2C400A0CC87 /* PermissionStore+State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F00C2E55D2C400A0CC87 /* PermissionStore+State.swift */; };
+		40C8F0112E55D3D000A0CC87 /* PermissionStore+DefaultReducer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0102E55D3D000A0CC87 /* PermissionStore+DefaultReducer.swift */; };
+		40C8F0142E55D44300A0CC87 /* PermissionStore+MicrophoneMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0132E55D44300A0CC87 /* PermissionStore+MicrophoneMiddleware.swift */; };
+		40C8F0162E55D8B600A0CC87 /* PermissionStore+CameraMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0152E55D8B600A0CC87 /* PermissionStore+CameraMiddleware.swift */; };
+		40C8F0182E55DAFD00A0CC87 /* PermissionStore+PushNotificationsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0172E55DAFD00A0CC87 /* PermissionStore+PushNotificationsMiddleware.swift */; };
+		40C8F0222E55EAA300A0CC87 /* ControlStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0212E55EAA300A0CC87 /* ControlStyle.swift */; };
+		40C8F0252E55EF9600A0CC87 /* PermissionsPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0242E55EF9600A0CC87 /* PermissionsPromptView.swift */; };
+		40C8F0272E55F2D400A0CC87 /* URLNavigating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8F0262E55F2D400A0CC87 /* URLNavigating.swift */; };
 		40C9E4422C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */; };
 		40C9E4442C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */; };
 		40C9E4462C94742900802B28 /* CallParticipant+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */; };
@@ -2290,6 +2301,17 @@
 		40C7B8312B61325500FB9DB2 /* ModalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalButton.swift; sourceTree = "<group>"; };
 		40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView.swift; sourceTree = "<group>"; };
 		40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListButton.swift; sourceTree = "<group>"; };
+		40C8F0052E55D25300A0CC87 /* PermissionsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsStore.swift; sourceTree = "<group>"; };
+		40C8F0082E55D28400A0CC87 /* PermissionStore+Namespace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionStore+Namespace.swift"; sourceTree = "<group>"; };
+		40C8F00A2E55D2C000A0CC87 /* PermissionStore+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionStore+Action.swift"; sourceTree = "<group>"; };
+		40C8F00C2E55D2C400A0CC87 /* PermissionStore+State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionStore+State.swift"; sourceTree = "<group>"; };
+		40C8F0102E55D3D000A0CC87 /* PermissionStore+DefaultReducer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionStore+DefaultReducer.swift"; sourceTree = "<group>"; };
+		40C8F0132E55D44300A0CC87 /* PermissionStore+MicrophoneMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionStore+MicrophoneMiddleware.swift"; sourceTree = "<group>"; };
+		40C8F0152E55D8B600A0CC87 /* PermissionStore+CameraMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionStore+CameraMiddleware.swift"; sourceTree = "<group>"; };
+		40C8F0172E55DAFD00A0CC87 /* PermissionStore+PushNotificationsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PermissionStore+PushNotificationsMiddleware.swift"; sourceTree = "<group>"; };
+		40C8F0212E55EAA300A0CC87 /* ControlStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlStyle.swift; sourceTree = "<group>"; };
+		40C8F0242E55EF9600A0CC87 /* PermissionsPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsPromptView.swift; sourceTree = "<group>"; };
+		40C8F0262E55F2D400A0CC87 /* URLNavigating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLNavigating.swift; sourceTree = "<group>"; };
 		40C9E4412C943DC000802B28 /* WebRTCCoordinatorStateMachine_ErrorStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCCoordinatorStateMachine_ErrorStageTests.swift; sourceTree = "<group>"; };
 		40C9E4432C94740600802B28 /* Stream_Video_Sfu_Models_VideoLayer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Stream_Video_Sfu_Models_VideoLayer+Convenience.swift"; sourceTree = "<group>"; };
 		40C9E4452C94742300802B28 /* CallParticipant+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallParticipant+Convenience.swift"; sourceTree = "<group>"; };
@@ -3409,6 +3431,7 @@
 		40245F2E2BE269B400FCF075 /* CallControls */ = {
 			isa = PBXGroup;
 			children = (
+				40C8F0202E55EA9300A0CC87 /* Styles */,
 				40245F302BE269C300FCF075 /* Stateful */,
 				40245F2F2BE269BE00FCF075 /* Stateless */,
 			);
@@ -5198,6 +5221,53 @@
 			path = Controls;
 			sourceTree = "<group>";
 		};
+		40C8F0042E55D21D00A0CC87 /* PermissionsStore */ = {
+			isa = PBXGroup;
+			children = (
+				40C8F0072E55D26900A0CC87 /* Namespace */,
+				40C8F0052E55D25300A0CC87 /* PermissionsStore.swift */,
+			);
+			path = PermissionsStore;
+			sourceTree = "<group>";
+		};
+		40C8F0072E55D26900A0CC87 /* Namespace */ = {
+			isa = PBXGroup;
+			children = (
+				40C8F0122E55D41F00A0CC87 /* Middleware */,
+				40C8F00F2E55D3C300A0CC87 /* Reducers */,
+				40C8F0082E55D28400A0CC87 /* PermissionStore+Namespace.swift */,
+				40C8F00A2E55D2C000A0CC87 /* PermissionStore+Action.swift */,
+				40C8F00C2E55D2C400A0CC87 /* PermissionStore+State.swift */,
+			);
+			path = Namespace;
+			sourceTree = "<group>";
+		};
+		40C8F00F2E55D3C300A0CC87 /* Reducers */ = {
+			isa = PBXGroup;
+			children = (
+				40C8F0102E55D3D000A0CC87 /* PermissionStore+DefaultReducer.swift */,
+			);
+			path = Reducers;
+			sourceTree = "<group>";
+		};
+		40C8F0122E55D41F00A0CC87 /* Middleware */ = {
+			isa = PBXGroup;
+			children = (
+				40C8F0132E55D44300A0CC87 /* PermissionStore+MicrophoneMiddleware.swift */,
+				40C8F0152E55D8B600A0CC87 /* PermissionStore+CameraMiddleware.swift */,
+				40C8F0172E55DAFD00A0CC87 /* PermissionStore+PushNotificationsMiddleware.swift */,
+			);
+			path = Middleware;
+			sourceTree = "<group>";
+		};
+		40C8F0202E55EA9300A0CC87 /* Styles */ = {
+			isa = PBXGroup;
+			children = (
+				40C8F0212E55EAA300A0CC87 /* ControlStyle.swift */,
+			);
+			path = Styles;
+			sourceTree = "<group>";
+		};
 		40C9E44F2C9880D300802B28 /* Unwrap */ = {
 			isa = PBXGroup;
 			children = (
@@ -6192,6 +6262,7 @@
 				8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */,
 				401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */,
 				40E110462B5A9DF4007DF492 /* CallDurationView.swift */,
+				40C8F0242E55EF9600A0CC87 /* PermissionsPromptView.swift */,
 			);
 			path = CallView;
 			sourceTree = "<group>";
@@ -6589,6 +6660,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C8F0042E55D21D00A0CC87 /* PermissionsStore */,
 				40944D132E4E2D8800088AF0 /* Store */,
 				406568852E0426F600A67EAC /* IdleTimerAdapter */,
 				404098C72DDF45DA00D7BEC5 /* SelectiveEncodable */,
@@ -6981,6 +7053,7 @@
 		84EBAA91288C135700BE3176 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40C8F0262E55F2D400A0CC87 /* URLNavigating.swift */,
 				4051A26D2D665AF5000C3167 /* Swinft6Migration */,
 				4097B3812BF4E36C0057992D /* Backports */,
 				40F0C3A42BC7F8CB00AB75AD /* VideoRendererPool */,
@@ -8027,8 +8100,10 @@
 				40FDE1F62D6E086200985F81 /* Sequence.swift in Sources */,
 				8490032329D308A000AD9BB4 /* BackstageSettingsRequest.swift in Sources */,
 				404098BF2DDE29AD00D7BEC5 /* WebRTCItemTransformerProcessingUnit.swift in Sources */,
+				40C8F00D2E55D2C400A0CC87 /* PermissionStore+State.swift in Sources */,
 				408721EE2E12740E006A68CB /* TimerControl.swift in Sources */,
 				841BAA362BD15CDE000C73E4 /* CallEvent.swift in Sources */,
+				40C8F0182E55DAFD00A0CC87 /* PermissionStore+PushNotificationsMiddleware.swift in Sources */,
 				8456E6D1287EC343004E180E /* Logger.swift in Sources */,
 				40429D5D2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift in Sources */,
 				4075F0782DCE3FFC0062A4CC /* WebRTCTrackStorage.swift in Sources */,
@@ -8051,6 +8126,7 @@
 				4159F1822C86FA41002B94D3 /* UserEventPayload.swift in Sources */,
 				40BBC4B72C627E59002AEF92 /* VideoMediaAdapter.swift in Sources */,
 				84D91E9D2C7CB0AA00B163A0 /* CallRtmpBroadcastFailedEvent.swift in Sources */,
+				40C8F0112E55D3D000A0CC87 /* PermissionStore+DefaultReducer.swift in Sources */,
 				4019A25A2E40E2A600CE70A4 /* RTCAudioStoreAction.swift in Sources */,
 				84A737D028F4716E001A6769 /* models.pb.swift in Sources */,
 				408721E42E127396006A68CB /* RepeatingTimer.swift in Sources */,
@@ -8290,6 +8366,7 @@
 				402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */,
 				4019A2832E4352DF00CE70A4 /* RTCAudioSession+AudioSessionProtocol.swift in Sources */,
 				40382F502C8B3DAE00C2D00F /* StreamRTCPeerConnection.swift in Sources */,
+				40C8F00B2E55D2C000A0CC87 /* PermissionStore+Action.swift in Sources */,
 				40E18AAD2CD51E5900A65C9F /* RecursiveQueue.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,
 				40AD64B82DC16AB10077AE15 /* WebRTCTracesAdapter.swift in Sources */,
@@ -8414,6 +8491,7 @@
 				40FB151F2BF78C6A00D5E580 /* Call+Error.swift in Sources */,
 				848CCCEC2AB8ED8F002E83A2 /* HLSSettingsResponse.swift in Sources */,
 				842B8E312A2DFED900863A87 /* TargetResolution.swift in Sources */,
+				40C8F0092E55D28400A0CC87 /* PermissionStore+Namespace.swift in Sources */,
 				408CF9C62CAEC24A00F56833 /* ScreenPropertiesAdapter.swift in Sources */,
 				843060FD2D381A4A000E14D5 /* SessionSettingsResponse.swift in Sources */,
 				843060FE2D381A4A000E14D5 /* SessionSettingsRequest.swift in Sources */,
@@ -8458,8 +8536,10 @@
 				406B3BE12C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift in Sources */,
 				845C09842C0DEB5C00F725B3 /* LimitsSettingsRequest.swift in Sources */,
 				4159F1742C86FA41002B94D3 /* MediaPubSubHint.swift in Sources */,
+				40C8F0142E55D44300A0CC87 /* PermissionStore+MicrophoneMiddleware.swift in Sources */,
 				40BBC48D2C623C6E002AEF92 /* ICECandidate.swift in Sources */,
 				84DC38DA29ADFCFD00946713 /* Extensions.swift in Sources */,
+				40C8F0062E55D25300A0CC87 /* PermissionsStore.swift in Sources */,
 				40BBC4DC2C63A4C8002AEF92 /* WebRTCCoordinator+Leaving.swift in Sources */,
 				40BBC4E62C63A619002AEF92 /* WebRTCCoordinator+Rejoining.swift in Sources */,
 				8490032229D308A000AD9BB4 /* AudioSettingsRequest.swift in Sources */,
@@ -8499,6 +8579,7 @@
 				403793C52D35196600C752DF /* StreamAppStateAdapter.swift in Sources */,
 				84DC38B429ADFCFD00946713 /* ICEServer.swift in Sources */,
 				4159F1902C86FA41002B94D3 /* PublisherAggregateStats.swift in Sources */,
+				40C8F0162E55D8B600A0CC87 /* PermissionStore+CameraMiddleware.swift in Sources */,
 				40C4DF482C1C2BFC0035DBC2 /* LastParticipantAutoLeavePolicy.swift in Sources */,
 				82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */,
 				40E3634E2D09FDE50028C52A /* CameraCaptureHandler.swift in Sources */,
@@ -9056,6 +9137,7 @@
 				40E110472B5A9DF4007DF492 /* CallDurationView.swift in Sources */,
 				40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */,
 				846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */,
+				40C8F0252E55EF9600A0CC87 /* PermissionsPromptView.swift in Sources */,
 				40F18B8C2BEBAC4C00ADF76E /* CallEndedViewModifier.swift in Sources */,
 				4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */,
 				40E110492B5A9F03007DF492 /* Formatters.swift in Sources */,
@@ -9064,11 +9146,13 @@
 				840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */,
 				40A7C5B52E099B4600EEDF9C /* ParticipantEventResetAdapter.swift in Sources */,
 				40A941782B4DC576006D6965 /* PictureInPictureTrackStateAdapter.swift in Sources */,
+				40C8F0222E55EAA300A0CC87 /* ControlStyle.swift in Sources */,
 				408D29A42B6D251600885473 /* UIView+Snapshot.swift in Sources */,
 				4072A5902DAEADFF00108E8F /* PictureInPictureStore.swift in Sources */,
 				84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */,
 				40073B882C458250006A2867 /* VideoRendererView.swift in Sources */,
 				40A941722B4D9750006D6965 /* PictureInPictureVideoCallViewController.swift in Sources */,
+				40C8F0272E55F2D400A0CC87 /* URLNavigating.swift in Sources */,
 				409AF6E62DAFAC4700EE7BF6 /* PictureInPictureReconnectionView.swift in Sources */,
 				40A941702B4D96E6006D6965 /* PictureInPictureController.swift in Sources */,
 			);
