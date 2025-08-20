@@ -88,16 +88,20 @@ struct WebRTCAuthenticator: WebRTCAuthenticating {
         /// - Finally, applies the determined call settings to the state adapter.
         let initialCallSettings = await coordinator.stateAdapter.initialCallSettings
         let remoteCallSettings = CallSettings(response.call.settings)
-        var callSettings = initialCallSettings ?? remoteCallSettings
-        if
-            coordinator.stateAdapter.audioSession.currentRoute.isExternal,
-            callSettings.speakerOn
-        {
-            callSettings = callSettings.withUpdatedSpeakerState(false)
-        }
-        await coordinator.stateAdapter.set(
-            callSettings: callSettings
-        )
+        let callSettings = {
+            var result = initialCallSettings ?? remoteCallSettings
+            if
+                coordinator.stateAdapter.audioSession.currentRoute.isExternal,
+                result.speakerOn
+            {
+                result = result.withUpdatedSpeakerState(false)
+            }
+            return result
+        }()
+
+        await coordinator
+            .stateAdapter
+            .enqueueCallSettings { _ in callSettings }
 
         await coordinator.stateAdapter.set(
             videoOptions: .init(preferredCameraPosition: {

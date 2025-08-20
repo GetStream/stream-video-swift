@@ -189,10 +189,10 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     func test_changeAudioState_shouldUpdateAudioState() async throws {
         await subject.changeAudioState(isEnabled: false)
 
-        await assertEqualAsync(
-            await subject.stateAdapter.callSettings.audioOn,
-            false
-        )
+        await fulfillment {
+            let currentValue = await self.subject.stateAdapter.callSettings.audioOn
+            return currentValue == false
+        }
     }
 
     // MARK: - changeSoundState
@@ -200,10 +200,10 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     func test_changeSoundState_shouldUpdateAudioOutputState() async throws {
         await subject.changeSoundState(isEnabled: false)
 
-        await assertEqualAsync(
-            await subject.stateAdapter.callSettings.audioOutputOn,
-            false
-        )
+        await fulfillment {
+            let currentValue = await self.subject.stateAdapter.callSettings.audioOutputOn
+            return currentValue == false
+        }
     }
 
     // MARK: - changeSpeakerState
@@ -211,10 +211,10 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     func test_changeSpeakerState_shouldUpdateSpeakerState() async throws {
         await subject.changeSpeakerState(isEnabled: false)
 
-        await assertEqualAsync(
-            await subject.stateAdapter.callSettings.speakerOn,
-            false
-        )
+        await fulfillment {
+            let currentValue = await self.subject.stateAdapter.callSettings.speakerOn
+            return currentValue == false
+        }
     }
 
     // MARK: - changeTrackVisibility
@@ -660,7 +660,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             await subject.stateAdapter.set(videoFilter: videoFilter)
         }
         await subject.stateAdapter.set(ownCapabilities: ownCapabilities)
-        await subject.stateAdapter.set(callSettings: callSettings)
+        await subject.stateAdapter.enqueueCallSettings { _ in callSettings }
         await subject.stateAdapter.set(sessionID: .unique)
         await subject.stateAdapter.set(token: .unique)
         await subject.stateAdapter.set(participantsCount: 12)
