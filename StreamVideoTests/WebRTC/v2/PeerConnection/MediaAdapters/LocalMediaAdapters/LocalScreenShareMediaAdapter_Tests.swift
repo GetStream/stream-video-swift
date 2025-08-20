@@ -9,8 +9,6 @@ import StreamWebRTC
 
 final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
-    private let mockActiveCallProvider: MockActiveCallProvider! = .init()
-    private let mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
     private var disposableBag: DisposableBag! = .init()
     private lazy var sessionId: String! = .unique
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()

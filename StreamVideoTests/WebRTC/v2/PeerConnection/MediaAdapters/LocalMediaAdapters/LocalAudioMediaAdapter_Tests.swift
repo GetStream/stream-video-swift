@@ -9,8 +9,8 @@ import Combine
 
 final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
-    private let mockActiveCallProvider: MockActiveCallProvider! = .init()
-    private let mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
+    private var mockStreamVideo: MockStreamVideo! = .init()
+    private var mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
     private var disposableBag: DisposableBag! = .init()
     private lazy var sessionId: String! = .unique
     private lazy var publishOptions: [PublishOptions.AudioPublishOptions] = []
@@ -31,6 +31,8 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() {
         subject = nil
+        mockStreamVideo = nil
+        mockAudioRecorder = nil
         spySubject = nil
         mockSFUStack = nil
         mockPeerConnection = nil

@@ -15,4 +15,10 @@ final class MockAppStateAdapter: AppStateProviding, @unchecked Sendable {
     lazy var subject: CurrentValueSubject<ApplicationState, Never> = .init(.foreground)
     var state: ApplicationState { subject.value }
     var statePublisher: AnyPublisher<ApplicationState, Never> { subject.eraseToAnyPublisher() }
+
+    /// We call this just before the object that needs to use the mock is about to be created.
+    func makeShared() {
+        AppStateProviderKey.currentValue = self
+        InjectedValues[\.applicationStateAdapter] = self
+    }
 }

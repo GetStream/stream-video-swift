@@ -188,9 +188,6 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
             middlewares: [defaultParams]
         )
         StreamVideoProviderKey.currentValue = self
-        // This is used from the `StreamCallAudioRecorder` to observe active
-        // calls and activate/deactivate the AudioSession.
-        StreamActiveCallProviderKey.currentValue = self
 
         // Update the streamVideo instance on the noiseCancellationFilter
         // to allow it to observe the activeCall state.

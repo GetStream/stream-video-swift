@@ -23,7 +23,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() async throws {
         await subject.stopListening()
-        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorder(filename: "test.wav")
+        InjectedValues[\.callAudioRecorder] = StreamCallAudioRecorder()
         mockAudioRecorder = nil
         mockStreamVideo = nil
         subject = nil
@@ -33,7 +33,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
     // MARK: - init
 
     func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async throws {
-        await mockAudioRecorder.startRecording(ignoreActiveCall: true)
+        mockAudioRecorder.startRecording(ignoreActiveCall: true)
 
         let inputs = [
             -100,
@@ -43,7 +43,7 @@ final class MicrophoneChecker_Tests: XCTestCase, @unchecked Sendable {
         ]
 
         for value in inputs {
-            mockAudioRecorder.metersSubject.send(Float(value))
+            mockAudioRecorder.mockStore.dispatch(.setMeter(.init(value)))
             await wait(for: 0.1)
         }
 

@@ -7,232 +7,199 @@ import Combine
 import Foundation
 import StreamWebRTC
 
-/// This class abstracts the usage of AVAudioRecorder, providing a convenient way to record and manage
-/// audio streams. It handles setting up the recording environment, starting and stopping recording, and
-/// publishing the average power of the audio signal. Additionally, it adjusts its behavior based on the
-/// presence of an active call, automatically stopping recording if needed.
+/// A high-level audio recorder for managing audio recording during calls.
+///
+/// This class provides a simplified interface for audio recording,
+/// abstracting the complexity of `AVAudioRecorder` management and audio
+/// session configuration. It automatically handles:
+/// - Recording permissions
+/// - Audio session category management
+/// - Interruption handling
+/// - Active call synchronization
+/// - Real-time audio level monitoring
+///
+/// ## Usage Example
+///
+/// ```swift
+/// let recorder = StreamCallAudioRecorder()
+///
+/// // Subscribe to audio levels
+/// recorder.metersPublisher.sink { level in
+///     print("Audio level: \(level) dB")
+/// }
+///
+/// // Start recording
+/// await recorder.startRecording()
+///
+/// // Stop recording
+/// await recorder.stopRecording()
+/// ```
+///
+/// ## Automatic Behavior
+///
+/// By default, the recorder synchronizes with the active call state:
+/// - Starts recording when the user enables their microphone in a call
+/// - Stops recording when the call ends or microphone is disabled
+/// - Handles interruptions gracefully (phone calls, alarms, etc.)
 open class StreamCallAudioRecorder: @unchecked Sendable {
-    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
+    /// The current audio power level in decibels (dB).
+    ///
+    /// This property is continuously updated during recording to reflect
+    /// the real-time audio input level. Values typically range from:
+    /// - `-160 dB`: Complete silence or no input
+    /// - `-60 dB` to `-40 dB`: Very quiet speech
+    /// - `-40 dB` to `-20 dB`: Normal speech
+    /// - `-20 dB` to `0 dB`: Loud speech or noise
+    /// - `0 dB`: Maximum level (clipping may occur)
+    ///
+    /// The value updates at the display refresh rate (typically 60Hz) for
+    /// smooth UI animations.
+    ///
+    /// ## Usage Example
+    ///
+    /// ```swift
+    /// // Observe meter changes with Combine
+    /// recorder.$meters
+    ///     .map { dB in
+    ///         // Convert dB to normalized value (0...1)
+    ///         return max(0, min(1, (dB + 160) / 160))
+    ///     }
+    ///     .sink { normalizedLevel in
+    ///         updateWaveformUI(level: normalizedLevel)
+    ///     }
+    /// ```
+    ///
+    /// - Note: Returns `0` when recording is not active.
+    @Published open private(set) var meters: Float = 0
 
-    @Injected(\.activeCallProvider) private var activeCallProvider
-    @Injected(\.audioStore) private var audioStore
+    /// Indicates whether audio recording is currently active.
+    ///
+    /// This property reflects the actual recording state, which may differ
+    /// from the desired state due to:
+    /// - Missing microphone permissions
+    /// - Audio session interruptions (phone calls, alarms)
+    /// - Audio session category incompatibility
+    /// - System resource constraints
+    ///
+    /// ## Observable
+    ///
+    /// As a `@Published` property, you can observe changes using Combine:
+    ///
+    /// ```swift
+    /// recorder.$isRecording
+    ///     .sink { isRecording in
+    ///         updateRecordingUI(active: isRecording)
+    ///     }
+    /// ```
+    ///
+    /// ## State Synchronization
+    ///
+    /// This property automatically synchronizes with:
+    /// - Active call microphone state
+    /// - Audio session interruptions
+    /// - Application lifecycle events
+    ///
+    /// - Important: Always check this property to determine the actual
+    ///   recording state rather than assuming recording started successfully
+    ///   after calling `startRecording()`.
+    @Published open private(set) var isRecording: Bool = false
 
-    /// The builder used to create the AVAudioRecorder instance.
-    let audioRecorderBuilder: AVAudioRecorderBuilder
+    /// The store managing recording state.
+    private let store: Store<Namespace>
 
-    private let _isRecordingSubject: CurrentValueSubject<Bool, Never> = .init(false)
-    var isRecordingPublisher: AnyPublisher<Bool, Never> {
-        _isRecordingSubject.eraseToAnyPublisher()
-    }
-
-    private var hasActiveCallCancellable: AnyCancellable?
-
-    /// A cancellable used to schedule the update of audio meters.
-    private(set) var updateMetersTimerCancellable: AnyCancellable?
-
-    /// A PassthroughSubject that publishes the average power of the audio signal.
-    private var _metersPublisher: PassthroughSubject<Float, Never> = .init()
-
-    /// A public publisher that exposes the average power of the audio signal.
-    open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
-
-    @Atomic private(set) var isRecording: Bool = false {
-        willSet {
-            _isRecordingSubject.send(newValue)
-        }
-    }
-
-    /// Indicates whether an active call is present, influencing recording behaviour.
-    private var hasActiveCall: Bool = false {
-        didSet {
-            guard hasActiveCall != oldValue else { return }
-            log.debug("🎙️updated with hasActiveCall:\(hasActiveCall).")
-            if !hasActiveCall {
-                Task(disposableBag: disposableBag) { [weak self] in await self?.stopRecording() }
-            }
-        }
-    }
-
+    /// Container for managing Combine subscriptions.
     private let disposableBag = DisposableBag()
 
-    /// Initializes the recorder with a filename.
+    /// Initializes a new audio recorder instance.
     ///
-    /// - Parameter filename: The name of the file to record to.
-    public init(filename: String) {
-        audioRecorderBuilder = .init(inCacheDirectoryWithFilename: filename)
-
-        setUp()
+    /// The recorder is initialized with default settings optimized for
+    /// voice recording during calls. During initialization:
+    /// 1. Creates the internal state store
+    /// 2. Sets up bindings between store state and published properties
+    /// 3. Prepares middleware for handling recording lifecycle
+    ///
+    /// The recorder automatically synchronizes its `isRecording` and
+    /// `meters` properties with the internal store state, ensuring UI
+    /// updates happen on the main thread.
+    public convenience init() {
+        self.init(Namespace.store(initialState: .initial))
     }
 
-    /// Initializes the recorder with a custom builder and audio session.
-    ///
-    /// - Parameter audioRecorderBuilder: The builder used to create the recorder.
-    init(
-        audioRecorderBuilder: AVAudioRecorderBuilder
-    ) {
-        self.audioRecorderBuilder = audioRecorderBuilder
+    init(_ store: Store<Namespace>) {
+        self.store = store
+        // Bind store's recording state to the published property
+        store
+            .publisher(\.isRecording)
+            .assign(to: \.isRecording, onWeak: self)
+            .store(in: disposableBag)
 
-        setUp()
-    }
-
-    deinit {
-        removeRecodingFile()
-        hasActiveCallCancellable?.cancel()
-        hasActiveCallCancellable = nil
+        // Bind store's meter values to the published property
+        store
+            .publisher(\.meter)
+            .assign(to: \.meters, onWeak: self)
+            .store(in: disposableBag)
     }
 
     // MARK: - Public API
 
-    /// Starts recording audio asynchronously.
-    /// - Parameters:
-    /// - ignoreActiveCall: Instructs the internal AudioRecorder to ignore the existence of an activeCall
-    /// and start recording anyway.
-    open func startRecording(ignoreActiveCall: Bool = false) async {
-        await performOperation { [weak self] in
-            guard
-                let self,
-                !isRecording
-            else {
-                return
-            }
-
-            var audioRecorder: AVAudioRecorder?
-            do {
-                audioRecorder = try await setUpAudioCaptureIfRequired()
-            } catch {
-                log.error("🎙️Failed to set up recording session", error: error)
-            }
-
-            guard
-                let audioRecorder,
-                hasActiveCall || ignoreActiveCall
-            else {
-                return // No-op
-            }
-
-            await deferSessionActivation()
-            audioRecorder.record()
-            isRecording = true
-            audioRecorder.isMeteringEnabled = true
-
-            updateMetersTimerCancellable?.cancel()
-            disposableBag.remove("update-meters")
-            updateMetersTimerCancellable = DefaultTimer
-                .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
-                .sinkTask(storeIn: disposableBag, identifier: "update-meters") { [weak self, audioRecorder] _ in
-                    audioRecorder.updateMeters()
-                    self?._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))
-                }
-
-            log.debug("️🎙️Recording started.")
+    /// Starts audio recording asynchronously.
+    ///
+    /// This method initiates audio recording if permissions are granted
+    /// and the audio session is properly configured. Recording will
+    /// automatically stop if an interruption occurs or permissions are
+    /// revoked.
+    ///
+    /// - Parameter ignoreActiveCall: When `true`, starts recording
+    ///   regardless of whether there's an active call. When `false`
+    ///   (default), recording only starts if there's an active call with
+    ///   audio enabled. This is useful for testing audio levels outside
+    ///   of a call context.
+    ///
+    /// - Note: Recording requires microphone permission. The system will
+    ///   prompt for permission if not already granted.
+    open func startRecording(ignoreActiveCall: Bool = false) {
+        if ignoreActiveCall {
+            store.dispatch(.setShouldRecord(true))
         }
+
+        store.dispatch(.setIsRecording(true))
     }
 
-    /// Stops recording audio asynchronously.
-    open func stopRecording() async {
-        await performOperation { [weak self] in
-            self?.updateMetersTimerCancellable?.cancel()
-            self?.updateMetersTimerCancellable = nil
-            self?.disposableBag.remove("update-meters")
-
-            guard
-                let self,
-                isRecording,
-                let audioRecorder = audioRecorderBuilder.result
-            else {
-                return
-            }
-
-            audioRecorder.stop()
-
-            // Ensure that recorder has stopped recording.
-            _ = try? await audioRecorder
-                .publisher(for: \.isRecording)
-                .filter { $0 == false }
-                .nextValue(timeout: 0.5)
-
-            isRecording = false
-            removeRecodingFile()
-
-            log.debug("️🎙️Recording stopped.")
-        }
-    }
-
-    // MARK: - Private helpers
-
-    private func performOperation(
-        file: StaticString = #file,
-        line: UInt = #line,
-        _ operation: @Sendable @escaping () async -> Void
-    ) async {
-        do {
-            try await processingQueue.addSynchronousTaskOperation {
-                await operation()
-                return () // Explicitly return Void
-            }
-        } catch {
-            log.error(ClientError(with: error, file, line))
-        }
-    }
-
-    private func setUp() {
-        do {
-            try audioRecorderBuilder.build()
-        } catch {
-            if type(of: error) != CancellationError.self {
-                log.error("🎙️Failed to create AVAudioRecorder.", error: error)
-            }
-        }
-
-        hasActiveCallCancellable = activeCallProvider
-            .hasActiveCallPublisher
-            .receive(on: DispatchQueue.global(qos: .utility))
-            .removeDuplicates()
-            .assign(to: \.hasActiveCall, onWeak: self)
-    }
-
-    private func setUpAudioCaptureIfRequired() async throws -> AVAudioRecorder {
-        guard
-            await audioStore.requestRecordPermission() == true
-        else {
-            throw ClientError("🎙️Permission denied.")
-        }
-
-        guard
-            let audioRecorder = audioRecorderBuilder.result
-        else {
-            throw ClientError("🎙️Unable to fetch AVAudioRecorder instance.")
-        }
-
-        return audioRecorder
-    }
-
-    private func removeRecodingFile() {
-        let fileURL = audioRecorderBuilder.fileURL
-        do {
-            try FileManager.default.removeItem(at: fileURL)
-            log.debug("🎙️Successfully deleted audio filename")
-        } catch {
-            log.debug("🎙️Cannot delete \(fileURL).\(error)")
-        }
-    }
-
-    private func deferSessionActivation() async {
-        _ = try? await audioStore
-            .publisher(\.category)
-            .filter { $0 == .playAndRecord }
-            .nextValue(timeout: 1)
+    /// Stops audio recording asynchronously.
+    ///
+    /// This method stops the current recording session and releases
+    /// associated resources. Audio level updates will cease after calling
+    /// this method.
+    ///
+    /// - Note: This method is safe to call even if recording is not
+    ///   currently active.
+    open func stopRecording() {
+        store.dispatch(.setIsRecording(false))
     }
 }
 
-/// Provides the default value of the `StreamCallAudioRecorder` class.
+/// Injection key for providing the default `StreamCallAudioRecorder`
+/// instance.
+///
+/// This key enables dependency injection of the audio recorder throughout
+/// the application.
 struct StreamCallAudioRecorderKey: InjectionKey {
-    nonisolated(unsafe) static var currentValue: StreamCallAudioRecorder = StreamCallAudioRecorder(
-        filename: "recording.wav"
-    )
+    /// The default recorder instance used when no custom recorder is
+    /// provided.
+    nonisolated(unsafe) static var currentValue: StreamCallAudioRecorder = StreamCallAudioRecorder()
 }
 
 extension InjectedValues {
+    /// The shared audio recorder instance for call audio recording.
+    ///
+    /// This property provides access to the application-wide audio recorder
+    /// through dependency injection. You can customize the recorder by
+    /// setting a custom instance:
+    ///
+    /// ```swift
+    /// // Use a custom recorder
+    /// InjectedValues[\Self.callAudioRecorder] = CustomAudioRecorder()
+    /// ```
     public var callAudioRecorder: StreamCallAudioRecorder {
         get {
             Self[StreamCallAudioRecorderKey.self]

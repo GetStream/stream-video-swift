@@ -8,8 +8,8 @@ import XCTest
 
 final class IdleTimerAdapter_Tests: XCTestCase, @unchecked Sendable {
 
-    private var mockActiveCallProvider: MockActiveCallProvider! = .init()
-    private lazy var subject: IdleTimerAdapter! = .init(mockActiveCallProvider)
+    private var mockStreamVideo: MockStreamVideo! = .init()
+    private lazy var subject: IdleTimerAdapter! = .init(mockStreamVideo)
 
     override func setUp() {
         super.setUp()
@@ -18,37 +18,37 @@ final class IdleTimerAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() {
         subject = nil
-        mockActiveCallProvider = nil
+        mockStreamVideo = nil
         super.tearDown()
     }
 
     // MARK: - hasActiveCall
 
     func test_hasActiveCall_isTrue_IdleTimerIsDisabled() async {
-        mockActiveCallProvider.subject.send(true)
+        mockStreamVideo.state.activeCall = .dummy()
 
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == true }
     }
 
     func test_hasActiveCall_isFalse_IdleTimerIsEnabled() async {
-        mockActiveCallProvider.subject.send(false)
+        mockStreamVideo.state.activeCall = nil
 
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == false }
     }
 
     func test_hasActiveCall_changesFromFalseToTrue_firstIsEnabledThenDisabled() async {
-        mockActiveCallProvider.subject.send(false)
+        mockStreamVideo.state.activeCall = nil
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == false }
 
-        mockActiveCallProvider.subject.send(true)
+        mockStreamVideo.state.activeCall = .dummy()
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == true }
     }
 
     func test_hasActiveCall_changesFromTrueToFalse_firstIsDisabledThenEnabled() async {
-        mockActiveCallProvider.subject.send(true)
+        mockStreamVideo.state.activeCall = .dummy()
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == true }
 
-        mockActiveCallProvider.subject.send(false)
+        mockStreamVideo.state.activeCall = nil
         await fulfilmentInMainActor { self.subject.isIdleTimerDisabled == false }
     }
 }

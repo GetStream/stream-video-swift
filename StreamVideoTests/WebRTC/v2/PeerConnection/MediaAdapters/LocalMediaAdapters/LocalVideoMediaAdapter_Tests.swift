@@ -8,8 +8,6 @@ import Combine
 @preconcurrency import XCTest
 
 final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
-    private let mockActiveCallProvider: MockActiveCallProvider! = .init()
-    private let mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
     private lazy var sessionId: String! = .unique
     private lazy var publishOptions: [PublishOptions.VideoPublishOptions]! = [.dummy(codec: .h264)]
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
