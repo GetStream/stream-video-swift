@@ -188,15 +188,6 @@ struct SimpleCallingView: View {
         await call.updateAudioSessionPolicy(AppEnvironment.audioSessionPolicy.value)
     }
 
-    private func setProximityPolicies(for callId: String) throws {
-        let policies = AppEnvironment.proximityPolicies.map(\.value)
-        guard !policies.isEmpty else {
-            return
-        }
-        let call = streamVideo.call(callType: callType, callId: callId)
-        try policies.forEach { try call.addProximityPolicy($0) }
-    }
-
     private func setClientCapabilities(for callId: String) async {
         guard let clientCapabilities = AppEnvironment.clientCapabilities else {
             return
@@ -241,7 +232,6 @@ struct SimpleCallingView: View {
         case .lobby:
             await setPreferredVideoCodec(for: text)
             try? await setAudioSessionPolicyOverride(for: text)
-            try? setProximityPolicies(for: text)
             await setClientCapabilities(for: text)
             viewModel.enterLobby(
                 callType: callType,
@@ -251,13 +241,11 @@ struct SimpleCallingView: View {
         case .join:
             await setPreferredVideoCodec(for: text)
             try? await setAudioSessionPolicyOverride(for: text)
-            try? setProximityPolicies(for: text)
             await setClientCapabilities(for: text)
             viewModel.joinCall(callType: callType, callId: text)
         case let .start(callId):
             await setPreferredVideoCodec(for: callId)
             try? await setAudioSessionPolicyOverride(for: callId)
-            try? setProximityPolicies(for: callId)
             await setClientCapabilities(for: callId)
             viewModel.startCall(
                 callType: callType,

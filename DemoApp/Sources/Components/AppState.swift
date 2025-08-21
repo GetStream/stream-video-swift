@@ -9,7 +9,7 @@ import SwiftUI
 
 @MainActor
 final class AppState: ObservableObject {
-    
+
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
     @Injected(\.callKitAdapter) private var callKitAdapter
     @Injected(\.gleap) private var gleap
@@ -35,7 +35,10 @@ final class AppState: ObservableObject {
     }
 
     @Published var loading = false
-    @Published var activeCall: Call?
+    @Published var activeCall: Call? {
+        didSet { didUpdate(activeCall: activeCall) }
+    }
+
     @Published var activeAnonymousCallId: String = ""
     @Published var voIPPushToken: String? {
         didSet {
@@ -110,7 +113,7 @@ final class AppState: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.voIPPushToken = $0 }
     }
-    
+
     // MARK: - Actions
 
     func connectUser() {
@@ -127,7 +130,7 @@ final class AppState: ObservableObject {
             }
         }
     }
-    
+
     func logout() async {
         if let voipPushToken = unsecureRepository.currentVoIPPushToken() {
             do {
@@ -180,7 +183,7 @@ final class AppState: ObservableObject {
             log.debug("Clearing up VOIP push notification token.")
         }
     }
-    
+
     private func didUpdate(pushToken: String?) {
         if let pushToken, let streamVideo {
             Task {
@@ -205,6 +208,19 @@ final class AppState: ObservableObject {
 
     private func didUpdate(videoFilter: VideoFilter?) {
         activeCall?.setVideoFilter(videoFilter)
+    }
+
+    private func didUpdate(activeCall: Call?) {
+        guard
+            !AppEnvironment.proximityPolicies.isEmpty,
+            let activeCall
+        else {
+            return
+        }
+
+        AppEnvironment
+            .proximityPolicies
+            .forEach { try? activeCall.addProximityPolicy($0.value) }
     }
 }
 
