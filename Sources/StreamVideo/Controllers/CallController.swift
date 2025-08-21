@@ -517,6 +517,12 @@ class CallController: @unchecked Sendable {
         await webRTCCoordinator.disableClientCapabilities(capabilities)
     }
 
+    // MARK: - HiFi
+
+    func setHiFiEnabled(_ isEnabled: Bool) async {
+        await webRTCCoordinator.setHiFiEnabled(isEnabled)
+    }
+
     // MARK: - CallKit tracing
 
     func didPerform(_ action: WebRTCTrace.CallKitAction) async {

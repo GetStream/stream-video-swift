@@ -82,6 +82,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
+    private(set) var audioMediaConstraints: RTCMediaConstraints = .defaultConstraints
 
     private var videoFilter: VideoFilter?
 
@@ -208,6 +209,12 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         )
     }
 
+    func setAudioMediaConstraints(
+        constraints: RTCMediaConstraints
+    ) {
+        self.audioMediaConstraints = constraints
+    }
+
     // MARK: - Client Capabilities
 
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) {
@@ -263,7 +270,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,
-            clientCapabilities: clientCapabilities
+            clientCapabilities: clientCapabilities,
+            audioMediaConstraints: audioMediaConstraints
         )
 
         let subscriber = rtcPeerConnectionCoordinatorFactory.buildCoordinator(
@@ -282,7 +290,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,
-            clientCapabilities: clientCapabilities
+            clientCapabilities: clientCapabilities,
+            audioMediaConstraints: audioMediaConstraints
         )
 
         publisher

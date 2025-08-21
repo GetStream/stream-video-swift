@@ -419,12 +419,22 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.set(audioSessionPolicy: policy)
     }
 
+    // MARK: -
+
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await stateAdapter.enableClientCapabilities(capabilities)
     }
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await stateAdapter.disableClientCapabilities(capabilities)
+    }
+
+    // MARK: - Client Capabilities
+
+    func setHiFiEnabled(_ isEnabled: Bool) async {
+        await stateAdapter.setAudioMediaConstraints(
+            constraints: isEnabled ? .hiFiAudioConstraints : .defaultConstraints
+        )
     }
 
     // MARK: - CallKit tracing

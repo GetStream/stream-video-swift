@@ -48,7 +48,8 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        mediaConstraints: RTCMediaConstraints
     ) {
         self.init(
             sessionID: sessionID,
@@ -60,7 +61,8 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
                 publishOptions: publishOptions,
-                subject: subject
+                subject: subject,
+                mediaConstraints: mediaConstraints
             ),
             subject: subject
         )

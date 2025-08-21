@@ -142,7 +142,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        clientCapabilities: Set<ClientCapability>
+        clientCapabilities: Set<ClientCapability>,
+        audioMediaConstraints: RTCMediaConstraints
     ) {
         self.init(
             sessionId: sessionId,
@@ -163,7 +164,8 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
-                screenShareSessionProvider: screenShareSessionProvider
+                screenShareSessionProvider: screenShareSessionProvider,
+                audioMediaConstraints: audioMediaConstraints
             ),
             iceAdapter: .init(
                 sessionID: sessionId,

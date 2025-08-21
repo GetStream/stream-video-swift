@@ -43,7 +43,8 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        clientCapabilities: Set<ClientCapability>
+        clientCapabilities: Set<ClientCapability>,
+        audioMediaConstraints: RTCMediaConstraints
     ) -> RTCPeerConnectionCoordinator
 }
 
@@ -85,7 +86,8 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
-        clientCapabilities: Set<ClientCapability>
+        clientCapabilities: Set<ClientCapability>,
+        audioMediaConstraints: RTCMediaConstraints
     ) -> RTCPeerConnectionCoordinator {
         RTCPeerConnectionCoordinator(
             sessionId: sessionId,
@@ -100,7 +102,8 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,
-            clientCapabilities: clientCapabilities
+            clientCapabilities: clientCapabilities,
+            audioMediaConstraints: audioMediaConstraints
         )
     }
 }

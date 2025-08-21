@@ -67,7 +67,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        mediaConstraints: RTCMediaConstraints
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -77,7 +78,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
 
         // Create the primary audio track for the session.
-        let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let source = peerConnectionFactory.makeAudioSource(mediaConstraints)
         let track = peerConnectionFactory.makeAudioTrack(source: source)
         primaryTrack = track
         streamIds = ["\(sessionID):audio"]

@@ -20,7 +20,8 @@ final class RTCTemporaryPeerConnection {
         sfuAdapter: SFUAdapter
     ) async throws {
         let peerConnectionFactory = coordinator.stateAdapter.peerConnectionFactory
-        let audioSource = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let audioSource = peerConnectionFactory
+            .makeAudioSource(await coordinator.stateAdapter.audioMediaConstraints)
         let audioTrack = peerConnectionFactory.makeAudioTrack(source: audioSource)
 
         let videoSource = peerConnectionFactory.makeVideoSource(forScreenShare: false)
