@@ -8,6 +8,14 @@ import StreamWebRTC
 /// A protocol defining requirements for an audio filter capture post-processing module.
 public protocol AudioFilterCapturePostProcessingModule: RTCAudioCustomProcessingDelegate {
 
+    /// Indicates whether High-Fidelity (HiFi) audio mode is enabled.
+    ///
+    /// When `true`, audio filtering and post-processing are bypassed to
+    /// preserve the original audio quality. This is useful for music
+    /// streaming and high-quality voice calls where audio fidelity is
+    /// paramount over noise reduction and echo cancellation.
+    var isHiFiEnabled: Bool { get set }
+
     /// The currently active audio filter.
     var audioFilter: AudioFilter? { get }
 
@@ -18,6 +26,16 @@ public protocol AudioFilterCapturePostProcessingModule: RTCAudioCustomProcessing
 
 /// A class that handles post-processing of captured audio streams using custom audio filtering.
 open class StreamAudioFilterCapturePostProcessingModule: NSObject, AudioFilterCapturePostProcessingModule, @unchecked Sendable {
+
+    /// Controls whether High-Fidelity (HiFi) audio mode is enabled.
+    ///
+    /// When set to `true`, the audio processing in
+    /// `audioProcessingProcess(audioBuffer:)` is bypassed, allowing the
+    /// original audio to pass through without any filtering or modification.
+    /// This preserves audio quality for music and high-fidelity voice calls.
+    ///
+    /// - Note: Defaults to `false` to enable audio filtering by default.
+    public var isHiFiEnabled: Bool = true
 
     /// The audio filter for processing audio streams.
     public private(set) var audioFilter: AudioFilter?
@@ -77,8 +95,21 @@ open class StreamAudioFilterCapturePostProcessingModule: NSObject, AudioFilterCa
     }
 
     /// Handles audio processing on received audio buffers.
+    ///
+    /// This method applies the configured audio filter to the incoming audio
+    /// buffer unless HiFi mode is enabled. When `isHiFiEnabled` is `true`,
+    /// the method returns immediately without processing, preserving the
+    /// original audio quality.
+    ///
     /// - Parameter audioBuffer: The incoming audio buffer to process.
+    ///
+    /// - Note: Processing is skipped when either HiFi mode is enabled or no
+    ///   audio filter is configured.
     open func audioProcessingProcess(audioBuffer: RTCAudioBuffer) {
+        guard !isHiFiEnabled else {
+            return
+        }
+
         guard let audioFilter else {
             return
         }

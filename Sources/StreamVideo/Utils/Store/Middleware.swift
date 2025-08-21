@@ -85,5 +85,5 @@ class Middleware<Namespace: StoreNamespace>: @unchecked Sendable {
         file: StaticString,
         function: StaticString,
         line: UInt
-    ) {}
+    ) async {}
 }

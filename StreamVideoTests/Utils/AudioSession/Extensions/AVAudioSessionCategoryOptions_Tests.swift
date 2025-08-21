@@ -18,7 +18,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -31,7 +31,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -44,7 +44,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -57,7 +57,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: true
             ),
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -70,7 +70,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: true
             ),
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .defaultToSpeaker
             ]
         )
@@ -84,7 +84,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: true
             ),
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -97,7 +97,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: true
             ),
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -110,7 +110,7 @@ final class AVAudioSessionCategoryOptionsTests: XCTestCase, @unchecked Sendable 
                 appIsInForeground: false
             ),
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }

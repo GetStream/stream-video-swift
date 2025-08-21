@@ -9,7 +9,7 @@ import XCTest
 final class RTCVideoTrack_CloneTests: XCTestCase, @unchecked Sendable {
 
     func test_clone_preservesEnabledState() {
-        let factory = PeerConnectionFactory.mock()
+        let factory = MockPeerConnectionFactory()
         let originalTrack = factory.mockVideoTrack(forScreenShare: false)
         originalTrack.isEnabled = true
 
@@ -19,7 +19,7 @@ final class RTCVideoTrack_CloneTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_clone_createsNewTrack() {
-        let factory = PeerConnectionFactory.mock()
+        let factory = MockPeerConnectionFactory()
         let originalTrack = factory.mockVideoTrack(forScreenShare: false)
 
         let clonedTrack = originalTrack.clone(from: factory)

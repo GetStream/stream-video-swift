@@ -8,6 +8,14 @@ import StreamWebRTC
 /// A protocol defining requirements for an audio processing module that supports audio filters.
 public protocol AudioProcessingModule: RTCAudioProcessingModule, Sendable {
 
+    /// Controls whether High-Fidelity (HiFi) audio mode is enabled.
+    ///
+    /// When `true`, audio filtering and processing are bypassed to maintain
+    /// the original audio quality. This is ideal for music streaming and
+    /// high-quality voice communications where preserving audio fidelity
+    /// is more important than noise reduction.
+    var isHiFiEnabled: Bool { get set }
+
     /// The currently active audio filter.
     var activeAudioFilter: AudioFilter? { get }
 
@@ -50,6 +58,19 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
     
     override public func apply(_ config: RTCAudioProcessingConfig) {
         super.apply(config)
+    }
+
+    /// Controls High-Fidelity (HiFi) audio mode for this processing module.
+    ///
+    /// This property delegates to the underlying capture post-processing
+    /// module. When enabled, audio filtering is bypassed in the capture
+    /// pipeline to preserve original audio quality.
+    ///
+    /// - Note: Changes to this property take effect immediately for all
+    ///   subsequent audio buffers processed through the capture pipeline.
+    public var isHiFiEnabled: Bool {
+        get { _capturePostProcessingDelegate.isHiFiEnabled }
+        set { _capturePostProcessingDelegate.isHiFiEnabled = newValue }
     }
 
     /// Retrieves the identifier of the currently active audio filter.

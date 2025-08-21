@@ -8,7 +8,7 @@ import XCTest
 
 final class MediaTransceiverStorage_Tests: XCTestCase, @unchecked Sendable {
 
-    private lazy var factory: PeerConnectionFactory! = .mock()
+    private lazy var factory: MockPeerConnectionFactory! = .init()
     private lazy var trackA: RTCMediaStreamTrack! = factory.mockVideoTrack(forScreenShare: false)
     private lazy var trackB: RTCMediaStreamTrack! = factory.mockVideoTrack(forScreenShare: true)
     private lazy var subject: MediaTransceiverStorage<String>! = .init(for: .video)

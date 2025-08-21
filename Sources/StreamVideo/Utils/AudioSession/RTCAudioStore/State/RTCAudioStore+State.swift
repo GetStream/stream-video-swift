@@ -17,31 +17,33 @@ extension RTCAudioStore {
     ///
     /// - Note: Properties such as `category`, `mode`, `options`, and
     ///   `overrideOutputAudioPort` are encoded as their string or raw values.
-    struct State: Equatable, Encodable {
+    public struct State: Equatable, Encodable {
 
         /// Indicates if the audio session is currently active.
-        var isActive: Bool
+        public var isActive: Bool
         /// Indicates if the audio session is currently interrupted.
-        var isInterrupted: Bool
+        public var isInterrupted: Bool
         /// If true, prefers no interruptions from system alerts.
-        var prefersNoInterruptionsFromSystemAlerts: Bool
+        public var prefersNoInterruptionsFromSystemAlerts: Bool
         /// If true, audio is enabled.
-        var isAudioEnabled: Bool
+        public var isAudioEnabled: Bool
         /// If true, manual audio management is enabled.
-        var useManualAudio: Bool
+        public var useManualAudio: Bool
         /// The AVAudioSession category. Encoded as its string value.
-        var category: AVAudioSession.Category
+        public var category: AVAudioSession.Category
         /// The AVAudioSession mode. Encoded as its string value.
-        var mode: AVAudioSession.Mode
+        public var mode: AVAudioSession.Mode
         /// The AVAudioSession category options. Encoded as its raw value.
-        var options: AVAudioSession.CategoryOptions
+        public var options: AVAudioSession.CategoryOptions
         /// The AVAudioSession port override. Encoded as its raw value.
-        var overrideOutputAudioPort: AVAudioSession.PortOverride
+        public var overrideOutputAudioPort: AVAudioSession.PortOverride
         /// Indicates if the app has permission to record audio.
-        var hasRecordingPermission: Bool
+        public var hasRecordingPermission: Bool
+
+        public var inputConfiguration: InputConfiguration
 
         /// The initial default state for the audio store.
-        static let initial = State(
+        nonisolated(unsafe) static let initial = State(
             isActive: false,
             isInterrupted: false,
             prefersNoInterruptionsFromSystemAlerts: true,
@@ -49,9 +51,10 @@ extension RTCAudioStore {
             useManualAudio: false,
             category: .playAndRecord,
             mode: .voiceChat,
-            options: .allowBluetooth,
+            options: .allowBluetoothHFP,
             overrideOutputAudioPort: .none,
-            hasRecordingPermission: false
+            hasRecordingPermission: false,
+            inputConfiguration: .initial
         )
 
         /// Encodes this state into the given encoder.
@@ -59,7 +62,7 @@ extension RTCAudioStore {
         /// AVFoundation types are encoded as their string or raw value
         /// representations for compatibility.
         /// - Parameter encoder: The encoder to write data to.
-        func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(isActive, forKey: .isActive)
             try container.encode(isInterrupted, forKey: .isInterrupted)
@@ -71,6 +74,7 @@ extension RTCAudioStore {
             try container.encode(options.rawValue, forKey: .options)
             try container.encode(overrideOutputAudioPort.rawValue, forKey: .overrideOutputAudioPort)
             try container.encode(hasRecordingPermission, forKey: .hasRecordingPermission)
+            try container.encode(inputConfiguration, forKey: .inputConfiguration)
         }
 
         /// Coding keys for encoding and decoding the state.
@@ -85,6 +89,7 @@ extension RTCAudioStore {
             case options
             case overrideOutputAudioPort
             case hasRecordingPermission
+            case inputConfiguration
         }
     }
 }

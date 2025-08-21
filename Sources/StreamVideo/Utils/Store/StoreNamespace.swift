@@ -39,7 +39,7 @@ import Foundation
 /// ```swift
 /// let store = MyFeature.store(initialState: .default)
 /// ```
-protocol StoreNamespace {
+protocol StoreNamespace: Sendable {
     /// The state type managed by this store.
     ///
     /// Must be `Equatable` to enable change detection for publishers.

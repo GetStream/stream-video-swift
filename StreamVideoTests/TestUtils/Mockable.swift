@@ -11,7 +11,7 @@ protocol Payloadable {
 enum EmptyPayloadable: Payloadable { var payload: Any { () } }
 
 @dynamicMemberLookup
-protocol Mockable {
+protocol Mockable: AnyObject {
 
     associatedtype FunctionKey: Hashable & CaseIterable
     associatedtype FunctionInputKey: Payloadable
@@ -50,8 +50,26 @@ extension Mockable {
 
     func timesCalled(_ key: FunctionKey) -> Int { stubbedFunctionInput[key]?.count ?? 0 }
 
-    mutating func resetRecords(for key: FunctionKey) {
+    func resetRecords(for key: FunctionKey) {
         stubbedFunctionInput[key] = []
+    }
+
+    func stub<T>(for keyPath: KeyPath<Self, T>, with value: T) {
+        stubbedProperty[propertyKey(for: keyPath)] = value
+    }
+
+    func stub<T>(for function: FunctionKey, with value: T) {
+        stubbedFunction[function] = value
+    }
+
+    static var initialStubbedFunctionInput: [FunctionKey: [FunctionInputKey]] {
+        FunctionKey
+            .allCases
+            .reduce(into: [FunctionKey: [FunctionInputKey]]()) { $0[$1] = [] }
+    }
+
+    func record(_ key: FunctionKey, input: FunctionInputKey) {
+        stubbedFunctionInput[key]?.append(input)
     }
 }
 

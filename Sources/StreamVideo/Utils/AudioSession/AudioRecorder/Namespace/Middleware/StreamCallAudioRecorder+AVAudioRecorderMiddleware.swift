@@ -59,7 +59,7 @@ extension StreamCallAudioRecorder.Namespace {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) {
+        ) async {
             switch action {
             case let .setIsRecording(value):
                 if value, state.shouldRecord, !state.isInterrupted {

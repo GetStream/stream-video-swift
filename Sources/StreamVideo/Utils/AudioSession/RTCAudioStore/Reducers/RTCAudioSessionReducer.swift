@@ -83,6 +83,7 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
                 webRTCConfiguration.category = category.rawValue
                 webRTCConfiguration.mode = mode.rawValue
                 webRTCConfiguration.categoryOptions = options
+                webRTCConfiguration.inputNumberOfChannels = state.inputConfiguration.preferredNumberOfChannels
 
                 try $0.setConfiguration(webRTCConfiguration)
                 RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
@@ -139,6 +140,17 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
             }
             updatedState.isActive = value
             updatedState.isAudioEnabled = value
+
+        case let .setInputBitrate(value):
+            let inputConfiguration = RTCAudioStore.State.InputConfiguration(value)
+            try source.perform {
+                let webRTCConfiguration = RTCAudioSessionConfiguration.webRTC()
+                webRTCConfiguration.inputNumberOfChannels = inputConfiguration.preferredNumberOfChannels
+
+                try $0.setConfiguration(webRTCConfiguration)
+                RTCAudioSessionConfiguration.setWebRTC(webRTCConfiguration)
+            }
+            updatedState.inputConfiguration = inputConfiguration
         }
 
         return updatedState

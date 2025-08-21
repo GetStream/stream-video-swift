@@ -29,7 +29,7 @@ extension PermissionStore {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) {
+        ) async {
             switch action {
             case .requestMicrophonePermission:
                 requestPermission()

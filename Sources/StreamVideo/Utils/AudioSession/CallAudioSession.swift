@@ -26,6 +26,7 @@ final class CallAudioSession: @unchecked Sendable {
 
     private var interruptionEffect: RTCAudioStore.InterruptionEffect?
     private var routeChangeEffect: RTCAudioStore.RouteChangeEffect?
+    private var hifiEffect: RTCAudioStore.HiFiEffect?
 
     init(
         policy: AudioSessionPolicy = DefaultAudioSessionPolicy()
@@ -33,6 +34,10 @@ final class CallAudioSession: @unchecked Sendable {
         self.policy = policy
 
         initialAudioSessionConfiguration()
+    }
+
+    func setAudioInputBitrate(_ audioBitrate: AudioBitrate) {
+        audioStore.dispatch(.audioSession(.setInputBitrate(audioBitrate)))
     }
 
     func activate(
@@ -52,6 +57,7 @@ final class CallAudioSession: @unchecked Sendable {
             callSettingsPublisher: callSettingsPublisher,
             delegate: delegate
         )
+        hifiEffect = .init(audioStore)
 
         Publishers
             .CombineLatest(callSettingsPublisher, ownCapabilitiesPublisher)
@@ -203,7 +209,7 @@ final class CallAudioSession: @unchecked Sendable {
                 .setCategory(
                     .playAndRecord,
                     mode: .voiceChat,
-                    options: .allowBluetooth
+                    options: .allowBluetoothHFP
                 )
             )
         )

@@ -17,7 +17,8 @@ class CallController: @unchecked Sendable {
         user: user,
         apiKey: apiKey,
         callCid: callCid(from: callId, callType: callType),
-        videoConfig: videoConfig
+        videoConfig: videoConfig,
+        peerConnectionFactory: StreamPeerConnectionFactory.build(audioProcessingModule: videoConfig.audioProcessingModule)
     ) {
         [weak self, callId] create, ring, migratingFrom, notify, options in
         if let self {
@@ -515,6 +516,14 @@ class CallController: @unchecked Sendable {
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await webRTCCoordinator.disableClientCapabilities(capabilities)
+    }
+
+    // MARK: - AudioCaptureConfiguration
+
+    func setAudioInputBitrate(
+        _ audioBitrate: AudioBitrate
+    ) async {
+        await webRTCCoordinator.setAudioInputBitrate(audioBitrate)
     }
 
     // MARK: - CallKit tracing

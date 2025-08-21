@@ -59,6 +59,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        peerConnectionFactory: PeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory(),
         webRTCAuthenticator: WebRTCAuthenticating = WebRTCAuthenticator(),
         callAuthentication: @escaping AuthenticationHandler
@@ -68,6 +69,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
+            peerConnectionFactory: peerConnectionFactory,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
         )
         self.callAuthentication = callAuthentication
@@ -416,12 +418,22 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.set(audioSessionPolicy: policy)
     }
 
+    // MARK: -
+
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await stateAdapter.enableClientCapabilities(capabilities)
     }
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await stateAdapter.disableClientCapabilities(capabilities)
+    }
+
+    // MARK: - HiFi Audio Configuration
+
+    func setAudioInputBitrate(
+        _ audioBitrate: AudioBitrate
+    ) async {
+        await stateAdapter.setAudioInputBitrate(audioBitrate)
     }
 
     // MARK: - CallKit tracing

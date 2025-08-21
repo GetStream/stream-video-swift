@@ -34,8 +34,16 @@ final class WebRTCStatsCollector_Tests: XCTestCase, @unchecked Sendable {
     }
 
     func test_collectStats_generatesReportAndPublishesIt() async throws {
-        trackStorage.addTrack(.dummy(kind: .audio, peerConnectionFactory: .mock()), type: .audio, for: "track-1")
-        trackStorage.addTrack(.dummy(kind: .video, peerConnectionFactory: .mock()), type: .video, for: "track-2")
+        trackStorage.addTrack(
+            .dummy(kind: .audio, peerConnectionFactory: MockPeerConnectionFactory()),
+            type: .audio,
+            for: "track-1"
+        )
+        trackStorage.addTrack(
+            .dummy(kind: .video, peerConnectionFactory: MockPeerConnectionFactory()),
+            type: .video,
+            for: "track-2"
+        )
         mockPublisher.stub(for: .statsReport, with: StreamRTCStatisticsReport.dummy())
         mockSubscriber.stub(for: .statsReport, with: StreamRTCStatisticsReport.dummy())
         subject.publisher = mockPublisher
@@ -54,8 +62,16 @@ final class WebRTCStatsCollector_Tests: XCTestCase, @unchecked Sendable {
 
     func test_scheduleCollection_withZeroInterval_cancelsTimer() async throws {
         interval = 0
-        trackStorage.addTrack(.dummy(kind: .audio, peerConnectionFactory: .mock()), type: .audio, for: "track-1")
-        trackStorage.addTrack(.dummy(kind: .video, peerConnectionFactory: .mock()), type: .video, for: "track-2")
+        trackStorage.addTrack(
+            .dummy(kind: .audio, peerConnectionFactory: MockPeerConnectionFactory()),
+            type: .audio,
+            for: "track-1"
+        )
+        trackStorage.addTrack(
+            .dummy(kind: .video, peerConnectionFactory: MockPeerConnectionFactory()),
+            type: .video,
+            for: "track-2"
+        )
         mockPublisher.stub(for: .statsReport, with: StreamRTCStatisticsReport.dummy())
         mockSubscriber.stub(for: .statsReport, with: StreamRTCStatisticsReport.dummy())
         subject.publisher = mockPublisher

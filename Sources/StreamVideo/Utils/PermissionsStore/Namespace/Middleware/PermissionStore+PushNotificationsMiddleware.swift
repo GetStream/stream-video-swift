@@ -30,7 +30,7 @@ extension PermissionStore {
             file: StaticString,
             function: StaticString,
             line: UInt
-        ) {
+        ) async {
             switch action {
             case let .requestPushNotificationPermission(options):
                 requestPermission(with: options)
