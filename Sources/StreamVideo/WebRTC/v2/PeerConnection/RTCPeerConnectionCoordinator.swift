@@ -124,6 +124,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
     ///   - callSettings: Settings for the current call.
     ///   - audioSettings: Settings for audio processing.
     ///   - publishOptions: The publishOptions to use to publish the initial tracks.
+    ///   - hiFiEnabled: Whether to enable HiFi audio mode (disables audio processing).
     ///   - sfuAdapter: Adapter for communicating with the SFU.
     ///   - audioSession: The audio session to be used.
     ///   - videoCaptureSessionProvider: Provider for video capturing sessions.
@@ -139,6 +140,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         publishOptions: PublishOptions,
+        hiFiEnabled: Bool = false,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
@@ -162,6 +164,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
+                hiFiEnabled: hiFiEnabled,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
             ),

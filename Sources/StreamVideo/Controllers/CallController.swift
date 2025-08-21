@@ -155,6 +155,12 @@ class CallController: @unchecked Sendable {
     func changeAudioState(isEnabled: Bool) async throws {
         await webRTCCoordinator.changeAudioState(isEnabled: isEnabled)
     }
+    
+    /// Sets HiFi audio mode which disables audio processing for better quality
+    /// - Parameter enabled: Whether to enable HiFi mode
+    func setHiFiAudioEnabled(_ enabled: Bool) async throws {
+        await webRTCCoordinator.setHiFiAudioEnabled(enabled)
+    }
 
     /// Changes the video state for the current user.
     /// - Parameter isEnabled: whether video should be enabled.

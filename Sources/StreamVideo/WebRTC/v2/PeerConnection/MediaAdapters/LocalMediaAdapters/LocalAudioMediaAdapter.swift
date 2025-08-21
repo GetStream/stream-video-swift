@@ -60,6 +60,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - peerConnectionFactory: The factory for creating WebRTC components.
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio tracks.
+    ///   - hiFiEnabled: Whether to enable HiFi audio mode (disables audio processing).
     ///   - subject: A publisher that emits track events.
     init(
         sessionID: String,
@@ -67,6 +68,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
+        hiFiEnabled: Bool = false,
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.sessionID = sessionID
@@ -77,7 +79,8 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
 
         // Create the primary audio track for the session.
-        let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let constraints = hiFiEnabled ? RTCMediaConstraints.hiFiAudioConstraints : RTCMediaConstraints.defaultConstraints
+        let source = peerConnectionFactory.makeAudioSource(constraints)
         let track = peerConnectionFactory.makeAudioTrack(source: source)
         primaryTrack = track
         streamIds = ["\(sessionID):audio"]

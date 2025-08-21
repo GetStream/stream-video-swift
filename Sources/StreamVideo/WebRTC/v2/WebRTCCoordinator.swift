@@ -151,6 +151,12 @@ final class WebRTCCoordinator: @unchecked Sendable {
                 .withUpdatedAudioState(isEnabled)
         )
     }
+    
+    /// Sets HiFi audio mode which disables audio processing for better quality
+    /// - Parameter enabled: Whether to enable HiFi mode
+    func setHiFiAudioEnabled(_ enabled: Bool) async {
+        await stateAdapter.setHiFiAudioEnabled(enabled)
+    }
 
     /// Changes the video state (enabled/disabled) for the call.
     ///

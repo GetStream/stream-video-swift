@@ -12,6 +12,9 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
     /// The status of the microphone.
     @Published public internal(set) var status: CallSettingsStatus
     let state = CallSettingsState()
+    
+    /// Whether HiFi audio mode is enabled (disables audio processing)
+    @Published public private(set) var isHiFiEnabled: Bool = false
 
     init(callController: CallController, initialStatus: CallSettingsStatus) {
         self.callController = callController
@@ -31,6 +34,13 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
     /// Disables the microphone.
     public func disable() async throws {
         try await updateAudioStatus(.disabled)
+    }
+    
+    /// Sets HiFi audio mode which disables audio processing for better quality
+    /// - Parameter enabled: Whether to enable HiFi mode
+    public func setHiFiEnabled(_ enabled: Bool) async throws {
+        try await callController.setHiFiAudioEnabled(enabled)
+        isHiFiEnabled = enabled
     }
     
     // MARK: - private

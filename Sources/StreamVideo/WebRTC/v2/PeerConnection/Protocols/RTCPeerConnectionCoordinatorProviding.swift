@@ -22,6 +22,7 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
     ///   - callSettings: Settings related to the overall call.
     ///   - audioSettings: Settings for audio configuration.
     ///   - publishOptions: The publishOptions to use to create the initial tracks.
+    ///   - hiFiEnabled: Whether to enable HiFi audio mode (disables audio processing).
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
@@ -40,6 +41,7 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         publishOptions: PublishOptions,
+        hiFiEnabled: Bool,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
@@ -64,6 +66,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - callSettings: Settings related to the overall call.
     ///   - audioSettings: Settings for audio configuration.
     ///   - publishOptions: The publishOptions to use to create the initial tracks.
+    ///   - hiFiEnabled: Whether to enable HiFi audio mode (disables audio processing).
     ///   - sfuAdapter: The adapter for interacting with the Selective Forwarding Unit.
     ///   - videoCaptureSessionProvider: Provider for video capturing functionality.
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
@@ -82,6 +85,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
         callSettings: CallSettings,
         audioSettings: AudioSettings,
         publishOptions: PublishOptions,
+        hiFiEnabled: Bool,
         sfuAdapter: SFUAdapter,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
@@ -97,6 +101,7 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
             callSettings: callSettings,
             audioSettings: audioSettings,
             publishOptions: publishOptions,
+            hiFiEnabled: hiFiEnabled,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,

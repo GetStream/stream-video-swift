@@ -75,6 +75,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     @Published private(set) var participantPins: [PinInfo] = []
     @Published private(set) var incomingVideoQualitySettings: IncomingVideoQualitySettings = .none
     @Published private(set) var isTracingEnabled: Bool = false
+    @Published private(set) var isHiFiAudioEnabled: Bool = false
 
     private(set) var clientCapabilities: Set<ClientCapability> = [
         .subscriberVideoPause
@@ -222,6 +223,11 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             ownCapabilities: ownCapabilities
         )
     }
+    
+    /// Sets HiFi audio mode which disables audio processing for better quality
+    func setHiFiAudioEnabled(_ enabled: Bool) {
+        isHiFiAudioEnabled = enabled
+    }
 
     // MARK: - Client Capabilities
 
@@ -275,6 +281,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             callSettings: callSettings,
             audioSettings: audioSettings,
             publishOptions: publishOptions,
+            hiFiEnabled: isHiFiAudioEnabled,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,

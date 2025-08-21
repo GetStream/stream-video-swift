@@ -40,6 +40,7 @@ final class MediaAdapter {
     ///   - videoOptions: The video options for the call.
     ///   - videoConfig: The video configuration for the call.
     ///   - publishOptions: The publishOptions to use for creating the initial tracks
+    ///   - hiFiEnabled: Whether to enable HiFi audio mode (disables audio processing).
     ///   - audioSession: The audio session manager.
     ///   - videoCaptureSessionProvider: Provides access to the active video capturing session.
     ///   - screenShareSessionProvider: Provides access to the active screen sharing session.
@@ -52,6 +53,7 @@ final class MediaAdapter {
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
         publishOptions: PublishOptions,
+        hiFiEnabled: Bool = false,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -93,6 +95,7 @@ final class MediaAdapter {
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,
                     publishOptions: publishOptions.audio,
+                    hiFiEnabled: hiFiEnabled,
                     subject: subject
                 ),
                 videoMediaAdapter: .init(

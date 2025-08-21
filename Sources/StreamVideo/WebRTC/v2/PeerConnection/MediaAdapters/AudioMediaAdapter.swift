@@ -41,6 +41,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - peerConnectionFactory: The factory for creating WebRTC peer connection components.
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio.
+    ///   - hiFiEnabled: Whether to enable HiFi audio mode (disables audio processing).
     ///   - subject: A subject for publishing track events.
     convenience init(
         sessionID: String,
@@ -48,6 +49,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
+        hiFiEnabled: Bool = false,
         subject: PassthroughSubject<TrackEvent, Never>
     ) {
         self.init(
@@ -60,6 +62,7 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
                 peerConnectionFactory: peerConnectionFactory,
                 sfuAdapter: sfuAdapter,
                 publishOptions: publishOptions,
+                hiFiEnabled: hiFiEnabled,
                 subject: subject
             ),
             subject: subject
