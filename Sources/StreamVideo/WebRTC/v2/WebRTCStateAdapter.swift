@@ -301,6 +301,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             callSettings: callSettings,
             audioSettings: audioSettings,
             publishOptions: publishOptions,
+            hiFiEnabled: isHiFiAudioEnabled,
             sfuAdapter: sfuAdapter,
             videoCaptureSessionProvider: videoCaptureSessionProvider,
             screenShareSessionProvider: screenShareSessionProvider,
