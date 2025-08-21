@@ -54,6 +54,7 @@ final class MediaAdapter {
         publishOptions: PublishOptions,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
+        /// Media constraints for audio track creation, supporting HiFi mode.
         audioMediaConstraints: RTCMediaConstraints
     ) {
         let subject = PassthroughSubject<TrackEvent, Never>()

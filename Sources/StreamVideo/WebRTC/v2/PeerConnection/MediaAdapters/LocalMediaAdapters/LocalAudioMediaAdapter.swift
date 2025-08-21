@@ -61,6 +61,9 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio tracks.
     ///   - subject: A publisher that emits track events.
+    ///   - mediaConstraints: The media constraints to apply when creating
+    ///     the audio source. Use `.hiFiAudioConstraints` for high-fidelity
+    ///     audio or `.defaultConstraints` for standard processing.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,

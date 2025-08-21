@@ -73,6 +73,25 @@ extension RTCMediaConstraints {
         optional: [.activated(.DtlsSrtpKeyAgreement)]
     )
 
+    /// Media constraints optimized for High-Fidelity (HiFi) audio capture.
+    ///
+    /// These constraints disable all audio processing features to preserve
+    /// the original audio quality, making them ideal for music streaming
+    /// and high-quality voice calls where audio fidelity is paramount.
+    ///
+    /// The following audio processing features are explicitly disabled:
+    /// - Echo cancellation (both standard and Google's implementation)
+    /// - Automatic gain control
+    /// - Noise suppression
+    /// - Highpass filtering
+    /// - Typing noise detection
+    ///
+    /// - Warning: Disabling echo cancellation may cause audio feedback when
+    ///   using speakers. Users should use headphones or ensure proper
+    ///   acoustic isolation when HiFi mode is enabled.
+    ///
+    /// - Note: DTLS-SRTP key agreement remains enabled for secure audio
+    ///   transmission.
     nonisolated(unsafe) static let hiFiAudioConstraints = RTCMediaConstraints(
         optional: [
             .activated(.DtlsSrtpKeyAgreement),

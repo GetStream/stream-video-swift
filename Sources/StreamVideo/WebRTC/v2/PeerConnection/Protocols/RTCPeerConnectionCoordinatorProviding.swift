@@ -27,8 +27,10 @@ protocol RTCPeerConnectionCoordinatorProviding: Sendable {
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     ///   - clientCapabilities: A set of client capabilities that affect how the
     ///     coordinator behaves (e.g., enabling paused tracks support).
-    ///
-    /// This parameter affects features such as support for paused tracks.
+    ///   - audioMediaConstraints: Media constraints for audio track creation.
+    ///     Use `.hiFiAudioConstraints` for high-fidelity audio without
+    ///     processing or `.defaultConstraints` for standard audio with echo
+    ///     cancellation and noise suppression.
     /// - Returns: An initialized `RTCPeerConnectionCoordinator` instance.
     func buildCoordinator(
         sessionId: String,
@@ -70,8 +72,10 @@ final class StreamRTCPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordina
     ///   - screenShareSessionProvider: Provider for screen sharing functionality.
     ///   - clientCapabilities: A set of client capabilities that affect how the
     ///     coordinator behaves (e.g., enabling paused tracks support).
-    ///
-    /// This parameter affects features such as support for paused tracks.
+    ///   - audioMediaConstraints: Media constraints for audio track creation.
+    ///     Use `.hiFiAudioConstraints` for high-fidelity audio without
+    ///     processing or `.defaultConstraints` for standard audio with echo
+    ///     cancellation and noise suppression.
     /// - Returns: A newly created `RTCPeerConnectionCoordinator` instance.
     func buildCoordinator(
         sessionId: String,

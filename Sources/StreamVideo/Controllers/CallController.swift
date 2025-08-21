@@ -519,6 +519,17 @@ class CallController: @unchecked Sendable {
 
     // MARK: - HiFi
 
+    /// Configures the High-Fidelity (HiFi) audio mode for the current call.
+    ///
+    /// This method enables or disables HiFi audio mode by adjusting the
+    /// underlying WebRTC audio constraints. When enabled, audio processing
+    /// features are disabled to maintain pristine audio quality.
+    ///
+    /// - Parameter isEnabled: Whether to enable HiFi audio mode.
+    ///
+    /// - Note: This is an internal method that delegates to the WebRTC
+    ///   coordinator. Public API consumers should use
+    ///   `MicrophoneManager.setHiFiEnabled(_:)` instead.
     func setHiFiEnabled(_ isEnabled: Bool) async {
         await webRTCCoordinator.setHiFiEnabled(isEnabled)
     }

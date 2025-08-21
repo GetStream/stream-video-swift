@@ -42,6 +42,8 @@ final class AudioMediaAdapter: MediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio.
     ///   - subject: A subject for publishing track events.
+    ///   - mediaConstraints: Audio media constraints for track creation,
+    ///     supporting HiFi mode configuration.
     convenience init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,

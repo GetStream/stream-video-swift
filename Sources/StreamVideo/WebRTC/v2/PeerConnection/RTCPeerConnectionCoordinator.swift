@@ -143,6 +143,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider,
         clientCapabilities: Set<ClientCapability>,
+        /// Audio constraints for creating tracks, supports HiFi audio mode.
         audioMediaConstraints: RTCMediaConstraints
     ) {
         self.init(

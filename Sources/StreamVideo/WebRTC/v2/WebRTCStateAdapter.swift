@@ -82,6 +82,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
 
     // Various private and internal properties.
     private(set) var initialCallSettings: CallSettings?
+    /// The current audio media constraints used for audio track creation.
+    /// Defaults to standard constraints with audio processing enabled.
     private(set) var audioMediaConstraints: RTCMediaConstraints = .defaultConstraints
 
     private var videoFilter: VideoFilter?
@@ -209,6 +211,18 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         )
     }
 
+    /// Updates the audio media constraints for future audio tracks.
+    ///
+    /// This method sets the constraints that will be used when creating new
+    /// audio tracks for peer connections. It does not affect existing tracks.
+    ///
+    /// - Parameter constraints: The `RTCMediaConstraints` to apply for audio
+    ///   capture. Use `.hiFiAudioConstraints` for high-fidelity audio or
+    ///   `.defaultConstraints` for standard audio with processing enabled.
+    ///
+    /// - Important: This change only affects audio tracks created after this
+    ///   method is called. To apply new constraints to an active call, the
+    ///   audio track may need to be recreated.
     func setAudioMediaConstraints(
         constraints: RTCMediaConstraints
     ) {
