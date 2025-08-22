@@ -10,6 +10,7 @@ import UIKit
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.permissions) var permissions
 
     func application(
         _ application: UIApplication,
@@ -95,15 +96,21 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     // MARK: - Private Helpers
 
     private func setUpRemoteNotifications() {
-        UNUserNotificationCenter
-            .current()
-            .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                if granted {
-                    Task { @MainActor in
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
+        Task {
+            do {
+                guard
+                    try await permissions.requestPushNotificationPermission(with: [.alert, .sound, .badge])
+                else {
+                    log.warning("Push notifications request not granted.")
+                    return
                 }
+                _ = await Task { @MainActor in
+                    UIApplication.shared.registerForRemoteNotifications()
+                }.result
+            } catch {
+                log.error("Push notifications request failed.", error: error)
             }
+        }
     }
 
     private func setUpPerformanceTracking() {
