@@ -585,6 +585,10 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
             await subject.stateAdapter.audioMediaConstraints,
             .hiFiAudioConstraints
         )
+        await assertEqualAsync(
+            await subject.stateAdapter.videoConfig.audioProcessingModule.isHiFiEnabled,
+            true
+        )
     }
 
     func test_setHiFiEnabled_false_correctlyUpdatesStateAdapter() async throws {
@@ -593,6 +597,10 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         await assertEqualAsync(
             await subject.stateAdapter.audioMediaConstraints,
             .defaultConstraints
+        )
+        await assertEqualAsync(
+            await subject.stateAdapter.videoConfig.audioProcessingModule.isHiFiEnabled,
+            false
         )
     }
 

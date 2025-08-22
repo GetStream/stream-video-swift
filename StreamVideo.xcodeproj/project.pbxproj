@@ -367,6 +367,8 @@
 		4080E64A2E586917001C19DB /* PeerConnectionFactoryStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4080E6492E586917001C19DB /* PeerConnectionFactoryStorage.swift */; };
 		4080E64C2E586A96001C19DB /* MockPeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4080E64B2E586A96001C19DB /* MockPeerConnectionFactory.swift */; };
 		4080E64D2E58797D001C19DB /* MockPeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4080E64B2E586A96001C19DB /* MockPeerConnectionFactory.swift */; };
+		4080E6502E5880AE001C19DB /* StreamAudioFilterCapturePostProcessingModule_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4080E64F2E5880AE001C19DB /* StreamAudioFilterCapturePostProcessingModule_Tests.swift */; };
+		4080E6522E5881BB001C19DB /* MockAudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4080E6512E5881BB001C19DB /* MockAudioFilter.swift */; };
 		408521E52D661C7600F012B8 /* RawJSON+Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E42D661C7500F012B8 /* RawJSON+Double.swift */; };
 		408521E72D661CA700F012B8 /* ThermalState+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */; };
 		408679F72BD12F1000D027E0 /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408679F62BD12F1000D027E0 /* AudioFilter.swift */; };
@@ -1996,6 +1998,8 @@
 		4080E6472E58687E001C19DB /* PeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactory.swift; sourceTree = "<group>"; };
 		4080E6492E586917001C19DB /* PeerConnectionFactoryStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactoryStorage.swift; sourceTree = "<group>"; };
 		4080E64B2E586A96001C19DB /* MockPeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPeerConnectionFactory.swift; sourceTree = "<group>"; };
+		4080E64F2E5880AE001C19DB /* StreamAudioFilterCapturePostProcessingModule_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioFilterCapturePostProcessingModule_Tests.swift; sourceTree = "<group>"; };
+		4080E6512E5881BB001C19DB /* MockAudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAudioFilter.swift; sourceTree = "<group>"; };
 		408521E42D661C7500F012B8 /* RawJSON+Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RawJSON+Double.swift"; sourceTree = "<group>"; };
 		408521E62D661CA700F012B8 /* ThermalState+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThermalState+Comparable.swift"; sourceTree = "<group>"; };
 		408679F62BD12F1000D027E0 /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
@@ -4148,6 +4152,14 @@
 				84BBF62A28AFC24000387A02 /* StreamPeerConnectionFactory.swift */,
 			);
 			path = PeerConnectionFactory;
+			sourceTree = "<group>";
+		};
+		4080E64E2E5880AA001C19DB /* AudioFilter */ = {
+			isa = PBXGroup;
+			children = (
+				4080E64F2E5880AE001C19DB /* StreamAudioFilterCapturePostProcessingModule_Tests.swift */,
+			);
+			path = AudioFilter;
 			sourceTree = "<group>";
 		};
 		408679F52BD12EFC00D027E0 /* AudioFilter */ = {
@@ -6416,6 +6428,7 @@
 		8492B87629081CE700006649 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
+				4080E6512E5881BB001C19DB /* MockAudioFilter.swift */,
 				40C71B7A2E536F0F00733BF6 /* MockAVAudioRecorder.swift */,
 				40C71B582E53564D00733BF6 /* Store */,
 				40D75C572E438607000E0438 /* MockAVAudioSessionRouteDescription.swift */,
@@ -6690,6 +6703,7 @@
 		84D6494529E9F2B7002CA428 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				4080E64E2E5880AA001C19DB /* AudioFilter */,
 				40FE5EB92C9C7D35006B0881 /* VideoCapturing */,
 				406B3C072C8F602D00FC93A1 /* v2 */,
 				40AB34BD2C5D33C800B5B6B3 /* SFU */,
@@ -8749,6 +8763,7 @@
 				84F58B7229EE922700010C4C /* WebSocketConnectionState_Tests.swift in Sources */,
 				40FE5EBD2C9C82A6006B0881 /* MockRTCVideoCapturerDelegate.swift in Sources */,
 				40B48C4C2D14F721002C4EAB /* RTPMapVisitorTests.swift in Sources */,
+				4080E6502E5880AE001C19DB /* StreamAudioFilterCapturePostProcessingModule_Tests.swift in Sources */,
 				40B48C152D14C93B002C4EAB /* CGSize_AdaptTests.swift in Sources */,
 				40382F3D2C89C11D00C2D00F /* MockRTCPeerConnectionCoordinatorFactory.swift in Sources */,
 				4013A8EF2D81E98C00F81C15 /* WebRTCCoordinatorStateMachine_BlockedStageTests.swift in Sources */,
@@ -8811,6 +8826,7 @@
 				409AF6EC2DAFE31900EE7BF6 /* XCTestCase+Wait.swift in Sources */,
 				40AB34BC2C5D30AD00B5B6B3 /* URLSessionConfiguration_WaitsForConnectivityTests.swift in Sources */,
 				40F101792D5CBA2D00C49481 /* XCTAsyncUnwrap.swift in Sources */,
+				4080E6522E5881BB001C19DB /* MockAudioFilter.swift in Sources */,
 				40C4DF502C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift in Sources */,
 				4013387C2BF248E9007318BD /* Mockable.swift in Sources */,
 				406B3C512C91F8C000FC93A1 /* MockWebRTCAuthenticator.swift in Sources */,

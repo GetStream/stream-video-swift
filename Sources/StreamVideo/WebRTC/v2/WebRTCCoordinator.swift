@@ -435,20 +435,27 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     /// Configures High-Fidelity (HiFi) audio mode for WebRTC connections.
     ///
-    /// This method switches between HiFi and standard audio constraints.
-    /// When HiFi is enabled, the audio capture uses constraints that disable
-    /// processing features to maintain original audio quality.
+    /// This method performs two key operations:
+    /// 1. Switches between HiFi and standard audio constraints for new tracks
+    /// 2. Configures the audio processing module to bypass filtering when HiFi
+    ///    is enabled
     ///
-    /// - Parameter isEnabled: If `true`, applies HiFi audio constraints that
-    ///   disable echo cancellation, noise suppression, and other processing.
-    ///   If `false`, reverts to default constraints with standard processing.
+    /// When HiFi is enabled, the audio capture uses constraints that disable
+    /// processing features (echo cancellation, noise suppression, etc.) and
+    /// bypasses any custom audio filters to maintain original audio quality.
+    ///
+    /// - Parameter isEnabled: If `true`, applies HiFi audio constraints and
+    ///   disables audio filtering. If `false`, reverts to default constraints
+    ///   with standard processing and filtering enabled.
     ///
     /// - Note: The constraint change affects new audio tracks created after
-    ///   this call. Existing audio tracks maintain their original constraints.
+    ///   this call. The audio processing module change takes effect immediately
+    ///   for all audio buffers being processed.
     func setHiFiEnabled(_ isEnabled: Bool) async {
         await stateAdapter.setAudioMediaConstraints(
             constraints: isEnabled ? .hiFiAudioConstraints : .defaultConstraints
         )
+        stateAdapter.videoConfig.audioProcessingModule.isHiFiEnabled = isEnabled
     }
 
     // MARK: - CallKit tracing
