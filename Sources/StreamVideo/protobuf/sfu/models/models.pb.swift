@@ -210,6 +210,63 @@ extension Stream_Video_Sfu_Models_TrackType: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+/// must be aligned with kit
+enum Stream_Video_Sfu_Models_ParticipantSource: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case webrtcUnspecified // = 0
+  case rtmp // = 1
+  case whip // = 2
+  case sip // = 3
+  case rtsp // = 4
+  case srt // = 5
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .webrtcUnspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .webrtcUnspecified
+    case 1: self = .rtmp
+    case 2: self = .whip
+    case 3: self = .sip
+    case 4: self = .rtsp
+    case 5: self = .srt
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .webrtcUnspecified: return 0
+    case .rtmp: return 1
+    case .whip: return 2
+    case .sip: return 3
+    case .rtsp: return 4
+    case .srt: return 5
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_ParticipantSource: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static let allCases: [Stream_Video_Sfu_Models_ParticipantSource] = [
+    .webrtcUnspecified,
+    .rtmp,
+    .whip,
+    .sip,
+    .rtsp,
+    .srt,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   typealias RawValue = Int
   case unspecified // = 0
@@ -915,6 +972,8 @@ struct Stream_Video_Sfu_Models_Participant {
 
   var roles: [String] = []
 
+  var source: Stream_Video_Sfu_Models_ParticipantSource = .webrtcUnspecified
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1480,6 +1539,7 @@ extension Stream_Video_Sfu_Models_PeerType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackType: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_ParticipantSource: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ErrorCode: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_SdkType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
@@ -1552,6 +1612,17 @@ extension Stream_Video_Sfu_Models_TrackType: SwiftProtobuf._ProtoNameProviding {
     2: .same(proto: "TRACK_TYPE_VIDEO"),
     3: .same(proto: "TRACK_TYPE_SCREEN_SHARE"),
     4: .same(proto: "TRACK_TYPE_SCREEN_SHARE_AUDIO"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_ParticipantSource: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED"),
+    1: .same(proto: "PARTICIPANT_SOURCE_RTMP"),
+    2: .same(proto: "PARTICIPANT_SOURCE_WHIP"),
+    3: .same(proto: "PARTICIPANT_SOURCE_SIP"),
+    4: .same(proto: "PARTICIPANT_SOURCE_RTSP"),
+    5: .same(proto: "PARTICIPANT_SOURCE_SRT"),
   ]
 }
 
@@ -1810,6 +1881,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
     11: .same(proto: "image"),
     12: .same(proto: "custom"),
     13: .same(proto: "roles"),
+    14: .same(proto: "source"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1831,6 +1903,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
       case 11: try { try decoder.decodeSingularStringField(value: &self.image) }()
       case 12: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
       case 13: try { try decoder.decodeRepeatedStringField(value: &self.roles) }()
+      case 14: try { try decoder.decodeSingularEnumField(value: &self.source) }()
       default: break
       }
     }
@@ -1880,6 +1953,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
     if !self.roles.isEmpty {
       try visitor.visitRepeatedStringField(value: self.roles, fieldNumber: 13)
     }
+    if self.source != .webrtcUnspecified {
+      try visitor.visitSingularEnumField(value: self.source, fieldNumber: 14)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1897,6 +1973,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
     if lhs.image != rhs.image {return false}
     if lhs._custom != rhs._custom {return false}
     if lhs.roles != rhs.roles {return false}
+    if lhs.source != rhs.source {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
