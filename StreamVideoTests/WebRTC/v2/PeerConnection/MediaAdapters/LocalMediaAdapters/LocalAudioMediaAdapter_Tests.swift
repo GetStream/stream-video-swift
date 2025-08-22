@@ -45,6 +45,33 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - init
+
+    func test_init_defaultMediaConstraints_peerConnectionFactoryMakeAudioSourceWasCalledWithExpetedConstraints() {
+        _ = subject
+
+        XCTAssertEqual(
+            peerConnectionFactory.recordedInputPayload(
+                RTCMediaConstraints?.self,
+                for: .makeAudioSource
+            )?.first,
+            .defaultConstraints
+        )
+    }
+
+    func test_init_HiFiMediaConstraints_peerConnectionFactoryMakeAudioSourceWasCalledWithExpetedConstraints() {
+        mediaConstraints = .hiFiAudioConstraints
+        _ = subject
+
+        XCTAssertEqual(
+            peerConnectionFactory.recordedInputPayload(
+                RTCMediaConstraints?.self,
+                for: .makeAudioSource
+            )?.first,
+            .hiFiAudioConstraints
+        )
+    }
+
     // MARK: - setUp(with:ownCapabilities:)
 
     func test_setUp_hasAudioCapabilityAndAudioOn_addsTrack() async throws {

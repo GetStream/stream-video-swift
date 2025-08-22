@@ -341,8 +341,31 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             let currentValue = await self.subject.callSettings
             return currentValue == callSettings
         }
+        await subject.setAudioMediaConstraints(constraints: .defaultConstraints)
 
         try await subject.configurePeerConnections()
+
+        let peerConnectionCoordinatorBuildResult = (
+            sessionId: String,
+            peerType: PeerConnectionType,
+            peerConnection: StreamRTCPeerConnectionProtocol,
+            peerConnectionFactory: PeerConnectionFactory,
+            videoOptions: VideoOptions,
+            videoConfig: VideoConfig,
+            callSettings: CallSettings,
+            audioSettings: AudioSettings,
+            publishOptions: PublishOptions,
+            sfuAdapter: SFUAdapter,
+            videoCaptureSessionProvider: VideoCaptureSessionProvider,
+            screenShareSessionProvider: ScreenShareSessionProvider,
+            clientCapabilities: Set<ClientCapability>,
+            audioMediaConstraints: RTCMediaConstraints
+        ).self
+        let publisherRecordedInput = try XCTUnwrap(
+            rtcPeerConnectionCoordinatorFactory.recordedInputPayload(peerConnectionCoordinatorBuildResult, for: .buildCoordinator)?
+                .first
+        )
+        XCTAssertEqual(publisherRecordedInput.audioMediaConstraints, .defaultConstraints)
 
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
@@ -465,6 +488,68 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
 
         XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
+    }
+
+    func test_configurePeerConnections_defaultAudioMediaConstraints_publisherWasConfiguredWithCorrectAudioeMediaConstraints(
+    ) async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.setAudioMediaConstraints(constraints: .defaultConstraints)
+
+        try await subject.configurePeerConnections()
+
+        let peerConnectionCoordinatorBuildResult = (
+            sessionId: String,
+            peerType: PeerConnectionType,
+            peerConnection: StreamRTCPeerConnectionProtocol,
+            peerConnectionFactory: PeerConnectionFactory,
+            videoOptions: VideoOptions,
+            videoConfig: VideoConfig,
+            callSettings: CallSettings,
+            audioSettings: AudioSettings,
+            publishOptions: PublishOptions,
+            sfuAdapter: SFUAdapter,
+            videoCaptureSessionProvider: VideoCaptureSessionProvider,
+            screenShareSessionProvider: ScreenShareSessionProvider,
+            clientCapabilities: Set<ClientCapability>,
+            audioMediaConstraints: RTCMediaConstraints
+        ).self
+        let publisherRecordedInput = try XCTUnwrap(
+            rtcPeerConnectionCoordinatorFactory.recordedInputPayload(peerConnectionCoordinatorBuildResult, for: .buildCoordinator)?
+                .first
+        )
+        XCTAssertEqual(publisherRecordedInput.audioMediaConstraints, .defaultConstraints)
+    }
+
+    func test_configurePeerConnections_HiFiAudioMediaConstraints_publisherWasConfiguredWithCorrectAudioeMediaConstraints(
+    ) async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.setAudioMediaConstraints(constraints: .hiFiAudioConstraints)
+
+        try await subject.configurePeerConnections()
+
+        let peerConnectionCoordinatorBuildResult = (
+            sessionId: String,
+            peerType: PeerConnectionType,
+            peerConnection: StreamRTCPeerConnectionProtocol,
+            peerConnectionFactory: PeerConnectionFactory,
+            videoOptions: VideoOptions,
+            videoConfig: VideoConfig,
+            callSettings: CallSettings,
+            audioSettings: AudioSettings,
+            publishOptions: PublishOptions,
+            sfuAdapter: SFUAdapter,
+            videoCaptureSessionProvider: VideoCaptureSessionProvider,
+            screenShareSessionProvider: ScreenShareSessionProvider,
+            clientCapabilities: Set<ClientCapability>,
+            audioMediaConstraints: RTCMediaConstraints
+        ).self
+        let publisherRecordedInput = try XCTUnwrap(
+            rtcPeerConnectionCoordinatorFactory.recordedInputPayload(peerConnectionCoordinatorBuildResult, for: .buildCoordinator)?
+                .first
+        )
+        XCTAssertEqual(publisherRecordedInput.audioMediaConstraints, .hiFiAudioConstraints)
     }
 
     // MARK: - configureAudioSession
