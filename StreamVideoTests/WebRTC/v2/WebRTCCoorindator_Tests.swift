@@ -16,6 +16,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
+    private lazy var mockPeerConnectionFactory: MockPeerConnectionFactory! = .init()
     private lazy var mockCallAuthenticator: MockCallAuthenticator! = .init()
     private lazy var mockWebRTCAuthenticator: MockWebRTCAuthenticator! = .init()
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
@@ -25,6 +26,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         apiKey: apiKey,
         callCid: callCid,
         videoConfig: Self.videoConfig,
+        peerConnectionFactory: mockPeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
         webRTCAuthenticator: mockWebRTCAuthenticator,
         callAuthentication: mockCallAuthenticator.authenticate
@@ -45,6 +47,7 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
         callCid = nil
         apiKey = nil
         user = nil
+        mockPeerConnectionFactory = nil
         try await super.tearDown()
     }
 

@@ -33,7 +33,7 @@ struct MockRTCPeerConnectionCoordinatorStack: @unchecked Sendable {
         publishOptions: PublishOptions = .init(),
         sessionId: String = .unique,
         peerConnection: MockRTCPeerConnection = .init(),
-        peerConnectionFactory: PeerConnectionFactory = .mock(),
+        peerConnectionFactory: MockPeerConnectionFactory = MockPeerConnectionFactory(),
         mockSFUStack: MockSFUStack = .init(),
         audioSession: CallAudioSession? = nil,
         spySubject: PassthroughSubject<TrackEvent, Never> = .init(),

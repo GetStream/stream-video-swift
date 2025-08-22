@@ -29,7 +29,7 @@ final class PictureInPictureScreenSharingViewTests: StreamVideoUITestCase, @unch
         PictureInPictureScreenSharingView(
             store: .init(),
             participant: .dummy(name: "Get Stream"),
-            track: RTCMediaStreamTrack.dummy(kind: .video, peerConnectionFactory: .mock()) as! RTCVideoTrack
+            track: RTCMediaStreamTrack.dummy(kind: .video, peerConnectionFactory: MockPeerConnectionFactory()) as! RTCVideoTrack
         )
         .frame(width: targetSize.width, height: targetSize.height)
     }

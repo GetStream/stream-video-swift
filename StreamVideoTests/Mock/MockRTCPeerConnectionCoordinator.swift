@@ -159,9 +159,7 @@ final class MockRTCPeerConnectionCoordinator:
         iceConnectionStateAdapter: ICEConnectionStateAdapter? = nil,
         audioMediaConstraints: RTCMediaConstraints = .defaultConstraints
     ) throws {
-        let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: MockAudioProcessingModule.shared
-        )
+        let peerConnectionFactory = MockPeerConnectionFactory()
 
         let sessionId = String.unique
         let peerConnection = MockRTCPeerConnection()

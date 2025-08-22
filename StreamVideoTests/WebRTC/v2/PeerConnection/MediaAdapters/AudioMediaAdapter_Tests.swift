@@ -10,7 +10,7 @@ import XCTest
 final class AudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var sessionId: String! = .unique
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = .init()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockMediaAdapter: MockLocalMediaAdapter! = .init()

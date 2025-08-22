@@ -481,11 +481,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         mockRTCCoordinator?.stub(for: .mid, with: "test-mid")
-        let mockTrack = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockAudioTrack()
+        let mockTrack = await(
+            mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .peerConnectionFactory as! MockPeerConnectionFactory
+        )
+        .mockAudioTrack()
         mockTrack.isEnabled = true
         mockRTCCoordinator?.stub(for: .localTrack, with: mockTrack)
         mockCoordinatorStack
@@ -924,11 +926,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         mockRTCCoordinator?.stub(for: .mid, with: "test-mid")
-        let mockTrack = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockAudioTrack()
+        let mockTrack = await(
+            mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .peerConnectionFactory as! MockPeerConnectionFactory
+        )
+        .mockAudioTrack()
         mockTrack.isEnabled = true
         mockRTCCoordinator?.stub(for: .localTrack, with: mockTrack)
         mockCoordinatorStack
@@ -1129,11 +1133,13 @@ final class WebRTCCoordinatorStateMachine_JoiningStageTests: XCTestCase, @unchec
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         mockRTCCoordinator?.stub(for: .mid, with: "test-mid")
-        let mockTrack = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockAudioTrack()
+        let mockTrack = await(
+            mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .peerConnectionFactory as! MockPeerConnectionFactory
+        )
+        .mockAudioTrack()
         mockTrack.isEnabled = true
         mockRTCCoordinator?.stub(for: .localTrack, with: mockTrack)
         mockCoordinatorStack

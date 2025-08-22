@@ -30,7 +30,7 @@ final class PictureInPictureVideoParticipantViewTests: StreamVideoUITestCase, @u
             store: .init(),
             viewFactory: .init(DefaultViewFactory.shared),
             participant: .dummy(name: "Get Stream"),
-            track: RTCMediaStreamTrack.dummy(kind: .video, peerConnectionFactory: .mock()) as? RTCVideoTrack
+            track: RTCMediaStreamTrack.dummy(kind: .video, peerConnectionFactory: MockPeerConnectionFactory()) as? RTCVideoTrack
         )
         .frame(width: targetSize.width, height: targetSize.height)
     }

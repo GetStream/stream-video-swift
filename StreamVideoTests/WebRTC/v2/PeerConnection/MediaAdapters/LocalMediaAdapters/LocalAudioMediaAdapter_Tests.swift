@@ -15,7 +15,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private var mediaConstraints: RTCMediaConstraints! = .defaultConstraints
     private lazy var sessionId: String! = .unique
     private lazy var publishOptions: [PublishOptions.AudioPublishOptions] = []
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = MockPeerConnectionFactory()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()

@@ -113,6 +113,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        peerConnectionFactory: PeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
@@ -121,9 +122,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: videoConfig.audioProcessingModule
-        )
         self.peerConnectionFactory = peerConnectionFactory
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
