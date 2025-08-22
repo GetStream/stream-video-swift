@@ -14,6 +14,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
         case changeVideoState
         case enableClientCapabilities
         case disableClientCapabilities
+        case setHiFiEnabled
     }
 
     enum MockFunctionInputKey: Payloadable {
@@ -36,6 +37,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
         case disableClientCapabilities(Set<ClientCapability>)
 
+        case setHiFiEnabled(Bool)
+
         var payload: Any {
             switch self {
             case let .setDisconnectionTimeout(timeout):
@@ -49,6 +52,8 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
             case let .enableClientCapabilities(value):
                 return value
             case let .disableClientCapabilities(value):
+                return value
+            case let .setHiFiEnabled(value):
                 return value
             }
         }
@@ -142,5 +147,10 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
     ) async {
         stubbedFunctionInput[.disableClientCapabilities]?
             .append(.disableClientCapabilities(capabilities))
+    }
+
+    override func setHiFiEnabled(_ isEnabled: Bool) async {
+        stubbedFunctionInput[.setHiFiEnabled]?
+            .append(.setHiFiEnabled(isEnabled))
     }
 }
