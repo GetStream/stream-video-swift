@@ -12,6 +12,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private var mockStreamVideo: MockStreamVideo! = .init()
     private var mockAudioRecorder: MockStreamCallAudioRecorder! = .init()
     private var disposableBag: DisposableBag! = .init()
+    private var mediaConstraints: RTCMediaConstraints! = .defaultConstraints
     private lazy var sessionId: String! = .unique
     private lazy var publishOptions: [PublishOptions.AudioPublishOptions] = []
     private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
@@ -24,7 +25,8 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         peerConnectionFactory: peerConnectionFactory,
         sfuAdapter: mockSFUStack.adapter,
         publishOptions: publishOptions,
-        subject: spySubject
+        subject: spySubject,
+        mediaConstraints: mediaConstraints
     )
 
     private var temporaryPeerConnection: RTCPeerConnection?
@@ -39,6 +41,7 @@ final class LocalAudioMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
         peerConnectionFactory = nil
         temporaryPeerConnection = nil
         disposableBag = nil
+        mediaConstraints = nil
         super.tearDown()
     }
 

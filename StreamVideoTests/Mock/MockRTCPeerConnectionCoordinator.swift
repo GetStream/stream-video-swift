@@ -156,7 +156,8 @@ final class MockRTCPeerConnectionCoordinator:
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init(),
         iceAdapter: ICEAdapter? = nil,
-        iceConnectionStateAdapter: ICEConnectionStateAdapter? = nil
+        iceConnectionStateAdapter: ICEConnectionStateAdapter? = nil,
+        audioMediaConstraints: RTCMediaConstraints = .defaultConstraints
     ) throws {
         let peerConnectionFactory = PeerConnectionFactory.build(
             audioProcessingModule: MockAudioProcessingModule.shared
@@ -183,7 +184,8 @@ final class MockRTCPeerConnectionCoordinator:
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
-                screenShareSessionProvider: screenShareSessionProvider
+                screenShareSessionProvider: screenShareSessionProvider,
+                audioMediaConstraints: audioMediaConstraints
             ),
             iceAdapter: iceAdapter ?? .init(
                 sessionID: sessionId,
