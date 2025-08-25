@@ -39,7 +39,7 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
             id: "\(streamVideo.user.id)-\(idSuffix)",
             availableFrame: availableFrame,
             contentMode: .scaleAspectFill,
-            customData: ["videoOn": .bool(callSettings.videoOn)],
+            customData: [:],
             call: call
         )
         .adjustVideoFrame(to: availableFrame.width, ratio: availableFrame.width / availableFrame.height)
