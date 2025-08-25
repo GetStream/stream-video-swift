@@ -410,11 +410,11 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let _subscriber = await subject.subscriber
         let subscriber = try XCTUnwrap(_subscriber)
 
-        _ = await Task(timeout: 1) {
+        _ = await Task(timeoutInSeconds: 1) {
             try await publisher.ensureSetUpHasBeenCompleted()
         }.result
 
-        _ = await Task(timeout: 1) {
+        _ = await Task(timeoutInSeconds: 1) {
             try await subscriber.ensureSetUpHasBeenCompleted()
         }.result
     }
