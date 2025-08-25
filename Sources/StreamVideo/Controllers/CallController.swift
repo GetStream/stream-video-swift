@@ -17,7 +17,8 @@ class CallController: @unchecked Sendable {
         user: user,
         apiKey: apiKey,
         callCid: callCid(from: callId, callType: callType),
-        videoConfig: videoConfig
+        videoConfig: videoConfig,
+        peerConnectionFactory: StreamPeerConnectionFactory.build(audioProcessingModule: videoConfig.audioProcessingModule)
     ) {
         [weak self, callId] create, ring, migratingFrom, notify, options in
         if let self {
@@ -515,6 +516,23 @@ class CallController: @unchecked Sendable {
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await webRTCCoordinator.disableClientCapabilities(capabilities)
+    }
+
+    // MARK: - HiFi
+
+    /// Configures the High-Fidelity (HiFi) audio mode for the current call.
+    ///
+    /// This method enables or disables HiFi audio mode by adjusting the
+    /// underlying WebRTC audio constraints. When enabled, audio processing
+    /// features are disabled to maintain pristine audio quality.
+    ///
+    /// - Parameter isEnabled: Whether to enable HiFi audio mode.
+    ///
+    /// - Note: This is an internal method that delegates to the WebRTC
+    ///   coordinator. Public API consumers should use
+    ///   `MicrophoneManager.setHiFiEnabled(_:)` instead.
+    func setHiFiEnabled(_ isEnabled: Bool) async {
+        await webRTCCoordinator.setHiFiEnabled(isEnabled)
     }
 
     // MARK: - CallKit tracing

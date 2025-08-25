@@ -12,7 +12,7 @@ final class RTCPeerConnectionCoordinator_Tests: XCTestCase, @unchecked Sendable 
     private lazy var sessionId: String! = .unique
     private lazy var peerType: PeerConnectionType! = .publisher
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = MockPeerConnectionFactory()
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var spySubject: PassthroughSubject<TrackEvent, Never>! = .init()
     private lazy var mockLocalMediaAdapterA: MockLocalMediaAdapter! = .init()

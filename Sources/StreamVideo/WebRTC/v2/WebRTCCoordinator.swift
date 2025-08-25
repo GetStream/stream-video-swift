@@ -62,6 +62,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        peerConnectionFactory: PeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding = StreamRTCPeerConnectionCoordinatorFactory(),
         webRTCAuthenticator: WebRTCAuthenticating = WebRTCAuthenticator(),
         callAuthentication: @escaping AuthenticationHandler
@@ -71,6 +72,7 @@ final class WebRTCCoordinator: @unchecked Sendable {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
+            peerConnectionFactory: peerConnectionFactory,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
         )
         self.callAuthentication = callAuthentication
@@ -419,12 +421,41 @@ final class WebRTCCoordinator: @unchecked Sendable {
         await stateAdapter.set(audioSessionPolicy: policy)
     }
 
+    // MARK: -
+
     func enableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await stateAdapter.enableClientCapabilities(capabilities)
     }
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) async {
         await stateAdapter.disableClientCapabilities(capabilities)
+    }
+
+    // MARK: - HiFi Audio Configuration
+
+    /// Configures High-Fidelity (HiFi) audio mode for WebRTC connections.
+    ///
+    /// This method performs two key operations:
+    /// 1. Switches between HiFi and standard audio constraints for new tracks
+    /// 2. Configures the audio processing module to bypass filtering when HiFi
+    ///    is enabled
+    ///
+    /// When HiFi is enabled, the audio capture uses constraints that disable
+    /// processing features (echo cancellation, noise suppression, etc.) and
+    /// bypasses any custom audio filters to maintain original audio quality.
+    ///
+    /// - Parameter isEnabled: If `true`, applies HiFi audio constraints and
+    ///   disables audio filtering. If `false`, reverts to default constraints
+    ///   with standard processing and filtering enabled.
+    ///
+    /// - Note: The constraint change affects new audio tracks created after
+    ///   this call. The audio processing module change takes effect immediately
+    ///   for all audio buffers being processed.
+    func setHiFiEnabled(_ isEnabled: Bool) async {
+        await stateAdapter.setAudioMediaConstraints(
+            constraints: isEnabled ? .hiFiAudioConstraints : .defaultConstraints
+        )
+        stateAdapter.videoConfig.audioProcessingModule.isHiFiEnabled = isEnabled
     }
 
     // MARK: - CallKit tracing

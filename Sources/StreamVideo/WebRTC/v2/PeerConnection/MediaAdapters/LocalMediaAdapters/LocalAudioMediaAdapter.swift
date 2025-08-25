@@ -61,13 +61,17 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///   - sfuAdapter: The adapter for communicating with the SFU.
     ///   - publishOptions: The options for publishing audio tracks.
     ///   - subject: A publisher that emits track events.
+    ///   - mediaConstraints: The media constraints to apply when creating
+    ///     the audio source. Use `.hiFiAudioConstraints` for high-fidelity
+    ///     audio or `.defaultConstraints` for standard processing.
     init(
         sessionID: String,
         peerConnection: StreamRTCPeerConnectionProtocol,
         peerConnectionFactory: PeerConnectionFactory,
         sfuAdapter: SFUAdapter,
         publishOptions: [PublishOptions.AudioPublishOptions],
-        subject: PassthroughSubject<TrackEvent, Never>
+        subject: PassthroughSubject<TrackEvent, Never>,
+        mediaConstraints: RTCMediaConstraints
     ) {
         self.sessionID = sessionID
         self.peerConnection = peerConnection
@@ -77,7 +81,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
         self.subject = subject
 
         // Create the primary audio track for the session.
-        let source = peerConnectionFactory.makeAudioSource(.defaultConstraints)
+        let source = peerConnectionFactory.makeAudioSource(mediaConstraints)
         let track = peerConnectionFactory.makeAudioTrack(source: source)
         primaryTrack = track
         streamIds = ["\(sessionID):audio"]

@@ -9,7 +9,7 @@ import XCTest
 final class RTCAudioTrack_CloneTests: XCTestCase, @unchecked Sendable {
 
     func test_clone_preservesEnabledState() {
-        let factory = PeerConnectionFactory.mock()
+        let factory = MockPeerConnectionFactory()
         let originalTrack = factory.mockAudioTrack()
         originalTrack.isEnabled = true
 
@@ -19,7 +19,7 @@ final class RTCAudioTrack_CloneTests: XCTestCase, @unchecked Sendable {
     }
 
     func test_clone_createsNewTrack() {
-        let factory = PeerConnectionFactory.mock()
+        let factory = MockPeerConnectionFactory()
         let originalTrack = factory.mockAudioTrack()
 
         let clonedTrack = originalTrack.clone(from: factory)

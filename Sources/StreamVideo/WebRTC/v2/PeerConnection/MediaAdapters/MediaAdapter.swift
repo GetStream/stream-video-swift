@@ -53,7 +53,9 @@ final class MediaAdapter {
         videoConfig: VideoConfig,
         publishOptions: PublishOptions,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
-        screenShareSessionProvider: ScreenShareSessionProvider
+        screenShareSessionProvider: ScreenShareSessionProvider,
+        /// Media constraints for audio track creation, supporting HiFi mode.
+        audioMediaConstraints: RTCMediaConstraints
     ) {
         let subject = PassthroughSubject<TrackEvent, Never>()
         
@@ -93,7 +95,8 @@ final class MediaAdapter {
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,
                     publishOptions: publishOptions.audio,
-                    subject: subject
+                    subject: subject,
+                    mediaConstraints: audioMediaConstraints
                 ),
                 videoMediaAdapter: .init(
                     sessionID: sessionID,

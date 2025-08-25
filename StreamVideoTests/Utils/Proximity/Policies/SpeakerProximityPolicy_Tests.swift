@@ -11,7 +11,7 @@ import XCTest
 final class SpeakerProximityPolicy_Tests: XCTestCase, @unchecked Sendable {
 
     private lazy var mockCall: MockCall! = .init(.dummy())
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = .init()
     private lazy var subject: SpeakerProximityPolicy! = .init()
 
     override func setUp() async throws {
