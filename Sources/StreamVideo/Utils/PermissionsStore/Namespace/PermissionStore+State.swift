@@ -5,7 +5,8 @@
 import Foundation
 
 extension PermissionStore {
-
+    
+    /// Represents the state of a system permission.
     public enum Permission: Equatable, Sendable, CustomStringConvertible {
         case unknown
         case requesting
@@ -26,9 +27,13 @@ extension PermissionStore {
         }
     }
 
+    /// The state container for all permission statuses.
     public struct StoreState: Equatable, CustomStringConvertible {
+        /// The current microphone permission status.
         public var microphonePermission: Permission
+        /// The current camera permission status.
         public var cameraPermission: Permission
+        /// The current push notification permission status.
         public var pushNotificationPermission: Permission
 
         public var description: String {

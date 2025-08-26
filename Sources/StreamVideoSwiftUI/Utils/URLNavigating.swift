@@ -8,8 +8,11 @@ import StreamVideo
 import UIKit
 #endif
 
+/// Protocol for navigation to external URLs and system settings.
 public protocol URLNavigating {
-
+    
+    /// Opens the app's settings page in the system Settings app.
+    /// - Throws: An error if the settings cannot be opened.
     @MainActor
     func openSettings() throws
 }
@@ -25,6 +28,8 @@ extension InjectedValues {
     }
 }
 
+/// Default implementation of URLNavigating that handles URL navigation on
+/// supported platforms.
 final class StreamURLNavigator: URLNavigating {
 
     @MainActor

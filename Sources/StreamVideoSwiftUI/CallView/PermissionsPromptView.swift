@@ -5,6 +5,8 @@
 import StreamVideo
 import SwiftUI
 
+/// A view that prompts users to grant camera and microphone permissions when
+/// they are missing. Provides a direct link to the app's settings.
 public struct PermissionsPromptView: View {
 
     @Injected(\.urlNavigator) private var urlNavigator

@@ -5,7 +5,9 @@
 import Foundation
 
 extension PermissionStore {
-
+    
+    /// Default reducer that handles permission state updates based on
+    /// dispatched actions.
     final class DefaultReducer: Reducer<Namespace>, @unchecked Sendable {
 
         override func reduce(

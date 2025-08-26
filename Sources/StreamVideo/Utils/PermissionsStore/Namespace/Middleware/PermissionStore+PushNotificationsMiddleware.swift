@@ -7,7 +7,9 @@ import StreamWebRTC
 import UserNotifications
 
 extension PermissionStore {
-
+    
+    /// Middleware that handles push notification permission requests and
+    /// state updates.
     final class PushNotificationsMiddleware: Middleware<Namespace>, @unchecked Sendable {
 
         private let permissionProvider: PushNotificationsPermissionProviding

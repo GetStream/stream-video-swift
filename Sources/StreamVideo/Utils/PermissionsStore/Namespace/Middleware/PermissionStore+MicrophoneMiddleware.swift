@@ -6,7 +6,9 @@ import Foundation
 import StreamWebRTC
 
 extension PermissionStore {
-
+    
+    /// Middleware that handles microphone permission requests and state
+    /// updates.
     final class MicrophoneMiddleware: Middleware<Namespace>, @unchecked Sendable {
 
         private let permissionProvider: MicrophonePermissionProviding

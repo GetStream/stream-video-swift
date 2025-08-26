@@ -5,13 +5,19 @@
 import AVFoundation
 import Foundation
 
+/// Protocol for providing microphone permission management.
 protocol MicrophonePermissionProviding {
-
+    
+    /// The current microphone permission status from the system.
     var systemPermission: PermissionStore.Permission { get }
-
+    
+    /// Requests microphone permission from the user.
+    /// - Parameter completion: Called with `true` if permission granted.
     func requestPermission(_ completion: @escaping (Bool) -> Void)
 }
 
+/// Default implementation for microphone permission management using
+/// AVFoundation.
 final class StreamMicrophonePermissionProvider: MicrophonePermissionProviding {
     var systemPermission: PermissionStore.Permission {
         if #available(iOS 17.0, *) {

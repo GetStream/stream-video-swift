@@ -7,7 +7,8 @@ import Foundation
 import StreamWebRTC
 
 extension PermissionStore {
-
+    
+    /// Middleware that handles camera permission requests and state updates.
     final class CameraMiddleware: Middleware<Namespace>, @unchecked Sendable {
 
         private let permissionProvider: CameraPermissionProviding

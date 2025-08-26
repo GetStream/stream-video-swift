@@ -5,13 +5,18 @@
 import AVFoundation
 import Foundation
 
+/// Protocol for providing camera permission management.
 protocol CameraPermissionProviding {
-
+    
+    /// The current camera permission status from the system.
     var systemPermission: PermissionStore.Permission { get }
-
+    
+    /// Requests camera permission from the user.
+    /// - Parameter completion: Called with `true` if permission granted.
     func requestPermission(_ completion: @escaping (Bool) -> Void)
 }
 
+/// Default implementation for camera permission management using AVFoundation.
 final class StreamCameraPermissionProvider: CameraPermissionProviding {
     var systemPermission: PermissionStore.Permission {
         switch AVCaptureDevice.authorizationStatus(for: .video) {

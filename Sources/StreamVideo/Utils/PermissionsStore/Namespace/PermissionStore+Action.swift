@@ -6,7 +6,8 @@ import Foundation
 import UserNotifications
 
 extension PermissionStore {
-
+    
+    /// Actions that can be dispatched to the permission store.
     public enum StoreAction: Sendable, Equatable {
         case setMicrophonePermission(Permission)
         case requestMicrophonePermission

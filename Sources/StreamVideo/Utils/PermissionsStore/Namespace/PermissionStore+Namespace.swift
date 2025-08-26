@@ -5,7 +5,9 @@
 import Foundation
 
 extension PermissionStore {
-
+    
+    /// Namespace that defines the store configuration for permission
+    /// management.
     enum Namespace: StoreNamespace {
         typealias State = StoreState
 

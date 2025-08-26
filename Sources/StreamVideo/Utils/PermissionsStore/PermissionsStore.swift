@@ -5,6 +5,8 @@
 import Foundation
 import UserNotifications
 
+/// Manages system permissions for camera, microphone, and push notifications.
+/// Provides a reactive interface for permission state observation and requests.
 public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
@@ -41,6 +43,9 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
             .store(in: disposableBag)
     }
 
+    /// Requests microphone permission from the user.
+    /// - Returns: `true` if permission was granted, `false` otherwise.
+    /// - Throws: An error if the permission request times out.
     public func requestMicrophonePermission() async throws -> Bool {
         store.dispatch(.requestMicrophonePermission)
         return try await store.publisher(\.microphonePermission)
@@ -48,6 +53,9 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
             .nextValue() == .granted
     }
 
+    /// Requests camera permission from the user.
+    /// - Returns: `true` if permission was granted, `false` otherwise.
+    /// - Throws: An error if the permission request times out.
     public func requestCameraPermission() async throws -> Bool {
         store.dispatch(.requestCameraPermission)
         return try await store.publisher(\.cameraPermission)
@@ -55,6 +63,10 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
             .nextValue() == .granted
     }
 
+    /// Requests push notification permission from the user.
+    /// - Parameter options: The notification authorization options to request.
+    /// - Returns: `true` if permission was granted, `false` otherwise.
+    /// - Throws: An error if the permission request times out.
     public func requestPushNotificationPermission(
         with options: UNAuthorizationOptions
     ) async throws -> Bool {
