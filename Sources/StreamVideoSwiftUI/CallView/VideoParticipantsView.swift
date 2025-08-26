@@ -312,6 +312,7 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
     }
 }
 
+@MainActor
 public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.images) var images
@@ -355,7 +356,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
             ? call?.state.$callSettings.eraseToAnyPublisher()
             : nil
     }
-    
+
     public var body: some View {
         rendererViewWithCameraPositionAwareness
             .opacity(showVideo ? 1 : 0)
