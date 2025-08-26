@@ -19,7 +19,7 @@ extension StreamCallAudioRecorder.Namespace {
     /// 2. It dispatches `.setIsInterrupted(true)` to pause recording
     /// 3. When the interruption ends, it dispatches `.setIsInterrupted(false)`
     /// 4. Recording automatically resumes if it should be active
-    final class InterruptionMiddleware: Middleware<StreamCallAudioRecorder.Namespace> {
+    final class InterruptionMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
         /// The audio store for monitoring interruption state.
         @Injected(\.audioStore) private var audioStore
 

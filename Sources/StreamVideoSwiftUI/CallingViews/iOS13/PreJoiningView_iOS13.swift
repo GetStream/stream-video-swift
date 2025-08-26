@@ -56,8 +56,6 @@ public struct LobbyView_iOS13<Factory: ViewFactory>: View {
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
-        .onChange(of: callSettings) { newValue in
-            Task { await viewModel.didUpdate(callSettings: newValue) }
-        }
+        .onChange(of: callSettings) { viewModel.didUpdate(callSettings: $0) }
     }
 }

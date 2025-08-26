@@ -153,7 +153,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     }
                 }
 
-            await audioRecorder.startRecording()
+            audioRecorder.startRecording()
 
             log.debug(
                 """
@@ -170,7 +170,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     ///
     /// This disables the primary track and all associated transceivers.
     func unpublish() {
-        processingQueue.addTaskOperation { [weak self] in
+        processingQueue.addOperation { [weak self] in
             guard let self, primaryTrack.isEnabled else { return }
 
             primaryTrack.isEnabled = false
@@ -178,7 +178,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             transceiverStorage
                 .forEach { $0.value.track.isEnabled = false }
 
-            await audioRecorder.stopRecording()
+            audioRecorder.stopRecording()
 
             log.debug(
                 """

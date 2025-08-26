@@ -24,7 +24,7 @@ extension StreamCallAudioRecorder.Namespace {
     /// - Takes the current state and an action as input
     /// - Returns a new state without side effects
     /// - Does not modify the original state
-    final class DefaultReducer: Reducer<StreamCallAudioRecorder.Namespace> {
+    final class DefaultReducer: Reducer<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
         /// Processes an action to produce a new state.
         ///
         /// This method creates a copy of the current state, applies the

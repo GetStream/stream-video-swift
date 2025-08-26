@@ -54,8 +54,8 @@ public struct LobbyView<Factory: ViewFactory>: View {
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
-        .onChange(of: callSettings) { newValue in Task { await viewModel.didUpdate(callSettings: newValue) } }
-        .onAppear { Task { await viewModel.didUpdate(callSettings: callSettings) } }
+        .onChange(of: callSettings) { viewModel.didUpdate(callSettings: $0) }
+        .onAppear { viewModel.didUpdate(callSettings: callSettings) }
     }
 }
 
