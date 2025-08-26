@@ -9,27 +9,31 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
     @Injected(\.audioStore) private var audioStore
 
-    @Published public private(set) var hasMicrophonePermission: Bool = false
-    @Published public private(set) var hasCameraPermission: Bool = false
+    @Published public private(set) var hasMicrophonePermission: Bool
+    @Published public private(set) var hasCameraPermission: Bool
 
-    private let store = Namespace.store(initialState: .initial)
+    private let store: Store<Namespace>
     private let disposableBag = DisposableBag()
 
-    private static let shared = PermissionStore()
+    static let shared = PermissionStore()
 
-    private init() {
+    init(store: Store<Namespace> = Namespace.store(initialState: .initial)) {
+        self.store = store
+        hasMicrophonePermission = store.state.microphonePermission == .granted
+        hasCameraPermission = store.state.cameraPermission == .granted
+        
         store
             .publisher(\.microphonePermission)
             .map { $0 == .granted }
             .receive(on: DispatchQueue.main)
-            .assign(to: \.hasMicrophonePermission, on: self)
+            .assign(to: \.hasMicrophonePermission, onWeak: self)
             .store(in: disposableBag)
 
         store
             .publisher(\.cameraPermission)
             .map { $0 == .granted }
             .receive(on: DispatchQueue.main)
-            .assign(to: \.hasCameraPermission, on: self)
+            .assign(to: \.hasCameraPermission, onWeak: self)
             .store(in: disposableBag)
 
         $hasMicrophonePermission

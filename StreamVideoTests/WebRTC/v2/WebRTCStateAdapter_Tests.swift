@@ -14,6 +14,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
+    private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var subject: WebRTCStateAdapter! = .init(
         user: user,
         apiKey: apiKey,
@@ -24,8 +25,15 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     // MARK: - Lifecycle
 
+    override func setUp() {
+        super.setUp()
+        _ = mockPermissions
+    }
+
     override func tearDown() {
+        mockPermissions.dismantle()
         subject = nil
+        mockPermissions = nil
         callCid = nil
         apiKey = nil
         user = nil

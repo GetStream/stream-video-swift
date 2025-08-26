@@ -10,6 +10,13 @@ import XCTest
 
 final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
+    private var mockPermissions: MockPermissionsStore! = .init()
+
+    override func tearDown() {
+        mockPermissions = nil
+        super.tearDown()
+    }
+
     // MARK: - Appearance
 
     @MainActor

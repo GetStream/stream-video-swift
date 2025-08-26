@@ -33,13 +33,13 @@ public struct PermissionsPromptView: View {
     private var title: some View {
         switch (permissions.hasCameraPermission, permissions.hasMicrophonePermission) {
         case (false, false):
-            text(for: "Please grant permission to access your camera and microphone.")
+            text(for: L10n.Call.Permissions.Missing.cameraandmic)
 
         case (false, true):
-            text(for: "Please grant permission to access your camera.")
+            text(for: L10n.Call.Permissions.Missing.camera)
 
         case (true, false):
-            text(for: "Please grant permission to access your microphone.")
+            text(for: L10n.Call.Permissions.Missing.mic)
 
         case (true, true):
             EmptyView()
@@ -69,13 +69,13 @@ public struct PermissionsPromptView: View {
         } label: {
             if #available(iOS 14.0, *) {
                 Label {
-                    Text("Settings")
+                    Text(L10n.Call.Permissions.Missing.Cta.title)
                 } icon: {
                     Image(systemName: "gear")
                 }
                 .minimumScaleFactor(0.7)
             } else {
-                Text("\(Image(systemName: "gear")) Settings")
+                Text("\(Image(systemName: "gear")) \(Text(L10n.Call.Permissions.Missing.Cta.title))")
                     .minimumScaleFactor(0.7)
             }
         }
@@ -88,12 +88,10 @@ public struct PermissionsPromptView: View {
 
     private var alertContentView: Alert {
         Alert(
-            title: Text("Info"),
-            message: Text(
-                "After toggling any of the settings in the system settings, the app will restart automatically. You will need to join the call again."
-            ),
+            title: Text(L10n.Call.Permissions.Missing.Prompt.title),
+            message: Text(L10n.Call.Permissions.Missing.Prompt.message),
             primaryButton: .default(
-                Text("Continue"),
+                Text(L10n.Alert.Actions.continue),
                 action: { try? urlNavigator.openSettings() }
             ),
             secondaryButton: .cancel {

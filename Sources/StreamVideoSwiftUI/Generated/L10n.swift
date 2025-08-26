@@ -9,6 +9,8 @@ internal enum L10n {
 
   internal enum Alert {
     internal enum Actions {
+      /// Continue
+      internal static var `continue`: String { L10n.tr("Localizable", "alert.actions.continue") }
       /// Ok
       internal static var ok: String { L10n.tr("Localizable", "alert.actions.ok") }
     }
@@ -100,6 +102,26 @@ internal enum L10n {
       internal static var title: String { L10n.tr("Localizable", "call.participants.title") }
       /// Unmute me
       internal static var unmuteme: String { L10n.tr("Localizable", "call.participants.unmuteme") }
+    }
+    internal enum Permissions {
+      internal enum Missing {
+        /// Please grant permission to access your camera.
+        internal static var camera: String { L10n.tr("Localizable", "call.permissions.missing.camera") }
+        /// Please grant permission to access your camera and microphone.
+        internal static var cameraandmic: String { L10n.tr("Localizable", "call.permissions.missing.cameraandmic") }
+        /// Please grant permission to access your microphone.
+        internal static var mic: String { L10n.tr("Localizable", "call.permissions.missing.mic") }
+        internal enum Cta {
+          /// Settings
+          internal static var title: String { L10n.tr("Localizable", "call.permissions.missing.cta.title") }
+        }
+        internal enum Prompt {
+          /// After toggling any of the settings in the system settings, the app will restart automatically. You will need to join the call again.
+          internal static var message: String { L10n.tr("Localizable", "call.permissions.missing.prompt.message") }
+          /// Info
+          internal static var title: String { L10n.tr("Localizable", "call.permissions.missing.prompt.title") }
+        }
+      }
     }
   }
 

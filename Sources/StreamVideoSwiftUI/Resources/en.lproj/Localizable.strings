@@ -39,6 +39,7 @@
 "alert.error.title" = "Something went wrong.";
 "alert.error.message" = "The operation couldn't be completed.";
 "alert.actions.ok" = "Ok";
+"alert.actions.continue" = "Continue";
 
 "call.livestream.not-started" = "Livestream is not started. Please come back later.";
 "call.livestream.live" = "Live";
@@ -48,3 +49,11 @@
 "call.livestream.ended" = "The livestream has ended.";
 "call.livestream.recordings" = "Watch the recording:";
 "call.livestream.host-video-unavailable" = "The host's video is not available.";
+
+/// MARK: - PermissionsPromptView
+"call.permissions.missing.cameraandmic" = "Please grant permission to access your camera and microphone.";
+"call.permissions.missing.camera" = "Please grant permission to access your camera.";
+"call.permissions.missing.mic" = "Please grant permission to access your microphone.";
+"call.permissions.missing.cta.title" = "Settings";
+"call.permissions.missing.prompt.title" = "Info";
+"call.permissions.missing.prompt.message" = "After toggling any of the settings in the system settings, the app will restart automatically. You will need to join the call again.";

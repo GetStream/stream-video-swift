@@ -7,7 +7,7 @@ import UserNotifications
 
 extension PermissionStore {
 
-    public enum StoreAction: Sendable {
+    public enum StoreAction: Sendable, Equatable {
         case setMicrophonePermission(Permission)
         case requestMicrophonePermission
 

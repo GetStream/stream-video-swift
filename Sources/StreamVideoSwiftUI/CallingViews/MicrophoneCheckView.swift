@@ -18,7 +18,7 @@ public struct MicrophoneCheckView: View {
     var isPinned: Bool
     var maxHeight: Float = 14
 
-    @State private var hasMicrophoneAccess = true
+    @State private var hasMicrophoneAccess: Bool
 
     public init(
         audioLevels: [Float],
@@ -32,6 +32,7 @@ public struct MicrophoneCheckView: View {
         self.isSilent = isSilent
         self.isPinned = isPinned
         self.maxHeight = maxHeight
+        hasMicrophoneAccess = InjectedValues[\.permissions].hasMicrophonePermission
     }
     
     public var body: some View {

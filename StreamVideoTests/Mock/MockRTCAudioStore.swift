@@ -16,7 +16,7 @@ final class MockRTCAudioStore {
         audioStore = RTCAudioStore(session: session)
     }
 
-    deinit {
+    func dismantle() {
         InjectedValues[\.audioStore] = .init()
     }
 

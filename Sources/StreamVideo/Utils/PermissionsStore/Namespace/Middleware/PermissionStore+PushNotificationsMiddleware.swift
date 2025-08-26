@@ -10,8 +10,16 @@ extension PermissionStore {
 
     final class PushNotificationsMiddleware: Middleware<Namespace>, @unchecked Sendable {
 
+        private let permissionProvider: PushNotificationsPermissionProviding
+
         override var dispatcher: Store<PermissionStore.Namespace>.Dispatcher? {
             didSet { didUpdate(dispatcher) }
+        }
+
+        init(
+            permissionProvider: PushNotificationsPermissionProviding = StreamPushNotificationsPermissionProvider()
+        ) {
+            self.permissionProvider = permissionProvider
         }
 
         override func apply(
@@ -33,25 +41,7 @@ extension PermissionStore {
         // MARK: - Private Helpers
 
         private func systemPermission() async -> Permission {
-            let authorizationStatus = await UNUserNotificationCenter
-                .current()
-                .notificationSettings()
-                .authorizationStatus
-
-            switch authorizationStatus {
-            case .notDetermined:
-                return .unknown
-            case .provisional:
-                return .granted
-            case .denied:
-                return .denied
-            case .authorized:
-                return .granted
-            case .ephemeral:
-                return .granted
-            @unknown default:
-                return .unknown
-            }
+            await permissionProvider.systemPermission()
         }
 
         private func didUpdate(_ dispatcher: Store<Namespace>.Dispatcher?) {
@@ -68,11 +58,9 @@ extension PermissionStore {
         }
 
         private func requestPermission(with options: UNAuthorizationOptions) {
-            UNUserNotificationCenter
-                .current()
-                .requestAuthorization(options: options) { [weak self] in
-                    self?.didUpdateRequestAuthorization(granted: $0, error: $1)
-                }
+            permissionProvider.requestPermission(with: options) { [weak self] in
+                self?.didUpdateRequestAuthorization(granted: $0, error: $1)
+            }
         }
 
         private func didUpdateRequestAuthorization(granted: Bool, error: Error?) {

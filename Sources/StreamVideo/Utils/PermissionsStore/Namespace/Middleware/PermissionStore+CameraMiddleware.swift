@@ -10,8 +10,15 @@ extension PermissionStore {
 
     final class CameraMiddleware: Middleware<Namespace>, @unchecked Sendable {
 
+        private let permissionProvider: CameraPermissionProviding
         override var dispatcher: Store<PermissionStore.Namespace>.Dispatcher? {
             didSet { dispatcher?.dispatch(.setCameraPermission(systemPermission)) }
+        }
+
+        init(
+            permissionProvider: CameraPermissionProviding = StreamCameraPermissionProvider()
+        ) {
+            self.permissionProvider = permissionProvider
         }
 
         override func apply(
@@ -33,23 +40,14 @@ extension PermissionStore {
         // MARK: - Private Helpers
 
         private var systemPermission: Permission {
-            switch AVCaptureDevice.authorizationStatus(for: .video) {
-            case .notDetermined:
-                return .unknown
-            case .restricted:
-                return .denied
-            case .denied:
-                return .denied
-            case .authorized:
-                return .granted
-            @unknown default:
-                return .unknown
-            }
+            permissionProvider.systemPermission
         }
 
         private func requestPermission() {
-            AVCaptureDevice.requestAccess(for: .video) { [weak self] in
-                self?.dispatcher?.dispatch(.setCameraPermission($0 ? .granted : .denied))
+            permissionProvider.requestPermission { [weak self] in
+                self?
+                    .dispatcher?
+                    .dispatch(.setCameraPermission($0 ? .granted : .denied))
             }
         }
     }
