@@ -42,5 +42,3 @@ public enum CodingKeys: String, CodingKey, CaseIterable {
         hasher.combine(type)
     }
 }
-
-public struct AppEventResponse: @unchecked Sendable,  Event, Codable, JSONEncodable, Hashable {}
