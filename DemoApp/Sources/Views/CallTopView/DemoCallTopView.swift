@@ -77,9 +77,9 @@ struct DemoCallTopView: View {
         } else {
             if let call = viewModel.call {
                 if call.callType == .livestream, call.currentUserHasCapability(.startBroadcastCall) {
-                    PermissionsPromptView()
+                    PermissionsPromptView(call: call)
                 } else if call.callType != .livestream {
-                    PermissionsPromptView()
+                    PermissionsPromptView(call: call)
                 } else {
                     EmptyView()
                 }

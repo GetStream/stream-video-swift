@@ -66,7 +66,7 @@ public struct CallTopView: View {
                 sharingPopupDismissed: $sharingPopupDismissed
             )
         } else {
-            PermissionsPromptView()
+            PermissionsPromptView(call: viewModel.call)
         }
     }
 

@@ -45,7 +45,7 @@ final class ParticipantEventResetAdapter_Tests: XCTestCase, @unchecked Sendable 
     ) async throws {
         _ = subject
         try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask { @MainActor in
+            group.addTask { @Sendable @MainActor in
                 self.viewModel.participantEvent = .init(
                     id: .unique,
                     callCid: .unique,
@@ -67,7 +67,7 @@ final class ParticipantEventResetAdapter_Tests: XCTestCase, @unchecked Sendable 
                 XCTAssertNotNil(self.viewModel.participantEvent)
             }
 
-            group.addTask { @MainActor in
+            group.addTask { @Sendable @MainActor in
                 await self.wait(for: self.interval)
                 XCTAssertNotNil(self.viewModel.participantEvent)
 

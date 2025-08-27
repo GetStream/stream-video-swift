@@ -413,7 +413,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 
     private var showVideo: Bool {
         if isLocalParticipant {
-            return callSettings?.videoOn ?? false
+            return callSettings?.videoOn == true && permissions.hasCameraPermission
         } else {
             return participant.shouldDisplayTrack
         }

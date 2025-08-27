@@ -50,7 +50,7 @@ final class StreamMicrophonePermissionProvider: MicrophonePermissionProviding {
             AVAudioApplication
                 .requestRecordPermission(completionHandler: completion)
         } else {
-            return AVAudioSession
+            AVAudioSession
                 .sharedInstance()
                 .requestRecordPermission(completion)
         }

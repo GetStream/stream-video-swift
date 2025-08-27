@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import SwiftUI
 
@@ -11,40 +12,61 @@ public struct PermissionsPromptView: View {
 
     @Injected(\.urlNavigator) private var urlNavigator
 
+    private let ownCapabilitiesPublisher: AnyPublisher<Set<OwnCapability>, Never>?
+
     @ObservedObject private var permissions = InjectedValues[\.permissions]
+
     @State private var presentNavigationPopup = false
     @State private var isHidden = false
+    @State private var requiresCameraPermission: Bool
+    @State private var requiresMicrophonePermission: Bool
 
-    public init() {}
+    public init(call: Call?) {
+        let ownCapabilities = Set(call?.state.ownCapabilities ?? [])
+        requiresCameraPermission = ownCapabilities.contains(.sendVideo)
+        requiresMicrophonePermission = ownCapabilities.contains(.sendAudio)
+        ownCapabilitiesPublisher = call?
+            .state
+            .$ownCapabilities
+            .map(Set.init)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
 
     public var body: some View {
-        if (!permissions.hasCameraPermission || !permissions.hasMicrophonePermission), !isHidden {
-            HStack {
-                title
-                Spacer()
-                actionsContainerView
+        Group {
+            if (isMissingCameraPermission || isMissingMicrophonePermission), !isHidden {
+                HStack {
+                    title
+                    Spacer()
+                    actionsContainerView
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(8)
+                .modifier(ShadowViewModifier())
+                .alert(isPresented: $presentNavigationPopup) { alertContentView }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(8)
-            .modifier(ShadowViewModifier())
-            .alert(isPresented: $presentNavigationPopup) { alertContentView }
+        }
+        .onReceive(ownCapabilitiesPublisher) {
+            requiresCameraPermission = $0.contains(.sendVideo)
+            requiresMicrophonePermission = $0.contains(.sendAudio)
         }
     }
 
     @ViewBuilder
     private var title: some View {
-        switch (permissions.hasCameraPermission, permissions.hasMicrophonePermission) {
+        switch (isMissingCameraPermission, isMissingMicrophonePermission) {
         case (false, false):
-            text(for: L10n.Call.Permissions.Missing.cameraandmic)
-
-        case (false, true):
-            text(for: L10n.Call.Permissions.Missing.camera)
+            EmptyView()
 
         case (true, false):
+            text(for: L10n.Call.Permissions.Missing.camera)
+
+        case (false, true):
             text(for: L10n.Call.Permissions.Missing.mic)
 
         case (true, true):
-            EmptyView()
+            text(for: L10n.Call.Permissions.Missing.cameraandmic)
         }
     }
 
@@ -100,5 +122,13 @@ public struct PermissionsPromptView: View {
                 isHidden = true
             }
         )
+    }
+
+    private var isMissingCameraPermission: Bool {
+        requiresCameraPermission && !permissions.hasCameraPermission
+    }
+
+    private var isMissingMicrophonePermission: Bool {
+        requiresMicrophonePermission && !permissions.hasMicrophonePermission
     }
 }

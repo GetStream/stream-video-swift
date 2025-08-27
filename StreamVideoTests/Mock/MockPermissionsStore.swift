@@ -36,6 +36,10 @@ final class MockPermissionsStore: @unchecked Sendable {
         InjectedValues[\.permissions] = .init(store: mockStore)
     }
 
+    func dismantle() {
+        InjectedValues[\.permissions] = .shared
+    }
+
     func timesCalled(_ function: Function) -> Int {
         mockReducer
             .inputs
