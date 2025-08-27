@@ -7868,7 +7868,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\n# Add Homebrew paths for both Intel and Apple Silicon Macs\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\n\necho \"SwiftGen Build Phase: Starting at $(date)\"\necho \"PATH: $PATH\"\n\nif which mint >/dev/null && mint which swiftgen >/dev/null 2>&1; then\n    echo \"Running SwiftGen...\"\n    echo \"Mint found at: $(which mint)\"\n    echo \"SwiftGen found at: $(mint which swiftgen)\"\n    xcrun --sdk macosx mint run swiftgen config run --config \"${SRCROOT}/Sources/StreamVideoSwiftUI/.swiftgen.yml\"\n    echo \"SwiftGen completed with exit code: $?\"\nelse\n    echo \"Warning: Bootstrap not run, please run ./Scripts/bootstrap.sh\"\n    echo \"Mint path: $(which mint || echo 'not found')\"\n    echo \"Current PATH: $PATH\"\n    exit 1  # Fail the build to make it obvious\nfi\n";
+			shellScript = "#!/bin/sh\n# Add Homebrew paths for both Intel and Apple Silicon Macs\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\n\necho \"SwiftGen Build Phase: Starting at $(date)\"\necho \"PATH: $PATH\"\n\nif which mint >/dev/null && mint which swiftgen >/dev/null 2>&1; then\n    echo \"Running SwiftGen...\"\n    echo \"Mint found at: $(which mint)\"\n    echo \"SwiftGen found at: $(mint which swiftgen)\"\n    xcrun --sdk macosx mint run swiftgen config run --config \"${SRCROOT}/Sources/StreamVideoSwiftUI/.swiftgen.yml\"\n    echo \"SwiftGen completed with exit code: $?\"\nelse\n    echo \"Warning: Bootstrap not run, please run ./Scripts/bootstrap.sh\"\n    echo \"Mint path: $(which mint || echo 'not found')\"\n    echo \"Current PATH: $PATH\"\n    exit 0\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
