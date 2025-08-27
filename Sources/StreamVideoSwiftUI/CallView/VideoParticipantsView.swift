@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamWebRTC
 import SwiftUI
@@ -311,6 +312,7 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
     }
 }
 
+@MainActor
 public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 
     @Injected(\.images) var images
@@ -325,7 +327,10 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     var customData: [String: RawJSON]
     var call: Call?
 
-    @State private var isUsingFrontCameraForLocalUser: Bool = false
+    private var isLocalParticipant: Bool
+
+    private var callSettingsPublisher: AnyPublisher<CallSettings, Never>?
+    @State private var callSettings: CallSettings?
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -345,60 +350,73 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.customData = customData
         self.call = call
+        isLocalParticipant = participant.sessionId == call?.state.localParticipant?.sessionId
+        callSettings = call?.state.callSettings
+        callSettingsPublisher = (participant.sessionId == call?.state.localParticipant?.sessionId)
+            ? call?.state.$callSettings.eraseToAnyPublisher()
+            : nil
     }
-    
+
     public var body: some View {
-        withCallSettingsObservation {
-            VideoRendererView(
-                id: id,
-                size: availableFrame.size,
-                contentMode: contentMode,
-                showVideo: showVideo,
-                handleRendering: { [weak call, participant] view in
-                    guard call != nil else { return }
-                    view.handleViewRendering(for: participant) { [weak call] size, participant in
-                        Task { [weak call] in
-                            await call?.updateTrackSize(size, for: participant)
-                        }
+        rendererViewWithCameraPositionAwareness
+            .opacity(showVideo ? 1 : 0)
+            .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
+            .accessibility(identifier: "callParticipantView")
+            .streamAccessibility(value: showVideo ? "1" : "0")
+            .overlay(overlayView)
+    }
+
+    @ViewBuilder
+    private var rendererViewWithCameraPositionAwareness: some View {
+        if isLocalParticipant {
+            Group {
+                if callSettings?.cameraPosition == .front {
+                    rendererView
+                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                } else {
+                    rendererView
+                }
+            }
+            .onReceive(callSettingsPublisher) { callSettings = $0 }
+        } else {
+            rendererView
+        }
+    }
+
+    @ViewBuilder
+    private var rendererView: some View {
+        VideoRendererView(
+            id: id,
+            size: availableFrame.size,
+            contentMode: contentMode,
+            showVideo: showVideo,
+            handleRendering: { [weak call, participant] view in
+                guard call != nil else { return }
+                view.handleViewRendering(for: participant) { [weak call] size, participant in
+                    Task { [weak call] in
+                        await call?.updateTrackSize(size, for: participant)
                     }
                 }
-            )
-        }
-        .opacity(showVideo ? 1 : 0)
-        .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
-        .accessibility(identifier: "callParticipantView")
-        .streamAccessibility(value: showVideo ? "1" : "0")
-        .overlay(
-            CallParticipantImageView(
-                viewFactory: viewFactory,
-                id: participant.id,
-                name: participant.name,
-                imageURL: participant.profileImageURL
-            )
-            .opacity(showVideo ? 0 : 1)
+            }
         )
     }
 
-    private var showVideo: Bool {
-        participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
+    @ViewBuilder
+    private var overlayView: some View {
+        CallParticipantImageView(
+            viewFactory: viewFactory,
+            id: participant.id,
+            name: participant.name,
+            imageURL: participant.profileImageURL
+        )
+        .opacity(showVideo ? 0 : 1)
     }
 
-    @MainActor
-    @ViewBuilder
-    private func withCallSettingsObservation(
-        @ViewBuilder _ content: () -> some View
-    ) -> some View {
-        if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
-            Group {
-                if isUsingFrontCameraForLocalUser {
-                    content()
-                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                } else {
-                    content()
-                }
-            }.onReceive(call?.state.$callSettings) { self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
+    private var showVideo: Bool {
+        if isLocalParticipant {
+            return callSettings?.videoOn ?? false
         } else {
-            content()
+            return participant.shouldDisplayTrack
         }
     }
 }
