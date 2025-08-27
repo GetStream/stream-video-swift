@@ -276,7 +276,7 @@ extension WebRTCCoordinator.StateMachine.Stage {
             try await RTCTemporaryPeerConnection(
                 peerConnectionType: peerConnectionType,
                 coordinator: coordinator,
-                sfuAdapter: sfuAdapter
+                sfuAdapter: sfuAdapter,
             ).createOffer().sdp
         }
 

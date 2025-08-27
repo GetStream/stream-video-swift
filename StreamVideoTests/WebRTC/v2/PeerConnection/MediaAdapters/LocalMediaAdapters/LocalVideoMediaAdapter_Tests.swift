@@ -10,7 +10,7 @@ import Combine
 final class LocalVideoMediaAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var sessionId: String! = .unique
     private lazy var publishOptions: [PublishOptions.VideoPublishOptions]! = [.dummy(codec: .h264)]
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = MockPeerConnectionFactory()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = MockSFUStack()
     private lazy var mockCapturerFactory: MockVideoCapturerFactory! = .init()

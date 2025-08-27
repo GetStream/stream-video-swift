@@ -12,6 +12,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
     let apiKey: String
     let callCid: String
     let videoConfig: VideoConfig
+    let peerConnectionFactory: MockPeerConnectionFactory
     let callAuthenticator: MockCallAuthenticator
     let webRTCAuthenticator: MockWebRTCAuthenticator
     let coordinator: WebRTCCoordinator
@@ -26,6 +27,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
         apiKey: String = .unique,
         callCid: String = "default:\(String.unique)",
         videoConfig: VideoConfig,
+        peerConnectionFactory: MockPeerConnectionFactory = .init(),
         callAuthenticator: MockCallAuthenticator = .init(),
         webRTCAuthenticator: MockWebRTCAuthenticator = .init(),
         sfuStack: MockSFUStack = .init(),
@@ -36,6 +38,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
+        self.peerConnectionFactory = peerConnectionFactory
         self.callAuthenticator = callAuthenticator
         self.webRTCAuthenticator = webRTCAuthenticator
         self.sfuStack = sfuStack
@@ -46,6 +49,7 @@ final class MockWebRTCCoordinatorStack: @unchecked Sendable {
             apiKey: apiKey,
             callCid: callCid,
             videoConfig: videoConfig,
+            peerConnectionFactory: peerConnectionFactory,
             rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory,
             webRTCAuthenticator: webRTCAuthenticator,
             callAuthentication: callAuthenticator.authenticate

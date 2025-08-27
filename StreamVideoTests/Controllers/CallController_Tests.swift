@@ -683,6 +683,26 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - setHiFiEnabled
+
+    func test_setHiFiEnabled_true_correctlyUpdatesStateAdapter() async throws {
+        await subject.setHiFiEnabled(true)
+        
+        await assertEqualAsync(
+            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.audioMediaConstraints,
+            .hiFiAudioConstraints
+        )
+    }
+
+    func test_setHiFiEnabled_false_correctlyUpdatesStateAdapter() async throws {
+        await subject.setHiFiEnabled(false)
+
+        await assertEqualAsync(
+            await mockWebRTCCoordinatorFactory.mockCoordinatorStack.coordinator.stateAdapter.audioMediaConstraints,
+            .defaultConstraints
+        )
+    }
+
     // MARK: - Private helpers
 
     private func assertTransitionToStage(

@@ -11,7 +11,7 @@ import XCTest
 @MainActor
 final class PictureInPictureTrackStateAdapterTests: XCTestCase, @unchecked Sendable {
 
-    private lazy var factory: PeerConnectionFactory! = .build(audioProcessingModule: MockAudioProcessingModule.shared)
+    private lazy var factory: MockPeerConnectionFactory! = .init()
     private lazy var store: PictureInPictureStore! = .init()
     private lazy var mockCall: MockCall! = .init()
     private lazy var subject: PictureInPictureTrackStateAdapter! = .init(store: store)

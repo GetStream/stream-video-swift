@@ -932,9 +932,7 @@ final class CallViewModel_Tests: XCTestCase, @unchecked Sendable {
         await prepare()
         subject.startCall(callType: callType, callId: callId, members: participants)
         await assertCallingState(.inCall)
-        let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: MockAudioProcessingModule.shared
-        )
+        let peerConnectionFactory = MockPeerConnectionFactory()
         let trackA = try XCTUnwrap(
             RTCVideoTrack.dummy(
                 kind: .video,

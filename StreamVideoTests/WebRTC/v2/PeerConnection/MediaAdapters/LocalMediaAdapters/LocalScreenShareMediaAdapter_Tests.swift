@@ -11,7 +11,7 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
 
     private var disposableBag: DisposableBag! = .init()
     private lazy var sessionId: String! = .unique
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = MockPeerConnectionFactory()
     private lazy var mockPeerConnection: MockRTCPeerConnection! = .init()
     private lazy var mockSFUStack: MockSFUStack! = .init()
     private lazy var mockCapturerFactory: MockVideoCapturerFactory! = .init()
@@ -450,22 +450,28 @@ final class LocalScreenShareMediaAdapter_Tests: XCTestCase, @unchecked Sendable 
         videoOptions: PublishOptions.VideoPublishOptions = .dummy(codec: .h264)
     ) throws -> RTCRtpTransceiver {
         if temporaryPeerConnection == nil {
-            temporaryPeerConnection = try peerConnectionFactory.makePeerConnection(
-                configuration: .init(),
-                constraints: .defaultConstraints,
-                delegate: nil
+            temporaryPeerConnection = try XCTUnwrap(
+                peerConnectionFactory.makePeerConnection(
+                    configuration: .init(),
+                    constraints: .defaultConstraints,
+                    delegate: nil
+                )
             )
         }
 
-        return temporaryPeerConnection!.addTransceiver(
-            of: type == .audio ? .audio : .video,
-            init: RTCRtpTransceiverInit(
-                trackType: type,
-                direction: direction,
-                streamIds: streamIds,
-                videoOptions: videoOptions
+        let result = try XCTUnwrap(
+            temporaryPeerConnection?.addTransceiver(
+                of: type == .audio ? .audio : .video,
+                init: RTCRtpTransceiverInit(
+                    trackType: type,
+                    direction: direction,
+                    streamIds: streamIds,
+                    videoOptions: videoOptions
+                )
             )
-        )!
+        )
+
+        return result
     }
 
     private func assertTrackEvent(

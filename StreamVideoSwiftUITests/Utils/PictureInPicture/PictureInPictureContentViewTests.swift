@@ -37,7 +37,7 @@ final class PictureInPictureContentViewTests: StreamVideoUITestCase, @unchecked 
                 .screenSharing(
                     MockCall(.dummy()),
                     .dummy(name: "Get Stream"),
-                    RTCMediaStreamTrack.dummy(kind: .video, peerConnectionFactory: .mock()) as! RTCVideoTrack
+                    RTCMediaStreamTrack.dummy(kind: .video, peerConnectionFactory: MockPeerConnectionFactory()) as! RTCVideoTrack
                 )
             ),
             variants: snapshotVariants,

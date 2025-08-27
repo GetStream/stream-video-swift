@@ -13,12 +13,14 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
     private lazy var user: User! = .dummy()
     private lazy var apiKey: String! = .unique
     private lazy var callCid: String! = .unique
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = .init()
     private lazy var rtcPeerConnectionCoordinatorFactory: MockRTCPeerConnectionCoordinatorFactory! = .init()
     private lazy var subject: WebRTCStateAdapter! = .init(
         user: user,
         apiKey: apiKey,
         callCid: callCid,
         videoConfig: Self.videoConfig,
+        peerConnectionFactory: peerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: rtcPeerConnectionCoordinatorFactory
     )
 
@@ -29,6 +31,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         callCid = nil
         apiKey = nil
         user = nil
+        peerConnectionFactory = nil
         super.tearDown()
     }
 
@@ -338,8 +341,31 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             let currentValue = await self.subject.callSettings
             return currentValue == callSettings
         }
+        await subject.setAudioMediaConstraints(constraints: .defaultConstraints)
 
         try await subject.configurePeerConnections()
+
+        let peerConnectionCoordinatorBuildResult = (
+            sessionId: String,
+            peerType: PeerConnectionType,
+            peerConnection: StreamRTCPeerConnectionProtocol,
+            peerConnectionFactory: PeerConnectionFactory,
+            videoOptions: VideoOptions,
+            videoConfig: VideoConfig,
+            callSettings: CallSettings,
+            audioSettings: AudioSettings,
+            publishOptions: PublishOptions,
+            sfuAdapter: SFUAdapter,
+            videoCaptureSessionProvider: VideoCaptureSessionProvider,
+            screenShareSessionProvider: ScreenShareSessionProvider,
+            clientCapabilities: Set<ClientCapability>,
+            audioMediaConstraints: RTCMediaConstraints
+        ).self
+        let publisherRecordedInput = try XCTUnwrap(
+            rtcPeerConnectionCoordinatorFactory.recordedInputPayload(peerConnectionCoordinatorBuildResult, for: .buildCoordinator)?
+                .first
+        )
+        XCTAssertEqual(publisherRecordedInput.audioMediaConstraints, .defaultConstraints)
 
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
         let mockSubscriber = try await XCTAsyncUnwrap(await subject.subscriber as? MockRTCPeerConnectionCoordinator)
@@ -425,7 +451,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         await subject.set(sfuAdapter: sfuStack.adapter)
         let screenShareSessionProvider = await subject.screenShareSessionProvider
         screenShareSessionProvider.activeSession = .init(
-            localTrack: await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true),
+            localTrack: peerConnectionFactory.mockVideoTrack(forScreenShare: true),
             screenSharingType: .inApp,
             capturer: MockStreamVideoCapturer()
         )
@@ -462,6 +488,68 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
 
         XCTAssertEqual(mockPublisher.timesCalled(.beginScreenSharing), 0)
+    }
+
+    func test_configurePeerConnections_defaultAudioMediaConstraints_publisherWasConfiguredWithCorrectAudioeMediaConstraints(
+    ) async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.setAudioMediaConstraints(constraints: .defaultConstraints)
+
+        try await subject.configurePeerConnections()
+
+        let peerConnectionCoordinatorBuildResult = (
+            sessionId: String,
+            peerType: PeerConnectionType,
+            peerConnection: StreamRTCPeerConnectionProtocol,
+            peerConnectionFactory: PeerConnectionFactory,
+            videoOptions: VideoOptions,
+            videoConfig: VideoConfig,
+            callSettings: CallSettings,
+            audioSettings: AudioSettings,
+            publishOptions: PublishOptions,
+            sfuAdapter: SFUAdapter,
+            videoCaptureSessionProvider: VideoCaptureSessionProvider,
+            screenShareSessionProvider: ScreenShareSessionProvider,
+            clientCapabilities: Set<ClientCapability>,
+            audioMediaConstraints: RTCMediaConstraints
+        ).self
+        let publisherRecordedInput = try XCTUnwrap(
+            rtcPeerConnectionCoordinatorFactory.recordedInputPayload(peerConnectionCoordinatorBuildResult, for: .buildCoordinator)?
+                .first
+        )
+        XCTAssertEqual(publisherRecordedInput.audioMediaConstraints, .defaultConstraints)
+    }
+
+    func test_configurePeerConnections_HiFiAudioMediaConstraints_publisherWasConfiguredWithCorrectAudioeMediaConstraints(
+    ) async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        await subject.setAudioMediaConstraints(constraints: .hiFiAudioConstraints)
+
+        try await subject.configurePeerConnections()
+
+        let peerConnectionCoordinatorBuildResult = (
+            sessionId: String,
+            peerType: PeerConnectionType,
+            peerConnection: StreamRTCPeerConnectionProtocol,
+            peerConnectionFactory: PeerConnectionFactory,
+            videoOptions: VideoOptions,
+            videoConfig: VideoConfig,
+            callSettings: CallSettings,
+            audioSettings: AudioSettings,
+            publishOptions: PublishOptions,
+            sfuAdapter: SFUAdapter,
+            videoCaptureSessionProvider: VideoCaptureSessionProvider,
+            screenShareSessionProvider: ScreenShareSessionProvider,
+            clientCapabilities: Set<ClientCapability>,
+            audioMediaConstraints: RTCMediaConstraints
+        ).self
+        let publisherRecordedInput = try XCTUnwrap(
+            rtcPeerConnectionCoordinatorFactory.recordedInputPayload(peerConnectionCoordinatorBuildResult, for: .buildCoordinator)?
+                .first
+        )
+        XCTAssertEqual(publisherRecordedInput.audioMediaConstraints, .hiFiAudioConstraints)
     }
 
     // MARK: - configureAudioSession
@@ -518,7 +606,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let videoCaptureSessionProvider = await subject.videoCaptureSessionProvider
         videoCaptureSessionProvider.activeSession = .init(
             position: .front,
-            localTrack: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false),
+            localTrack: peerConnectionFactory.mockVideoTrack(forScreenShare: false),
             capturer: mockVideoCapturer
         )
 
@@ -531,7 +619,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         let mockVideoCapturer = MockStreamVideoCapturer()
         let screenShareSessionProvider = await subject.screenShareSessionProvider
         screenShareSessionProvider.activeSession = .init(
-            localTrack: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: true),
+            localTrack: peerConnectionFactory.mockVideoTrack(forScreenShare: true),
             screenSharingType: .inApp,
             capturer: mockVideoCapturer
         )
@@ -616,9 +704,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didAddTrack_videoOfExistingParticipant_shouldAddTrack() async throws {
         let participant = CallParticipant.dummy()
-        let track = await subject
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: false)
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
         await subject.enqueue { _ in [participant.sessionId: participant] }
 
         await subject.didAddTrack(
@@ -638,9 +724,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didAddTrack_screenSharingOfExistingParticipant_shouldAddTrack() async throws {
         let participant = CallParticipant.dummy()
-        let track = await subject
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: true)
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: true)
         await subject.enqueue { _ in [participant.sessionId: participant] }
 
         await subject.didAddTrack(
@@ -662,9 +746,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didRemoveTrack_videoOfExistingParticipant_shouldRemoveTrack() async throws {
         let participant = CallParticipant.dummy()
-        let track = await subject
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: false)
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
         await subject.enqueue { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .video, for: participant.sessionId)
 
@@ -683,9 +765,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_didRemoveTrack_screenSharingOfExistingParticipant_shouldRemoveTrack() async throws {
         let participant = CallParticipant.dummy()
-        let track = await subject
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: true)
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: true)
         await subject.enqueue { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .screenshare, for: participant.sessionId)
 
@@ -706,9 +786,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_trackFor_withVideo_shouldReturnCorrectTrack() async throws {
         let participant = CallParticipant.dummy()
-        let track = await subject
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: false)
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: false)
         await subject.enqueue { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .video, for: participant.sessionId)
 
@@ -719,9 +797,7 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
 
     func test_trackFor_withScreenShare_shouldReturnCorrectTrack() async throws {
         let participant = CallParticipant.dummy()
-        let track = await subject
-            .peerConnectionFactory
-            .mockVideoTrack(forScreenShare: true)
+        let track = peerConnectionFactory.mockVideoTrack(forScreenShare: true)
         await subject.enqueue { _ in [participant.sessionId: participant] }
         await subject.didAddTrack(track, type: .screenshare, for: participant.sessionId)
 
@@ -758,9 +834,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             "3": .dummy(id: "3")
         ]
         let participantTracks: [String: RTCMediaStreamTrack] = [
-            "1": await subject.peerConnectionFactory.mockAudioTrack(),
-            "2": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: false),
-            "3": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true)
+            "1": peerConnectionFactory.mockAudioTrack(),
+            "2": peerConnectionFactory.mockVideoTrack(forScreenShare: false),
+            "3": peerConnectionFactory.mockVideoTrack(forScreenShare: true)
         ]
         await subject.enqueue { _ in initialParticipants }
 
@@ -785,9 +861,9 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
             "3": .dummy(id: "3")
         ]
         let participantTracks: [String: RTCMediaStreamTrack] = [
-            "1": await subject.peerConnectionFactory.mockAudioTrack(),
-            "2": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: false),
-            "3": await subject.peerConnectionFactory.mockVideoTrack(forScreenShare: true)
+            "1": peerConnectionFactory.mockAudioTrack(),
+            "2": peerConnectionFactory.mockVideoTrack(forScreenShare: false),
+            "3": peerConnectionFactory.mockVideoTrack(forScreenShare: true)
         ]
         await subject.set(incomingVideoQualitySettings: .disabled(group: .custom(sessionIds: ["2"])))
         await subject.enqueue { _ in initialParticipants }
