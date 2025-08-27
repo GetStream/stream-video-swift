@@ -5,16 +5,22 @@
 import StreamVideo
 import SwiftUI
 
-public struct CallTopView: View {
-            
+public struct CallTopView<Factory: ViewFactory>: View {
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.colors) var colors
     @Injected(\.images) var images
-    
+
+    private var viewFactory: Factory
+
     @ObservedObject var viewModel: CallViewModel
     @State var sharingPopupDismissed = false
     
-    public init(viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
+        self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
     
@@ -66,7 +72,7 @@ public struct CallTopView: View {
                 sharingPopupDismissed: $sharingPopupDismissed
             )
         } else {
-            PermissionsPromptView(call: viewModel.call)
+            viewFactory.makePermissionsPromptView(call: viewModel.call)
         }
     }
 

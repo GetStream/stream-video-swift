@@ -6,17 +6,23 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
-struct DemoCallTopView: View {
+struct DemoCallTopView<Factory: ViewFactory>: View {
 
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
 
+    private var viewFactory: Factory
+
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var appState = AppState.shared
     @State var sharingPopupDismissed = false
 
-    init(viewModel: CallViewModel) {
+    init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
+        self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
 
@@ -77,9 +83,9 @@ struct DemoCallTopView: View {
         } else {
             if let call = viewModel.call {
                 if call.callType == .livestream, call.currentUserHasCapability(.startBroadcastCall) {
-                    PermissionsPromptView(call: call)
+                    viewFactory.makePermissionsPromptView(call: call)
                 } else if call.callType != .livestream {
-                    PermissionsPromptView(call: call)
+                    viewFactory.makePermissionsPromptView(call: call)
                 } else {
                     EmptyView()
                 }
