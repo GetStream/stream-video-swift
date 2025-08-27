@@ -1048,7 +1048,12 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func deleteTranscription(type: String, id: String, session: String, filename: String) async throws -> DeleteTranscriptionResponse {
+    open func deleteTranscription(
+        type: String,
+        id: String,
+        session: String,
+        filename: String
+    ) async throws -> DeleteTranscriptionResponse {
         var path = "/video/call/{type}/{id}/{session}/transcriptions/{filename}"
 
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -1280,5 +1285,5 @@ protocol DefaultAPIEndpoints {
         
     func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
         
-    func videoConnect() async throws
+    func videoConnect() async throws -> Void
 }
