@@ -1081,7 +1081,6 @@
 		841BAA392BD15CDE000C73E4 /* UserSessionStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA202BD15CDC000C73E4 /* UserSessionStats.swift */; };
 		841BAA3A2BD15CDE000C73E4 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA212BD15CDD000C73E4 /* Location.swift */; };
 		841BAA3C2BD15CDE000C73E4 /* VideoResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA232BD15CDD000C73E4 /* VideoResolution.swift */; };
-		841BAA3D2BD15CDE000C73E4 /* GetCallStatsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA242BD15CDD000C73E4 /* GetCallStatsResponse.swift */; };
 		841BAA3E2BD15CDE000C73E4 /* CollectUserFeedbackResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA252BD15CDD000C73E4 /* CollectUserFeedbackResponse.swift */; };
 		841BAA3F2BD15CDE000C73E4 /* QueryCallStatsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA262BD15CDD000C73E4 /* QueryCallStatsRequest.swift */; };
 		841BAA402BD15CDE000C73E4 /* UserStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BAA272BD15CDD000C73E4 /* UserStats.swift */; };
@@ -1486,6 +1485,21 @@
 		84DCA2212A39E380000C3411 /* URLSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2202A39E380000C3411 /* URLSessionTransport.swift */; };
 		84DCA2232A39E432000C3411 /* AuthMiddlewares.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */; };
 		84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
+		84DD69022E5F24A9001A1DF5 /* CallFrameRecordingFrameReadyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68F42E5F24A9001A1DF5 /* CallFrameRecordingFrameReadyEvent.swift */; };
+		84DD69032E5F24A9001A1DF5 /* AppUpdatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68F22E5F24A9001A1DF5 /* AppUpdatedEvent.swift */; };
+		84DD69042E5F24A9001A1DF5 /* CallFrameRecordingFailedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68F32E5F24A9001A1DF5 /* CallFrameRecordingFailedEvent.swift */; };
+		84DD69052E5F24A9001A1DF5 /* CallUserFeedbackSubmittedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68F82E5F24A9001A1DF5 /* CallUserFeedbackSubmittedEvent.swift */; };
+		84DD69062E5F24A9001A1DF5 /* CallStatsReportReadyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68F72E5F24A9001A1DF5 /* CallStatsReportReadyEvent.swift */; };
+		84DD69082E5F24A9001A1DF5 /* KickedUserEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68FA2E5F24A9001A1DF5 /* KickedUserEvent.swift */; };
+		84DD69092E5F24A9001A1DF5 /* CallFrameRecordingStoppedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68F62E5F24A9001A1DF5 /* CallFrameRecordingStoppedEvent.swift */; };
+		84DD690A2E5F24A9001A1DF5 /* QueryCallParticipantsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68FE2E5F24A9001A1DF5 /* QueryCallParticipantsResponse.swift */; };
+		84DD690B2E5F24A9001A1DF5 /* StartFrameRecordingRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68FF2E5F24A9001A1DF5 /* StartFrameRecordingRequest.swift */; };
+		84DD690C2E5F24A9001A1DF5 /* StartFrameRecordingResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD69002E5F24A9001A1DF5 /* StartFrameRecordingResponse.swift */; };
+		84DD690D2E5F24A9001A1DF5 /* KickUserResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68FC2E5F24A9001A1DF5 /* KickUserResponse.swift */; };
+		84DD690E2E5F24A9001A1DF5 /* KickUserRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68FB2E5F24A9001A1DF5 /* KickUserRequest.swift */; };
+		84DD690F2E5F24A9001A1DF5 /* StopFrameRecordingResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD69012E5F24A9001A1DF5 /* StopFrameRecordingResponse.swift */; };
+		84DD69102E5F24A9001A1DF5 /* QueryCallParticipantsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68FD2E5F24A9001A1DF5 /* QueryCallParticipantsRequest.swift */; };
+		84DD69112E5F24A9001A1DF5 /* CallFrameRecordingStartedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DD68F52E5F24A9001A1DF5 /* CallFrameRecordingStartedEvent.swift */; };
 		84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7912947476300DD4CE3 /* CallViewHelper.swift */; };
 		84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */; };
 		84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */; };
@@ -2583,7 +2597,6 @@
 		841BAA202BD15CDC000C73E4 /* UserSessionStats.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSessionStats.swift; sourceTree = "<group>"; };
 		841BAA212BD15CDD000C73E4 /* Location.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		841BAA232BD15CDD000C73E4 /* VideoResolution.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoResolution.swift; sourceTree = "<group>"; };
-		841BAA242BD15CDD000C73E4 /* GetCallStatsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCallStatsResponse.swift; sourceTree = "<group>"; };
 		841BAA252BD15CDD000C73E4 /* CollectUserFeedbackResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectUserFeedbackResponse.swift; sourceTree = "<group>"; };
 		841BAA262BD15CDD000C73E4 /* QueryCallStatsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryCallStatsRequest.swift; sourceTree = "<group>"; };
 		841BAA272BD15CDD000C73E4 /* UserStats.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserStats.swift; sourceTree = "<group>"; };
@@ -2985,6 +2998,21 @@
 		84DCA21E2A39DA15000C3411 /* APIHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
 		84DCA2202A39E380000C3411 /* URLSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionTransport.swift; sourceTree = "<group>"; };
 		84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMiddlewares.swift; sourceTree = "<group>"; };
+		84DD68F22E5F24A9001A1DF5 /* AppUpdatedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdatedEvent.swift; sourceTree = "<group>"; };
+		84DD68F32E5F24A9001A1DF5 /* CallFrameRecordingFailedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallFrameRecordingFailedEvent.swift; sourceTree = "<group>"; };
+		84DD68F42E5F24A9001A1DF5 /* CallFrameRecordingFrameReadyEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallFrameRecordingFrameReadyEvent.swift; sourceTree = "<group>"; };
+		84DD68F52E5F24A9001A1DF5 /* CallFrameRecordingStartedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallFrameRecordingStartedEvent.swift; sourceTree = "<group>"; };
+		84DD68F62E5F24A9001A1DF5 /* CallFrameRecordingStoppedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallFrameRecordingStoppedEvent.swift; sourceTree = "<group>"; };
+		84DD68F72E5F24A9001A1DF5 /* CallStatsReportReadyEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatsReportReadyEvent.swift; sourceTree = "<group>"; };
+		84DD68F82E5F24A9001A1DF5 /* CallUserFeedbackSubmittedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallUserFeedbackSubmittedEvent.swift; sourceTree = "<group>"; };
+		84DD68FA2E5F24A9001A1DF5 /* KickedUserEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickedUserEvent.swift; sourceTree = "<group>"; };
+		84DD68FB2E5F24A9001A1DF5 /* KickUserRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickUserRequest.swift; sourceTree = "<group>"; };
+		84DD68FC2E5F24A9001A1DF5 /* KickUserResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickUserResponse.swift; sourceTree = "<group>"; };
+		84DD68FD2E5F24A9001A1DF5 /* QueryCallParticipantsRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryCallParticipantsRequest.swift; sourceTree = "<group>"; };
+		84DD68FE2E5F24A9001A1DF5 /* QueryCallParticipantsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryCallParticipantsResponse.swift; sourceTree = "<group>"; };
+		84DD68FF2E5F24A9001A1DF5 /* StartFrameRecordingRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartFrameRecordingRequest.swift; sourceTree = "<group>"; };
+		84DD69002E5F24A9001A1DF5 /* StartFrameRecordingResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartFrameRecordingResponse.swift; sourceTree = "<group>"; };
+		84DD69012E5F24A9001A1DF5 /* StopFrameRecordingResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopFrameRecordingResponse.swift; sourceTree = "<group>"; };
 		84E4F7912947476300DD4CE3 /* CallViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewHelper.swift; sourceTree = "<group>"; };
 		84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQuality.swift; sourceTree = "<group>"; };
 		84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQualityIndicator.swift; sourceTree = "<group>"; };
@@ -6691,6 +6719,21 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				84DD68F22E5F24A9001A1DF5 /* AppUpdatedEvent.swift */,
+				84DD68F32E5F24A9001A1DF5 /* CallFrameRecordingFailedEvent.swift */,
+				84DD68F42E5F24A9001A1DF5 /* CallFrameRecordingFrameReadyEvent.swift */,
+				84DD68F52E5F24A9001A1DF5 /* CallFrameRecordingStartedEvent.swift */,
+				84DD68F62E5F24A9001A1DF5 /* CallFrameRecordingStoppedEvent.swift */,
+				84DD68F72E5F24A9001A1DF5 /* CallStatsReportReadyEvent.swift */,
+				84DD68F82E5F24A9001A1DF5 /* CallUserFeedbackSubmittedEvent.swift */,
+				84DD68FA2E5F24A9001A1DF5 /* KickedUserEvent.swift */,
+				84DD68FB2E5F24A9001A1DF5 /* KickUserRequest.swift */,
+				84DD68FC2E5F24A9001A1DF5 /* KickUserResponse.swift */,
+				84DD68FD2E5F24A9001A1DF5 /* QueryCallParticipantsRequest.swift */,
+				84DD68FE2E5F24A9001A1DF5 /* QueryCallParticipantsResponse.swift */,
+				84DD68FF2E5F24A9001A1DF5 /* StartFrameRecordingRequest.swift */,
+				84DD69002E5F24A9001A1DF5 /* StartFrameRecordingResponse.swift */,
+				84DD69012E5F24A9001A1DF5 /* StopFrameRecordingResponse.swift */,
 				843061022D3968C8000E14D5 /* StartClosedCaptionsRequest.swift */,
 				843060FB2D381A4A000E14D5 /* SessionSettingsRequest.swift */,
 				843060FC2D381A4A000E14D5 /* SessionSettingsResponse.swift */,
@@ -6793,7 +6836,6 @@
 				84DC388529ADFCFC00946713 /* GeofenceSettingsRequest.swift */,
 				841BAA1B2BD15CDC000C73E4 /* GeolocationResult.swift */,
 				8490031E29D308A000AD9BB4 /* GetCallResponse.swift */,
-				841BAA242BD15CDD000C73E4 /* GetCallStatsResponse.swift */,
 				8469593629BB6B4E00134EA0 /* GetEdgesResponse.swift */,
 				84DC387429ADFCFC00946713 /* GetOrCreateCallRequest.swift */,
 				84DC384B29ADFCFC00946713 /* GetOrCreateCallResponse.swift */,
@@ -8264,6 +8306,21 @@
 				40944D1F2E4E37E600088AF0 /* StoreNamespace.swift in Sources */,
 				84DC38C329ADFCFD00946713 /* GeofenceSettings.swift in Sources */,
 				842B8E162A2DFED900863A87 /* CallRingEvent.swift in Sources */,
+				84DD69022E5F24A9001A1DF5 /* CallFrameRecordingFrameReadyEvent.swift in Sources */,
+				84DD69032E5F24A9001A1DF5 /* AppUpdatedEvent.swift in Sources */,
+				84DD69042E5F24A9001A1DF5 /* CallFrameRecordingFailedEvent.swift in Sources */,
+				84DD69052E5F24A9001A1DF5 /* CallUserFeedbackSubmittedEvent.swift in Sources */,
+				84DD69062E5F24A9001A1DF5 /* CallStatsReportReadyEvent.swift in Sources */,
+				84DD69082E5F24A9001A1DF5 /* KickedUserEvent.swift in Sources */,
+				84DD69092E5F24A9001A1DF5 /* CallFrameRecordingStoppedEvent.swift in Sources */,
+				84DD690A2E5F24A9001A1DF5 /* QueryCallParticipantsResponse.swift in Sources */,
+				84DD690B2E5F24A9001A1DF5 /* StartFrameRecordingRequest.swift in Sources */,
+				84DD690C2E5F24A9001A1DF5 /* StartFrameRecordingResponse.swift in Sources */,
+				84DD690D2E5F24A9001A1DF5 /* KickUserResponse.swift in Sources */,
+				84DD690E2E5F24A9001A1DF5 /* KickUserRequest.swift in Sources */,
+				84DD690F2E5F24A9001A1DF5 /* StopFrameRecordingResponse.swift in Sources */,
+				84DD69102E5F24A9001A1DF5 /* QueryCallParticipantsRequest.swift in Sources */,
+				84DD69112E5F24A9001A1DF5 /* CallFrameRecordingStartedEvent.swift in Sources */,
 				842B8E2D2A2DFED900863A87 /* StopTranscriptionResponse.swift in Sources */,
 				400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */,
 				40C2B5BE2C2C448200EC2C2D /* RejectionReasonProvider.swift in Sources */,
@@ -8371,7 +8428,6 @@
 				40AD64C62DC269E60077AE15 /* ProximityPolicy.swift in Sources */,
 				40D75C652E44F5CE000E0438 /* CameraInterruptionsHandler.swift in Sources */,
 				40AD64C72DC269E60077AE15 /* SpeakerProximityPolicy.swift in Sources */,
-				841BAA3D2BD15CDE000C73E4 /* GetCallStatsResponse.swift in Sources */,
 				842E70D92B91BE1700D2D68B /* CallClosedCaption.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */,

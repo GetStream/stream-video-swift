@@ -402,6 +402,30 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
+    open func kickUser(
+        type: String,
+        id: String,
+        kickUserRequest: KickUserRequest
+    ) async throws -> KickUserResponse {
+        var path = "/video/call/{type}/{id}/kick"
+
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST",
+            request: kickUserRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(KickUserResponse.self, from: $0)
+        }
+    }
+
     open func endCall(type: String, id: String) async throws -> EndCallResponse {
         var path = "/video/call/{type}/{id}/mark_ended"
         
@@ -462,6 +486,35 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(MuteUsersResponse.self, from: $0)
+        }
+    }
+
+    open func queryCallParticipants(
+        id: String,
+        type: String,
+        limit: Int?,
+        queryCallParticipantsRequest: QueryCallParticipantsRequest
+    ) async throws -> QueryCallParticipantsResponse {
+        var path = "/video/call/{type}/{id}/participants"
+
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let queryParams = APIHelper.mapValuesToQueryItems([
+            "limit": (wrappedValue: limit?.encodeToJSON(), isExplode: true)
+        ])
+
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            queryParams: queryParams ?? [],
+            httpMethod: "POST",
+            request: queryCallParticipantsRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(QueryCallParticipantsResponse.self, from: $0)
         }
     }
 
@@ -680,6 +733,30 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
+    open func startFrameRecording(
+        type: String,
+        id: String,
+        startFrameRecordingRequest: StartFrameRecordingRequest
+    ) async throws -> StartFrameRecordingResponse {
+        var path = "/video/call/{type}/{id}/start_frame_recording"
+
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST",
+            request: startFrameRecordingRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(StartFrameRecordingResponse.self, from: $0)
+        }
+    }
+
     open func startRecording(
         type: String,
         id: String,
@@ -728,33 +805,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func getCallStats(type: String, id: String, session: String) async throws -> GetCallStatsResponse {
-        var path = "/video/call/{type}/{id}/stats/{session}"
-        
-        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
-        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
-        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
-        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
-        let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
-        let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        path = path.replacingOccurrences(
-            of: String(format: "{%@}", "session"),
-            with: sessionPostEscape,
-            options: .literal,
-            range: nil
-        )
-        
-        let urlRequest = try makeRequest(
-            uriPath: path,
-            httpMethod: "GET"
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(GetCallStatsResponse.self, from: $0)
-        }
-    }
-
     open func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse {
         var path = "/video/call/{type}/{id}/stop_broadcasting"
         
@@ -795,6 +845,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StopClosedCaptionsResponse.self, from: $0)
+        }
+    }
+
+    open func stopFrameRecording(type: String, id: String) async throws -> StopFrameRecordingResponse {
+        var path = "/video/call/{type}/{id}/stop_frame_recording"
+
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
+
+        let urlRequest = try makeRequest(
+            uriPath: path,
+            httpMethod: "POST"
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(StopFrameRecordingResponse.self, from: $0)
         }
     }
 
@@ -979,14 +1048,9 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
 
-    open func deleteTranscription(
-        type: String,
-        id: String,
-        session: String,
-        filename: String
-    ) async throws -> DeleteTranscriptionResponse {
+    open func deleteTranscription(type: String, id: String, session: String, filename: String) async throws -> DeleteTranscriptionResponse {
         var path = "/video/call/{type}/{id}/{session}/transcriptions/{filename}"
-        
+
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         path = path.replacingOccurrences(of: String(format: "{%@}", "type"), with: typePostEscape, options: .literal, range: nil)
@@ -995,21 +1059,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         path = path.replacingOccurrences(of: String(format: "{%@}", "id"), with: idPostEscape, options: .literal, range: nil)
         let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
         let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        path = path.replacingOccurrences(
-            of: String(format: "{%@}", "session"),
-            with: sessionPostEscape,
-            options: .literal,
-            range: nil
-        )
+        path = path.replacingOccurrences(of: String(format: "{%@}", "session"), with: sessionPostEscape, options: .literal, range: nil)
         let filenamePreEscape = "\(APIHelper.mapValueToPathItem(filename))"
         let filenamePostEscape = filenamePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        path = path.replacingOccurrences(
-            of: String(format: "{%@}", "filename"),
-            with: filenamePostEscape,
-            options: .literal,
-            range: nil
-        )
-        
+        path = path.replacingOccurrences(of: String(format: "{%@}", "filename"), with: filenamePostEscape, options: .literal, range: nil)
+
         let urlRequest = try makeRequest(
             uriPath: path,
             httpMethod: "DELETE"
@@ -1143,14 +1197,18 @@ protocol DefaultAPIEndpoints {
     func goLive(type: String, id: String, goLiveRequest: GoLiveRequest) async throws -> GoLiveResponse
         
     func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest) async throws -> JoinCallResponse
-        
+
+    func kickUser(type: String, id: String, kickUserRequest: KickUserRequest) async throws -> KickUserResponse
+
     func endCall(type: String, id: String) async throws -> EndCallResponse
         
     func updateCallMembers(type: String, id: String, updateCallMembersRequest: UpdateCallMembersRequest) async throws
         -> UpdateCallMembersResponse
         
     func muteUsers(type: String, id: String, muteUsersRequest: MuteUsersRequest) async throws -> MuteUsersResponse
-        
+
+    func queryCallParticipants(id: String, type: String, limit: Int?, queryCallParticipantsRequest: QueryCallParticipantsRequest) async throws -> QueryCallParticipantsResponse
+
     func videoPin(type: String, id: String, pinRequest: PinRequest) async throws -> PinResponse
         
     func sendVideoReaction(type: String, id: String, sendReactionRequest: SendReactionRequest) async throws -> SendReactionResponse
@@ -1179,9 +1237,7 @@ protocol DefaultAPIEndpoints {
         
     func startTranscription(type: String, id: String, startTranscriptionRequest: StartTranscriptionRequest) async throws
         -> StartTranscriptionResponse
-        
-    func getCallStats(type: String, id: String, session: String) async throws -> GetCallStatsResponse
-        
+    
     func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
         
     func stopClosedCaptions(type: String, id: String, stopClosedCaptionsRequest: StopClosedCaptionsRequest) async throws
@@ -1204,10 +1260,14 @@ protocol DefaultAPIEndpoints {
         -> UpdateUserPermissionsResponse
         
     func deleteRecording(type: String, id: String, session: String, filename: String) async throws -> DeleteRecordingResponse
-        
-    func deleteTranscription(type: String, id: String, session: String, filename: String) async throws
-        -> DeleteTranscriptionResponse
-        
+
+    func deleteTranscription(
+        type: String,
+        id: String,
+        session: String,
+        filename: String
+    ) async throws -> DeleteTranscriptionResponse
+
     func queryCalls(queryCallsRequest: QueryCallsRequest) async throws -> QueryCallsResponse
         
     func deleteDevice(id: String) async throws -> ModelResponse
@@ -1220,5 +1280,5 @@ protocol DefaultAPIEndpoints {
         
     func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
         
-    func videoConnect() async throws -> Void
+    func videoConnect() async throws
 }
