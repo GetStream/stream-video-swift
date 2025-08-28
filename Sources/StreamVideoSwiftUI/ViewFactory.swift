@@ -99,7 +99,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the minimized call view slot.
     func makeMinimizedCallView(viewModel: CallViewModel) -> MinimizedCallViewType
 
-    associatedtype CallTopViewType: View = CallTopView
+    associatedtype CallTopViewType: View = CallTopView<Self>
     /// Creates a view displayed at the top of the call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in thetop  call view slot.
@@ -170,6 +170,15 @@ public protocol ViewFactory: AnyObject {
         _ user: User,
         with options: UserAvatarViewOptions
     ) -> UserAvatarViewType
+
+    associatedtype PermissionsPromptViewType: View
+    /// Creates a promptView that asks the user to accept missing permissions.
+    /// - Parameters:
+    ///   - call: The current call.
+    /// - Returns: A view representing the user's avatar.
+    func makePermissionsPromptView(
+        call: Call?
+    ) -> PermissionsPromptViewType
 }
 
 extension ViewFactory {
@@ -291,7 +300,7 @@ extension ViewFactory {
     }
 
     public func makeCallTopView(viewModel: CallViewModel) -> some View {
-        CallTopView(viewModel: viewModel)
+        CallTopView(viewFactory: self, viewModel: viewModel)
     }
 
     public func makeParticipantsListView(
@@ -394,6 +403,12 @@ extension ViewFactory {
             size: options.size,
             failbackProvider: options.failbackProvider
         )
+    }
+
+    public func makePermissionsPromptView(
+        call: Call?
+    ) -> some View {
+        PermissionsPromptView(call: call)
     }
 }
 

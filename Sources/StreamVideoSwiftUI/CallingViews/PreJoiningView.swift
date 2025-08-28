@@ -265,36 +265,36 @@ struct CallSettingsView: View {
     
     var body: some View {
         HStack(spacing: 32) {
-            Button {
+            StatelessMicrophoneIconView(
+                call: nil,
+                callSettings: callSettings,
+                size: iconSize,
+                controlStyle: .init(
+                    enabled: .init(icon: images.micTurnOn, iconStyle: .primary),
+                    disabled: .init(icon: images.micTurnOff, iconStyle: .transparent)
+                )
+            ) {
                 callSettings = CallSettings(
                     audioOn: !callSettings.audioOn,
                     videoOn: callSettings.videoOn,
                     speakerOn: callSettings.speakerOn
                 )
-            } label: {
-                CallIconView(
-                    icon: (callSettings.audioOn ? images.micTurnOn : images.micTurnOff),
-                    size: iconSize,
-                    iconStyle: (callSettings.audioOn ? .primary : .transparent)
-                )
-                .accessibility(identifier: "microphoneToggle")
-                .streamAccessibility(value: callSettings.audioOn ? "1" : "0")
             }
 
-            Button {
+            StatelessVideoIconView(
+                call: nil,
+                callSettings: callSettings,
+                size: iconSize,
+                controlStyle: .init(
+                    enabled: .init(icon: images.videoTurnOn, iconStyle: .primary),
+                    disabled: .init(icon: images.videoTurnOff, iconStyle: .transparent)
+                )
+            ) {
                 callSettings = CallSettings(
                     audioOn: callSettings.audioOn,
                     videoOn: !callSettings.videoOn,
                     speakerOn: callSettings.speakerOn
                 )
-            } label: {
-                CallIconView(
-                    icon: (callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
-                    size: iconSize,
-                    iconStyle: (callSettings.videoOn ? .primary : .transparent)
-                )
-                .accessibility(identifier: "cameraToggle")
-                .streamAccessibility(value: callSettings.videoOn ? "1" : "0")
             }
         }
         .padding()

@@ -11,7 +11,14 @@ import XCTest
 @MainActor
 final class MicrophoneCheckView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
-    func test_microphoneCheckView_withAudioLevels_snapshot() throws {
+    private nonisolated(unsafe) var mockPermissions: MockPermissionsStore! = .init()
+
+    override func tearDown() {
+        mockPermissions = nil
+        super.tearDown()
+    }
+
+    func test_microphoneCheckView_withAudioLevels_snapshot() async throws {
         for count in 0...5 {
             let view = MicrophoneCheckView(
                 audioLevels: (0..<count).map { 0.2 * Float($0) },

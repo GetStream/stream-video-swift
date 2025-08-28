@@ -10,7 +10,14 @@ import XCTest
 
 @MainActor
 final class CallControlsView_Tests: StreamVideoUITestCase, @unchecked Sendable {
-    
+
+    private nonisolated(unsafe) var mockPermissions: MockPermissionsStore! = .init()
+
+    override func tearDown() {
+        mockPermissions = nil
+        super.tearDown()
+    }
+
     func test_callControlsView_withoutCapabilities_snapshot() throws {
         let view = CallControlsView(viewModel: CallViewModel())
         AssertSnapshot(

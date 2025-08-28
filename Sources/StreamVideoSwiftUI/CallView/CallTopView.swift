@@ -5,16 +5,22 @@
 import StreamVideo
 import SwiftUI
 
-public struct CallTopView: View {
-            
+public struct CallTopView<Factory: ViewFactory>: View {
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.colors) var colors
     @Injected(\.images) var images
-    
+
+    private var viewFactory: Factory
+
     @ObservedObject var viewModel: CallViewModel
     @State var sharingPopupDismissed = false
     
-    public init(viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory = DefaultViewFactory.shared,
+        viewModel: CallViewModel
+    ) {
+        self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
     
@@ -51,21 +57,25 @@ public struct CallTopView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            .overlay(overlayView)
             .padding(.horizontal, 16)
             .padding(.vertical)
             .frame(maxWidth: .infinity)
         }
-        .overlay(
-            viewModel.call?.state.isCurrentUserScreensharing == true ?
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-                .opacity(sharingPopupDismissed ? 0 : 1)
-                : nil
-        )
     }
-    
+
+    @ViewBuilder
+    private var overlayView: some View {
+        if viewModel.call?.state.isCurrentUserScreensharing == true, !sharingPopupDismissed {
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed
+            )
+        } else {
+            viewFactory.makePermissionsPromptView(call: viewModel.call)
+        }
+    }
+
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false

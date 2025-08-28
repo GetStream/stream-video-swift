@@ -326,11 +326,10 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
     var edgesIgnoringSafeArea: Edge.Set
     var customData: [String: RawJSON]
     var call: Call?
-
     private var isLocalParticipant: Bool
-
     private var callSettingsPublisher: AnyPublisher<CallSettings, Never>?
     @State private var callSettings: CallSettings?
+    @ObservedObject private var permissions = InjectedValues[\.permissions]
 
     public init(
         viewFactory: Factory = DefaultViewFactory.shared,
@@ -414,7 +413,7 @@ public struct VideoCallParticipantView<Factory: ViewFactory>: View {
 
     private var showVideo: Bool {
         if isLocalParticipant {
-            return callSettings?.videoOn ?? false
+            return callSettings?.videoOn == true && permissions.hasCameraPermission
         } else {
             return participant.shouldDisplayTrack
         }

@@ -5,7 +5,7 @@
 import Foundation
 @testable import StreamVideo
 
-final class MockMiddleware<Namespace: StoreNamespace>: Middleware<Namespace> {
+final class MockMiddleware<Namespace: StoreNamespace>: Middleware<Namespace>, @unchecked Sendable {
 
     private(set) var actionsReceived: [Namespace.Action] = []
     private(set) var actionsDispatched: [Namespace.Action] = []
