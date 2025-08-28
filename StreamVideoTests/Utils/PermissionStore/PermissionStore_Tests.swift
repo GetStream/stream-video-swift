@@ -88,7 +88,8 @@ final class PermissionStore_Tests: XCTestCase, @unchecked Sendable {
         store.dispatch(.setMicrophonePermission(.granted))
 
         _ = try await subject.requestMicrophonePermission()
-        await fulfillment { self.mockReducer.inputs.count > 1 }
+        await fulfillment(timeout: 2) { self.mockReducer.inputs.count > 1 }
+        XCTAssertTrue(mockReducer.inputs.count > 1)
 
         let requestMicrophonePermission = mockReducer
             .inputs
@@ -108,7 +109,8 @@ final class PermissionStore_Tests: XCTestCase, @unchecked Sendable {
         store.dispatch(.setCameraPermission(.granted))
 
         _ = try await subject.requestCameraPermission()
-        await fulfillment { self.mockReducer.inputs.count > 1 }
+        await fulfillment(timeout: 2) { self.mockReducer.inputs.count > 1 }
+        XCTAssertTrue(mockReducer.inputs.count > 1)
 
         let requestCameraPermission = mockReducer
             .inputs
