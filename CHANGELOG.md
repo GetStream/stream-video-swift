@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+- Improved the LastParticipantLeavePolicy to be more robust. [#924](https://github.com/GetStream/stream-video-swift/pull/924)
+
 ### 🐞 Fixed
 - An issue that was causing the local participant's audio waveform visualization to stop working. [#912](https://github.com/GetStream/stream-video-swift/pull/912)
 - Proximity policies weren't updating CallSettings correctly. That would cause issues where Speaker may not be reenabled or video not being stopped/restarted when proximity changes. [#913](https://github.com/GetStream/stream-video-swift/pull/913)

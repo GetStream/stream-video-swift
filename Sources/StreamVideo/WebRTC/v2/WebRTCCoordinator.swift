@@ -42,9 +42,6 @@ final class WebRTCCoordinator: @unchecked Sendable {
 
     private let disposableBag = DisposableBag()
 
-    /// Cancellable token for listening to participant updates.
-    private var didUpdateParticipantsCancellable: AnyCancellable?
-
     /// Initializes the `WebRTCCoordinator` with user details, video settings,
     /// and connection handlers.
     ///

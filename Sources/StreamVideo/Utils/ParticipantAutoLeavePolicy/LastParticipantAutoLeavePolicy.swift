@@ -31,8 +31,12 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
     /// Subscription for observing changes to the call participants.
     private var callParticipantsObservation: AnyCancellable?
 
+    private var callReconnectionStatusObservation: AnyCancellable?
+
     /// The maximum number of participants observed in the current call.
     private var maxAggregatedParticipantsCount: Int = 0
+    private var isActive: Bool = false
+    private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
 
     /// The current number of participants in the call.
     private var currentParticipantsCount: Int = 0 {
@@ -40,10 +44,7 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
             maxAggregatedParticipantsCount = max(maxAggregatedParticipantsCount, currentParticipantsCount)
             let currentCount = currentParticipantsCount
             let maxCount = maxAggregatedParticipantsCount
-            // Check if the policy trigger conditions are met.
-            Task(disposableBag: disposableBag) { @MainActor [weak self] in
-                self?.checkTrigger(currentCount: currentCount, maxCount: maxCount)
-            }
+            checkTrigger(currentCount: currentCount, maxCount: maxCount)
         }
     }
 
@@ -93,6 +94,7 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
         callParticipantsObservation = nil
         maxAggregatedParticipantsCount = 0
         currentParticipantsCount = 0
+        isActive = false
 
         // Start call observation only if the activeCall is an incoming or
         // outgoing call.
@@ -107,7 +109,18 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
                 .state
                 .$participantsMap
                 .map(\.count)
+                .log(.debug) { "LastParticipantAutoLeavePolicy received updated participants count:\($0)." }
+                .receive(on: processingQueue)
+                .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
                 .assign(to: \.currentParticipantsCount, onWeak: self)
+
+            callReconnectionStatusObservation = call
+                .state
+                .$reconnectionStatus
+                .map { $0 == .connected }
+                .log(.debug) { "LastParticipantAutoLeavePolicy will set isActive:\($0)." }
+                .receive(on: processingQueue)
+                .assign(to: \.isActive, onWeak: self)
         }
     }
 
@@ -115,50 +128,57 @@ public final class LastParticipantAutoLeavePolicy: ParticipantAutoLeavePolicy, @
     /// - Parameters:
     ///   - currentCount: The current number of participants in the call.
     ///   - maxCount: The maximum number of participants that have been in the call.
-    @MainActor
     private func checkTrigger(currentCount: Int, maxCount: Int) {
-        guard let activeCall else { return }
+        processingQueue.addTaskOperation { @MainActor [weak self] in
+            guard
+                let self,
+                isActive,
+                let activeCall
+            else {
+                return
+            }
 
-        // Conditions to trigger the policy: single participant and previously
-        // had more than one participant.
-        guard currentCount == 1, maxCount > 1 else {
+            // Conditions to trigger the policy: single participant and previously
+            // had more than one participant.
+            guard currentCount == 1, maxCount > 1 else {
+                log.debug(
+                    """
+                    Participants updated without triggering \(type(of: self)).
+                    CallCid: \(activeCall.cId)
+                    Participants count: \(currentCount)
+                    Max Participants count: \(maxCount)
+                    """
+                )
+                return
+            }
+
+            // Ensure the session has been accepted by someone.
+            guard
+                activeCall.state.session?.acceptedBy.isEmpty == false
+            else {
+                log.debug(
+                    """
+                    Participants updated without triggering \(type(of: self)).
+                    CallCid: \(activeCall.cId)
+                    Participants count: \(currentCount)
+                    Max Participants count: \(maxCount)
+                    Session acceptedBy: \(activeCall.state.session?.acceptedBy)
+                    """
+                )
+                return
+            }
+
+            // Log the trigger and execute the closure.
             log.debug(
                 """
-                Participants updated without triggering \(type(of: self)).
-                CallCid: \(activeCall.cId)
-                Participants count: \(currentCount)
-                Max Participants count: \(maxCount)
-                """
-            )
-            return
-        }
-
-        // Ensure the session has been accepted by someone.
-        guard
-            activeCall.state.session?.acceptedBy.isEmpty == false
-        else {
-            log.debug(
-                """
-                Participants updated without triggering \(type(of: self)).
+                Participants updated triggering \(type(of: self)).
                 CallCid: \(activeCall.cId)
                 Participants count: \(currentCount)
                 Max Participants count: \(maxCount)
                 Session acceptedBy: \(activeCall.state.session?.acceptedBy)
                 """
             )
-            return
+            onPolicyTriggered?()
         }
-
-        // Log the trigger and execute the closure.
-        log.debug(
-            """
-            Participants updated triggering \(type(of: self)).
-            CallCid: \(activeCall.cId)
-            Participants count: \(currentCount)
-            Max Participants count: \(maxCount)
-            Session acceptedBy: \(activeCall.state.session?.acceptedBy)
-            """
-        )
-        onPolicyTriggered?()
     }
 }
