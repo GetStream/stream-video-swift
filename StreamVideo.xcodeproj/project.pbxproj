@@ -264,6 +264,10 @@
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
+		405072602E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4050725F2E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift */; };
+		405072622E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405072612E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift */; };
+		405072652E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405072642E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift */; };
+		405072672E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405072662E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift */; };
 		4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */; };
 		4051A2732D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
 		4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
@@ -698,6 +702,8 @@
 		40C4DF522C1C60A80035DBC2 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		40C4DF532C1C60A80035DBC2 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
+		40C4E8322E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */; };
+		40C4E8352E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */; };
 		40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689172C64DDC70054528A /* Publisher+TaskSink.swift */; };
 		40C708D62D8D729500D3501F /* Gleap in Frameworks */ = {isa = PBXBuildFile; productRef = 40C708D52D8D729500D3501F /* Gleap */; };
 		40C71B5A2E53565300733BF6 /* Store+Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B592E53565300733BF6 /* Store+Mocks.swift */; };
@@ -1961,6 +1967,10 @@
 		404A81302DA3C5F0001F7FA8 /* MockDefaultAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDefaultAPI.swift; sourceTree = "<group>"; };
 		404A81352DA3CBF0001F7FA8 /* CallConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfigurationTests.swift; sourceTree = "<group>"; };
 		404A81372DA3CC0C001F7FA8 /* CallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfiguration.swift; sourceTree = "<group>"; };
+		4050725F2E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy.swift; sourceTree = "<group>"; };
+		405072612E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicyProtocol.swift; sourceTree = "<group>"; };
+		405072642E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallKitMissingPermissionPolicy+NoOp.swift"; sourceTree = "<group>"; };
+		405072662E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallKitMissingPermissionPolicy+EndCall.swift"; sourceTree = "<group>"; };
 		4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sendable+Extensions.swift"; sourceTree = "<group>"; };
 		4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Conformances.swift"; sourceTree = "<group>"; };
 		4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppStateAdapter.swift; sourceTree = "<group>"; };
@@ -2306,6 +2316,8 @@
 		40C4DF4A2C1C2C330035DBC2 /* ParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
 		40C4DF4C2C1C2CD80035DBC2 /* DefaultParticipantAutoLeavePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultParticipantAutoLeavePolicy.swift; sourceTree = "<group>"; };
 		40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicyTests.swift; sourceTree = "<group>"; };
+		40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_Tests.swift; sourceTree = "<group>"; };
+		40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_EndCallTests.swift; sourceTree = "<group>"; };
 		40C689172C64DDC70054528A /* Publisher+TaskSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+TaskSink.swift"; sourceTree = "<group>"; };
 		40C689192C64F74F0054528A /* SFUSignalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUSignalService.swift; sourceTree = "<group>"; };
 		40C6891D2C6661990054528A /* SFUEventAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUEventAdapter.swift; sourceTree = "<group>"; };
@@ -3247,9 +3259,9 @@
 		40034C212CFE116200A318B1 /* AvailabilityPolicy */ = {
 			isa = PBXGroup;
 			children = (
+				40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */,
 				40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */,
 				40034C292CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */,
-				40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */,
 				40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */,
 			);
 			path = AvailabilityPolicy;
@@ -3997,6 +4009,25 @@
 				4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */,
 			);
 			path = AsyncImage;
+			sourceTree = "<group>";
+		};
+		4050725E2E5F49B1003D2109 /* MissingPermissionPolicy */ = {
+			isa = PBXGroup;
+			children = (
+				405072632E5F4CD3003D2109 /* Policies */,
+				405072612E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift */,
+				4050725F2E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift */,
+			);
+			path = MissingPermissionPolicy;
+			sourceTree = "<group>";
+		};
+		405072632E5F4CD3003D2109 /* Policies */ = {
+			isa = PBXGroup;
+			children = (
+				405072662E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift */,
+				405072642E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift */,
+			);
+			path = Policies;
 			sourceTree = "<group>";
 		};
 		4051A26D2D665AF5000C3167 /* Swinft6Migration */ = {
@@ -5214,6 +5245,23 @@
 			path = ParticipantAutoLeavePolicy;
 			sourceTree = "<group>";
 		};
+		40C4E8302E60BB8A00FC29BC /* MissingPermissionPolicy */ = {
+			isa = PBXGroup;
+			children = (
+				40C4E8332E60BC5900FC29BC /* Policies */,
+				40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */,
+			);
+			path = MissingPermissionPolicy;
+			sourceTree = "<group>";
+		};
+		40C4E8332E60BC5900FC29BC /* Policies */ = {
+			isa = PBXGroup;
+			children = (
+				40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */,
+			);
+			path = Policies;
+			sourceTree = "<group>";
+		};
 		40C71B572E5355F800733BF6 /* Store */ = {
 			isa = PBXGroup;
 			children = (
@@ -5454,6 +5502,7 @@
 		40DE867A2BBEAA6900E88D8A /* CallKit */ = {
 			isa = PBXGroup;
 			children = (
+				40C4E8302E60BB8A00FC29BC /* MissingPermissionPolicy */,
 				40034C242CFE154F00A318B1 /* AvailabilityPolicy */,
 				40DE867C2BBEAA8600E88D8A /* CallKitPushNotificationAdapterTests.swift */,
 				40F017412BBEC81C00E89FD1 /* CallKitServiceTests.swift */,
@@ -5897,6 +5946,7 @@
 		40FB01FF2BAC8A4000A1C206 /* CallKit */ = {
 			isa = PBXGroup;
 			children = (
+				4050725E2E5F49B1003D2109 /* MissingPermissionPolicy */,
 				40034C212CFE116200A318B1 /* AvailabilityPolicy */,
 				40FB02022BAC93A800A1C206 /* CallKitAdapter.swift */,
 				40FB02042BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift */,
@@ -8377,6 +8427,7 @@
 				40BBC4BA2C627F83002AEF92 /* TrackEvent.swift in Sources */,
 				406128832CF33000007F5CDC /* SDPParser.swift in Sources */,
 				84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */,
+				405072672E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift in Sources */,
 				4039F0CF2D024DDF0078159E /* MediaTransceiverStorage.swift in Sources */,
 				8469593829BB6B4E00134EA0 /* GetEdgesResponse.swift in Sources */,
 				40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */,
@@ -8638,8 +8689,10 @@
 				40BBC4E02C63A564002AEF92 /* WebRTCCoordinator+Disconnected.swift in Sources */,
 				40BBC4DA2C63A439002AEF92 /* WebRTCCoordinator+Joined.swift in Sources */,
 				848CCCE92AB8ED8F002E83A2 /* ThumbnailResponse.swift in Sources */,
+				405072602E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift in Sources */,
 				841BAA322BD15CDE000C73E4 /* CallTranscriptionStoppedEvent.swift in Sources */,
 				84DC38D429ADFCFD00946713 /* CallSettingsResponse.swift in Sources */,
+				405072622E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift in Sources */,
 				84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */,
 				40BBC4E42C63A5FF002AEF92 /* WebRTCCoordinator+FastReconnected.swift in Sources */,
 				404A81382DA3CC0C001F7FA8 /* CallConfiguration.swift in Sources */,
@@ -8717,6 +8770,7 @@
 				40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */,
 				40BBC4EA2C63A665002AEF92 /* WebRTCCoordinator+Migrated.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
+				405072652E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift in Sources */,
 				848CCCE72AB8ED8F002E83A2 /* ThumbnailsSettingsRequest.swift in Sources */,
 				8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */,
 				84CD12202C73831000056640 /* CallMissedEvent.swift in Sources */,
@@ -8806,6 +8860,7 @@
 				406B3C4A2C91EE9700FC93A1 /* MockWebRTCCoordinatorStack.swift in Sources */,
 				40C71B692E535D7400733BF6 /* StreamCallAudioRecorder_DefaultReducerTests.swift in Sources */,
 				40AB34C92C5D3F2E00B5B6B3 /* ParticipantsStats+Dummy.swift in Sources */,
+				40C4E8322E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift in Sources */,
 				84F58B7629EE92BF00010C4C /* UniqueValues.swift in Sources */,
 				40B48C512D14F7AE002C4EAB /* SDPParser_Tests.swift in Sources */,
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
@@ -8944,6 +8999,7 @@
 				40AF6A372C93423400BA2935 /* WebRTCCoordinatorStateMachine_FastReconnectingStageTests.swift in Sources */,
 				40F0176D2BBEF20D00E89FD1 /* EgressResponse+Dummy.swift in Sources */,
 				40C71B7F2E54790400733BF6 /* Store_RaceConditionTests.swift in Sources */,
+				40C4E8352E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift in Sources */,
 				40C71B802E54790400733BF6 /* Store_ConcurrencyTests.swift in Sources */,
 				40C71B812E54790400733BF6 /* Store_PerformanceTests.swift in Sources */,
 				84F58B9129EEB36E00010C4C /* EventNotificationCenter_Mock.swift in Sources */,

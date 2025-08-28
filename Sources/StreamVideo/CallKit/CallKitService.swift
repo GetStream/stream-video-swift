@@ -8,14 +8,14 @@ import Combine
 import Foundation
 import StreamWebRTC
 
-/// `CallKitService` manages interactions with the CallKit framework,
-/// facilitating VoIP calls in an application.
+/// Manages CallKit integration for VoIP calls.
 open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     @Injected(\.callCache) private var callCache
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.currentDevice) private var currentDevice
     @Injected(\.audioStore) private var audioStore
+    @Injected(\.permissions) private var permissions
     private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
@@ -44,8 +44,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
-    /// The currently active StreamVideo client.
-    /// - Important: We need to update it whenever a user logins.
+    /// Current `StreamVideo` client. Update when user logs in.
     public var streamVideo: StreamVideo? {
         didSet { didUpdate(streamVideo) }
     }
@@ -75,11 +74,13 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// Whether the call can be held on its own or swapped with another call.
     /// - Important: Holding a call isn't supported yet!
     open var supportsHolding: Bool = false
-    /// Whether the service supports Video in addition to Audio calls. If set to true, CallKit push notification
-    /// title, will be suffixed with the word `Video` next to the application's name. Otherwise, it will be
-    /// suffixed with the word `Audio`.
-    /// - Note: defaults to `false`.
+    /// Whether video is supported. If true, CallKit push titles add "Video";
+    /// otherwise "Audio". Default is `false`.
     open var supportsVideo: Bool = false
+
+    /// Policy for handling calls when mic permission is missing while the app
+    /// runs in the background. See `CallKitMissingPermissionPolicy`.
+    open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
 
     var callSettings: CallSettings?
 
@@ -90,20 +91,19 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     private var _storage: [UUID: CallEntry] = [:]
     private let storageAccessQueue: UnfairQueue = .init()
-    private var active: UUID?
+    private var active: UUID? {
+        didSet { observeCallSettings(active) }
+    }
+
     var callCount: Int { storageAccessQueue.sync { _storage.count } }
 
     private var callEndedNotificationCancellable: AnyCancellable?
     private var ringingTimerCancellable: AnyCancellable?
 
-    /// A reducer responsible for handling audio session changes triggered by CallKit.
-    ///
-    /// The `callKitAudioReducer` manages updates to the audio session state in
-    /// response to CallKit events, ensuring proper activation and deactivation
-    /// of the audio system when calls are handled through CallKit.
+    /// Handles audio session changes triggered by CallKit.
     private lazy var callKitAudioReducer = CallKitAudioSessionReducer(store: audioStore)
 
-    /// Initializes the `CallKitService` instance.
+    /// Initialize.
     override public init() {
         super.init()
 
@@ -115,14 +115,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             .sink { [weak self] in self?.callEnded($0.cId, ringingTimedOut: false) }
     }
 
-    /// Reports an incoming call to the CallKit framework.
-    ///
-    /// - Parameters:
-    ///   - cid: The call ID.
-    ///   - localizedCallerName: The localized caller name.
-    ///   - callerId: The caller's identifier.
-    ///   - hasVideo: Indicator if call is video or audio.
-    ///   - completion: A closure to be called upon completion.
+    /// Report an incoming call to CallKit.
     open func reportIncomingCall(
         _ cid: String,
         localizedCallerName: String,
@@ -192,6 +185,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     }
                 }
 
+                try missingPermissionPolicy
+                    .policy
+                    .reportCall()
+
                 let callState = try await callEntry.call.get()
                 if !checkIfCallWasHandled(callState: callState) {
                     callEntry.createdBy = callState.call.createdBy.toUser
@@ -225,11 +222,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
-    /// Handles the event when a call is accepted from the same user on another device.
-    ///
-    /// - Parameter response: The call accepted event.
+    /// Handle acceptance by the same user on another device.
     open func callAccepted(_ response: CallAcceptedEvent) {
-        /// The call was accepted somewhere else (e.g the incoming call on the same device or another
+        // Accepted elsewhere.
         /// device). No action is required.
         guard
             let newCallEntry = callEntry(for: response.callCid),
@@ -261,10 +256,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callCache.remove(for: newCallEntry.call.cId)
     }
 
-    /// Handles the event when a call is rejected from the same user on another device or if the creator
-    /// of the call declined it.
-    ///
-    /// - Parameter response: The call rejected event.
+    /// Handle a rejection from the same user or the call creator elsewhere.
     open func callRejected(_ response: CallRejectedEvent) {
         guard
             let newCallEntry = callEntry(for: response.callCid),
@@ -306,7 +298,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callCache.remove(for: newCallEntry.call.cId)
     }
 
-    /// Handles the event when a call ends.
+    /// Handle call end event.
     open func callEnded(
         _ cId: String,
         ringingTimedOut: Bool
@@ -346,13 +338,11 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
 
-    /// Handles the event when a participant leaves the call.
-    ///
-    /// - Parameter response: The call session participant left event.
+    /// Handle when a participant leaves the call.
     open func callParticipantLeft(
         _ response: CallSessionParticipantLeftEvent
     ) {
-        /// We listen for the event so in the case we are the only ones remaining
+        // End the call if only one participant remains.
         /// in the call, we leave.
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else {
@@ -371,9 +361,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     // MARK: - CXProviderDelegate
 
-    /// Called when the provider has been reset. Delegates must respond to this callback by cleaning up
-    /// all internal call state (disconnecting communication channels, releasing network resources, etc.).
-    /// This callback can be treated as a request to end all calls without the need to respond to any actions
+    /// Provider reset: end and clean up calls.
     open func providerDidReset(_ provider: CXProvider) {
         log.debug("CXProvider didReset.", subsystems: .callKit)
         storageAccessQueue.sync {
@@ -401,9 +389,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        /// Activates the audio session for CallKit. This line notifies the audio store
-        /// to activate the provided AVAudioSession, ensuring that the app's audio
-        /// routing and configuration are correctly handled when CallKit takes control
+        /// Ask the audio store to activate the CallKit session.
+        ///
+        ///
         /// of the audio session during a call.
         audioStore.dispatch(.callKit(.activate(audioSession)))
     }
@@ -425,9 +413,9 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             subsystems: .callKit
         )
 
-        /// Notifies the audio store to deactivate the provided AVAudioSession.
-        /// This ensures that when CallKit relinquishes control of the audio session,
-        /// the app's audio routing and configuration are updated appropriately.
+        /// Ask the audio store to deactivate the CallKit session.
+        ///
+        ///
         audioStore.dispatch(.callKit(.deactivate(audioSession)))
     }
 
@@ -463,8 +451,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
 
             do {
-                /// Sets the join source to `.callKit` to indicate that the call was
-                /// joined via CallKit. This helps with audioSession management.
+                /// Mark join source as `.callKit` for audio session.
+                ///
                 callToJoinEntry.call.state.joinSource = .callKit
 
                 try await callToJoinEntry.call.join(callSettings: callSettings)
@@ -561,16 +549,28 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         _ provider: CXProvider,
         perform action: CXSetMutedCallAction
     ) {
-        guard let stackEntry = callEntry(for: action.callUUID) else {
+        guard
+            let stackEntry = callEntry(for: action.callUUID)
+        else {
             action.fail()
             return
         }
-        stackEntry.call.didPerform(.performSetMutedCall)
-        Task(disposableBag: disposableBag) {
+        Task(disposableBag: disposableBag) { [permissions] in
+            guard permissions.hasMicrophonePermission else {
+                if action.isMuted {
+                    action.fulfill()
+                } else {
+                    action.fail()
+                }
+                return
+            }
+
             do {
                 if action.isMuted {
+                    stackEntry.call.didPerform(.performSetMutedCall)
                     try await stackEntry.call.microphone.disable()
                 } else {
+                    stackEntry.call.didPerform(.performSetMutedCall)
                     try await stackEntry.call.microphone.enable()
                 }
             } catch {
@@ -586,20 +586,14 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     // MARK: - Helpers
 
-    /// Requests a transaction asynchronously.
-    ///
-    /// - Parameter transaction: The transaction to be requested.
-    /// - Throws: An error if the request fails.
+    /// Request a CallKit transaction.
     open func requestTransaction(
         _ action: CXAction
     ) async throws {
         try await callController.requestTransaction(with: action)
     }
 
-    /// Checks whether the call was handled.
-    ///
-    /// - Parameter callState: The state of the call.
-    /// - Returns: A boolean value indicating whether the call was handled.
+    /// Return whether this call was already accepted or rejected.
     open func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
         guard let streamVideo else {
             log.warning(
@@ -627,9 +621,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         return isAccepted || isRejected || isRejectedByEveryoneElse
     }
 
-    /// Sets up a ringing timer for the call.
-    ///
-    /// - Parameter callState: The state of the call.
+    /// Start the ringing timeout timer for the call.
     open func setUpRingingTimer(for callState: GetCallResponse) {
         let timeout = TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000)
         ringingTimerCancellable = DefaultTimer
@@ -644,8 +636,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             }
     }
 
-    /// A method that's being called every time the StreamVideo instance is getting updated.
-    /// - Parameter streamVideo: The new StreamVideo instance (nil if none)
+    /// Called when `StreamVideo` changes. Adds/removes the audio reducer and
+    /// subscribes to events on real devices.
     open func didUpdate(_ streamVideo: StreamVideo?) {
         if streamVideo != nil {
             audioStore.add(callKitAudioReducer)
@@ -662,10 +654,8 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     // MARK: - Private helpers
 
-    /// Subscription to event should **never** perform an accept or joining a call action. Those actions
-    /// are only being performed explicitly from the component that receives the user action.
-    /// Subscribing to events is being used to reject/stop calls that have been accepted/rejected
-    /// on other devices or components (e.g. incoming callScreen, CallKitService)
+    /// Do not auto-accept or join in subscriptions. Mirror remote accept/
+    /// reject/end to keep state in sync.
     private func subscribeToCallEvents() {
         disposableBag.removeAll()
 
@@ -788,15 +778,46 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private func callEntry(for uuid: UUID) -> CallEntry? {
         storageAccessQueue.sync { _storage[uuid] }
     }
+
+    private func observeCallSettings(
+        _ callUUID: UUID?
+    ) {
+        let key = "call-settings-observation"
+        guard
+            let callUUID,
+            let callEntry = callEntry(for: callUUID)
+        else {
+            disposableBag.remove(key)
+            return
+        }
+
+        Task { @MainActor in
+            callEntry
+                .call
+                .state
+                .$callSettings
+                .map { !$0.audioOn }
+                .removeDuplicates()
+                .log(.debug, subsystems: .callKit) { "Will perform SetMutedCallAction with muted:\($0). " }
+                .sinkTask(storeIn: disposableBag) { [weak self] in
+                    do {
+                        try await self?.requestTransaction(CXSetMutedCallAction(call: callUUID, muted: $0))
+                    } catch {
+                        log.warning("Unable to apply CallSettings.audioOn:\(!$0).", subsystems: .callKit)
+                    }
+                }
+                .store(in: disposableBag, key: key)
+        }
+    }
 }
 
 extension CallKitService: InjectionKey {
-    /// Provides the current instance of `CallKitService`.
+    /// Current `CallKitService` instance.
     nonisolated(unsafe) public static var currentValue: CallKitService = .init()
 }
 
 extension InjectedValues {
-    /// A property wrapper to access the `CallKitService` instance.
+    /// Accessor for `CallKitService`.
     public var callKitService: CallKitService {
         get { Self[CallKitService.self] }
         set { Self[CallKitService.self] = newValue }
