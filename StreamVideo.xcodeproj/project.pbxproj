@@ -264,6 +264,10 @@
 		404C27CB2BF2552800DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404C27CC2BF2552900DF2937 /* XCTestCase+PredicateFulfillment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409CA7982BEE21720045F7AA /* XCTestCase+PredicateFulfillment.swift */; };
 		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
+		405072602E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4050725F2E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift */; };
+		405072622E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405072612E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift */; };
+		405072652E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405072642E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift */; };
+		405072672E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405072662E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift */; };
 		4051A26F2D665B03000C3167 /* Sendable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */; };
 		4051A2732D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
 		4051A2742D673430000C3167 /* CustomStringConvertible+Conformances.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */; };
@@ -1961,6 +1965,10 @@
 		404A81302DA3C5F0001F7FA8 /* MockDefaultAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDefaultAPI.swift; sourceTree = "<group>"; };
 		404A81352DA3CBF0001F7FA8 /* CallConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfigurationTests.swift; sourceTree = "<group>"; };
 		404A81372DA3CC0C001F7FA8 /* CallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConfiguration.swift; sourceTree = "<group>"; };
+		4050725F2E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy.swift; sourceTree = "<group>"; };
+		405072612E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicyProtocol.swift; sourceTree = "<group>"; };
+		405072642E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallKitMissingPermissionPolicy+NoOp.swift"; sourceTree = "<group>"; };
+		405072662E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallKitMissingPermissionPolicy+EndCall.swift"; sourceTree = "<group>"; };
 		4051A26E2D665B03000C3167 /* Sendable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sendable+Extensions.swift"; sourceTree = "<group>"; };
 		4051A2722D673430000C3167 /* CustomStringConvertible+Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible+Conformances.swift"; sourceTree = "<group>"; };
 		4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppStateAdapter.swift; sourceTree = "<group>"; };
@@ -3247,9 +3255,9 @@
 		40034C212CFE116200A318B1 /* AvailabilityPolicy */ = {
 			isa = PBXGroup;
 			children = (
+				40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */,
 				40034C2B2CFE157300A318B1 /* CallKitAlwaysAvailabilityPolicy.swift */,
 				40034C292CFE156F00A318B1 /* CallKitRegionBasedAvailabilityPolicy.swift */,
-				40034C272CFE156800A318B1 /* CallKitAvailabilityPolicy.swift */,
 				40034C252CFE155C00A318B1 /* CallKitAvailabilityPolicyProtocol.swift */,
 			);
 			path = AvailabilityPolicy;
@@ -3997,6 +4005,25 @@
 				4049CE832BBBF8EF003D07D2 /* StreamAsyncImage.swift */,
 			);
 			path = AsyncImage;
+			sourceTree = "<group>";
+		};
+		4050725E2E5F49B1003D2109 /* MissingPermissionPolicy */ = {
+			isa = PBXGroup;
+			children = (
+				405072632E5F4CD3003D2109 /* Policies */,
+				405072612E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift */,
+				4050725F2E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift */,
+			);
+			path = MissingPermissionPolicy;
+			sourceTree = "<group>";
+		};
+		405072632E5F4CD3003D2109 /* Policies */ = {
+			isa = PBXGroup;
+			children = (
+				405072662E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift */,
+				405072642E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift */,
+			);
+			path = Policies;
 			sourceTree = "<group>";
 		};
 		4051A26D2D665AF5000C3167 /* Swinft6Migration */ = {
@@ -5897,6 +5924,7 @@
 		40FB01FF2BAC8A4000A1C206 /* CallKit */ = {
 			isa = PBXGroup;
 			children = (
+				4050725E2E5F49B1003D2109 /* MissingPermissionPolicy */,
 				40034C212CFE116200A318B1 /* AvailabilityPolicy */,
 				40FB02022BAC93A800A1C206 /* CallKitAdapter.swift */,
 				40FB02042BAC94FB00A1C206 /* CallKitPushNotificationAdapter.swift */,
@@ -8377,6 +8405,7 @@
 				40BBC4BA2C627F83002AEF92 /* TrackEvent.swift in Sources */,
 				406128832CF33000007F5CDC /* SDPParser.swift in Sources */,
 				84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */,
+				405072672E5F4CF7003D2109 /* CallKitMissingPermissionPolicy+EndCall.swift in Sources */,
 				4039F0CF2D024DDF0078159E /* MediaTransceiverStorage.swift in Sources */,
 				8469593829BB6B4E00134EA0 /* GetEdgesResponse.swift in Sources */,
 				40AB34AE2C5D02D400B5B6B3 /* SFUAdapter.swift in Sources */,
@@ -8638,8 +8667,10 @@
 				40BBC4E02C63A564002AEF92 /* WebRTCCoordinator+Disconnected.swift in Sources */,
 				40BBC4DA2C63A439002AEF92 /* WebRTCCoordinator+Joined.swift in Sources */,
 				848CCCE92AB8ED8F002E83A2 /* ThumbnailResponse.swift in Sources */,
+				405072602E5F49D5003D2109 /* CallKitMissingPermissionPolicy.swift in Sources */,
 				841BAA322BD15CDE000C73E4 /* CallTranscriptionStoppedEvent.swift in Sources */,
 				84DC38D429ADFCFD00946713 /* CallSettingsResponse.swift in Sources */,
+				405072622E5F4CCA003D2109 /* CallKitMissingPermissionPolicyProtocol.swift in Sources */,
 				84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */,
 				40BBC4E42C63A5FF002AEF92 /* WebRTCCoordinator+FastReconnected.swift in Sources */,
 				404A81382DA3CC0C001F7FA8 /* CallConfiguration.swift in Sources */,
@@ -8717,6 +8748,7 @@
 				40E363772D0A2E320028C52A /* BroadcastBufferReaderKey.swift in Sources */,
 				40BBC4EA2C63A665002AEF92 /* WebRTCCoordinator+Migrated.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
+				405072652E5F4CDD003D2109 /* CallKitMissingPermissionPolicy+NoOp.swift in Sources */,
 				848CCCE72AB8ED8F002E83A2 /* ThumbnailsSettingsRequest.swift in Sources */,
 				8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */,
 				84CD12202C73831000056640 /* CallMissedEvent.swift in Sources */,

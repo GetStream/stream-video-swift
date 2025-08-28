@@ -16,6 +16,7 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     @Injected(\.uuidFactory) private var uuidFactory
     @Injected(\.currentDevice) private var currentDevice
     @Injected(\.audioStore) private var audioStore
+    @Injected(\.permissions) private var permissions
     private let disposableBag = DisposableBag()
 
     /// Represents a call that is being managed by the service.
@@ -81,6 +82,21 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     /// - Note: defaults to `false`.
     open var supportsVideo: Bool = false
 
+    /// The policy that determines how to handle CallKit calls when
+    /// microphone permissions are missing.
+    ///
+    /// This policy is used to control the behavior when the app attempts
+    /// to report an incoming call but lacks the necessary microphone
+    /// permissions. The available policies are:
+    /// - `.endCall`: Throws an error if microphone permission is missing
+    ///   while running in the background, effectively ending the call
+    /// - `.none`: No action is taken regardless of permission status
+    ///
+    /// - Note: This policy only applies when the app is in the background
+    ///   and microphone permission has not been granted.
+    /// - Important: The default value is `.endCall` for security reasons.
+    open var missingPermissionPolicy: CallKitMissingPermissionPolicy = .none
+
     var callSettings: CallSettings?
 
     /// The call controller used for managing calls.
@@ -90,7 +106,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     private var _storage: [UUID: CallEntry] = [:]
     private let storageAccessQueue: UnfairQueue = .init()
-    private var active: UUID?
+    private var active: UUID? {
+        didSet { observeCallSettings(active) }
+    }
+
     var callCount: Int { storageAccessQueue.sync { _storage.count } }
 
     private var callEndedNotificationCancellable: AnyCancellable?
@@ -191,6 +210,10 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         self?.streamVideo?.state.ringingCall = callEntry.call
                     }
                 }
+
+                try missingPermissionPolicy
+                    .policy
+                    .reportCall()
 
                 let callState = try await callEntry.call.get()
                 if !checkIfCallWasHandled(callState: callState) {
@@ -561,16 +584,28 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         _ provider: CXProvider,
         perform action: CXSetMutedCallAction
     ) {
-        guard let stackEntry = callEntry(for: action.callUUID) else {
+        guard
+            let stackEntry = callEntry(for: action.callUUID)
+        else {
             action.fail()
             return
         }
-        stackEntry.call.didPerform(.performSetMutedCall)
-        Task(disposableBag: disposableBag) {
+        Task(disposableBag: disposableBag) { [permissions] in
+            guard permissions.hasMicrophonePermission else {
+                if action.isMuted {
+                    action.fulfill()
+                } else {
+                    action.fail()
+                }
+                return
+            }
+
             do {
                 if action.isMuted {
+                    stackEntry.call.didPerform(.performSetMutedCall)
                     try await stackEntry.call.microphone.disable()
                 } else {
+                    stackEntry.call.didPerform(.performSetMutedCall)
                     try await stackEntry.call.microphone.enable()
                 }
             } catch {
@@ -787,6 +822,37 @@ open class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
 
     private func callEntry(for uuid: UUID) -> CallEntry? {
         storageAccessQueue.sync { _storage[uuid] }
+    }
+
+    private func observeCallSettings(
+        _ callUUID: UUID?
+    ) {
+        let key = "call-settings-observation"
+        guard
+            let callUUID,
+            let callEntry = callEntry(for: callUUID)
+        else {
+            disposableBag.remove(key)
+            return
+        }
+
+        Task { @MainActor in
+            callEntry
+                .call
+                .state
+                .$callSettings
+                .map { !$0.audioOn }
+                .removeDuplicates()
+                .log(.debug, subsystems: .callKit) { "Will perform SetMutedCallAction with muted:\($0). " }
+                .sinkTask(storeIn: disposableBag) { [weak self] in
+                    do {
+                        try await self?.requestTransaction(CXSetMutedCallAction(call: callUUID, muted: $0))
+                    } catch {
+                        log.warning("Unable to apply CallSettings.audioOn:\(!$0).", subsystems: .callKit)
+                    }
+                }
+                .store(in: disposableBag, key: key)
+        }
     }
 }
 
