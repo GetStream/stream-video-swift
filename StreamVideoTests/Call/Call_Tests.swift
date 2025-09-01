@@ -611,6 +611,29 @@ final class Call_Tests: StreamVideoTestCase {
         )
     }
 
+    func test_kickUser_coordinatorWasCalledWithExpectedValues() async throws {
+        let mockCoordinatorClient = MockDefaultAPIEndpoints()
+        let call = Call(
+            from: .init(call: .dummy(), members: [], ownCapabilities: []),
+            coordinatorClient: mockCoordinatorClient,
+            callController: .dummy(defaultAPI: mockCoordinatorClient)
+        )
+        let userId = String.unique
+
+        _ = try? await call.kickUser(userId: userId)
+
+        let input = try XCTUnwrap(
+            mockCoordinatorClient
+                .recordedInputPayload(
+                    (String, String, KickUserRequest).self,
+                    for: .kickUser
+                )?.first
+        )
+        XCTAssertEqual(call.callType, input.0)
+        XCTAssertEqual(call.callId, input.1)
+        XCTAssertEqual(input.2.userId, userId)
+    }
+
     // MARK: - Private helpers
 
     private func assertUpdateState(
