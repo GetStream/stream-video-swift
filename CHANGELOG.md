@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- When the user is missing a permission, the SDK will prompt them to accept any missing permission. [#915](https://github.com/GetStream/stream-video-swift/pull/915)
+
 ### 🔄 Changed
 
 # [1.32.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.32.0)
