@@ -23,7 +23,7 @@ extension StreamCallAudioRecorder.Namespace {
     final class AVAudioRecorderMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
 
         /// The audio store for managing permissions and session state.
-        @Injected(\.audioStore) private var audioStore
+        @Injected(\.permissions) private var permissions
 
         /// Builder for creating and caching the audio recorder instance.
         private var audioRecorder: AVAudioRecorder?
@@ -121,21 +121,27 @@ extension StreamCallAudioRecorder.Namespace {
                     return
                 }
 
-                audioRecorder.isMeteringEnabled = true
-                guard
-                    await audioStore.requestRecordPermission(),
-                    audioRecorder.record()
-                else {
-                    dispatcher?.dispatch(.setIsRecording(false))
-                    audioRecorder.isMeteringEnabled = false
-                    return
-                }
+                do {
+                    let hasPermission = try await permissions.requestMicrophonePermission()
+                    audioRecorder.isMeteringEnabled = true
 
-                updateMetersCancellable = DefaultTimer
-                    .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
-                    .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
-                    .compactMap { [weak audioRecorder] in audioRecorder?.averagePower(forChannel: 0) }
-                    .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
+                    guard
+                        hasPermission,
+                        audioRecorder.record()
+                    else {
+                        dispatcher?.dispatch(.setIsRecording(false))
+                        audioRecorder.isMeteringEnabled = false
+                        return
+                    }
+
+                    updateMetersCancellable = DefaultTimer
+                        .publish(every: ScreenPropertiesAdapter.currentValue.refreshRate)
+                        .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
+                        .compactMap { [weak audioRecorder] in audioRecorder?.averagePower(forChannel: 0) }
+                        .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
+                } catch {
+                    log.error(error, subsystems: .audioRecording)
+                }
             }
         }
 

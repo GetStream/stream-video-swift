@@ -815,6 +815,11 @@ struct Stream_Video_Sfu_Event_JoinRequest {
     set {_uniqueStorage()._capabilities = newValue}
   }
 
+  var source: Stream_Video_Sfu_Models_ParticipantSource {
+    get {return _storage._source}
+    set {_uniqueStorage()._source = newValue}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -2368,6 +2373,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     9: .standard(proto: "preferred_publish_options"),
     10: .standard(proto: "preferred_subscribe_options"),
     11: .same(proto: "capabilities"),
+    12: .same(proto: "source"),
   ]
 
 fileprivate class _StorageClass: @unchecked Sendable {
@@ -2382,6 +2388,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
     var _preferredPublishOptions: [Stream_Video_Sfu_Models_PublishOption] = []
     var _preferredSubscribeOptions: [Stream_Video_Sfu_Models_SubscribeOption] = []
     var _capabilities: [Stream_Video_Sfu_Models_ClientCapability] = []
+    var _source: Stream_Video_Sfu_Models_ParticipantSource = .webrtcUnspecified
 
     static let defaultInstance = _StorageClass()
 
@@ -2399,6 +2406,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
       _preferredPublishOptions = source._preferredPublishOptions
       _preferredSubscribeOptions = source._preferredSubscribeOptions
       _capabilities = source._capabilities
+      _source = source._source
     }
   }
 
@@ -2428,6 +2436,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         case 9: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredPublishOptions) }()
         case 10: try { try decoder.decodeRepeatedMessageField(value: &_storage._preferredSubscribeOptions) }()
         case 11: try { try decoder.decodeRepeatedEnumField(value: &_storage._capabilities) }()
+        case 12: try { try decoder.decodeSingularEnumField(value: &_storage._source) }()
         default: break
         }
       }
@@ -2473,6 +2482,9 @@ fileprivate class _StorageClass: @unchecked Sendable {
       if !_storage._capabilities.isEmpty {
         try visitor.visitPackedEnumField(value: _storage._capabilities, fieldNumber: 11)
       }
+      if _storage._source != .webrtcUnspecified {
+        try visitor.visitSingularEnumField(value: _storage._source, fieldNumber: 12)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2493,6 +2505,7 @@ fileprivate class _StorageClass: @unchecked Sendable {
         if _storage._preferredPublishOptions != rhs_storage._preferredPublishOptions {return false}
         if _storage._preferredSubscribeOptions != rhs_storage._preferredSubscribeOptions {return false}
         if _storage._capabilities != rhs_storage._capabilities {return false}
+        if _storage._source != rhs_storage._source {return false}
         return true
       }
       if !storagesAreEqual {return false}

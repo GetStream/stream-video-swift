@@ -13,9 +13,11 @@ final class CallConnectingView_Tests: StreamVideoUITestCase, @unchecked Sendable
 
     private lazy var viewModel: CallViewModel! = .init()
     private lazy var factory: DefaultViewFactory! = DefaultViewFactory.shared
+    private nonisolated(unsafe) var mockPermissions: MockPermissionsStore! = .init()
 
     override func tearDown() async throws {
         viewModel = nil
+        mockPermissions = nil
         factory = nil
         try await super.tearDown()
     }

@@ -73,16 +73,14 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     
     public func cleanUp() {
         disposableBag.removeAll()
-        Task {
-            await callAudioRecorder.stopRecording()
-        }
+        callAudioRecorder.stopRecording()
     }
 
-    public func didUpdate(callSettings: CallSettings) async {
+    public func didUpdate(callSettings: CallSettings) {
         if callSettings.audioOn {
-            await callAudioRecorder.startRecording(ignoreActiveCall: true)
+            callAudioRecorder.startRecording(ignoreActiveCall: true)
         } else {
-            await callAudioRecorder.stopRecording()
+            callAudioRecorder.stopRecording()
         }
     }
 

@@ -10,24 +10,110 @@ import SwiftUI
 public struct ControlBadgeView: View {
     @Injected(\.colors) private var colors
 
+    enum Content {
+        case text(String, foreground: Color, background: Color)
+        case image(Image, foreground: Color, background: Color)
+    }
+
     /// The value to be displayed within the badge.
-    var value: String
+    var content: Content
 
     /// Initializes a control badge view with the specified value.
     /// - Parameter value: The value to display within the badge.
-    public init(_ value: String) {
-        self.value = value
+    public init(
+        _ value: String,
+        foreground: Color = InjectedValues[\.colors].textInverted,
+        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+    ) {
+        content = .text(
+            value,
+            foreground: foreground,
+            background: background
+        )
+    }
+
+    public init(
+        _ image: Image,
+        foreground: Color = InjectedValues[\.colors].textInverted,
+        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+    ) {
+        content = .image(
+            image,
+            foreground: foreground,
+            background: background
+        )
     }
 
     public var body: some View {
         TopRightView {
-            Text(value)
-                .minimumScaleFactor(0.3)
+            contentView
                 .frame(width: 14, height: 14)
                 .padding(2)
                 .font(.system(size: 12))
-                .foregroundColor(colors.textInverted)
-                .background(Circle().fill(colors.onlineIndicatorColor))
+                .foregroundColor(foregroundColor)
+                .background(Circle().fill(backgroundColor))
         }
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        switch content {
+        case let .text(string, _, _):
+            Text(string)
+                .minimumScaleFactor(0.3)
+        case let .image(image, _, _):
+            image
+        }
+    }
+
+    private var foregroundColor: Color {
+        switch content {
+        case let .text(_, foreground, _):
+            return foreground
+        case let .image(_, foreground, _):
+            return foreground
+        }
+    }
+
+    private var backgroundColor: Color {
+        switch content {
+        case let .text(_, _, background):
+            return background
+        case let .image(_, _, background):
+            return background
+        }
+    }
+}
+
+extension View {
+
+    @ViewBuilder
+    public func badge(
+        _ value: String,
+        foreground: Color = InjectedValues[\.colors].textInverted,
+        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+    ) -> some View {
+        overlay(
+            ControlBadgeView(
+                value,
+                foreground: foreground,
+                background: background
+            )
+        )
+    }
+
+    @ViewBuilder
+    public func badge(
+        _ value: Image,
+        foreground: Color = InjectedValues[\.colors].textInverted,
+        background: Color = InjectedValues[\.colors].onlineIndicatorColor
+    ) -> some View {
+        overlay(
+            ControlBadgeView(
+                value,
+                foreground: foreground,
+                background: background
+            )
+        )
     }
 }

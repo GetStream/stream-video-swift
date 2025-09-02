@@ -12,9 +12,15 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
     private lazy var mockCoordinatorStack: MockWebRTCCoordinatorStack! = .init(
         videoConfig: Self.videoConfig
     )
+    private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var subject: WebRTCAuthenticator! = .init()
 
     // MARK: - Lifecycle
+
+    override func setUp() {
+        super.setUp()
+        _ = mockPermissions
+    }
 
     override class func tearDown() {
         Self.videoConfig = nil
@@ -22,7 +28,9 @@ final class WebRTCAuthenticator_Tests: XCTestCase, @unchecked Sendable {
     }
 
     override func tearDown() {
+        mockPermissions.dismantle()
         mockCoordinatorStack = nil
+        mockPermissions = nil
         subject = nil
         super.tearDown()
     }

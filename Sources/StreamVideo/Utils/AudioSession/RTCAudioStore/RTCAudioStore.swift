@@ -166,21 +166,6 @@ final class RTCAudioStore: @unchecked Sendable {
         }
     }
 
-    // MARK: - Helpers
-
-    /// Requests record permission from the user, updating state.
-    func requestRecordPermission() async -> Bool {
-        guard
-            !state.hasRecordingPermission
-        else {
-            return true
-        }
-
-        let result = await session.requestRecordPermission()
-        dispatch(.audioSession(.setHasRecordingPermission(result)))
-        return result
-    }
-
     // MARK: - Private Helpers
 
     private func perform(

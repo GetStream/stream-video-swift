@@ -37,6 +37,14 @@ enum SystemEnvironment {
         #endif
     }
 
+    static var isTests: Bool {
+        #if STREAM_TESTS
+        return NSClassFromString("XCTest") != nil
+        #else
+        return false
+        #endif
+    }
+
     private static var hasAppStoreReceipt: Bool {
         if let appStoreReceipt = Bundle.main.appStoreReceiptURL {
             return appStoreReceipt.lastPathComponent != "sandboxReceipt"

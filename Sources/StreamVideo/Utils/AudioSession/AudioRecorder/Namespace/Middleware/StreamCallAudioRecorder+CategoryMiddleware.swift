@@ -20,7 +20,7 @@ extension StreamCallAudioRecorder.Namespace {
     ///
     /// Recording stops for all other categories (e.g., `.playback`,
     /// `.ambient`, `.soloAmbient`).
-    final class CategoryMiddleware: Middleware<StreamCallAudioRecorder.Namespace> {
+    final class CategoryMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
         /// The audio store for monitoring session category changes.
         @Injected(\.audioStore) private var audioStore
 

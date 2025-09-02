@@ -9,21 +9,23 @@ import XCTest
 
 final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoTestCase, @unchecked Sendable {
 
-    private var mockAudioStore: MockRTCAudioStore! = .init()
     private var actionsReceived: [(StreamCallAudioRecorder.Namespace.Action, Store<StreamCallAudioRecorder.Namespace>.Delay)]! = []
     private var audioRecorder: MockAVAudioRecorder!
+    private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var subject: StreamCallAudioRecorder
         .Namespace
         .AVAudioRecorderMiddleware! = .init(audioRecorder: audioRecorder)
 
     override func setUp() async throws {
         try await super.setUp()
-        mockAudioStore.makeShared()
+        _ = mockPermissions
         audioRecorder = try .build()
         _ = subject
     }
 
     override func tearDown() {
+        mockPermissions.dismantle()
+        
         subject = nil
         audioRecorder = nil
         actionsReceived = nil
@@ -33,7 +35,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     // MARK: - setIsRecording
 
     func test_setIsRecordingTrue_shouldRecordFalse_requestRecordPermissionWasNotCalled() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: false, meter: 0),
             action: .setIsRecording(true),
@@ -43,11 +44,10 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         )
 
         await wait(for: 0.1)
-        XCTAssertEqual(mockAudioStore.session.timesCalled(.requestRecordPermission), 0)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
     func test_setIsRecordingTrue_shouldRecordTrue_isMeteringEnabledShouldBeSetToTrue() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
             action: .setIsRecording(true),
@@ -60,7 +60,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     }
 
     func test_setIsRecordingTrue_shouldRecordTrue_requestRecordPermissionWasCalled() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
             action: .setIsRecording(true),
@@ -70,12 +69,12 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         )
 
         await fulfillment {
-            (self.mockAudioStore.audioStore.session as? MockAudioSession)?.timesCalled(.requestRecordPermission) == 1
+            self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1
         }
     }
 
     func test_setIsRecordingTrue_shouldRecordTrueRequestRecordPermissionFalse_isMeteringEnabledShouldBeSetToFalse() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: false)
+        mockPermissions.stubMicrophonePermission(.denied)
         let validation = expectation(description: "Dispatcher was called.")
         subject.dispatcher = .init { action, _, _, _, _ in
             switch action {
@@ -98,7 +97,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     }
 
     func test_setIsRecordingTrue_shouldRecordTrueRequestRecordPermissionTrue_recordWasCalled() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
             action: .setIsRecording(true),
@@ -111,7 +109,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     }
 
     func test_setIsRecordingTrue_shouldRecordTrueRequestRecordPermissionTrueRecordFalse_isMeteringEnabledShouldBeSetToFalse() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         audioRecorder.stub(for: .record, with: false)
         let validation = expectation(description: "Dispatcher was called.")
         subject.dispatcher = .init { action, _, _, _, _ in
@@ -135,7 +132,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     }
 
     func test_setIsRecordingTrue_shouldRecordTrueRequestRecordPermissionTrueRecordTrue_observesMeters() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         audioRecorder.stub(for: .record, with: true)
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
@@ -194,7 +190,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         )
 
         await wait(for: 0.1)
-        XCTAssertEqual(mockAudioStore.session.timesCalled(.requestRecordPermission), 0)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
     func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingTrue_requestRecordPermissionWasNotCalled() async {
@@ -207,7 +203,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         )
 
         await wait(for: 0.1)
-        XCTAssertEqual(mockAudioStore.session.timesCalled(.requestRecordPermission), 0)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
     func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_requestRecordPermissionWasCalled() async {
@@ -219,7 +215,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
             line: #line
         )
 
-        await fulfillment { self.mockAudioStore.session.timesCalled(.requestRecordPermission) == 1 }
+        await fulfillment { self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1 }
     }
 
     // MARK: - setShouldRecord
@@ -234,7 +230,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         )
 
         await wait(for: 0.1)
-        XCTAssertEqual(mockAudioStore.session.timesCalled(.requestRecordPermission), 0)
+        XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
     func test_setShouldRecordTrue_isRecordingFalse_requestRecordPermissionWasCalled() async {
@@ -246,7 +242,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
             line: #line
         )
 
-        await fulfillment { self.mockAudioStore.session.timesCalled(.requestRecordPermission) == 1 }
+        await fulfillment { self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1 }
     }
 
     func test_setShouldRecordFalse_isRecordingTrue_stopWasCalled() async {
@@ -269,7 +265,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     // MARK: - Private Helpers
 
     private func prepareAsRecording() async {
-        mockAudioStore.session.stub(for: .requestRecordPermission, with: true)
         audioRecorder.stub(for: .record, with: true)
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),

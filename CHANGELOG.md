@@ -4,7 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### ✅ Added
+- When the user is missing a permission, the SDK will prompt them to accept any missing permission. [#915](https://github.com/GetStream/stream-video-swift/pull/915)
+
 ### 🔄 Changed
+
+# [1.32.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.32.0)
+_September 01, 2025_
+
+### 🔄 Changed
+- Improved the LastParticipantLeavePolicy to be more robust. [#925](https://github.com/GetStream/stream-video-swift/pull/925)
 
 # [1.31.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.31.0)
 _August 21, 2025_
@@ -15,7 +24,6 @@ _August 21, 2025_
 
 # [1.30.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.30.0)
 _August 08, 2025_
-
 
 ### ✅ Added
 - The SDK now handles the interruptions produced from AVCaptureSession to ensure video capturing is active when needed. [#907](https://github.com/GetStream/stream-video-swift/pull/907)

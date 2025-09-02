@@ -5,7 +5,7 @@
 import Foundation
 @testable import StreamVideo
 
-final class MockReducer<Namespace: StoreNamespace>: Reducer<Namespace> {
+final class MockReducer<Namespace: StoreNamespace>: Reducer<Namespace>, @unchecked Sendable {
 
     struct Input {
         var action: Namespace.Action

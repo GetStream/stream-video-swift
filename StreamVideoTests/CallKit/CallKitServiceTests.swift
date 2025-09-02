@@ -20,6 +20,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     private var localizedCallerName: String! = "Test Caller"
     private var callerId: String! = "test@example.com"
     private var mockAudioStore: MockRTCAudioStore! = .init()
+    private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var mockedStreamVideo: MockStreamVideo! = MockStreamVideo(
         stubbedProperty: [
             MockStreamVideo.propertyKey(for: \.state): MockStreamVideo.State(user: user)
@@ -37,6 +38,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
 
     override func setUp() {
         super.setUp()
+        _ = mockPermissions
         InjectedValues[\.uuidFactory] = uuidFactory
         mockAudioStore.makeShared()
         subject.callController = callController
@@ -45,6 +47,7 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
     }
 
     override func tearDown() {
+        mockPermissions.dismantle()
         subject = nil
         uuidFactory = nil
         callController = nil
@@ -361,6 +364,60 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    // MARK: missingPermissionPolicy
+
+    @MainActor
+    func test_reportIncomingCall_hasNoMicrophonePermission_missingPermissionPolicyIsNone_callWasNotEnded() async throws {
+        stubCall(
+            response: .dummy(
+                call: .dummy(
+                    session: .dummy(
+                        acceptedBy: [:],
+                        rejectedBy: [:]
+                    )
+                ),
+                members: [.dummy(userId: user.id)]
+            )
+        )
+        subject.streamVideo = mockedStreamVideo
+        subject.missingPermissionPolicy = .none
+        mockPermissions.stubMicrophonePermission(.denied)
+
+        try await assertNotRequestTransaction(CXEndCallAction.self) {
+            subject.reportIncomingCall(
+                cid,
+                localizedCallerName: localizedCallerName,
+                callerId: callerId,
+                hasVideo: false
+            ) { _ in }
+        }
+    }
+
+    @MainActor
+    func test_reportIncomingCall_hasNoMicrophonePermission_missingPermissionPolicyIsEndCall_callWasEnded() async throws {
+        stubCall(
+            response: .dummy(
+                call: .dummy(
+                    cid: cid,
+                    id: callId,
+                    type: .default
+                )
+            )
+        )
+        subject.streamVideo = mockedStreamVideo
+        subject.missingPermissionPolicy = .endCall
+        mockPermissions.stubMicrophonePermission(.denied)
+
+        try await assertRequestTransaction(CXEndCallAction.self) {
+            self.subject.reportIncomingCall(
+                self.cid,
+                localizedCallerName: self.localizedCallerName,
+                callerId: self.callerId,
+                hasVideo: false
+            ) { _ in }
+        }
+    }
+
     // MARK: - accept
 
     @MainActor
@@ -436,16 +493,46 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         }
     }
 
+    @MainActor
+    func test_accept_noMicrophonePermissions_callWasMutedAsExpected() async throws {
+        mockPermissions.stubMicrophonePermission(.denied)
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        _ = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+        subject.missingPermissionPolicy = .none
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+
+        try await assertRequestTransaction(CXSetMutedCallAction.self) {
+            // Accept call
+            subject.provider(
+                callProvider,
+                perform: CXAnswerCallAction(
+                    call: firstCallUUID
+                )
+            )
+        }
+    }
+
     // MARK: - mute
 
     @MainActor
-    func test_mute_callWasMutedAsExpected() async throws {
+    func test_mute_hasMicrophonePermission_callWasMutedAsExpected() async throws {
         let customCallSettings = CallSettings(audioOn: true, videoOn: true)
         subject.callSettings = customCallSettings
         let firstCallUUID = UUID()
         uuidFactory.getResult = firstCallUUID
         let call = stubCall(response: defaultGetCallResponse)
         subject.streamVideo = mockedStreamVideo
+        subject.missingPermissionPolicy = .none
 
         subject.reportIncomingCall(
             cid,
@@ -481,6 +568,38 @@ final class CallKitServiceTests: XCTestCase, @unchecked Sendable {
         )
 
         await fulfillment { call.microphone.status == .disabled }
+    }
+
+    @MainActor
+    func test_mute_noMicrophonePermission_attemptsToUnmute_actionFails() async throws {
+        let firstCallUUID = UUID()
+        uuidFactory.getResult = firstCallUUID
+        let call = stubCall(response: defaultGetCallResponse)
+        subject.streamVideo = mockedStreamVideo
+        subject.missingPermissionPolicy = .none
+        let callStateWithMicOff = CallState()
+        callStateWithMicOff.callSettings = .init(audioOn: false)
+        call.stub(for: \.state, with: callStateWithMicOff)
+        mockPermissions.stubMicrophonePermission(.denied)
+
+        subject.reportIncomingCall(
+            cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId,
+            hasVideo: false
+        ) { _ in }
+
+        await waitExpectation(timeout: 1)
+        XCTAssertEqual(call.state.callSettings.audioOn, false)
+
+        // Once we have joined the call
+        subject.provider(
+            callProvider,
+            perform: CXSetMutedCallAction(call: firstCallUUID, muted: false)
+        )
+
+        await waitExpectation(timeout: 1)
+        XCTAssertEqual(call.state.callSettings.audioOn, false)
     }
 
     // MARK: - callAccepted

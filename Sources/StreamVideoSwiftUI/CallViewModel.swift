@@ -669,7 +669,7 @@ open class CallViewModel: ObservableObject {
         isMinimized = false
         localVideoPrimary = false
         hasAcceptedCall = false
-        Task { await audioRecorder.stopRecording() }
+        audioRecorder.stopRecording()
 
         // Reset the CallSettings so that the next Call will be joined
         // with either new overrides or the values provided from the API.
@@ -733,9 +733,7 @@ open class CallViewModel: ObservableObject {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 setCallingState(.idle)
-                Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
-                    await self?.audioRecorder.stopRecording()
-                }
+                audioRecorder.stopRecording()
                 enteringCallTask = nil
             }
         }

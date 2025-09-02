@@ -292,6 +292,22 @@ public class CallState: ObservableObject {
             captioning = true
         case .typeCallClosedCaptionsStoppedEvent:
             captioning = false
+        case .typeAppUpdatedEvent:
+            break
+        case .typeCallFrameRecordingFailedEvent:
+            break
+        case .typeCallFrameRecordingFrameReadyEvent:
+            break
+        case .typeCallFrameRecordingStartedEvent:
+            break
+        case .typeCallFrameRecordingStoppedEvent:
+            break
+        case .typeKickedUserEvent:
+            break
+        case .typeCallStatsReportReadyEvent:
+            break
+        case .typeCallUserFeedbackSubmittedEvent:
+            break
         }
     }
     

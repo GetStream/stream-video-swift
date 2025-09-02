@@ -10,6 +10,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
 
     private nonisolated(unsafe) static var videoConfig: VideoConfig! = .dummy()
 
+    private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var defaultAPI: DefaultAPI! = DefaultAPI(
         basePath: "example.com",
         transport: httpClient,
@@ -41,7 +42,14 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    override func setUp() {
+        super.setUp()
+        _ = mockPermissions
+    }
+
     override func tearDown() {
+        mockPermissions.dismantle()
+
         subject = nil
         mockWebRTCCoordinatorFactory = nil
         cachedLocation = nil
@@ -51,6 +59,7 @@ final class CallController_Tests: StreamVideoTestCase, @unchecked Sendable {
         user = nil
         defaultAPI = nil
         httpClient = nil
+        mockPermissions = nil
         super.tearDown()
     }
 

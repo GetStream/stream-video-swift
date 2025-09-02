@@ -13,6 +13,7 @@ private class WSEventMapping: Decodable {
 }
 
 public enum VideoEvent: Codable, Hashable {
+    case typeAppUpdatedEvent(AppUpdatedEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeClosedCaptionEvent(ClosedCaptionEvent)
@@ -22,9 +23,14 @@ public enum VideoEvent: Codable, Hashable {
     case typeCallCreatedEvent(CallCreatedEvent)
     case typeCallDeletedEvent(CallDeletedEvent)
     case typeCallEndedEvent(CallEndedEvent)
+    case typeCallFrameRecordingFailedEvent(CallFrameRecordingFailedEvent)
+    case typeCallFrameRecordingFrameReadyEvent(CallFrameRecordingFrameReadyEvent)
+    case typeCallFrameRecordingStartedEvent(CallFrameRecordingStartedEvent)
+    case typeCallFrameRecordingStoppedEvent(CallFrameRecordingStoppedEvent)
     case typeCallHLSBroadcastingFailedEvent(CallHLSBroadcastingFailedEvent)
     case typeCallHLSBroadcastingStartedEvent(CallHLSBroadcastingStartedEvent)
     case typeCallHLSBroadcastingStoppedEvent(CallHLSBroadcastingStoppedEvent)
+    case typeKickedUserEvent(KickedUserEvent)
     case typeCallLiveStartedEvent(CallLiveStartedEvent)
     case typeCallMemberAddedEvent(CallMemberAddedEvent)
     case typeCallMemberRemovedEvent(CallMemberRemovedEvent)
@@ -49,12 +55,14 @@ public enum VideoEvent: Codable, Hashable {
     case typeCallSessionParticipantJoinedEvent(CallSessionParticipantJoinedEvent)
     case typeCallSessionParticipantLeftEvent(CallSessionParticipantLeftEvent)
     case typeCallSessionStartedEvent(CallSessionStartedEvent)
+    case typeCallStatsReportReadyEvent(CallStatsReportReadyEvent)
     case typeCallTranscriptionFailedEvent(CallTranscriptionFailedEvent)
     case typeCallTranscriptionReadyEvent(CallTranscriptionReadyEvent)
     case typeCallTranscriptionStartedEvent(CallTranscriptionStartedEvent)
     case typeCallTranscriptionStoppedEvent(CallTranscriptionStoppedEvent)
     case typeUnblockedUserEvent(UnblockedUserEvent)
     case typeCallUpdatedEvent(CallUpdatedEvent)
+    case typeCallUserFeedbackSubmittedEvent(CallUserFeedbackSubmittedEvent)
     case typeCallUserMutedEvent(CallUserMutedEvent)
     case typeConnectionErrorEvent(ConnectionErrorEvent)
     case typeConnectedEvent(ConnectedEvent)
@@ -64,6 +72,8 @@ public enum VideoEvent: Codable, Hashable {
 
     public var type: String {
         switch self {
+        case let .typeAppUpdatedEvent(value):
+            return value.type
         case let .typeCallAcceptedEvent(value):
             return value.type
         case let .typeBlockedUserEvent(value):
@@ -82,11 +92,21 @@ public enum VideoEvent: Codable, Hashable {
             return value.type
         case let .typeCallEndedEvent(value):
             return value.type
+        case let .typeCallFrameRecordingFailedEvent(value):
+            return value.type
+        case let .typeCallFrameRecordingFrameReadyEvent(value):
+            return value.type
+        case let .typeCallFrameRecordingStartedEvent(value):
+            return value.type
+        case let .typeCallFrameRecordingStoppedEvent(value):
+            return value.type
         case let .typeCallHLSBroadcastingFailedEvent(value):
             return value.type
         case let .typeCallHLSBroadcastingStartedEvent(value):
             return value.type
         case let .typeCallHLSBroadcastingStoppedEvent(value):
+            return value.type
+        case let .typeKickedUserEvent(value):
             return value.type
         case let .typeCallLiveStartedEvent(value):
             return value.type
@@ -136,6 +156,8 @@ public enum VideoEvent: Codable, Hashable {
             return value.type
         case let .typeCallSessionStartedEvent(value):
             return value.type
+        case let .typeCallStatsReportReadyEvent(value):
+            return value.type
         case let .typeCallTranscriptionFailedEvent(value):
             return value.type
         case let .typeCallTranscriptionReadyEvent(value):
@@ -147,6 +169,8 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeUnblockedUserEvent(value):
             return value.type
         case let .typeCallUpdatedEvent(value):
+            return value.type
+        case let .typeCallUserFeedbackSubmittedEvent(value):
             return value.type
         case let .typeCallUserMutedEvent(value):
             return value.type
@@ -165,6 +189,8 @@ public enum VideoEvent: Codable, Hashable {
 
     public var rawValue: Event {
         switch self {
+        case let .typeAppUpdatedEvent(value):
+            return value
         case let .typeCallAcceptedEvent(value):
             return value
         case let .typeBlockedUserEvent(value):
@@ -183,11 +209,21 @@ public enum VideoEvent: Codable, Hashable {
             return value
         case let .typeCallEndedEvent(value):
             return value
+        case let .typeCallFrameRecordingFailedEvent(value):
+            return value
+        case let .typeCallFrameRecordingFrameReadyEvent(value):
+            return value
+        case let .typeCallFrameRecordingStartedEvent(value):
+            return value
+        case let .typeCallFrameRecordingStoppedEvent(value):
+            return value
         case let .typeCallHLSBroadcastingFailedEvent(value):
             return value
         case let .typeCallHLSBroadcastingStartedEvent(value):
             return value
         case let .typeCallHLSBroadcastingStoppedEvent(value):
+            return value
+        case let .typeKickedUserEvent(value):
             return value
         case let .typeCallLiveStartedEvent(value):
             return value
@@ -237,6 +273,8 @@ public enum VideoEvent: Codable, Hashable {
             return value
         case let .typeCallSessionStartedEvent(value):
             return value
+        case let .typeCallStatsReportReadyEvent(value):
+            return value
         case let .typeCallTranscriptionFailedEvent(value):
             return value
         case let .typeCallTranscriptionReadyEvent(value):
@@ -248,6 +286,8 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeUnblockedUserEvent(value):
             return value
         case let .typeCallUpdatedEvent(value):
+            return value
+        case let .typeCallUserFeedbackSubmittedEvent(value):
             return value
         case let .typeCallUserMutedEvent(value):
             return value
@@ -267,6 +307,8 @@ public enum VideoEvent: Codable, Hashable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
+        case let .typeAppUpdatedEvent(value):
+            try container.encode(value)
         case let .typeCallAcceptedEvent(value):
             try container.encode(value)
         case let .typeBlockedUserEvent(value):
@@ -285,11 +327,21 @@ public enum VideoEvent: Codable, Hashable {
             try container.encode(value)
         case let .typeCallEndedEvent(value):
             try container.encode(value)
+        case let .typeCallFrameRecordingFailedEvent(value):
+            try container.encode(value)
+        case let .typeCallFrameRecordingFrameReadyEvent(value):
+            try container.encode(value)
+        case let .typeCallFrameRecordingStartedEvent(value):
+            try container.encode(value)
+        case let .typeCallFrameRecordingStoppedEvent(value):
+            try container.encode(value)
         case let .typeCallHLSBroadcastingFailedEvent(value):
             try container.encode(value)
         case let .typeCallHLSBroadcastingStartedEvent(value):
             try container.encode(value)
         case let .typeCallHLSBroadcastingStoppedEvent(value):
+            try container.encode(value)
+        case let .typeKickedUserEvent(value):
             try container.encode(value)
         case let .typeCallLiveStartedEvent(value):
             try container.encode(value)
@@ -339,6 +391,8 @@ public enum VideoEvent: Codable, Hashable {
             try container.encode(value)
         case let .typeCallSessionStartedEvent(value):
             try container.encode(value)
+        case let .typeCallStatsReportReadyEvent(value):
+            try container.encode(value)
         case let .typeCallTranscriptionFailedEvent(value):
             try container.encode(value)
         case let .typeCallTranscriptionReadyEvent(value):
@@ -350,6 +404,8 @@ public enum VideoEvent: Codable, Hashable {
         case let .typeUnblockedUserEvent(value):
             try container.encode(value)
         case let .typeCallUpdatedEvent(value):
+            try container.encode(value)
+        case let .typeCallUserFeedbackSubmittedEvent(value):
             try container.encode(value)
         case let .typeCallUserMutedEvent(value):
             try container.encode(value)
@@ -369,7 +425,10 @@ public enum VideoEvent: Codable, Hashable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dto = try container.decode(WSEventMapping.self)
-        if dto.type == "call.accepted" {
+        if dto.type == "app.updated" {
+            let value = try container.decode(AppUpdatedEvent.self)
+            self = .typeAppUpdatedEvent(value)
+        } else if dto.type == "call.accepted" {
             let value = try container.decode(CallAcceptedEvent.self)
             self = .typeCallAcceptedEvent(value)
         } else if dto.type == "call.blocked_user" {
@@ -396,6 +455,18 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "call.ended" {
             let value = try container.decode(CallEndedEvent.self)
             self = .typeCallEndedEvent(value)
+        } else if dto.type == "call.frame_recording_failed" {
+            let value = try container.decode(CallFrameRecordingFailedEvent.self)
+            self = .typeCallFrameRecordingFailedEvent(value)
+        } else if dto.type == "call.frame_recording_ready" {
+            let value = try container.decode(CallFrameRecordingFrameReadyEvent.self)
+            self = .typeCallFrameRecordingFrameReadyEvent(value)
+        } else if dto.type == "call.frame_recording_started" {
+            let value = try container.decode(CallFrameRecordingStartedEvent.self)
+            self = .typeCallFrameRecordingStartedEvent(value)
+        } else if dto.type == "call.frame_recording_stopped" {
+            let value = try container.decode(CallFrameRecordingStoppedEvent.self)
+            self = .typeCallFrameRecordingStoppedEvent(value)
         } else if dto.type == "call.hls_broadcasting_failed" {
             let value = try container.decode(CallHLSBroadcastingFailedEvent.self)
             self = .typeCallHLSBroadcastingFailedEvent(value)
@@ -405,6 +476,9 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "call.hls_broadcasting_stopped" {
             let value = try container.decode(CallHLSBroadcastingStoppedEvent.self)
             self = .typeCallHLSBroadcastingStoppedEvent(value)
+        } else if dto.type == "call.kicked_user" {
+            let value = try container.decode(KickedUserEvent.self)
+            self = .typeKickedUserEvent(value)
         } else if dto.type == "call.live_started" {
             let value = try container.decode(CallLiveStartedEvent.self)
             self = .typeCallLiveStartedEvent(value)
@@ -477,6 +551,9 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "call.session_started" {
             let value = try container.decode(CallSessionStartedEvent.self)
             self = .typeCallSessionStartedEvent(value)
+        } else if dto.type == "call.stats_report_ready" {
+            let value = try container.decode(CallStatsReportReadyEvent.self)
+            self = .typeCallStatsReportReadyEvent(value)
         } else if dto.type == "call.transcription_failed" {
             let value = try container.decode(CallTranscriptionFailedEvent.self)
             self = .typeCallTranscriptionFailedEvent(value)
@@ -495,6 +572,9 @@ public enum VideoEvent: Codable, Hashable {
         } else if dto.type == "call.updated" {
             let value = try container.decode(CallUpdatedEvent.self)
             self = .typeCallUpdatedEvent(value)
+        } else if dto.type == "call.user_feedback_submitted" {
+            let value = try container.decode(CallUserFeedbackSubmittedEvent.self)
+            self = .typeCallUserFeedbackSubmittedEvent(value)
         } else if dto.type == "call.user_muted" {
             let value = try container.decode(CallUserMutedEvent.self)
             self = .typeCallUserMutedEvent(value)
