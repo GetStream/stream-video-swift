@@ -27,7 +27,7 @@ func configureSentry() {
         ]
     } else {
         LogConfig.level = .debug
-        LogConfig.webRTCLogsEnabled = true
+        LogConfig.webRTCLogsEnabled = false
         LogConfig.destinationTypes = [
             MemoryLogDestination.self,
             OSLogDestination.self
