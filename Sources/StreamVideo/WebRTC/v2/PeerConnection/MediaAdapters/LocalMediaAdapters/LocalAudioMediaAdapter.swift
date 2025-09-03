@@ -217,13 +217,6 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     else {
                         throw ClientError("Microphone permission request denied.")
                     }
-                    // This ensures that the session is correctly configured
-                    // ** before ** WebRTC starts publishing tracks.
-                    audioStore.restartAudioSession(
-                        category: audioStore.state.category,
-                        mode: audioStore.state.mode,
-                        options: audioStore.state.options
-                    )
                 }
             }
 

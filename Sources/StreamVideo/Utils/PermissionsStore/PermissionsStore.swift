@@ -80,13 +80,68 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async throws -> Bool {
-        try await processAccessRequest(
-            keyPath: \.microphonePermission,
-            requestAction: .requestMicrophonePermission,
-            file: file,
-            function: function,
-            line: line
-        )
+        switch store.state.microphonePermission {
+        case .unknown:
+            log.debug(
+                "Store identifier:\(Namespace.identifier) requesting permission for keyPath:microphonePermission.",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+
+            store.dispatch(.requestMicrophonePermission)
+
+            let result = try await store.publisher(\.microphonePermission)
+                .filter { $0 != .requesting && $0 != .unknown }
+                .nextValue() == .granted
+
+            log.debug(
+                "Store identifier:\(Namespace.identifier) permission request for keyPath:microphonePermission completed with grant result:\(result).",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+
+            let state = audioStore.state
+            try await audioStore.dispatchAsync([
+                .audioSession(.isActive(false)),
+                .generic(.delay(seconds: 0.2)),
+                .audioSession(.isAudioEnabled(false)),
+                .generic(.delay(seconds: 0.2)),
+                .audioSession(
+                    .setCategory(
+                        state.category,
+                        mode: state.mode,
+                        options: state.options
+                    )
+                ),
+                .generic(.delay(seconds: 0.2)),
+                .audioSession(.isAudioEnabled(true)),
+                .generic(.delay(seconds: 0.2)),
+                .audioSession(.isActive(true))
+            ])
+
+            return result
+
+        case .requesting:
+            let result = try await store.publisher(\.microphonePermission)
+                .filter { $0 != .requesting && $0 != .unknown }
+                .nextValue() == .granted
+
+            log.debug(
+                "Store identifier:\(Namespace.identifier) permission request for keyPath:microphonePermission completed with grant result:\(result).",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+            return result
+
+        case .granted:
+            return true
+
+        case .denied:
+            return false
+        }
     }
 
     /// Requests camera permission from the user.
