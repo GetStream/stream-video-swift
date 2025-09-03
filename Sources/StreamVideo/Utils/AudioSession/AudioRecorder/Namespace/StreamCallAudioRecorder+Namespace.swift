@@ -66,7 +66,8 @@ extension StreamCallAudioRecorder {
                 CategoryMiddleware(),
                 AVAudioRecorderMiddleware(),
                 ActiveCallMiddleware(),
-                ApplicationStateMiddleware()
+                ApplicationStateMiddleware(),
+                AudioSessionActiveStateMiddleware()
             ]
         }
 

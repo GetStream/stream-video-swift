@@ -40,6 +40,11 @@ extension User {
                 "https://getstream.io/static/62cdddcc7759dc8c3ba5b1f67153658c/802d2/ilias-pavlidakis.webp"
             ),
             (
+                "alexey",
+                "Alexey",
+                "https://ca.slack-edge.com/T02RM6X6B-U034BHQ5PT2-9d0c17bccd5a-512"
+            ),
+            (
                 "marcelo",
                 "Marcelo",
                 "https://getstream.io/static/aaf5fb17dcfd0a3dd885f62bd21b325a/802d2/marcelo-pires.webp"
