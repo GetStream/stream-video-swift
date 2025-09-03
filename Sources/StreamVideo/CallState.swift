@@ -430,13 +430,25 @@ public class CallState: ObservableObject {
         }
     }
     
-    internal func update(callSettings: CallSettings) {
+    internal func update(
+        callSettings: CallSettings,
+        file: StaticString = #fileID,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
         guard callSettings != self.callSettings else {
             localCallSettingsUpdate = true
             return
         }
+        let oldValue = self.callSettings
         self.callSettings = callSettings
         localCallSettingsUpdate = true
+        log.debug(
+            "CallSettings updated from \(oldValue) → \(callSettings).",
+            functionName: function,
+            fileName: file,
+            lineNumber: line
+        )
     }
     
     internal func update(statsReport: CallStatsReport?) {

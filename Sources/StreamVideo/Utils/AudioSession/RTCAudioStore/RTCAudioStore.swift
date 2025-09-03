@@ -58,6 +58,7 @@ final class RTCAudioStore: @unchecked Sendable {
             .sink { _ in }
 
         add(RTCAudioSessionReducer(store: self))
+        add(RTCAudioStore.MicrophonePermissionMiddleware(self))
 
         dispatch(.audioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)))
         dispatch(.audioSession(.useManualAudio(true)))
@@ -162,6 +163,39 @@ final class RTCAudioStore: @unchecked Sendable {
                     fileName: file,
                     lineNumber: line
                 )
+            }
+        }
+    }
+
+    func dispatch(
+        _ actions: [RTCAudioStoreAction],
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+            for action in actions {
+                do {
+                    await applyDelayIfRequired(for: action)
+
+                    try perform(
+                        action,
+                        file: file,
+                        function: function,
+                        line: line
+                    )
+                } catch {
+                    log.error(
+                        error,
+                        subsystems: .audioSession,
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
+                }
             }
         }
     }

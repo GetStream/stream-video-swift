@@ -35,6 +35,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     }
 
     @Injected(\.permissions) private var permissions
+    @Injected(\.applicationStateAdapter) private var applicationStateAdapter
 
     // Properties for user, API key, call ID, video configuration, and factories.
     let unifiedSessionId: String = UUID().uuidString
@@ -484,6 +485,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         lineNumber: UInt = #line,
         _ operation: @Sendable @escaping (CallSettings) -> CallSettings
     ) {
+        let applicationStateAdapter = self.applicationStateAdapter
         callSettingsProcessingQueue.addTaskOperation { [weak self] in
             guard
                 let self
@@ -495,11 +497,19 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             let currentCallSettings = await callSettings
             var updatedCallSettings = operation(currentCallSettings)
 
-            if !permissions.hasCameraPermission, updatedCallSettings.videoOn {
+            if
+                !permissions.hasCameraPermission,
+                updatedCallSettings.videoOn,
+                (!permissions.canRequestCameraPermission || applicationStateAdapter.state != .foreground)
+            {
                 updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
             }
 
-            if !permissions.hasMicrophonePermission, updatedCallSettings.audioOn {
+            if
+                !permissions.hasMicrophonePermission,
+                updatedCallSettings.audioOn,
+                (!permissions.canRequestMicrophonePermission || applicationStateAdapter.state != .foreground)
+            {
                 updatedCallSettings = updatedCallSettings.withUpdatedAudioState(false)
             }
 
@@ -518,7 +528,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             }
 
             try await publisher.didUpdateCallSettings(updatedCallSettings)
-            log.debug("Publisher callSettings updated: \(updatedCallSettings).", subsystems: .webRTC)
+            log.debug(
+                "Publisher callSettings updated: \(updatedCallSettings).",
+                subsystems: .webRTC,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
         }
     }
 

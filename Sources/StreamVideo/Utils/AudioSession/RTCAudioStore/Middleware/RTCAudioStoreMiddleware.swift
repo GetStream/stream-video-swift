@@ -8,6 +8,8 @@ import Foundation
 /// Implementers can observe or modify actions as they are processed, enabling custom behavior or side effects.
 protocol RTCAudioStoreMiddleware: AnyObject {
 
+    var store: RTCAudioStore? { get }
+
     /// Applies an action to the RTCAudioStore state, with context information.
     ///
     /// - Parameters:

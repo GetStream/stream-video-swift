@@ -704,6 +704,8 @@
 		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		40C4E8322E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */; };
 		40C4E8352E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */; };
+		40C4E84B2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E84A2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift */; };
+		40C4E84E2E682C7000FC29BC /* RTCAudioStore+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E84D2E682C7000FC29BC /* RTCAudioStore+Convenience.swift */; };
 		40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689172C64DDC70054528A /* Publisher+TaskSink.swift */; };
 		40C708D62D8D729500D3501F /* Gleap in Frameworks */ = {isa = PBXBuildFile; productRef = 40C708D52D8D729500D3501F /* Gleap */; };
 		40C71B5A2E53565300733BF6 /* Store+Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B592E53565300733BF6 /* Store+Mocks.swift */; };
@@ -2318,6 +2320,8 @@
 		40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicyTests.swift; sourceTree = "<group>"; };
 		40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_Tests.swift; sourceTree = "<group>"; };
 		40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_EndCallTests.swift; sourceTree = "<group>"; };
+		40C4E84A2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+MicrophonePermissionMiddleware.swift"; sourceTree = "<group>"; };
+		40C4E84D2E682C7000FC29BC /* RTCAudioStore+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+Convenience.swift"; sourceTree = "<group>"; };
 		40C689172C64DDC70054528A /* Publisher+TaskSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+TaskSink.swift"; sourceTree = "<group>"; };
 		40C689192C64F74F0054528A /* SFUSignalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUSignalService.swift; sourceTree = "<group>"; };
 		40C6891D2C6661990054528A /* SFUEventAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUEventAdapter.swift; sourceTree = "<group>"; };
@@ -3385,6 +3389,7 @@
 		4019A24E2E40E08200CE70A4 /* RTCAudioStore */ = {
 			isa = PBXGroup;
 			children = (
+				40C4E84C2E682C6700FC29BC /* Extensions */,
 				4019A2812E4352CB00CE70A4 /* AudioSessions */,
 				4019A2642E40ECFA00CE70A4 /* Effects */,
 				4019A2552E40E26800CE70A4 /* State */,
@@ -3429,6 +3434,7 @@
 			isa = PBXGroup;
 			children = (
 				4019A2622E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift */,
+				40C4E84A2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift */,
 			);
 			path = Middleware;
 			sourceTree = "<group>";
@@ -5260,6 +5266,14 @@
 				40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */,
 			);
 			path = Policies;
+			sourceTree = "<group>";
+		};
+		40C4E84C2E682C6700FC29BC /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40C4E84D2E682C7000FC29BC /* RTCAudioStore+Convenience.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		40C71B572E5355F800733BF6 /* Store */ = {
@@ -8275,6 +8289,7 @@
 				842E70D82B91BE1700D2D68B /* StatsOptions.swift in Sources */,
 				4067F30B2CDA3359002E28BD /* AVAudioSessionRouteDescription+Convenience.swift in Sources */,
 				40E3635F2D0A18B10028C52A /* CameraZoomHandler.swift in Sources */,
+				40C4E84B2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift in Sources */,
 				40E363312D09DC650028C52A /* CGSize+DefaultValues.swift in Sources */,
 				40BBC48E2C623C6E002AEF92 /* PeerConnectionType.swift in Sources */,
 				84BAD77E2A6BFFB200733156 /* BroadcastSampleHandler.swift in Sources */,
@@ -8445,6 +8460,7 @@
 				40FB02012BAC8A4A00A1C206 /* CallKitService.swift in Sources */,
 				4091158C2E05BE9000F9135C /* ICEConnectionStateAdapter.swift in Sources */,
 				40944D0A2E4CDF9100088AF0 /* StreamCallAudioRecorder+CategoryMiddleware.swift in Sources */,
+				40C4E84E2E682C7000FC29BC /* RTCAudioStore+Convenience.swift in Sources */,
 				840F598F2A77FDCB00EF3EB2 /* PinRequest.swift in Sources */,
 				40AAD1932D2EF34400D10330 /* RTCCameraVideoCapturer+Convenience.swift in Sources */,
 				84DC389F29ADFCFD00946713 /* JoinCallResponse.swift in Sources */,

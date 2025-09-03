@@ -71,25 +71,11 @@ extension RTCAudioStore {
 
             store.dispatch(.audioSession(.isInterrupted(false)))
             if shouldResumeSession {
-                store.dispatch(.audioSession(.isActive(false)))
-                store.dispatch(.audioSession(.isAudioEnabled(false)))
-
-                store.dispatch(.generic(.delay(seconds: 0.2)))
-
-                store.dispatch(
-                    .audioSession(
-                        .setCategory(
-                            store.state.category,
-                            mode: store.state.mode,
-                            options: store.state.options
-                        )
-                    )
+                store.restartAudioSession(
+                    category: store.state.category,
+                    mode: store.state.mode,
+                    options: store.state.options
                 )
-
-                store.dispatch(.generic(.delay(seconds: 0.2)))
-
-                store.dispatch(.audioSession(.isAudioEnabled(true)))
-                store.dispatch(.audioSession(.isActive(true)))
             }
         }
     }

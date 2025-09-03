@@ -77,7 +77,7 @@ extension StreamCallAudioRecorder.Namespace {
                 }
 
             case let .setShouldRecord(value):
-                if value, !state.isRecording {
+                if value, !state.isRecording, !state.isInterrupted {
                     startRecording()
                 } else if !value, state.isRecording {
                     stopRecording()

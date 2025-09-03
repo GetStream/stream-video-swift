@@ -734,7 +734,10 @@ class CallController: @unchecked Sendable {
             .stateAdapter
             .$callSettings
             .removeDuplicates()
-            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in self?.call?.state.callSettings = $0 }
+            .sinkTask(storeIn: disposableBag) { @MainActor [weak self] in
+                self?.call?.state.update(callSettings: $0)
+                self?.call?.updateCallSettingsManagers(with: $0)
+            }
             .store(in: disposableBag)
     }
 }
