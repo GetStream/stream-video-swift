@@ -38,8 +38,18 @@ extension StreamCallAudioRecorder.Namespace {
             cancellable = audioStore
                 .publisher(\.isActive)
                 .sink { [weak self] isActive in
-                    // Update the store's interruption state
-                    self?.dispatcher?.dispatch(.setIsRecording(isActive), delay: .init(before: 0.2))
+                    guard let state = self?.stateProvider?() else {
+                        return
+                    }
+
+                    switch (isActive, state.shouldRecord, state.isRecording) {
+                    case (true, true, false):
+                        self?.dispatcher?.dispatch(.setIsRecording(isActive), delay: .init(before: 0.2))
+                    case (false, _, true):
+                        self?.dispatcher?.dispatch(.setIsRecording(isActive))
+                    default:
+                        break
+                    }
                 }
         }
     }

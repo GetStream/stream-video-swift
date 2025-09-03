@@ -32,12 +32,12 @@ extension User {
             (
                 "martin",
                 "Martin",
-                "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp"
+                "https://ca.slack-edge.com/T02RM6X6B-U02G45JTM6C-f4884eaf8fdd-512"
             ),
             (
                 "ilias",
                 "Ilias",
-                "https://getstream.io/static/62cdddcc7759dc8c3ba5b1f67153658c/802d2/ilias-pavlidakis.webp"
+                "https://ca.slack-edge.com/T02RM6X6B-U04LTJUTXFW-bc6e23c4e7ee-512"
             ),
             (
                 "alexey",

@@ -16,10 +16,13 @@ extension RTCAudioStore {
     /// mode, and options, with appropriate delays to ensure smooth recovery.
     final class InterruptionEffect: NSObject, RTCAudioSessionDelegate {
 
+        @Injected(\.permissions) private var permissions
+
         /// The audio session instance used to observe interruption events.
         private let session: AudioSessionProtocol
         /// A weak reference to the `RTCAudioStore` to dispatch state changes.
         private weak var store: RTCAudioStore?
+        private let disposableBag = DisposableBag()
 
         /// Creates a new `InterruptionEffect` that listens to the given `RTCAudioStore`'s audio session.
         ///
@@ -31,6 +34,15 @@ extension RTCAudioStore {
             super.init()
 
             session.add(self)
+
+            if !permissions.hasMicrophonePermission {
+                permissions
+                    .$hasMicrophonePermission
+                    .filter { $0 }
+                    .removeDuplicates()
+                    .sink { [weak self] _ in self?.restartAudioSession() }
+                    .store(in: disposableBag)
+            }
         }
 
         deinit {
@@ -65,18 +77,27 @@ extension RTCAudioStore {
             _ session: RTCAudioSession,
             shouldResumeSession: Bool
         ) {
-            guard let store else {
+            guard permissions.hasMicrophonePermission, let store else {
                 return
             }
 
             store.dispatch(.audioSession(.isInterrupted(false)))
             if shouldResumeSession {
-                store.restartAudioSession(
-                    category: store.state.category,
-                    mode: store.state.mode,
-                    options: store.state.options
-                )
+                restartAudioSession()
             }
+        }
+
+        // MARK: - Private Helpers
+
+        private func restartAudioSession() {
+            guard let store else {
+                return
+            }
+            store.restartAudioSession(
+                category: store.state.category,
+                mode: store.state.mode,
+                options: store.state.options
+            )
         }
     }
 }

@@ -53,12 +53,7 @@ final class RTCAudioStore: @unchecked Sendable {
         )
         processingQueue.underlyingQueue = underlyingQueue
 
-        logCancellable = stateSubject
-            .log(.debug, subsystems: .audioSession) { "AudioStore state updated to: \($0)" }
-            .sink { _ in }
-
         add(RTCAudioSessionReducer(store: self))
-        add(RTCAudioStore.MicrophonePermissionMiddleware(self))
 
         dispatch(.audioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)))
         dispatch(.audioSession(.useManualAudio(true)))
@@ -238,7 +233,7 @@ final class RTCAudioStore: @unchecked Sendable {
             stateSubject.send(updatedState)
 
             log.debug(
-                "Completed action: \(action).",
+                "Store identifier:RTCAudioStore completed action:\(action) state:\(state).",
                 subsystems: .audioSession,
                 functionName: function,
                 fileName: file,

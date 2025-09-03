@@ -704,7 +704,6 @@
 		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		40C4E8322E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */; };
 		40C4E8352E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */; };
-		40C4E84B2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E84A2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift */; };
 		40C4E84E2E682C7000FC29BC /* RTCAudioStore+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E84D2E682C7000FC29BC /* RTCAudioStore+Convenience.swift */; };
 		40C4E8502E683C9B00FC29BC /* StreamCallAudioRecorder+AudioSessionActiveStateMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E84F2E683C9B00FC29BC /* StreamCallAudioRecorder+AudioSessionActiveStateMiddleware.swift */; };
 		40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689172C64DDC70054528A /* Publisher+TaskSink.swift */; };
@@ -2321,7 +2320,6 @@
 		40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicyTests.swift; sourceTree = "<group>"; };
 		40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_Tests.swift; sourceTree = "<group>"; };
 		40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_EndCallTests.swift; sourceTree = "<group>"; };
-		40C4E84A2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+MicrophonePermissionMiddleware.swift"; sourceTree = "<group>"; };
 		40C4E84D2E682C7000FC29BC /* RTCAudioStore+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCAudioStore+Convenience.swift"; sourceTree = "<group>"; };
 		40C4E84F2E683C9B00FC29BC /* StreamCallAudioRecorder+AudioSessionActiveStateMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamCallAudioRecorder+AudioSessionActiveStateMiddleware.swift"; sourceTree = "<group>"; };
 		40C689172C64DDC70054528A /* Publisher+TaskSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+TaskSink.swift"; sourceTree = "<group>"; };
@@ -3436,7 +3434,6 @@
 			isa = PBXGroup;
 			children = (
 				4019A2622E40EB6000CE70A4 /* RTCAudioStoreMiddleware.swift */,
-				40C4E84A2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift */,
 			);
 			path = Middleware;
 			sourceTree = "<group>";
@@ -8292,7 +8289,6 @@
 				842E70D82B91BE1700D2D68B /* StatsOptions.swift in Sources */,
 				4067F30B2CDA3359002E28BD /* AVAudioSessionRouteDescription+Convenience.swift in Sources */,
 				40E3635F2D0A18B10028C52A /* CameraZoomHandler.swift in Sources */,
-				40C4E84B2E67682100FC29BC /* RTCAudioStore+MicrophonePermissionMiddleware.swift in Sources */,
 				40E363312D09DC650028C52A /* CGSize+DefaultValues.swift in Sources */,
 				40BBC48E2C623C6E002AEF92 /* PeerConnectionType.swift in Sources */,
 				84BAD77E2A6BFFB200733156 /* BroadcastSampleHandler.swift in Sources */,

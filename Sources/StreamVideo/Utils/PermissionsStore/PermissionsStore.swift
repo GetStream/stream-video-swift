@@ -81,20 +81,77 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) async throws -> Bool {
-        switch store.state.microphonePermission {
+        try await processAccessRequest(
+            keyPath: \.microphonePermission,
+            requestAction: .requestMicrophonePermission,
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    /// Requests camera permission from the user.
+    /// - Returns: `true` if permission was granted, `false` otherwise.
+    /// - Throws: An error if the permission request times out.
+    public func requestCameraPermission(
+        file: StaticString = #fileID,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws -> Bool {
+        try await processAccessRequest(
+            keyPath: \.cameraPermission,
+            requestAction: .requestCameraPermission,
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    /// Requests push notification permission from the user.
+    /// - Parameter options: The notification authorization options to request.
+    /// - Returns: `true` if permission was granted, `false` otherwise.
+    /// - Throws: An error if the permission request times out.
+    public func requestPushNotificationPermission(
+        with options: UNAuthorizationOptions,
+        file: StaticString = #fileID,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws -> Bool {
+        try await processAccessRequest(
+            keyPath: \.pushNotificationPermission,
+            requestAction: .requestPushNotificationPermission(options),
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    // MARK: - Private helpers
+
+    private func processAccessRequest(
+        keyPath: KeyPath<Namespace.State, Permission>,
+        requestAction: Namespace.Action,
+        file: StaticString,
+        function: StaticString,
+        line: UInt
+    ) async throws -> Bool {
+        switch store.state[keyPath: keyPath] {
         case .unknown:
             log.debug(
-                "Requesting microphone permission.",
+                "Store identifier:\(Namespace.identifier) requesting permission for keyPath:\(keyPath).",
                 functionName: function,
                 fileName: file,
                 lineNumber: line
             )
-            store.dispatch(.requestMicrophonePermission)
-            let result = try await store.publisher(\.microphonePermission)
+
+            store.dispatch(requestAction)
+
+            let result = try await store.publisher(keyPath)
                 .filter { $0 != .requesting && $0 != .unknown }
                 .nextValue() == .granted
+
             log.debug(
-                "Microphone permission request completed with grant result:\(result).",
+                "Store identifier:\(Namespace.identifier) permission request for keyPath:\(keyPath) completed with grant result:\(result).",
                 functionName: function,
                 fileName: file,
                 lineNumber: line
@@ -102,11 +159,12 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
             return result
 
         case .requesting:
-            let result = try await store.publisher(\.microphonePermission)
+            let result = try await store.publisher(keyPath)
                 .filter { $0 != .requesting && $0 != .unknown }
                 .nextValue() == .granted
+
             log.debug(
-                "Microphone permission request completed with grant result:\(result).",
+                "Store identifier:\(Namespace.identifier) permission request for keyPath:\(keyPath) completed with grant result:\(result).",
                 functionName: function,
                 fileName: file,
                 lineNumber: line
@@ -119,29 +177,6 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
         case .denied:
             return false
         }
-    }
-
-    /// Requests camera permission from the user.
-    /// - Returns: `true` if permission was granted, `false` otherwise.
-    /// - Throws: An error if the permission request times out.
-    public func requestCameraPermission() async throws -> Bool {
-        store.dispatch(.requestCameraPermission)
-        return try await store.publisher(\.cameraPermission)
-            .filter { $0 != .requesting && $0 != .unknown }
-            .nextValue() == .granted
-    }
-
-    /// Requests push notification permission from the user.
-    /// - Parameter options: The notification authorization options to request.
-    /// - Returns: `true` if permission was granted, `false` otherwise.
-    /// - Throws: An error if the permission request times out.
-    public func requestPushNotificationPermission(
-        with options: UNAuthorizationOptions
-    ) async throws -> Bool {
-        store.dispatch(.requestPushNotificationPermission(options))
-        return try await store.publisher(\.pushNotificationPermission)
-            .filter { $0 != .requesting && $0 != .unknown }
-            .nextValue() == .granted
     }
 }
 
