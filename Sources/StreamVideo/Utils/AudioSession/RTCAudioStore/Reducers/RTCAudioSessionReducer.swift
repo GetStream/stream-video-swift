@@ -139,6 +139,9 @@ final class RTCAudioSessionReducer: RTCAudioStoreReducer {
             }
             updatedState.isActive = value
             updatedState.isAudioEnabled = value
+
+        case .restart:
+            break
         }
 
         return updatedState

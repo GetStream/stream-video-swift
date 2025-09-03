@@ -21,9 +21,6 @@ extension RTCAudioStore {
         private let session: AudioSessionProtocol
         /// A weak reference to the `RTCAudioStore` to dispatch state changes.
         private weak var store: RTCAudioStore?
-        private let disposableBag = DisposableBag()
-        private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
-        private let subject = PassthroughSubject<Void, Never>()
 
         /// Creates a new `InterruptionEffect` that listens to the given `RTCAudioStore`'s audio session.
         ///
@@ -35,23 +32,6 @@ extension RTCAudioStore {
             super.init()
 
             session.add(self)
-
-            subject
-                .debounce(for: .seconds(1), scheduler: processingQueue)
-                .log(.debug, subsystems: .audioSession) { "Restarting audioSession." }
-                .compactMap { [weak self] in self?.store }
-                .sink { [weak self] in self?.restartAudioSession(store: $0) }
-                .store(in: disposableBag)
-
-            if !store.state.hasRecordingPermission {
-                store
-                    .publisher(\.hasRecordingPermission)
-                    .filter { $0 == true }
-                    .log(.debug, subsystems: .audioSession) { _ in "Microphone permission granted. Restarting AudioSession." }
-                    .removeDuplicates()
-                    .sink { [weak self] _ in self?.subject.send(()) }
-                    .store(in: disposableBag)
-            }
         }
 
         deinit {
@@ -86,34 +66,14 @@ extension RTCAudioStore {
             _ session: RTCAudioSession,
             shouldResumeSession: Bool
         ) {
-            processingQueue.addOperation { [weak self] in
-                guard let self, let store, store.state.hasRecordingPermission else {
-                    return
-                }
-
-                store.dispatch(.audioSession(.isInterrupted(false)))
-                if shouldResumeSession {
-                    subject.send(())
-                }
+            guard let store, store.state.hasRecordingPermission else {
+                return
             }
-        }
 
-        // MARK: - Private Helpers
-
-        private func restartAudioSession(
-            store: RTCAudioStore,
-            file: StaticString = #fileID,
-            function: StaticString = #function,
-            line: UInt = #line
-        ) {
-            store.restartAudioSession(
-                category: store.state.category,
-                mode: store.state.mode,
-                options: store.state.options,
-                file: file,
-                function: function,
-                line: line
-            )
+            store.dispatch(.audioSession(.isInterrupted(false)))
+            if shouldResumeSession {
+                store.dispatch(.audioSession(.restart()))
+            }
         }
     }
 }

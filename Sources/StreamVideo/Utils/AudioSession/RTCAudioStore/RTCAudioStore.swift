@@ -54,6 +54,7 @@ final class RTCAudioStore: @unchecked Sendable {
         processingQueue.underlyingQueue = underlyingQueue
 
         add(RTCAudioSessionReducer(store: self))
+        add(RestartMiddleware(self))
 
         dispatch(.audioSession(.setPrefersNoInterruptionsFromSystemAlerts(true)))
         dispatch(.audioSession(.useManualAudio(true)))
@@ -108,7 +109,7 @@ final class RTCAudioStore: @unchecked Sendable {
 
     /// Dispatches an audio store action asynchronously and waits for completion.
     func dispatchAsync(
-        _ action: RTCAudioStoreAction,
+        _ actions: [RTCAudioStoreAction],
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
@@ -118,15 +119,31 @@ final class RTCAudioStore: @unchecked Sendable {
                 return
             }
 
-            await applyDelayIfRequired(for: action)
+            for action in actions {
+                await applyDelayIfRequired(for: action)
 
-            try perform(
-                action,
-                file: file,
-                function: function,
-                line: line
-            )
+                try perform(
+                    action,
+                    file: file,
+                    function: function,
+                    line: line
+                )
+            }
         }
+    }
+
+    func dispatchAsync(
+        _ action: RTCAudioStoreAction,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws {
+        try await dispatchAsync(
+            [action],
+            file: file,
+            function: function,
+            line: line
+        )
     }
 
     /// Dispatches an audio store action for processing on the queue.
