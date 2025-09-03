@@ -12,37 +12,42 @@ extension User {
             (
                 "valia",
                 "Bernard Windler",
-                "https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg"
+                ""
             ),
             (
                 "vasil",
                 "Willard Hesser",
-                "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg"
+                ""
             ),
             (
                 "thierry",
                 "Thierry",
-                "https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp"
+                "https://ca.slack-edge.com/T02RM6X6B-U02RM6X6D-bc07196e422d-512"
             ),
             (
                 "tommaso",
                 "Tommaso",
-                "https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp"
+                "https://ca.slack-edge.com/T02RM6X6B-U02U7SJP4-4cd2158d78de-512"
             ),
             (
                 "martin",
                 "Martin",
-                "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp"
+                "https://ca.slack-edge.com/T02RM6X6B-U02G45JTM6C-f4884eaf8fdd-72"
             ),
             (
                 "ilias",
                 "Ilias",
-                "https://getstream.io/static/62cdddcc7759dc8c3ba5b1f67153658c/802d2/ilias-pavlidakis.webp"
+                "https://ca.slack-edge.com/T02RM6X6B-U04LTJUTXFW-bc6e23c4e7ee-72"
+            ),
+            (
+                "alexey",
+                "Alexey",
+                "https://ca.slack-edge.com/T02RM6X6B-U034BHQ5PT2-9d0c17bccd5a-72"
             ),
             (
                 "marcelo",
                 "Marcelo",
-                "https://getstream.io/static/aaf5fb17dcfd0a3dd885f62bd21b325a/802d2/marcelo-pires.webp"
+                "https://ca.slack-edge.com/T02RM6X6B-UD6TCA6P6-3fca649bc81c-72"
             ),
             (
                 "kanat",
@@ -55,7 +60,7 @@ extension User {
                 "https://ca.slack-edge.com/T02RM6X6B-U05UD37MA1G-f062f8b7afc2-512"
             )
         ].map {
-            User(id: $0.0, name: $0.1, imageURL: URL(string: $0.2))
+            User(id: $0.0, name: $0.1, imageURL: $0.2.isEmpty ? nil : URL(string: $0.2))
         }
     }()
 }
