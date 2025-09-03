@@ -10,7 +10,10 @@ extension RTCAudioStore {
     func restartAudioSession(
         category: AVAudioSession.Category,
         mode: AVAudioSession.Mode,
-        options: AVAudioSession.CategoryOptions
+        options: AVAudioSession.CategoryOptions,
+        file: StaticString = #fileID,
+        function: StaticString = #function,
+        line: UInt = #line
     ) {
         dispatch(
             [
@@ -27,7 +30,10 @@ extension RTCAudioStore {
                 .generic(.delay(seconds: 0.2)),
                 .audioSession(.isAudioEnabled(true)),
                 .audioSession(.isActive(true))
-            ]
+            ],
+            file: file,
+            function: function,
+            line: line
         )
     }
 }

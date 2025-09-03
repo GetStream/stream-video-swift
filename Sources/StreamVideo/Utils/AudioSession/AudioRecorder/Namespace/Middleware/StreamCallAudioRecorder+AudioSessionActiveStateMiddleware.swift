@@ -39,7 +39,7 @@ extension StreamCallAudioRecorder.Namespace {
                 .publisher(\.isActive)
                 .sink { [weak self] isActive in
                     // Update the store's interruption state
-                    self?.dispatcher?.dispatch(.setIsRecording(isActive))
+                    self?.dispatcher?.dispatch(.setIsRecording(isActive), delay: .init(before: 0.2))
                 }
         }
     }

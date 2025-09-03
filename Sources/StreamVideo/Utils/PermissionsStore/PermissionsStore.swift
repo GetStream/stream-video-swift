@@ -31,7 +31,7 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
         store
             .publisher(\.microphonePermission)
-            .map { $0 == .unknown }
+            .map { $0 == .unknown || $0 == .requesting }
             .receive(on: DispatchQueue.main)
             .assign(to: \.canRequestMicrophonePermission, onWeak: self)
             .store(in: disposableBag)
@@ -46,7 +46,7 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
         store
             .publisher(\.cameraPermission)
-            .map { $0 == .unknown }
+            .map { $0 == .unknown || $0 == .requesting }
             .receive(on: DispatchQueue.main)
             .assign(to: \.canRequestCameraPermission, onWeak: self)
             .store(in: disposableBag)
@@ -76,11 +76,49 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
     /// Requests microphone permission from the user.
     /// - Returns: `true` if permission was granted, `false` otherwise.
     /// - Throws: An error if the permission request times out.
-    public func requestMicrophonePermission() async throws -> Bool {
-        store.dispatch(.requestMicrophonePermission)
-        return try await store.publisher(\.microphonePermission)
-            .filter { $0 != .requesting && $0 != .unknown }
-            .nextValue() == .granted
+    public func requestMicrophonePermission(
+        file: StaticString = #fileID,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws -> Bool {
+        switch store.state.microphonePermission {
+        case .unknown:
+            log.debug(
+                "Requesting microphone permission.",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+            store.dispatch(.requestMicrophonePermission)
+            let result = try await store.publisher(\.microphonePermission)
+                .filter { $0 != .requesting && $0 != .unknown }
+                .nextValue() == .granted
+            log.debug(
+                "Microphone permission request completed with grant result:\(result).",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+            return result
+
+        case .requesting:
+            let result = try await store.publisher(\.microphonePermission)
+                .filter { $0 != .requesting && $0 != .unknown }
+                .nextValue() == .granted
+            log.debug(
+                "Microphone permission request completed with grant result:\(result).",
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+            return result
+
+        case .granted:
+            return true
+
+        case .denied:
+            return false
+        }
     }
 
     /// Requests camera permission from the user.
