@@ -17,6 +17,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
     /// The audio recorder for capturing audio during the call session.
     @Injected(\.callAudioRecorder) private var audioRecorder
     @Injected(\.permissions) private var permissions
+    @Injected(\.audioStore) private var audioStore
 
     /// The unique identifier for the current session.
     private let sessionID: String
@@ -216,6 +217,13 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                     else {
                         throw ClientError("Microphone permission request denied.")
                     }
+                    // This ensures that the session is correctly configured
+                    // ** before ** WebRTC starts publishing tracks.
+                    audioStore.restartAudioSession(
+                        category: audioStore.state.category,
+                        mode: audioStore.state.mode,
+                        options: audioStore.state.options
+                    )
                 }
             }
 

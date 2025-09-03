@@ -15,9 +15,11 @@ extension RTCAudioStore {
         function: StaticString = #function,
         line: UInt = #line
     ) {
+        // Delays seems to be important!
         dispatch(
             [
                 .audioSession(.isActive(false)),
+                .generic(.delay(seconds: 0.2)),
                 .audioSession(.isAudioEnabled(false)),
                 .generic(.delay(seconds: 0.2)),
                 .audioSession(
@@ -29,6 +31,7 @@ extension RTCAudioStore {
                 ),
                 .generic(.delay(seconds: 0.2)),
                 .audioSession(.isAudioEnabled(true)),
+                .generic(.delay(seconds: 0.2)),
                 .audioSession(.isActive(true))
             ],
             file: file,
