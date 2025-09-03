@@ -4622,11 +4622,11 @@
 			isa = PBXGroup;
 			children = (
 				40944CB72E4CBB5300088AF0 /* StreamCallAudioRecorder+InterruptionMiddleware.swift */,
-				40C4E84F2E683C9B00FC29BC /* StreamCallAudioRecorder+AudioSessionActiveStateMiddleware.swift */,
 				40944D092E4CDF9100088AF0 /* StreamCallAudioRecorder+CategoryMiddleware.swift */,
 				40944CB92E4CBC7D00088AF0 /* StreamCallAudioRecorder+AVAudioRecorderMiddleware.swift */,
 				40944CBB2E4CBEED00088AF0 /* StreamCallAudioRecorder+ActiveCallMiddleware.swift */,
 				40944D0D2E4CE0B400088AF0 /* StreamCallAudioRecorder+ApplicationStateMiddleware.swift */,
+				40C4E84F2E683C9B00FC29BC /* StreamCallAudioRecorder+AudioSessionActiveStateMiddleware.swift */,
 			);
 			path = Middleware;
 			sourceTree = "<group>";

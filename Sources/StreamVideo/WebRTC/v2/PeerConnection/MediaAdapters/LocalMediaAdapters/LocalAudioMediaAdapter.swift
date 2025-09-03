@@ -16,6 +16,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The audio recorder for capturing audio during the call session.
     @Injected(\.callAudioRecorder) private var audioRecorder
+    @Injected(\.permissions) private var permissions
 
     /// The unique identifier for the current session.
     private let sessionID: String
@@ -205,7 +206,19 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
             
             let isMuted = !settings.audioOn
             let isLocalMuted = !primaryTrack.isEnabled
-            
+
+            if !isMuted {
+                if permissions.hasMicrophonePermission {
+                    _ = try await permissions.requestMicrophonePermission()
+                } else {
+                    guard
+                        try await permissions.requestMicrophonePermission()
+                    else {
+                        throw ClientError("Microphone permission request denied.")
+                    }
+                }
+            }
+
             if isMuted != isLocalMuted {
                 try await sfuAdapter.updateTrackMuteState(
                     .audio,

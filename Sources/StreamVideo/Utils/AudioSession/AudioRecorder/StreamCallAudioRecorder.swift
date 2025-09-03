@@ -42,6 +42,8 @@ import StreamWebRTC
 /// - Stops recording when the call ends or microphone is disabled
 /// - Handles interruptions gracefully (phone calls, alarms, etc.)
 open class StreamCallAudioRecorder: @unchecked Sendable {
+    @Injected(\.permissions) private var permissions
+
     /// The current audio power level in decibels (dB).
     ///
     /// This property is continuously updated during recording to reflect
@@ -158,7 +160,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     /// - Note: Recording requires microphone permission. The system will
     ///   prompt for permission if not already granted.
     open func startRecording(ignoreActiveCall: Bool = false) {
-        if ignoreActiveCall {
+        if ignoreActiveCall || !permissions.hasMicrophonePermission {
             store.dispatch(.setShouldRecord(true))
         }
 

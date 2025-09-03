@@ -38,7 +38,6 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
         store
             .publisher(\.microphonePermission)
-            .log(.debug) { "Microphone permission changed to \($0)." }
             .map { $0 == .granted }
             .receive(on: DispatchQueue.main)
             .assign(to: \.hasMicrophonePermission, onWeak: self)
