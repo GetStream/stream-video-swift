@@ -109,42 +109,34 @@ final class CallAudioSession: @unchecked Sendable {
             return
         }
 
-        do {
-            if configuration.isActive {
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .setCategory(
-                            configuration.category,
-                            mode: configuration.mode,
-                            options: configuration.options
-                        )
+        var actions: [RTCAudioStoreAction] = []
+
+        if configuration.isActive {
+            actions.append(
+                .audioSession(
+                    .setCategory(
+                        configuration.category,
+                        mode: configuration.mode,
+                        options: configuration.options
                     )
                 )
-            }
-        } catch {
-            log.error(
-                "Unable to apply configuration category:\(configuration.category) mode:\(configuration.mode) options:\(configuration.options).",
-                subsystems: .audioSession,
-                error: error
             )
         }
 
         if configuration.isActive, let overrideOutputAudioPort = configuration.overrideOutputAudioPort {
-            do {
-                try await audioStore.dispatchAsync(
-                    .audioSession(
-                        .setOverrideOutputPort(overrideOutputAudioPort)
-                    )
+            actions.append(
+                .audioSession(
+                    .setOverrideOutputPort(overrideOutputAudioPort)
                 )
-            } catch {
-                log.error(
-                    "Unable to apply configuration overrideOutputAudioPort:\(overrideOutputAudioPort).",
-                    subsystems: .audioSession,
-                    error: error
-                )
-            }
+            )
         }
-        
+
+        do {
+            try await audioStore.dispatchAsync(actions)
+        } catch {
+            log.error(error, subsystems: .audioSession)
+        }
+
         await handleAudioOutputUpdateIfRequired(configuration)
     }
 
