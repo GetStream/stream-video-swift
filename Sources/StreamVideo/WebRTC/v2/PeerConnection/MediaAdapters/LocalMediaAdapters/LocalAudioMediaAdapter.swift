@@ -132,6 +132,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 return
             }
 
+            log.debug("Start publishing of local audio tracks.", subsystems: .webRTC)
             primaryTrack.isEnabled = true
 
             publishOptions.forEach {

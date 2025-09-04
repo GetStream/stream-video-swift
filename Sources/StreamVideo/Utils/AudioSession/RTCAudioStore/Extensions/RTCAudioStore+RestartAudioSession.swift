@@ -9,7 +9,7 @@ extension RTCAudioStore {
     private var restartAudioSessionActions: [RTCAudioStoreAction] {
         let state = self.state
         return [
-            .audioSession(.isActive(false)),
+            .failable(.audioSession(.isActive(false))),
             .audioSession(.isAudioEnabled(false)),
             .generic(.delay(seconds: 0.2)),
             .audioSession(

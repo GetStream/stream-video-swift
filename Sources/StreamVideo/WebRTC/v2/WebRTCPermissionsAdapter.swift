@@ -27,6 +27,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
         applicationStateAdapter
             .statePublisher
             .receive(on: DispatchQueue.global(qos: .userInteractive))
+            .removeDuplicates()
             .sink { [weak self] in self?.didUpdateApplicationState($0) }
             .store(in: disposableBag)
     }
@@ -91,6 +92,11 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 return
             }
 
+            log.debug(
+                "Application became active and we will request permissions for microphone:\(shouldRequestMicrophonePermission) camera:\(shouldRequestCameraPermission)",
+                subsystems: .webRTC
+            )
+
             if shouldRequestMicrophonePermission {
                 log.debug("Requesting microphone permission.", subsystems: .webRTC)
                 let result = try await permissions.requestMicrophonePermission()
@@ -103,16 +109,13 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 log.debug("Camera permission request completed with result:\(result).", subsystems: .webRTC)
             }
 
-            log.debug(
-                "Application became active and we will request permissions for microphone:\(shouldRequestMicrophonePermission) camera:\(shouldRequestCameraPermission)",
-                subsystems: .webRTC
-            )
-
+            log.debug("Restarting audioSession started.")
             do {
                 try await audioStore.restartAudioSessionSync()
             } catch {
                 log.error(error, subsystems: .audioSession)
             }
+            log.debug("Restarting audioSession completed.")
 
             delegate?.webrtcApplicationDidBecomeActive(
                 audioOn: shouldRequestMicrophonePermission,

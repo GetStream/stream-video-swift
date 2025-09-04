@@ -32,13 +32,15 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
         store
             .publisher(\.microphonePermission)
-            .map { $0 == .unknown || $0 == .requesting }
+            .filter { $0 != .requesting }
+            .map { $0 == .unknown }
             .receive(on: DispatchQueue.main)
             .assign(to: \.canRequestMicrophonePermission, onWeak: self)
             .store(in: disposableBag)
 
         store
             .publisher(\.microphonePermission)
+            .filter { $0 != .requesting }
             .map { $0 == .granted }
             .receive(on: DispatchQueue.main)
             .assign(to: \.hasMicrophonePermission, onWeak: self)
@@ -46,19 +48,22 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
 
         store
             .publisher(\.cameraPermission)
-            .map { $0 == .unknown || $0 == .requesting }
+            .filter { $0 != .requesting }
+            .map { $0 == .unknown }
             .receive(on: DispatchQueue.main)
             .assign(to: \.canRequestCameraPermission, onWeak: self)
             .store(in: disposableBag)
 
         store
             .publisher(\.cameraPermission)
+            .filter { $0 != .requesting }
             .map { $0 == .granted }
             .receive(on: DispatchQueue.main)
             .assign(to: \.hasCameraPermission, onWeak: self)
             .store(in: disposableBag)
 
         $hasMicrophonePermission
+            .removeDuplicates()
             .sink { [weak self] in self?.audioStore.dispatch(.audioSession(.setHasRecordingPermission($0))) }
             .store(in: disposableBag)
     }
