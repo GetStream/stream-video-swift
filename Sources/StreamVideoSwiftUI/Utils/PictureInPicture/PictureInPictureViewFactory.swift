@@ -14,6 +14,8 @@ import SwiftUI
 /// ensures thread safety with `@unchecked Sendable` conformance.
 final class PictureInPictureViewFactory: @unchecked Sendable {
 
+    let source: any ViewFactory
+
     private let _makeParticipantImageView: (CallParticipant) -> AnyView
 
     /// Creates a new instance of `PictureInPictureViewFactory`.
@@ -22,6 +24,7 @@ final class PictureInPictureViewFactory: @unchecked Sendable {
     ///   protocol, used to create the participant image views.
     @MainActor
     init<Factory: ViewFactory>(_ viewFactory: Factory) {
+        source = viewFactory
         _makeParticipantImageView = {
             AnyView(
                 CallParticipantImageView(
