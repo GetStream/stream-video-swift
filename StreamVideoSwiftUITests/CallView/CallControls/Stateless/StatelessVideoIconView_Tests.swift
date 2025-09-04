@@ -13,9 +13,9 @@ final class StatelessVideoIconView_Tests: StreamVideoUITestCase, @unchecked Send
     // MARK: - Appearance
 
     @MainActor
-    func test_appearance_videoOn_wasConfiguredCorrectly() throws {
+    func test_appearance_videoOn_wasConfiguredCorrectly() async throws {
         AssertSnapshot(
-            try makeSubject(
+            try await makeSubject(
                 true
             ),
             variants: snapshotVariants,
@@ -24,10 +24,36 @@ final class StatelessVideoIconView_Tests: StreamVideoUITestCase, @unchecked Send
     }
 
     @MainActor
-    func test_appearance_videoOff_wasConfiguredCorrectly() throws {
+    func test_appearance_videoOff_wasConfiguredCorrectly() async throws {
         AssertSnapshot(
-            try makeSubject(
+            try await makeSubject(
                 false
+            ),
+            variants: snapshotVariants,
+            size: sizeThatFits
+        )
+    }
+
+    @MainActor
+    func test_appearance_videoOn_noPermission_canRequest_wasConfiguredCorrectly() async throws {
+        AssertSnapshot(
+            try await makeSubject(
+                true,
+                hasPermission: false,
+                canRequestPermission: true
+            ),
+            variants: snapshotVariants,
+            size: sizeThatFits
+        )
+    }
+
+    @MainActor
+    func test_appearance_videoOn_noPermission_cannotRequestPermission_wasConfiguredCorrectly() async throws {
+        AssertSnapshot(
+            try await makeSubject(
+                true,
+                hasPermission: false,
+                canRequestPermission: false
             ),
             variants: snapshotVariants,
             size: sizeThatFits
@@ -39,10 +65,27 @@ final class StatelessVideoIconView_Tests: StreamVideoUITestCase, @unchecked Send
     @MainActor
     private func makeSubject(
         _ videoOn: Bool,
+        hasPermission: Bool = true,
+        canRequestPermission: Bool = true,
         actionHandler: (() -> Void)? = nil,
         file: StaticString = #file,
         line: UInt = #line
-    ) throws -> StatelessVideoIconView {
+    ) async throws -> StatelessVideoIconView {
+        let mockPermissions = MockPermissionsStore()
+
+        if hasPermission {
+            mockPermissions.stubCameraPermission(.granted)
+            await fulfillment { mockPermissions.mockStore.state.cameraPermission == .granted }
+        } else {
+            if canRequestPermission {
+                mockPermissions.stubCameraPermission(.unknown)
+                await fulfillment { mockPermissions.mockStore.state.cameraPermission == .unknown }
+            } else {
+                mockPermissions.stubCameraPermission(.denied)
+                await fulfillment { mockPermissions.mockStore.state.cameraPermission == .denied }
+            }
+        }
+
         let call = try XCTUnwrap(
             streamVideoUI?.streamVideo.call(
                 callType: .default,

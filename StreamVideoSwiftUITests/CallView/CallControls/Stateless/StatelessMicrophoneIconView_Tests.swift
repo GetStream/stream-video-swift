@@ -10,19 +10,12 @@ import XCTest
 
 final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked Sendable {
 
-    private var mockPermissions: MockPermissionsStore! = .init()
-
-    override func tearDown() {
-        mockPermissions = nil
-        super.tearDown()
-    }
-
     // MARK: - Appearance
 
     @MainActor
-    func test_appearance_micOn_wasConfiguredCorrectly() throws {
+    func test_appearance_micOn_hasPermission_wasConfiguredCorrectly() async throws {
         AssertSnapshot(
-            try makeSubject(
+            try await makeSubject(
                 true
             ),
             variants: snapshotVariants,
@@ -31,10 +24,36 @@ final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked
     }
 
     @MainActor
-    func test_appearance_micOff_wasConfiguredCorrectly() throws {
+    func test_appearance_micOff_hasPermission_wasConfiguredCorrectly() async throws {
         AssertSnapshot(
-            try makeSubject(
+            try await makeSubject(
                 false
+            ),
+            variants: snapshotVariants,
+            size: sizeThatFits
+        )
+    }
+
+    @MainActor
+    func test_appearance_micOn_noPermission_canRequest_wasConfiguredCorrectly() async throws {
+        AssertSnapshot(
+            try await makeSubject(
+                true,
+                hasPermission: false,
+                canRequestPermission: true
+            ),
+            variants: snapshotVariants,
+            size: sizeThatFits
+        )
+    }
+
+    @MainActor
+    func test_appearance_micOn_noPermission_cannotRequestPermission_wasConfiguredCorrectly() async throws {
+        AssertSnapshot(
+            try await makeSubject(
+                true,
+                hasPermission: false,
+                canRequestPermission: false
             ),
             variants: snapshotVariants,
             size: sizeThatFits
@@ -46,10 +65,27 @@ final class StatelessMicrophoneIconView_Tests: StreamVideoUITestCase, @unchecked
     @MainActor
     private func makeSubject(
         _ micOn: Bool,
+        hasPermission: Bool = true,
+        canRequestPermission: Bool = true,
         actionHandler: (() -> Void)? = nil,
         file: StaticString = #file,
         line: UInt = #line
-    ) throws -> StatelessMicrophoneIconView {
+    ) async throws -> StatelessMicrophoneIconView {
+        let mockPermissions = MockPermissionsStore()
+
+        if hasPermission {
+            mockPermissions.stubMicrophonePermission(.granted)
+            await fulfillment { mockPermissions.mockStore.state.microphonePermission == .granted }
+        } else {
+            if canRequestPermission {
+                mockPermissions.stubMicrophonePermission(.unknown)
+                await fulfillment { mockPermissions.mockStore.state.microphonePermission == .unknown }
+            } else {
+                mockPermissions.stubMicrophonePermission(.denied)
+                await fulfillment { mockPermissions.mockStore.state.microphonePermission == .denied }
+            }
+        }
+
         let call = try XCTUnwrap(
             streamVideoUI?.streamVideo.call(
                 callType: .default,

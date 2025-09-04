@@ -60,6 +60,8 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     }
 
     func test_setIsRecordingTrue_shouldRecordTrue_requestRecordPermissionWasCalled() async {
+        mockPermissions.stubMicrophonePermission(.unknown)
+
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
             action: .setIsRecording(true),
@@ -159,6 +161,36 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
             self.audioRecorder.timesCalled(.stop) == 1
                 && self.audioRecorder.isMeteringEnabled == false
         }
+
+        XCTAssertEqual(audioRecorder.timesCalled(.stop), 1)
+        XCTAssertFalse(audioRecorder.isMeteringEnabled)
+    }
+
+    func test_setIsRecordingTrue_calledTwice_restartsRecorderOnce() async {
+        // First start
+        audioRecorder.stub(for: .record, with: true)
+        subject.apply(
+            state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
+            action: .setIsRecording(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+        await fulfillment { self.audioRecorder.timesCalled(.record) == 1 }
+
+        // Second start should call stop before recording again
+        subject.apply(
+            state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
+            action: .setIsRecording(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        await fulfillment {
+            self.audioRecorder.timesCalled(.stop) >= 1
+                && self.audioRecorder.timesCalled(.record) >= 2
+        }
     }
 
     // MARK: - setIsInterrupted
@@ -207,6 +239,8 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     }
 
     func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_requestRecordPermissionWasCalled() async {
+        mockPermissions.stubMicrophonePermission(.unknown)
+
         subject.apply(
             state: .init(isRecording: false, isInterrupted: true, shouldRecord: true, meter: 0),
             action: .setIsInterrupted(false),
@@ -233,18 +267,6 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         XCTAssertEqual(mockPermissions.timesCalled(.requestMicrophonePermission), 0)
     }
 
-    func test_setShouldRecordTrue_isRecordingFalse_requestRecordPermissionWasCalled() async {
-        subject.apply(
-            state: .init(isRecording: false, isInterrupted: true, shouldRecord: true, meter: 0),
-            action: .setShouldRecord(true),
-            file: #file,
-            function: #function,
-            line: #line
-        )
-
-        await fulfillment { self.mockPermissions.timesCalled(.requestMicrophonePermission) == 1 }
-    }
-
     func test_setShouldRecordFalse_isRecordingTrue_stopWasCalled() async {
         await prepareAsRecording()
 
@@ -260,6 +282,38 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
             self.audioRecorder.timesCalled(.stop) == 1
                 && self.audioRecorder.isMeteringEnabled == false
         }
+    }
+
+    func test_setShouldRecordFalse_whenNotRecording_doesNotCallStop() async {
+        subject.apply(
+            state: .init(isRecording: false, isInterrupted: false, shouldRecord: false, meter: 0),
+            action: .setShouldRecord(false),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        await wait(for: 0.2)
+        XCTAssertEqual(audioRecorder.timesCalled(.stop), 0)
+    }
+
+    func test_setIsRecordingTrue_dispatchesSetMeterValues() async {
+        audioRecorder.stub(for: .record, with: true)
+        let meterExpectation = expectation(description: "meter updates")
+        meterExpectation.expectedFulfillmentCount = 2
+        subject.dispatcher = .init { action, _, _, _, _ in
+            if case .setMeter = action { meterExpectation.fulfill() }
+        }
+
+        subject.apply(
+            state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
+            action: .setIsRecording(true),
+            file: #file,
+            function: #function,
+            line: #line
+        )
+
+        await safeFulfillment(of: [meterExpectation])
     }
 
     // MARK: - Private Helpers

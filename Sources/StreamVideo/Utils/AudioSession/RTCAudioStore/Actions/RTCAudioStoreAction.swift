@@ -4,10 +4,12 @@
 
 import Foundation
 
-enum RTCAudioStoreAction: Sendable {
+indirect enum RTCAudioStoreAction: Sendable {
     case generic(RTCAudioStoreAction.Generic)
 
     case audioSession(RTCAudioStoreAction.AudioSession)
 
     case callKit(RTCAudioStoreAction.CallKit)
+
+    case failable(RTCAudioStoreAction)
 }

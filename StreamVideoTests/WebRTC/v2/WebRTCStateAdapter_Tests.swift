@@ -914,6 +914,50 @@ final class WebRTCStateAdapter_Tests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(updatedCallSettings, newCallSettings)
     }
 
+    // MARK: - permissionsAdapter(_:audioOn:)
+
+    func test_permissionsAdapter_audioOn_valueWasUpdated_publisherWasUpdated() async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+        await subject.enqueueCallSettings { _ in CallSettings(audioOn: false) }
+
+        subject.permissionsAdapter(.init(subject), audioOn: true)
+
+        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        await fulfillment {
+            mockPublisher.timesCalled(.didUpdateCallSettings) == 2
+        }
+
+        let updatedAudioOn = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(CallSettings.self, for: .didUpdateCallSettings)?
+                .last?.audioOn
+        )
+        XCTAssertTrue(updatedAudioOn)
+    }
+
+    // MARK: - permissionsAdapter(_:videoOn:)
+
+    func test_permissionsAdapter_videoOn_valueWasUpdated_publisherWasUpdated() async throws {
+        let sfuStack = MockSFUStack()
+        await subject.set(sfuAdapter: sfuStack.adapter)
+        try await subject.configurePeerConnections()
+        await subject.enqueueCallSettings { _ in CallSettings(videoOn: false) }
+
+        subject.permissionsAdapter(.init(subject), videoOn: true)
+
+        let mockPublisher = try await XCTAsyncUnwrap(await subject.publisher as? MockRTCPeerConnectionCoordinator)
+        await fulfillment {
+            mockPublisher.timesCalled(.didUpdateCallSettings) == 2
+        }
+
+        let updatedVideoOn = try XCTUnwrap(
+            mockPublisher.recordedInputPayload(CallSettings.self, for: .didUpdateCallSettings)?
+                .last?.videoOn
+        )
+        XCTAssertTrue(updatedVideoOn)
+    }
+
     // MARK: - Private helpers
 
     private func assertNilAsync<T>(

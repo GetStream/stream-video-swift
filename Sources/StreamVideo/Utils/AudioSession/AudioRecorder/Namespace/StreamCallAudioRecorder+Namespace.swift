@@ -56,8 +56,8 @@ extension StreamCallAudioRecorder {
         /// 1. ``InterruptionMiddleware``: Monitors audio interruptions
         /// 2. ``CategoryMiddleware``: Monitors audio session category changes
         /// 3. ``AVAudioRecorderMiddleware``: Manages the actual recorder
-        /// 4. ``ActiveCallMiddleware``: Syncs with active call state
-        /// 5. ``ApplicationStateMiddleware``: Handles app lifecycle events
+        /// 4. ``ShouldRecordMiddleware``: Computes `shouldRecord` from call
+        ///    `audioOn`, audio‑session `isActive`, and permission
         ///
         /// - Returns: An array of middleware for handling side effects.
         static func middleware() -> [Middleware<Namespace>] {
@@ -65,8 +65,7 @@ extension StreamCallAudioRecorder {
                 InterruptionMiddleware(),
                 CategoryMiddleware(),
                 AVAudioRecorderMiddleware(),
-                ActiveCallMiddleware(),
-                ApplicationStateMiddleware()
+                ShouldRecordMiddleware()
             ]
         }
 
