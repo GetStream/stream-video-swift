@@ -62,7 +62,7 @@ final class MockCallController: CallController, Mockable, @unchecked Sendable {
 
     convenience init() {
         self.init(
-            defaultAPI: .dummy(),
+            defaultAPI: MockDefaultAPIEndpoints(),
             user: .dummy(),
             callId: .unique,
             callType: .unique,

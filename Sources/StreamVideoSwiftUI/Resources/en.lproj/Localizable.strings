@@ -28,6 +28,7 @@
 "call.current.unpin-for-everyone" = "Unpin for everyone";
 "call.current.sharing" = "You are sharing your screen";
 "call.current.stop-sharing" = "Stop sharing";
+"call.current.kick-user" = "Kick user";
 
 "waiting-room.title" = "Before Joining";
 "waiting-room.subtitle" = "Setup your audio and video";

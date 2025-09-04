@@ -33,6 +33,7 @@ public enum OwnCapability: String, Sendable, Codable, CaseIterable {
     case updateCallMember = "update-call-member"
     case updateCallPermissions = "update-call-permissions"
     case updateCallSettings = "update-call-settings"
+    case kickUser = "kick-user"
     case unknown = "_unknown"
 
     public init(from decoder: Decoder) throws {

@@ -70,7 +70,7 @@ extension DefaultAPI {
 
 extension CallController {
     static func dummy(
-        defaultAPI: DefaultAPI = .dummy(),
+        defaultAPI: DefaultAPIEndpoints = MockDefaultAPIEndpoints(),
         user: User = .dummy(),
         callId: String = .unique,
         callType: String = .default,

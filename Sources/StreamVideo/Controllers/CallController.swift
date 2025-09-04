@@ -50,7 +50,7 @@ class CallController: @unchecked Sendable {
     private let callId: String
     private let callType: String
     private let apiKey: String
-    private let defaultAPI: DefaultAPI
+    private let defaultAPI: DefaultAPIEndpoints
     private let videoConfig: VideoConfig
     private let webRTCCoordinatorFactory: WebRTCCoordinatorProviding
     private var cachedLocation: String?
@@ -65,7 +65,7 @@ class CallController: @unchecked Sendable {
     private let disposableBag = DisposableBag()
 
     init(
-        defaultAPI: DefaultAPI,
+        defaultAPI: DefaultAPIEndpoints,
         user: User,
         callId: String,
         callType: String,

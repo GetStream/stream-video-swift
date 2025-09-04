@@ -56,7 +56,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     private let disposableBag = DisposableBag()
     internal let callController: CallController
-    internal let coordinatorClient: DefaultAPI
+    internal let coordinatorClient: DefaultAPIEndpoints
 
     /// This adapter is used to manage closed captions for the
     /// call.
@@ -67,7 +67,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal init(
         callType: String,
         callId: String,
-        coordinatorClient: DefaultAPI,
+        coordinatorClient: DefaultAPIEndpoints,
         callController: CallController,
         callSettings: CallSettings? = nil
     ) {
@@ -95,7 +95,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     internal convenience init(
         from response: CallStateResponseFields,
-        coordinatorClient: DefaultAPI,
+        coordinatorClient: DefaultAPIEndpoints,
         callController: CallController
     ) {
         self.init(
@@ -1434,6 +1434,22 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         _ capabilities: Set<ClientCapability>
     ) async {
         await callController.disableClientCapabilities(capabilities)
+    }
+
+    // MARK: - kickUser
+
+    public func kickUser(
+        userId: String,
+        block: Bool? = nil
+    ) async throws -> KickUserResponse {
+        try await coordinatorClient.kickUser(
+            type: callType,
+            id: callId,
+            kickUserRequest: .init(
+                block: block,
+                userId: userId
+            )
+        )
     }
 
     // MARK: - Internal

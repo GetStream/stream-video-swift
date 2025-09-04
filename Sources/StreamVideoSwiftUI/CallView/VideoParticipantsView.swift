@@ -182,6 +182,10 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
             }
         }
 
+        if call?.state.ownCapabilities.contains(.kickUser) == true {
+            result.append((title: L10n.Call.Current.kickUser, action: { kickUser() }))
+        }
+
         return result
     }
 
@@ -275,6 +279,16 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
                     userId: participant.userId,
                     sessionId: participant.id
                 )
+            } catch {
+                log.error(error)
+            }
+        }
+    }
+
+    private func kickUser() {
+        Task {
+            do {
+                _ = try await call?.kickUser(userId: participant.userId)
             } catch {
                 log.error(error)
             }
