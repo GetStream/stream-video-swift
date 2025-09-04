@@ -10,7 +10,7 @@ import StreamWebRTC
 /// video call. This class manages the connection setup, track handling, and
 /// participants, including their media settings, capabilities, and track
 /// updates.
-actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
+actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, WebRTCPermissionsAdapterDelegate {
 
     typealias ParticipantsStorage = [String: CallParticipant]
     typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
@@ -94,6 +94,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private var queuedTraces: ConsumableBucket<WebRTCTrace> = .init()
+    private lazy var permissionsAdapter: WebRTCPermissionsAdapter = .init(self)
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -128,6 +129,8 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
         self.audioSession = .init()
+
+        _ = permissionsAdapter
     }
 
     /// Sets the session ID.
@@ -491,17 +494,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 return
             }
 
-            let permissions = await self.permissions
             let currentCallSettings = await callSettings
-            var updatedCallSettings = operation(currentCallSettings)
-
-            if !permissions.hasCameraPermission, updatedCallSettings.videoOn {
-                updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
-            }
-
-            if !permissions.hasMicrophonePermission, updatedCallSettings.audioOn {
-                updatedCallSettings = updatedCallSettings.withUpdatedAudioState(false)
-            }
+            let updatedCallSettings = try await permissionsAdapter
+                .updateRequestedCallSettings(operation(currentCallSettings))
 
             guard
                 updatedCallSettings != currentCallSettings
@@ -686,6 +681,28 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 "AudioSession delegated updated speakerOn:\(speakerOn).",
                 subsystems: .audioSession
             )
+        }
+    }
+
+    // MARK: - WebRTCPermissionsAdapterDelegate
+
+    nonisolated func webrtcApplicationDidBecomeActive(
+        audioOn: Bool,
+        videoOn: Bool
+    ) {
+        Task { [weak self] in
+            await self?.enqueueCallSettings { callSettings in
+                var updatedCallSettings = callSettings
+                if audioOn {
+                    updatedCallSettings = updatedCallSettings.withUpdatedAudioState(true)
+                }
+
+                if videoOn {
+                    updatedCallSettings = updatedCallSettings.withUpdatedVideoState(true)
+                }
+
+                return updatedCallSettings
+            }
         }
     }
 }

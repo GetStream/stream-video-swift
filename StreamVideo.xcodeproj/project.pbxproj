@@ -704,6 +704,7 @@
 		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		40C4E8322E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */; };
 		40C4E8352E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */; };
+		40C4E85A2E69821800FC29BC /* WebRTCPermissionsAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8592E69821800FC29BC /* WebRTCPermissionsAdapter.swift */; };
 		40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689172C64DDC70054528A /* Publisher+TaskSink.swift */; };
 		40C708D62D8D729500D3501F /* Gleap in Frameworks */ = {isa = PBXBuildFile; productRef = 40C708D52D8D729500D3501F /* Gleap */; };
 		40C71B5A2E53565300733BF6 /* Store+Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B592E53565300733BF6 /* Store+Mocks.swift */; };
@@ -2318,6 +2319,7 @@
 		40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicyTests.swift; sourceTree = "<group>"; };
 		40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_Tests.swift; sourceTree = "<group>"; };
 		40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_EndCallTests.swift; sourceTree = "<group>"; };
+		40C4E8592E69821800FC29BC /* WebRTCPermissionsAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCPermissionsAdapter.swift; sourceTree = "<group>"; };
 		40C689172C64DDC70054528A /* Publisher+TaskSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+TaskSink.swift"; sourceTree = "<group>"; };
 		40C689192C64F74F0054528A /* SFUSignalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUSignalService.swift; sourceTree = "<group>"; };
 		40C6891D2C6661990054528A /* SFUEventAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUEventAdapter.swift; sourceTree = "<group>"; };
@@ -5146,6 +5148,7 @@
 				40483CB72C9B1DEE00B4FCA8 /* WebRTCCoordinatorProviding.swift */,
 				40BBC4C52C638915002AEF92 /* WebRTCCoordinator.swift */,
 				40BBC4C22C6373C4002AEF92 /* WebRTCStateAdapter.swift */,
+				40C4E8592E69821800FC29BC /* WebRTCPermissionsAdapter.swift */,
 				4075F0772DCE3FFC0062A4CC /* WebRTCTrackStorage.swift */,
 				406B3C422C91E41000FC93A1 /* WebRTCAuthenticator.swift */,
 				40429D5C2C779AED00AC7FFF /* WebRTCMigrationStatusObserver.swift */,
@@ -8672,6 +8675,7 @@
 				406B3BE12C8F356A00FC93A1 /* RTCIceCandidate+Convenience.swift in Sources */,
 				845C09842C0DEB5C00F725B3 /* LimitsSettingsRequest.swift in Sources */,
 				4159F1742C86FA41002B94D3 /* MediaPubSubHint.swift in Sources */,
+				40C4E85A2E69821800FC29BC /* WebRTCPermissionsAdapter.swift in Sources */,
 				40C8F0142E55D44300A0CC87 /* PermissionStore+MicrophoneMiddleware.swift in Sources */,
 				40BBC48D2C623C6E002AEF92 /* ICECandidate.swift in Sources */,
 				84DC38DA29ADFCFD00946713 /* Extensions.swift in Sources */,
