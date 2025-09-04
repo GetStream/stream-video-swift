@@ -29,6 +29,7 @@ public struct StatelessMicrophoneIconView: View {
     @ObservedObject private var callSettings: CallSettings
 
     @State private var hasPermission: Bool
+    @State private var canRequestPermission: Bool
 
     /// Initializes a stateless microphone icon view.
     ///
@@ -53,6 +54,7 @@ public struct StatelessMicrophoneIconView: View {
         self.controlStyle = controlStyle
         self.actionHandler = actionHandler
         hasPermission = InjectedValues[\.permissions].hasMicrophonePermission
+        canRequestPermission = InjectedValues[\.permissions].canRequestMicrophonePermission
     }
 
     /// The body of the microphone icon view.
@@ -61,10 +63,11 @@ public struct StatelessMicrophoneIconView: View {
             action: { actionHandler?() },
             label: { label(isEnabled: callSettings.audioOn, hasPermission: hasPermission) }
         )
-        .disabled(!hasPermission)
+        .disabled(!hasPermission && !canRequestPermission)
         .accessibility(identifier: "microphoneToggle")
         .streamAccessibility(value: callSettings.audioOn ? "1" : "0")
         .onReceive(permissions.$hasMicrophonePermission) { hasPermission = $0 }
+        .onReceive(permissions.$canRequestMicrophonePermission) { canRequestPermission = $0 }
     }
 
     // MARK: - Private Helpers
@@ -81,7 +84,7 @@ public struct StatelessMicrophoneIconView: View {
                 : controlStyle.disabled.iconStyle
         )
 
-        if hasPermission {
+        if hasPermission || canRequestPermission {
             content
         } else {
             content
