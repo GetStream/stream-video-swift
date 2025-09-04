@@ -28,7 +28,8 @@ extension Stream_Video_Sfu_Models_Participant {
             audioLevel: audioLevel,
             audioLevels: [audioLevel],
             pin: pin,
-            pausedTracks: []
+            pausedTracks: [],
+            source: .init(source)
         )
     }
 }

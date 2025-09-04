@@ -4,7 +4,8 @@
 
 import Foundation
 
-/// A comparator which sorts participants by whether they are the dominant speaker.
+/// A comparator which sorts participants by whether they are the dominant
+/// speaker.
 nonisolated(unsafe) public let dominantSpeaker: StreamSortComparator<CallParticipant> = { a, b in
     if a.isDominantSpeaker && !b.isDominantSpeaker { return .orderedAscending }
     if !a.isDominantSpeaker && b.isDominantSpeaker { return .orderedDescending }
@@ -56,7 +57,8 @@ nonisolated(unsafe) public let pinned: StreamSortComparator<CallParticipant> = {
     return .orderedSame
 }
 
-/// A comparator creator which sets up a comparator prioritizing participants who have a specific role.
+/// A comparator creator which sets up a comparator prioritizing participants
+/// who have a specific role.
 nonisolated public func roles(_ roles: [String] = ["admin", "host", "speaker"]) -> StreamSortComparator<CallParticipant> {
     { a, b in
         if hasAnyRole(a, roles) && !hasAnyRole(b, roles) { return .orderedAscending }
@@ -75,11 +77,25 @@ nonisolated private func hasAnyRole(_ participant: CallParticipant, _ roles: [St
     participant.roles.contains(where: roles.contains)
 }
 
-/// Comparator for sorting `CallParticipant` objects based on their `id` property
+/// Comparator for sorting `CallParticipant` objects based on their `id`
+/// property
 nonisolated(unsafe) public var id: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.id) }
 
-/// Comparator for sorting `CallParticipant` objects based on their `userId` property
+/// Comparator for sorting `CallParticipant` objects based on their `userId`
+/// property
 nonisolated(unsafe) public var userId: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.userId) }
 
-/// Comparator for sorting `CallParticipant` objects based on the date and time (`joinedAt`) they joined the call
+/// Comparator for sorting `CallParticipant` objects based on the date and time
+/// (`joinedAt`) they joined the call
 nonisolated(unsafe) public var joinedAt: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.joinedAt) }
+
+/// Comparator that prioritizes participants whose `source` matches the given
+/// value.
+/// Use this to surface ingest or SIP participants before others.
+nonisolated public func participantSource(_ source: ParticipantSource) -> StreamSortComparator<CallParticipant> {
+    { a, b in
+        if a.source == source && b.source != source { return .orderedAscending }
+        if a.source != source && b.source == source { return .orderedDescending }
+        return .orderedSame
+    }
+}

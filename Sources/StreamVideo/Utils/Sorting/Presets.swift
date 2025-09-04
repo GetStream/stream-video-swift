@@ -73,6 +73,7 @@ nonisolated(unsafe) public let livestreamOrAudioRoomSortPreset = [
             [
                 dominantSpeaker,
                 speaking,
+                participantSource(.rtmp),
                 publishingVideo,
                 publishingAudio
             ]

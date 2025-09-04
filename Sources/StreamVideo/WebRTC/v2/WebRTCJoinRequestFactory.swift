@@ -62,6 +62,7 @@ struct WebRTCJoinRequestFactory {
             publisherSdp: publisherSdp
         )
         result.capabilities = capabilities
+        result.source = .webrtcUnspecified
 
         if let reconnectDetails = await buildReconnectDetails(
             for: connectionType,
