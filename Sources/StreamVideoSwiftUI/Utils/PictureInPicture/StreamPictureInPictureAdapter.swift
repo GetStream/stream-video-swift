@@ -82,6 +82,17 @@ public final class StreamPictureInPictureAdapter: @unchecked Sendable {
                 .store(in: disposableBag)
         }
     }
+
+    // MARK: - State updaters
+
+    /// Updates the ViewFactory instance the will be used by Picture-in-Picture to create UI components.
+    @MainActor
+    public func setViewFactory<V: ViewFactory>(_ viewFactory: V) {
+        guard let store else {
+            return
+        }
+        store.dispatch(.setViewFactory(.init(viewFactory)))
+    }
 }
 
 /// Provides the default value for the Picture-in-Picture adapter.

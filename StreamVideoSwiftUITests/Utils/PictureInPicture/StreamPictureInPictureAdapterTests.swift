@@ -37,4 +37,18 @@ final class StreamPictureInPictureAdapterTests: XCTestCase, @unchecked Sendable 
 
         await fulfilmentInMainActor { self.subject.store?.state.sourceView === view }
     }
+
+    // MARK: - ViewFactory updated
+
+    @MainActor
+    func test_setViewFactory_storeWasUpdated() async {
+        final class CustomViewFactory: ViewFactory {}
+        _ = subject
+        await fulfillment { self.subject.store != nil }
+        let viewFactory = CustomViewFactory()
+
+        subject.setViewFactory(viewFactory)
+
+        await fulfillment { self.subject.store?.state.viewFactory.source === viewFactory }
+    }
 }
