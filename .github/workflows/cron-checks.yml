@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 18.3
+          - ios: 18.5
             xcode: 16.3
             os: macos-15
             device: "iPhone 16 Pro"
@@ -124,7 +124,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 18.3
+          - ios: 18.5
             xcode: 16.3
             os: macos-15
             device: "iPhone 16 Pro"
