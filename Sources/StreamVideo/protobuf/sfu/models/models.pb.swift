@@ -267,6 +267,50 @@ extension Stream_Video_Sfu_Models_ParticipantSource: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+enum Stream_Video_Sfu_Models_AudioBitrateType: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case voiceStandardUnspecified // = 0
+  case voiceHighQuality // = 1
+  case musicHighQuality // = 2
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .voiceStandardUnspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .voiceStandardUnspecified
+    case 1: self = .voiceHighQuality
+    case 2: self = .musicHighQuality
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .voiceStandardUnspecified: return 0
+    case .voiceHighQuality: return 1
+    case .musicHighQuality: return 2
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_AudioBitrateType: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static let allCases: [Stream_Video_Sfu_Models_AudioBitrateType] = [
+    .voiceStandardUnspecified,
+    .voiceHighQuality,
+    .musicHighQuality,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   typealias RawValue = Int
   case unspecified // = 0
@@ -1207,6 +1251,8 @@ struct Stream_Video_Sfu_Models_TrackInfo {
 
   var publishOptionID: Int32 = 0
 
+  var audioBitrateType: Stream_Video_Sfu_Models_AudioBitrateType = .voiceStandardUnspecified
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1540,6 +1586,7 @@ extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantSource: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AudioBitrateType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ErrorCode: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_SdkType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
@@ -1623,6 +1670,14 @@ extension Stream_Video_Sfu_Models_ParticipantSource: SwiftProtobuf._ProtoNamePro
     3: .same(proto: "PARTICIPANT_SOURCE_SIP"),
     4: .same(proto: "PARTICIPANT_SOURCE_RTSP"),
     5: .same(proto: "PARTICIPANT_SOURCE_SRT"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_AudioBitrateType: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "AUDIO_BITRATE_TYPE_VOICE_STANDARD_UNSPECIFIED"),
+    1: .same(proto: "AUDIO_BITRATE_TYPE_VOICE_HIGH_QUALITY"),
+    2: .same(proto: "AUDIO_BITRATE_TYPE_MUSIC_HIGH_QUALITY"),
   ]
 }
 
@@ -2350,6 +2405,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     10: .same(proto: "muted"),
     11: .same(proto: "codec"),
     12: .standard(proto: "publish_option_id"),
+    13: .standard(proto: "audio_bitrate_type"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2368,6 +2424,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
       case 11: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
       case 12: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
+      case 13: try { try decoder.decodeSingularEnumField(value: &self.audioBitrateType) }()
       default: break
       }
     }
@@ -2408,6 +2465,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.publishOptionID != 0 {
       try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 12)
     }
+    if self.audioBitrateType != .voiceStandardUnspecified {
+      try visitor.visitSingularEnumField(value: self.audioBitrateType, fieldNumber: 13)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2422,6 +2482,7 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.muted != rhs.muted {return false}
     if lhs._codec != rhs._codec {return false}
     if lhs.publishOptionID != rhs.publishOptionID {return false}
+    if lhs.audioBitrateType != rhs.audioBitrateType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
