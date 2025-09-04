@@ -704,6 +704,7 @@
 		40C4DF572C1C61BD0035DBC2 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		40C4E8322E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */; };
 		40C4E8352E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */; };
+		40C4E85F2E69B5C100FC29BC /* ParticipantSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4E85E2E69B5C100FC29BC /* ParticipantSource.swift */; };
 		40C689182C64DDC70054528A /* Publisher+TaskSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C689172C64DDC70054528A /* Publisher+TaskSink.swift */; };
 		40C708D62D8D729500D3501F /* Gleap in Frameworks */ = {isa = PBXBuildFile; productRef = 40C708D52D8D729500D3501F /* Gleap */; };
 		40C71B5A2E53565300733BF6 /* Store+Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B592E53565300733BF6 /* Store+Mocks.swift */; };
@@ -2318,6 +2319,7 @@
 		40C4DF4F2C1C415F0035DBC2 /* LastParticipantAutoLeavePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastParticipantAutoLeavePolicyTests.swift; sourceTree = "<group>"; };
 		40C4E8312E60BBCC00FC29BC /* CallKitMissingPermissionPolicy_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_Tests.swift; sourceTree = "<group>"; };
 		40C4E8342E60BC6300FC29BC /* CallKitMissingPermissionPolicy_EndCallTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitMissingPermissionPolicy_EndCallTests.swift; sourceTree = "<group>"; };
+		40C4E85E2E69B5C100FC29BC /* ParticipantSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantSource.swift; sourceTree = "<group>"; };
 		40C689172C64DDC70054528A /* Publisher+TaskSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+TaskSink.swift"; sourceTree = "<group>"; };
 		40C689192C64F74F0054528A /* SFUSignalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUSignalService.swift; sourceTree = "<group>"; };
 		40C6891D2C6661990054528A /* SFUEventAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFUEventAdapter.swift; sourceTree = "<group>"; };
@@ -6483,6 +6485,7 @@
 		8456E6D9287EC46D004E180E /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				40C4E85E2E69B5C100FC29BC /* ParticipantSource.swift */,
 				4019A2792E42475300CE70A4 /* JoinSource.swift */,
 				403CA9B32CC7BAF0001A88C2 /* VideoCodec.swift */,
 				4029E94D2CB8160E00E1D571 /* IncomingVideoQualitySettings.swift */,
@@ -8722,6 +8725,7 @@
 				82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */,
 				40E3634E2D09FDE50028C52A /* CameraCaptureHandler.swift in Sources */,
 				40944CBC2E4CBEED00088AF0 /* StreamCallAudioRecorder+ActiveCallMiddleware.swift in Sources */,
+				40C4E85F2E69B5C100FC29BC /* ParticipantSource.swift in Sources */,
 				406583922B877A1600B4F979 /* BackgroundImageFilterProcessor.swift in Sources */,
 				8490DD23298D5330007E53D2 /* Data+Gzip.swift in Sources */,
 				84DC38B829ADFCFD00946713 /* UpdateUserPermissionsResponse.swift in Sources */,
