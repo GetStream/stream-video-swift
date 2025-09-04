@@ -112,7 +112,7 @@ final class RTCAudioStore: @unchecked Sendable {
 
     /// Dispatches an audio store action asynchronously and waits for completion.
     func dispatchAsync(
-        _ action: RTCAudioStoreAction,
+        _ actions: [RTCAudioStoreAction],
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
@@ -122,14 +122,65 @@ final class RTCAudioStore: @unchecked Sendable {
                 return
             }
 
-            await applyDelayIfRequired(for: action)
+            for action in actions {
+                await applyDelayIfRequired(for: action)
 
-            try perform(
-                action,
-                file: file,
-                function: function,
-                line: line
-            )
+                try perform(
+                    action,
+                    file: file,
+                    function: function,
+                    line: line
+                )
+            }
+        }
+    }
+
+    /// Dispatches an audio store action asynchronously and waits for completion.
+    func dispatchAsync(
+        _ action: RTCAudioStoreAction,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws {
+        try await dispatchAsync(
+            [action],
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    func dispatch(
+        _ actions: [RTCAudioStoreAction],
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+
+            for action in actions {
+                do {
+                    await applyDelayIfRequired(for: action)
+
+                    try perform(
+                        action,
+                        file: file,
+                        function: function,
+                        line: line
+                    )
+                } catch {
+                    log.error(
+                        error,
+                        subsystems: .audioSession,
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
+                }
+            }
         }
     }
 
@@ -140,30 +191,7 @@ final class RTCAudioStore: @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) {
-        processingQueue.addTaskOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
-            do {
-                await applyDelayIfRequired(for: action)
-
-                try perform(
-                    action,
-                    file: file,
-                    function: function,
-                    line: line
-                )
-            } catch {
-                log.error(
-                    error,
-                    subsystems: .audioSession,
-                    functionName: function,
-                    fileName: file,
-                    lineNumber: line
-                )
-            }
-        }
+        dispatch([action], file: file, function: function, line: line)
     }
 
     // MARK: - Private Helpers

@@ -13,6 +13,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     @Injected(\.applicationStateAdapter) private var applicationStateAdapter
     @Injected(\.permissions) private var permissions
+    @Injected(\.audioStore) private var audioStore
 
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
 
@@ -35,26 +36,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
     ) async throws -> CallSettings {
         switch applicationStateAdapter.state {
         case .foreground:
-            if
-                callSettings.audioOn,
-                !permissions.hasMicrophonePermission,
-                permissions.canRequestMicrophonePermission
-            {
-                log.debug("Requesting microphone permission.", subsystems: .webRTC)
-                let result = try await permissions.requestMicrophonePermission()
-                log.debug("Microphone permission request completed with result:\(result).", subsystems: .webRTC)
-            }
-
-            if
-                callSettings.videoOn,
-                !permissions.hasCameraPermission,
-                permissions.canRequestCameraPermission
-            {
-                log.debug("Requesting camera permission.", subsystems: .webRTC)
-                let result = try await permissions.requestCameraPermission()
-                log.debug("Camera permission request completed with result:\(result).", subsystems: .webRTC)
-            }
-
             return callSettings
 
         case .background, .unknown:
@@ -72,6 +53,8 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
                 updatedCallSettings = updatedCallSettings
                     .withUpdatedAudioState(false)
+            } else {
+                shouldRequestCameraPermission = false
             }
 
             if updatedCallSettings.videoOn, !permissions.hasCameraPermission {
@@ -86,6 +69,8 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
                 updatedCallSettings = updatedCallSettings
                     .withUpdatedVideoState(false)
+            } else {
+                shouldRequestCameraPermission = false
             }
 
             return updatedCallSettings
@@ -101,14 +86,38 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             return
         }
 
-        log.debug(
-            "Application became active and we will request permissions for microphone:\(shouldRequestMicrophonePermission) camera:\(shouldRequestCameraPermission)",
-            subsystems: .webRTC
-        )
+        Task { [weak self] in
+            guard let self else {
+                return
+            }
 
-        delegate?.webrtcApplicationDidBecomeActive(
-            audioOn: shouldRequestMicrophonePermission,
-            videoOn: shouldRequestCameraPermission
-        )
+            if shouldRequestMicrophonePermission {
+                log.debug("Requesting microphone permission.", subsystems: .webRTC)
+                let result = try await permissions.requestMicrophonePermission()
+                log.debug("Microphone permission request completed with result:\(result).", subsystems: .webRTC)
+            }
+
+            if shouldRequestCameraPermission {
+                log.debug("Requesting camera permission.", subsystems: .webRTC)
+                let result = try await permissions.requestCameraPermission()
+                log.debug("Camera permission request completed with result:\(result).", subsystems: .webRTC)
+            }
+
+            log.debug(
+                "Application became active and we will request permissions for microphone:\(shouldRequestMicrophonePermission) camera:\(shouldRequestCameraPermission)",
+                subsystems: .webRTC
+            )
+
+            do {
+                try await audioStore.restartAudioSessionSync()
+            } catch {
+                log.error(error, subsystems: .audioSession)
+            }
+
+            delegate?.webrtcApplicationDidBecomeActive(
+                audioOn: shouldRequestMicrophonePermission,
+                videoOn: shouldRequestCameraPermission
+            )
+        }
     }
 }
