@@ -29,8 +29,6 @@ final class RTCAudioStore: @unchecked Sendable {
     @Atomic private(set) var middleware: [RTCAudioStoreMiddleware] = []
     @Atomic private(set) var reducers: [RTCAudioStoreReducer] = []
 
-    private var logCancellable: AnyCancellable?
-
     init(
         session: AudioSessionProtocol = RTCAudioSession.sharedInstance(),
         underlyingQueue: dispatch_queue_t? = .global(qos: .userInteractive)
@@ -52,10 +50,6 @@ final class RTCAudioStore: @unchecked Sendable {
             )
         )
         processingQueue.underlyingQueue = underlyingQueue
-
-        logCancellable = stateSubject
-            .log(.debug, subsystems: .audioSession) { "AudioStore state updated to: \($0)" }
-            .sink { _ in }
 
         add(RTCAudioSessionReducer(store: self))
 
@@ -112,7 +106,7 @@ final class RTCAudioStore: @unchecked Sendable {
 
     /// Dispatches an audio store action asynchronously and waits for completion.
     func dispatchAsync(
-        _ action: RTCAudioStoreAction,
+        _ actions: [RTCAudioStoreAction],
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
@@ -122,14 +116,101 @@ final class RTCAudioStore: @unchecked Sendable {
                 return
             }
 
-            await applyDelayIfRequired(for: action)
+            for action in actions {
+                await applyDelayIfRequired(for: action)
 
-            try perform(
-                action,
-                file: file,
-                function: function,
-                line: line
-            )
+                if case let .failable(nestedAction) = action {
+                    do {
+                        try perform(
+                            nestedAction,
+                            file: file,
+                            function: function,
+                            line: line
+                        )
+                    } catch {
+                        log.warning(
+                            "RTCAudioStore action:\(nestedAction) failed with error:\(error).",
+                            functionName: function,
+                            fileName: file,
+                            lineNumber: line
+                        )
+                    }
+                } else {
+                    try perform(
+                        action,
+                        file: file,
+                        function: function,
+                        line: line
+                    )
+                }
+            }
+        }
+    }
+
+    /// Dispatches an audio store action asynchronously and waits for completion.
+    func dispatchAsync(
+        _ action: RTCAudioStoreAction,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws {
+        try await dispatchAsync(
+            [action],
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    func dispatch(
+        _ actions: [RTCAudioStoreAction],
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        processingQueue.addTaskOperation { [weak self] in
+            guard let self else {
+                return
+            }
+
+            for action in actions {
+                do {
+                    await applyDelayIfRequired(for: action)
+
+                    if case let .failable(nestedAction) = action {
+                        do {
+                            try perform(
+                                nestedAction,
+                                file: file,
+                                function: function,
+                                line: line
+                            )
+                        } catch {
+                            log.warning(
+                                "RTCAudioStore action:\(nestedAction) failed with error:\(error).",
+                                functionName: function,
+                                fileName: file,
+                                lineNumber: line
+                            )
+                        }
+                    } else {
+                        try perform(
+                            action,
+                            file: file,
+                            function: function,
+                            line: line
+                        )
+                    }
+                } catch {
+                    log.error(
+                        error,
+                        subsystems: .audioSession,
+                        functionName: function,
+                        fileName: file,
+                        lineNumber: line
+                    )
+                }
+            }
         }
     }
 
@@ -140,30 +221,7 @@ final class RTCAudioStore: @unchecked Sendable {
         function: StaticString = #function,
         line: UInt = #line
     ) {
-        processingQueue.addTaskOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
-            do {
-                await applyDelayIfRequired(for: action)
-
-                try perform(
-                    action,
-                    file: file,
-                    function: function,
-                    line: line
-                )
-            } catch {
-                log.error(
-                    error,
-                    subsystems: .audioSession,
-                    functionName: function,
-                    fileName: file,
-                    lineNumber: line
-                )
-            }
-        }
+        dispatch([action], file: file, function: function, line: line)
     }
 
     // MARK: - Private Helpers
@@ -204,7 +262,7 @@ final class RTCAudioStore: @unchecked Sendable {
             stateSubject.send(updatedState)
 
             log.debug(
-                "Completed action: \(action).",
+                "Store identifier:RTCAudioStore completed action:\(action) state:\(updatedState).",
                 subsystems: .audioSession,
                 functionName: function,
                 fileName: file,
@@ -212,7 +270,7 @@ final class RTCAudioStore: @unchecked Sendable {
             )
         } catch {
             log.error(
-                "Failed action: \(action).",
+                "Store identifier:RTCAudioStore failed to apply action:\(action) state:\(state).",
                 subsystems: .audioSession,
                 error: error,
                 functionName: function,

@@ -29,6 +29,7 @@ public struct StatelessVideoIconView: View {
     @ObservedObject private var callSettings: CallSettings
 
     @State private var hasPermission: Bool
+    @State private var canRequestPermission: Bool
 
     /// Initializes a stateless video icon view.
     ///
@@ -52,6 +53,7 @@ public struct StatelessVideoIconView: View {
         self.controlStyle = controlStyle
         self.actionHandler = actionHandler
         hasPermission = InjectedValues[\.permissions].hasCameraPermission
+        canRequestPermission = InjectedValues[\.permissions].canRequestCameraPermission
     }
 
     /// The body of the video icon view.
@@ -60,10 +62,11 @@ public struct StatelessVideoIconView: View {
             action: { actionHandler?() },
             label: { label(isEnabled: callSettings.videoOn, hasPermission: hasPermission) }
         )
-        .disabled(!hasPermission)
+        .disabled(!hasPermission && !canRequestPermission)
         .accessibility(identifier: "cameraToggle")
         .streamAccessibility(value: callSettings.videoOn ? "1" : "0")
         .onReceive(permissions.$hasCameraPermission) { hasPermission = $0 }
+        .onReceive(permissions.$canRequestCameraPermission) { canRequestPermission = $0 }
     }
 
     // MARK: - Private Helpers
@@ -80,7 +83,7 @@ public struct StatelessVideoIconView: View {
                 : controlStyle.disabled.iconStyle
         )
 
-        if hasPermission {
+        if hasPermission || canRequestPermission {
             content
         } else {
             content

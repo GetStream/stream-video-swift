@@ -62,7 +62,7 @@ extension StreamCallAudioRecorder.Namespace {
         ) {
             switch action {
             case let .setIsRecording(value):
-                if value, state.shouldRecord {
+                if value, state.shouldRecord, !state.isInterrupted {
                     startRecording()
                 } else {
                     stopRecording()
@@ -77,7 +77,7 @@ extension StreamCallAudioRecorder.Namespace {
                 }
 
             case let .setShouldRecord(value):
-                if value, !state.isRecording {
+                if value, !state.isRecording, !state.isInterrupted {
                     startRecording()
                 } else if !value, state.isRecording {
                     stopRecording()
