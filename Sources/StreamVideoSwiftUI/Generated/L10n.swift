@@ -24,6 +24,8 @@ internal enum L10n {
 
   internal enum Call {
     internal enum Current {
+      /// Kick user
+      internal static var kickUser: String { L10n.tr("Localizable", "call.current.kick-user") }
       /// Full Screen
       internal static var layoutFullScreen: String { L10n.tr("Localizable", "call.current.layout-full-screen") }
       /// Grid
