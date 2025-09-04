@@ -125,10 +125,10 @@ public struct PermissionsPromptView: View {
     }
 
     private var isMissingCameraPermission: Bool {
-        requiresCameraPermission && !permissions.hasCameraPermission
+        requiresCameraPermission && !permissions.hasCameraPermission && !permissions.canRequestCameraPermission
     }
 
     private var isMissingMicrophonePermission: Bool {
-        requiresMicrophonePermission && !permissions.hasMicrophonePermission
+        requiresMicrophonePermission && !permissions.hasMicrophonePermission && !permissions.canRequestMicrophonePermission
     }
 }
