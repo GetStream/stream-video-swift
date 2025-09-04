@@ -71,8 +71,17 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
     /// Requests microphone permission from the user.
     /// - Returns: `true` if permission was granted, `false` otherwise.
     /// - Throws: An error if the permission request times out.
-    public func requestMicrophonePermission() async throws -> Bool {
-        store.dispatch(.requestMicrophonePermission)
+    public func requestMicrophonePermission(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws -> Bool {
+        store.dispatch(
+            .requestMicrophonePermission,
+            file: file,
+            function: function,
+            line: line
+        )
         return try await store.publisher(\.microphonePermission)
             .filter { $0 != .requesting && $0 != .unknown }
             .nextValue() == .granted
@@ -81,8 +90,17 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
     /// Requests camera permission from the user.
     /// - Returns: `true` if permission was granted, `false` otherwise.
     /// - Throws: An error if the permission request times out.
-    public func requestCameraPermission() async throws -> Bool {
-        store.dispatch(.requestCameraPermission)
+    public func requestCameraPermission(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) async throws -> Bool {
+        store.dispatch(
+            .requestCameraPermission,
+            file: file,
+            function: function,
+            line: line
+        )
         return try await store.publisher(\.cameraPermission)
             .filter { $0 != .requesting && $0 != .unknown }
             .nextValue() == .granted
@@ -93,9 +111,17 @@ public final class PermissionStore: ObservableObject, @unchecked Sendable {
     /// - Returns: `true` if permission was granted, `false` otherwise.
     /// - Throws: An error if the permission request times out.
     public func requestPushNotificationPermission(
-        with options: UNAuthorizationOptions
+        with options: UNAuthorizationOptions,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
     ) async throws -> Bool {
-        store.dispatch(.requestPushNotificationPermission(options))
+        store.dispatch(
+            .requestPushNotificationPermission(options),
+            file: file,
+            function: function,
+            line: line
+        )
         return try await store.publisher(\.pushNotificationPermission)
             .filter { $0 != .requesting && $0 != .unknown }
             .nextValue() == .granted

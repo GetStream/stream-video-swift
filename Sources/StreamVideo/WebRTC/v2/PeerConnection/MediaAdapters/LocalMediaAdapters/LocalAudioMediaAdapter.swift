@@ -16,6 +16,7 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
 
     /// The audio recorder for capturing audio during the call session.
     @Injected(\.callAudioRecorder) private var audioRecorder
+    @Injected(\.audioStore) private var audioStore
 
     /// The unique identifier for the current session.
     private let sessionID: String
@@ -130,6 +131,17 @@ final class LocalAudioMediaAdapter: LocalMediaAdapting, @unchecked Sendable {
                 !primaryTrack.isEnabled
             else {
                 return
+            }
+
+            do {
+                _ = try await audioStore
+                    .publisher(\.isActive)
+                    .nextValue(timeout: 1)
+            } catch {
+                log.error(
+                    "AudioSession wasn't active while trying to activated primary track.",
+                    subsystems: .webRTC
+                )
             }
 
             log.debug("Start publishing of local audio tracks.", subsystems: .webRTC)

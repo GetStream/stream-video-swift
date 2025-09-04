@@ -40,7 +40,7 @@ public struct StatelessMicrophoneIconView: View {
     @MainActor
     public init(
         call: Call?,
-        callSettings: CallSettings = .init(),
+        callSettings: CallSettings? = nil,
         size: CGFloat = 44,
         controlStyle: ToggleControlStyle = .init(
             enabled: .init(icon: Appearance.default.images.micTurnOn, iconStyle: .transparent),
@@ -50,7 +50,7 @@ public struct StatelessMicrophoneIconView: View {
     ) {
         self.call = call
         self.size = size
-        _callSettings = .init(wrappedValue: call?.state.callSettings ?? callSettings)
+        _callSettings = .init(wrappedValue: call?.state.callSettings ?? callSettings ?? .init())
         self.controlStyle = controlStyle
         self.actionHandler = actionHandler
         hasPermission = InjectedValues[\.permissions].hasMicrophonePermission
