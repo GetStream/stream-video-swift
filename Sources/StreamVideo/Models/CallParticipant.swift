@@ -44,18 +44,22 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
     /// List of the last 10 audio levels.
     public var audioLevels: [Float]
     /// Pinning metadata used to keep this participant visible across layouts.
-    ///
     /// If set, the participant is considered pinned either locally or remotely.
     /// SDK integrators can use this to reflect UI state (e.g., always visible).
     public var pin: PinInfo?
 
     /// The set of media track types currently paused for this participant.
-    ///
     /// This is used to control bandwidth or presentation. SDK integrators can
     /// rely on it to know when a participant's track has been paused remotely.
     public var pausedTracks: Set<TrackType>
 
-    /// The user's id. This is not necessarily unique, since a user can join from multiple devices.
+    /// Describes where the participant's media originates from.
+    /// Distinguish WebRTC users from ingest sources like RTMP or SIP. Defaults
+    /// to `.webRTCUnspecified`.
+    public var source: ParticipantSource
+
+    /// The user's id. This is not necessarily unique, since a user can join
+    /// from multiple devices.
     public var userId: String {
         user.id
     }
@@ -92,7 +96,8 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         audioLevel: Float,
         audioLevels: [Float],
         pin: PinInfo?,
-        pausedTracks: Set<TrackType>
+        pausedTracks: Set<TrackType>,
+        source: ParticipantSource = .webRTCUnspecified
     ) {
         user = User(
             id: userId,
@@ -118,6 +123,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         self.audioLevels = audioLevels
         self.pin = pin
         self.pausedTracks = pausedTracks
+        self.source = source
     }
 
     public static func == (lhs: CallParticipant, rhs: CallParticipant) -> Bool {
@@ -143,10 +149,12 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
             lhs.pausedTracks == rhs.pausedTracks
     }
 
+    /// Indicates whether any pin is applied to this participant.
     public var isPinned: Bool {
         pin != nil
     }
 
+    /// Indicates whether the pin was set by another user.
     public var isPinnedRemotely: Bool {
         guard let pin else { return false }
         return pin.isLocal == false
@@ -490,6 +498,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         )
     }
 
+    /// Returns a copy with the given track type marked as paused.
     public func withPausedTrack(_ trackType: TrackType) -> CallParticipant {
         var updatedPausedTracks = pausedTracks
         updatedPausedTracks.insert(trackType)
@@ -519,6 +528,7 @@ public struct CallParticipant: Identifiable, Sendable, Hashable {
         )
     }
 
+    /// Returns a copy with the given track type unpaused.
     public func withUnpausedTrack(_ trackType: TrackType) -> CallParticipant {
         var updatedPausedTracks = pausedTracks
         updatedPausedTracks.remove(trackType)

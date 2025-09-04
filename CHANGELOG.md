@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - When the user is missing a permission, the SDK will prompt them to accept any missing permission. [#915](https://github.com/GetStream/stream-video-swift/pull/915)
 - You can now set the `ViewFactory` instance to be used from Picture-in-Picture. [#934](https://github.com/GetStream/stream-video-swift/pull/934) 
+- `CallParticipant` now exposes the `source` property, which can be used to distinguish between WebRTC users and ingest sources like RTMP or SIP. [#93](https://github.com/GetStream/stream-video-swift/pull/933)
 
 ### 🔄 Changed
 - Improved the LastParticipantLeavePolicy to be more robust. [#925](https://github.com/GetStream/stream-video-swift/pull/925)

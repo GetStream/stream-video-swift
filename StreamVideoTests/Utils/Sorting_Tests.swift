@@ -777,6 +777,47 @@ final class Sorting_Tests: XCTestCase, @unchecked Sendable {
         )
     }
 
+    // MARK: - participantSource
+
+    func test_participantSource_rtmpHasPriority() {
+        let subject = participantSource(.rtmp)
+
+        assertSort(
+            [
+                .dummy(source: .rtmp),
+                .dummy(source: .webRTCUnspecified)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[0], $0[1]] } // "rtmp" has priority over "webRTCUnspecified".
+        )
+    }
+
+    func test_participantSource_srtHasPriority() {
+        let subject = participantSource(.srt)
+
+        assertSort(
+            [
+                .dummy(source: .rtmp),
+                .dummy(source: .srt)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[1], $0[0]] } // "srt" has priority over "rtmp".
+        )
+    }
+
+    func test_participantSource_sameSource() {
+        let subject = participantSource(.rtmp)
+
+        assertSort(
+            [
+                .dummy(source: .rtmp),
+                .dummy(source: .rtmp)
+            ],
+            comparator: subject,
+            expectedTransformer: { [$0[0], $0[1]] }
+        )
+    }
+
     // MARK: - Private Helpers
 
     private func assertSort(

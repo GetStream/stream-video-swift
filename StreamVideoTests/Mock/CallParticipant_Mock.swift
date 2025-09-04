@@ -30,7 +30,8 @@ extension CallParticipant {
         audioLevel: Float = 0,
         audioLevels: [Float] = [],
         pin: PinInfo? = nil,
-        pausedTracks: Set<TrackType> = []
+        pausedTracks: Set<TrackType> = [],
+        source: ParticipantSource = .webRTCUnspecified
     ) -> CallParticipant {
         .init(
             id: id,
@@ -54,7 +55,8 @@ extension CallParticipant {
             audioLevel: audioLevel,
             audioLevels: audioLevels,
             pin: pin,
-            pausedTracks: pausedTracks
+            pausedTracks: pausedTracks,
+            source: source
         )
     }
 }
