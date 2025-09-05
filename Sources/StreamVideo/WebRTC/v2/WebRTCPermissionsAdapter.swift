@@ -69,14 +69,25 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                     return callSettings
                 }
 
+                self.requiredPermissions = updatedRequiredPermissions
+                log.debug(
+                    "Required permissions updated to:\(requiredPermissions)",
+                    subsystems: .webRTC
+                )
+
                 switch applicationStateAdapter.state {
-                case .foreground:
-                    if shouldPrompt(for: updatedRequiredPermissions) {
-                        self.requiredPermissions = updatedRequiredPermissions
-                        _ = try await requestRequiredPermissions(invokeDelegate: false)
-                    }
-                case .unknown, .background:
-                    self.requiredPermissions = updatedRequiredPermissions
+                case .foreground where shouldPrompt(for: updatedRequiredPermissions):
+                    log.debug(
+                        "Application state is .foreground. Requesting permissions for:\(requiredPermissions)",
+                        subsystems: .webRTC
+                    )
+
+                    _ = try await requestRequiredPermissions(invokeDelegate: false)
+                default:
+                    log.debug(
+                        "Application state is \(applicationStateAdapter.state) but we won't request for permissions:\(requiredPermissions).",
+                        subsystems: .webRTC
+                    )
                 }
 
                 var updatedCallSettings = callSettings
