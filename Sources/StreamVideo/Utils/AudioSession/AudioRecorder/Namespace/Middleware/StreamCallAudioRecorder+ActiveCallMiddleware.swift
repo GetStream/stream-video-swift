@@ -22,7 +22,6 @@ extension StreamCallAudioRecorder.Namespace {
         /// The main StreamVideo instance for accessing call state.
         @Injected(\.streamVideo) private var streamVideo
         @Injected(\.audioStore) private var audioStore
-        @Injected(\.permissions) private var permissions
 
         /// Container for managing subscription lifecycles.
         private let disposableBag = DisposableBag()
@@ -64,16 +63,28 @@ extension StreamCallAudioRecorder.Namespace {
                     .removeDuplicates()
                     .eraseToAnyPublisher()
 
+//                aggregatedCancellable = audioOnPublisher
+//                    .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
+
                 let isAudioSessionActivePublisher = audioStore
                     .publisher(\.isActive)
                     .eraseToAnyPublisher()
 
-                let hasPermissionPublisher = permissions
-                    .$hasMicrophonePermission
+//                aggregatedCancellable = Publishers
+//                    .CombineLatest(audioOnPublisher, isAudioSessionActivePublisher)
+//                    .log(.debug) { "Store identifier:call.audio.recording.store received audioOn:\($0) isAudioSessionActive:\($1)." }
+//                    .map { $0 && $1 }
+//                    .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
+
+                let hasPermissionPublisher = audioStore
+                    .publisher(\.hasRecordingPermission)
                     .eraseToAnyPublisher()
 
                 aggregatedCancellable = Publishers
                     .CombineLatest3(audioOnPublisher, isAudioSessionActivePublisher, hasPermissionPublisher)
+                    .log(.debug) {
+                        "Store identifier:call.audio.recording.store received audioOn:\($0) isAudioSessionActive:\($1) hasPermission:\($2)."
+                    }
                     .map { $0 && $1 && $2 }
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
             } else {

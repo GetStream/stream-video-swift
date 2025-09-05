@@ -9,8 +9,7 @@ extension RTCAudioStore {
     private var restartAudioSessionActions: [RTCAudioStoreAction] {
         let state = self.state
         return [
-            .failable(.audioSession(.isActive(false))),
-            .audioSession(.isAudioEnabled(false)),
+            .failable(.audioSession(.setAVAudioSessionActive(false))),
             .generic(.delay(seconds: 0.2)),
             .audioSession(
                 .setCategory(
@@ -19,9 +18,11 @@ extension RTCAudioStore {
                     options: state.options
                 )
             ),
+            .audioSession(
+                .setOverrideOutputPort(state.overrideOutputAudioPort)
+            ),
             .generic(.delay(seconds: 0.2)),
-            .audioSession(.isAudioEnabled(true)),
-            .audioSession(.isActive(true))
+            .failable(.audioSession(.setAVAudioSessionActive(true)))
         ]
     }
 
@@ -30,6 +31,10 @@ extension RTCAudioStore {
         function: StaticString = #function,
         line: UInt = #line
     ) {
+        log.debug(
+            "Store identifier:RTCAudioStore will restart AudioSession asynchronously.",
+            subsystems: .audioSession
+        )
         dispatch(
             restartAudioSessionActions,
             file: file,
@@ -43,11 +48,19 @@ extension RTCAudioStore {
         function: StaticString = #function,
         line: UInt = #line
     ) async throws {
+        log.debug(
+            "Store identifier:RTCAudioStore will restart AudioSession.",
+            subsystems: .audioSession
+        )
         try await dispatchAsync(
             restartAudioSessionActions,
             file: file,
             function: function,
             line: line
+        )
+        log.debug(
+            "Store identifier:RTCAudioStore did restart AudioSession.",
+            subsystems: .audioSession
         )
     }
 }
