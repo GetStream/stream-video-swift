@@ -176,6 +176,10 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     open func stopRecording() {
         store.dispatch(.setIsRecording(false))
     }
+
+    func dispatch(_ action: Namespace.Action) {
+        store.dispatch(action)
+    }
 }
 
 /// Injection key for providing the default `StreamCallAudioRecorder`

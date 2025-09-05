@@ -51,6 +51,11 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     /// For observing changes, use ``publisher(_:)`` instead.
     var state: Namespace.State { stateSubject.value }
 
+    var isSuspended: Bool {
+        get { processingQueue.isSuspended }
+        set { processingQueue.isSuspended = newValue }
+    }
+
     /// Unique identifier for this store instance.
     private let identifier: String
     

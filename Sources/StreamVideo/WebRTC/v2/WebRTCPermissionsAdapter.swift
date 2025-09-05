@@ -47,6 +47,20 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             .removeDuplicates()
             .sink { [weak self] _ in self?.didMoveToForeground() }
             .store(in: disposableBag)
+
+        permissions
+            .$hasMicrophonePermission
+            .removeDuplicates()
+            .log(.debug) { "Received microphone permission updated to granted:\($0)" }
+            .sink { [weak self] in self?.didUpdateMicrophonePermission($0) }
+            .store(in: disposableBag)
+
+        permissions
+            .$hasCameraPermission
+            .removeDuplicates()
+            .log(.debug) { "Received camera permission updated to granted:\($0)" }
+            .sink { [weak self] in self?.didUpdateCameraPermission($0) }
+            .store(in: disposableBag)
     }
 
     func willSet(callSettings: CallSettings) async -> CallSettings {
@@ -81,7 +95,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                         subsystems: .webRTC
                     )
 
-                    _ = try await requestRequiredPermissions(invokeDelegate: false)
+                    _ = try await requestRequiredPermissions()
                 case .foreground:
                     break
                 default:
@@ -124,14 +138,14 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             }
 
             do {
-                try await requestRequiredPermissions(invokeDelegate: true)
+                try await requestRequiredPermissions()
             } catch {
                 log.error(error, subsystems: .webRTC)
             }
         }
     }
 
-    private func requestRequiredPermissions(invokeDelegate: Bool) async throws {
+    private func requestRequiredPermissions() async throws {
         guard
             shouldPrompt(for: requiredPermissions)
         else {
@@ -152,10 +166,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 else {
                     continue
                 }
-                let result = try await permissions.requestMicrophonePermission()
-                if invokeDelegate {
-                    delegate?.permissionsAdapter(self, audioOn: result)
-                }
+                _ = try await permissions.requestMicrophonePermission()
             case .camera:
                 guard
                     !permissions.hasCameraPermission,
@@ -163,10 +174,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 else {
                     continue
                 }
-                let result = try await permissions.requestCameraPermission()
-                if invokeDelegate {
-                    delegate?.permissionsAdapter(self, videoOn: result)
-                }
+                _ = try await permissions.requestCameraPermission()
             }
         }
 
@@ -174,8 +182,6 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             "WebRTC completed request permissions for:\(Array(requiredPermissions)).",
             subsystems: .webRTC
         )
-
-        requiredPermissions = []
     }
 
     private func shouldPrompt(for items: Set<RequiredPermission>) -> Bool {
@@ -192,6 +198,26 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
             case .camera:
                 return !permissions.hasCameraPermission && permissions.canRequestCameraPermission
             }
+        }
+    }
+
+    private func didUpdateMicrophonePermission(_ hasPermission: Bool) {
+        processingQueue.addOperation { [weak self] in
+            guard let self, requiredPermissions.contains(.microphone) else {
+                return
+            }
+            delegate?.permissionsAdapter(self, audioOn: hasPermission)
+            requiredPermissions.remove(.microphone)
+        }
+    }
+
+    private func didUpdateCameraPermission(_ hasPermission: Bool) {
+        processingQueue.addOperation { [weak self] in
+            guard let self, requiredPermissions.contains(.camera) else {
+                return
+            }
+            delegate?.permissionsAdapter(self, videoOn: hasPermission)
+            requiredPermissions.remove(.camera)
         }
     }
 }

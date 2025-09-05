@@ -63,18 +63,9 @@ extension StreamCallAudioRecorder.Namespace {
                     .removeDuplicates()
                     .eraseToAnyPublisher()
 
-//                aggregatedCancellable = audioOnPublisher
-//                    .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
-
                 let isAudioSessionActivePublisher = audioStore
                     .publisher(\.isActive)
                     .eraseToAnyPublisher()
-
-//                aggregatedCancellable = Publishers
-//                    .CombineLatest(audioOnPublisher, isAudioSessionActivePublisher)
-//                    .log(.debug) { "Store identifier:call.audio.recording.store received audioOn:\($0) isAudioSessionActive:\($1)." }
-//                    .map { $0 && $1 }
-//                    .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
 
                 let hasPermissionPublisher = audioStore
                     .publisher(\.hasRecordingPermission)
@@ -86,6 +77,7 @@ extension StreamCallAudioRecorder.Namespace {
                         "Store identifier:call.audio.recording.store received audioOn:\($0) isAudioSessionActive:\($1) hasPermission:\($2)."
                     }
                     .map { $0 && $1 && $2 }
+                    .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
             } else {
                 aggregatedCancellable?.cancel()

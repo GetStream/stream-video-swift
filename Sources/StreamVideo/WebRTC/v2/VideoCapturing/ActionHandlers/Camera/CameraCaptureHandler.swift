@@ -21,6 +21,7 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
 
     @Injected(\.captureDeviceProvider) private var captureDeviceProvider
     @Injected(\.permissions) private var permissions
+    @Injected(\.audioStore) private var audioStore
 
     private var activeConfiguration: Configuration?
 
@@ -42,6 +43,8 @@ final class CameraCaptureHandler: StreamVideoCapturerActionHandler, @unchecked S
                 videoCapturer: cameraCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
+
+            try await audioStore.restartAudioSessionSync()
 
         case let .setCameraPosition(position, videoSource, videoCapturer, videoCapturerDelegate):
             guard

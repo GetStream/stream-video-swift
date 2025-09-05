@@ -14,12 +14,15 @@ extension RTCAudioStore {
     /// When an interruption begins, it disables audio and marks the session as interrupted.
     /// When the interruption ends, it optionally resumes the session by restoring the audio session category,
     /// mode, and options, with appropriate delays to ensure smooth recovery.
-    final class InterruptionEffect: NSObject, RTCAudioSessionDelegate {
+    final class InterruptionEffect: NSObject, RTCAudioSessionDelegate, @unchecked Sendable {
+
+        @Injected(\.callAudioRecorder) private var callAudioRecorder
 
         /// The audio session instance used to observe interruption events.
         private let session: AudioSessionProtocol
         /// A weak reference to the `RTCAudioStore` to dispatch state changes.
         private weak var store: RTCAudioStore?
+        private let disposableBag = DisposableBag()
 
         /// Creates a new `InterruptionEffect` that listens to the given `RTCAudioStore`'s audio session.
         ///
@@ -71,7 +74,17 @@ extension RTCAudioStore {
 
             store.dispatch(.audioSession(.isInterrupted(false)))
             if shouldResumeSession {
-                store.restartAudioSession()
+                Task(disposableBag: disposableBag) {
+                    log.debug(
+                        "AudioSession will restarting...",
+                        subsystems: .audioSession
+                    )
+                    _ = try await store.restartAudioSessionSync()
+                    log.debug(
+                        "AudioSession restart completed.",
+                        subsystems: .audioSession
+                    )
+                }
             }
         }
     }
