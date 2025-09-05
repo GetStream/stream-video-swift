@@ -66,6 +66,8 @@ final class CallAudioSession: @unchecked Sendable {
 
         if shouldSetActive {
             audioStore.dispatch(.audioSession(.isActive(true)))
+        } else {
+            audioStore.restartAudioSession()
         }
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))

@@ -26,6 +26,23 @@ extension RTCAudioStore {
         ]
     }
 
+    func restartAudioSession(
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) {
+        log.debug(
+            "Store identifier:RTCAudioStore will restart AudioSession asynchronously.",
+            subsystems: .audioSession
+        )
+        dispatch(
+            restartAudioSessionActions,
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
     func restartAudioSessionSync(
         file: StaticString = #file,
         function: StaticString = #function,
