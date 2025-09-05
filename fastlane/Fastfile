@@ -810,3 +810,33 @@ def frameworks_sizes
     StreamWebRTC: stream_web_rtc_size_kb.round(0)
   }
 end
+
+desc "Updates WebRTC dependency locally. Usage: `bundle exec fastlane update_stream_chat version:125.6422.070`"
+lane :update_webrtc do |options|
+  raise UI.user_error!('Provide a version.') unless options[:version]
+
+  Dir.chdir('..') do
+    current_webrtc_version = File.read('Package.swift')[/stream-video-swift-webrtc\.git", exact: "([\d.]+)"\)/, 1]
+    ['StreamVideo.xcodeproj/project.pbxproj', 'Package.swift', 'StreamVideo-XCFramework.podspec', 'StreamVideo.podspec', swift_environment_path].each do |file|
+      if file == 'StreamVideo.xcodeproj/project.pbxproj'
+        content = File.read(file)
+        parts = current_webrtc_version.split('.')
+        parts[-1] = parts[-1].to_i.to_s
+        normalized_current_version = parts.join('.')
+        parts = options[:version].split('.')
+        parts[-1] = parts[-1].to_i.to_s
+        normalized_new_version = parts.join('.')
+        File.write(file, content.gsub("version = #{normalized_current_version}", "version = #{normalized_new_version}"))
+      else
+        File.write(file, File.read(file).gsub(current_webrtc_version, options[:version]))
+      end
+    end
+  end
+
+  pr_create(
+    title: "Update WebRTC dependency to #{options[:version]}",
+    base_branch: 'develop',
+    head_branch: "ci/update-webrtc-dependency-#{Time.now.to_i}",
+    github_repo: github_repo
+  )
+end
