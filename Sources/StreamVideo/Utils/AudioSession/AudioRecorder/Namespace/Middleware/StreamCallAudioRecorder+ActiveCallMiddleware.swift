@@ -21,6 +21,8 @@ extension StreamCallAudioRecorder.Namespace {
     final class ActiveCallMiddleware: Middleware<StreamCallAudioRecorder.Namespace>, @unchecked Sendable {
         /// The main StreamVideo instance for accessing call state.
         @Injected(\.streamVideo) private var streamVideo
+        @Injected(\.audioStore) private var audioStore
+        @Injected(\.permissions) private var permissions
 
         /// Container for managing subscription lifecycles.
         private let disposableBag = DisposableBag()
@@ -29,7 +31,7 @@ extension StreamCallAudioRecorder.Namespace {
         private var activeCallCancellable: AnyCancellable?
         
         /// Subscription to monitor call audio settings.
-        private var callSettingsCancellable: AnyCancellable?
+        private var aggregatedCancellable: AnyCancellable?
 
         /// Initializes the middleware and sets up active call monitoring.
         override init() {
@@ -53,16 +55,30 @@ extension StreamCallAudioRecorder.Namespace {
         ///   call is active.
         private func didUpdate(_ activeCall: Call?) async {
             if let activeCall {
-                callSettingsCancellable?.cancel()
+                aggregatedCancellable?.cancel()
 
-                callSettingsCancellable = await activeCall
+                let audioOnPublisher = await activeCall
                     .state
                     .$callSettings
                     .map(\.audioOn)
+                    .removeDuplicates()
+                    .eraseToAnyPublisher()
+
+                let isAudioSessionActivePublisher = audioStore
+                    .publisher(\.isActive)
+                    .eraseToAnyPublisher()
+
+                let hasPermissionPublisher = permissions
+                    .$hasMicrophonePermission
+                    .eraseToAnyPublisher()
+
+                aggregatedCancellable = Publishers
+                    .CombineLatest3(audioOnPublisher, isAudioSessionActivePublisher, hasPermissionPublisher)
+                    .map { $0 && $1 && $2 }
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
             } else {
-                callSettingsCancellable?.cancel()
-                callSettingsCancellable = nil
+                aggregatedCancellable?.cancel()
+                aggregatedCancellable = nil
             }
         }
     }
