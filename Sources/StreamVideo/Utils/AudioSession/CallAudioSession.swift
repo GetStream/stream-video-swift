@@ -57,6 +57,7 @@ final class CallAudioSession: @unchecked Sendable {
             .CombineLatest(callSettingsPublisher, ownCapabilitiesPublisher)
             .compactMap { [policy] in policy.configuration(for: $0, ownCapabilities: $1) }
             .removeDuplicates()
+            .debounce(for: .seconds(0.5), scheduler: DispatchQueue.global(qos: .userInteractive))
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdateConfiguration($0) }
             .store(in: disposableBag)
 
