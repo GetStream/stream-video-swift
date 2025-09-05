@@ -38,6 +38,7 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
 
     private weak var delegate: WebRTCPermissionsAdapterDelegate?
     private var requiredPermissions: Set<RequiredPermission> = []
+    private var lastCallSettings: CallSettings?
 
     init(_ delegate: WebRTCPermissionsAdapterDelegate) {
         self.delegate = delegate
@@ -66,7 +67,10 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
     func willSet(callSettings: CallSettings) async -> CallSettings {
         do {
             return try await processingQueue.addSynchronousTaskOperation { [weak self] in
-                guard let self else {
+                guard
+                    let self,
+                    (lastCallSettings?.videoOn != callSettings.videoOn || lastCallSettings?.audioOn != callSettings.audioOn)
+                else {
                     return callSettings
                 }
 
@@ -118,6 +122,8 @@ final class WebRTCPermissionsAdapter: @unchecked Sendable {
                 if callSettings.videoOn, !permissions.hasCameraPermission {
                     updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
                 }
+
+                lastCallSettings = updatedCallSettings
                 return updatedCallSettings
             }
         } catch {

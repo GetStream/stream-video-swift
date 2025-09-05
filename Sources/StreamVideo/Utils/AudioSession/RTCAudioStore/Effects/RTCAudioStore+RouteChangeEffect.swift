@@ -70,7 +70,7 @@ extension RTCAudioStore {
             reason: AVAudioSession.RouteChangeReason,
             previousRoute: AVAudioSessionRouteDescription
         ) {
-            guard let activeCallSettings else {
+            guard let activeCallSettings, session.isActive else {
                 return
             }
 
