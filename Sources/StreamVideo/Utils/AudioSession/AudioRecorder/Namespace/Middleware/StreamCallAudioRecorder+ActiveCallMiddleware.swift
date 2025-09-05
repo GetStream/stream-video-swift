@@ -82,6 +82,8 @@ extension StreamCallAudioRecorder.Namespace {
             } else {
                 aggregatedCancellable?.cancel()
                 aggregatedCancellable = nil
+
+                dispatcher?.dispatch(.setShouldRecord(false))
             }
         }
     }

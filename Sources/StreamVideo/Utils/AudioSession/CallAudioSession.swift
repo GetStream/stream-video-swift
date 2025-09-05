@@ -58,6 +58,7 @@ final class CallAudioSession: @unchecked Sendable {
             .compactMap { [policy] in policy.configuration(for: $0, ownCapabilities: $1) }
             .removeDuplicates()
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.global(qos: .userInteractive))
+            .log(.debug, subsystems: .audioSession) { "Updated configuration: \($0)" }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdateConfiguration($0) }
             .store(in: disposableBag)
 

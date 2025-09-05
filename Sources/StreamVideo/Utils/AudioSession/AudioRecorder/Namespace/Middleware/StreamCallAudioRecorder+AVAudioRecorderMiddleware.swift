@@ -102,11 +102,13 @@ extension StreamCallAudioRecorder.Namespace {
         private func startRecording() {
             processingQueue.addTaskOperation { [weak self] in
                 guard
-                    let self,
-                    updateMetersCancellable == nil
+                    let self
                 else {
                     return
                 }
+
+                updateMetersCancellable?.cancel()
+                updateMetersCancellable = nil
 
                 if audioRecorder == nil {
                     do {
@@ -120,6 +122,9 @@ extension StreamCallAudioRecorder.Namespace {
                 guard let audioRecorder else {
                     return
                 }
+                
+                audioRecorder.stop()
+                audioRecorder.isMeteringEnabled = false
 
                 do {
                     let hasPermission = try await permissions.requestMicrophonePermission()
