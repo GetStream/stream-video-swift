@@ -61,6 +61,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
 
     func test_setIsRecordingTrue_shouldRecordTrue_requestRecordPermissionWasCalled() async {
         mockPermissions.stubMicrophonePermission(.unknown)
+        await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
 
         subject.apply(
             state: .init(isRecording: false, isInterrupted: false, shouldRecord: true, meter: 0),
@@ -77,6 +78,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
 
     func test_setIsRecordingTrue_shouldRecordTrueRequestRecordPermissionFalse_isMeteringEnabledShouldBeSetToFalse() async {
         mockPermissions.stubMicrophonePermission(.denied)
+        await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .denied }
         let validation = expectation(description: "Dispatcher was called.")
         subject.dispatcher = .init { action, _, _, _, _ in
             switch action {
@@ -240,6 +242,7 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
 
     func test_setIsInterruptedFalse_shouldRecordTrueIsRecordingFalse_requestRecordPermissionWasCalled() async {
         mockPermissions.stubMicrophonePermission(.unknown)
+        await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
 
         subject.apply(
             state: .init(isRecording: false, isInterrupted: true, shouldRecord: true, meter: 0),

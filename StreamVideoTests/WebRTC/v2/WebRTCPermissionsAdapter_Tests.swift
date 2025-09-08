@@ -25,6 +25,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
     func test_willSet_audioOnTrue_withDeniedMic_downgradesAudioOff() async {
         mockAppStateAdapter.makeShared()
         mockPermissions.stubMicrophonePermission(.denied)
+        await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .denied }
 
         let input = CallSettings(audioOn: true, videoOn: false)
         let output = await subject.willSet(callSettings: input)
@@ -36,6 +37,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
     func test_willSet_videoOnTrue_withDeniedCamera_downgradesVideoOff() async {
         mockAppStateAdapter.makeShared()
         mockPermissions.stubCameraPermission(.denied)
+        await fulfillment { self.mockPermissions.mockStore.state.cameraPermission == .denied }
 
         let input = CallSettings(audioOn: false, videoOn: true)
         let output = await subject.willSet(callSettings: input)
@@ -48,6 +50,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockAppStateAdapter.makeShared()
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubMicrophonePermission(.unknown)
+        await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .unknown }
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -72,6 +75,7 @@ final class WebRTCPermissionsAdapter_Tests: StreamVideoTestCase, @unchecked Send
         mockAppStateAdapter.makeShared()
         mockAppStateAdapter.stubbedState = .foreground
         mockPermissions.stubCameraPermission(.unknown)
+        await fulfillment { self.mockPermissions.mockStore.state.cameraPermission == .unknown }
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
