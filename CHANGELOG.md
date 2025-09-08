@@ -18,6 +18,9 @@ _September 08, 2025_
 ### 🔄 Changed
 - Improved the LastParticipantLeavePolicy to be more robust. [#925](https://github.com/GetStream/stream-video-swift/pull/925)
 
+# [1.31.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.31.0)
+_August 21, 2025_
+
 ### 🐞 Fixed
 - An issue that was causing the local participant's audio waveform visualization to stop working. [#912](https://github.com/GetStream/stream-video-swift/pull/912)
 - Proximity policies weren't updating CallSettings correctly. That would cause issues where Speaker may not be reenabled or video not being stopped/restarted when proximity changes. [#913](https://github.com/GetStream/stream-video-swift/pull/913)
