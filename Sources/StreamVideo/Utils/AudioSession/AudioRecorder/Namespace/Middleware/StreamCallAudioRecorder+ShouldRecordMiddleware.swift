@@ -85,9 +85,12 @@ extension StreamCallAudioRecorder.Namespace {
                     .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
                     .sink { [weak self] in self?.dispatcher?.dispatch(.setShouldRecord($0)) }
             } else {
+                guard aggregatedCancellable != nil else {
+                    return
+                }
+
                 aggregatedCancellable?.cancel()
                 aggregatedCancellable = nil
-
                 dispatcher?.dispatch(.setShouldRecord(false))
             }
         }
