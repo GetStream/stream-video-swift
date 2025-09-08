@@ -13,7 +13,8 @@ extension RTCAudioStore {
     private var restartAudioSessionActions: [RTCAudioStoreAction] {
         let state = self.state
         return [
-            .failable(.audioSession(.setAVAudioSessionActive(false))),
+            .audioSession(.isActive(false)),
+            .audioSession(.isAudioEnabled(false)),
             .generic(.delay(seconds: 0.2)),
             .audioSession(
                 .setCategory(
@@ -26,7 +27,8 @@ extension RTCAudioStore {
                 .setOverrideOutputPort(state.overrideOutputAudioPort)
             ),
             .generic(.delay(seconds: 0.2)),
-            .failable(.audioSession(.setAVAudioSessionActive(true)))
+            .audioSession(.isAudioEnabled(true)),
+            .audioSession(.isActive(true))
         ]
     }
 
