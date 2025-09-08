@@ -10,7 +10,7 @@ import StreamWebRTC
 /// video call. This class manages the connection setup, track handling, and
 /// participants, including their media settings, capabilities, and track
 /// updates.
-actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
+actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, WebRTCPermissionsAdapterDelegate {
 
     typealias ParticipantsStorage = [String: CallParticipant]
     typealias ParticipantOperation = @Sendable(ParticipantsStorage) -> ParticipantsStorage
@@ -94,6 +94,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
     private let processingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private let callSettingsProcessingQueue = OperationQueue(maxConcurrentOperationCount: 1)
     private var queuedTraces: ConsumableBucket<WebRTCTrace> = .init()
+    private lazy var permissionsAdapter: WebRTCPermissionsAdapter = .init(self)
 
     /// Initializes the WebRTC state adapter with user details and connection
     /// configurations.
@@ -128,6 +129,10 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
         self.screenShareSessionProvider = screenShareSessionProvider
         self.audioSession = .init()
+
+        Task { [weak self] in
+            _ = await self?.permissionsAdapter
+        }
     }
 
     /// Sets the session ID.
@@ -491,17 +496,9 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
                 return
             }
 
-            let permissions = await self.permissions
             let currentCallSettings = await callSettings
-            var updatedCallSettings = operation(currentCallSettings)
-
-            if !permissions.hasCameraPermission, updatedCallSettings.videoOn {
-                updatedCallSettings = updatedCallSettings.withUpdatedVideoState(false)
-            }
-
-            if !permissions.hasMicrophonePermission, updatedCallSettings.audioOn {
-                updatedCallSettings = updatedCallSettings.withUpdatedAudioState(false)
-            }
+            let updatedCallSettings = await permissionsAdapter
+                .willSet(callSettings: operation(currentCallSettings))
 
             guard
                 updatedCallSettings != currentCallSettings
@@ -518,7 +515,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             }
 
             try await publisher.didUpdateCallSettings(updatedCallSettings)
-            log.debug("Publisher callSettings updated: \(updatedCallSettings).", subsystems: .webRTC)
+            log.debug(
+                "Publisher callSettings updated: \(updatedCallSettings).",
+                subsystems: .webRTC,
+                functionName: functionName,
+                fileName: fileName,
+                lineNumber: lineNumber
+            )
         }
     }
 
@@ -684,6 +687,44 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate {
             }
             log.debug(
                 "AudioSession delegated updated speakerOn:\(speakerOn).",
+                subsystems: .audioSession
+            )
+        }
+    }
+
+    // MARK: - WebRTCPermissionsAdapterDelegate
+
+    nonisolated func permissionsAdapter(
+        _ permissionsAdapter: WebRTCPermissionsAdapter,
+        audioOn: Bool
+    ) {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
+            await self.enqueueCallSettings {
+                $0.withUpdatedAudioState(audioOn)
+            }
+            log.debug(
+                "PermissionsAdapter delegated updated audioOn:\(audioOn).",
+                subsystems: .audioSession
+            )
+        }
+    }
+
+    nonisolated func permissionsAdapter(
+        _ permissionsAdapter: WebRTCPermissionsAdapter,
+        videoOn: Bool
+    ) {
+        Task(disposableBag: disposableBag) { [weak self] in
+            guard let self else {
+                return
+            }
+            await self.enqueueCallSettings {
+                $0.withUpdatedVideoState(videoOn)
+            }
+            log.debug(
+                "PermissionsAdapter delegated updated videoOn:\(videoOn).",
                 subsystems: .audioSession
             )
         }

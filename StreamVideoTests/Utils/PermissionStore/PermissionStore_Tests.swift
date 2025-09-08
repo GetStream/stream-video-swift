@@ -34,6 +34,24 @@ final class PermissionStore_Tests: XCTestCase, @unchecked Sendable {
         super.tearDown()
     }
 
+    // MARK: - canRequestMicrophonePermission
+
+    func test_canRequestMicrophonePermission_whenIsUnknown_returnsTrue() async {
+        await wait(for: 1.0)
+
+        store.dispatch(.setMicrophonePermission(.unknown))
+
+        await fulfillment { self.subject.canRequestMicrophonePermission == true }
+    }
+
+    func test_canRequestMicrophonePermission_whenIsNotUnknown_returnsFalse() async {
+        await wait(for: 1.0)
+
+        store.dispatch(.setMicrophonePermission(.granted))
+
+        await fulfillment { self.subject.canRequestMicrophonePermission == false }
+    }
+
     // MARK: - hasMicrophonePermission
 
     func test_microphonePermissionGranted_hasMicrophonePermissionWasUpdated() async {
@@ -48,6 +66,24 @@ final class PermissionStore_Tests: XCTestCase, @unchecked Sendable {
         store.dispatch(.setMicrophonePermission(.denied))
 
         await fulfillment { self.subject.hasMicrophonePermission == false }
+    }
+
+    // MARK: - canRequestCameraPermission
+
+    func test_canRequestCameraPermission_whenIsUnknown_returnsTrue() async {
+        await wait(for: 1.0)
+
+        store.dispatch(.setCameraPermission(.unknown))
+
+        await fulfillment { self.subject.canRequestCameraPermission == true }
+    }
+
+    func test_canRequestCameraPermission_whenIsNotUnknown_returnsFalse() async {
+        await wait(for: 1.0)
+
+        store.dispatch(.setCameraPermission(.granted))
+
+        await fulfillment { self.subject.canRequestCameraPermission == false }
     }
 
     // MARK: - hasCameraPermission

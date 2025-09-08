@@ -57,6 +57,11 @@ final class CallAudioSession: @unchecked Sendable {
             .CombineLatest(callSettingsPublisher, ownCapabilitiesPublisher)
             .compactMap { [policy] in policy.configuration(for: $0, ownCapabilities: $1) }
             .removeDuplicates()
+            // We add a little debounce delay to avoid multiple requests to
+            // overwhelm the AVAudioSession. The value has been set empirically
+            // and it can be adapter if required.
+            .debounce(for: .seconds(0.5), scheduler: DispatchQueue.global(qos: .userInteractive))
+            .log(.debug, subsystems: .audioSession) { "Updated configuration: \($0)" }
             .sinkTask(storeIn: disposableBag) { [weak self] in await self?.didUpdateConfiguration($0) }
             .store(in: disposableBag)
 
@@ -64,6 +69,12 @@ final class CallAudioSession: @unchecked Sendable {
 
         if shouldSetActive {
             audioStore.dispatch(.audioSession(.isActive(true)))
+        } else {
+            // In this codepath it means that we are being activated from CallKit.
+            // As CallKit is taking over the audioSession we perform a quick
+            // restart to ensure that our configuration has been activated
+            // and respected.
+            audioStore.restartAudioSession()
         }
 
         statsAdapter?.trace(.init(audioSession: traceRepresentation))

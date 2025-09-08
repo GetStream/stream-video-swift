@@ -35,8 +35,7 @@ final class StreamCallAudioRecorder_NamespaceTests: StreamVideoTestCase, @unchec
                 "InterruptionMiddleware",
                 "CategoryMiddleware",
                 "AVAudioRecorderMiddleware",
-                "ActiveCallMiddleware",
-                "ApplicationStateMiddleware"
+                "ShouldRecordMiddleware"
             ]
         )
     }

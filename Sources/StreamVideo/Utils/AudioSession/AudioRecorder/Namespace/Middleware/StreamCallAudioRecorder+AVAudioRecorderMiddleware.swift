@@ -62,7 +62,7 @@ extension StreamCallAudioRecorder.Namespace {
         ) {
             switch action {
             case let .setIsRecording(value):
-                if value, state.shouldRecord {
+                if value, state.shouldRecord, !state.isInterrupted {
                     startRecording()
                 } else {
                     stopRecording()
@@ -70,16 +70,16 @@ extension StreamCallAudioRecorder.Namespace {
             case let .setIsInterrupted(value):
                 if value {
                     stopRecording()
-                } else if !value, state.shouldRecord, !state.isRecording {
+                } else if !value, state.shouldRecord {
                     startRecording()
                 } else {
                     break
                 }
 
             case let .setShouldRecord(value):
-                if value, !state.isRecording {
+                if value, !state.isInterrupted {
                     startRecording()
-                } else if !value, state.isRecording {
+                } else if !value {
                     stopRecording()
                 } else {
                     break
@@ -102,8 +102,7 @@ extension StreamCallAudioRecorder.Namespace {
         private func startRecording() {
             processingQueue.addTaskOperation { [weak self] in
                 guard
-                    let self,
-                    updateMetersCancellable == nil
+                    let self
                 else {
                     return
                 }
@@ -120,6 +119,17 @@ extension StreamCallAudioRecorder.Namespace {
                 guard let audioRecorder else {
                     return
                 }
+
+                if updateMetersCancellable != nil {
+                    // In order for AVAudioRecorder to keep receive metering updates
+                    // we need to stop and start everytime there is a change in the
+                    // AVAudioSession configuration.
+                    audioRecorder.stop()
+                    audioRecorder.isMeteringEnabled = false
+                }
+
+                updateMetersCancellable?.cancel()
+                updateMetersCancellable = nil
 
                 do {
                     let hasPermission = try await permissions.requestMicrophonePermission()
@@ -139,6 +149,8 @@ extension StreamCallAudioRecorder.Namespace {
                         .map { [weak audioRecorder] _ in audioRecorder?.updateMeters() }
                         .compactMap { [weak audioRecorder] in audioRecorder?.averagePower(forChannel: 0) }
                         .sink { [weak self] in self?.dispatcher?.dispatch(.setMeter($0)) }
+
+                    log.debug("AVAudioRecorder started...", subsystems: .audioRecording)
                 } catch {
                     log.error(error, subsystems: .audioRecording)
                 }
@@ -158,6 +170,8 @@ extension StreamCallAudioRecorder.Namespace {
                     updateMetersCancellable != nil,
                     let audioRecorder
                 else {
+                    self?.updateMetersCancellable?.cancel()
+                    self?.updateMetersCancellable = nil
                     return
                 }
 
@@ -165,6 +179,7 @@ extension StreamCallAudioRecorder.Namespace {
                 audioRecorder.isMeteringEnabled = false
                 updateMetersCancellable?.cancel()
                 updateMetersCancellable = nil
+                log.debug("AVAudioRecorder stopped.", subsystems: .audioRecording)
             }
         }
     }

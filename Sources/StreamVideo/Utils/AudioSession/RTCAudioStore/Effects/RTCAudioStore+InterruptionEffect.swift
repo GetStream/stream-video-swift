@@ -14,12 +14,13 @@ extension RTCAudioStore {
     /// When an interruption begins, it disables audio and marks the session as interrupted.
     /// When the interruption ends, it optionally resumes the session by restoring the audio session category,
     /// mode, and options, with appropriate delays to ensure smooth recovery.
-    final class InterruptionEffect: NSObject, RTCAudioSessionDelegate {
+    final class InterruptionEffect: NSObject, RTCAudioSessionDelegate, @unchecked Sendable {
 
         /// The audio session instance used to observe interruption events.
         private let session: AudioSessionProtocol
         /// A weak reference to the `RTCAudioStore` to dispatch state changes.
         private weak var store: RTCAudioStore?
+        private let disposableBag = DisposableBag()
 
         /// Creates a new `InterruptionEffect` that listens to the given `RTCAudioStore`'s audio session.
         ///
@@ -71,25 +72,25 @@ extension RTCAudioStore {
 
             store.dispatch(.audioSession(.isInterrupted(false)))
             if shouldResumeSession {
-                store.dispatch(.audioSession(.isActive(false)))
-                store.dispatch(.audioSession(.isAudioEnabled(false)))
-
-                store.dispatch(.generic(.delay(seconds: 0.2)))
-
-                store.dispatch(
-                    .audioSession(
-                        .setCategory(
-                            store.state.category,
-                            mode: store.state.mode,
-                            options: store.state.options
-                        )
+                Task(disposableBag: disposableBag) {
+                    log.debug(
+                        "AudioSession will restart...",
+                        subsystems: .audioSession
                     )
-                )
-
-                store.dispatch(.generic(.delay(seconds: 0.2)))
-
-                store.dispatch(.audioSession(.isAudioEnabled(true)))
-                store.dispatch(.audioSession(.isActive(true)))
+                    do {
+                        _ = try await store.restartAudioSessionSync()
+                        log.debug(
+                            "AudioSession restart completed.",
+                            subsystems: .audioSession
+                        )
+                    } catch {
+                        log.error(
+                            "Audio session restart failed.",
+                            subsystems: .audioSession,
+                            error: error
+                        )
+                    }
+                }
             }
         }
     }

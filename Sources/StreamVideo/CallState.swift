@@ -426,7 +426,9 @@ public class CallState: ObservableObject {
         ingress = Ingress(rtmp: rtmp)
         
         if !localCallSettingsUpdate {
-            callSettings = .init(response.settings)
+            // All CallSettings updates go through the update method to ensure
+            // proper propagation.
+            update(callSettings: .init(response.settings))
         }
     }
     
