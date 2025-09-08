@@ -74,14 +74,22 @@ extension RTCAudioStore {
             if shouldResumeSession {
                 Task(disposableBag: disposableBag) {
                     log.debug(
-                        "AudioSession will restarting...",
+                        "AudioSession will restart...",
                         subsystems: .audioSession
                     )
-                    _ = try await store.restartAudioSessionSync()
-                    log.debug(
-                        "AudioSession restart completed.",
-                        subsystems: .audioSession
-                    )
+                    do {
+                        _ = try await store.restartAudioSessionSync()
+                        log.debug(
+                            "AudioSession restart completed.",
+                            subsystems: .audioSession
+                        )
+                    } catch {
+                        log.error(
+                            "Audio session restart failed.",
+                            subsystems: .audioSession,
+                            error: error
+                        )
+                    }
                 }
             }
         }
