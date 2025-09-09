@@ -47,10 +47,6 @@ open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, A
             renderPreProcessingDelegate: renderPreProcessingDelegate
         )
     }
-    
-    override public func apply(_ config: RTCAudioProcessingConfig) {
-        super.apply(config)
-    }
 
     /// Retrieves the identifier of the currently active audio filter.
     public var activeAudioFilter: AudioFilter? {
