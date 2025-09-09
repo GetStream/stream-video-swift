@@ -68,7 +68,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
                 let start = CFAbsoluteTimeGetCurrent()
                 
                 for i in 0..<100 {
-                    try? await store.dispatchSync(.setValue(i))
+                    try? await store.dispatch(.setValue(i)).result()
                 }
                 
                 let elapsed = CFAbsoluteTimeGetCurrent() - start

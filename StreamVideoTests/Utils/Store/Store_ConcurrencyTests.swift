@@ -79,10 +79,8 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
                 group.addTask { [weak self] in
                     guard let self else { return -1 }
                     
-                    try? await self.store.dispatchSync(
-                        .setValue(i)
-                    )
-                    
+                    try? await self.store.dispatch(.setValue(i)).result()
+
                     // Capture the state after sync dispatch
                     let value = self.store.state.value
                     lock.sync { results.append(value) }
@@ -264,8 +262,8 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
         // Then: Store should remain functional
         // Dispatch a final action to verify store is still working
         let finalValue = 999_999
-        try await store.dispatchSync(.setValue(finalValue))
-        
+        try await store.dispatch(.setValue(finalValue)).result()
+
         XCTAssertEqual(
             store.state.value,
             finalValue,
@@ -305,7 +303,7 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
         }
         
         // Then: Store should remain functional
-        try await store.dispatchSync(.increment)
+        try await store.dispatch(.increment).result()
         XCTAssertGreaterThanOrEqual(store.state.counter, 1)
     }
 }

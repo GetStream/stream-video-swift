@@ -24,7 +24,7 @@ import Foundation
 ///
 /// - Note: This is an internal component of the store architecture and
 ///   should not be used directly.
-class StoreExecutor<Namespace: StoreNamespace> {
+class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
 
     /// Executes a single action through the store pipeline.
     ///
