@@ -60,6 +60,10 @@ struct DemoCallingTopView: View {
                         .foregroundColor(.primary)
                 }
             }
+
+            if !AppEnvironment.configuration.isRelease {
+                DebugMenu()
+            }
         }
         .alert(isPresented: $logoutAlertShown) {
             Alert(

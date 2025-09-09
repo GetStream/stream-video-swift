@@ -56,6 +56,7 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
     @State var selectedParticipants = [User]()
     @State var incomingCallInfo: IncomingCall?
     @State var logoutAlertShown = false
+    @State var addUserShown = false
 
     private var isActionDisabled: Bool {
         guard AppEnvironment.configuration != .test else {
@@ -195,7 +196,12 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
         List {
             Section {
                 ForEach(participants) { participant in
-                    Button {
+                    LoginItemView(
+                        selected: .init(
+                            get: { selectedParticipants.contains(participant) },
+                            set: { _ in }
+                        )
+                    ) {
                         if selectedParticipants.contains(participant) {
                             selectedParticipants.removeAll { user in
                                 user.id == participant.id
@@ -203,35 +209,32 @@ struct DetailedCallingView<Factory: ViewFactory>: View {
                         } else {
                             selectedParticipants.append(participant)
                         }
-                    } label: {
-                        HStack {
-                            Label {
-                                Text(participant.name)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            } icon: {
-                                viewFactory.makeUserAvatar(
-                                    participant,
-                                    with: .init(size: imageSize)
-                                )
-                            }
-
-                            if selectedParticipants.contains(participant) {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                        .foregroundColor(appearance.colors.text)
-                        .listRowBackground(Color.clear)
+                    } title: {
+                        Text(participant.name)
+                    } icon: {
+                        AppUserView(user: participant)
                     }
-                    .padding(8)
-                    .listRowBackground(Color.clear)
+                    .foregroundColor(appearance.colors.text)
                 }
             } header: {
-                Text("Built-In")
+                HStack {
+                    Text("Built-In")
+                    Spacer()
+                    Button {
+                        addUserShown = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .foregroundColor(appearance.colors.text)
+                }
             }
         }
         .listStyle(.plain)
         .background(Color.clear)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .sheet(isPresented: $addUserShown, onDismiss: {}) {
+            DemoAddUserView()
+        }
     }
 
     private func setPreferredVideoCodec(for callId: String) async {

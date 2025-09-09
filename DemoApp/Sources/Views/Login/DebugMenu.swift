@@ -140,7 +140,8 @@ struct DebugMenu: View {
                 for: [.demo, .pronto, .prontoStaging, .prontoFrankfurtC2],
                 currentValue: baseURL,
                 additionalItems: { customEnvironmentView },
-                label: "Environment"
+                label: "Environment",
+                availableAfterLogin: false
             ) { self.baseURL = $0 }
 
             makeMultipleSelectMenu(
@@ -158,14 +159,16 @@ struct DebugMenu: View {
             makeMenu(
                 for: [.simple, .detailed],
                 currentValue: loggedInView,
-                label: "LoggedIn View"
+                label: "LoggedIn View",
+                availableAfterLogin: false
             ) { self.loggedInView = $0 }
 
             makeMenu(
                 for: [.never, .oneMinute, .fiveMinutes, .thirtyMinutes],
                 currentValue: tokenExpiration,
                 additionalItems: { customTokenExpirationView },
-                label: "Token Expiration"
+                label: "Token Expiration",
+                availableAfterLogin: false
             ) { self.tokenExpiration = $0 }
 
             makeMenu(
@@ -502,26 +505,31 @@ struct DebugMenu: View {
         currentValue: Item,
         @ViewBuilder additionalItems: () -> some View = { EmptyView() },
         label: String,
+        availableAfterLogin: Bool = true,
         updater: @escaping (Item) -> Void
     ) -> some View {
-        Menu {
-            ForEach(items, id: \.self) { item in
-                Button {
-                    updater(item)
-                } label: {
-                    Label {
-                        Text(item.title)
-                    } icon: {
-                        currentValue == item
-                            ? AnyView(Image(systemName: "checkmark"))
-                            : AnyView(EmptyView())
+        if !availableAfterLogin, appState.userState == .loggedIn {
+            EmptyView()
+        } else {
+            Menu {
+                ForEach(items, id: \.self) { item in
+                    Button {
+                        updater(item)
+                    } label: {
+                        Label {
+                            Text(item.title)
+                        } icon: {
+                            currentValue == item
+                                ? AnyView(Image(systemName: "checkmark"))
+                                : AnyView(EmptyView())
+                        }
                     }
                 }
-            }
 
-            additionalItems()
-        } label: {
-            Text(label)
+                additionalItems()
+            } label: {
+                Text(label)
+            }
         }
     }
 
@@ -531,25 +539,30 @@ struct DebugMenu: View {
         currentValues: Set<Item>,
         @ViewBuilder additionalItems: () -> some View = { EmptyView() },
         label: String,
+        availableAfterLogin: Bool = true,
         updater: @escaping (Item, Bool) -> Void
     ) -> some View {
-        Menu {
-            ForEach(items, id: \.self) { item in
-                Button {
-                    updater(item, currentValues.contains(item))
-                } label: {
-                    Label {
-                        Text(item.title)
-                    } icon: {
-                        currentValues.contains(item)
-                            ? AnyView(Image(systemName: "checkmark"))
-                            : AnyView(EmptyView())
+        if !availableAfterLogin, appState.userState == .loggedIn {
+            EmptyView()
+        } else {
+            Menu {
+                ForEach(items, id: \.self) { item in
+                    Button {
+                        updater(item, currentValues.contains(item))
+                    } label: {
+                        Label {
+                            Text(item.title)
+                        } icon: {
+                            currentValues.contains(item)
+                                ? AnyView(Image(systemName: "checkmark"))
+                                : AnyView(EmptyView())
+                        }
                     }
                 }
+                additionalItems()
+            } label: {
+                Text(label)
             }
-            additionalItems()
-        } label: {
-            Text(label)
         }
     }
 }

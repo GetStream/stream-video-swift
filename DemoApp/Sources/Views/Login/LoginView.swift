@@ -151,28 +151,38 @@ struct LoginView: View {
 
 struct LoginItemView<Title: View, Icon: View>: View {
 
+    var selected: Binding<Bool>
     var action: () -> Void
     var title: Title
     var icon: Icon
 
     init(
+        selected: Binding<Bool> = .constant(false),
         action: @escaping () -> Void,
         @ViewBuilder title: @escaping () -> Title,
         @ViewBuilder icon: @escaping () -> Icon
     ) {
+        self.selected = selected
         self.action = action
         self.title = title()
         self.icon = icon()
     }
 
     var body: some View {
-        Button {
-            action()
-        } label: {
-            Label {
-                title
-            } icon: {
-                icon
+        HStack {
+            Button {
+                action()
+            } label: {
+                Label {
+                    title
+                } icon: {
+                    icon
+                }
+            }
+
+            if selected.wrappedValue {
+                Spacer()
+                Image(systemName: "checkmark")
             }
         }
         .padding(8)
