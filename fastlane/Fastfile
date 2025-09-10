@@ -14,8 +14,8 @@ podspec_names = ['StreamVideo', 'StreamVideo-XCFramework', 'StreamVideoSwiftUI',
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
 sinatra_port = 4567
 video_buddy_port = 5678
-derived_data_path = 'derived_data'
-source_packages_path = 'spm_cache'
+derived_data_path = is_ci ? 'derived_data' : nil
+source_packages_path = is_ci ? 'spm_cache' : nil
 gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
@@ -251,7 +251,7 @@ lane :test do |options|
     scan(scan_options.merge(only_testing: failed_tests))
   end
 
-  slather unless options[:build_for_testing]
+  slather if is_ci && options[:build_for_testing]
 end
 
 desc 'Runs SwiftUI tests'

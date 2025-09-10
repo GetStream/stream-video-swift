@@ -13,8 +13,9 @@
 - Build (CLI):
   - `xcodebuild -scheme StreamVideo -destination 'platform=iOS Simulator,name=iPhone 15' -configuration Debug build`
 - Tests (CLI):
-  - `xcodebuild -scheme StreamVideo -destination 'platform=iOS Simulator,name=iPhone 15' -configuration Debug test`
-  - `xcodebuild -scheme StreamVideoSwiftUI -destination 'platform=iOS Simulator,name=iPhone 15' -configuration Debug test`
+  - `bundle exec fastlane test`
+  - `bundle exec fastlane test_swiftui`
+  - `bundle exec fastlane test_uikit`
 - Lint: `bundle exec fastlane run_swift_format strict:true` (respect `fastlane/Fastfile`).
 
 ## Coding Style & Naming Conventions
