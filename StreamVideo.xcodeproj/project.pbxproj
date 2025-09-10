@@ -725,7 +725,7 @@
 		40C71B6C2E535F3900733BF6 /* StreamCallAudioRecorder_InterruptionMiddlewareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B6B2E535F3900733BF6 /* StreamCallAudioRecorder_InterruptionMiddlewareTests.swift */; };
 		40C71B6E2E53618800733BF6 /* StreamCallAudioRecorder_CategoryMiddlewareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B6D2E53618800733BF6 /* StreamCallAudioRecorder_CategoryMiddlewareTests.swift */; };
 		40C71B702E53644300733BF6 /* StreamCallAudioRecorder_ShouldRecordMiddlewareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B6F2E53644300733BF6 /* StreamCallAudioRecorder_ShouldRecordMiddlewareTests.swift */; };
-		40C71B722E5365F700733BF6 /* Dispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B712E5365F700733BF6 /* Dispatcher.swift */; };
+		40C71B722E5365F700733BF6 /* Store+Dispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B712E5365F700733BF6 /* Store+Dispatcher.swift */; };
 		40C71B792E536CE200733BF6 /* StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B782E536CE200733BF6 /* StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift */; };
 		40C71B7B2E536F0F00733BF6 /* MockAVAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B7A2E536F0F00733BF6 /* MockAVAudioRecorder.swift */; };
 		40C71B7F2E54790400733BF6 /* Store_RaceConditionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C71B7E2E54790400733BF6 /* Store_RaceConditionTests.swift */; };
@@ -2346,7 +2346,7 @@
 		40C71B6B2E535F3900733BF6 /* StreamCallAudioRecorder_InterruptionMiddlewareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder_InterruptionMiddlewareTests.swift; sourceTree = "<group>"; };
 		40C71B6D2E53618800733BF6 /* StreamCallAudioRecorder_CategoryMiddlewareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder_CategoryMiddlewareTests.swift; sourceTree = "<group>"; };
 		40C71B6F2E53644300733BF6 /* StreamCallAudioRecorder_ShouldRecordMiddlewareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder_ShouldRecordMiddlewareTests.swift; sourceTree = "<group>"; };
-		40C71B712E5365F700733BF6 /* Dispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dispatcher.swift; sourceTree = "<group>"; };
+		40C71B712E5365F700733BF6 /* Store+Dispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Store+Dispatcher.swift"; sourceTree = "<group>"; };
 		40C71B782E536CE200733BF6 /* StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests.swift; sourceTree = "<group>"; };
 		40C71B7A2E536F0F00733BF6 /* MockAVAudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAVAudioRecorder.swift; sourceTree = "<group>"; };
 		40C71B7C2E54790400733BF6 /* Store_ConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store_ConcurrencyTests.swift; sourceTree = "<group>"; };
@@ -4652,7 +4652,7 @@
 				40944D1A2E4E355B00088AF0 /* StoreLogger.swift */,
 				40944D262E4E3F7000088AF0 /* StoreExecutor.swift */,
 				402B5E7E2E70415D007D4FA5 /* StoreTask.swift */,
-				40C71B712E5365F700733BF6 /* Dispatcher.swift */,
+				40C71B712E5365F700733BF6 /* Store+Dispatcher.swift */,
 			);
 			path = Store;
 			sourceTree = "<group>";
@@ -8232,7 +8232,7 @@
 				40064BE32E5C9900007CDB33 /* MicrophonePermissionProvider.swift in Sources */,
 				84E5C51C2A013C440003A27A /* PushNotificationsConfig.swift in Sources */,
 				402C2A412DCE184400E60006 /* Combine+Sendable.swift in Sources */,
-				40C71B722E5365F700733BF6 /* Dispatcher.swift in Sources */,
+				40C71B722E5365F700733BF6 /* Store+Dispatcher.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
 				8449824E2C738A830029734D /* StopAllRTMPBroadcastsResponse.swift in Sources */,
 				40E363522D0A11620028C52A /* AVCaptureDevice+OutputFormat.swift in Sources */,
