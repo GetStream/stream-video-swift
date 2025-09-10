@@ -122,7 +122,7 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
             let delay = StoreDelay(
                 before: Double(10 - i) * 0.01
             )
-            store.dispatch(.appendToSequence(i), delay: delay)
+            store.dispatch(.delayed(.appendToSequence(i), delay: delay))
         }
         
         // Then: Despite delays, actions should be processed in dispatch order
@@ -333,7 +333,7 @@ private struct ConcurrencyTestState: Equatable {
 
 // MARK: - Test Actions
 
-private enum ConcurrencyTestAction: Sendable {
+private enum ConcurrencyTestAction: Sendable, StoreActionBoxProtocol {
     case increment
     case setValue(Int)
     case appendToSequence(Int)

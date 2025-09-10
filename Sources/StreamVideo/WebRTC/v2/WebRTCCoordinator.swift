@@ -130,9 +130,6 @@ final class WebRTCCoordinator: @unchecked Sendable {
     ) async throws {
         await stateAdapter
             .enqueueCallSettings { $0.withUpdatedCameraPosition(position) }
-        try await stateAdapter.publisher?.didUpdateCameraPosition(
-            position == .front ? .front : .back
-        )
     }
 
     /// Changes the audio state (enabled/disabled) for the call.

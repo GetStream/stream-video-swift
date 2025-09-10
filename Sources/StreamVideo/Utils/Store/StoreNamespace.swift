@@ -49,7 +49,7 @@ protocol StoreNamespace {
     ///
     /// Must be `Sendable` to support concurrent dispatch from multiple
     /// contexts.
-    associatedtype Action: Sendable
+    associatedtype Action: Sendable, StoreActionBoxProtocol
 
     /// Unique identifier for this store namespace.
     ///

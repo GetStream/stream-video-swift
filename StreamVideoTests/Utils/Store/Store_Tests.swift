@@ -77,12 +77,12 @@ private struct TestStoreState: Equatable {
     var reducersAccessVerification: String = ""
 }
 
-private enum TestStoreAction {
+private enum TestStoreAction: Sendable, StoreActionBoxProtocol {
     case callReducersWithStep
     case verifyReducersOrder
 }
 
-private final class TestStoreReducer: Reducer<TestStoreNamespace> {
+private final class TestStoreReducer: Reducer<TestStoreNamespace>, @unchecked Sendable {
     private(set) var timesCalled: Int = 0
 
     var identifier: String = .unique

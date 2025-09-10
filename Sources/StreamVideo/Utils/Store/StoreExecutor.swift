@@ -34,7 +34,7 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
     /// - Parameters:
     ///   - identifier: The store identifier for logging.
     ///   - state: The current state before processing.
-    ///   - action: The action to process.
+    ///   - action: The boxed action to process (optionally delayed).
     ///   - delay: Configuration for delays before and after processing.
     ///   - reducers: Array of reducers to apply to the action.
     ///   - middleware: Array of middleware for side effects.
@@ -55,8 +55,7 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
     func run(
         identifier: String,
         state: Namespace.State,
-        action: Namespace.Action,
-        delay: StoreDelay,
+        action: StoreActionBox<Namespace.Action>,
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
         logger: StoreLogger<Namespace>,
@@ -66,13 +65,13 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
         line: UInt
     ) async throws {
         // Apply optional delay before processing action
-        await delay.applyDelayBeforeIfRequired()
+        await action.applyDelayBeforeIfRequired()
 
         // Notify all middleware about the action
         middleware.forEach {
             $0.apply(
                 state: state,
-                action: action,
+                action: action.wrappedValue,
                 file: file,
                 function: function,
                 line: line
@@ -85,7 +84,7 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
                 .reduce(state) {
                     try $1.reduce(
                         state: $0,
-                        action: action,
+                        action: action.wrappedValue,
                         file: file,
                         function: function,
                         line: line
@@ -95,7 +94,7 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
             // Log successful completion
             logger.didComplete(
                 identifier: identifier,
-                action: action,
+                action: action.wrappedValue,
                 state: updatedState,
                 file: file,
                 function: function,
@@ -106,12 +105,12 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
             subject.send(updatedState)
 
             // Apply optional delay after successful processing
-            await delay.applyDelayAfterIfRequired()
+            await action.applyDelayAfterIfRequired()
         } catch {
             // Log failure and rethrow
             logger.didFail(
                 identifier: identifier,
-                action: action,
+                action: action.wrappedValue,
                 error: error,
                 file: file,
                 function: function,

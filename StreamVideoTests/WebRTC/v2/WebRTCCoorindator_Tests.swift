@@ -169,18 +169,20 @@ final class WebRTCCoordinator_Tests: XCTestCase, @unchecked Sendable {
                 .publisher as? MockRTCPeerConnectionCoordinator
         )
 
-        try await subject.changeCameraMode(position: .back)
+        let expected = await subject.stateAdapter.callSettings.cameraPosition.next()
+        try await subject.changeCameraMode(position: expected)
 
-        await assertEqualAsync(
-            await subject.stateAdapter.callSettings.cameraPosition,
-            .back
-        )
+        await fulfillment {
+            let cameraPosition = await self.subject.stateAdapter.callSettings.cameraPosition
+            return cameraPosition == expected
+        }
+
         XCTAssertEqual(
             mockPublisher.recordedInputPayload(
                 AVCaptureDevice.Position.self,
                 for: .didUpdateCameraPosition
-            )?.first,
-            .back
+            )?.last,
+            (expected == .front) ? .front : .back
         )
     }
 

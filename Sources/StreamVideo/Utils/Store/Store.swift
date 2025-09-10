@@ -205,15 +205,15 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
 
     // MARK: - Action Dispatch
 
-    /// Dispatches an action asynchronously.
+    /// Dispatches one or more actions asynchronously.
     ///
-    /// This method queues the action for processing and returns immediately.
-    /// Actions are processed serially in the order they were dispatched.
+    /// This queues the provided actions for processing and returns
+    /// immediately. Actions are processed serially in the order they were
+    /// dispatched.
     ///
     /// - Parameters:
-    ///   - action: The action to dispatch.
-    ///   - delay: Configuration for delays before and/or after processing.
-    ///     Defaults to `.none()` (no delays).
+    ///   - actions: The actions to dispatch, optionally boxed with
+    ///     ``StoreActionBox`` for custom delays.
     ///   - file: Source file (automatically captured).
     ///   - function: Function name (automatically captured).
     ///   - line: Line number (automatically captured).
@@ -225,11 +225,13 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     /// ## Examples
     ///
     /// ```swift
-    /// // Fire-and-forget
+    /// // Fire‑and‑forget
     /// store.dispatch(.someAction)
     ///
-    /// // Debounce rapid updates
-    /// store.dispatch(.updateValue(text), delay: .init(before: 0.3))
+    /// // Debounce rapid updates (delay before processing a specific action)
+    /// store.dispatch([
+    ///     .delayed(.updateValue(text), delay: .init(before: 0.3))
+    /// ])
     ///
     /// // Await completion and handle errors
     /// let task = store.dispatch(.performWork)
@@ -239,12 +241,12 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///     logger.error("Action failed: \(error)")
     /// }
     /// ```
+
     @discardableResult
     /// - Returns: A ``StoreTask`` that can be awaited for completion
     ///   or ignored for fire-and-forget semantics.
     func dispatch(
-        _ action: Namespace.Action,
-        delay: StoreDelay = .none(),
+        _ actions: [StoreActionBox<Namespace.Action>],
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
@@ -257,8 +259,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
             await task.run(
                 identifier: identifier,
                 state: state,
-                action: action,
-                delay: delay,
+                actions: actions,
                 reducers: reducers,
                 middleware: middleware,
                 logger: logger,
@@ -269,5 +270,56 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
             )
         }
         return task
+    }
+
+    @discardableResult
+    /// - Returns: A ``StoreTask`` that can be awaited for completion
+    ///   or ignored for fire-and-forget semantics.
+    func dispatch(
+        _ action: StoreActionBox<Namespace.Action>,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> StoreTask<Namespace> {
+        dispatch(
+            [action],
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    @discardableResult
+    /// - Returns: A ``StoreTask`` that can be awaited for completion
+    ///   or ignored for fire-and-forget semantics.
+    func dispatch(
+        _ actions: [Namespace.Action],
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> StoreTask<Namespace> {
+        dispatch(
+            actions.map(\.box),
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    @discardableResult
+    /// - Returns: A ``StoreTask`` that can be awaited for completion
+    ///   or ignored for fire-and-forget semantics.
+    func dispatch(
+        _ action: Namespace.Action,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> StoreTask<Namespace> {
+        dispatch(
+            [action.box],
+            file: file,
+            function: function,
+            line: line
+        )
     }
 }

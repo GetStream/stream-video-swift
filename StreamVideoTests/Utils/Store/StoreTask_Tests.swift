@@ -88,7 +88,7 @@ final class StoreTask_Tests: XCTestCase, @unchecked Sendable {
         let before: TimeInterval = 0.2
 
         // When
-        _ = subject.dispatch(.setValue(9), delay: .init(before: before))
+        _ = subject.dispatch(TaskTestNamespace.Action.setValue(9).withBeforeDelay(before))
 
         // Then: Before delay elapses, value should not be updated
         try await Task.sleep(nanoseconds: 50_000_000) // 50ms
@@ -119,7 +119,7 @@ private struct TaskTestState: Equatable {
     static let initial = TaskTestState()
 }
 
-private enum TaskTestAction: Sendable {
+private enum TaskTestAction: Sendable, StoreActionBoxProtocol {
     case increment
     case setValue(Int)
     case fail

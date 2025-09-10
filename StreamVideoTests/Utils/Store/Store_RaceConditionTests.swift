@@ -296,7 +296,7 @@ private struct RaceTestState: Equatable {
 
 // MARK: - Test Actions
 
-private enum RaceTestAction: Sendable {
+private enum RaceTestAction: Sendable, StoreActionBoxProtocol {
     case setCounter(Int)
     case update(id: Int, value: Int)
     case slowOperation

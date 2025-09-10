@@ -76,8 +76,8 @@ final class PermissionStore_CameraMiddlewareTests: XCTestCase, @unchecked Sendab
     ) async throws {
         mockPermissionProvider.stub(for: \.systemPermission, with: stubbedResult)
         let expectation = self.expectation(description: "\(expected) was dispatched.")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            guard action == expected else {
+        subject.dispatcher = .init { actions, _, _, _ in
+            guard actions.first?.wrappedValue == expected else {
                 return
             }
             expectation.fulfill()
@@ -95,8 +95,8 @@ final class PermissionStore_CameraMiddlewareTests: XCTestCase, @unchecked Sendab
     ) async throws {
         mockPermissionProvider.stub(for: .requestPermission, with: stubbedResult)
         let expectation = self.expectation(description: "\(expected) was dispatched.")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            guard action == expected else {
+        subject.dispatcher = .init { actions, _, _, _ in
+            guard actions.first?.wrappedValue == expected else {
                 return
             }
             expectation.fulfill()

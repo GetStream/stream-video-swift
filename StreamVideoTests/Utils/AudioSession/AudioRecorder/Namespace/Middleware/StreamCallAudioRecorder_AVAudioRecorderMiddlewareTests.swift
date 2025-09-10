@@ -80,8 +80,8 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         mockPermissions.stubMicrophonePermission(.denied)
         await fulfillment { self.mockPermissions.mockStore.state.microphonePermission == .denied }
         let validation = expectation(description: "Dispatcher was called.")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setIsRecording(value) where value == false:
                 validation.fulfill()
             default:
@@ -115,8 +115,8 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
     func test_setIsRecordingTrue_shouldRecordTrueRequestRecordPermissionTrueRecordFalse_isMeteringEnabledShouldBeSetToFalse() async {
         audioRecorder.stub(for: .record, with: false)
         let validation = expectation(description: "Dispatcher was called.")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setIsRecording(value) where value == false:
                 validation.fulfill()
             default:
@@ -304,8 +304,8 @@ final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoT
         audioRecorder.stub(for: .record, with: true)
         let meterExpectation = expectation(description: "meter updates")
         meterExpectation.expectedFulfillmentCount = 2
-        subject.dispatcher = .init { action, _, _, _, _ in
-            if case .setMeter = action { meterExpectation.fulfill() }
+        subject.dispatcher = .init { actions, _, _, _ in
+            if case .setMeter = actions.first?.wrappedValue { meterExpectation.fulfill() }
         }
 
         subject.apply(

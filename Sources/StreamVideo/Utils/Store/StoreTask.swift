@@ -53,8 +53,7 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
     func run(
         identifier: String,
         state: Namespace.State,
-        action: Namespace.Action,
-        delay: StoreDelay,
+        actions: [StoreActionBox<Namespace.Action>],
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
         logger: StoreLogger<Namespace>,
@@ -65,19 +64,20 @@ final class StoreTask<Namespace: StoreNamespace>: Sendable {
     ) async {
         resultSubject.send(.running)
         do {
-            try await executor.run(
-                identifier: identifier,
-                state: state,
-                action: action,
-                delay: delay,
-                reducers: reducers,
-                middleware: middleware,
-                logger: logger,
-                subject: subject,
-                file: file,
-                function: function,
-                line: line
-            )
+            for action in actions {
+                try await executor.run(
+                    identifier: identifier,
+                    state: state,
+                    action: action,
+                    reducers: reducers,
+                    middleware: middleware,
+                    logger: logger,
+                    subject: subject,
+                    file: file,
+                    function: function,
+                    line: line
+                )
+            }
             resultSubject.send(.completed)
         } catch {
             resultSubject.send(.failed(error))

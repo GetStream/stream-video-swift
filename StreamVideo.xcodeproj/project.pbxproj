@@ -282,6 +282,7 @@
 		405616F32E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405616F22E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift */; };
 		405687AE2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
 		405687AF2D78A0E700093B98 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405687AD2D78A0E700093B98 /* QRCodeView.swift */; };
+		405997AD2E71818600AB62BA /* StoreActionBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405997AC2E71818600AB62BA /* StoreActionBox.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		405BFFD22DBB8BE8005B2BE4 /* ProximityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 405BFFD12DBB8BE8005B2BE4 /* ProximityManager.swift */; };
 		406128812CF32FEF007F5CDC /* SDPLineVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */; };
@@ -1990,6 +1991,7 @@
 		4052BF542DBA830D0085AFA5 /* MockAppStateAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppStateAdapter.swift; sourceTree = "<group>"; };
 		405616F22E0C0E7200442FF2 /* ICEConnectionStateAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICEConnectionStateAdapter_Tests.swift; sourceTree = "<group>"; };
 		405687AD2D78A0E700093B98 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
+		405997AC2E71818600AB62BA /* StoreActionBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreActionBox.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		405BFFD12DBB8BE8005B2BE4 /* ProximityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityManager.swift; sourceTree = "<group>"; };
 		406128802CF32FEF007F5CDC /* SDPLineVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDPLineVisitor.swift; sourceTree = "<group>"; };
@@ -4653,6 +4655,7 @@
 				40944D262E4E3F7000088AF0 /* StoreExecutor.swift */,
 				402B5E7E2E70415D007D4FA5 /* StoreTask.swift */,
 				40C71B712E5365F700733BF6 /* Store+Dispatcher.swift */,
+				405997AC2E71818600AB62BA /* StoreActionBox.swift */,
 			);
 			path = Store;
 			sourceTree = "<group>";
@@ -8364,6 +8367,7 @@
 				4159F16D2C86FA41002B94D3 /* UserUpdatedEvent.swift in Sources */,
 				84A4DDBD2A3B35030097F3E9 /* LocationFetcher.swift in Sources */,
 				84DC38B529ADFCFD00946713 /* CallStateResponseFields.swift in Sources */,
+				405997AD2E71818600AB62BA /* StoreActionBox.swift in Sources */,
 				40B48C472D14E803002C4EAB /* StreamVideoCapturing.swift in Sources */,
 				842E70D72B91BE1700D2D68B /* CallRecordingFailedEvent.swift in Sources */,
 				40F1016A2D5A653B00C49481 /* AudioSessionConfiguration.swift in Sources */,

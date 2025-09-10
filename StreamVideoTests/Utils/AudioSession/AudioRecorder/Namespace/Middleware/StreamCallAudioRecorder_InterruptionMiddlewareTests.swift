@@ -23,8 +23,8 @@ final class StreamCallAudioRecorder_InterruptionMiddlewareTests: XCTestCase, @un
 
     func test_audioStoreIsInterrupted_true_dispatchesSetIsInterruptedTrue() async {
         let validation = expectation(description: "Dispatcher was called")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setIsInterrupted(value) where value == true:
                 validation.fulfill()
             default:
@@ -39,8 +39,8 @@ final class StreamCallAudioRecorder_InterruptionMiddlewareTests: XCTestCase, @un
 
     func test_audioStoreIsInterrupted_false_dispatchesSetIsInterruptedFalse() async {
         let validation = expectation(description: "Dispatcher was called")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setIsInterrupted(value) where value == false:
                 validation.fulfill()
             default:

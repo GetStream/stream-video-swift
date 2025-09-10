@@ -87,7 +87,7 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
                 let delay = StoreDelay(
                     before: 0.001
                 )
-                store.dispatch(.setValue(i), delay: delay)
+                store.dispatch(.delayed(.setValue(i), delay: delay))
             }
             
             // Wait for completion
@@ -271,7 +271,7 @@ private struct PerformanceTestState: Equatable {
 
 // MARK: - Test Actions
 
-private enum PerformanceTestAction: Sendable {
+private enum PerformanceTestAction: Sendable, StoreActionBoxProtocol {
     case increment
     case setValue(Int)
     case appendToArray(Int)
