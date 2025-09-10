@@ -1,5 +1,23 @@
 # Repository Guidelines
 
+Guidance for AI coding agents (Copilot, Cursor, Aider, Claude, etc.) working in this repository. Human readers are welcome, but this file is written for tools.
+
+### Repository purpose
+
+This repository hosts Stream’s Swift Video/Calling SDK for Apple platforms. It provides the real‑time audio/video client, call state & signaling, and SwiftUI/UI kit components to build 1:1 and group calls with chat integration.
+
+Agents should optimize for media quality, API stability, backwards compatibility, and high test coverage.
+
+### Tech & toolchain
+- Language: Swift
+- UI frameworks: SwiftUI first; UIKit components may also be present
+- Media stack: WebRTC/AVFoundation under the hood
+- Primary distribution: Swift Package Manager (SPM)
+- Secondary (if applicable): CocoaPods
+- Xcode: 15.x or newer (Apple Silicon supported)
+- Platforms / deployment targets: Use the values set in Package.swift/podspecs; do not lower without approval
+- CI: GitHub Actions (assume PR validation for build + tests + lint)
+
 ## Project Structure & Module Organization
 - Root: `Package.swift` (SPM entry).
 - Sources: `Sources/StreamVideo/`, `Sources/StreamVideoSwiftUI/`, `Sources/StreamVideoUIKit/`.
@@ -17,6 +35,17 @@
   - `bundle exec fastlane test_swiftui`
   - `bundle exec fastlane test_uikit`
 - Lint: `bundle exec fastlane run_swift_format strict:true` (respect `fastlane/Fastfile`).
+
+### Public API & SemVer
+- Follow semantic versioning across public modules.
+- Any public API change must include updated docs and migration notes.
+- Avoid source‑breaking changes; if unavoidable, deprecate first with a transition path.
+
+### Performance & quality
+  • Avoid heavy work on the main thread; keep rendering/state updates efficient.
+  • Monitor frame rate, bitrate adaptation, and CPU/GPU usage; prefer hardware‑accelerated codecs when available.
+  • Be careful with retain cycles in capture/render pipelines; audit async capture lists.
+  • Consider adaptive UI for low‑bandwidth scenarios (thumbnail modes, audio‑only fallback).
 
 ## Coding Style & Naming Conventions
 - Swift (SPM-first). Indentation: 4 spaces; avoid trailing whitespace.
@@ -47,6 +76,11 @@
 - Avoid stating the obvious e.g. `var isActive: Bool // A variable that indicates if the view is active`.
 - Read around the APIs you are documenting and add context to make the comments more useful.
 
+### Compatibility & dependencies
+  • Maintain compatibility with deployment targets in Package.swift.
+  • Avoid adding new third‑party deps without discussion.
+  • Validate SPM integration in a fresh sample app when changing module boundaries.
+
 ## Commit & Pull Request Guidelines
 - Commits: small, focused, imperative subject lines ("Fix crash in renderer").
 - Before opening a PR: build all affected schemes, run tests, `bundle exec fastlane run_swift_format strict:true`.
@@ -55,3 +89,10 @@
 ## Security & Configuration Tips
 - Never commit API keys or user data; use env/xcconfig with placeholders.
 - Redact tokens in logs; use TLS; respect backend-provided TURN/ICE config.
+
+### Media & permissions checklist
+- Request & handle camera and microphone permissions gracefully.
+- Handle foreground/background transitions; pause/resume capture appropriately.
+- Support device rotation and multi‑orientation previews.
+- Validate CallKit integration (if present) and ensure correct audio session categories/modes.
+- Ensure PushKit/VoIP notifications are optional and documented if supported.
