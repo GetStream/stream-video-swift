@@ -8,7 +8,7 @@ extension Store {
 
     struct Dispatcher: Sendable {
 
-        typealias Handler = @Sendable(Namespace.Action, Delay, StaticString, StaticString, UInt) -> Void
+        typealias Handler = @Sendable(Namespace.Action, StoreDelay, StaticString, StaticString, UInt) -> Void
         private let handler: Handler
 
         init(_ store: Store) {
@@ -29,7 +29,7 @@ extension Store {
 
         func dispatch(
             _ action: Namespace.Action,
-            delay: Delay = .none(),
+            delay: StoreDelay = .none(),
             file: StaticString = #file,
             function: StaticString = #function,
             line: UInt = #line

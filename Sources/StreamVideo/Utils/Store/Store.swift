@@ -244,7 +244,7 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
     ///   or ignored for fire-and-forget semantics.
     func dispatch(
         _ action: Namespace.Action,
-        delay: Delay = .none(),
+        delay: StoreDelay = .none(),
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line

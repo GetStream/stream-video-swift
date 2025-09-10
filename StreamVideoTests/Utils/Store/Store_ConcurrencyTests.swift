@@ -119,7 +119,7 @@ final class Store_ConcurrencyTests: XCTestCase, @unchecked Sendable {
         // When: Dispatch actions with varying delays
         for i in actions {
             // Earlier actions have longer delays
-            let delay = Store<ConcurrencyTestNamespace>.Delay(
+            let delay = StoreDelay(
                 before: Double(10 - i) * 0.01
             )
             store.dispatch(.appendToSequence(i), delay: delay)

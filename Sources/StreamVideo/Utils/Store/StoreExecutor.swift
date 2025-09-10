@@ -56,7 +56,7 @@ class StoreExecutor<Namespace: StoreNamespace>: @unchecked Sendable {
         identifier: String,
         state: Namespace.State,
         action: Namespace.Action,
-        delay: Store<Namespace>.Delay,
+        delay: StoreDelay,
         reducers: [Reducer<Namespace>],
         middleware: [Middleware<Namespace>],
         logger: StoreLogger<Namespace>,

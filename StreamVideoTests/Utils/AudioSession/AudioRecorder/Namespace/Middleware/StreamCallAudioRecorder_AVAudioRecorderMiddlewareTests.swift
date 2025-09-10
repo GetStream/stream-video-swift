@@ -9,7 +9,7 @@ import XCTest
 
 final class StreamCallAudioRecorder_AVAudioRecorderMiddlewareTests: StreamVideoTestCase, @unchecked Sendable {
 
-    private var actionsReceived: [(StreamCallAudioRecorder.Namespace.Action, Store<StreamCallAudioRecorder.Namespace>.Delay)]! = []
+    private var actionsReceived: [(StreamCallAudioRecorder.Namespace.Action, StoreDelay)]! = []
     private var audioRecorder: MockAVAudioRecorder!
     private lazy var mockPermissions: MockPermissionsStore! = .init()
     private lazy var subject: StreamCallAudioRecorder
