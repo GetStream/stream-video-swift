@@ -14,8 +14,10 @@ struct DemoMoreControlsViewModifier: ViewModifier {
     @Injected(\.snapshotTrigger) var snapshotTrigger
     @Injected(\.appearance) var appearance
     @Injected(\.localParticipantSnapshotViewModel) var localParticipantSnapshotViewModel
+    @Injected(\.audioStore) var audioStore
 
     @State private var isStatsPresented = false
+    @State private var isHiFiEnabled = false
 
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
@@ -40,6 +42,23 @@ struct DemoMoreControlsViewModifier: ViewModifier {
 
                         VStack {
                             DemoNoiseCancellationButtonView(viewModel: viewModel)
+
+                            DemoMoreControlListButtonView(
+                                action: { Task { await viewModel.call?.microphone.setHiFiEnabled(!isHiFiEnabled) } },
+                                label: isHiFiEnabled ? "Disable HiFi" : "HiFi"
+                            ) {
+                                Image(
+                                    systemName: isHiFiEnabled
+                                        ? "wave.3.forward.circle.fill"
+                                        : "wave.3.forward.circle"
+                                )
+                            }
+                            .onReceive(
+                                audioStore
+                                    .publisher(\.inputConfiguration)
+                                    .map { $0.audioBitrate == .musicHighQuality }
+                                    .receive(on: DispatchQueue.main)
+                            ) { isHiFiEnabled = $0 }
 
                             DemoMoreControlListButtonView(
                                 action: { viewModel.toggleSpeaker() },

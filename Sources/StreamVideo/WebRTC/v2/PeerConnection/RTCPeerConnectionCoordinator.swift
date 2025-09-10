@@ -162,6 +162,7 @@ class RTCPeerConnectionCoordinator: @unchecked Sendable {
                 videoOptions: videoOptions,
                 videoConfig: videoConfig,
                 publishOptions: publishOptions,
+                audioSettings: audioSettings,
                 videoCaptureSessionProvider: videoCaptureSessionProvider,
                 screenShareSessionProvider: screenShareSessionProvider
             ),

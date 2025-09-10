@@ -142,7 +142,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
                     .playAndRecord,
                     mode: .videoChat,
                     options: [
-                        .allowBluetooth,
+                        .allowBluetoothHFP,
                         .mixWithOthers
                     ]
                 )
@@ -161,7 +161,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
         )
         XCTAssertEqual(input.category, AVAudioSession.Category.playAndRecord.rawValue)
         XCTAssertEqual(input.mode, AVAudioSession.Mode.videoChat.rawValue)
-        XCTAssertEqual(input.categoryOptions, [.allowBluetooth, .mixWithOthers])
+        XCTAssertEqual(input.categoryOptions, [.allowBluetoothHFP, .mixWithOthers])
     }
 
     func test_reduce_setCategory_updatedStateHasIsActiveCorrectlySet() throws {
@@ -177,7 +177,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
                     .playAndRecord,
                     mode: .videoChat,
                     options: [
-                        .allowBluetooth,
+                        .allowBluetoothHFP,
                         .mixWithOthers
                     ]
                 )
@@ -189,7 +189,7 @@ final class RTCAudioSessionReducer_Tests: XCTestCase, @unchecked Sendable {
 
         XCTAssertEqual(updatedState.category, .playAndRecord)
         XCTAssertEqual(updatedState.mode, .videoChat)
-        XCTAssertEqual(updatedState.options, [.allowBluetooth, .mixWithOthers])
+        XCTAssertEqual(updatedState.options, [.allowBluetoothHFP, .mixWithOthers])
     }
 
     // MARK: - setOverrideOutputPort

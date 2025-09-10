@@ -8,7 +8,7 @@ import XCTest
 
 final class WebRTCTrackStorage_Tests: XCTestCase, @unchecked Sendable {
 
-    private lazy var peerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var peerConnectionFactory: MockPeerConnectionFactory! = .init()
     private lazy var subject: WebRTCTrackStorage! = .init()
 
     override func tearDown() {

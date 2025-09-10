@@ -14,7 +14,7 @@ final class PictureInPictureContentProviderTests: XCTestCase, @unchecked Sendabl
     private static nonisolated(unsafe) var videoConfig: VideoConfig! = .dummy()
 
     private lazy var store: PictureInPictureStore! = .init()
-    private lazy var mockPeerConnectionFactory: PeerConnectionFactory! = .mock()
+    private lazy var mockPeerConnectionFactory: MockPeerConnectionFactory! = MockPeerConnectionFactory()
     private lazy var subject: PictureInPictureContentProvider! = .init(store: store)
 
     override func setUp() async throws {

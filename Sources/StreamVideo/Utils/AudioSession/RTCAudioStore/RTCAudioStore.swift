@@ -13,12 +13,12 @@ import StreamWebRTC
 /// observation, and enables serial action processing to avoid concurrency
 /// issues. Use this type to access and manage all call audio state in a
 /// thread-safe, observable way.
-final class RTCAudioStore: @unchecked Sendable {
+public final class RTCAudioStore: @unchecked Sendable {
 
     static let shared = RTCAudioStore()
 
     /// The current state of the audio session.
-    var state: State { stateSubject.value }
+    public var state: State { stateSubject.value }
 
     /// The underlying WebRTC audio session being managed.
     let session: AudioSessionProtocol
@@ -46,7 +46,8 @@ final class RTCAudioStore: @unchecked Sendable {
                 mode: .init(rawValue: session.mode),
                 options: session.categoryOptions,
                 overrideOutputAudioPort: .none,
-                hasRecordingPermission: session.recordPermissionGranted
+                hasRecordingPermission: session.recordPermissionGranted,
+                inputConfiguration: .initial
             )
         )
         processingQueue.underlyingQueue = underlyingQueue
@@ -63,7 +64,7 @@ final class RTCAudioStore: @unchecked Sendable {
     /// Publishes changes to the specified state property.
     ///
     /// Use this to observe changes for a specific audio state key path.
-    func publisher<V: Equatable>(
+    public func publisher<V: Equatable>(
         _ keyPath: KeyPath<State, V>
     ) -> AnyPublisher<V, Never> {
         stateSubject
@@ -295,11 +296,11 @@ final class RTCAudioStore: @unchecked Sendable {
 }
 
 extension RTCAudioStore: InjectionKey {
-    nonisolated(unsafe) static var currentValue: RTCAudioStore = .shared
+    nonisolated(unsafe) public static var currentValue: RTCAudioStore = .shared
 }
 
 extension InjectedValues {
-    var audioStore: RTCAudioStore {
+    public var audioStore: RTCAudioStore {
         get { Self[RTCAudioStore.self] }
         set { Self[RTCAudioStore.self] = newValue }
     }

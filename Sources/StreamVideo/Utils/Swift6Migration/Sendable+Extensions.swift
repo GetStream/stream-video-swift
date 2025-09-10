@@ -14,7 +14,6 @@ extension AnyCancellable: @retroactive @unchecked Sendable {}
 extension AVCaptureDevice: @retroactive @unchecked Sendable {}
 extension AVCapturePhotoOutput: @retroactive @unchecked Sendable {}
 extension AVCaptureVideoDataOutput: @retroactive @unchecked Sendable {}
-extension CIImage: @retroactive @unchecked Sendable {}
 extension CMSampleBuffer: @retroactive @unchecked Sendable {}
 extension CXAnswerCallAction: @retroactive @unchecked Sendable {}
 extension CXSetHeldCallAction: @retroactive @unchecked Sendable {}
@@ -29,12 +28,12 @@ extension Published.Publisher: @retroactive @unchecked Sendable {}
 extension RTCVideoFrame: @retroactive @unchecked Sendable {}
 extension AnyPublisher: @retroactive @unchecked Sendable {}
 extension Publishers.Filter: @retroactive @unchecked Sendable {}
+extension RTCAudioSource: @retroactive @unchecked Sendable {}
 #else
 extension AnyCancellable: @unchecked Sendable {}
 extension AVCaptureDevice: @unchecked Sendable {}
 extension AVCapturePhotoOutput: @unchecked Sendable {}
 extension AVCaptureVideoDataOutput: @unchecked Sendable {}
-extension CIImage: @unchecked Sendable {}
 extension CMSampleBuffer: @unchecked Sendable {}
 extension CXAnswerCallAction: @unchecked Sendable {}
 extension CXSetHeldCallAction: @unchecked Sendable {}
@@ -50,4 +49,5 @@ extension Published.Publisher: @unchecked Sendable {}
 extension RTCVideoFrame: @unchecked Sendable {}
 extension AnyPublisher: @unchecked Sendable {}
 extension Publishers.Filter: @unchecked Sendable {}
+extension RTCAudioSource: @unchecked Sendable {}
 #endif

@@ -216,11 +216,13 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         mockPublisher?.stubbedMid[.audio] = "audio"
-        mockPublisher?.stubbedTrack[.audio] = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockAudioTrack()
+        mockPublisher?.stubbedTrack[.audio] = await(
+            mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .peerConnectionFactory as! MockPeerConnectionFactory
+        )
+        .mockAudioTrack()
 
         let result = await subject.buildReconnectDetails(
             for: .fastReconnect,
@@ -242,11 +244,13 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         mockPublisher?.stubbedMid[.audio] = "audio"
-        mockPublisher?.stubbedTrack[.audio] = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockAudioTrack()
+        mockPublisher?.stubbedTrack[.audio] = await(
+            mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .peerConnectionFactory as! MockPeerConnectionFactory
+        )
+        .mockAudioTrack()
         let fromSfuID = String.unique
 
         let result = await subject.buildReconnectDetails(
@@ -269,11 +273,13 @@ final class WebRTCJoinRequestFactory_Tests: XCTestCase, @unchecked Sendable {
             sfuAdapter: mockCoordinatorStack.sfuStack.adapter
         )
         mockPublisher?.stubbedMid[.audio] = "audio"
-        mockPublisher?.stubbedTrack[.audio] = await mockCoordinatorStack
-            .coordinator
-            .stateAdapter
-            .peerConnectionFactory
-            .mockAudioTrack()
+        mockPublisher?.stubbedTrack[.audio] = await(
+            mockCoordinatorStack
+                .coordinator
+                .stateAdapter
+                .peerConnectionFactory as! MockPeerConnectionFactory
+        )
+        .mockAudioTrack()
         let fromSessionID = String.unique
 
         let result = await subject.buildReconnectDetails(

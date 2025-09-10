@@ -95,7 +95,7 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
         let subject = CallParticipant.dummy(
             hasVideo: true,
             showTrack: true,
-            track: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false)
+            track: MockPeerConnectionFactory().mockVideoTrack(forScreenShare: false)
         )
 
         XCTAssertTrue(subject.shouldDisplayTrack)
@@ -105,7 +105,7 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
         let subject = CallParticipant.dummy(
             hasVideo: true,
             showTrack: true,
-            track: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false),
+            track: MockPeerConnectionFactory().mockVideoTrack(forScreenShare: false),
             pausedTracks: [.video]
         )
 
@@ -116,7 +116,7 @@ final class CallParticipants_Tests: XCTestCase, @unchecked Sendable {
         let subject = CallParticipant.dummy(
             hasVideo: true,
             showTrack: true,
-            track: PeerConnectionFactory.mock().mockVideoTrack(forScreenShare: false),
+            track: MockPeerConnectionFactory().mockVideoTrack(forScreenShare: false),
             pausedTracks: []
         )
 

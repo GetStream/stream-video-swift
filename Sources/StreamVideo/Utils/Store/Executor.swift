@@ -69,8 +69,8 @@ class StoreExecutor<Namespace: StoreNamespace> {
         await delay.applyDelayBeforeIfRequired()
 
         // Notify all middleware about the action
-        middleware.forEach {
-            $0.apply(
+        for item in middleware {
+            await item.apply(
                 state: state,
                 action: action,
                 file: file,

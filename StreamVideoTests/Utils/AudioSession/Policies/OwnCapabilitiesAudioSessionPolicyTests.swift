@@ -71,7 +71,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, AVAudioSession.PortOverride.none)
@@ -96,7 +96,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
         XCTAssertEqual(configuration.overrideOutputAudioPort, .speaker)
@@ -179,7 +179,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth,
+                .allowBluetoothHFP,
                 .defaultToSpeaker
             ]
         )
@@ -203,7 +203,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -227,7 +227,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }
@@ -251,7 +251,7 @@ final class OwnCapabilitiesAudioSessionPolicyTests: XCTestCase, @unchecked Senda
         XCTAssertEqual(
             configuration.options,
             [
-                .allowBluetooth
+                .allowBluetoothHFP
             ]
         )
     }

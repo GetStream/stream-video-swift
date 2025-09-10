@@ -52,6 +52,7 @@ final class MediaAdapter {
         videoOptions: VideoOptions,
         videoConfig: VideoConfig,
         publishOptions: PublishOptions,
+        audioSettings: AudioSettings,
         videoCaptureSessionProvider: VideoCaptureSessionProvider,
         screenShareSessionProvider: ScreenShareSessionProvider
     ) {
@@ -93,7 +94,8 @@ final class MediaAdapter {
                     peerConnectionFactory: peerConnectionFactory,
                     sfuAdapter: sfuAdapter,
                     publishOptions: publishOptions.audio,
-                    subject: subject
+                    subject: subject,
+                    audioSettings: audioSettings
                 ),
                 videoMediaAdapter: .init(
                     sessionID: sessionID,
@@ -162,7 +164,7 @@ final class MediaAdapter {
                 )
             }
             
-            while try await group.next() != nil {}
+            try await group.waitForAll()
         }
     }
     
@@ -185,7 +187,7 @@ final class MediaAdapter {
                 try await screenShareMediaAdapter.didUpdateCallSettings(settings)
             }
             
-            while try await group.next() != nil {}
+            try await group.waitForAll()
         }
     }
     
@@ -231,7 +233,7 @@ final class MediaAdapter {
                 try await screenShareMediaAdapter.didUpdatePublishOptions(publishOptions)
             }
             
-            while try await group.next() != nil {}
+            try await group.waitForAll()
         }
     }
     

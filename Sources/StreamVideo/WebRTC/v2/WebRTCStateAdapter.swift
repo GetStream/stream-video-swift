@@ -113,6 +113,7 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         apiKey: String,
         callCid: String,
         videoConfig: VideoConfig,
+        peerConnectionFactory: PeerConnectionFactory,
         rtcPeerConnectionCoordinatorFactory: RTCPeerConnectionCoordinatorProviding,
         videoCaptureSessionProvider: VideoCaptureSessionProvider = .init(),
         screenShareSessionProvider: ScreenShareSessionProvider = .init()
@@ -121,9 +122,6 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
         self.apiKey = apiKey
         self.callCid = callCid
         self.videoConfig = videoConfig
-        let peerConnectionFactory = PeerConnectionFactory.build(
-            audioProcessingModule: videoConfig.audioProcessingModule
-        )
         self.peerConnectionFactory = peerConnectionFactory
         self.rtcPeerConnectionCoordinatorFactory = rtcPeerConnectionCoordinatorFactory
         self.videoCaptureSessionProvider = videoCaptureSessionProvider
@@ -223,6 +221,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
 
     func disableClientCapabilities(_ capabilities: Set<ClientCapability>) {
         self.clientCapabilities = self.clientCapabilities.subtracting(capabilities)
+    }
+
+    // MARK: - HiFi
+
+    func setAudioInputBitrate(_ value: AudioBitrate) {
+        audioSession.setAudioInputBitrate(value)
+        videoConfig.audioProcessingModule.isHiFiEnabled = value == .musicHighQuality
     }
 
     // MARK: - Session Management
