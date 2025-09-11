@@ -118,7 +118,7 @@ extension UserRobot {
     @discardableResult
     func selectParticipants(count: Int) -> Self {
         CallDetailsPage.participants.waitCount(1)
-        for i in 0...count - 1 {
+        for i in 1...count {
             CallDetailsPage.participants.element(boundBy: i).tap()
         }
         return self
