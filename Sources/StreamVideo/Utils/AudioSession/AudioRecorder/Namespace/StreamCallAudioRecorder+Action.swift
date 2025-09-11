@@ -10,7 +10,7 @@ extension StreamCallAudioRecorder.Namespace {
     /// These actions represent state changes in the audio recording system
     /// and are processed by reducers and middleware to update the store's
     /// state.
-    enum StoreAction: Sendable, Equatable {
+    enum StoreAction: Sendable, Equatable, StoreActionBoxProtocol {
         /// Sets whether audio recording is currently active.
         ///
         /// - Parameter isRecording: `true` if recording is active, `false`

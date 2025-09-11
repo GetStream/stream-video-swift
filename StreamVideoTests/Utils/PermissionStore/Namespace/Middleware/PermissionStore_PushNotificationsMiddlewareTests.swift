@@ -80,8 +80,8 @@ final class PermissionStore_PushNotificationsMiddlewareTests: XCTestCase, @unche
         await wait(for: 1.0)
         mockPermissionProvider.stub(for: .systemPermission, with: stubbedResult)
         let expectation = self.expectation(description: "\(expected) was dispatched.")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            guard action == expected else {
+        subject.dispatcher = .init { actions, _, _, _ in
+            guard actions.first?.wrappedValue == expected else {
                 return
             }
             expectation.fulfill()
@@ -100,8 +100,8 @@ final class PermissionStore_PushNotificationsMiddlewareTests: XCTestCase, @unche
     ) async throws {
         mockPermissionProvider.stub(for: .requestPermission, with: stubbedResult)
         let expectation = self.expectation(description: "\(expected) was dispatched.")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            guard action == expected else {
+        subject.dispatcher = .init { actions, _, _, _ in
+            guard actions.first?.wrappedValue == expected else {
                 return
             }
             expectation.fulfill()

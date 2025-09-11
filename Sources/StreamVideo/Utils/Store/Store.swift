@@ -205,52 +205,61 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
 
     // MARK: - Action Dispatch
 
-    /// Dispatches an action synchronously, waiting for completion.
+    /// Dispatches one or more actions asynchronously.
     ///
-    /// This method blocks until the action has been fully processed through
-    /// middleware and reducers. Use this when you need to ensure an action
-    /// completes before continuing.
+    /// This queues the provided actions for processing and returns
+    /// immediately. Actions are processed serially in the order they were
+    /// dispatched.
     ///
     /// - Parameters:
-    ///   - action: The action to dispatch.
-    ///   - delay: Configuration for delays before and/or after processing.
-    ///     Defaults to `.none()` (no delays).
+    ///   - actions: The actions to dispatch, optionally boxed with
+    ///     ``StoreActionBox`` for custom delays.
     ///   - file: Source file (automatically captured).
     ///   - function: Function name (automatically captured).
     ///   - line: Line number (automatically captured).
     ///
-    /// - Throws: Any error from reducer processing.
+    /// - Note: Errors from reducers are not thrown here. They are
+    ///   captured by the returned ``StoreTask``. If you need to handle
+    ///   errors, `await` ``StoreTask/result()`` on the returned task.
     ///
-    /// - Warning: This method blocks the calling task. Prefer
-    ///   ``dispatch(_:delay:file:function:line:)`` for fire-and-forget
-    ///   operations.
-    ///
-    /// ## Example
+    /// ## Examples
     ///
     /// ```swift
-    /// // Wait for action to complete with delay
-    /// try await store.dispatchSync(
-    ///     .updateData,
-    ///     delay: .init(before: 0.5)
-    /// )
+    /// // Fire‑and‑forget
+    /// store.dispatch(.someAction)
+    ///
+    /// // Debounce rapid updates (delay before processing a specific action)
+    /// store.dispatch([
+    ///     .delayed(.updateValue(text), delay: .init(before: 0.3))
+    /// ])
+    ///
+    /// // Await completion and handle errors
+    /// let task = store.dispatch(.performWork)
+    /// do {
+    ///     try await task.result()
+    /// } catch {
+    ///     logger.error("Action failed: \(error)")
+    /// }
     /// ```
-    func dispatchSync(
-        _ action: Namespace.Action,
-        delay: Delay = .none(),
+
+    @discardableResult
+    /// - Returns: A ``StoreTask`` that can be awaited for completion
+    ///   or ignored for fire-and-forget semantics.
+    func dispatch(
+        _ actions: [StoreActionBox<Namespace.Action>],
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-    ) async throws {
-        try await processingQueue.addSynchronousTaskOperation { [weak self] in
+    ) -> StoreTask<Namespace> {
+        let task = StoreTask(executor: executor)
+        processingQueue.addTaskOperation { [weak self] in
             guard let self else {
                 return
             }
-
-            try await executor.run(
+            await task.run(
                 identifier: identifier,
                 state: state,
-                action: action,
-                delay: delay,
+                actions: actions,
                 reducers: reducers,
                 middleware: middleware,
                 logger: logger,
@@ -260,66 +269,57 @@ final class Store<Namespace: StoreNamespace>: @unchecked Sendable {
                 line: line
             )
         }
+        return task
     }
 
-    /// Dispatches an action asynchronously.
-    ///
-    /// This method queues the action for processing and returns immediately.
-    /// Actions are processed serially in the order they were dispatched.
-    ///
-    /// - Parameters:
-    ///   - action: The action to dispatch.
-    ///   - delay: Configuration for delays before and/or after processing.
-    ///     Defaults to `.none()` (no delays).
-    ///   - file: Source file (automatically captured).
-    ///   - function: Function name (automatically captured).
-    ///   - line: Line number (automatically captured).
-    ///
-    /// - Note: Errors from reducers are logged but not thrown. Use
-    ///   ``dispatchSync(_:delay:file:function:line:)`` if you need error
-    ///   handling.
-    ///
-    /// ## Examples
-    ///
-    /// ```swift
-    /// // Fire and forget with no delay
-    /// store.dispatch(.someAction)
-    ///
-    /// // Debounce rapid updates
-    /// store.dispatch(.updateValue(text), delay: .init(before: 0.3))
-    ///
-    /// // Add delay after for UI smoothness
-    /// store.dispatch(.transition, delay: .init(after: 0.2))
-    /// ```
+    @discardableResult
+    /// - Returns: A ``StoreTask`` that can be awaited for completion
+    ///   or ignored for fire-and-forget semantics.
     func dispatch(
-        _ action: Namespace.Action,
-        delay: Delay = .none(),
+        _ action: StoreActionBox<Namespace.Action>,
         file: StaticString = #file,
         function: StaticString = #function,
         line: UInt = #line
-    ) {
-        processingQueue.addTaskOperation { [weak self] in
-            guard let self else {
-                return
-            }
+    ) -> StoreTask<Namespace> {
+        dispatch(
+            [action],
+            file: file,
+            function: function,
+            line: line
+        )
+    }
 
-            do {
-                try await executor.run(
-                    identifier: identifier,
-                    state: state,
-                    action: action,
-                    delay: delay,
-                    reducers: reducers,
-                    middleware: middleware,
-                    logger: logger,
-                    subject: stateSubject,
-                    file: file,
-                    function: function,
-                    line: line
-                )
-            } catch {
-                /* No-op as the error is being logged inside the executor. */
-            }
-        }
+    @discardableResult
+    /// - Returns: A ``StoreTask`` that can be awaited for completion
+    ///   or ignored for fire-and-forget semantics.
+    func dispatch(
+        _ actions: [Namespace.Action],
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> StoreTask<Namespace> {
+        dispatch(
+            actions.map(\.box),
+            file: file,
+            function: function,
+            line: line
+        )
+    }
+
+    @discardableResult
+    /// - Returns: A ``StoreTask`` that can be awaited for completion
+    ///   or ignored for fire-and-forget semantics.
+    func dispatch(
+        _ action: Namespace.Action,
+        file: StaticString = #file,
+        function: StaticString = #function,
+        line: UInt = #line
+    ) -> StoreTask<Namespace> {
+        dispatch(
+            [action.box],
+            file: file,
+            function: function,
+            line: line
+        )
     }
 }

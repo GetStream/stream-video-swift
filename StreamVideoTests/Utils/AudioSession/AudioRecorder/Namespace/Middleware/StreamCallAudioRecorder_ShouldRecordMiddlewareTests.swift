@@ -25,8 +25,8 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
     func test_activeCall_nonNilWithAudioOn_dispatchesSetShouldRecordTrue() async throws {
         let validation = expectation(description: "Dispatcher was called")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setShouldRecord(value) where value == true:
                 validation.fulfill()
             default:
@@ -48,8 +48,8 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
     func test_activeCall_nonNilWithAudioOn_changesToAudioOnFalse_dispatchesSetShouldRecordFalse() async throws {
         let validation = expectation(description: "Dispatcher was called")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setShouldRecord(value) where value == false:
                 validation.fulfill()
             default:
@@ -75,7 +75,7 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
     func test_activeCall_nil_noActionIsBeingDispatch() async throws {
         let validation = expectation(description: "Dispatcher was called")
         validation.isInverted = true
-        subject.dispatcher = .init { _, _, _, _, _ in }
+        subject.dispatcher = .init { _, _, _, _ in }
         
         let call = await MockCall(.dummy())
         try await call.microphone.enable()
@@ -85,8 +85,8 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
     func test_activeCall_audioOn_butPermissionMissing_dispatchesSetShouldRecordFalse() async throws {
         let validation = expectation(description: "Dispatcher was called")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setShouldRecord(value) where value == false:
                 validation.fulfill()
             default:
@@ -107,8 +107,8 @@ final class StreamCallAudioRecorder_ShouldRecordMiddlewareTests: StreamVideoTest
 
     func test_activeCall_audioOn_butAudioSessionInactive_dispatchesSetShouldRecordFalse() async throws {
         let validation = expectation(description: "Dispatcher was called")
-        subject.dispatcher = .init { action, _, _, _, _ in
-            switch action {
+        subject.dispatcher = .init { actions, _, _, _ in
+            switch actions[0].wrappedValue {
             case let .setShouldRecord(value) where value == false:
                 validation.fulfill()
             default:

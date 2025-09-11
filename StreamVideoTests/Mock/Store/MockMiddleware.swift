@@ -8,7 +8,7 @@ import Foundation
 final class MockMiddleware<Namespace: StoreNamespace>: Middleware<Namespace>, @unchecked Sendable {
 
     private(set) var actionsReceived: [Namespace.Action] = []
-    private(set) var actionsDispatched: [Namespace.Action] = []
+    private(set) var actionsDispatched: [StoreActionBox<Namespace.Action>] = []
 
     var stubbedState: Namespace.State?
     var stubbedDispatcher: Store<Namespace>.Dispatcher?
@@ -21,12 +21,10 @@ final class MockMiddleware<Namespace: StoreNamespace>: Middleware<Namespace>, @u
 
     override init() {
         super.init()
-        stubbedDispatcher = .init { action, delay, file, function, line in
-            self.actionsDispatched.append(action)
-
+        stubbedDispatcher = .init { actions, file, function, line in
+            self.actionsDispatched.append(contentsOf: actions)
             self.actualDispatcher?.dispatch(
-                action,
-                delay: delay,
+                actions,
                 file: file,
                 function: function,
                 line: line

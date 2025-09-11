@@ -46,12 +46,18 @@ class StoreLogger<Namespace: StoreNamespace> {
     /// aggregation tools.
     let logSubsystem: LogSubsystem
 
+    let statistics: StoreStatistics<Namespace> = .init()
+
     /// Initializes a new store logger.
     ///
     /// - Parameter logSubsystem: The subsystem for categorizing logs.
     ///   Defaults to `.other`.
     init(logSubsystem: LogSubsystem = .other) {
         self.logSubsystem = logSubsystem
+
+        #if DEBUG
+        statistics.enable(interval: 60) { [weak self] in self?.report($0, interval: $1) }
+        #endif
     }
 
     /// Called when an action has been successfully processed.
@@ -74,6 +80,7 @@ class StoreLogger<Namespace: StoreNamespace> {
         function: StaticString,
         line: UInt
     ) {
+        defer { statistics.record(action) }
         log.debug(
             "Store identifier:\(identifier) completed action:\(action) state:\(state).",
             subsystems: logSubsystem,
@@ -103,6 +110,7 @@ class StoreLogger<Namespace: StoreNamespace> {
         function: StaticString,
         line: UInt
     ) {
+        defer { statistics.record(action) }
         log.error(
             "Store identifier:\(identifier) failed to apply action:\(action).",
             subsystems: logSubsystem,
@@ -110,6 +118,16 @@ class StoreLogger<Namespace: StoreNamespace> {
             functionName: function,
             fileName: file,
             lineNumber: line
+        )
+    }
+
+    func report(
+        _ numberOfActions: Int,
+        interval: TimeInterval
+    ) {
+        log.debug(
+            "Store identifier:\(Namespace.identifier) performs \(numberOfActions) per \(interval) seconds.",
+            subsystems: logSubsystem
         )
     }
 }

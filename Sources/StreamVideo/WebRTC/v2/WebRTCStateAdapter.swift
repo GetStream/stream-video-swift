@@ -515,6 +515,13 @@ actor WebRTCStateAdapter: ObservableObject, StreamAudioSessionAdapterDelegate, W
             }
 
             try await publisher.didUpdateCallSettings(updatedCallSettings)
+
+            if updatedCallSettings.cameraPosition != currentCallSettings.cameraPosition {
+                try await publisher.didUpdateCameraPosition(
+                    updatedCallSettings.cameraPosition == .back ? .back : .front
+                )
+            }
+
             log.debug(
                 "Publisher callSettings updated: \(updatedCallSettings).",
                 subsystems: .webRTC,

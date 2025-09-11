@@ -65,13 +65,10 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
             let expectation = XCTestExpectation(description: "Sync dispatch")
             
             Task {
-                let start = CFAbsoluteTimeGetCurrent()
                 
                 for i in 0..<100 {
-                    try? await store.dispatchSync(.setValue(i))
+                    try? await store.dispatch(.setValue(i)).result()
                 }
-                
-                let elapsed = CFAbsoluteTimeGetCurrent() - start
                 
                 expectation.fulfill()
             }
@@ -87,10 +84,10 @@ final class Store_PerformanceTests: XCTestCase, @unchecked Sendable {
         measure {
             for i in 0..<iterations {
                 // Small delay to simulate debouncing
-                let delay = Store<PerformanceTestNamespace>.Delay(
+                let delay = StoreDelay(
                     before: 0.001
                 )
-                store.dispatch(.setValue(i), delay: delay)
+                store.dispatch(.delayed(.setValue(i), delay: delay))
             }
             
             // Wait for completion
@@ -274,7 +271,7 @@ private struct PerformanceTestState: Equatable {
 
 // MARK: - Test Actions
 
-private enum PerformanceTestAction: Sendable {
+private enum PerformanceTestAction: Sendable, StoreActionBoxProtocol {
     case increment
     case setValue(Int)
     case appendToArray(Int)
