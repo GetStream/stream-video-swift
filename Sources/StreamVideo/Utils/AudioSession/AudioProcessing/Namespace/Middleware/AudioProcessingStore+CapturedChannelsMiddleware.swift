@@ -5,6 +5,9 @@
 import Combine
 import Foundation
 
+/// Observes custom processing events to keep the store in sync with the
+/// current capture channel count and initialization lifecycle.
+
 extension AudioProcessingStore.Namespace {
 
     final class CapturedChannelsMiddleware: Middleware<AudioProcessingStore.Namespace>, @unchecked Sendable {
@@ -44,6 +47,7 @@ extension AudioProcessingStore.Namespace {
                     )
                 )
             case let .audioProcessingProcess(buffer):
+                // Keep the state’s channel count aligned with incoming buffers.
                 if buffer.channels != stateProvider?()?.numberOfCaptureChannels {
                     dispatcher?.dispatch(.setNumberOfCaptureChannels(buffer.channels))
                 }

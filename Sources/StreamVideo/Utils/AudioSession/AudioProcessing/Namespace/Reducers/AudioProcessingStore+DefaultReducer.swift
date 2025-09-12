@@ -4,10 +4,13 @@
 
 import Foundation
 
+/// Pure reducer that updates audio processing state in response to actions.
+
 extension AudioProcessingStore.Namespace {
 
     final class DefaultReducer: Reducer<AudioProcessingStore.Namespace>, @unchecked Sendable {
 
+        /// Applies the given action and returns updated state.
         override func reduce(
             state: AudioProcessingStore.Namespace.StoreState,
             action: AudioProcessingStore.Namespace.StoreAction,

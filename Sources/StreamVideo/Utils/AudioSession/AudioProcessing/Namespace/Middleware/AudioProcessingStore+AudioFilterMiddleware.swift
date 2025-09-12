@@ -6,6 +6,9 @@ import Combine
 import Foundation
 import StreamWebRTC
 
+/// Applies the selected `AudioFilter` to incoming capture buffers and keeps it
+/// configured with the current sample format.
+
 extension AudioProcessingStore.Namespace {
 
     final class AudioFilterMiddleware: Middleware<AudioProcessingStore.Namespace>, @unchecked Sendable {
@@ -21,6 +24,7 @@ extension AudioProcessingStore.Namespace {
         ) {
             switch action {
             case let .setInitializedConfiguration(sampleRate, channels):
+                // Initialize the filter with the negotiated format.
                 if let audioFilter = state.audioFilter {
                     audioFilter.initialize(
                         sampleRate: sampleRate,
@@ -28,6 +32,7 @@ extension AudioProcessingStore.Namespace {
                     )
                 }
             case let .setAudioFilter(audioFilter):
+                // Late filter selection: initialize if we already know format.
                 if state.initializedSampleRate > 0, state.initializedChannels > 0 {
                     audioFilter?.initialize(
                         sampleRate: state.initializedSampleRate,
