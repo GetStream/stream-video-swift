@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- Reworked the AudioFilter pipeline to be more robust and flexible. [#942](https://github.com/GetStream/stream-video-swift/pull/942)
+- **Breaking** `StreamAudioFilterProcessingModule`, `AudioFilterCapturePostProcessingModule`, `StreamAudioFilterCapturePostProcessingModule` have been removed. [#942](https://github.com/GetStream/stream-video-swift/pull/942)
 
 # [1.32.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.32.0)
 _September 08, 2025_

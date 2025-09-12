@@ -65,6 +65,7 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - Prefer instance properties that are explicitly unwrapped which you nullify on tearDown. 
 - Add/extend tests for call lifecycle, state/view models, media toggles, and SwiftUI layout logic (use fakes/mocks).
 - Run both `StreamVideo` and `StreamVideoSwiftUI` tests locally; keep/raise coverage.
+- Only add tests for .swift files.
 
 ## Comments
 - Use docC for non-private APIs.
