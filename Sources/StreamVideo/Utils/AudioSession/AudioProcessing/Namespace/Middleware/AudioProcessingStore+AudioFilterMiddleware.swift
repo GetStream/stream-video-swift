@@ -32,6 +32,7 @@ extension AudioProcessingStore.Namespace {
                     )
                 }
             case let .setAudioFilter(audioFilter):
+                state.audioFilter?.release()
                 // Late filter selection: initialize if we already know format.
                 if state.initializedSampleRate > 0, state.initializedChannels > 0 {
                     audioFilter?.initialize(
@@ -43,6 +44,9 @@ extension AudioProcessingStore.Namespace {
                     audioFilter,
                     capturePostProcessingDelegate: state.capturePostProcessingDelegate
                 )
+
+            case .release:
+                state.audioFilter?.release()
             default:
                 break
             }
