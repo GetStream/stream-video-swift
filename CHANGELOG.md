@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+
+# [1.33.0](https://github.com/GetStream/stream-video-swift/releases/tag/1.33.0)
+_September 15, 2025_
+
+### 🔄 Changed
 - Updated WebRTC version to 135.0.41. [#942](https://github.com/GetStream/stream-video-swift/pull/942)
 - Reworked the AudioFilter pipeline to be more robust and flexible. [#942](https://github.com/GetStream/stream-video-swift/pull/942)
 - **Breaking** `StreamAudioFilterProcessingModule`, `AudioFilterCapturePostProcessingModule`, `StreamAudioFilterCapturePostProcessingModule` have been removed. [#942](https://github.com/GetStream/stream-video-swift/pull/942)
