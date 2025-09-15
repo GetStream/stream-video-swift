@@ -37,6 +37,7 @@ extension AudioProcessingStore.Namespace {
             case .release:
                 updatedState.initializedSampleRate = 0
                 updatedState.initializedChannels = 0
+                updatedState.audioFilter = nil
             }
 
             return updatedState

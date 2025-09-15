@@ -9,5 +9,5 @@ extension SystemEnvironment {
   /// A Stream Video version.
   public static let version: String = "1.33.0-SNAPSHOT"
   /// The WebRTC version.
-  public static let webRTCVersion: String = "125.6422.070"
+  public static let webRTCVersion: String = "137.0.41"
 }

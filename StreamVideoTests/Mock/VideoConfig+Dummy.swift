@@ -14,7 +14,8 @@ extension VideoConfig {
     }
 }
 
-final class MockAudioProcessingModule: NSObject, AudioProcessingModule {
+final class MockAudioProcessingModule: NSObject, AudioProcessingModule, @unchecked Sendable {
+    var config: RTCAudioProcessingConfig = .init()
     static let shared = MockAudioProcessingModule()
     override private init() {}
     var activeAudioFilter: AudioFilter? { nil }
