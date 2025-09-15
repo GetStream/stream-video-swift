@@ -267,7 +267,7 @@ extension Stream_Video_Sfu_Models_ParticipantSource: CaseIterable {
 
 #endif  // swift(>=4.2)
 
-enum Stream_Video_Sfu_Models_AudioBitrateType: SwiftProtobuf.Enum {
+enum Stream_Video_Sfu_Models_AudioBitrateProfile: SwiftProtobuf.Enum {
   typealias RawValue = Int
   case voiceStandardUnspecified // = 0
   case voiceHighQuality // = 1
@@ -300,9 +300,9 @@ enum Stream_Video_Sfu_Models_AudioBitrateType: SwiftProtobuf.Enum {
 
 #if swift(>=4.2)
 
-extension Stream_Video_Sfu_Models_AudioBitrateType: CaseIterable {
+extension Stream_Video_Sfu_Models_AudioBitrateProfile: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static let allCases: [Stream_Video_Sfu_Models_AudioBitrateType] = [
+  static let allCases: [Stream_Video_Sfu_Models_AudioBitrateProfile] = [
     .voiceStandardUnspecified,
     .voiceHighQuality,
     .musicHighQuality,
@@ -1174,6 +1174,9 @@ struct Stream_Video_Sfu_Models_PublishOption {
   /// For SVC codecs, prefer using the L1T3 (single spatial, 3 temporal layers) mode instead.
   var useSingleLayer: Bool = false
 
+  /// Audio bitrate profiles for different audio quality profiles.
+  var audioBitrateProfiles: [Stream_Video_Sfu_Models_AudioBitrate] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1218,6 +1221,20 @@ struct Stream_Video_Sfu_Models_ICETrickle {
   init() {}
 }
 
+struct Stream_Video_Sfu_Models_AudioBitrate {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var profile: Stream_Video_Sfu_Models_AudioBitrateProfile = .voiceStandardUnspecified
+
+  var bitrate: Int32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Stream_Video_Sfu_Models_TrackInfo {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -1250,8 +1267,6 @@ struct Stream_Video_Sfu_Models_TrackInfo {
   mutating func clearCodec() {self._codec = nil}
 
   var publishOptionID: Int32 = 0
-
-  var audioBitrateType: Stream_Video_Sfu_Models_AudioBitrateType = .voiceStandardUnspecified
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1586,7 +1601,7 @@ extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantSource: @unchecked Sendable {}
-extension Stream_Video_Sfu_Models_AudioBitrateType: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AudioBitrateProfile: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ErrorCode: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_SdkType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
@@ -1607,6 +1622,7 @@ extension Stream_Video_Sfu_Models_SubscribeOption: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_PublishOption: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Codec: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ICETrickle: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AudioBitrate: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackInfo: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Error: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ClientDetails: @unchecked Sendable {}
@@ -1673,11 +1689,11 @@ extension Stream_Video_Sfu_Models_ParticipantSource: SwiftProtobuf._ProtoNamePro
   ]
 }
 
-extension Stream_Video_Sfu_Models_AudioBitrateType: SwiftProtobuf._ProtoNameProviding {
+extension Stream_Video_Sfu_Models_AudioBitrateProfile: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "AUDIO_BITRATE_TYPE_VOICE_STANDARD_UNSPECIFIED"),
-    1: .same(proto: "AUDIO_BITRATE_TYPE_VOICE_HIGH_QUALITY"),
-    2: .same(proto: "AUDIO_BITRATE_TYPE_MUSIC_HIGH_QUALITY"),
+    0: .same(proto: "AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED"),
+    1: .same(proto: "AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY"),
+    2: .same(proto: "AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY"),
   ]
 }
 
@@ -2220,6 +2236,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     7: .standard(proto: "video_dimension"),
     8: .same(proto: "id"),
     9: .standard(proto: "use_single_layer"),
+    10: .standard(proto: "audio_bitrate_profiles"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2237,6 +2254,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
       case 7: try { try decoder.decodeSingularMessageField(value: &self._videoDimension) }()
       case 8: try { try decoder.decodeSingularInt32Field(value: &self.id) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.useSingleLayer) }()
+      case 10: try { try decoder.decodeRepeatedMessageField(value: &self.audioBitrateProfiles) }()
       default: break
       }
     }
@@ -2274,6 +2292,9 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if self.useSingleLayer != false {
       try visitor.visitSingularBoolField(value: self.useSingleLayer, fieldNumber: 9)
     }
+    if !self.audioBitrateProfiles.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.audioBitrateProfiles, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2287,6 +2308,7 @@ extension Stream_Video_Sfu_Models_PublishOption: SwiftProtobuf.Message, SwiftPro
     if lhs._videoDimension != rhs._videoDimension {return false}
     if lhs.id != rhs.id {return false}
     if lhs.useSingleLayer != rhs.useSingleLayer {return false}
+    if lhs.audioBitrateProfiles != rhs.audioBitrateProfiles {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2392,6 +2414,44 @@ extension Stream_Video_Sfu_Models_ICETrickle: SwiftProtobuf.Message, SwiftProtob
   }
 }
 
+extension Stream_Video_Sfu_Models_AudioBitrate: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".AudioBitrate"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "profile"),
+    2: .same(proto: "bitrate"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.profile) }()
+      case 2: try { try decoder.decodeSingularInt32Field(value: &self.bitrate) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.profile != .voiceStandardUnspecified {
+      try visitor.visitSingularEnumField(value: self.profile, fieldNumber: 1)
+    }
+    if self.bitrate != 0 {
+      try visitor.visitSingularInt32Field(value: self.bitrate, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_AudioBitrate, rhs: Stream_Video_Sfu_Models_AudioBitrate) -> Bool {
+    if lhs.profile != rhs.profile {return false}
+    if lhs.bitrate != rhs.bitrate {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TrackInfo"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -2405,7 +2465,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     10: .same(proto: "muted"),
     11: .same(proto: "codec"),
     12: .standard(proto: "publish_option_id"),
-    13: .standard(proto: "audio_bitrate_type"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2424,7 +2483,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 10: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
       case 11: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
       case 12: try { try decoder.decodeSingularInt32Field(value: &self.publishOptionID) }()
-      case 13: try { try decoder.decodeSingularEnumField(value: &self.audioBitrateType) }()
       default: break
       }
     }
@@ -2465,9 +2523,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if self.publishOptionID != 0 {
       try visitor.visitSingularInt32Field(value: self.publishOptionID, fieldNumber: 12)
     }
-    if self.audioBitrateType != .voiceStandardUnspecified {
-      try visitor.visitSingularEnumField(value: self.audioBitrateType, fieldNumber: 13)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2482,7 +2537,6 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.muted != rhs.muted {return false}
     if lhs._codec != rhs._codec {return false}
     if lhs.publishOptionID != rhs.publishOptionID {return false}
-    if lhs.audioBitrateType != rhs.audioBitrateType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
