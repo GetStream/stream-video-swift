@@ -88,7 +88,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_YEETD: true
-        SKIP_MINT_BOOTSTRAP: true
+        SKIP_SWIFT_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_swiftui }}"
       timeout-minutes: 120
@@ -114,7 +114,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_YEETD: true
-        SKIP_MINT_BOOTSTRAP: true
+        SKIP_SWIFT_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:"${{ github.event.inputs.record_snapshots_uikit }}"
       timeout-minutes: 120
@@ -263,7 +263,7 @@ jobs:
         INSTALL_ALLURE: true
         INSTALL_VIDEO_BUDDY: true
         INSTALL_YEETD: true
-        SKIP_MINT_BOOTSTRAP: true
+        SKIP_SWIFT_BOOTSTRAP: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
       timeout-minutes: 60
