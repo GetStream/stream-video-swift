@@ -21,4 +21,4 @@ rm -rf ./Sources/StreamVideo/OpenApi/generated/Models/*
 )
 
 # format the generated code
-mint run swiftformat Sources/StreamVideo/OpenApi/generated
+swiftformat Sources/StreamVideo/OpenApi/generated
