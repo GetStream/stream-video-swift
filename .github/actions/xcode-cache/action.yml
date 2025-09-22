@@ -3,12 +3,16 @@ description: 'Cache Xcode dependencies'
 runs:
   using: "composite"
   steps:
-    - run: echo "IMAGE=${ImageOS}-${ImageVersion}" >> $GITHUB_ENV
-      shell: bash
-    - name: Cache SPM
-      uses: actions/cache@v4
-      id: spm-cache
+    - name: Cache Xcode
+      uses: irgaly/xcode-cache@v1
       with:
-        path: spm_cache
-        key: ${{ env.IMAGE }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: ${{ env.IMAGE }}-spm-
+        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ hashFiles('**/Package.resolved') }}-${{ github.ref_name }}
+        restore-keys: |
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ hashFiles('**/Package.resolved') }}
+          xcode-cache-deriveddata-${{ github.workflow }}-${{ github.ref_name }}-
+          xcode-cache-deriveddata-${{ github.workflow }}-
+        deriveddata-directory: ${{ github.workspace }}/derived_data
+        swiftpm-cache-key: xcode-cache-spm-${{ hashFiles('**/Package.resolved') }}
+        swiftpm-cache-restore-keys: xcode-cache-spm-
+        sourcepackages-directory: ${{ github.workspace }}/spm_cache
+        verbose: true
