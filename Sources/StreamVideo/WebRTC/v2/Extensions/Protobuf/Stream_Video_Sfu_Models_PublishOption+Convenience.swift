@@ -33,8 +33,8 @@ extension Stream_Video_Sfu_Models_PublishOption {
     /// `Stream_Video_Sfu_Models_PublishOption`.
     ///
     /// - Parameter source: The `AudioPublishOptions` to convert.
-    init(_ source: PublishOptions.AudioPublishOptions) {
-        trackType = .audio
+    init(_ source: PublishOptions.AudioPublishOptions, trackType: Stream_Video_Sfu_Models_TrackType) {
+        self.trackType = trackType
         codec = .init()
         codec.name = source.codec.rawValue
         bitrate = Int32(source.bitrate)

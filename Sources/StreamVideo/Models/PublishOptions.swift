@@ -230,6 +230,8 @@ struct PublishOptions: Sendable, Hashable {
     let video: [VideoPublishOptions]
     /// Configured options for publishing screen-sharing tracks.
     let screenShare: [VideoPublishOptions]
+    /// Configured options for publishing screen-sharing tracks.
+    let screenShareAudio: [AudioPublishOptions]
 
     /// Initializes the publish options from a list of server models.
     ///
@@ -238,6 +240,7 @@ struct PublishOptions: Sendable, Hashable {
         var audio = [AudioPublishOptions]()
         var video = [VideoPublishOptions]()
         var screenShare = [VideoPublishOptions]()
+        var screenShareAudio = [AudioPublishOptions]()
 
         for publishOption in publishOptions {
             switch publishOption.trackType {
@@ -247,6 +250,8 @@ struct PublishOptions: Sendable, Hashable {
                 video.append(.init(publishOption))
             case .screenShare:
                 screenShare.append(.init(publishOption))
+            case .screenShareAudio:
+                screenShareAudio.append(.init(publishOption))
             default:
                 break
             }
@@ -256,6 +261,7 @@ struct PublishOptions: Sendable, Hashable {
         self.audio = audio
         self.video = video
         self.screenShare = screenShare
+        self.screenShareAudio = screenShareAudio
     }
 
     /// Initializes the publish options with audio, video, and screen-sharing configurations.
@@ -267,11 +273,13 @@ struct PublishOptions: Sendable, Hashable {
     init(
         audio: [AudioPublishOptions] = [],
         video: [VideoPublishOptions] = [],
-        screenShare: [VideoPublishOptions] = []
+        screenShare: [VideoPublishOptions] = [],
+        screenShareAudio: [AudioPublishOptions] = []
     ) {
         var source: [Stream_Video_Sfu_Models_PublishOption] = []
         source.append(
-            contentsOf: audio.map(Stream_Video_Sfu_Models_PublishOption.init)
+            contentsOf: audio
+                .map { Stream_Video_Sfu_Models_PublishOption($0, trackType: .audio) }
         )
         source.append(
             contentsOf: video
@@ -281,10 +289,15 @@ struct PublishOptions: Sendable, Hashable {
             contentsOf: screenShare
                 .map { Stream_Video_Sfu_Models_PublishOption($0, trackType: .screenShare) }
         )
+        source.append(
+            contentsOf: screenShareAudio
+                .map { Stream_Video_Sfu_Models_PublishOption($0, trackType: .screenShareAudio) }
+        )
 
         self.source = source
         self.audio = audio
         self.video = video
         self.screenShare = screenShare
+        self.screenShareAudio = screenShareAudio
     }
 }

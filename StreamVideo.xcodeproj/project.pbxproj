@@ -503,6 +503,8 @@
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */; };
 		40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */; };
+		40A5F82E2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F82D2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift */; };
+		40A5F8302E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F82F2E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift */; };
 		40A7C5B52E099B4600EEDF9C /* ParticipantEventResetAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */; };
 		40A7C5B82E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */; };
 		40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */; };
@@ -2188,6 +2190,8 @@
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
 		40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIInterfaceOrientation+CGOrientation.swift"; sourceTree = "<group>"; };
 		40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIImage_Resize_Tests.swift; sourceTree = "<group>"; };
+		40A5F82D2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenShareAudioMediaAdapter.swift; sourceTree = "<group>"; };
+		40A5F82F2E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalScreenShareAudioMediaAdapter.swift; sourceTree = "<group>"; };
 		40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter.swift; sourceTree = "<group>"; };
 		40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter_Tests.swift; sourceTree = "<group>"; };
 		40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapter.swift; sourceTree = "<group>"; };
@@ -5269,6 +5273,7 @@
 				40BBC4B02C6276A7002AEF92 /* LocalAudioMediaAdapter.swift */,
 				40BBC4B42C627761002AEF92 /* LocalVideoMediaAdapter.swift */,
 				40BBC4BD2C6280E4002AEF92 /* LocalScreenShareMediaAdapter.swift */,
+				40A5F82F2E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift */,
 			);
 			path = LocalMediaAdapters;
 			sourceTree = "<group>";
@@ -5282,6 +5287,7 @@
 				40BBC4AB2C627304002AEF92 /* AudioMediaAdapter.swift */,
 				40BBC4B62C627E59002AEF92 /* VideoMediaAdapter.swift */,
 				40BBC4BB2C6280B4002AEF92 /* ScreenShareMediaAdapter.swift */,
+				40A5F82D2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift */,
 				40429D5E2C779B3D00AC7FFF /* ScreenShareSession.swift */,
 				408CF9C72CAEC61B00F56833 /* VideoCaptureSession.swift */,
 			);
@@ -8405,6 +8411,7 @@
 				4075F0782DCE3FFC0062A4CC /* WebRTCTrackStorage.swift in Sources */,
 				84A7E1802883629700526C98 /* WebSocketClient.swift in Sources */,
 				40BBC4B12C6276A7002AEF92 /* LocalAudioMediaAdapter.swift in Sources */,
+				40A5F8302E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift in Sources */,
 				406B3C3C2C9197FF00FC93A1 /* WebRTCConfiguration.swift in Sources */,
 				40064BEF2E5CA3C5007CDB33 /* PushNotificationsPermissionProvider.swift in Sources */,
 				84D2E37829DC856D001D2118 /* CallMemberUpdatedPermissionEvent.swift in Sources */,
@@ -8672,6 +8679,7 @@
 				40E18AAD2CD51E5900A65C9F /* RecursiveQueue.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,
 				40AD64B82DC16AB10077AE15 /* WebRTCTracesAdapter.swift in Sources */,
+				40A5F82E2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift in Sources */,
 				40BBC4D42C639371002AEF92 /* WebRTCCoordinator+Connected.swift in Sources */,
 				40D36AC02DDDB88200972D75 /* WebRTCStatsAdapting.swift in Sources */,
 				4019A25E2E40E45D00CE70A4 /* RTCAudioSessionReducer.swift in Sources */,

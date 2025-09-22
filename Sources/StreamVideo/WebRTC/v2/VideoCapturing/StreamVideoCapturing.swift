@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import StreamWebRTC
 
 protocol StreamVideoCapturing: AnyObject, Sendable {
     func supportsBackgrounding() async -> Bool
@@ -43,4 +44,8 @@ protocol StreamVideoCapturing: AnyObject, Sendable {
     func removeVideoOutput(
         _ videoOutput: AVCaptureVideoDataOutput
     ) async throws
+
+    func startAudioCapture(capturer: RTCPCMAudioCapturer) async throws
+
+    func stopAudioCapture() async throws
 }

@@ -44,6 +44,8 @@ extension TrackType {
     public static let video: Self = "video"
     /// Represents a screen sharing track.
     public static let screenshare: Self = "screenshare"
+    /// Represents a screen sharing-audio track.
+    public static let screenshareAudio: Self = "screenshare-audio"
     /// Represents an unknown track type.
     static let unknown: Self = "unknown"
 }

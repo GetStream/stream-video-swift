@@ -20,16 +20,14 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         let videoCapturerDelegate = StreamVideoCaptureHandler(source: videoSource)
 
         #if targetEnvironment(simulator)
-        let videoCapturer: RTCVideoCapturer = {
-            if let videoURL = InjectedValues[\.simulatorStreamFile] {
-                return SimulatorScreenCapturer(
-                    delegate: videoCapturerDelegate,
-                    videoURL: videoURL
-                )
-            } else {
-                return RTCFileVideoCapturer(delegate: videoSource)
-            }
-        }()
+        let videoCapturer: RTCVideoCapturer = if let videoURL = InjectedValues[\.simulatorStreamFile] {
+            SimulatorScreenCapturer(
+                delegate: videoCapturerDelegate,
+                videoURL: videoURL
+            )
+        } else {
+            RTCFileVideoCapturer(delegate: videoSource)
+        }
         return .init(
             videoSource: videoSource,
             videoCapturer: videoCapturer,
@@ -88,88 +86,100 @@ final class StreamVideoCapturer: StreamVideoCapturing {
     // MARK: - Nested Types
 
     enum Action: @unchecked Sendable, CustomStringConvertible {
-    case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
-         case startCapture(
-             position: AVCaptureDevice.Position,
-             dimensions: CGSize,
-             frameRate: Int,
-             videoSource: RTCVideoSource,
-             videoCapturer: RTCVideoCapturer,
-             videoCapturerDelegate: RTCVideoCapturerDelegate
-         )
-         case stopCapture(videoCapturer: RTCVideoCapturer)
-         case setCameraPosition(
-             position: AVCaptureDevice.Position,
-             videoSource: RTCVideoSource,
-             videoCapturer: RTCVideoCapturer,
-             videoCapturerDelegate: RTCVideoCapturerDelegate
-         )
-         case updateCaptureQuality(
-             dimensions: CGSize,
-             device: AVCaptureDevice,
-             videoSource: RTCVideoSource,
-             videoCapturer: RTCVideoCapturer,
-             videoCapturerDelegate: RTCVideoCapturerDelegate
-         )
-         case focus(
-             point: CGPoint,
-             videoCaptureSession: AVCaptureSession
-         )
-         case addCapturePhotoOutput(
-             capturePhotoOutput: AVCapturePhotoOutput,
-             videoCaptureSession: AVCaptureSession
-         )
-         case removeCapturePhotoOutput(
-             capturePhotoOutput: AVCapturePhotoOutput,
-             videoCaptureSession: AVCaptureSession
-         )
-         case addVideoOutput(
-             videoOutput: AVCaptureVideoDataOutput,
-             videoCaptureSession: AVCaptureSession
-         )
-         case removeVideoOutput(
-             videoOutput: AVCaptureVideoDataOutput,
-             videoCaptureSession: AVCaptureSession
-         )
-         case zoom(
-             factor: CGFloat,
-             videoCaptureSession: AVCaptureSession
-         )
+        case checkBackgroundCameraAccess(_ videoCaptureSession: AVCaptureSession)
+        case startCapture(
+            position: AVCaptureDevice.Position,
+            dimensions: CGSize,
+            frameRate: Int,
+            videoSource: RTCVideoSource,
+            videoCapturer: RTCVideoCapturer,
+            videoCapturerDelegate: RTCVideoCapturerDelegate
+        )
+        case stopCapture(videoCapturer: RTCVideoCapturer)
+        case setCameraPosition(
+            position: AVCaptureDevice.Position,
+            videoSource: RTCVideoSource,
+            videoCapturer: RTCVideoCapturer,
+            videoCapturerDelegate: RTCVideoCapturerDelegate
+        )
+        case updateCaptureQuality(
+            dimensions: CGSize,
+            device: AVCaptureDevice,
+            videoSource: RTCVideoSource,
+            videoCapturer: RTCVideoCapturer,
+            videoCapturerDelegate: RTCVideoCapturerDelegate
+        )
+        case focus(
+            point: CGPoint,
+            videoCaptureSession: AVCaptureSession
+        )
+        case addCapturePhotoOutput(
+            capturePhotoOutput: AVCapturePhotoOutput,
+            videoCaptureSession: AVCaptureSession
+        )
+        case removeCapturePhotoOutput(
+            capturePhotoOutput: AVCapturePhotoOutput,
+            videoCaptureSession: AVCaptureSession
+        )
+        case addVideoOutput(
+            videoOutput: AVCaptureVideoDataOutput,
+            videoCaptureSession: AVCaptureSession
+        )
+        case removeVideoOutput(
+            videoOutput: AVCaptureVideoDataOutput,
+            videoCaptureSession: AVCaptureSession
+        )
+        case zoom(
+            factor: CGFloat,
+            videoCaptureSession: AVCaptureSession
+        )
 
-         var description: String {
+        case startAudioCapture(
+            capturer: RTCPCMAudioCapturer
+        )
+
+        case stopAudioCapture
+
+        var description: String {
             switch self {
             case let .checkBackgroundCameraAccess(videoCaptureSession):
-                return ".checkBackgroundCameraAccess(videoCaptureSession:\(customString(for: videoCaptureSession)))"
+                ".checkBackgroundCameraAccess(videoCaptureSession:\(customString(for: videoCaptureSession)))"
 
             case let .startCapture(position, dimensions, frameRate, videoSource, videoCapturer, videoCapturerDelegate):
-                return ".startCapture(position:\(position), dimensions:\(dimensions), frameRate:\(frameRate), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
+                ".startCapture(position:\(position), dimensions:\(dimensions), frameRate:\(frameRate), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
 
             case let .stopCapture(videoCapturer):
-                return ".stopCapture(videoCapturer:\(customString(for: videoCapturer)))"
+                ".stopCapture(videoCapturer:\(customString(for: videoCapturer)))"
 
             case let .setCameraPosition(position, videoSource, videoCapturer, videoCapturerDelegate):
-                return ".startCapture(position:\(position), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
+                ".startCapture(position:\(position), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
 
             case let .updateCaptureQuality(dimensions, device, videoSource, videoCapturer, videoCapturerDelegate):
-                return ".startCapture(dimensions:\(dimensions), device:\(customString(for: device)), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
+                ".startCapture(dimensions:\(dimensions), device:\(customString(for: device)), videoSource:\(customString(for: videoSource)), videoCapturer:\(customString(for: videoCapturer)), videoCapturerDelegate:\(customString(for: videoCapturerDelegate)))"
 
             case let .focus(point, videoCaptureSession):
-                return ".focus(point:\(point), videoCaptureSession:\(customString(for: videoCaptureSession)))"
+                ".focus(point:\(point), videoCaptureSession:\(customString(for: videoCaptureSession)))"
 
             case let .addCapturePhotoOutput(capturePhotoOutput, videoCaptureSession):
-                return ".addCapturePhotoOutput(capturePhotoOutput:\(capturePhotoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
+                ".addCapturePhotoOutput(capturePhotoOutput:\(capturePhotoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
 
             case let .removeCapturePhotoOutput(capturePhotoOutput, videoCaptureSession):
-                return ".removeCapturePhotoOutput(capturePhotoOutput:\(capturePhotoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
+                ".removeCapturePhotoOutput(capturePhotoOutput:\(capturePhotoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
 
             case let .addVideoOutput(videoOutput, videoCaptureSession):
-                return ".addVideoOutput(videoOutput:\(videoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
+                ".addVideoOutput(videoOutput:\(videoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
 
             case let .removeVideoOutput(videoOutput, videoCaptureSession):
-                return ".removeVideoOutput(videoOutput:\(videoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
+                ".removeVideoOutput(videoOutput:\(videoOutput), videoCaptureSession:\(customString(for: videoCaptureSession)))"
 
             case let .zoom(factor, videoCaptureSession):
-                return ".zoom(factor:\(factor), videoCaptureSession:\(customString(for: videoCaptureSession)))"
+                ".zoom(factor:\(factor), videoCaptureSession:\(customString(for: videoCaptureSession)))"
+
+            case let .startAudioCapture(capturer):
+                ".startAudioCapture(capturer:\(customString(for: capturer))"
+
+            case .stopAudioCapture:
+                ".stopAudioCapture"
             }
         }
     }
@@ -214,9 +224,9 @@ final class StreamVideoCapturer: StreamVideoCapturing {
 
     func supportsBackgrounding() -> Bool {
         if #available(iOS 16.0, *) {
-            return videoCaptureSession?.isMultitaskingCameraAccessSupported ?? false
+            videoCaptureSession?.isMultitaskingCameraAccessSupported ?? false
         } else {
-            return false
+            false
         }
     }
 
@@ -357,6 +367,18 @@ final class StreamVideoCapturer: StreamVideoCapturing {
         )
     }
 
+    // MARK: - ScreenSharing Audio
+
+    func startAudioCapture(
+        capturer: RTCPCMAudioCapturer
+    ) async throws {
+        try await enqueueOperation(for: .startAudioCapture(capturer: capturer))
+    }
+
+    func stopAudioCapture() async throws {
+        try await enqueueOperation(for: .stopAudioCapture)
+    }
+
     // MARK: - Private
 
     private func enqueueOperation(
@@ -366,7 +388,7 @@ final class StreamVideoCapturer: StreamVideoCapturing {
             guard let self else {
                 return
             }
-            let actionHandlers = self.actionHandlers
+            let actionHandlers = actionHandlers
             for actionHandler in actionHandlers {
                 try await actionHandler.handle(action)
             }

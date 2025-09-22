@@ -236,6 +236,21 @@ final class WebRTCCoordinator: @unchecked Sendable {
         try await stateAdapter.publisher?.stopScreenSharing()
     }
 
+    // MARK: - Screensharing Audio
+
+    /// Starts screensharing audio of the specified type.
+    func startScreensharingAudio(
+    ) async throws {
+        try await stateAdapter
+            .publisher?
+            .beginScreenSharingAudio(with: Array(stateAdapter.ownCapabilities))
+    }
+
+    /// Stops screensharing audio.
+    func stopScreensharingAudio() async throws {
+        try await stateAdapter.publisher?.stopScreenSharingAudio()
+    }
+
     /// Changes the pin state of a participant.
     ///
     /// - Parameters:

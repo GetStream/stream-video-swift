@@ -17,7 +17,10 @@ final class MediaAdapter {
     
     /// The adapter for managing screen share media.
     private let screenShareMediaAdapter: ScreenShareMediaAdapter
-    
+
+    /// The adapter for managing screen share media.
+    private let screenShareAudioMediaAdapter: ScreenShareAudioMediaAdapter
+
     /// A subject for publishing track events.
     private let subject: PassthroughSubject<TrackEvent, Never>
     
@@ -81,6 +84,13 @@ final class MediaAdapter {
                     peerConnectionFactory: peerConnectionFactory,
                     localMediaManager: LocalNoOpMediaAdapter(subject: subject),
                     subject: subject
+                ),
+                screenShareAudioMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    localMediaManager: LocalNoOpMediaAdapter(subject: subject),
+                    subject: subject
                 )
             )
             
@@ -114,6 +124,15 @@ final class MediaAdapter {
                     publishOptions: publishOptions.screenShare,
                     subject: subject,
                     screenShareSessionProvider: screenShareSessionProvider
+                ),
+                screenShareAudioMediaAdapter: .init(
+                    sessionID: sessionID,
+                    peerConnection: peerConnection,
+                    peerConnectionFactory: peerConnectionFactory,
+                    sfuAdapter: sfuAdapter,
+                    publishOptions: publishOptions.screenShareAudio,
+                    subject: subject,
+                    screenShareSessionProvider: screenShareSessionProvider
                 )
             )
         }
@@ -123,12 +142,14 @@ final class MediaAdapter {
         subject: PassthroughSubject<TrackEvent, Never>,
         audioMediaAdapter: AudioMediaAdapter,
         videoMediaAdapter: VideoMediaAdapter,
-        screenShareMediaAdapter: ScreenShareMediaAdapter
+        screenShareMediaAdapter: ScreenShareMediaAdapter,
+        screenShareAudioMediaAdapter: ScreenShareAudioMediaAdapter
     ) {
         self.subject = subject
         self.audioMediaAdapter = audioMediaAdapter
         self.videoMediaAdapter = videoMediaAdapter
         self.screenShareMediaAdapter = screenShareMediaAdapter
+        self.screenShareAudioMediaAdapter = screenShareAudioMediaAdapter
     }
     
     /// Sets up the media adapters with the given settings and capabilities.
@@ -140,7 +161,12 @@ final class MediaAdapter {
         with settings: CallSettings,
         ownCapabilities: [OwnCapability]
     ) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
+        try await withThrowingTaskGroup(of: Void.self) { [
+            audioMediaAdapter,
+            videoMediaAdapter,
+            screenShareMediaAdapter,
+            screenShareAudioMediaAdapter
+        ] group in
             group.addTask {
                 try await audioMediaAdapter.setUp(
                     with: settings,
@@ -161,6 +187,13 @@ final class MediaAdapter {
                     ownCapabilities: ownCapabilities
                 )
             }
+
+            group.addTask {
+                try await screenShareAudioMediaAdapter.setUp(
+                    with: settings,
+                    ownCapabilities: ownCapabilities
+                )
+            }
             
             while try await group.next() != nil {}
         }
@@ -172,7 +205,12 @@ final class MediaAdapter {
     func didUpdateCallSettings(
         _ settings: CallSettings
     ) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
+        try await withThrowingTaskGroup(of: Void.self) { [
+            audioMediaAdapter,
+            videoMediaAdapter,
+            screenShareMediaAdapter,
+            screenShareAudioMediaAdapter
+        ] group in
             group.addTask {
                 try await audioMediaAdapter.didUpdateCallSettings(settings)
             }
@@ -183,6 +221,10 @@ final class MediaAdapter {
             
             group.addTask {
                 try await screenShareMediaAdapter.didUpdateCallSettings(settings)
+            }
+            
+            group.addTask {
+                try await screenShareAudioMediaAdapter.didUpdateCallSettings(settings)
             }
             
             while try await group.next() != nil {}
@@ -201,13 +243,15 @@ final class MediaAdapter {
     ) -> [Stream_Video_Sfu_Models_TrackInfo] {
         switch type {
         case .audio:
-            return audioMediaAdapter.trackInfo(for: collectionType)
+            audioMediaAdapter.trackInfo(for: collectionType)
         case .video:
-            return videoMediaAdapter.trackInfo(for: collectionType)
+            videoMediaAdapter.trackInfo(for: collectionType)
         case .screenshare:
-            return screenShareMediaAdapter.trackInfo(for: collectionType)
+            screenShareMediaAdapter.trackInfo(for: collectionType)
+        case .screenshareAudio:
+            screenShareAudioMediaAdapter.trackInfo(for: collectionType)
         default:
-            return []
+            []
         }
     }
     
@@ -218,7 +262,7 @@ final class MediaAdapter {
         _ publishOptions: PublishOptions
     ) async throws {
         try await withThrowingTaskGroup(of: Void.self) {
-            [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
+            [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter, screenShareAudioMediaAdapter] group in
             group.addTask {
                 try await audioMediaAdapter.didUpdatePublishOptions(publishOptions)
             }
@@ -231,6 +275,10 @@ final class MediaAdapter {
                 try await screenShareMediaAdapter.didUpdatePublishOptions(publishOptions)
             }
             
+            group.addTask {
+                try await screenShareAudioMediaAdapter.didUpdatePublishOptions(publishOptions)
+            }
+            
             while try await group.next() != nil {}
         }
     }
@@ -241,7 +289,12 @@ final class MediaAdapter {
     func changePublishQuality(
         with event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) async {
-        await withTaskGroup(of: Void.self) { [audioMediaAdapter, videoMediaAdapter, screenShareMediaAdapter] group in
+        await withTaskGroup(of: Void.self) { [
+            audioMediaAdapter,
+            videoMediaAdapter,
+            screenShareMediaAdapter,
+            screenShareAudioMediaAdapter
+        ] group in
             group.addTask {
                 audioMediaAdapter.changePublishQuality(
                     with: event.audioSenders.filter { $0.trackType == .audio }
@@ -257,6 +310,12 @@ final class MediaAdapter {
             group.addTask {
                 screenShareMediaAdapter.changePublishQuality(
                     with: event.videoSenders.filter { $0.trackType == .screenShare }
+                )
+            }
+
+            group.addTask {
+                screenShareAudioMediaAdapter.changePublishQuality(
+                    with: event.audioSenders.filter { $0.trackType == .screenShareAudio }
                 )
             }
             
@@ -352,5 +411,19 @@ final class MediaAdapter {
     /// Stops the current screen sharing session.
     func stopScreenSharing() async throws {
         try await screenShareMediaAdapter.stopScreenSharing()
+    }
+
+    // MARK: - ScreenSharing audio
+
+    func beginScreenSharingAudio(
+        with ownCapabilities: [OwnCapability]
+    ) async throws {
+        try await screenShareAudioMediaAdapter.begin(
+            with: ownCapabilities
+        )
+    }
+
+    func stopScreenSharingAudio() async throws {
+        try await screenShareAudioMediaAdapter.stop()
     }
 }

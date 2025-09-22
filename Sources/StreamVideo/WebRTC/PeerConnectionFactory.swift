@@ -56,9 +56,9 @@ final class PeerConnectionFactory: @unchecked Sendable {
         if let factory = PeerConnectionFactoryStorage.shared.factory(
             for: audioProcessingModule
         ) {
-            return factory
+            factory
         } else {
-            return .init(audioProcessingModule)
+            .init(audioProcessingModule)
         }
     }
     
@@ -109,12 +109,13 @@ final class PeerConnectionFactory: @unchecked Sendable {
     /// Creates an audio source with optional constraints.
     /// - Parameter constraints: Optional RTCMediaConstraints for the audio source.
     /// - Returns: An RTCAudioSource instance.
-    func makeAudioSource(_ constraints: RTCMediaConstraints?) -> RTCAudioSource {
-        let result = factory.audioSource(with: constraints)
+    func makeAudioSource(
+        _ constraints: RTCMediaConstraints?,
+        standalone: Bool = false
+    ) -> RTCAudioSource {
+        let result = factory.audioSource(with: constraints, standalone: standalone)
         log.debug(
-            """
-            AudioSource was created \(Unmanaged.passUnretained(result).toOpaque())
-            """,
+            "AudioSource was created standalone:\(standalone) \(Unmanaged.passUnretained(result).toOpaque())",
             subsystems: .webRTC
         )
         return result

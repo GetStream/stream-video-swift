@@ -16,6 +16,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     private struct Session {
         var videoCapturer: RTCVideoCapturer
         var videoCapturerDelegate: RTCVideoCapturerDelegate
+        var audioCapturer: RTCPCMAudioCapturer?
     }
 
     init(recorder: RPScreenRecorder = .shared()) {
@@ -59,8 +60,16 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
                 videoCapturer: videoCapturer,
                 videoCapturerDelegate: videoCapturerDelegate
             )
+
         case .stopCapture:
             try await stop()
+
+        case let .startAudioCapture(capturer):
+            activeSession?.audioCapturer = capturer
+
+        case .stopAudioCapture:
+            activeSession?.audioCapturer = nil
+
         default:
             break
         }
@@ -116,7 +125,7 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         error: Error?
     ) {
         guard
-            let activeSession = self.activeSession
+            let activeSession
         else {
             log.warning(
                 "\(type(of: self)) received sample buffer but no active session was found.",
@@ -125,16 +134,31 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
             return
         }
 
-        guard
-            sampleBufferType == .video
-        else {
-            log.warning(
-                "\(type(of: self)) only video sample buffers are supported. Received \(sampleBufferType).",
-                subsystems: .videoCapturer
+        switch sampleBufferType {
+        case .video:
+            processVideoBuffer(
+                activeSession: activeSession,
+                sampleBuffer: sampleBuffer
             )
-            return
-        }
 
+        case .audioApp:
+            processAudioAppBuffer(
+                activeSession: activeSession,
+                sampleBuffer: sampleBuffer
+            )
+
+        case .audioMic:
+            break
+
+        @unknown default:
+            break
+        }
+    }
+
+    private func processVideoBuffer(
+        activeSession: Session,
+        sampleBuffer: CMSampleBuffer
+    ) {
         guard
             CMSampleBufferGetNumSamples(sampleBuffer) == 1,
             CMSampleBufferIsValid(sampleBuffer),
@@ -173,6 +197,13 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         )
     }
 
+    private func processAudioAppBuffer(
+        activeSession: Session,
+        sampleBuffer: CMSampleBuffer
+    ) {
+        activeSession.audioCapturer?.capture(sampleBuffer)
+    }
+
     private func stop() async throws {
         guard
             isRecording == true
@@ -194,7 +225,7 @@ extension RPScreenRecorder {
                 continuation.resume(throwing: ClientError())
                 return
             }
-            self.stopCapture { error in
+            stopCapture { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {

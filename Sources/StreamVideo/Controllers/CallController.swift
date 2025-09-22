@@ -201,12 +201,24 @@ class CallController: @unchecked Sendable {
         }
     }
 
+    // MARK: - ScreenSharing
+
     func startScreensharing(type: ScreensharingType) async throws {
         try await webRTCCoordinator.startScreensharing(type: type)
     }
 
     func stopScreensharing() async throws {
         try await webRTCCoordinator.stopScreensharing()
+    }
+
+    // MARK: - ScreenSharing Audio
+
+    func startScreensharingAudio() async throws {
+        try await webRTCCoordinator.startScreensharingAudio()
+    }
+
+    func stopScreensharingAudio() async throws {
+        try await webRTCCoordinator.stopScreensharingAudio()
     }
 
     /// Starts noise cancellation asynchronously.
@@ -599,7 +611,7 @@ class CallController: @unchecked Sendable {
         Task(disposableBag: disposableBag) { [weak self] in
             guard let self else { return }
             do {
-                self.cachedLocation = try await getLocation()
+                cachedLocation = try await getLocation()
             } catch {
                 log.error(error)
             }
@@ -699,10 +711,9 @@ class CallController: @unchecked Sendable {
                 .log(.debug, subsystems: .webRTC) { _ in "Current user was blocked. Will leave the call now." }
                 .sinkTask(storeIn: disposableBag) { [weak self] _ in
                     guard let self else { return }
-                    self
-                        .webRTCCoordinator
+                    webRTCCoordinator
                         .stateMachine
-                        .transition(.blocked(self.webRTCCoordinator.stateMachine.currentStage.context))
+                        .transition(.blocked(webRTCCoordinator.stateMachine.currentStage.context))
                 }
                 .store(in: disposableBag, key: DisposableKey.currentUserBlocked.rawValue)
         }

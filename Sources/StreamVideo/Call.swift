@@ -34,9 +34,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             .compactMap {
                 switch $0 {
                 case let .coordinatorEvent(event):
-                    return event
+                    event
                 default:
-                    return nil
+                    nil
                 }
             }
             .eraseToAnyPublisher()
@@ -55,8 +55,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     )
 
     private let disposableBag = DisposableBag()
-    internal let callController: CallController
-    internal let coordinatorClient: DefaultAPIEndpoints
+    let callController: CallController
+    let coordinatorClient: DefaultAPIEndpoints
 
     /// This adapter is used to manage closed captions for the
     /// call.
@@ -64,7 +64,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     @Atomic private var hasSubscribedToRequiredAdapters = false
 
-    internal init(
+    init(
         callType: String,
         callId: String,
         coordinatorClient: DefaultAPIEndpoints,
@@ -93,7 +93,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         configure(callSettings: callSettings)
     }
 
-    internal convenience init(
+    convenience init(
         from response: CallStateResponseFields,
         coordinatorClient: DefaultAPIEndpoints,
         callController: CallController
@@ -154,16 +154,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         /// indicating the call was joined from within the app UI. The resolved
         /// `JoinSource` value is then used to record how the call was joined,
         /// enabling analytics and behavioral branching based on entry point.
-        let joinSource = await {
-            if let joinSource = await state.joinSource {
-                return joinSource
-            } else {
-                return await Task { @MainActor in
-                    state.joinSource = .inApp
-                    return .inApp
-                }.value
-            }
-        }()
+        let joinSource = if let joinSource = await state.joinSource {
+            joinSource
+        } else {
+            await Task { @MainActor () -> JoinSource in
+                state.joinSource = .inApp
+                return .inApp
+            }.value
+        }
 
         let result: Any? = stateMachine.withLock { currentStage, transitionHandler in
             if
@@ -522,6 +520,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         streamVideo.videoConfig.audioProcessingModule.setAudioFilter(audioFilter)
     }
 
+    // MARK: - ScreenSharing
+
     /// Starts screensharing from the device.
     /// - Parameter type: The screensharing type (in-app or broadcasting).
     public func startScreensharing(type: ScreensharingType) async throws {
@@ -531,6 +531,16 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Stops screensharing from the current device.
     public func stopScreensharing() async throws {
         try await callController.stopScreensharing()
+    }
+
+    // MARK: - ScreenSharing Audio
+
+    public func startScreensharingAudio() async throws {
+        try await callController.startScreensharingAudio()
+    }
+
+    public func stopScreensharingAudio() async throws {
+        try await callController.stopScreensharingAudio()
     }
 
     public func eventPublisher<WSEvent: Event>(for event: WSEvent.Type) -> AnyPublisher<WSEvent, Never> {
@@ -681,7 +691,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
-            self.state.removePermissionRequest(request: request)
+            state.removePermissionRequest(request: request)
         }
         return response
     }
@@ -908,7 +918,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     // MARK: - Query members methods
 
-    internal func queryMembers(
+    func queryMembers(
         filters: [String: RawJSON]? = nil, limit: Int? = nil, next: String? = nil, sort: [SortParamRequest]? = nil
     ) async throws -> QueryMembersResponse {
         let request = QueryMembersRequest(
@@ -928,7 +938,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// - Parameters:
     ///   - filters: An optional dictionary of filters.
-    ///   - sort: An optional array of `SortParamRequest` that determines the sorting order of the results. Defaults to sorting by `created_at` in descending order.
+    ///   - sort: An optional array of `SortParamRequest` that determines the sorting order of the results. Defaults to sorting by
+    /// `created_at` in descending order.
     ///   - limit: The maximum number of members to return. Defaults to 25.
     ///
     /// - Returns: A `QueryMembersResponse` containing the results of the query.
@@ -1454,11 +1465,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     // MARK: - Internal
 
-    internal func update(reconnectionStatus: ReconnectionStatus) {
+    func update(reconnectionStatus: ReconnectionStatus) {
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
-            if reconnectionStatus != self.state.reconnectionStatus {
-                self.state.reconnectionStatus = reconnectionStatus
+            if reconnectionStatus != state.reconnectionStatus {
+                state.reconnectionStatus = reconnectionStatus
             }
         }
 
@@ -1474,13 +1485,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         subscribeToClosedCaptionsSettingsChanges()
     }
 
-    internal func update(recordingState: RecordingState) {
+    func update(recordingState: RecordingState) {
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             self?.state.recordingState = recordingState
         }
     }
 
-    internal func onEvent(_ event: WrappedEvent) async {
+    func onEvent(_ event: WrappedEvent) async {
         guard case let .coordinatorEvent(videoEvent) = event else {
             return
         }
@@ -1489,14 +1500,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         await Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
-            self.state.updateState(from: videoEvent)
+            state.updateState(from: videoEvent)
         }.value
 
         eventSubject.send(event)
     }
 
     @MainActor
-    internal func transitionDueToError(_ error: Error) {
+    func transitionDueToError(_ error: Error) {
         if stateMachine.currentStage.id == .joined {
             state.disconnectionError = error
         }
@@ -1508,7 +1519,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
-    internal func didPerform(_ action: WebRTCTrace.CallKitAction) {
+    func didPerform(_ action: WebRTCTrace.CallKitAction) {
         Task(disposableBag: disposableBag) { [weak callController] in
             await callController?.didPerform(action)
         }
@@ -1556,8 +1567,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func subscribeToOwnCapabilitiesChanges() {
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
-            self
-                .state
+            state
                 .$ownCapabilities
                 .removeDuplicates()
                 .sinkTask(storeIn: disposableBag) { [weak self] in
@@ -1571,7 +1581,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
+                .CombineLatest(state.$session, state.$settings)
                 .filter { $0.0 != nil }
                 .map { $0.1?.audio.noiseCancellation }
                 .removeDuplicates()
@@ -1584,7 +1594,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
+                .CombineLatest(state.$session, state.$settings)
                 .filter { $0.0 != nil }
                 .map { $0.1?.transcription }
                 .removeDuplicates()
@@ -1597,7 +1607,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         Task(disposableBag: disposableBag) { @MainActor [weak self] in
             guard let self else { return }
             Publishers
-                .CombineLatest(self.state.$session, self.state.$settings)
+                .CombineLatest(state.$session, state.$settings)
                 .filter { $0.0 != nil }
                 .map { $0.1?.transcription.closedCaptionMode }
                 .removeDuplicates()
@@ -1693,7 +1703,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Handles updates to transcription settings.
     /// - Parameter value: The updated `TranscriptionSettings` value.
     private func didUpdate(_ mode: TranscriptionSettings.ClosedCaptionMode?) {
-        guard let mode = mode else {
+        guard let mode else {
             log.debug("ClosedCaptionSettings updated. No action!")
             return
         }
