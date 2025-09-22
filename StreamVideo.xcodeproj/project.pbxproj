@@ -505,6 +505,12 @@
 		40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */; };
 		40A5F82E2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F82D2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift */; };
 		40A5F8302E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F82F2E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift */; };
+		40A5F8342E816B0E00E83E9E /* huddle-song-1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 40A5F8312E816B0E00E83E9E /* huddle-song-1.mp3 */; };
+		40A5F8352E816B0E00E83E9E /* huddle-song-2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 40A5F8322E816B0E00E83E9E /* huddle-song-2.mp3 */; };
+		40A5F8382E816B2C00E83E9E /* HuddleTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F8372E816B2C00E83E9E /* HuddleTrack.swift */; };
+		40A5F8392E816B2C00E83E9E /* HuddleTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F8372E816B2C00E83E9E /* HuddleTrack.swift */; };
+		40A5F83C2E816BC700E83E9E /* HuddleAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F83B2E816BC700E83E9E /* HuddleAudioPlayer.swift */; };
+		40A5F83D2E816BC700E83E9E /* HuddleAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A5F83B2E816BC700E83E9E /* HuddleAudioPlayer.swift */; };
 		40A7C5B52E099B4600EEDF9C /* ParticipantEventResetAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */; };
 		40A7C5B82E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */; };
 		40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */; };
@@ -2192,6 +2198,10 @@
 		40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIImage_Resize_Tests.swift; sourceTree = "<group>"; };
 		40A5F82D2E81474000E83E9E /* ScreenShareAudioMediaAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenShareAudioMediaAdapter.swift; sourceTree = "<group>"; };
 		40A5F82F2E81492300E83E9E /* LocalScreenShareAudioMediaAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalScreenShareAudioMediaAdapter.swift; sourceTree = "<group>"; };
+		40A5F8312E816B0E00E83E9E /* huddle-song-1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "huddle-song-1.mp3"; sourceTree = "<group>"; };
+		40A5F8322E816B0E00E83E9E /* huddle-song-2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "huddle-song-2.mp3"; sourceTree = "<group>"; };
+		40A5F8372E816B2C00E83E9E /* HuddleTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HuddleTrack.swift; sourceTree = "<group>"; };
+		40A5F83B2E816BC700E83E9E /* HuddleAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HuddleAudioPlayer.swift; sourceTree = "<group>"; };
 		40A7C5B22E099B1000EEDF9C /* ParticipantEventResetAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter.swift; sourceTree = "<group>"; };
 		40A7C5B72E099D6200EEDF9C /* ParticipantEventResetAdapter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventResetAdapter_Tests.swift; sourceTree = "<group>"; };
 		40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapter.swift; sourceTree = "<group>"; };
@@ -3607,6 +3617,7 @@
 		401A64AF2A9DF82C00534ED1 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				40A5F8362E816B2000E83E9E /* HuddleTrack */,
 				401A64B02A9DF83200534ED1 /* TokenResponse.swift */,
 				40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */,
 				40F445AD2A9DFC34004BE3DA /* UserState.swift */,
@@ -3841,6 +3852,7 @@
 		4030E5912A9DF3E6003E8CBA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				40A5F8332E816B0E00E83E9E /* huddle-music */,
 				406AF2042AF3DE4000ED4D0C /* test.mp4 */,
 				4030E5932A9DF439003E8CBA /* Assets */,
 				4030E5922A9DF3ED003E8CBA /* Entitlements */,
@@ -3908,6 +3920,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				40A5F83A2E816BBB00E83E9E /* HuddleAudioPlayer */,
 				4014F1042D8C2EFE004E7EFD /* Gleap */,
 				845C098F2C0E0B6B00F725B3 /* SessionTimer */,
 				403EFC9D2BDBFDEE0057C248 /* Feedback */,
@@ -4839,6 +4852,31 @@
 				40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		40A5F8332E816B0E00E83E9E /* huddle-music */ = {
+			isa = PBXGroup;
+			children = (
+				40A5F8312E816B0E00E83E9E /* huddle-song-1.mp3 */,
+				40A5F8322E816B0E00E83E9E /* huddle-song-2.mp3 */,
+			);
+			path = "huddle-music";
+			sourceTree = "<group>";
+		};
+		40A5F8362E816B2000E83E9E /* HuddleTrack */ = {
+			isa = PBXGroup;
+			children = (
+				40A5F8372E816B2C00E83E9E /* HuddleTrack.swift */,
+			);
+			path = HuddleTrack;
+			sourceTree = "<group>";
+		};
+		40A5F83A2E816BBB00E83E9E /* HuddleAudioPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				40A5F83B2E816BC700E83E9E /* HuddleAudioPlayer.swift */,
+			);
+			path = HuddleAudioPlayer;
 			sourceTree = "<group>";
 		};
 		40A7C5B42E099B1600EEDF9C /* ParticipantEventResetAdapter */ = {
@@ -7975,6 +8013,8 @@
 				4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 				40ED6D4B2B14F0E600FB5F69 /* Launch Screen.storyboard in Resources */,
+				40A5F8342E816B0E00E83E9E /* huddle-song-1.mp3 in Resources */,
+				40A5F8352E816B0E00E83E9E /* huddle-song-2.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8159,6 +8199,7 @@
 				40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */,
 				40BBC47E2C62287F002AEF92 /* DemoReconnectionButtonView.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
+				40A5F8392E816B2C00E83E9E /* HuddleTrack.swift in Sources */,
 				40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */,
 				409145FC2B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
@@ -8192,6 +8233,7 @@
 				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
 				4091460B2B690AA4007F3C17 /* CallButtonView.swift in Sources */,
 				4029E94A2CB8086000E1D571 /* DemoManualQualitySelectionButtonView.swift in Sources */,
+				40A5F83C2E816BC700E83E9E /* HuddleAudioPlayer.swift in Sources */,
 				40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */,
 				409146062B68FF4B007F3C17 /* DemoControls.swift in Sources */,
 				4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */,
@@ -8299,6 +8341,7 @@
 				40AB35422B738C3700E465CC /* CallViewModel+Snapshot.swift in Sources */,
 				406A8E9D2AA1D7E9001F598A /* String+Unique.swift in Sources */,
 				409795402DC11381000C6E39 /* DemoVideoViewOverlay.swift in Sources */,
+				40A5F8382E816B2C00E83E9E /* HuddleTrack.swift in Sources */,
 				406A8E942AA1D7C5001F598A /* UserCredentials.swift in Sources */,
 				40FA32892CC1C1FD008B62C7 /* DemoStatsAdapter.swift in Sources */,
 				40AB35492B738C4E00E465CC /* DemoChatModifier.swift in Sources */,
@@ -8320,6 +8363,7 @@
 				401C1EDB2D48DCF300304609 /* DemoTranscriptionAndClosedCaptionsButtonView.swift in Sources */,
 				406A8E9F2AA1D7E9001F598A /* CallViewModel+CallSettingsPublisher.swift in Sources */,
 				40AB353D2B738C1300E465CC /* MemoryLogDestination.swift in Sources */,
+				40A5F83D2E816BC700E83E9E /* HuddleAudioPlayer.swift in Sources */,
 				406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */,
 				407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */,
 				401C1EE82D48F20F00304609 /* DemoClosedCaptionsView.swift in Sources */,

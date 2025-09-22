@@ -9,21 +9,26 @@ import SwiftUI
 struct DemoBroadcastMoreControlsListButtonView: View {
     @Injected(\.appearance) private var appearance
 
-    @State private var selection: ScreensharingType = .inApp
+    @State private var selection: ScreensharingType?
+    @State private var selectedAudio: String? = nil
 
     @ObservedObject var viewModel: CallViewModel
+    @ObservedObject var audioPlayer: HuddleAudioPlayer = .shared
     let preferredExtension: String
     @StateObject private var broadcastObserver = BroadcastObserver()
 
     var body: some View {
         ZStack {
             if isCurrentUserScreenSharing {
-                DemoMoreControlListButtonView(
-                    action: { viewModel.stopScreensharing() },
-                    label: selection == .inApp ? "Stop Screensharing" : "Stop Broadcasting"
-                ) {
-                    Image(systemName: "record.circle")
-                        .foregroundColor(appearance.colors.accentRed)
+                VStack {
+                    DemoMoreControlListButtonView(
+                        action: { viewModel.stopScreensharing() },
+                        label: selection == .inApp ? "Stop Screensharing" : "Stop Broadcasting"
+                    ) {
+                        Image(systemName: "record.circle")
+                            .foregroundColor(appearance.colors.accentRed)
+                    }
+                    screenShareAudioView
                 }
                 .transition(.opacity.combined(with: .scale))
             } else {
@@ -82,6 +87,45 @@ struct DemoBroadcastMoreControlsListButtonView: View {
         .disabled(isBroadcastDisabled)
         .onAppear { broadcastObserver.observe() }
         .opacity(isBroadcastDisabled ? 0.75 : 1)
+    }
+
+    @ViewBuilder
+    private var screenShareAudioView: some View {
+        if selection == .inApp, !HuddleTrack.allCases.filter({ $0.exists == true }).isEmpty {
+            Menu {
+                Button {
+                    audioPlayer.stopPlaying()
+                    viewModel.stopScreensharingAudio()
+                } label: {
+                    Text("None")
+                }
+
+                ForEach(HuddleTrack.allCases, id: \.rawValue) { track in
+                    if track.exists {
+                        Button {
+                            audioPlayer.startPlaying(track)
+                            viewModel.startScreensharingAudio()
+                        } label: {
+                            Label {
+                                Text(track.rawValue)
+                            } icon: {
+                                if audioPlayer.selectedTrack == track {
+                                    Image(systemName: "play")
+                                }
+                            }
+                        }
+                    }
+                }
+            } label: {
+                Label("Play audio", systemImage: "chevron.down")
+                    .frame(height: 40)
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(.borderless)
+                    .foregroundColor(appearance.colors.white)
+                    .background(Color(appearance.colors.participantBackground))
+                    .clipShape(Capsule())
+            }
+        }
     }
 
     private var isCurrentUserScreenSharing: Bool {

@@ -578,7 +578,7 @@ open class CallViewModel: ObservableObject {
         }
     }
 
-    public func stopScreensharingAudio() async throws {
+    public func stopScreensharingAudio() {
         Task(disposableBag: disposableBag, priority: .userInitiated) { [weak self] in
             guard let self else { return }
             do {
