@@ -505,7 +505,6 @@ private_lane :build_example_app do |options|
     when 'DemoAppUIKit'
       :uikit_sample_apps
     when 'DocumentationTests'
-      options[:derived_data_path] = derived_data_path
       :documentation_tests
     end
 
@@ -516,7 +515,7 @@ private_lane :build_example_app do |options|
     scheme: options[:scheme],
     clean: is_localhost,
     configuration: 'Debug',
-    derived_data_path: options[:derived_data_path],
+    derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     build_for_testing: true
   )
@@ -790,7 +789,9 @@ def frameworks_sizes
     scheme: 'DemoAppUIKit',
     archive_path: archive_dir,
     export_method: 'ad-hoc',
-    export_options: 'fastlane/sdk_size_export_options.plist'
+    export_options: 'fastlane/sdk_size_export_options.plist',
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path
   )
 
   frameworks_path = "../#{archive_dir}/Products/Applications/DemoAppUIKit.app/Frameworks"
