@@ -487,12 +487,12 @@ lane :build_swiftui_demo do |options|
 end
 
 desc 'Builds UIKit Demo app'
-lane :build_uikit_demo do
+lane :build_uikit_demo do |options|
   build_example_app(scheme: 'DemoAppUIKit', clean: options[:clean])
 end
 
 desc 'Builds Tests for Docs'
-lane :build_docs_test do
+lane :build_docs_test do |options|
   build_example_app(scheme: 'DocumentationTests', project: 'DocumentationTests/DocumentationTests/DocumentationTests.xcodeproj', clean: options[:clean])
 end
 
