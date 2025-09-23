@@ -482,18 +482,18 @@ private_lane :update_testplan_on_ci do |options|
 end
 
 desc 'Builds SwiftUI Demo app'
-lane :build_swiftui_demo do
-  build_example_app(scheme: 'DemoApp')
+lane :build_swiftui_demo do |options|
+  build_example_app(scheme: 'DemoApp', clean: options[:clean])
 end
 
 desc 'Builds UIKit Demo app'
 lane :build_uikit_demo do
-  build_example_app(scheme: 'DemoAppUIKit')
+  build_example_app(scheme: 'DemoAppUIKit', clean: options[:clean])
 end
 
 desc 'Builds Tests for Docs'
 lane :build_docs_test do
-  build_example_app(scheme: 'DocumentationTests', project: 'DocumentationTests/DocumentationTests/DocumentationTests.xcodeproj')
+  build_example_app(scheme: 'DocumentationTests', project: 'DocumentationTests/DocumentationTests/DocumentationTests.xcodeproj', clean: options[:clean])
 end
 
 private_lane :build_example_app do |options|
@@ -513,7 +513,7 @@ private_lane :build_example_app do |options|
   scan(
     project: options[:project],
     scheme: options[:scheme],
-    clean: true,
+    clean: options[:clean] || true,
     configuration: 'Debug',
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,

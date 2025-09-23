@@ -214,11 +214,11 @@ jobs:
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build SwiftUI Demo App
-      run: bundle exec fastlane build_swiftui_demo
+      run: bundle exec fastlane build_swiftui_demo clean:true
     - name: Build UIKit Demo App
-      run: bundle exec fastlane build_uikit_demo
+      run: bundle exec fastlane build_uikit_demo clean:false
     - name: Build Docs Test Project
-      run: bundle exec fastlane build_docs_test
+      run: bundle exec fastlane build_docs_test clean:true
 
   allure_testops_launch:
     name: Launch Allure TestOps
