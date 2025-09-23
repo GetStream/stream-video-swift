@@ -505,6 +505,7 @@ private_lane :build_example_app do |options|
     when 'DemoAppUIKit'
       :uikit_sample_apps
     when 'DocumentationTests'
+      options[:derived_data_path] = derived_data_path
       :documentation_tests
     end
 
@@ -515,7 +516,7 @@ private_lane :build_example_app do |options|
     scheme: options[:scheme],
     clean: is_localhost,
     configuration: 'Debug',
-    derived_data_path: derived_data_path,
+    derived_data_path: options[:derived_data_path],
     cloned_source_packages_path: source_packages_path,
     build_for_testing: true
   )
