@@ -6,8 +6,8 @@ runs:
     - name: Cache Xcode
       uses: irgaly/xcode-cache@v1
       with:
-        key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
-        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-
+        key: xcode-cache-deriveddata-${{ github.workflow }}_${{ github.job }}-${{ github.sha }}
+        restore-keys: xcode-cache-deriveddata-${{ github.workflow }}_${{ github.job }}-
         deriveddata-directory: ${{ github.workspace }}/derived_data
         swiftpm-cache-key: xcode-cache-spm-${{ hashFiles('**/Package.resolved') }}
         swiftpm-cache-restore-keys: xcode-cache-spm-
