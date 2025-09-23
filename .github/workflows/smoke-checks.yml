@@ -265,8 +265,11 @@ jobs:
         INSTALL_VIDEO_BUDDY: true
         INSTALL_YEETD: true
         SKIP_SWIFT_BOOTSTRAP: true
+    - name: Build
+      run: bundle exec fastlane build_test_app_and_frameworks
+      timeout-minutes: 60
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}'
+      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
       timeout-minutes: 60
       env:
         MATRIX_SIZE: ${{ strategy.job-total }}

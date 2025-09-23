@@ -505,7 +505,6 @@ private_lane :build_example_app do |options|
     when 'DemoAppUIKit'
       :uikit_sample_apps
     when 'DocumentationTests'
-      options[:derived_data_path] = derived_data_path
       :documentation_tests
     end
 
@@ -516,7 +515,7 @@ private_lane :build_example_app do |options|
     scheme: options[:scheme],
     clean: is_localhost,
     configuration: 'Debug',
-    derived_data_path: options[:derived_data_path],
+    derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     build_for_testing: true
   )
@@ -778,7 +777,7 @@ lane :update_img_shields_sdk_sizes do |options|
   )
 end
 
-def frameworks_sizes
+private_lane :frameworks_sizes do
   root_dir = 'Build/SDKSize'
   archive_dir = "#{root_dir}/DemoApp.xcarchive"
 
