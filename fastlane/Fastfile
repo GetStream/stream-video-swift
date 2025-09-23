@@ -217,7 +217,7 @@ lane :build_test_app_and_frameworks do
     result_bundle: true,
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
-    clean: is_localhost,
+    clean: true,
     build_for_testing: true
   )
 end
@@ -290,7 +290,7 @@ private_lane :test_ui do |options|
     project: xcode_project,
     scheme: options[:scheme],
     testplan: options[:scheme],
-    clean: is_localhost,
+    clean: true,
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
     skip_build: options[:skip_build],
@@ -421,7 +421,7 @@ lane :test_e2e do |options|
     result_bundle: true,
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
-    clean: is_localhost,
+    clean: true,
     test_without_building: options[:test_without_building],
     build_for_testing: options[:build_for_testing],
     devices: options[:device],
@@ -513,7 +513,7 @@ private_lane :build_example_app do |options|
   scan(
     project: options[:project],
     scheme: options[:scheme],
-    clean: is_localhost,
+    clean: true,
     configuration: 'Debug',
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path,
@@ -790,6 +790,7 @@ private_lane :frameworks_sizes do
     archive_path: archive_dir,
     export_method: 'ad-hoc',
     export_options: 'fastlane/sdk_size_export_options.plist',
+    clean: true,
     derived_data_path: derived_data_path,
     cloned_source_packages_path: source_packages_path
   )
