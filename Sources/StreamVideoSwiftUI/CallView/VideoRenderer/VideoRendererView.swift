@@ -160,6 +160,15 @@ extension VideoRendererView {
                     if $0 { handleRendering?(renderer) }
                 }
                 .store(in: disposableBag)
+
+            #if targetEnvironment(macCatalyst)
+            renderer
+                .trackSizePublisher
+                .map { $0.width > $0.height ? UIView.ContentMode.scaleAspectFill : .scaleAspectFit }
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in self?.renderer.videoContentMode = $0 }
+                .store(in: disposableBag)
+            #endif
         }
     }
 }
