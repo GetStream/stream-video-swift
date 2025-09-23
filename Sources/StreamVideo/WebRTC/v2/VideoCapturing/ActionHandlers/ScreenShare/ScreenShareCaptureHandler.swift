@@ -2,6 +2,7 @@
 // Copyright © 2025 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import Foundation
 import ReplayKit
 import StreamWebRTC
@@ -12,6 +13,8 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
     private var activeSession: Session?
     private let recorder: RPScreenRecorder
     private let disposableBag = DisposableBag()
+    private let audioConverter = ScreenShareAudioConverter()
+    private let audioDiagnostics = ScreenShareAudioDiagnostics()
 
     private struct Session {
         var videoCapturer: RTCVideoCapturer
@@ -201,7 +204,42 @@ final class ScreenShareCaptureHandler: NSObject, StreamVideoCapturerActionHandle
         activeSession: Session,
         sampleBuffer: CMSampleBuffer
     ) {
-        activeSession.audioCapturer?.capture(sampleBuffer)
+        guard let audioCapturer = activeSession.audioCapturer else {
+            return
+        }
+
+        switch audioConverter.convert(sampleBuffer) {
+        case let .success(buffer):
+            audioDiagnostics.analyze(
+                original: sampleBuffer,
+                converted: buffer
+            )
+            audioCapturer.capture(buffer)
+        case .empty:
+            log.info(
+                "\(type(of: self)) screen share audio is empty",
+                subsystems: .videoCapturer
+            )
+        case let .noData(streamDescription, status, inputFrames):
+            let message =
+                "\(type(of: self)) screen share audio conversion returned with no data "
+                    + "(status:\(status.rawValue) inputFrames:\(inputFrames) "
+                    + "sampleRate:\(streamDescription.mSampleRate) "
+                    + "channels:\(streamDescription.mChannelsPerFrame))."
+
+            log.warning(
+                message,
+                subsystems: .videoCapturer
+            )
+        case let .failure(file, function, line):
+            log.error(
+                "\(type(of: self)) screen share audio conversion failed.",
+                subsystems: .videoCapturer,
+                functionName: function,
+                fileName: file,
+                lineNumber: line
+            )
+        }
     }
 
     private func stop() async throws {
