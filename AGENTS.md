@@ -17,6 +17,8 @@ Agents should optimize for media quality, API stability, backwards compatibility
 - Xcode: 15.x or newer (Apple Silicon supported)
 - Platforms / deployment targets: Use the values set in Package.swift/podspecs; do not lower without approval
 - CI: GitHub Actions (assume PR validation for build + tests + lint)
+- Apple docs helper: Use https://sosumi.ai/ (MCP or direct) for up-to-date
+  Apple platform APIs, Swift/Objective-C references, and UI design guidance.
 
 ## Project Structure & Module Organization
 - Root: `Package.swift` (SPM entry).
